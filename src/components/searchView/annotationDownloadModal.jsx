@@ -26,7 +26,7 @@ class AnnnotationDownloadModal extends React.Component {
         ? this.props.selectedAnnotations
         : this.props.selected;
     const aimList = Object.keys(annsToDownload);
-    this.props.updateStatus();
+    // this.props.updateStatus();
     const promise =
       projectID || pid
         ? downloadAnnotations(optionObj, aimList, projectID || pid)
@@ -35,7 +35,7 @@ class AnnnotationDownloadModal extends React.Component {
       .then(result => {
         let blob = new Blob([result[0].data], { type: "application/zip" });
         this.triggerBrowserDownload(blob, "Annotations");
-        this.props.updateStatus();
+        // this.props.updateStatus();
         this.props.onSubmit();
       })
       .catch(err => {
@@ -166,7 +166,7 @@ export default connect(mapStateToProps)(AnnnotationDownloadModal);
 AnnnotationDownloadModal.propTypes = {
   selectedAnnotations: PropTypes.object,
   selected: PropTypes.object,
-  updateStatus: PropTypes.bool,
+  // updateStatus: PropTypes.bool,
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
   className: PropTypes.string

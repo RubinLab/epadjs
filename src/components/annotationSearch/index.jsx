@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { toast } from 'react-toastify';
 import _ from 'lodash';
@@ -30,7 +30,6 @@ import {
   deleteAnnotationsList
 } from '../../services/annotationServices.js';
 import AnnotationTable from './AnnotationTable.jsx';
-import './annotationSearch.css';
 import { clearSelection, selectAnnotation } from '../annotationsList/action';
 import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
 import UploadModal from '../searchView/uploadModal';
@@ -42,9 +41,11 @@ import {
   runPluginsQueue
 } from '../../services/pluginServices';
 import TeachingFilters from './TeachingFilters.jsx';
-import Worklists from '../searchView/addWorklist';
+import AddToWorklist from '../searchView/addWorklist';
 import Projects from '../searchView/addToProject';
 import Spinner from 'react-bootstrap/Spinner';
+
+import './annotationSearch.css';
 
 const lists = {
   organize: ['AND', 'OR', '(', ')'],
@@ -1395,12 +1396,14 @@ const AnnotationSearch = props => {
       </div >
       <div className="icon_row">
         <div className="icon_r">
-          <button type="button" className="btn btn-sm" ><BsEyeFill /><br />View</button>
+          {/* <button type="button" className="btn btn-sm" ><BsEyeFill /><br />View</button> */}
           <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
-          <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
-          {showWorklist && (<Worklists className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)}
-          <button type="button" className="btn btn-sm" onClick={() => { setShowProjects(!showProjects) }}><BiDownload /><br />Move to Project</button>
-          {showProjects && (<Projects className='btn btn-sm worklist' onClose={() => { setShowProjects(false) }} />)}
+          {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
+          {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
+          <AddToWorklist />
+          <Projects />
+          {/* <button type="button" className="btn btn-sm" onClick={() => { setShowProjects(!showProjects) }}><BiDownload /><br />Copy to Project</button>
+          {showProjects && (<Projects className='btn btn-sm worklist' onClose={() => { setShowProjects(false) }} />)} */}
           <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
         </div>
       </div>
@@ -1419,86 +1422,86 @@ const AnnotationSearch = props => {
               <span onClick={() => handleSort('patientName')}>Patient Name </span>{
                 sort[0] === 'patientName' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
                 sort[0] === '-patientName' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)} < br />
-              <input className="form-control form-control-sm" type="text" placeholder="Filter name" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('patientName', target)} value={filters.patientName} />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('patientName', target)} value={filters.patientName} />
             </th>
             <th>
               <span onClick={() => handleSort('subjectID')}>MRN </span>{
                 sort[0] === 'subjectID' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
                 sort[0] === '-subjectID' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)} <br />
-              <input className="form-control form-control-sm" type="text" placeholder="Filter MRN" aria-label=".form-control-sm example" />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" />
             </th>
             <th><span onClick={() => handleSort('accessionNumber')}>Accession # </span>{
               sort[0] === 'accessionNumber' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
               sort[0] === '-accessionNumber' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)} < br />
-              <input className="form-control form-control-sm" type="text" placeholder="Filter Acc#" aria-label=".form-control-sm example" />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" />
             </th>
             <th><span onClick={() => handleSort('name')}>Case Title </span>{
               sort[0] === 'name' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
               sort[0] === '-name' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" placeholder="Filter Title" aria-label=".form-control-sm example" />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" />
             </th>
             <th><span onClick={() => handleSort('name')}>Age </span>{
               sort[0] === 'age' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
               sort[0] === '-age' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" placeholder="Filter Age" aria-label=".form-control-sm example" />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" />
             </th>
             <th>
               <span onClick={() => handleSort('sex')}>Sex </span>{
                 sort[0] === 'sex' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
                 sort[0] === '-sex' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" placeholder="Filter Sex" aria-label=".form-control-sm example" />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" />
             </th>
             <th>
               <span onClick={() => handleSort('modality')}>Modality </span>{
                 sort[0] === 'modality' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
                 sort[0] === '-modality' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" placeholder="Filter Modality" aria-label=".form-control-sm example" />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" />
             </th>
             <th>
               <span onClick={() => handleSort('studyDate')}>Study Date </span>{
                 sort[0] === 'studyDate' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
                 sort[0] === '-studyDate' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" placeholder="Filter Date" aria-label=".form-control-sm example" />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" />
             </th>
             <th>
               <span onClick={() => handleSort('anatomy')}>Anatomy </span>{
                 sort[0] === 'anatomy' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
                 sort[0] === '-anatomy' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" placeholder="Filter Anatomy" aria-label=".form-control-sm example" />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" />
             </th>
             <th><span onClick={() => handleSort('observation')}>Observation </span>{
               sort[0] === 'observation' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
               sort[0] === '-observation' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" placeholder="Filter Observation" aria-label=".form-control-sm example" />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" />
             </th>
             <th>
               <span onClick={() => handleSort('date')}>Created </span>{
                 sort[0] === 'date' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
                 sort[0] === '-date' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" placeholder="Filter Created" aria-label=".form-control-sm example" />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" />
             </th>
             <th>
               <span onClick={() => handleSort('templateType')}>Template </span>{
                 sort[0] === 'templateType' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
                 sort[0] === '-templateType' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" placeholder="Filter Template" aria-label=".form-control-sm example" />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" />
             </th>
             <th>
               <span onClick={() => handleSort('fullName')}>User </span>{
                 sort[0] === 'fullName' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
                 sort[0] === '-fullName' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" placeholder="Filter User" aria-label=".form-control-sm example" />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" />
             </th>
             <th><span onClick={() => handleSort('userComment')}>Comment </span>{
               sort[0] === 'userComment' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
               sort[0] === '-userComment' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" placeholder="Filter Comment" aria-label=".form-control-sm example" />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" />
             </th>
             <th>
               <span onClick={() => handleSort('projectName')}>Project </span>{
                 sort[0] === 'projectName' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
                 sort[0] === '-projectName' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" placeholder="Filter Project" aria-label=".form-control-sm example" />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" />
             </th>
           </tr>
         </thead>
@@ -1535,7 +1538,7 @@ const AnnotationSearch = props => {
           getSearchResult();
         }}
         onCancel={() => setShowDownload(false)}
-        updateStatus={() => console.log('update status')}
+        // updateStatus={() => console.log('update status')}
         projectID={selectedProject}
         show={showDownload}
       />

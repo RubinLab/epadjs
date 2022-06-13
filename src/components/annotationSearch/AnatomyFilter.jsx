@@ -23,7 +23,7 @@ const AnatomyFilter = (props) => {
     }
 
     const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
-        <button type="button" className="btn btn-dark btn-sm dropdown-toggle" ref={ref}
+        <button type="button" className="btn btn-dark btn-sm dropdown-toggle color-schema" ref={ref}
             onClick={(e) => {
                 if (firstRun) {
                     setAnatomies(getAnatomies());

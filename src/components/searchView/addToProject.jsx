@@ -1,29 +1,31 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
+import Dropdown from 'react-bootstrap/Dropdown';
+import { BiDownload } from 'react-icons/bi';
 import { addAimsToProject } from "../../services/projectServices";
 
 const ProjectAdd = ({ projectMap, onSave, onClose, className, annotations }) => {
   const projectNames = Object.values(projectMap);
   const projectIDs = Object.keys(projectMap);
-  let wrapperRef = useRef(null);
+  // let wrapperRef = useRef(null);
 
   const element = document.getElementsByClassName(className);
 
-  const handleClickOutside = (event) => {
-    if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-      onClose();
-    }
-  };
+  // const handleClickOutside = (event) => {
+  //   if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+  //     onClose();
+  //   }
+  // };
 
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleClickOutside);
-    return function cleanup() {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleClickOutside);
-    };
-  });
+  // useEffect(() => {
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   document.addEventListener("keydown", handleClickOutside);
+  //   return function cleanup() {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //     document.removeEventListener("keydown", handleClickOutside);
+  //   };
+  // });
 
   const addSelectionToProject = async (e) => {
     // If selected are not annotations, search is view is handling it (by props on Save)
@@ -57,20 +59,36 @@ const ProjectAdd = ({ projectMap, onSave, onClose, className, annotations }) => 
     onClose();
   }
 
-  var rect = element[0].getBoundingClientRect();
-  const projects = [];
-  projectNames.forEach((el, i) => {
-    projects.push(
-      <div
-        className="project__option"
-        onClick={addSelectionToProject}
-        id={projectIDs[i]}
-        key={`${projectIDs[i]} - ${i}`}
-      >
-        {el.projectName}
-      </div>
-    );
-  });
+  const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
+    <button type="button" className="btn btn-sm worklist dropdown color-schema" ref={ref}
+      onClick={(e) => {
+        onClick(e);
+      }}>
+      <BiDownload /><br />
+      {children}
+    </button>
+  ));
+
+  return (
+    <Dropdown className="d-inline mx-2" >
+      <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
+        Copy To Project
+      </Dropdown.Toggle>
+
+      <Dropdown.Menu className="dropdown-menu p-2 dropdown-menu-dark" style={{ backgroundColor: '#333', borderColor: 'white' }} >
+        {projectNames?.map(({ projectName }, y) => {
+          return (
+            <div key={y} id={projectIDs[y]} className="row" onClick={addSelectionToProject}>
+              <label id={projectIDs[y]} className="form-check-label title-case" style={{ paddingLeft: '0.3rem', cursor: 'pointer' }} htmlFor="flexCheckDefault">
+                {projectName}
+              </label>
+            </div>
+          )
+        })
+        }
+      </Dropdown.Menu>
+    </Dropdown>
+  );
 
   return (
     <div ref={wrapperRef}>

@@ -7,7 +7,7 @@ import Keycloak from "keycloak-js";
 import _ from "lodash";
 import { getUser, getUserInfo } from "./services/userServices";
 import { getSeries } from "./services/seriesServices";
-import NavBar from "./components/navbar_";
+import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
 import SearchView from "./components/searchView/searchView";
 import DisplayView from "./components/display/displayView";

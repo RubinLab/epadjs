@@ -255,6 +255,10 @@ td i{text-align: center;}
   border-right: 10px;
 }
 
+.color-schema{
+  color: #eaddb2 !important;
+}
+
 th > span{
   cursor:pointer;
 }

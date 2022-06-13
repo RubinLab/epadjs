@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { FaCogs, FaInfoCircle, FaBell } from 'react-icons/fa';
+import { BsFillGearFill, BsInfoCircleFill, BsBoxArrowInRight } from 'react-icons/bs';
+import { FaBell } from 'react-icons/fa';
 import logo from '../images/logo.png';
+import stella from '../images/stella-logo-temp-02.png';
+import stanford from '../images/stanford-rad-allwhite.png'
 import { connect } from 'react-redux';
-
 
 const NavBar = ({
   user,
@@ -16,141 +18,101 @@ const NavBar = ({
   onSwitchView,
   notificationWarning,
   pid,
-  onAnnotations,
-  viewType,
   path
 }) => {
   const mode = sessionStorage.getItem('mode');
   return (
-    <div>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
-        <Link
-          className="navbar-brand-right nounderline pr-3 "
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div className="container-fluid">
+        {mode === 'teaching' && (<Link
+          className="navbar-brand"
           to="#"
           id="epad-logo"
         >
-          <img src={logo} alt={'logo'} width="25px" />
-          {mode === 'lite' && 'eLite'} {mode !== 'lite' && 'ePAD'}
-        </Link>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-toggle="collapse"
-          data-target="#navbarColor01"
-          aria-controls="navbarColor01"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
+          <img src={stella} style={{ maxHeight: '40px', textAlign: 'left' }} />
+        </Link>)}
+        {mode !== 'teaching' && (<Link
+          className="navbar-brand"
+          to="#"
+          id="epad-logo"
         >
-          <span className="navbar-toggler-icon" />
+          <img src={logo} style={{ maxHeight: '40px', textAlign: 'left' }} />
+          {mode === 'lite' && 'eLite'} {mode !== 'lite' && 'ePAD'}
+        </Link>)}
+        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span className="navbar-toggler-icon"></span>
         </button>
-
-        <div className="collapse navbar-collapse pl-0" id="navbarColor01">
+        <div className="collapse navbar-collapse" id="navbarSupportedContent">
           {mode === 'teaching' && (
-            <ul className="navbar-nav mr-auto">
-              <li
-                id="navbar-ann"
-                className={
-                  path.includes('search') ? 'nav-link activeNav' : 'nav-link'
+            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+              <li className="nav-item" >
+                <a className={
+                  path.includes('search') ? 'nav-link active' : 'nav-link'
                 }
-                onClick={() => {
-                  onSwitchView('annotations');
-                }}
-              >
-                Search
+                  onClick={() => {
+                    onSwitchView('annotations');
+                  }} aria-current="page">Search</a>
               </li>
-              <li
-                id="navbarli"
-                className={
-                  path.includes('list') ? 'nav-link activeNav' : 'nav-link'
+              <li className="nav-item" >
+                <NavLink className={
+                  path.includes('flex') ? 'nav-link active' : 'nav-link'
                 }
-                onClick={() => {
-                  onSearchViewClick();
-                  onSwitchView('search', true);
-                }}
-              >
-                Patient List
+                  to={pid ? `/flex/${pid}` : `/flex`} aria-current="page">Study List</NavLink>
               </li>
-              <li
-                className="nav-item"
-                onClick={() => {
-                  onSwitchView('flex');
-                }}
-              >
-                <NavLink className="nav-link" to={pid ? `/flex/${pid}` : `/flex`}>
-                  Study List
-                </NavLink>
-              </li>
-              <li
-                id="navbarli"
-                className={
-                  path.includes('display') ? 'nav-link activeNav' : 'nav-link'
+              <li className="nav-item" >
+                <a className={
+                  path.includes('display') ? 'nav-link active' : 'nav-link'
                 }
-                onClick={() => {
-                  onSwitchView('display');
-                }}
-              >
-                Display
+                  onClick={() => {
+                    onSwitchView('display');
+                  }} aria-current="page">Display</a>
               </li>
             </ul>
-          )} {/* END TEACHING */}
+          )}{/* END TEACHING */}
           {mode !== 'teaching' && (
-            <ul className="navbar-nav mr-auto">
-              <li
-                id="navbarli"
-                className={
-                  path.includes('list') ? 'nav-link activeNav' : 'nav-link'
+            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+              <li className="nav-item" >
+                <a className={
+                  path.includes('list') ? 'nav-link active' : 'nav-link'
                 }
-                onClick={() => {
-                  onSearchViewClick();
-                  onSwitchView('search', true);
-                }}
-              >
-                Patient List
+                  onClick={() => {
+                    onSearchViewClick();
+                    onSwitchView('search', true);
+                  }} aria-current="page">Patient List</a>
               </li>
-              <li
-                id="navbarli"
-                className={
-                  path.includes('display') ? 'nav-link activeNav' : 'nav-link'
+              <li className="nav-item" >
+                <NavLink className={
+                  path.includes('flex') ? 'nav-link active' : 'nav-link'
                 }
-                onClick={() => {
-                  onSwitchView('display');
-                }}
-              >
-                Display
+                  to={pid ? `/flex/${pid}` : `/flex`} aria-current="page">Study List</NavLink>
               </li>
-              <li
-                className="nav-item"
-                onClick={() => {
-                  onSwitchView('flex');
-                }}
-              >
-                <NavLink className="nav-link" to={pid ? `/flex/${pid}` : `/flex`}>
-                  Study List
-                </NavLink>
-              </li>
-              <li
-                className="nav-item"
-                id="navbarReports"
-                onClick={() => {
-                  onReports();
-                }}
-              >
-                Analysis
-              </li>
-              <li
-                id="navbar-ann"
-                className={
-                  path.includes('search') ? 'nav-link activeNav' : 'nav-link'
+              <li className="nav-item" >
+                <a className={
+                  path.includes('search') ? 'nav-link active' : 'nav-link'
                 }
-                onClick={() => {
-                  onSwitchView('annotations');
-                }}
-              >
-                Search
+                  onClick={() => {
+                    onSwitchView('annotations');
+                  }} aria-current="page">Annotations</a>
+              </li>
+              <li className="nav-item" id="navbarReports">
+                <a className={
+                  path.includes('flex') ? 'nav-link active' : 'nav-link'
+                }
+                  onClick={() => {
+                    onReports();
+                  }} aria-current="page">Analysis</a>
+              </li>
+              <li className="nav-item" >
+                <a className={
+                  path.includes('display') ? 'nav-link active' : 'nav-link'
+                }
+                  onClick={() => {
+                    onSwitchView('display');
+                  }} aria-current="page">Display</a>
               </li>
             </ul>
           )}
-          <ul className="navbar-nav ml-auto">
+          <ul className="navbar-nav ms-auto">
             {!user && (
               <li className="nav-item pull-right">
                 <NavLink className="nav-link" to="/login">
@@ -159,64 +121,38 @@ const NavBar = ({
               </li>
             )}
             {user && (
-              <React.Fragment>
-                <li className="nav-item pull-right" data-name="mng">
-                  <div
-                    className="nav-link mng-icon"
-                    id="mng-icon"
-                    data-name="mng"
-                    onClick={e => {
-                      openGearMenu(e);
-                    }}
-                  >
-                    <FaCogs style={{ fontSize: '1.5rem' }} data-name="mng" />
-                  </div>
+              <>
+                <li className="nav-item">
+                  <a className="mng-icon nav-link" onClick={e => openGearMenu(e)} id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <BsFillGearFill />
+                  </a>
                 </li>
-                <li className="nav-item pull-right" data-name="info">
-                  <div
-                    className="nav-link info-icon"
-                    data-name="info"
-                    onClick={e => {
-                      openInfoMenu(e);
-                    }}
-                  >
-                    <FaInfoCircle
-                      style={{ fontSize: '1.5rem', position: 'relative' }}
-                      data-name="info"
-                    />
-                    {notificationWarning ? (
-                      <FaBell className="notification-warning" />
-                    ) : null}
-                  </div>
+                <li className="nav-item">
+                  <a className="info-icon nav-link" onClick={e => { openInfoMenu(e) }} id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <BsInfoCircleFill />
+                  </a>
+                  {notificationWarning ? (
+                    <FaBell className="notification-warning" />
+                  ) : null}
                 </li>
-                <li className="nav-item pull-right" data-name="user">
-                  <div
-                    className="nav-link user-profile"
-                    data-name="user"
-                    onClick={e => {
-                      openUser(e);
-                    }}
-                  >
-                    {user.displayname}
-                  </div>
+                <li className="nav-item"><a className="user-profile nav-link" onClick={e => openUser(e)}>{user.displayname}</a></li>
+                <li className="nav-item">
+                  <a className="nav-link" onClick={logout}>
+                    <BsBoxArrowInRight /></a>
                 </li>
-                <li className="nav-item-right pull-right">
-                  <NavLink className="nav-link" to="/logout" onClick={logout}>
-                    Logout
-                  </NavLink>
-                </li>
-              </React.Fragment>
+              </>
             )}
+            {mode === 'teaching' && (<li> <a className="navbar-brand" href="#"><img src={stanford} style={{ maxHeight: '40px', textAlign: 'right', paddingLeft: '1em' }} /></a></li>)}
           </ul>
         </div>
-      </nav>
-    </div>
+      </div>
+    </nav >
   );
 };
 
 const mapStateToProps = state => {
   return {
-    loading: state.annotationsListReducer.loading
+    loading: state.annotationsListReducer.loading,
   };
 };
 export default connect(mapStateToProps)(NavBar);

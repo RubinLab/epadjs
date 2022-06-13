@@ -34,7 +34,7 @@ const ModalityFilter = (props) => {
     }
 
     const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
-        <button id='modalityDrop' type="button" className="btn btn-dark btn-sm dropdown-toggle" ref={ref}
+        <button id='modalityDrop' type="button" className="btn btn-dark btn-sm dropdown-toggle color-schema" ref={ref}
             onClick={(e) => {
                 setSelecteds(props.selectedMods);
                 e.preventDefault();
@@ -72,7 +72,7 @@ const ModalityFilter = (props) => {
                                 return (
                                     <div key={i} className="mb-3 col-md-4">
                                         <input className="form-check-input" type="checkbox" value={modality} id="flexCheckDefault" checked={selecteds.includes(modality)} onChange={handleChange} />
-                                        <label className="form-check-label title-case" htmlFor="flexCheckDefault">
+                                        <label className="form-check-label title-case" style={{ paddingLeft: '0.3em' }} htmlFor="flexCheckDefault">
                                             {modality}
                                         </label>
                                     </div>

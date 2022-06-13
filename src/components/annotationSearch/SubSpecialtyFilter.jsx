@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import { getAllowedTermsOfTemplateComponent } from "Utils/aid"
 import { teachingFileTempCode } from '../../constants.js';
 import Dropdown from 'react-bootstrap/Dropdown';
-// import "./SubSpecialtyFilter.css";
 
 const componentLabel = "Radiology Specialty";
 
@@ -45,16 +44,20 @@ const SubSpecialityFilter = props => {
         setShow(false);
     }
 
+    const toggleHandler = (e) => {
+        if (firstRun) {
+            setSubSpecialities(getSubSpecialities);
+            setFirstRun(false);
+        }
+        setSelecteds(props.selectedSubs);
+        handleToggle();
+    }
+
     const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
-        <button id='subSpecDrop' type="button" className="btn btn-dark btn-sm dropdown-toggle" ref={ref}
+        <button data-bs-display="static" id='subSpecDrop' type="button" className="btn btn-dark btn-sm dropdown-toggle color-schema" ref={ref}
             onClick={(e) => {
-                if (firstRun) {
-                    setSubSpecialities(getSubSpecialities);
-                    setFirstRun(false);
-                }
-                setSelecteds(props.selectedSubs);
                 e.preventDefault();
-                handleToggle();
+                onClick(e);
             }}>
             {children}
         </button>
@@ -80,7 +83,7 @@ const SubSpecialityFilter = props => {
 
     return (
         <Dropdown id='subSpecDrop' className="d-inline mx-2" show={show} >
-            <Dropdown.Toggle as={CustomToggle}>
+            <Dropdown.Toggle as={CustomToggle} onClick={toggleHandler}>
                 Subspecialty
             </Dropdown.Toggle>
             <Dropdown.Menu className="p-2 dropdown-menu-dark subspecialty" >
@@ -91,7 +94,7 @@ const SubSpecialityFilter = props => {
                                 return (
                                     <div key={i} className="mb-3 col-md-6">
                                         <input className="form-check-input filter-input" type="checkbox" value={speciality} id="flexCheckDefault" checked={selecteds.includes(speciality)} onChange={handleChange} />
-                                        <label className="form-check-label title-case" htmlFor="flexCheckDefault">
+                                        <label className="form-check-label title-case" style={{ paddingLeft: '0.3rem' }} htmlFor="flexCheckDefault">
                                             {speciality}
                                         </label>
                                     </div>
@@ -105,7 +108,7 @@ const SubSpecialityFilter = props => {
                     <button className='btn btn-dark btn-sm' onClick={handleApply}>Apply</button>
                 </div>
             </Dropdown.Menu>
-        </Dropdown>
+        </Dropdown >
     );
 }
 
