@@ -60,7 +60,7 @@ const ProjectAdd = ({ projectMap, onSave, onClose, className, annotations }) => 
   }
 
   const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
-    <button type="button" className="btn btn-sm worklist dropdown color-schema" ref={ref}
+    <button type="button" className="btn btn-sm color-schema" ref={ref}
       onClick={(e) => {
         onClick(e);
       }}>
@@ -70,7 +70,7 @@ const ProjectAdd = ({ projectMap, onSave, onClose, className, annotations }) => 
   ));
 
   return (
-    <Dropdown className="d-inline mx-2" >
+    <Dropdown className="d-inline" >
       <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
         Copy To Project
       </Dropdown.Toggle>

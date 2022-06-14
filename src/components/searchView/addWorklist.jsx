@@ -119,18 +119,15 @@ const AddToWorklist = (props) => {
     const { selectedStudies, selectedPatients, selectedAnnotations } = props;
     if (Object.values(selectedStudies).length > 0) {
       addStudyToWorklist(e);
-      setShow(false);
     } else if (Object.values(selectedPatients).length > 0) {
       addSubjectToWorklist(e);
-      setShow(false);
     } else if (Object.values(selectedAnnotations).length > 0) {
       addAnnotationsToWorklist(selectedAnnotations, e.target.id);
-      setShow(false);
     }
   };
 
   const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
-    <button type="button" className="btn btn-sm worklist dropdown color-schema" ref={ref}
+    <button type="button" className="btn btn-sm color-schema" ref={ref}
       onClick={e => {
         if (firstRun) {
           fillWorklists();
@@ -144,7 +141,7 @@ const AddToWorklist = (props) => {
   ));
 
   return (
-    <Dropdown className="d-inline mx-2" >
+    <Dropdown className="d-inline" >
       <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
         Add To Worklist
       </Dropdown.Toggle>

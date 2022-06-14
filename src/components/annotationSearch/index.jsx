@@ -1374,22 +1374,22 @@ const AnnotationSearch = props => {
               setMyCases={setMyCases} />
           </div>
           {(selectedSubs.length + selectedMods.length + selectedAnatomies.length + selectedDiagnosis.length) > 0 &&
-            (<div className="filter-control">
+            (<div className="filter-control" style={{ paddingLeft: '0.9rem', paddingTop: '0.9rem' }}>
               Filters Applied: &nbsp;
               {selectedSubs.map(sub => {
-                return (<button key={sub} type="button" className="btn btn-dark btn-sm" onClick={() => clearSubspecialty(sub)} > {sub} < BiX /></button>);
+                return (<button key={sub} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearSubspecialty(sub)} > {sub} < BiX /></button>);
               })}
               {selectedMods.map(mod => {
-                return (<button key={mod} type="button" className="btn btn-dark btn-sm" onClick={() => clearModality(mod)} > {mod} < BiX /></button>);
+                return (<button key={mod} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearModality(mod)} > {mod} < BiX /></button>);
               })}
               {selectedAnatomies.map(anatomy => {
-                return (<button key={anatomy} type="button" className="btn btn-dark btn-sm" onClick={() => clearAnatomy(anatomy)} > {anatomy} < BiX /></button>);
+                return (<button key={anatomy} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearAnatomy(anatomy)} > {anatomy} < BiX /></button>);
               })}
               {selectedDiagnosis.map(diagnose => {
-                return (<button key={diagnose} type="button" className="btn btn-dark btn-sm" onClick={() => clearDiagnosis(diagnose)} > {diagnose
+                return (<button key={diagnose} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearDiagnosis(diagnose)} > {diagnose
                 } < BiX /></button>);
               })}
-              {(selectedSubs.length + selectedMods.length + selectedAnatomies.length + selectedDiagnosis) > 1 && (<button type="button" className="btn btn-dark btn-sm" onClick={clearAll}>Clear All Filters <BiX /></button>)}
+              {(selectedSubs.length + selectedMods.length + selectedAnatomies.length + selectedDiagnosis) > 1 && (<button type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={clearAll}>Clear All Filters <BiX /></button>)}
             </div>)
           }
         </div>
