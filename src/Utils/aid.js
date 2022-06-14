@@ -398,3 +398,21 @@ export const isSupportedModality = (serie) => {
   if (!serie.examType) return true;
   return DISP_MODALITIES.includes(serie.examType);
 };
+
+export const getAllowedTermsOfTemplateComponent = (template, componentLabel) => {
+  const {Component:components} = template[0];
+  let allowedTerms;
+  let termMeanings = [];
+  for(let i=0; i<components.length; i++){
+    if(components[i].label === componentLabel){
+      allowedTerms = components[i].AllowedTerm;
+      break;
+    } 
+  }
+  if(!allowedTerms)
+    return [];
+  allowedTerms.forEach(term => {
+    termMeanings.push(term.codeMeaning);
+  })
+  return termMeanings;
+}

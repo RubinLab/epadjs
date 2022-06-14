@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Route, Switch, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import Keycloak from "keycloak-js";
 import _ from "lodash";
@@ -50,9 +50,8 @@ import {
   decryptAndAdd,
 } from "./services/decryptUrlService";
 import { searchAnnotations } from "./services/annotationServices.js";
-import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
-import "./App.css";
+// import "./App.css";
 import RightsideBar from "./components/RightsideBar/RightsideBar";
 import MinimizedReport from "./components/searchView/MinimizedReport";
 import { FaJoint } from "react-icons/fa";
@@ -564,7 +563,18 @@ class App extends Component {
           : this.props.history.push(`/list`);
       }
     } else if (viewType === "display") {
-      this.props.history.push(`/display`);
+        if(this.props.openSeries.length)
+          this.props.history.push(`/display`);
+        else{
+          toast.info("There is no open series to display", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
     } else if (viewType === "annotations") {
       this.props.history.push(`/search`);
     }

@@ -1086,12 +1086,14 @@ class SearchView extends Component {
           <Worklists
             onClose={this.handleWorklistClick}
             updateProgress={this.props.updateProgress}
+            className="searchView-toolbar__icon worklist-icon"
           />
         )}
         {showProjects && (
           <Projects
-            onProjectClose={this.handleProjectClick}
+            onClose={this.handleProjectClick}
             onSave={this.addSelectionToProject}
+            className="searchView-toolbar__icon project-icon"
           />
         )}
         {newUser && (

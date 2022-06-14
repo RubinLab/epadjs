@@ -26,6 +26,8 @@ import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
 import SelectSerieModal from '../annotationsList/selectSerieModal';
 
+const mode = sessionStorage.getItem('mode');
+
 const defaultPageSize = 200;
 const maxPort = parseInt(sessionStorage.getItem('maxPort'));
 
@@ -33,8 +35,6 @@ const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
     const defaultRef = React.useRef();
     const resolvedRef = ref || defaultRef;
-
-    console.log(rest.selected);
 
     React.useEffect(() => {
       resolvedRef.current.indeterminate = indeterminate;
@@ -63,7 +63,9 @@ function Table({
   fetchData,
   controlledPageIndex,
   handlePageIndex,
-  listOfSelecteds
+  listOfSelecteds,
+  handleSort,
+  handleFilter,
 }) {
   // Use the state and functions returned from useTable to build your UI
   const {
@@ -130,7 +132,7 @@ function Table({
   }, [fetchData, pageIndex, pageSize]);
   return (
     <>
-      <table {...getTableProps()} style={{ width: '100%' }}>
+      {mode !== 'teaching' && (<>{/* <table {...getTableProps()} style={{ width: '100%' }}>
         <thead
           style={{
             color: 'aliceblue',
@@ -142,7 +144,8 @@ function Table({
             <tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map(column => (
                 <th
-                  {...column.getHeaderProps(column.getSortByToggleProps())}
+                  // {...column.getHeaderProps(column.getSortByToggleProps(() => alert("togged")))}
+                  // style={{ padding: '0.5rem' }} onClick={() => { handleSort(column) }}
                   style={{ padding: '0.5rem' }}
                 >
                   {column.render('Header')}
@@ -150,72 +153,80 @@ function Table({
               ))}
             </tr>
           ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row, i) => {
-            prepareRow(row);
-            return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map(cell => {
-                  return (
-                    <td
-                      {...cell.getCellProps()}
-                      style={{
-                        margin: '0',
-                        padding: '0.8rem 0.4rem',
-                        borderBottom: '0.2px solid #6c757d'
-                      }}
-                    >
-                      {cell.render('Cell')}
-                    </td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-          {noOfRows / defaultPageSize > 1 && (
-            <tr>
-              <td colSpan="10000">
-                Showing {defaultPageSize * pageIndex}-
-                {defaultPageSize * (pageIndex + 1)} of ~{pageCount * pageSize}{' '}
-                results
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-      {pageCount > 1 && (
-        <div className="pagination">
-          <button
-            onClick={() => {
-              handlePageIndex('prev');
-            }}
-            disabled={!canPreviousPage}
-          >
-            {'<'}
-          </button>
-          <select
-            value={pageSize}
-            onChange={e => {
-              setPageSize(Number(e.target.value));
-            }}
-          >
-            {[defaultPageSize].map((pageSize, i) => (
-              <option key={`${pageSize}-${i}`} value={pageSize}>
-                {pageSize}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={() => {
-              handlePageIndex('next');
-            }}
-            disabled={!canNextPage}
-          >
-            {'>'}
-          </button>
-        </div>
+        </thead> */}
+        {/* <tbody {...getTableBodyProps()}> */}</>)}
+      {rows.map((row, i) => {
+        prepareRow(row);
+        return (
+          <tr {...row.getRowProps()}>
+            {row.cells.map(cell => {
+              if (cell.column.id === 'select')
+                return (
+                  <td {...cell.getCellProps()} className='select_row'>
+                    {cell.render('Cell')}
+                  </td>
+                );
+              else
+                return (
+                  <td
+                    {...cell.getCellProps()}
+                  // style={{
+                  //   margin: '0',
+                  //   padding: '0.8rem 0.4rem',
+                  //   borderBottom: '0.2px solid #6c757d'
+                  // }}
+                  >
+                    {cell.render('Cell')}
+                  </td>)
+            })}
+          </tr>
+        );
+      })}
+      {noOfRows / defaultPageSize > 1 && (
+        <tr>
+          <td colSpan="10000">
+            Showing {defaultPageSize * pageIndex}-
+            {defaultPageSize * (pageIndex + 1)} of ~{pageCount * pageSize}{' '}
+            results
+          </td>
+        </tr>
       )}
+      {mode !== 'teaching' && (<>{/* </tbody>
+      </table> */}</>)}
+      {
+        pageCount > 1 && (
+          <div className="pagination">
+            <button
+              onClick={() => {
+                handlePageIndex('prev');
+              }}
+              disabled={!canPreviousPage}
+            >
+              {'<'}
+            </button>
+            <select
+              value={pageSize}
+              onChange={e => {
+                setPageSize(Number(e.target.value));
+              }}
+            >
+              {[defaultPageSize].map((pageSize, i) => (
+                <option key={`${pageSize}-${i}`} value={pageSize}>
+                  {pageSize}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={() => {
+                handlePageIndex('next');
+              }}
+              disabled={!canNextPage}
+            >
+              {'>'}
+            </button>
+          </div>
+        )
+      }
     </>
   );
 }
@@ -413,198 +424,368 @@ function AnnotationTable(props) {
     }
   };
 
-  const columns = React.useMemo(
-    () => [
-      {
-        id: 'study-desc',
-        Cell: ({ row }) => {
-          return (
-            <input
-              type="checkbox"
-              checked={
-                props.selectedAnnotations[row.original.aimID] ? true : false
-              }
-              onChange={() => props.updateSelectedAims(row.original)}
-            />
-          );
-        }
-      },
-      {
-        Header: 'Open',
-        sortable: false,
-        resizable: false,
-        style: { display: 'flex', justifyContent: 'center' },
-        Cell: ({ row }) => {
-          return (
-            // <Link className="open-link" to={'/display'}>
-            <div
-              onClick={() => {
-                if (
-                  row.original.seriesUID === 'noseries' ||
-                  !row.original.seriesUID
-                ) {
-                  // study aim opening
-                  displaySeries(row.original);
-                } else {
-                  // series opening
-                  openAnnotation(row.original);
+  const { patientName } = props.filters;
+
+  let columns = [];
+  if (mode === 'teaching') {
+    columns = React.useMemo(
+      () => [
+        {
+          Header: 'Select',
+          id: 'select',
+          class: 'select_row',
+          Cell: ({ row }) => {
+            return (
+              <input
+                type="checkbox"
+                className='form-check-input'
+                checked={
+                  props.selectedAnnotations[row.original.aimID] ? true : false
                 }
-              }}
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                width: '1rem'
-              }}
-            >
-              <FaRegEye className="menu-clickable" />
-            </div>
-            // </Link>
-          );
-        }
-      },
-      {
-        Header: 'Name',
-        accessor: 'name',
-        sortable: true,
-        resizable: true
-      },
-      {
-        Header: 'Subject',
-        accessor: 'patientName',
-        sortable: true,
-        resizable: true,
-        Cell: ({ row }) => {
-          return <div>{clearCarets(row.original.patientName)}</div>;
-        }
-      },
-      {
-        accessor: 'comment',
-        sortable: true,
-        resizable: true,
-        className: 'wrapped',
-        style: { whiteSpace: 'normal' },
-        Header: () => {
-          return (
-            <div className="mng-anns__header-flex">
-              <div>Modality / Series /</div>
-              <div>Slice / Series #</div>
-            </div>
-          );
-        }
-      },
-      {
-        Header: 'Template',
-        accessor: 'template',
-        resizable: true,
-        sortable: true
-      },
-      {
-        Header: 'User',
-        accessor: 'userName',
-        style: { whiteSpace: 'normal' },
-        resizable: true,
-        sortable: true
-      },
-      {
-        Header: 'Study',
-        sortable: true,
-        accessor: 'studyDate',
-        filterMethod: (filter, rows) =>
-          matchSorter(rows, filter.value, { keys: ['date'] }),
-        filterAll: true,
-        Cell: ({ row }) => {
-          if (!row.original.studyDate)
-            return <div></div>;
-          const studyDateArr = convertDateFormat(
-            row.original.studyDate,
-            'studyDate'
-          ).split(' ');
-          return <div>{formatDate(studyDateArr[0])}</div>;
-        }
-      },
-      {
-        Header: 'Created',
-        sortable: true,
-        id: 'date',
-        accessor: 'date',
-        filterMethod: (filter, rows) =>
-          matchSorter(rows, filter.value, { keys: ['date'] }),
-        filterAll: true,
-        Cell: ({ row }) => {
-          const studyDateArr = convertDateFormat(
-            row.original.date,
-            'date'
-          ).split(' ');
-          return <div>{formatDate(studyDateArr[0])}</div>;
-        }
-      },
-      {
-        Header: () => {
-          return (
-            <div className="mng-anns__header-flex">
-              <div>Created</div>
-              <div>Time</div>
-            </div>
-          );
+                onChange={() => props.updateSelectedAims(row.original)}
+              />
+            );
+          }
         },
-        sortable: false,
-        id: 'time',
-        filterMethod: (filter, rows) =>
-          matchSorter(rows, filter.value, { keys: ['time'] }),
-        filterAll: true,
-        Cell: ({ row }) => {
-          const studyDateArr = convertDateFormat(
-            row.original.date,
-            'date'
-          ).split(' ');
-          return <div>{studyDateArr[1]}</div>;
+        {
+          Header: 'Patient Name',
+          accessor: 'patientName',
+          Cell: ({ row }) => {
+            return <div onClick={() => {
+              if (
+                row.original.seriesUID === 'noseries' ||
+                !row.original.seriesUID
+              ) {
+                // study aim opening
+                displaySeries(row.original);
+              } else {
+                // series opening
+                openAnnotation(row.original);
+              }
+            }} style={{ textDecoration: 'underline', cursor: 'pointer' }}>{clearCarets(row.original.patientName)}</div >;
+          }
+        },
+        {
+          Header: 'MRN',
+          accessor: 'subjectID',
+        },
+        {
+          Header: 'Acc No',
+          accessor: 'accessionNumber',
+        },
+        {
+          accessor: 'name',
+        },
+        {
+          Header: 'Age',
+          accessor: 'age',
+        },
+        {
+          Header: 'Sex',
+          accessor: 'sex',
+        },
+        {
+          Header: 'Modality',
+          accessor: 'modality',
+        },
+        {
+          Header: 'Study Date',
+          accessor: 'studyDate',
+          Cell: ({ row }) => {
+            if (!row.original.studyDate)
+              return <div></div>;
+            const studyDateArr = convertDateFormat(
+              row.original.studyDate,
+              'studyDate'
+            ).split(' ');
+            return <div>{formatDate(studyDateArr[0])}</div>;
+          }
+        },
+        {
+          Header: 'Anatomy',
+          accessor: 'anatomy',
+          Cell: ({ row }) => {
+            return (
+              <div>
+                {Array.isArray(row.original.anatomy)
+                  ? row.original.anatomy.join(', ')
+                  : row.original.anatomy}
+              </div>
+            );
+          }
+        },
+        {
+          Header: 'Observation',
+          accessor: 'observation',
+          style: { 'whiteSpace': 'nowrap' },
+          Cell: ({ row }) => {
+            return (
+              <div>
+                {Array.isArray(row.original.observation)
+                  ? row.original.observation.join(', ')
+                  : row.original.observation}
+              </div>
+            );
+          }
+        },
+        {
+          Header: 'Created',
+          id: 'date',
+          accessor: 'date',
+          Cell: ({ row }) => {
+            const studyDateArr = convertDateFormat(
+              row.original.date,
+              'date'
+            ).split(' ');
+            return <div>{formatDate(studyDateArr[0])}</div>;
+          }
+        },
+        {
+          Header: 'Template',
+          accessor: 'templateType',
+        },
+        {
+          Header: 'User',
+          accessor: 'fullName',
+          style: { whiteSpace: 'normal' },
+        },
+        {
+          Header: 'Comment',
+          accessor: 'userComment'
+        },
+        {
+          Header: 'Project',
+          accessor: 'projectName'
         }
-      },
-      {
-        Header: 'Modality',
-        sortable: true,
-        resizable: true,
-        accessor: 'modality'
-      },
-      {
-        Header: 'Anatomy',
-        sortable: true,
-        resizable: true,
-        accessor: 'anatomy',
-        Cell: ({ row }) => {
-          return (
-            <div>
-              {Array.isArray(row.original.anatomy)
-                ? row.original.anatomy.join(', ')
-                : row.original.anatomy}
-            </div>
-          );
+      ],
+      [props.selectedAnnotations, data]
+    );
+  }
+  else {
+    columns = React.useMemo(
+      () => [
+        {
+          Header: 'Select',
+          id: 'study-desc',
+          Cell: ({ row }) => {
+            return (
+              <input
+                type="checkbox"
+                checked={
+                  props.selectedAnnotations[row.original.aimID] ? true : false
+                }
+                onChange={() => props.updateSelectedAims(row.original)}
+              />
+            );
+          }
+        },
+        {
+          Header: 'Open',
+          sortable: false,
+          resizable: false,
+          style: { display: 'flex', justifyContent: 'center' },
+          Cell: ({ row }) => {
+            return (
+              // <Link className="open-link" to={'/display'}>
+              <div
+                onClick={() => {
+                  if (
+                    row.original.seriesUID === 'noseries' ||
+                    !row.original.seriesUID
+                  ) {
+                    // study aim opening
+                    displaySeries(row.original);
+                  } else {
+                    // series opening
+                    openAnnotation(row.original);
+                  }
+                }}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  width: '1rem'
+                }}
+              >
+                <FaRegEye className="menu-clickable" />
+              </div>
+              // </Link>
+            );
+          }
+        },
+        {
+          // Header: 'Patient Name',
+          Header: ({ column }) => { return <div>Patient Name<input type="text" placeholder="search column" onInput={({ target }) => props.handleFilter(column.id, target)} value={patientName} /></div> },
+          accessor: 'patientName',
+          sortable: true,
+          resizable: true,
+          Cell: ({ row }) => {
+            return <div>{clearCarets(row.original.patientName)}</div>;
+          }
+        },
+        {
+          Header: mode == 'teaching' ? 'MRN' : 'Patient Id',
+          accessor: 'subjectID',
+          sortable: true,
+          resizable: true,
+        },
+        {
+          Header: 'Acc No',
+          accessor: 'accessionNumber',
+          sortable: true,
+          resizable: true,
+          isTeaching: true
+        },
+        {
+          Header: 'Annotation Name',
+          accessor: 'name',
+          sortable: true,
+          resizable: true
+        },
+        {
+          Header: 'Age',
+          accessor: 'age',
+          sortable: true,
+          resizable: true,
+          isTeaching: true,
+        },
+        {
+          Header: 'Sex',
+          accessor: 'sex',
+          sortable: true,
+          resizable: true,
+          isTeaching: true,
+        },
+        {
+          Header: 'Modality',
+          sortable: true,
+          resizable: true,
+          accessor: 'modality',
+        },
+        {
+          Header: 'Study Date',
+          sortable: true,
+          accessor: 'studyDate',
+          filterMethod: (filter, rows) =>
+            matchSorter(rows, filter.value, { keys: ['date'] }),
+          filterAll: true,
+          Cell: ({ row }) => {
+            if (!row.original.studyDate)
+              return <div></div>;
+            const studyDateArr = convertDateFormat(
+              row.original.studyDate,
+              'studyDate'
+            ).split(' ');
+            return <div>{formatDate(studyDateArr[0])}</div>;
+          }
+        },
+        {
+          Header: 'Anatomy',
+          sortable: true,
+          resizable: true,
+          accessor: 'anatomy',
+          Cell: ({ row }) => {
+            return (
+              <div>
+                {Array.isArray(row.original.anatomy)
+                  ? row.original.anatomy.join(', ')
+                  : row.original.anatomy}
+              </div>
+            );
+          }
+        },
+        {
+          Header: 'Observation',
+          sortable: true,
+          resizable: true,
+          accessor: 'observation',
+          Cell: ({ row }) => {
+            return (
+              <div>
+                {Array.isArray(row.original.observation)
+                  ? row.original.observation.join(', ')
+                  : row.original.observation}
+              </div>
+            );
+          }
+        },
+        {
+          Header: 'Created',
+          sortable: true,
+          id: 'date',
+          accessor: 'date',
+          filterMethod: (filter, rows) =>
+            matchSorter(rows, filter.value, { keys: ['date'] }),
+          filterAll: true,
+          Cell: ({ row }) => {
+            const studyDateArr = convertDateFormat(
+              row.original.date,
+              'date'
+            ).split(' ');
+            return <div>{formatDate(studyDateArr[0])}</div>;
+          }
+        },
+        {
+          Header: 'Template',
+          accessor: 'template',
+          resizable: true,
+          sortable: true
+        },
+        // {
+        //   accessor: 'comment',
+        //   sortable: true,
+        //   resizable: true,
+        //   className: 'wrapped',
+        //   style: { whiteSpace: 'normal' },
+        //   Header: () => {
+        //     if (mode !== 'teaching')
+        //       return (
+        //         <div className="mng-anns__header-flex">
+        //           <div>Modality / Series /</div>
+        //           <div>Slice / Series #</div>
+        //         </div>
+        //       );
+        //     else return 'Modality'
+        //   }
+        // },
+        {
+          Header: 'User',
+          accessor: 'fullName',
+          style: { whiteSpace: 'normal' },
+          resizable: true,
+          sortable: true
+        },
+        // {
+        //   Header: () => {
+        //     return (
+        //       <div className="mng-anns__header-flex">
+        //         <div>Created</div>
+        //         <div>Time</div>
+        //       </div>
+        //     );
+        //   },
+        //   sortable: false,
+        //   id: 'time',
+        //   filterMethod: (filter, rows) =>
+        //     matchSorter(rows, filter.value, { keys: ['time'] }),
+        //   filterAll: true,
+        //   Cell: ({ row }) => {
+        //     const studyDateArr = convertDateFormat(
+        //       row.original.date,
+        //       'date'
+        //     ).split(' ');
+        //     return <div>{studyDateArr[1]}</div>;
+        //   }
+        // },
+        {
+          Header: 'Comment',
+          sortable: true,
+          resizable: true,
+          accessor: 'comment'
         }
-      },
-      {
-        Header: 'Observation',
-        sortable: true,
-        resizable: true,
-        accessor: 'observation',
-        Cell: ({ row }) => {
-          return (
-            <div>
-              {Array.isArray(row.original.observation)
-                ? row.original.observation.join(', ')
-                : row.original.observation}
-            </div>
-          );
-        }
-      },
-      {
-        Header: 'Comment',
-        sortable: true,
-        resizable: true,
-        accessor: 'userComment'
-      }
-    ],
-    [props.selectedAnnotations, data]
-  );
+      ],
+      [props.selectedAnnotations, data]
+    );
+  }
 
   const fetchData = useCallback(
     ({ pageIndex }) => {
@@ -633,6 +814,8 @@ function AnnotationTable(props) {
         controlledPageIndex={currentPageIndex}
         handlePageIndex={handlePageIndex}
         listOfSelecteds={listOfSelecteds}
+        handleSort={props.handleSort}
+        handleFilter={props.handleFilter}
       />
       {showSelectSeriesModal && (
         <SelectSerieModal

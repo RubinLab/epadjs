@@ -150,3 +150,13 @@ export function updateWorklistProgressManually(
       annotationStatus
   );
 }
+
+export function addAimsToWorklist(worklist, body) {
+  return http.post(
+    http.apiUrl() +
+      "/worklists/" +
+      encodeURIComponent(worklist) +
+      "/aims",
+    body
+  );
+}
