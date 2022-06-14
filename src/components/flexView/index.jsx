@@ -10,14 +10,17 @@ import StudyTable from "./StudyTable";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
 import SeriesTable from "./SeriesTable";
 import 'react-table-v6/react-table.css';
-import "./flexView.css";
+// import "../annotationSearch/annotationSearch.css";
+// import "./flexView.css";
 
 const TreeTable = treeTableHOC(ReactTable);
+const mode = sessionStorage.getItem('mode');
 
 class FlexView extends React.Component {
+
   state = {
     columns: [],
-    order: [1, 4, 0, 10, 11, 6],
+    order: mode === 'teaching' ? [1, 8, 16, 4, 6, 9, 13, 3] : [1, 4, 0, 10, 11, 6],
     dropdownSelected: false,
     expanded: {},
     seriesTableOpen: false,
@@ -81,7 +84,7 @@ class FlexView extends React.Component {
       const { data } = await getSeries(projectID, patientID, studyUID);
       this.setState({ showSeriesTable: true, series: data });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -90,6 +93,8 @@ class FlexView extends React.Component {
   };
 
   componentDidMount = async () => {
+    const order = JSON.parse(sessionStorage.getItem('studyListColumns'));
+    this.setState({ order });
     try {
       if (this.props.pid) {
         await this.getData(this.props.pid);
@@ -97,7 +102,7 @@ class FlexView extends React.Component {
         this.mountEvents();
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -108,7 +113,7 @@ class FlexView extends React.Component {
         await this.defineColumns();
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
   getData = async (pid) => {
@@ -116,7 +121,9 @@ class FlexView extends React.Component {
     this.setState({ data: studies });
   };
 
-  componentWillUnmount = () => { };
+  componentWillUnmount = () => {
+    sessionStorage.setItem('studyListColumns', JSON.stringify(this.state.order));
+  };
 
   defineColumns = () => {
     const { order } = this.state;
