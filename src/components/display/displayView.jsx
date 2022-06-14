@@ -1624,9 +1624,8 @@ class DisplayView extends Component {
     const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
     // if (this.state.redirect) return <Redirect to="/list" />;
     const redirect = (mode === 'teaching' ? 'search' : 'list');
-    console.log("Redirect", redirect);
     return !Object.entries(series).length ? (
-      <Redirect to='/search' />
+      <Redirect to={`/${redirect}`} />
     ) : (
       <React.Fragment>
         <RightsideBar

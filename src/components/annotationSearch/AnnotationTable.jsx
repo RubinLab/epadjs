@@ -449,10 +449,7 @@ function AnnotationTable(props) {
         },
         {
           Header: 'Patient Name',
-          Header: ({ column }) => { return <div>Patient Name<input type="text" placeholder="search column" onInput={({ target }) => props.handleFilter(column.id, target)} value={patientName} /></div> },
           accessor: 'patientName',
-          sortable: true,
-          resizable: true,
           Cell: ({ row }) => {
             return <div onClick={() => {
               if (
@@ -471,49 +468,29 @@ function AnnotationTable(props) {
         {
           Header: 'MRN',
           accessor: 'subjectID',
-          sortable: true,
-          resizable: true,
         },
         {
           Header: 'Acc No',
           accessor: 'accessionNumber',
-          sortable: true,
-          resizable: true,
-          isTeaching: true
         },
         {
-          Header: 'Case Title / Annotation Name',
           accessor: 'name',
-          sortable: true,
-          resizable: true
         },
         {
           Header: 'Age',
           accessor: 'age',
-          sortable: true,
-          resizable: true,
-          isTeaching: true,
         },
         {
           Header: 'Sex',
           accessor: 'sex',
-          sortable: true,
-          resizable: true,
-          isTeaching: true,
         },
         {
           Header: 'Modality',
-          sortable: true,
-          resizable: true,
           accessor: 'modality',
         },
         {
           Header: 'Study Date',
-          sortable: true,
           accessor: 'studyDate',
-          filterMethod: (filter, rows) =>
-            matchSorter(rows, filter.value, { keys: ['date'] }),
-          filterAll: true,
           Cell: ({ row }) => {
             if (!row.original.studyDate)
               return <div></div>;
@@ -526,8 +503,6 @@ function AnnotationTable(props) {
         },
         {
           Header: 'Anatomy',
-          sortable: true,
-          resizable: true,
           accessor: 'anatomy',
           Cell: ({ row }) => {
             return (
@@ -541,8 +516,6 @@ function AnnotationTable(props) {
         },
         {
           Header: 'Observation',
-          sortable: true,
-          resizable: true,
           accessor: 'observation',
           style: { 'whiteSpace': 'nowrap' },
           Cell: ({ row }) => {
@@ -557,12 +530,8 @@ function AnnotationTable(props) {
         },
         {
           Header: 'Created',
-          sortable: true,
           id: 'date',
           accessor: 'date',
-          filterMethod: (filter, rows) =>
-            matchSorter(rows, filter.value, { keys: ['date'] }),
-          filterAll: true,
           Cell: ({ row }) => {
             const studyDateArr = convertDateFormat(
               row.original.date,
@@ -574,26 +543,18 @@ function AnnotationTable(props) {
         {
           Header: 'Template',
           accessor: 'templateType',
-          resizable: true,
-          sortable: true
         },
         {
           Header: 'User',
           accessor: 'fullName',
           style: { whiteSpace: 'normal' },
-          resizable: true,
-          sortable: true
         },
         {
           Header: 'Comment',
-          sortable: true,
-          resizable: true,
           accessor: 'userComment'
         },
         {
           Header: 'Project',
-          sortable: true,
-          resizable: true,
           accessor: 'projectName'
         }
       ],
@@ -675,7 +636,7 @@ function AnnotationTable(props) {
           isTeaching: true
         },
         {
-          Header: mode === 'teaching' ? 'Case Title / Annotation Name' : 'Annotation Name',
+          Header: 'Annotation Name',
           accessor: 'name',
           sortable: true,
           resizable: true
@@ -765,7 +726,7 @@ function AnnotationTable(props) {
         },
         {
           Header: 'Template',
-          accessor: mode === 'teaching' ? 'templateType' : 'template',
+          accessor: 'template',
           resizable: true,
           sortable: true
         },
@@ -838,9 +799,6 @@ function AnnotationTable(props) {
     },
     [props.bookmark]
   );
-
-  if (mode !== 'teaching')
-    columns = columns.filter(column => !column.isTeaching)
 
   return (
     <>

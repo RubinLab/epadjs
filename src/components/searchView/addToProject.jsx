@@ -36,7 +36,7 @@ const ProjectAdd = ({ projectMap, onSave, onClose, className, annotations }) => 
       const aimIDs = Object.keys(annotations);
       try {
         await addAimsToProject(id, aimIDs);
-        toast.success("Annotation(s) succesfully moved.", {
+        toast.success("Annotation(s) succesfully copied.", {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
