@@ -34,8 +34,8 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
         : value.toLowerCase();
       const keyLowercase = value.toLowerCase();
       return (
-        valueLowercase.startsWith(keyLowercaseControlled) ||
-        valueLowercase.startsWith(keyLowercase)
+        valueLowercase.includes(keyLowercaseControlled) ||
+        valueLowercase.includes(keyLowercase)
       );
     } catch (err) {
       console.log(err);
@@ -63,7 +63,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
         type === "date"
           ? filter.value.split("-").join("")
           : filter.value.split(":").join("");
-      return row[filter.id].startsWith(formattedKey);
+      return row[filter.id].includes(formattedKey);
     } catch (err) {
       console.log(err);
     }
