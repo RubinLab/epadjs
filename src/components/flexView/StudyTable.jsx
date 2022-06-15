@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import ReactTable from "react-table-v6";
 import { FaSortDown, FaSortUp } from "react-icons/fa";
 import find from "lodash/find";
-import "./flexView.css";
+// import "./flexView.css";
+import '../annotationSearch/annotationSearch.css';
 
 import {
   clearCarets,
@@ -33,8 +34,8 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
         : value.toLowerCase();
       const keyLowercase = value.toLowerCase();
       return (
-        valueLowercase.startsWith(keyLowercaseControlled) ||
-        valueLowercase.startsWith(keyLowercase)
+        valueLowercase.includes(keyLowercaseControlled) ||
+        valueLowercase.includes(keyLowercase)
       );
     } catch (err) {
       console.log(err);
@@ -47,12 +48,13 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       ? `inset 0px ${sortedCol.desc ? -3 : 3}px 0px 0px orangered`
       : "";
     const background = sortedCol ? "#3a3f44" : "";
-    return {
-      style: {
-        boxShadow,
-        background
-      }
-    };
+    // return {
+    //   style: {
+    //     boxShadow,
+    //     background
+    //   }
+    // };
+    return { className: 'select_row', style: { color: '#eaddb2' } };
   };
 
   const filterDateAndTime = (filter, row, type) => {
@@ -61,7 +63,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
         type === "date"
           ? filter.value.split("-").join("")
           : filter.value.split(":").join("");
-      return row[filter.id].startsWith(formattedKey);
+      return row[filter.id].includes(formattedKey);
     } catch (err) {
       console.log(err);
     }
@@ -103,12 +105,13 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       }
     },
     {
-      Header: "Patient Name",
+      Header: () => <span> Patient Name</span>,
       accessor: "patientName",
       id: "patientName-id",
       resizable: true,
       sortable: true,
       show: true,
+      style: { color: 'white' },
       filterMethod: (filter, row) => filterString(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
@@ -428,7 +431,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       sortable={true}
       defaultFilterMethod={(filter, row) => filterString(filter, row)}
       NoDataComponent={() => null}
-      className="flexView-table"
+      className="table table-dark table-striped table-hover title-case"
       columns={defineColumns()}
       showPagination={false}
       pageSize={data.length}
