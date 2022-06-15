@@ -135,16 +135,16 @@ class ToolMenu extends Component {
     };
 
     this.imagingTools = [
-      { name: "Close All", icon: <FaTimes />, tool: "ClearGrid" },
-      { name: "Select", icon: <FaMousePointer />, tool: "Noop" },
-      { name: "Levels", icon: <FiSun />, tool: "Wwwc" },
-      { name: "Presets", icon: <FiSunset />, tool: "Presets" },
-      { name: "Zoom", icon: <FiZoomIn />, tool: "Zoom" },
+      { name: "Close All", icon: <FaTimes />, tool: "ClearGrid", teaching: true },
+      { name: "Select", icon: <FaMousePointer />, tool: "Noop", teaching: true },
+      { name: "Levels", icon: <FiSun />, tool: "Wwwc", teaching: true },
+      { name: "Presets", icon: <FiSunset />, tool: "Presets", teaching: true },
+      { name: "Zoom", icon: <FiZoomIn />, tool: "Zoom", teaching: true },
       // { name: "Invert", icon: <FaAdjust />, tool: "Invert" },
-      { name: "Reset", icon: <MdLoop />, tool: "Reset" },
-      { name: "Pan", icon: <MdPanTool />, tool: "Pan" },
-      { name: "MetaData", icon: <FaListAlt />, tool: "MetaData" },
-      { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate" },
+      { name: "Reset", icon: <MdLoop />, tool: "Reset", teaching: true },
+      { name: "Pan", icon: <MdPanTool />, tool: "Pan", teaching: true },
+      { name: "MetaData", icon: <FaListAlt />, tool: "MetaData", teaching: true },
+      { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate", teaching: true },
       // { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
       { name: "Color", icon: <FaPalette />, tool: "colorLut" },
       { name: "Fusion", icon: <FaObjectUngroup />, tool: "fuse" },
@@ -155,26 +155,31 @@ class ToolMenu extends Component {
         name: "Point",
         icon: <div className="icon-point fontastic-icons" />,
         tool: "Probe",
+        teaching: true,
       },
       {
         name: "Line",
         icon: <FaRulerHorizontal />,
         tool: "Length",
+        teaching: true,
       },
       {
         name: "Circle",
         icon: <div className="icon-circle fontastic-icons" />,
         tool: "CircleRoi",
+        teaching: true
       },
       {
         name: "Perpendicular",
         icon: <div className="icon-perpendicular fontastic-icons" />,
         tool: "Bidirectional",
+        teaching: true
       },
       {
         name: "Poly/Freehand",
         icon: <div className="icon-polygon fontastic-icons" />,
         tool: "FreehandRoi3DTool",
+        teaching: true
         // child: (
         //   <span>
         //     Interpolation{" "}
@@ -200,13 +205,15 @@ class ToolMenu extends Component {
         name: "Sculpt 2D",
         icon: <FaScrewdriver />,
         tool: "FreehandRoiSculptor",
+        teaching: true
       },
       {
         name: "Sculpt 3D",
         icon: <FaScrewdriver />,
         tool: "FreehandRoi3DSculptor",
+        teaching: true
       },
-      { name: "Eraser", icon: <FaEraser />, tool: "Eraser" },
+      { name: "Eraser", icon: <FaEraser />, tool: "Eraser", teaching: true },
     ];
 
     this.segmentationTools = [
@@ -247,6 +254,9 @@ class ToolMenu extends Component {
         tool: "CorrectionScissors"
       }
     ];
+    if (mode === 'teaching') {
+      this.imagingTools = this.imagingTools.filter(tool => tool.teaching);
+    }
   }
 
   componentWillUnmount() {
@@ -490,15 +500,15 @@ class ToolMenu extends Component {
       this.setToolStateForAllElements(activeTool, "active");
     return (
       <div className="toolbar">
-        {this.imagingTools.map((imagingTool, i) => {
+        {this.imagingTools.map(({ name, icon, tool }, i) => {
           return (
             <ToolMenuItem
-              key={imagingTool.name}
-              name={imagingTool.name}
-              icon={imagingTool.icon}
+              key={name}
+              name={name}
+              icon={icon}
               index={i}
               isActive={this.state.activeToolIdx === i}
-              onClick={() => this.handleToolClicked(i, imagingTool.tool)}
+              onClick={() => this.handleToolClicked(i, tool)}
             />
           );
         })}
@@ -532,17 +542,17 @@ class ToolMenu extends Component {
             </span>
           </div>
         </div>
-        {this.markupTools.map((markupTool, i) => {
+        {this.markupTools.map(({ name, icon, tool, child }, i) => {
           i = i + this.imagingTools.length;
           return (
             <ToolMenuItem
-              key={markupTool.name}
-              name={markupTool.name}
-              icon={markupTool.icon}
+              key={name}
+              name={name}
+              icon={icon}
               index={i}
               isActive={this.state.activeToolIdx === i}
-              onClick={() => this.handleToolClicked(i, markupTool.tool)}
-              children={markupTool.child}
+              onClick={() => this.handleToolClicked(i, tool)}
+              children={child}
             />
           );
         })}
@@ -661,7 +671,7 @@ class ToolMenu extends Component {
                     </div> */}
         {/* </Collapsible> */}
         {/* <Collapsible trigger={"Segmentation Tools"} transitionTime={100}> */}
-        {this.segmentationTools.map((segmentationTool, i) => {
+        {mode !== 'teaching' && this.segmentationTools.map((segmentationTool, i) => {
           i = i + this.imagingTools.length + this.markupTools.length;
           return (
             <ToolMenuItem
