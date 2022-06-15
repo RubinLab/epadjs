@@ -5,7 +5,7 @@ import _ from "lodash";
 import { Button } from "react-bootstrap";
 import { getSeries } from "../../services/seriesServices";
 import { getStudies } from "../../services/projectServices";
-import DropDownMenu from "./dropdownMenu";
+import ColumnSelect from "./ColumnSelect.jsx";
 import StudyTable from "./StudyTable";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
 import SeriesTable from "./SeriesTable";
@@ -21,7 +21,6 @@ class FlexView extends React.Component {
   state = {
     columns: [],
     order: mode === 'teaching' ? [1, 8, 16, 4, 6, 9, 13, 3] : [1, 4, 0, 10, 11, 6],
-    dropdownSelected: false,
     expanded: {},
     seriesTableOpen: false,
     series: [],
@@ -84,7 +83,7 @@ class FlexView extends React.Component {
       const { data } = await getSeries(projectID, patientID, studyUID);
       this.setState({ showSeriesTable: true, series: data });
     } catch (err) {
-      console.error(err);
+      console.log(err);
     }
   };
 
@@ -113,7 +112,7 @@ class FlexView extends React.Component {
         await this.defineColumns();
       }
     } catch (err) {
-      console.error(err);
+      console.log(err);
     }
   };
   getData = async (pid) => {
@@ -134,11 +133,11 @@ class FlexView extends React.Component {
     this.setState({ columns: tableColumns });
   };
 
-  selectDropdown = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    this.setState((state) => ({ dropdownSelected: !state.dropdownSelected }));
-  };
+  // selectDropdown = (e) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   this.setState((state) => ({ dropdownSelected: !state.dropdownSelected }));
+  // };
 
   toggleColumn = async (e) => {
     const index = this.state.order.findIndex(
@@ -163,7 +162,6 @@ class FlexView extends React.Component {
   };
   render = () => {
     const {
-      dropdownSelected,
       order,
       data,
       series,
@@ -171,26 +169,16 @@ class FlexView extends React.Component {
     } = this.state;
     return (
       <div className="flexView">
-        <Button
-          onClick={this.selectDropdown}
-          variant="secondary"
-          id="flexMenu-button"
-        >
-          Select columns
-        </Button>
         {showSeriesTable && (
           // <SeriesTable series={series} onClose={this.closeSeriesTable} />
           <SelectSerieModal seriesPassed={[series]} onCancel={this.closeSeriesTable} />
         )}
-        {dropdownSelected && (
-          <DropDownMenu
-            selected={dropdownSelected}
-            order={order}
-            onChecked={this.toggleColumn}
-            studyColumns={this.studyColumns}
-            onClose={this.selectDropdown}
-          />
-        )}
+        <ColumnSelect
+          order={order}
+          onChecked={this.toggleColumn}
+          studyColumns={this.studyColumns}
+          onClose={this.selectDropdown}
+        />
         {this.state.data && (
           <StudyTable
             data={data}
