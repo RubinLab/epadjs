@@ -23,7 +23,10 @@ const messages = {
   deleteSelected: 'Delete selected users? This cannot be undone.'
 };
 
+let mode;
+
 class Users extends React.Component {
+  mode = sessionStorage.getItem('mode');
   state = {
     data: [],
     hasAdminPermission: false,
@@ -47,7 +50,6 @@ class Users extends React.Component {
 
   getUserData = async () => {
     const { data } = await getUsers();
-    const mode = sessionStorage.getItem('mode');
     let usersProjects = [];
     let hasAdminPermission = false;
     const filteredProjects = [];
@@ -217,7 +219,6 @@ class Users extends React.Component {
   };
 
   convertArrToStr = arr => {
-    const mode = sessionStorage.getItem('mode');
     if (arr.length > 0) {
       const result = [];
       const displayMap = {
@@ -294,7 +295,6 @@ class Users extends React.Component {
   };
 
   createUser = () => {
-    const mode = sessionStorage.getItem('mode');
     let roleEdit = [];
     let body = {};
     const { userToEdit } = this.state;
@@ -341,7 +341,6 @@ class Users extends React.Component {
   };
 
   defineColumns = () => {
-    const mode = sessionStorage.getItem('mode');
     return [
       {
         id: 'checkbox',
@@ -432,11 +431,10 @@ class Users extends React.Component {
           const text =
             projects.length > 0
               ? projects.reduce((all, item, i) => {
-                  const comma = projects.length - 1 > i ? ', ' : '';
-                  return `${all}${
-                    projectMap[item] ? projectMap[item].projectName : item
+                const comma = projects.length - 1 > i ? ', ' : '';
+                return `${all}${projectMap[item] ? projectMap[item].projectName : item
                   }${comma}`;
-                }, '')
+              }, '')
               : 'Add user to a project';
           return (
             <>

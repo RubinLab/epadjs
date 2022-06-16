@@ -54,7 +54,7 @@ import "./ToolMenu.css";
 import ToolMenuItem from "../ToolMenu/ToolMenuItem";
 import Interpolation from "./Interpolation";
 
-const mode = sessionStorage.getItem('mode');
+let mode;
 
 const mapStateToProps = (state) => {
   return {
@@ -112,6 +112,7 @@ class ToolMenu extends Component {
 
   constructor(props) {
     super(props);
+    mode = sessionStorage.getItem('mode');
     this.tools = tools;
     this.invert = this.invert.bind(this);
 

@@ -19,9 +19,10 @@ import UploadModal from '../../searchView/uploadModal';
 import EditTemplates from './projectTable';
 import { getTemplates } from '../../annotationsList/action';
 
-const mode = sessionStorage.getItem('mode');
+let mode;
 
 class Templates extends React.Component {
+  mode = sessionStorage.getItem('mode');
   state = {
     templates: [],
     projectList: {},
@@ -80,7 +81,7 @@ class Templates extends React.Component {
         const { data: templates } = await getTemplatesUniversal();
         this.setState({ templates });
       }
-    } catch (err) {}
+    } catch (err) { }
   };
 
   toggleRow = async (id, projectID) => {
@@ -365,11 +366,10 @@ class Templates extends React.Component {
         const text =
           projects.length > 0
             ? projects.reduce((all, item, i) => {
-                const comma = projects.length - 1 > i ? ', ' : '';
-                return `${all}${
-                  projectMap[item] ? projectMap[item].projectName : item
+              const comma = projects.length - 1 > i ? ', ' : '';
+              return `${all}${projectMap[item] ? projectMap[item].projectName : item
                 }${comma}`;
-              }, '')
+            }, '')
             : 'Add template to a project';
         return (
           <>
@@ -383,13 +383,13 @@ class Templates extends React.Component {
               <p className={className}>{text}</p>
             </div>
             <ReactTooltip
-                id="template-project-relation"
-                place="left"
-                type="info"
-                delayShow={1000}
-              >
-                <span className="filter-label">Assign template to a project</span>
-              </ReactTooltip>
+              id="template-project-relation"
+              place="left"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Assign template to a project</span>
+            </ReactTooltip>
           </>
         );
       }
