@@ -56,7 +56,7 @@ import AnnotationCreationModal from './annotationCreationModal.jsx';
 import UpLoadWizard from '../tagEditor/uploadWizard';
 import { DISP_MODALITIES } from '../../constants';
 
-const mode = sessionStorage.getItem('mode');
+let mode;
 
 const messages = {
   newUser: {
@@ -80,6 +80,7 @@ const messages = {
 class SearchView extends Component {
   constructor(props) {
     super(props);
+    mode = sessionStorage.getItem('mode');
     this.state = {
       seriesList: {},
       isSerieSelectionOpen: false,

@@ -25,12 +25,13 @@ import Switch from "react-switch";
 import { Modal } from "react-bootstrap";
 import "./aimEditor.css";
 
-const mode = sessionStorage.getItem('mode');
+let mode;
 const defaultAimName = sessionStorage.getItem('defaultAimName');
 
 class AimEditor extends Component {
   constructor(props) {
     super(props);
+    mode = sessionStorage.getItem('mode');
     this.image = this.getImage();
     this.semanticAnswers = {};
     this.state = {

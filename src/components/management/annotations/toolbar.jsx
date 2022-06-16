@@ -10,9 +10,10 @@ import {
 import { HiOutlineFolderDownload } from 'react-icons/hi';
 import ReactTooltip from 'react-tooltip';
 import '../menuStyle.css';
-const mode = sessionStorage.getItem('mode');
+let mode;
 
 const toolBar = props => {
+  mode = sessionStorage.getItem('mode');
   const {
     onDelete,
     onDownload,

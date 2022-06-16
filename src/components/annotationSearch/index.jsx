@@ -101,9 +101,10 @@ const styles = {
   }
 };
 
-const mode = sessionStorage.getItem('mode');
+let mode;
 
 const AnnotationSearch = props => {
+  mode = sessionStorage.getItem('mode');
   const [query, setQuery] = useState('');
   const [partialQuery, setPartialQuery] = useState({
     type: lists.type[0],

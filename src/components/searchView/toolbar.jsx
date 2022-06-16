@@ -15,9 +15,10 @@ import { FiMinimize2 } from 'react-icons/fi';
 import ReactTooltip from 'react-tooltip';
 import { BarLoader } from 'react-spinners';
 
-const mode = sessionStorage.getItem('mode');
+let mode;
 
 const toolBar = props => {
+  mode = sessionStorage.getItem('mode');
   const { project } = props;
   const noUpload = project === 'all' || project === 'nonassigned';
   const disabledStyle = {

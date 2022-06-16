@@ -11,9 +11,10 @@ import { uploadFileToStudy } from '../../services/studyServices';
 import { uploadFileToSeries } from '../../services/seriesServices';
 import { getTemplates } from '../annotationsList/action';
 
-const mode = sessionStorage.getItem('mode');
+let mode;
 
 class UploadModal extends React.Component {
+  mode = sessionStorage.getItem('mode');
   state = {
     tiff: false,
     osirix: false,
@@ -50,8 +51,8 @@ class UploadModal extends React.Component {
           nonSelectablePid && projects.length > 0
             ? projects[0].id
             : !nonSelectablePid
-            ? pid
-            : '';
+              ? pid
+              : '';
         this.setState({ projects, projectID });
       }
     } catch (err) {
@@ -260,7 +261,7 @@ UploadModal.propTypes = {
   selectedPatients: PropTypes.object,
   selectedSeries: PropTypes.object,
   selectedStudies: PropTypes.object,
-  clearTreeExpand:PropTypes.func
+  clearTreeExpand: PropTypes.func
 
 };
 

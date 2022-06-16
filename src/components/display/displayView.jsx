@@ -45,7 +45,7 @@ import { errorMonitor } from "events";
 import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
 import getVPDimensions from "./ViewportCalculations";
 
-const mode = sessionStorage.getItem('mode');
+let mode;
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 } },
@@ -141,6 +141,7 @@ const mapStateToProps = (state) => {
 class DisplayView extends Component {
   constructor(props) {
     super(props);
+    mode = sessionStorage.getItem('mode');
     this.state = {
       width: "100%",
       height: "100%",

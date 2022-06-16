@@ -14,10 +14,10 @@ import 'react-table-v6/react-table.css';
 // import "./flexView.css";
 
 const TreeTable = treeTableHOC(ReactTable);
-const mode = sessionStorage.getItem('mode');
+let mode;
 
 class FlexView extends React.Component {
-
+  mode = sessionStorage.getItem('mode');
   state = {
     columns: [],
     order: mode === 'teaching' ? [1, 8, 16, 4, 6, 9, 13, 3] : [1, 4, 0, 10, 11, 6],

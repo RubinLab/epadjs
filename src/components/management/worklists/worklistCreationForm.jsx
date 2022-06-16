@@ -8,7 +8,7 @@ import RequirementForm from "./requirementForm";
 import { saveWorklist } from "../../../services/worklistServices";
 import "../menuStyle.css";
 
-const mode = sessionStorage.getItem('mode');
+let mode;
 
 const messages = {
   fillRequiredFields: "Please fill the required fields",
@@ -19,6 +19,7 @@ const messages = {
 };
 
 class WorklistCreationForm extends React.Component {
+  mode = sessionStorage.getItem('mode');
   state = {
     page: 0,
     assigneeList: {},

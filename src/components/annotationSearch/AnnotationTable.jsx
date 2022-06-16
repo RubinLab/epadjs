@@ -25,11 +25,10 @@ import {
 import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
 import SelectSerieModal from '../annotationsList/selectSerieModal';
-
-const mode = sessionStorage.getItem('mode');
-
 const defaultPageSize = 200;
 const maxPort = parseInt(sessionStorage.getItem('maxPort'));
+
+let mode;
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
@@ -244,6 +243,7 @@ function Table({
 // };
 
 function AnnotationTable(props) {
+  mode = sessionStorage.getItem('mode');
   const [pageCount, setPageCount] = useState(0);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [data, setData] = useState([]);
