@@ -1680,7 +1680,7 @@ class DisplayView extends Component {
                   <div className={"column middle-right"}>
                     <Form inline className="slice-form">
                       <Form.Group className="slice-number">
-                        <Form.Label htmlFor="imageNum" className="slice-label">
+                        <Form.Label htmlFor="imageNum" className="slice-label" style={{ color: 'white' }}>
                           {"Slice # "}
                         </Form.Label>
                         <Form.Control
@@ -1693,6 +1693,7 @@ class DisplayView extends Component {
                             width: "60px",
                             height: "10px",
                             opacity: 1,
+                            display: 'inline'
                           }}
                         />
                       </Form.Group>

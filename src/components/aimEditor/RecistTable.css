@@ -13,7 +13,7 @@
     z-index: 20000;
 }
 
-.row {
+.recist-row {
     display: table-row;
 }
 
@@ -92,10 +92,6 @@
     display: table-row;
     font-weight: bold;
     text-align: center;
-}
-
-.Row {
-    display: table-row;
 }
 
 .Cell {

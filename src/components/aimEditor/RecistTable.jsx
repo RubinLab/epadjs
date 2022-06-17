@@ -68,7 +68,7 @@ class RecistTable extends Component {
                 <p>Non Target</p>
               </div>
             </div>
-            <div className="Row">
+            <div className="recist-row">
               <div className="Cell">
                 {targets &&
                   targets.map((target, index) => (
@@ -104,7 +104,7 @@ class RecistTable extends Component {
                   ))}
               </div>
             </div>
-            <div className="Row">
+            <div className="recist-row">
               <div className="Cell">
                 <button className="brush-presets" onClick={this.handleSelect}>
                   Select
