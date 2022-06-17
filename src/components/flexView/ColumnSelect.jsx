@@ -25,7 +25,7 @@ const ColumnSelect = (props) => {
           return (
             <div key={y} className="row">
               <div key={y} className="mb-3" style={{ width: '250px' }}>
-                <input className="form-check-input filter-input" type="checkbox" value={y} checked={order.includes(y)} onChange={onChecked} />
+                <input className="form-check-input filter-input" type="checkbox" value={y} checked={order?.includes(y)} onChange={onChecked} />
                 <label className="form-check-label title-case" style={{ paddingLeft: '0.3rem' }} htmlFor="flexCheckDefault">
                   {column}
                 </label>
