@@ -93,7 +93,8 @@ class FlexView extends React.Component {
 
   componentDidMount = async () => {
     const order = JSON.parse(sessionStorage.getItem('studyListColumns'));
-    this.setState({ order });
+    if (order && order.length)
+      this.setState({ order });
     try {
       if (this.props.pid) {
         await this.getData(this.props.pid);
@@ -106,9 +107,11 @@ class FlexView extends React.Component {
   };
 
   componentDidUpdate = async (prevProps) => {
+    console.log("Update", prevProps, this.props);
     try {
-      if (prevProps.match.params.pid !== this.props.match.params.pid) {
-        await this.getData(this.props.match.params.pid);
+      if (prevProps.pid !== this.props.pid) {
+        console.log("in the if");
+        await this.getData(this.props.pid);
         await this.defineColumns();
       }
     } catch (err) {
