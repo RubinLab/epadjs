@@ -107,10 +107,8 @@ class FlexView extends React.Component {
   };
 
   componentDidUpdate = async (prevProps) => {
-    console.log("Update", prevProps, this.props);
     try {
       if (prevProps.pid !== this.props.pid) {
-        console.log("in the if");
         await this.getData(this.props.pid);
         await this.defineColumns();
       }
