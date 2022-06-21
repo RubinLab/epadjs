@@ -24,7 +24,7 @@ class TeachingFilters extends React.Component {
                 </div>
                 <div className="col-auto" style={{ fontSize: '.9em', float: 'right' }}>
                     <div className="form-check form-check-inline" >
-                        <label className="form-check-label" htmlFor="flexCheckChecked">Include Significant Images</label>
+                        <label className="form-check-label" htmlFor="flexCheckChecked">Inc Significant Images</label>
                         <input className="form-check-input" type="checkbox" id="flexCheckChecked" key={"tfOnly"} checked={!tfOnly} onChange={e => setTfOnly(!e.target.checked)} />
                     </div>
                     <div className="form-check form-check-inline">
