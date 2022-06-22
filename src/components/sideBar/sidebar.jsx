@@ -43,7 +43,7 @@ class Sidebar extends Component {
       worklistsCreated: [],
       pacs: [],
       width: mode !== "lite" ? "205px" : "0",
-      tabMarginLeft: "180px",
+      tabMarginLeft: "185px",
       marginLeft: mode !== "lite" ? "205px" : "0",
       buttonDisplay: mode !== "lite" ? "none" : "block",
       open: mode !== "lite",
@@ -245,7 +245,7 @@ class Sidebar extends Component {
       this.setState({
         width: "205px",
         marginLeft: "205px",
-        tabMarginLeft: "180px",
+        tabMarginLeft: "185px",
         buttonDisplay: "none",
         open: true
       });
@@ -478,7 +478,7 @@ class Sidebar extends Component {
         <div className={open ? "left-open" : "left-closed"} style={{ width: width }}>
           <div className="drawer-control-left" onClick={this.handleOpenClose}>{open ? <BsArrowBarLeft className="bi bi-arrow-bar-left" /> : <BsArrowBarRight className="bi bi-arrow-bar-left" />}</div>
           <div className={open ? "left-tabs" : "left-tabs-closed"} style={{ marginLeft: tabMarginLeft }}>
-            <ul className="nav nav-tabs flex-column" style={{ borderLeft: 'none' }} id="myTab" role="tablist">
+            <ul className="nav nav-tabs flex-column" style={{ borderLeft: 'none', padding: '0px' }} id="myTab" role="tablist">
               <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation">
                 <button className={tab === 'projects' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'projects' })} id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects-tab-pane" type="button" role="tab" aria-controls="projects-tab-pane" aria-selected="false">Projects</button>
               </li>
@@ -517,7 +517,7 @@ class Sidebar extends Component {
           {this.props.children}
           {/* {this.props.activePort !== null ? <AnnotationsList /> : null} */}
         </div>
-      </div>
+      </div >
     );
   };
 }
