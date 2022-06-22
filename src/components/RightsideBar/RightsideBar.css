@@ -50,6 +50,11 @@
   padding: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-top: 0;
+  width: inherit;
+}
+
+.Collapsible__contentOuter{
+  width: inherit;
 }
 
 .Collapsible__contentInner p {
@@ -84,6 +89,7 @@
   padding: 10px;
   background: #861737;
   color: white;
+  width: inherit;
 }
 
 .Collapsible__trigger:after {
@@ -117,5 +123,4 @@
 
 .AimEditor-Wrapper {
   overflow-y: auto;
-  height: 400px;
 }

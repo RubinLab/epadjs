@@ -159,7 +159,7 @@ class DisplayView extends Component {
       redirect: this.props.series.length < 1 ? true : false,
       containerHeight: 0,
       tokenRefresh: null,
-      activeTool: undefined
+      activeTool: ''
     };
   }
 
