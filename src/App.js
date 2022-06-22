@@ -1434,19 +1434,10 @@ class App extends Component {
                   />
                 )}
                 {mode === "teaching" && (
-                  <ProtectedRoute
+                  <Redirect
                     from="/"
                     to="/search"
-                    render={(props) => (
-                      <AnnotationSearch
-                        {...props}
-                        pid={this.state.pid}
-                        searchQuery={this.state.searchQuery}
-                        setQuery={(query) =>
-                          this.setState({ searchQuery: query })
-                        }
-                      />
-                    )}
+                    
                   />
                 )}
 

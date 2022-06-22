@@ -150,36 +150,31 @@ body {
   text-align: center;
 }
 
-
 .progress-text {
   background-color: #777;
   color: #fff;
-  font-size: 12px;
   /* text-shadow: 1px 0px 1px rgba(0, 0, 0, 0.25); */
-  margin: 7px 7px 7px 0px;
+  margin: 7px;
 }
 .progress-text ul {
-  padding-left: 1.2rem !important;
+  padding-left:0rem !important;
   list-style-type: none !important;
-  margin-left: -12px;
+  margin:2px;
 }
 .progress-text ul li{
-  line-height: 1.2rem !important;
   list-style-type: none !important;
+  text-transform: capitalize;
 }
 .progress-text ul li b{
   color: #fff47e;
   font-weight: 400;
   list-style-type: none !important;
 }
-.progress_expanded {
+.progress-expanded {
   background-color: #cccccc;
-  padding: 3px;
-  position: fixed;
   left: 0;
-  padding-left: 1em;
-  width: 18em;
-  margin-bottom: 2em;
+  width: 172px;
+  padding: 0px;
 }
 
 .left-closed {
@@ -218,10 +213,78 @@ body {
   /* width: calc(100% - 200px); */
   padding: 1px;
   /* display: flex; */
+  color: white;
 }
 
 .mainView-closed {
   width: calc(100%-30px);
   transition: margin-left 0.3s;
   /* display: flex; */
+}
+
+.Collapsible__contentOuter {
+  width:172px; 
+  background:  #cccccc;
+}
+
+.Collapsible__contentInner {
+  background:  #cccccc;
+  width:172px; 
+}
+
+.Collapsible__contentInner p {
+  margin-bottom: 10px;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.Collapsible__contentInner p:last-child {
+  margin-bottom: 0;
+}
+
+.Collapsible__trigger {
+  display: block;
+  font-weight: 500;
+  text-decoration: none;
+  color: #3a3f44;
+  position: relative;
+  padding: 5px;
+  padding-left: 1em;
+  margin-top: 1.5em;
+  background:  #cccccc;
+  width: 172px;
+}
+
+.Collapsible__trigger.is-open {
+  display: block;
+  position: relative;  
+}
+
+.Collapsible__trigger:after {
+  font-family: "FontAwesome";
+  content: "\f107";
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  display: block;
+}
+
+.Collapsible__trigger.is-open:after {
+  transform: rotateZ(180deg);
+}
+
+.Collapsible__trigger.is-disabled {
+  opacity: 0.5;
+  background-color: grey;
+}
+
+.CustomTriggerCSS--open {
+  background-color: darkslateblue;
+}
+
+.Collapsible__custom-sibling {
+  padding: 5px;
+  font-size: 12px;
+  background-color: #cbb700;
+  color: black;
 }

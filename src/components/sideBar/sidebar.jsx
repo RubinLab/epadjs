@@ -137,7 +137,8 @@ class Sidebar extends Component {
     if (this.props.openSeries.length === 0 && setPid) {
       const pid = projects[0].id;
       this.setState({ pid, selected: pid });
-      this.props.history.push(`/list/${pid}`);
+      if (mode !== 'teaching')
+        this.props.history.push(`/list/${pid}`);
       this.props.getPidUpdate(pid);
     }
   };
@@ -261,10 +262,13 @@ class Sidebar extends Component {
       this.collapseAll();
     }
     if (type === "project" && this.props.type === "search") {
-      this.props.history.push(`/list/${id}`);
       this.setState({ index: 0 });
       this.props.getPidUpdate(id);
       this.props.clearTreeExpand();
+      if (mode === 'teaching')
+        this.props.history.push(`/search`);
+      else
+        this.props.history.push(`/list/${id}`);
     } else if (type === "project" && this.props.type === "flex") {
       this.props.history.push(`/flex/${id}`);
       this.setState({ index: 0 });
@@ -321,26 +325,24 @@ class Sidebar extends Component {
       pathname = pathname.split("/").pop();
       // const pid = pathname.pop();
       if (mode !== "lite") {
-        const projectsList = projects.map(project => {
+        const projectsList = projects.map(({ id, name, numberOfSubjects }) => {
           const matchProject =
-            selected === project.id ||
-            pathname === project.id ||
-            this.props.pid === project.id;
+            selected === id ||
+            pathname === id ||
+            this.props.pid === id;
           const styling = matchProject
             ? "element_selected"
             : "element";
           return (
-            <li className={matchProject ? "element_selected" : "element_de_selected"} onClick={() => {
-              this.handleRoute("project", project.id);
-              this.props.getPidUpdate(project.id);
-              this.setState({ selected: project.id });
-            }}>
-
-              {project.name}
+            <li key={id} className={matchProject ? "element_selected" : "element_de_selected"} onClick={() => {
+              this.handleRoute("project", id);
+              this.props.getPidUpdate(id);
+              this.setState({ selected: id });
+            }} style={{ padding: "0.2rem" }}>
+              {name}
               <div className={'element_number'}>
-                {project.numberOfSubjects}
+                {numberOfSubjects}
               </div>
-
             </li>
           );
         });
@@ -353,33 +355,24 @@ class Sidebar extends Component {
 
   renderWorklists = () => {
     const { type, selected } = this.state;
-    const worklists = this.state.worklistsAssigned.map(worklist => {
-      const className =
-        worklist.workListID === selected && type === "worklist"
-          ? "sidebar-row __selected"
-          : "sidebar-row";
+    const worklists = this.state.worklistsAssigned.map(({ workListID, name, projectIDs }) => {
+      const isSelected = (workListID === selected && type === "worklist");
       return (
-        <tr key={worklist.workListID} className={className}>
-          <td>
-            <p
-              onClick={() => {
-                this.handleRoute("worklist", worklist.workListID);
-                this.setState({ selected: worklist.workListID });
-              }}
-              style={{ padding: "0.6rem" }}
-            >
-              {worklist.name}
-              {worklist.projectIDs.length ? (
-                <span className="badge badge-secondary worklist">
-                  {worklist.projectIDs.length}
-                </span>
-              ) : null}
-            </p>
-          </td>
-        </tr>
+        <li key={workListID} className={isSelected ? 'element_selected' : 'element_de_selected'}
+          onClick={() => {
+            this.handleRoute("worklist", workListID);
+            this.setState({ selected: workListID });
+          }} style={{ padding: "0.4rem" }}>
+          {name}
+          {projectIDs.length ? (
+            <div className="element_number">
+              {projectIDs.length}
+            </div>
+          ) : null}
+        </li>
       );
     });
-    return <SidebarContent key="worklistContent">{worklists}</SidebarContent>;
+    return <ul className={'element'} style={{ listStyle: 'none' }}> {worklists}</ul >;
   };
 
   renderProgress = () => {
@@ -481,40 +474,6 @@ class Sidebar extends Component {
   render = () => {
     const { progressView, open, tab, marginLeft, width, tabMarginLeft } = this.state;
     return (
-      // <React.Fragment>
-      //   <div
-      //     id="leftSidebar"
-      //     className="sidenav"
-      //     style={{ width: this.state.width }}
-      //   >
-      //     <button
-      //       to="#"
-      //       className="closebtn __leftBar"
-      //       onClick={this.handleClose}
-      //     >
-      //       <FaArrowAltCircleLeft />
-      //     </button>
-      //     {this.renderContent()}
-      //   </div>
-      //   <div
-      //     className={this.state.open ? "mainView" : "mainView-closed"}
-      //     style={{
-      //       marginLeft: this.state.marginLeft,
-      //       height: "calc(100% - 50px)"
-      //     }}
-      //   >
-      //     <button
-      //       id="openNav"
-      //       style={{ display: this.state.buttonDisplay }}
-      //       onClick={this.handleOpen}
-      //     >
-      //       &#9776;
-      //     </button>
-      //     {this.props.children}
-      //     {/* {this.props.activePort !== null ? <AnnotationsList /> : null} */}
-      //   </div>
-      // </React.Fragment>
-
       <div>
         <div className={open ? "left-open" : "left-closed"} style={{ width: width }}>
           <div className="drawer-control-left" onClick={this.handleOpenClose}>{open ? <BsArrowBarLeft className="bi bi-arrow-bar-left" /> : <BsArrowBarRight className="bi bi-arrow-bar-left" />}</div>
@@ -524,7 +483,7 @@ class Sidebar extends Component {
                 <button className={tab === 'projects' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'projects' })} id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects-tab-pane" type="button" role="tab" aria-controls="projects-tab-pane" aria-selected="false">Projects</button>
               </li>
               <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation">
-                <button className={tab === 'workllist' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'worklist' })} id="worklists-tab" data-bs-toggle="tab" data-bs-target="#worklists-tab-pane" type="button" role="tab" aria-controls="worklists-tab-pane" aria-selected="true">Worklists</button>
+                <button className={tab === 'worklist' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'worklist' })} id="worklists-tab" data-bs-toggle="tab" data-bs-target="#worklists-tab-pane" type="button" role="tab" aria-controls="worklists-tab-pane" aria-selected="true">Worklists</button>
               </li>
               <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation">
                 <button className={tab === 'progress' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'progress' })} id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress-tab-pane" type="button" role="tab" aria-controls="progress-tab-pane" aria-selected="false">Progress</button>
@@ -555,7 +514,6 @@ class Sidebar extends Component {
             marginLeft: marginLeft
           }}
         >
-
           {this.props.children}
           {/* {this.props.activePort !== null ? <AnnotationsList /> : null} */}
         </div>
