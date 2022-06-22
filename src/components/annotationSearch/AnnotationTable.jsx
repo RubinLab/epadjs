@@ -574,7 +574,7 @@ function AnnotationTable(props) {
                 checked={
                   props.selectedAnnotations[row.original.aimID] ? true : false
                 }
-                onChange={() => props.updateSelectedAims(row.original)}
+                onClick={() => { props.updateSelectedAims(row.original); alert("hop") }}
               />
             );
           }
@@ -806,7 +806,6 @@ function AnnotationTable(props) {
         columns={columns}
         data={data}
         selected={props.selected}
-        // updateSelectedAims={props.updateSelectedAims}
         pageCount={pageCount}
         noOfRows={props.noOfRows}
         fetchData={fetchData}
