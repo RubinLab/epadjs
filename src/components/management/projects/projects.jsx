@@ -72,11 +72,11 @@ class Projects extends React.Component {
   getDefaultTemplate = (e, template) => {
     e.target.checked
       ? this.setState({
-          defaulttemplate: template
-        })
+        defaulttemplate: template
+      })
       : this.setState({
-          defaulttemplate: null
-        });
+        defaulttemplate: null
+      });
   };
 
   handleClickUSerRoles = async id => {
@@ -556,22 +556,20 @@ class Projects extends React.Component {
           defaultPageSize={10}
           NoDataComponent={() => null}
         />
-        {this.state.hasDeleteAllClicked && (
-          <DeleteAlert
-            message={messages.deleteSelected}
-            onCancel={this.handleCancel}
-            onDelete={this.deleteAllSelected}
-            error={this.state.errorMessage}
-          />
-        )}
-        {this.state.hasDeleteSingleClicked && (
-          <DeleteAlert
-            message={messages.deleteSingle}
-            onCancel={this.handleCancel}
-            onDelete={this.deleteSingleProject}
-            error={this.state.errorMessage}
-          />
-        )}
+        <DeleteAlert
+          show={this.state.hasDeleteAllClicked}
+          message={messages.deleteSelected}
+          onCancel={this.handleCancel}
+          onDelete={this.deleteAllSelected}
+          error={this.state.errorMessage}
+        />
+        <DeleteAlert
+          show={this.state.hasDeleteSingleClicked}
+          message={messages.deleteSingle}
+          onCancel={this.handleCancel}
+          onDelete={this.deleteSingleProject}
+          error={this.state.errorMessage}
+        />
         {this.state.hasAddClicked && (
           <ProjectCreationForm
             onType={this.handleFormInput}
