@@ -201,7 +201,8 @@ class DisplayView extends Component {
     const prevActiveSerie = prevSeries[prevActivePort];
 
     if (this.props.series.length < 1) {
-      if (pid) this.props.history.push(`/list/${pid}`);
+      if (mode === 'teaching') this.props.history.push('/search');
+      else if (pid) this.props.history.push(`/list/${pid}`);
       else return;
       return;
     }

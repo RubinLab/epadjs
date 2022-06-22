@@ -551,6 +551,7 @@ class App extends Component {
   };
 
   switchView = (viewType, force) => {
+    console.log('In switch');
     const { pid } = this.state;
     this.setState({ viewType });
     const { openSeries } = this.props;
