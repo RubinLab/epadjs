@@ -19,18 +19,21 @@ const messages = {
 };
 
 class WorklistCreationForm extends React.Component {
-  mode = sessionStorage.getItem('mode');
-  state = {
-    page: 0,
-    assigneeList: {},
-    name: "",
-    id: "",
-    description: "",
-    duedate: "",
-    error: "",
-    requirements: {},
-    isSelectedAll: false,
-  };
+  constructor(props) {
+    super(props);
+    mode = sessionStorage.getItem('mode');
+    this.state = {
+      page: 0,
+      assigneeList: {},
+      name: "",
+      id: "",
+      description: "",
+      duedate: "",
+      error: "",
+      requirements: {},
+      isSelectedAll: false,
+    };
+  }
 
   goPrevPage = () => {
     const { page } = this.state;
@@ -228,6 +231,8 @@ class WorklistCreationForm extends React.Component {
     let button3Func = onCancel;
     let disableSubmit = false;
     let disableNext = !id || !name || id.includes(" ");
+
+    console.log("Mode is", mode);
 
     if (page === 2) {
       button2Text = "Submit";
