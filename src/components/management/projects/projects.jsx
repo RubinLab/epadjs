@@ -302,7 +302,7 @@ class Projects extends React.Component {
     this.setState({ hasAddClicked: true });
   };
 
-  handleFormInput = e => {
+  handleFormInput = (e, isId = false) => {
     const { name, value } = e.target;
     if (name === 'defaulttemplate' && (value === 'none' || value === null)) {
       this.setState({ [name]: null });

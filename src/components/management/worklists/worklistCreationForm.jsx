@@ -232,8 +232,6 @@ class WorklistCreationForm extends React.Component {
     let disableSubmit = false;
     let disableNext = !id || !name || id.includes(" ");
 
-    console.log("Mode is", mode);
-
     if (page === 2) {
       button2Text = "Submit";
       const assigneeListArr = Object.keys(this.state.assigneeList);
