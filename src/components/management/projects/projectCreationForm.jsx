@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import "../menuStyle.css";
+import { teachingDefTempCode } from "../../../constants";
 
 const projectCreationForm = ({
   onCancel,
@@ -10,6 +11,7 @@ const projectCreationForm = ({
   error,
   templates,
 }) => {
+  const mode = sessionStorage.getItem('mode');
   const firstOption = (
     <option value={null} key="selectOpt">
       --Select template--
@@ -24,6 +26,15 @@ const projectCreationForm = ({
       </option>
     );
   });
+
+  const handleNameChange = (e) => {
+    const name = e.target.value;
+    const idInput = document.getElementById("projectID");
+    const newId = name.replace(/[^a-z0-9_]/gi, '');
+    idInput.value = newId;
+    onType({ target: { name: 'id', value: newId } });
+  }
+
   return (
     // <Modal.Dialog dialogClassName="add-project__modal">
     <Modal.Dialog id="modal-fix" className="in-modal">
@@ -38,7 +49,7 @@ const projectCreationForm = ({
             className="add-project__modal--input"
             name="name"
             type="text"
-            onChange={onType}
+            onChange={(e) => { onType(e); handleNameChange(e) }}
             id="projectName"
           />
           <h5 className="add-project__modal--label">ID*</h5>
@@ -69,6 +80,7 @@ const projectCreationForm = ({
             className="add-project__modal--select"
             onChange={onType}
             id="projectTemplate"
+            defaultValue={mode === 'teaching' ? teachingDefTempCode : null}
           >
             {options}
           </select>
