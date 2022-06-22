@@ -1347,7 +1347,7 @@ const AnnotationSearch = props => {
         {/* search / filters */}
         <div className="search_filter">
           <div className="row">
-            <div className="col-5">
+            <div className="col-4">
               <div className="input-group input-group-sm mb-3">
                 <input className="form-control" type="text" placeholder="Enter Search Terms and/or Use Filters at Right" aria-label="default input example" onChange={e => { setQuery(e.target.value) }} value={query} />
                 <span className="input-group-text" id="basic-addon1"><BiSearch /></span>

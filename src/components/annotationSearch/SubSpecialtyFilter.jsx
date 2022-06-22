@@ -82,7 +82,7 @@ const SubSpecialityFilter = props => {
     }
 
     return (
-        <Dropdown id='subSpecDrop' className="d-inline mx-2" show={show} >
+        <Dropdown id='subSpecDrop' className="d-inline mx-1" show={show} >
             <Dropdown.Toggle as={CustomToggle} onClick={toggleHandler}>
                 Subspecialty
             </Dropdown.Toggle>

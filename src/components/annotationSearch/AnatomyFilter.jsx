@@ -71,7 +71,7 @@ const AnatomyFilter = (props) => {
     );
 
     return (
-        <Dropdown className="d-inline mx-2">
+        <Dropdown className="d-inline mx-1">
             <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
                 Anatomy
             </Dropdown.Toggle>
