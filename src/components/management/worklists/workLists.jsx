@@ -201,7 +201,7 @@ class WorkList extends React.Component {
     fieldName === 'name'
       ? this.setState({ name: defaultValue })
       : // fieldName === "description"?
-        this.setState({ description: defaultValue });
+      this.setState({ description: defaultValue });
     // : this.setState({ duedate: defaultValue });
   };
 
@@ -237,7 +237,6 @@ class WorkList extends React.Component {
 
   getUpdate = e => {
     const { name, value } = e.target;
-    console.log(name, value);
     this.setState({ [name]: value });
   };
 
@@ -246,8 +245,8 @@ class WorkList extends React.Component {
     const body = name
       ? { name }
       : description === '' || description
-      ? { description }
-      : { duedate };
+        ? { description }
+        : { duedate };
     updateWorklist(worklistId, body)
       .then(() => this.getWorkListData())
       .catch(error =>
@@ -680,14 +679,13 @@ class WorkList extends React.Component {
           pageSizeOptions={[10, 20, 50]}
           defaultPageSize={10}
         />
-        {this.state.deleteSingleClicked && (
-          <DeleteAlert
-            message={messages.deleteSingle}
-            onCancel={this.handleCancel}
-            onDelete={this.deleteSingleWorklist}
-            error={this.state.errorMessage}
-          />
-        )}
+        <DeleteAlert
+          show={this.state.deleteSingleClicked}
+          message={messages.deleteSingle}
+          onCancel={this.handleCancel}
+          onDelete={this.deleteSingleWorklist}
+          error={this.state.errorMessage}
+        />
         {this.state.hasAddClicked && (
           <CreationForm
             users={this.state.userList}
@@ -696,15 +694,13 @@ class WorkList extends React.Component {
             error={this.state.error}
           />
         )}
-
-        {this.state.deleteAllClicked && (
-          <DeleteAlert
-            message={messages.deleteSelected}
-            onCancel={this.handleCancel}
-            onDelete={this.deleteAllSelected}
-            error={this.state.errorMessage}
-          />
-        )}
+        <DeleteAlert
+          show={this.state.deleteAllClicked}
+          message={messages.deleteSelected}
+          onCancel={this.handleCancel}
+          onDelete={this.deleteAllSelected}
+          error={this.state.errorMessage}
+        />
         {this.state.updateAssignee && (
           <UpdateAssignee
             onCancel={this.handleCancel}
