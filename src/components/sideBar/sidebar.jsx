@@ -43,7 +43,7 @@ class Sidebar extends Component {
       worklistsCreated: [],
       pacs: [],
       width: mode !== "lite" ? "205px" : "0",
-      tabMarginLeft: "177px",
+      tabMarginLeft: "170px",
       marginLeft: mode !== "lite" ? "205px" : "0",
       buttonDisplay: mode !== "lite" ? "none" : "block",
       open: mode !== "lite",
@@ -245,7 +245,7 @@ class Sidebar extends Component {
       this.setState({
         width: "205px",
         marginLeft: "205px",
-        tabMarginLeft: "177px",
+        tabMarginLeft: "170px",
         buttonDisplay: "none",
         open: true
       });
@@ -476,20 +476,6 @@ class Sidebar extends Component {
     return (
       <div>
         <div className={open ? "left-open" : "left-closed"} style={{ width: width }}>
-          <div className="drawer-control-left" onClick={this.handleOpenClose}>{open ? <BsArrowBarLeft className="bi bi-arrow-bar-left" /> : <BsArrowBarRight className="bi bi-arrow-bar-left" />}</div>
-          <div className={open ? "left-tabs" : "left-tabs-closed"} style={{ marginLeft: tabMarginLeft }}>
-            <ul className="nav nav-tabs flex-column" style={{ borderLeft: 'none', padding: '0px' }} id="myTab" role="tablist">
-              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation">
-                <button className={tab === 'projects' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'projects' })} id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects-tab-pane" type="button" role="tab" aria-controls="projects-tab-pane" aria-selected="false">Projects</button>
-              </li>
-              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation">
-                <button className={tab === 'worklist' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'worklist' })} id="worklists-tab" data-bs-toggle="tab" data-bs-target="#worklists-tab-pane" type="button" role="tab" aria-controls="worklists-tab-pane" aria-selected="true">Worklists</button>
-              </li>
-              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation">
-                <button className={tab === 'progress' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'progress' })} id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress-tab-pane" type="button" role="tab" aria-controls="progress-tab-pane" aria-selected="false">Progress</button>
-              </li>
-            </ul>
-          </div>
           {open && (
             <div className="left-editor-display">
               <div className="tab-content" id="myTabContent">
@@ -507,6 +493,21 @@ class Sidebar extends Component {
               </div>
             </div>
           )}
+          <div className="drawer-control-left" onClick={this.handleOpenClose}>{open ? <BsArrowBarLeft className="bi bi-arrow-bar-left" /> : <BsArrowBarRight className="bi bi-arrow-bar-left" />}</div>
+          <div className={open ? "left-tabs" : "left-tabs-closed"} style={{ marginLeft: tabMarginLeft }}>
+            <ul className="nav nav-tabs flex-column" style={{ borderLeft: 'none', padding: '0px' }} id="myTab" role="tablist">
+              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation">
+                <button className={tab === 'projects' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'projects' })} id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects-tab-pane" type="button" role="tab" aria-controls="projects-tab-pane" aria-selected="false">Projects</button>
+              </li>
+              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation">
+                <button className={tab === 'worklist' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'worklist' })} id="worklists-tab" data-bs-toggle="tab" data-bs-target="#worklists-tab-pane" type="button" role="tab" aria-controls="worklists-tab-pane" aria-selected="true">Worklists</button>
+              </li>
+              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation">
+                <button className={tab === 'progress' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'progress' })} id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress-tab-pane" type="button" role="tab" aria-controls="progress-tab-pane" aria-selected="false">Progress</button>
+              </li>
+            </ul>
+          </div>
+
         </div>
         <div
           className={open ? "mainView" : "mainView-closed"}
