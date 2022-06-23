@@ -169,7 +169,7 @@ class FlexView extends React.Component {
       showSeriesTable,
     } = this.state;
     return (
-      <div className="flexView">
+      <div className="flexView" style={{ fontSize: '12px' }}>
         {showSeriesTable && (
           // <SeriesTable series={series} onClose={this.closeSeriesTable} />
           <SelectSerieModal seriesPassed={[series]} onCancel={this.closeSeriesTable} />
