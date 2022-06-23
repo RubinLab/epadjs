@@ -14,15 +14,15 @@ class TeachingFilters extends React.Component {
         const { selectedDiagnosis, setSelectedDiagnosis, selectedAnatomies, setSelectedAnatomies, selectedSubs, setSelectedSubs, selectedMods, setSelectedMods, tfOnly, setTfOnly, myCases, setMyCases } = this.props;
         return (
             <>
-                <div className="col-auto">
-                    <div className="input-group input-group-sm mb-3">
+                <div className="col-5">
+                    <div className="input-group input-group-sm">
                         <SubSpecialtyFilter selectedSubs={selectedSubs} setSelectedSubs={setSelectedSubs} />
                         <ModalityFilter selectedMods={selectedMods} setSelectedMods={setSelectedMods} />
                         <AnatomyFilter selectedAnatomies={selectedAnatomies} setSelectedAnatomies={setSelectedAnatomies} />
                         <DiagnosisFilter selectedDiagnosis={selectedDiagnosis} setSelectedDiagnosis={setSelectedDiagnosis} />
                     </div>
                 </div>
-                <div className="col-auto" style={{ fontSize: '.9em', float: 'right' }}>
+                <div className="col-3" style={{ fontSize: '.9em', float: 'right' }}>
                     <div className="form-check form-check-inline" >
                         <label className="form-check-label" htmlFor="flexCheckChecked">Inc Significant Images</label>
                         <input className="form-check-input" type="checkbox" id="flexCheckChecked" key={"tfOnly"} checked={!tfOnly} onChange={e => setTfOnly(!e.target.checked)} />

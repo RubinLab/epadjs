@@ -203,7 +203,14 @@ td i{text-align: center;}
   --bs-dropdown-link-disabled-color: #adb5bd;
   --bs-dropdown-header-color: #adb5bd;
 }
-.search_filter{margin-bottom: 0em; padding: 1em; border: 1px #555 solid; border-radius: 12px; background-color: #333;}
+.search_filter{
+  margin-bottom: 0em; 
+  padding-top: 1em;
+  padding-bottom: 1em; 
+  border: 1px #555 solid; 
+  border-radius: 12px; 
+  background-color: #333;
+}
 .select_row{
   border-right: 1px solid #ececec !important;
   background-color: #555 !important;

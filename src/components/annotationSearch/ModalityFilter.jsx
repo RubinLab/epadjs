@@ -60,7 +60,7 @@ const ModalityFilter = (props) => {
     }
 
     return (
-        <Dropdown id='modalityDrop' className="d-inline mx-2" show={show}>
+        <Dropdown id='modalityDrop' className="d-inline mx-1" show={show}>
             <Dropdown.Toggle as={CustomToggle}>
                 Modality
             </Dropdown.Toggle>

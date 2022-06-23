@@ -43,7 +43,7 @@ class Sidebar extends Component {
       worklistsCreated: [],
       pacs: [],
       width: mode !== "lite" ? "205px" : "0",
-      tabMarginLeft: "185px",
+      tabMarginLeft: "177px",
       marginLeft: mode !== "lite" ? "205px" : "0",
       buttonDisplay: mode !== "lite" ? "none" : "block",
       open: mode !== "lite",
@@ -245,7 +245,7 @@ class Sidebar extends Component {
       this.setState({
         width: "205px",
         marginLeft: "205px",
-        tabMarginLeft: "185px",
+        tabMarginLeft: "177px",
         buttonDisplay: "none",
         open: true
       });
