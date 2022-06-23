@@ -610,7 +610,6 @@ class AimEditor extends Component {
       comment,
       isStudyAim
     };
-
     uploadAim(aimSaved, projectID, this.state.isUpdate, this.updatedAimId)
       .then(() => {
         // Write the aim to session storage for further autoFill

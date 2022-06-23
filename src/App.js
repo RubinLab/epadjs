@@ -898,9 +898,10 @@ class App extends Component {
             } catch (err) {
               console.error(err);
             }
+            let displayname = userData.firstname.concat(' ',userData.lastname);
             let user = {
               user: userData.username,
-              displayname: `${userData.firstname} + ' ' + ${userData.lastname}`,
+              displayname
             };
             await auth.setLoginSession(user, null);
             this.setState({
