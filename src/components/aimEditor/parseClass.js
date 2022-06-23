@@ -3695,10 +3695,6 @@ export var AimEditor = function (
       if (objs[i].className == "red check circle outline icon")
         countRedCircle++;
     }
-    console.log(
-      "form save ready",
-      document.getElementById("annotationName").value
-    );
     if (document.getElementById("annotationName").value === "")
       countRedCircle++;
     return countRedCircle;

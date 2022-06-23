@@ -358,7 +358,6 @@ const AnnotationSearch = props => {
   };
 
   const updateSelectedAims = aimData => {
-    console.log("clicked");
     props.dispatch(selectAnnotation(aimData));
   };
 
