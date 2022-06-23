@@ -4,7 +4,7 @@ import { BsFillGearFill, BsInfoCircleFill, BsBoxArrowInRight } from 'react-icons
 import { FaBell } from 'react-icons/fa';
 import logo from '../images/logo.png';
 import stella from '../images/stella-logo-temp-02.png';
-import stanford from '../images/stanford-rad-allwhite.png'
+import stanford from '../images/stanford-rad-allwhite.png';
 import { connect } from 'react-redux';
 
 const NavBar = ({
@@ -122,22 +122,22 @@ const NavBar = ({
             )}
             {user && (
               <>
-                <li className="nav-item">
+                <li className="nav-item" style={{ paddingRight: '0px' }}>
                   <a className="mng-icon nav-link" onClick={e => openGearMenu(e)} id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <BsFillGearFill />
                   </a>
                 </li>
-                <li className="nav-item">
+                <li className="nav-item" style={{ paddingRight: '0px' }}>
                   <a className="info-icon nav-link" onClick={e => { openInfoMenu(e) }} id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <BsInfoCircleFill />
+                    {notificationWarning ? (
+                      <FaBell className="notification-warning" style={{ paddingLeft: '5px' }} />
+                    ) : null}
                   </a>
-                  {notificationWarning ? (
-                    <FaBell className="notification-warning" />
-                  ) : null}
                 </li>
-                <li className="nav-item"><a className="user-profile nav-link" onClick={e => openUser(e)}>{user.displayname}</a></li>
-                <li className="nav-item">
-                  <a className="nav-link" onClick={logout}>
+                <li className="nav-item" style={{ paddingRight: '0px' }}><a className="user-profile nav-link" onClick={e => openUser(e)}>{user.displayname}</a></li>
+                <li className="nav-item" style={{ paddingRight: '0px' }}>
+                  <a className="nav-link" onClick={logout} style={{ paddingRight: '0px' }}>
                     <BsBoxArrowInRight /></a>
                 </li>
               </>

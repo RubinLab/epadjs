@@ -6,18 +6,17 @@ const mode = sessionStorage.getItem("mode");
 
 const team = props => {
   return (
-    // <Modal.Dialog dialogClassName="info-team__modal">
-    <Modal.Dialog id="modal-fix">
+    <Modal id="modal-fix" show={true}>
       <Modal.Header>
         <Modal.Title>ePAD Team</Modal.Title>
       </Modal.Header>
-      <Modal.Body className="info-team__mbody">
+      <Modal.Body >
         <>
-          <p className="info-team__desc">
+          <p >
             Development of ePAD has been supported through a number of funding
             mechanisms and sources.
           </p>
-          <p className="info-team__desc">
+          <p >
             Major contributors for the ePAD{" "}
             {mode === "lite" ? "Lite Beta " : "4.x "}
             release include (in alphabetic order):
@@ -30,12 +29,12 @@ const team = props => {
           </ul>
         </>
       </Modal.Body>
-      <Modal.Footer className="modal-footer__buttons">
+      <Modal.Footer >
         <button variant="secondary" onClick={props.onOK}>
           OK
         </button>
       </Modal.Footer>
-    </Modal.Dialog>
+    </Modal>
   );
 };
 

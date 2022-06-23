@@ -22,16 +22,16 @@ class About extends React.Component {
       : "beta";
     return (
       // <Modal.Dialog dialogClassName="info-about__modal">
-      <Modal.Dialog id="modal-fix">
+      <Modal id="modal-fix" show={true}>
         <Modal.Header>
           <Modal.Title>About ePAD {mode === "lite" ? "Lite" : ""}</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="info-about__mbody">
-          <div className="info-about__desc">
+        <Modal.Body >
+          <div >
             A web-based platform for quantitative imaging in the clinical
             workflow.
           </div>
-          <div className="info-about__buttonCont">
+          <div >
             <button
               className="info-about__button"
               onClick={() => {
@@ -58,16 +58,17 @@ class About extends React.Component {
             </button>
           </div>
 
-          <div className="info-about__desc">Version {version}</div>
-          <div className="info-about__desc">
+          <div>Version {version}</div>
+          <div>
             ePAD Copyright 2016 Stanford University. All rights reserved.
           </div>
-          <div className="info-about__desc">
+          <div>
             ePAD is made possible by the{" "}
             <a
               href="https://rubinlab.stanford.edu/"
               target="_blank"
               className="info-about__link"
+              style={{ color: 'red' }}
             >
               Rubin Lab
             </a>{" "}
@@ -76,11 +77,11 @@ class About extends React.Component {
               href="https://www.stanford.edu/"
               target="_blank"
               className="info-about__link"
-            >
+              style={{ color: 'red' }}>
               Stanford University.
             </a>{" "}
           </div>
-          <div className="info-about__desc">
+          <div>
             ePAD{" "}
             <a
               href="https://epad.stanford.edu/license"
@@ -93,12 +94,12 @@ class About extends React.Component {
           </div>
         </Modal.Body>
 
-        <Modal.Footer className="modal-footer__buttons">
+        <Modal.Footer>
           <button variant="secondary" onClick={this.props.onOK}>
             OK
           </button>
         </Modal.Footer>
-      </Modal.Dialog>
+      </Modal>
     );
   };
 }

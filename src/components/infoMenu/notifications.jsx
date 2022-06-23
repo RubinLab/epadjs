@@ -7,23 +7,23 @@ class Notifications extends React.Component {
     const { onOK, list, title } = this.props;
     return (
       // <Modal.Dialog dialogClassName="response__modal">
-      <Modal.Dialog id="modal-fix" className="notifications">
+      <Modal show={true} centered={true}>
         <Modal.Header>
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="response__mbody">
+        <Modal.Body className="response__mbody" >
           {!list.length
             ? `There is not any ${title.toLowerCase()} yet`
             : list.map((item, index) => (
-                <ListItem item={item} key={item.time + index} />
-              ))}
+              <ListItem item={item} key={item.time + index} />
+            ))}
         </Modal.Body>
-        <Modal.Footer className="modal-footer__buttons">
+        <Modal.Footer>
           <button variant="secondary" onClick={() => onOK(true)}>
             OK
           </button>
         </Modal.Footer>
-      </Modal.Dialog>
+      </Modal>
     );
   };
 }
