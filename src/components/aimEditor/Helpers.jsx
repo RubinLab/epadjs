@@ -128,7 +128,7 @@ export function prepAimForParseClass(aimJson) {
 }
 
 export function getUserForAim() {
-  return { userName: sessionStorage.getItem("username"), displayName: sessionStorage.getItem("displayName") };
+  return { name: sessionStorage.getItem("displayName"), loginName: sessionStorage.getItem("userName") };
 };
 
 // export function createStudyAim({ study, answers, updatedAimId, trackingUId }) {

@@ -551,7 +551,6 @@ class App extends Component {
   };
 
   switchView = (viewType, force) => {
-    console.log('In switch');
     const { pid } = this.state;
     this.setState({ viewType });
     const { openSeries } = this.props;
@@ -718,7 +717,6 @@ class App extends Component {
 
   handleArgs = async (args) => {
     const { data } = await decryptAndGrantAccess(args);
-    console.log("User Data", data);
     const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
     const { openSeries } = this.props;
 
@@ -832,7 +830,7 @@ class App extends Component {
       const { data: series } = await getSeries(projectID, patientID, studyUID);
       return series;
     } catch (err) {
-      console.log(err);
+      console.error(err);
       this.props.dispatch(annotationsLoadingError(err));
     }
   };
@@ -898,9 +896,10 @@ class App extends Component {
             } catch (err) {
               console.error(err);
             }
+            let displayname = userData.firstname.concat(' ',userData.lastname);
             let user = {
               user: userData.username,
-              displayname: `${userData.firstname} + ' ' + ${userData.lastname}`,
+              displayname
             };
             await auth.setLoginSession(user, null);
             this.setState({
