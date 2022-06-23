@@ -129,9 +129,10 @@ const NavBar = ({
                 </li>
                 <li className="nav-item" style={{ paddingRight: '0px' }}>
                   <a className="info-icon nav-link" onClick={e => { openInfoMenu(e) }} id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <BsInfoCircleFill />{notificationWarning && (
+                    <BsInfoCircleFill />
+                    {notificationWarning ? (
                       <FaBell className="notification-warning" style={{ paddingLeft: '5px' }} />
-                    )}
+                    ) : null}
                   </a>
                 </li>
                 <li className="nav-item" style={{ paddingRight: '0px' }}><a className="user-profile nav-link" onClick={e => openUser(e)}>{user.displayname}</a></li>

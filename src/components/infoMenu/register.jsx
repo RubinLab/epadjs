@@ -54,7 +54,7 @@ class Register extends React.Component {
       tmpState.registerFormElements.email !== "" &&
       tmpState.registerFormElements.emailagain !== "" &&
       tmpState.registerFormElements.email !==
-        tmpState.registerFormElements.emailagain
+      tmpState.registerFormElements.emailagain
     ) {
       tmpFormError = `${tmpFormError}email and retype email fields don't match`;
     }
@@ -258,11 +258,11 @@ class Register extends React.Component {
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
           <button variant="secondary" onClick={this.props.onOK}>
-            close
+            Close
           </button>
           {!this.state.apikeysent && (
             <button variant="secondary" onClick={this.submitForm}>
-              submit
+              Submit
             </button>
           )}
         </Modal.Footer>
