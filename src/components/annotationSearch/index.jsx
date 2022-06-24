@@ -1476,7 +1476,7 @@ const AnnotationSearch = props => {
               <span onClick={() => handleSort('templateType')}>Template </span>{
                 sort[0] === 'templateType' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
                 sort[0] === '-templateType' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('template', target)} value={filters.template} />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('templateType', target)} value={filters.template} />
             </th>
             <th>
               <span onClick={() => handleSort('fullName')}>User </span>{
@@ -1493,7 +1493,7 @@ const AnnotationSearch = props => {
               <span onClick={() => handleSort('projectName')}>Project </span>{
                 sort[0] === 'projectName' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
                 sort[0] === '-projectName' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('project', target)} value={filters.project} />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('projectName', target)} value={filters.project} />
             </th>
           </tr>
         </thead>
