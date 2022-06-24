@@ -1487,7 +1487,7 @@ const AnnotationSearch = props => {
             <th><span onClick={() => handleSort('userComment')}>Comment </span>{
               sort[0] === 'userComment' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
               sort[0] === '-userComment' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('comment', target)} value={filters.comment} />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('userComment', target)} value={filters.comment} />
             </th>
             <th>
               <span onClick={() => handleSort('projectName')}>Project </span>{
