@@ -1432,7 +1432,7 @@ const AnnotationSearch = props => {
               sort[0] === '-name' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
               <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('name', target)} value={filters.name} />
             </th>
-            <th><span onClick={() => handleSort('name')}>Age </span>{
+            <th><span onClick={() => handleSort('age')}>Age </span>{
               sort[0] === 'age' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
               sort[0] === '-age' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
               <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('age', target)} value={filters.age} />
