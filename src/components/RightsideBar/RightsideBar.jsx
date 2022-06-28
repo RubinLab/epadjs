@@ -91,7 +91,7 @@ class Rightsidebar extends Component {
         <div
           className={this.state.open ? "mainView" : "mainView-closed"}
           style={{
-            marginRight: this.state.marginRight,
+            marginRight: (open ? '455px' : '35px'),
             height: "calc(100% - 5px)",
           }}
         >
