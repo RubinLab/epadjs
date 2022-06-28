@@ -1,6 +1,5 @@
 import React from "react";
 import { connect } from "react-redux";
-import Switch from "react-switch";
 import Annotation from "./annotation";
 import AnnotationsLink from "./annotationsLink";
 import {
@@ -174,7 +173,6 @@ class AnnotationsList extends React.Component {
     let { activePort } = this.props;
     activePort = activePort || activePort === 0 ? activePort : 0;
     const { imageID } = openSeries[activePort];
-    const maxHeight = window.innerHeight * 0.6;
     const seriesUID = openSeries[activePort].seriesUID;
     let annotations = {};
     let aims = aimsList[seriesUID];
@@ -261,32 +259,34 @@ class AnnotationsList extends React.Component {
     });
     return (
       <React.Fragment>
-        <div className="annotationList-container">
-          <div className="label-toggle">
-            <div className="form-check form-switch form-check-inline">
-              <input className="form-check-input" type="checkbox" role="switch" id="showAnnotations" onChange={this.handleCalculations}
-                checked={this.state.showCalculations} />
-              <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Calculations</label>
+        <div className="annotationList-container" style={{ paddingTop: '5px' }}>
+          <div className="checkbox-row">
+            <div className="label-toggle">
+              <div className="form-check form-switch form-check-inline">
+                <input className="form-check-input" type="checkbox" role="switch" id="showAnnotations" onChange={this.handleCalculations}
+                  checked={this.state.showCalculations} />
+                <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Calculations</label>
+              </div>
+            </div>
+            <div className="label-toggle">
+              <div className="form-check form-switch form-check-inline">
+                <input className="form-check-input" type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllLabels}
+                  checked={this.state.labelDisplayAll} />
+                <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Details</label>
+              </div>
+            </div>
+            <div className="label-toggle">
+              <div className="form-check form-switch form-check-inline">
+                <input className="form-check-input" type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllAnnotations}
+                  checked={this.state.annsDisplayAll} />
+                <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Markups</label>
+              </div>
             </div>
           </div>
-          <div className="label-toggle">
-            <div className="form-check form-switch form-check-inline">
-              <input className="form-check-input" type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllLabels}
-                checked={this.state.labelDisplayAll} />
-              <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Annotation Details</label>
-            </div>
-          </div>
-          <div className="label-toggle">
-            <div className="form-check form-switch form-check-inline">
-              <input className="form-check-input" type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllAnnotations}
-                checked={this.state.annsDisplayAll} />
-              <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Markups</label>
-            </div>
-          </div>
-          <div style={{ maxHeight, overflow: "scroll" }}>{annList}</div>
-          <AnnotationsLink imageAims={imageAims} />
         </div>
-      </React.Fragment>
+        <div>{annList}</div>
+        <AnnotationsLink imageAims={imageAims} />
+      </React.Fragment >
     );
   };
 }

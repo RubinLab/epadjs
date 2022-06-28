@@ -42,78 +42,52 @@ const annotation = (props) => {
   if (props.aim.markupType && props.aim.markupType[0])
     displayEyeIcon = true;
   return (
-    <div className="annotation-container">
-      <div className={className} style={finalButtonStyle}>
-        <div
-          className="annotation-name__container"
-          data-id={props.id}
-          onClick={props.onSingleToggle}
-        >
-          {props.name}
-        </div>
-        <div
-          className="annotation-icon"
-          onClick={() => props.onEdit(props.id, props.serie)}
-        >
-          <FaEdit className="clickable-icon" />
+    <>
+      {/* <div className={className} style={finalButtonStyle}> */}
+      <div
+        className="annotation-header"
+        data-id={props.id}
+      >
+        {props.name}
+        <div className="annotation-icon" style={{ float: 'right' }}>
+          <span onClick={() => props.onEdit(props.id, props.serie)}><FaEdit className="clickable-icon" /></span>
           {/* <span class="tooltiptext">Edit annotation</span> */}
-        </div>
-        <div
-          className="annotation-icon"
-          onClick={() => props.onDelete(props.aim)}
-        >
-          <FaTrashAlt className="clickable-icon" />
-          {/* <span class="tooltiptext">Delete annotation</span> */}
-        </div>
-        {displayEyeIcon && (
-          <div
-            className="annotation-icon"
-            onClick={props.onClick}
-            data-id={props.id}
-            id={props.id}
-          >
-            {props.displayed ? (
-              <FaRegEye id={props.id} className="clickable-icon" />
-            ) : (
-              <FaRegEyeSlash id={props.id} className="clickable-icon" />
-            )}
-            {/* <span class="tooltiptext">Hide/show markup</span> */}
-          </div>
-        )}
-        <div
-          className="annotation-icon showLabel"
-          data-id={props.id}
-          onClick={props.onSingleToggle}
-        >
+          <span onClick={() => props.onDelete(props.aim)} ><FaTrashAlt className="clickable-icon" /></span>
+          {displayEyeIcon && props.displayed && (
+            <span id={props.id} onClick={props.onClick}><FaRegEye id={props.id} className="clickable-icon" /></span>
+          )}
+          {displayEyeIcon && !props.displayed && (
+            <span id={props.id} onClick={props.onClick}><FaRegEyeSlash id={props.id} className="clickable-icon" /></span>
+          )}
+          {/* <span class="tooltiptext">Hide/show markup</span> */}
+
           {props.showLabel ? (
-            <FaCaretUp className="clickable-icon" />
+            <span data-id={props.id} onClick={props.onSingleToggle}><FaCaretUp className="clickable-icon" /></span>
           ) : (
-            <FaCaretDown className="clickable-icon" />
+            <span data-id={props.id} onClick={props.onSingleToggle}><FaCaretDown className="clickable-icon" /></span>
           )}
         </div>
       </div>
+      {/* </div> */}
       {props.showLabel && (
-        <div className={labelClass} style={labelStyle}>
-          <div className="annotation-label__desc">
-            <div className="annotation__userName">{props.user}</div>
-            <div>-</div>
-            <div className="annotation__type">{props.aim.typeCode[0].code}</div>
-          </div>
-          {hasEntityData && (
-            <div className="annotation-aimData">
+        <div className={'annotation-back'}>
+          <div className="annotation-text">
+            {props.user} - {props.aim.typeCode[0].code}
+
+            {hasEntityData && (
               <AimEntityData aimData={props.aim} id={props.id} />
-            </div>
-          )}
-          {/* {calculations.length > 0 && calculations.length <= 10 && ( */}
-          <CalculationLabel
-            calculations={props.label}
-            name={props.name}
-            markupType={props.markupType}
-          />
-          {/* )} */}
+            )}
+            {/* {calculations.length > 0 && calculations.length <= 10 && ( */}
+            <CalculationLabel
+              calculations={props.label}
+              name={props.name}
+              markupType={props.markupType}
+            />
+            {/* )} */}
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

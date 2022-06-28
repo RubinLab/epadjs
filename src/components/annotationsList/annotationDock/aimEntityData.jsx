@@ -62,19 +62,18 @@ const aimEntityData = ({ aimData, id }) => {
         : comment.typeCode &&
           comment.typeCode.constructor === Object &&
           comment.typeCode['iso:displayName']
-        ? comment.typeCode['iso:displayName'].value
-        : comment['xsi:type'] && comment['xsi:type'] === 'Scale'
-        ? comment.valueLabel.value
-        : '';
+          ? comment.typeCode['iso:displayName'].value
+          : comment['xsi:type'] && comment['xsi:type'] === 'Scale'
+            ? comment.valueLabel.value
+            : '';
 
     listArr.push(
-      <li className="aimEntity-item" key={id + 'ind-' + i}>
-        <span className="aimEntity-question">{comment.label.value}:</span>
-        <span className="aimEntity-answer">{value}</span>
+      <li key={i}>
+        <b>{comment.label.value}:</b> {value}
       </li>
     );
   });
-  return <div className="aimEntity-list">{listArr}</div>;
+  return <ul>{listArr}</ul>;
 };
 
 export default aimEntityData;

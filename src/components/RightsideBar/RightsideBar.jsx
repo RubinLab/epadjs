@@ -14,8 +14,8 @@ class Rightsidebar extends Component {
     super(props);
 
     this.state = {
-      width: "300px",
-      marginRight: "300px",
+      width: "420px",
+      marginRight: "420px",
       buttonDisplay: "block",
       open: true,
     };
@@ -32,8 +32,8 @@ class Rightsidebar extends Component {
       });
     } else {
       this.setState({
-        width: "450px",
-        marginRight: "450px",
+        width: "420px",
+        marginRight: "420px",
         open: true,
       });
     }
@@ -84,9 +84,9 @@ class Rightsidebar extends Component {
               </div>
             </Collapsible>
           )}
-          <Collapsible trigger={"Annotations"} transitionTime={100} open={true}>
+          {!showAimEditor && (
             <AnnotationList updateTreeDataOnSave={this.props.updateTreeDataOnSave} onDelete={this.props.onCancel} />
-          </Collapsible>
+          )}
         </div>
         <div
           className={this.state.open ? "mainView" : "mainView-closed"}
