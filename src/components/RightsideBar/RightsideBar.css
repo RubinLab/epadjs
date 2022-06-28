@@ -214,9 +214,13 @@
   padding: 7px;
   color: black;
   font-size: 0.9rem;
+  background-color: #c4c4c4;
+  font-family: "Open-Sans", sans-serif;
+  padding: 7px;
+  color: #222;
 }
 
 .clickable-icon{
-  padding: 2px;
   font-size: 1.2rem;
+  margin-right: 5px;
 }

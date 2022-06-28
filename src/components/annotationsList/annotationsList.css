@@ -465,9 +465,3 @@ svg {
 .annsLink-table.__tbody.--row:last-of-type {
   border-bottom: none;
 }
-
-.annotation-header{
-  background-color: #c4c4c4;
-  padding: 7px;
-  color: #222;
-}
