@@ -32,18 +32,18 @@ class Rightsidebar extends Component {
       });
     } else {
       this.setState({
-        width: "300px",
-        marginRight: "300px",
+        width: "450px",
+        marginRight: "450px",
         open: true,
       });
     }
   };
 
   render() {
-    const { selectedAim } = this.props;
+    const { selectedAim, showAimEditor } = this.props;
     const { open, width, marginRight } = this.state;
     let aimEditorHeader;
-    selectedAim ? aimEditorHeader = "Aim Editor (Edit Mode)" : aimEditorHeader = "Aim Editor (Create Mode)"
+    selectedAim ? aimEditorHeader = "Edit Annotation" : aimEditorHeader = "Create Annotation"
     // const { projectID } = openSeries[activePort];
     return (
       <React.Fragment>
@@ -62,7 +62,7 @@ class Rightsidebar extends Component {
           {/* <Collapsible trigger={"Tools"} transitionTime={100}>
             <ToolMenu />
           </Collapsible> */}
-          {this.props.showAimEditor && (
+          {showAimEditor && (
             <Collapsible
               trigger={aimEditorHeader}
               open={true}

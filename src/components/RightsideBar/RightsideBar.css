@@ -150,3 +150,21 @@
   color: #fff;
   text-shadow: 1px 2px 0px rgba(0, 0, 0, 0.25);
 }
+
+.form-check-input:checked {
+  background-color: #2541D8 !important;
+  border-color: #2541D8 !important;
+}
+.form-switch .form-check-input {
+  border: #777 1px solid !important;
+}
+
+.form-check-inline {
+  display: inline-block;
+  margin-right: 3px !important;
+}
+
+.form-check-label{
+  font-size: 12px;
+  color:black;
+}
