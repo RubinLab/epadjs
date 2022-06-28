@@ -124,3 +124,29 @@
 .AimEditor-Wrapper {
   overflow-y: auto;
 }
+
+.right-tab-menu {
+  max-width: 35px;
+  height: 100vh;
+  right: 0;
+  position: fixed;
+  background-color: #555;
+  margin-left: 7px;
+  margin-right: 0px;
+  font-size: .9em;
+  padding: 10px;
+  padding-top: 20px;
+  z-index: 10000;
+  transition: 0.4s;
+}
+.drawer-control {
+  color: #ffffff;
+  text-align: left;
+}
+.right-tabs{
+  transform: rotate(90deg);
+  padding-top: 2em;
+  padding-bottom: 21px;
+  color: #fff;
+  text-shadow: 1px 2px 0px rgba(0, 0, 0, 0.25);
+}

@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
+import { BsArrowBarLeft, BsArrowBarRight } from "react-icons/bs";
 import Collapsible from "react-collapsible";
 import AnnotationList from "../annotationsList/annotationDock/annotationList";
 import AimEditor from "../aimEditor/aimEditor";
@@ -25,7 +26,7 @@ class Rightsidebar extends Component {
   handleToggle = () => {
     if (this.state.open) {
       this.setState({
-        width: "0",
+        width: "0px",
         marginRight: "0",
         open: false,
       });
@@ -40,30 +41,24 @@ class Rightsidebar extends Component {
 
   render() {
     const { selectedAim } = this.props;
+    const { open, width, marginRight } = this.state;
     let aimEditorHeader;
     selectedAim ? aimEditorHeader = "Aim Editor (Edit Mode)" : aimEditorHeader = "Aim Editor (Create Mode)"
     // const { projectID } = openSeries[activePort];
     return (
       <React.Fragment>
-        {!this.state.open && (
-          <div>
-            <button className="openbtn" onClick={this.handleToggle}>
-              <FaArrowAltCircleLeft />
-            </button>
+        <div>
+          <div className="right-tab-menu" style={{ marginRight: marginRight }}>
+            <div className="drawer-control" onClick={this.handleToggle}>{!open ? (<BsArrowBarLeft className="bi bi-arrow-bar-left" />) : (<BsArrowBarRight className="bi bi-arrow-bar-left" />)}</div>
+            <div className="right-tabs">Annotations</div>
           </div>
-        )}
+        </div>
+        {/* } */}
         <div
           id="mySidebar"
           className="rightsidenav"
-          style={{ width: this.state.width }}
+          style={{ width: width }}
         >
-          {this.state.open && (
-            <div>
-              <button className="closebtn" onClick={this.handleToggle}>
-                <FaArrowAltCircleRight />
-              </button>
-            </div>
-          )}
           {/* <Collapsible trigger={"Tools"} transitionTime={100}>
             <ToolMenu />
           </Collapsible> */}
