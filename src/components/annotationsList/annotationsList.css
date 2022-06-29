@@ -404,9 +404,9 @@ svg {
 
 .annsLink-table {
   width: fit-content;
-  margin: 10px auto;
+  margin: 1rem auto;
   table-layout: auto;
-  width: 85%;
+  width: 95%;
   /* table-layout: fixed; */
 }
 
@@ -464,4 +464,15 @@ svg {
 
 .annsLink-table.__tbody.--row:last-of-type {
   border-bottom: none;
+}
+
+table{
+  background-color: #333 !important;
+  border: none;
+  text-transform: capitalize;
+  font-size: 1.1rem;
+}
+
+th{
+  border: none !important;
 }
