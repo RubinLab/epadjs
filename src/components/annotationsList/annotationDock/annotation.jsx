@@ -36,7 +36,7 @@ const annotation = (props) => {
     props.id === props.openSeriesAimID
       ? "annotation-label__container --selected"
       : "annotation-label__container";
-  let displayEyeIcon = false;
+  let displayEyeIcon = true;
   if (props.aim.markupType && props.aim.markupType[0])
     displayEyeIcon = true;
   return (

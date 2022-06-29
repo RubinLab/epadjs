@@ -135,10 +135,10 @@ class AnnotationsList extends React.Component {
     const calculations = {};
     try {
       const { openSeries, activePort } = this.props;
-      const { imageID } = this.props.openSeries[this.props.activePort];
+      const { imageID } = openSeries[activePort];
       let imageAnnotations;
-      if (this.props.openSeries[this.props.activePort].imageAnnotations) {
-        imageAnnotations = this.props.openSeries[this.props.activePort]
+      if (openSeries[activePort].imageAnnotations) {
+        imageAnnotations = openSeries[activePort]
           .imageAnnotations[imageID];
         if (!imageAnnotations)
           imageAnnotations =
@@ -285,7 +285,7 @@ class AnnotationsList extends React.Component {
           </div>
         </div>
         <div>{annList}</div>
-        <AnnotationsLink imageAims={imageAims} />
+        {Object.keys(imageAims).length && (<AnnotationsLink imageAims={imageAims} />)}
       </React.Fragment >
     );
   };
