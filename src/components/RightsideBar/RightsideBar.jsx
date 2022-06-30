@@ -42,9 +42,6 @@ class Rightsidebar extends Component {
   render() {
     const { selectedAim, showAimEditor } = this.props;
     const { open, width, marginRight } = this.state;
-    let aimEditorHeader;
-    selectedAim ? aimEditorHeader = "Edit Annotation" : aimEditorHeader = "Create Annotation"
-    // const { projectID } = openSeries[activePort];
     return (
       <React.Fragment>
         <div>
@@ -59,16 +56,7 @@ class Rightsidebar extends Component {
           className="rightsidenav"
           style={{ width: width }}
         >
-          {/* <Collapsible trigger={"Tools"} transitionTime={100}>
-            <ToolMenu />
-          </Collapsible> */}
           {showAimEditor && (
-            // <Collapsible
-            //   trigger={aimEditorHeader}
-            //   open={true}
-            //   transitionTime={100}
-            //   triggerOpenedClassName={"test"}
-            // >
             <div className="AimEditor-Wrapper">
               <AimEditor
                 aimId={this.props.selectedAim}
@@ -82,7 +70,6 @@ class Rightsidebar extends Component {
                 setAimDirty={this.props.setAimDirty}
               />
             </div>
-            // </Collapsible>
           )}
           {!showAimEditor && (
             <AnnotationList updateTreeDataOnSave={this.props.updateTreeDataOnSave} onDelete={this.props.onCancel} />
