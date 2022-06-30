@@ -123,6 +123,7 @@
 
 .AimEditor-Wrapper {
   overflow-y: auto;
+  padding-left: 0.5rem;
 }
 
 .right-tab-menu {
@@ -212,12 +213,11 @@
   margin-top: 0.5rem;
   text-transform: capitalize;
   padding: 7px;
-  color: black;
-  font-size: 0.9rem;
-  background-color: #c4c4c4;
+  color: white;
+  font-size: 0.95rem;
+  background-color: #555555;
   font-family: "Open-Sans", sans-serif;
   padding: 7px;
-  color: #222;
 }
 
 .clickable-icon{

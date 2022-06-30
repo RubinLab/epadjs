@@ -30961,10 +30961,10 @@ a.ui.card:hover,
 /* Default Styling */
 
 .ui.accordion .title:not(.ui) {
-  /* padding: 0.5em 0em; */
+  padding-left:0.8rem; 
   font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
   font-size: 1em;
-  color: rgba(0, 0, 0, 0.87);
+  color: black;
 }
 
 /* Content */
