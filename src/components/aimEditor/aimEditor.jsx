@@ -208,6 +208,7 @@ class AimEditor extends Component {
     const { patientID, projectID } = openSeries[activePort];
     return (
       <div className="editor-form">
+        <div class="annotation-header">Required Annotations</div>
         {mode !== 'teaching' && (<div>
           <label>AutoFill :</label>
           <Switch

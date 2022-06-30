@@ -366,9 +366,9 @@ export var AimEditor = function (
     }
 
     labelAnnotationNameInput.style.fontFamily = self.fontfamily;
-    labelAnnotationNameInput.style.fontSize = "14px";
+    labelAnnotationNameInput.style.fontSize = "12px";
     labelAnnotationNameInput.style.paddingLeft = "2px";
-    labelAnnotationNameInput.style.lineHeight = "14px";
+    labelAnnotationNameInput.style.lineHeight = "12px";
     labelAnnotationNameInput.style.width = "100%";
 
     labelAnnotationNameInput.onkeyup = function () {
@@ -443,7 +443,7 @@ export var AimEditor = function (
           ""
         );
 
-        var componentDivLabel = document.createTextNode(cmplabel);
+        var componentDivLabel = document.createTextNode(cmplabel+": ");
         var componentDiv = document.createElement("div");
         componentDiv.className = " accordion mylbl";
         componentDiv.disabled = "true";
@@ -484,9 +484,9 @@ export var AimEditor = function (
         incontentDiv.id = ComponentDivId;
 
         componentDiv.appendChild(headerDiv);
-        headerDiv.appendChild(headerCheckIcon);
         headerDiv.appendChild(headerArrowIcon);
         headerDiv.appendChild(componentDivLabel);
+        headerDiv.appendChild(headerCheckIcon);
         self.checkIfCommentRequired(component, componentDiv);
         componentDiv.appendChild(incontentDiv);
 

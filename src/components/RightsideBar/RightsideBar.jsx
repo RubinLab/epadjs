@@ -63,26 +63,26 @@ class Rightsidebar extends Component {
             <ToolMenu />
           </Collapsible> */}
           {showAimEditor && (
-            <Collapsible
-              trigger={aimEditorHeader}
-              open={true}
-              transitionTime={100}
-              triggerOpenedClassName={"test"}
-            >
-              <div className="AimEditor-Wrapper">
-                <AimEditor
-                  aimId={this.props.selectedAim}
-                  onCancel={this.props.onCancel}
-                  // onCancel={this.closeAimEditor}
-                  updateTreeDataOnSave={this.props.updateTreeDataOnSave}
-                  updateProgress={this.props.updateProgress}
-                  // projectID={projectID}
-                  hasSegmentation={this.props.hasSegmentation}
-                  activeLabelMapIndex={this.props.activeLabelMapIndex}
-                  setAimDirty={this.props.setAimDirty}
-                />
-              </div>
-            </Collapsible>
+            // <Collapsible
+            //   trigger={aimEditorHeader}
+            //   open={true}
+            //   transitionTime={100}
+            //   triggerOpenedClassName={"test"}
+            // >
+            <div className="AimEditor-Wrapper">
+              <AimEditor
+                aimId={this.props.selectedAim}
+                onCancel={this.props.onCancel}
+                // onCancel={this.closeAimEditor}
+                updateTreeDataOnSave={this.props.updateTreeDataOnSave}
+                updateProgress={this.props.updateProgress}
+                // projectID={projectID}
+                hasSegmentation={this.props.hasSegmentation}
+                activeLabelMapIndex={this.props.activeLabelMapIndex}
+                setAimDirty={this.props.setAimDirty}
+              />
+            </div>
+            // </Collapsible>
           )}
           {!showAimEditor && (
             <AnnotationList updateTreeDataOnSave={this.props.updateTreeDataOnSave} onDelete={this.props.onCancel} />
