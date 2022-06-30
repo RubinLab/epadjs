@@ -2,11 +2,11 @@ import React from "react";
 import { connect } from "react-redux";
 import "../annotationsList.css";
 
-const handleJumpToAim = aimId => {  
-    window.dispatchEvent(
-      new CustomEvent("jumpToAimImage", { detail: aimId })
-    );
-  };
+const handleJumpToAim = aimId => {
+  window.dispatchEvent(
+    new CustomEvent("jumpToAimImage", { detail: aimId })
+  );
+};
 
 const annotationsLink = (props) => {
   const { openSeries, activePort, aimsList } = props;
@@ -14,7 +14,7 @@ const annotationsLink = (props) => {
   let list = [];
   let header = [];
 
-  
+
 
   if (aimsList[seriesUID]) {
     const seriesAims = Object.values(aimsList[seriesUID]);
@@ -24,7 +24,7 @@ const annotationsLink = (props) => {
         key="anns-header"
         id="annsHeader"
       >
-        Other aims in series
+        Other Image Annotations in Series
       </th>,
       // <th
       //   className="annsLink-table __header --cell"
@@ -59,9 +59,9 @@ const annotationsLink = (props) => {
       {aimsList[seriesUID] && (
         <table className="annsLink-table">
           <thead className="annsLink-table __header">
-            <tr className="annsLink-table __header --row">{header}</tr>
+            <tr className="annsLink-table __header --row" >{header}</tr>
           </thead>
-          <tbody className="annsLink-table __tbody">{list}</tbody>
+          <tbody className="annsLink-table __tbody" style={{ backgroundColor: '#333' }}>{list}</tbody>
         </table>
       )}
     </React.Fragment>

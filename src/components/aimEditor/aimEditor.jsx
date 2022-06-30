@@ -204,10 +204,12 @@ class AimEditor extends Component {
   }
 
   render() {
-    const { openSeries, activePort } = this.props;
+    const { openSeries, activePort, aimId } = this.props;
     const { patientID, projectID } = openSeries[activePort];
+    let header = aimId ? "Edit Annotation" : "Create Annotation";
     return (
       <div className="editor-form">
+        <div className="annotation-header">{header}</div>
         {mode !== 'teaching' && (<div>
           <label>AutoFill :</label>
           <Switch

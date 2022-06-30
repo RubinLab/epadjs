@@ -23,10 +23,10 @@ const calculationLabel = ({ calculations, name }) => {
           calcArr[i].type === "Standard Deviation"
             ? "Std Dev"
             : calcArr[i].type === "Maximum"
-            ? "Max"
-            : calcArr[i].type === "Minimum"
-            ? "Min"
-            : calcArr[i].type;
+              ? "Max"
+              : calcArr[i].type === "Minimum"
+                ? "Min"
+                : calcArr[i].type;
         labelArr.push(
           <div
             className="-calculation__label--el"
@@ -42,7 +42,6 @@ const calculationLabel = ({ calculations, name }) => {
       }
     }
   }
-
   return <div className="annotation-calculation__label">{labelArr}</div>;
 };
 

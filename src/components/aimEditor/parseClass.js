@@ -26,7 +26,8 @@ export var AimEditor = function (
   this.loadingAimFlag = false;
   this.handlerSetAimDirty = setAimDirty;
   this.activateDirtyCheck = false;
-  this.fontcolor = "#c9cdd4";
+  this.fontcolor = "black";
+  // this.fontcolor = "#c9cdd4";
   this.fontsize = "13px";
   this.fontweight = "1500";
   this.fontfamily = "Lato, Helvetica Neue, Arial, Helvetica, sans-serif;";
@@ -366,10 +367,10 @@ export var AimEditor = function (
     }
 
     labelAnnotationNameInput.style.fontFamily = self.fontfamily;
-    labelAnnotationNameInput.style.fontSize = "14px";
-    labelAnnotationNameInput.style.paddingLeft = "2px";
-    labelAnnotationNameInput.style.lineHeight = "14px";
-    labelAnnotationNameInput.style.width = "100%";
+    labelAnnotationNameInput.style.fontSize = "0.9rem";
+    labelAnnotationNameInput.style.paddingLeft = "0.1rem";
+    // labelAnnotationNameInput.style.lineHeight = "12px";
+    labelAnnotationNameInput.style.width = "94%";
 
     labelAnnotationNameInput.onkeyup = function () {
       if (self.activateDirtyCheck) {
@@ -389,10 +390,10 @@ export var AimEditor = function (
 
     var label = document.createElement("label");
     annotationNameLabelDiv.className = "comment";
-    annotationNameLabelDiv.style.paddingTop = "10px";
+    annotationNameLabelDiv.style.paddingTop = "0.5rem";
     label.textContent = "Comment";
     labelDiv.className = "comment";
-    labelDiv.style.paddingTop = "10px";
+    labelDiv.style.paddingTop = "0.5rem";
 
     var textareaDomObject = document.createElement("textarea");
     labelDiv.appendChild(label);
@@ -423,8 +424,6 @@ export var AimEditor = function (
 
     document.getElementById("accordion1").appendChild(annotationNameLabelDiv);
     document.getElementById("accordion1").appendChild(annotationNameDiv);
-    document.getElementById("accordion1").appendChild(labelDiv);
-    document.getElementById("accordion1").appendChild(commentDiv);
     //end adding comment textarea for the template
     var a = 0;
     // hiding the main aim editor to show only seperated components for teaching file
@@ -443,7 +442,7 @@ export var AimEditor = function (
           ""
         );
 
-        var componentDivLabel = document.createTextNode(cmplabel);
+        var componentDivLabel = document.createTextNode(cmplabel+": ");
         var componentDiv = document.createElement("div");
         componentDiv.className = " accordion mylbl";
         componentDiv.disabled = "true";
@@ -484,9 +483,9 @@ export var AimEditor = function (
         incontentDiv.id = ComponentDivId;
 
         componentDiv.appendChild(headerDiv);
-        headerDiv.appendChild(headerCheckIcon);
         headerDiv.appendChild(headerArrowIcon);
         headerDiv.appendChild(componentDivLabel);
+        headerDiv.appendChild(headerCheckIcon);
         self.checkIfCommentRequired(component, componentDiv);
         componentDiv.appendChild(incontentDiv);
 
@@ -542,6 +541,8 @@ export var AimEditor = function (
         }
       }
     }
+    document.getElementById("accordion1").appendChild(labelDiv);
+    document.getElementById("accordion1").appendChild(commentDiv);
 
     //uncomment below line for testing
     //self.mainButtonsDiv.innerHTML = "";

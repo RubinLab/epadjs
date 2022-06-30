@@ -146,13 +146,10 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  width: 95%;
-  height: auto;
-  max-width: 20rem;
-  min-width: 10rem;
   margin: 0 auto;
   margin-bottom: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 .annotation-button__container {
@@ -188,12 +185,10 @@
 
 .annotation-icon {
   cursor: pointer;
-  display: flex;
   justify-content: center;
   font-size: .9rem;
   display: inline-block;
-  margin: 0 auto;
-  width: 8%;
+  margin-left: 7px;
   /* margin-right: 0.2rem; */
 }
 
@@ -316,7 +311,6 @@ svg {
   display: flex;
   margin: 0 auto;
   margin-bottom: .5rem;
-  width: 90%;
   /* justify-content: center;
   justify-content: flex-start; */
 }
@@ -410,9 +404,9 @@ svg {
 
 .annsLink-table {
   width: fit-content;
-  margin: 10px auto;
+  margin: 1rem auto;
   table-layout: auto;
-  width: 85%;
+  width: 95%;
   /* table-layout: fixed; */
 }
 
@@ -470,4 +464,15 @@ svg {
 
 .annsLink-table.__tbody.--row:last-of-type {
   border-bottom: none;
+}
+
+table{
+  background-color: #333 !important;
+  border: none;
+  text-transform: capitalize;
+  font-size: 1.1rem;
+}
+
+th{
+  border: none !important;
 }
