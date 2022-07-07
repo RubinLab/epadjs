@@ -18,13 +18,15 @@ const SubSpecialityFilter = props => {
         return getAllowedTermsOfTemplateComponent(Template, componentLabel);
     }
 
-    useEffect(() => {
-        window.addEventListener('click', clickHandler);
-        return () => { window.removeEventListener('click', clickHandler) }
-    });
+    // useEffect(() => {
+    //     window.addEventListener('click', clickHandler);
+    //     return () => { window.removeEventListener('click', clickHandler) }
+    // });
 
     const clickHandler = (e) => {
-        if (!document.getElementById('subSpecDrop').contains(e.target) && e.target.id !== 'subSpecDrop')
+        console.log("E target", e.target);
+        console.log("contains", document.getElementById('subSpecDrop'));
+        if (!document.getElementById('subSpecDrop').contains(e.target) && e.target.id !== 'subSpecDrop' && e.target.id !== 'subSpecTog')
             setShow(false);
     }
 
@@ -54,9 +56,15 @@ const SubSpecialityFilter = props => {
     }
 
     const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
-        <button data-bs-display="static" id='subSpecDrop' type="button" className="btn btn-dark btn-sm dropdown-toggle color-schema" ref={ref}
+        <button data-bs-display="static" id='subSpecTog' type="button" className="btn btn-dark btn-sm dropdown-toggle color-schema" ref={ref}
             onClick={(e) => {
                 e.preventDefault();
+                if (firstRun) {
+                    setSubSpecialities(getSubSpecialities);
+                    setFirstRun(false);
+                }
+                setSelecteds(props.selectedSubs);
+                handleToggle();
                 onClick(e);
             }}>
             {children}
@@ -81,12 +89,23 @@ const SubSpecialityFilter = props => {
             setShow(true)
     }
 
+    const CustomMenu = React.forwardRef(
+        ({ children, className }, ref) => {
+
+            return (
+                <div id='subSpecDrop' className={className}>
+                    {children}
+                </div>
+            );
+        },
+    );
+
     return (
-        <Dropdown id='subSpecDrop' className="d-inline mx-1" show={show} >
-            <Dropdown.Toggle as={CustomToggle} onClick={toggleHandler}>
+        <Dropdown id='subSpecTog' className="d-inline mx-2" autoclose="outside" show={show} >
+            <Dropdown.Toggle as={CustomToggle} autoClose="outside">
                 Subspecialty
             </Dropdown.Toggle>
-            <Dropdown.Menu className="p-2 dropdown-menu-dark subspecialty" >
+            <Dropdown.Menu as={CustomMenu} className="p-2 dropdown-menu-dark subspecialty" >
                 {subSpecialities2D?.map((specialities, y) => {
                     return (
                         <div key={y} className="row">
