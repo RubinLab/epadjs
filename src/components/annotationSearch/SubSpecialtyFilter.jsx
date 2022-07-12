@@ -24,8 +24,6 @@ const SubSpecialityFilter = props => {
     });
 
     const clickHandler = (e) => {
-        console.log("E target", e.target);
-        console.log("contains", document.getElementById('subSpecDrop'));
         if (!document.getElementById('subSpecDrop').contains(e.target) && e.target.id !== 'subSpecDrop' && e.target.id !== 'subSpecTog' && e.target.id !== 'noClose')
             setShow(false);
     }
