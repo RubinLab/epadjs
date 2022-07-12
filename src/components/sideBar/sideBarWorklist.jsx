@@ -33,7 +33,7 @@ import {
   changeActivePort
 } from "../annotationsList/action";
 
-const mode = sessionStorage.getItem("mode");
+let mode;
 
 const messages = {
   deleteSingle: "Remove study from the worklist? This cannot be undone.",
@@ -62,6 +62,7 @@ class WorkList extends React.Component {
   };
 
   componentDidMount = async () => {
+    mode = sessionStorage.getItem("mode");
     this.getWorkListData(true);
   };
 

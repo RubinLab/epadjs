@@ -13,7 +13,7 @@ const ModalityFilter = (props) => {
     });
 
     const clickHandler = (e) => {
-        if (!document.getElementById('modalityDrop').contains(e.target) && e.target.id !== 'modalityDrop')
+        if (e.target.id !== 'modalityDrop' && e.target.id !== 'modalityTog' && e.target.id !== 'noClose')
             setShow(false);
     }
 
@@ -34,7 +34,7 @@ const ModalityFilter = (props) => {
     }
 
     const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
-        <button id='modalityDrop' type="button" className="btn btn-dark btn-sm dropdown-toggle color-schema" ref={ref}
+        <button id='modalityTog' type="button" className="btn btn-dark btn-sm dropdown-toggle color-schema" ref={ref}
             onClick={(e) => {
                 setSelecteds(props.selectedMods);
                 e.preventDefault();
@@ -55,24 +55,32 @@ const ModalityFilter = (props) => {
 
     const modalities2D = breakIntoArrayOfArrays(modalities);
 
+    const CustomMenu = React.forwardRef(({ children, className, id }, ref) => {
+        return (<div id={id} className={className} ref={ref}>
+            {children}
+        </div>
+        )
+    },
+    );
+
     const handleToggle = () => {
         setShow(!show)
     }
 
     return (
-        <Dropdown id='modalityDrop' className="d-inline mx-1" show={show}>
+        <Dropdown id='modalityTog' className="d-inline mx-1" show={show}>
             <Dropdown.Toggle as={CustomToggle}>
                 Modality
             </Dropdown.Toggle>
-            <Dropdown.Menu className="p-2 dropdown-menu-dark modality">
+            <Dropdown.Menu id='modalityDrop' as={CustomMenu} className="p-2 dropdown-menu-dark modality">
                 {modalities2D?.map((modalities, y) => {
                     return (
                         <div key={y} className="row">
                             {modalities.map((modality, i) => {
                                 return (
-                                    <div key={i} className="mb-3 col-md-4">
-                                        <input className="form-check-input" type="checkbox" value={modality} id="flexCheckDefault" checked={selecteds.includes(modality)} onChange={handleChange} />
-                                        <label className="form-check-label title-case" style={{ paddingLeft: '0.3em' }} htmlFor="flexCheckDefault">
+                                    <div id='noClose' key={i} className="mb-3 col-md-4">
+                                        <input id='noClose' className="form-check-input" type="checkbox" value={modality} checked={selecteds.includes(modality)} onChange={handleChange} />
+                                        <label id='noClose' className="form-check-label title-case" style={{ paddingLeft: '0.3em' }} htmlFor="noCLose">
                                             {modality}
                                         </label>
                                     </div>

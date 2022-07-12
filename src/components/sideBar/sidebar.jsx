@@ -58,6 +58,7 @@ class Sidebar extends Component {
   }
 
   componentDidMount = async () => {
+    mode = sessionStorage.getItem("mode");
     try {
       // this.setTabHeight();
       const projects = await this.getProjectsData();

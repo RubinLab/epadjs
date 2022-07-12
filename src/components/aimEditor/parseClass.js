@@ -6,8 +6,6 @@ import "./semantic/semantic.js";
 import DOMPurify from "dompurify";
 import { teachingFileTempCode } from "../../constants";
 
-const mode = sessionStorage.getItem("mode");
-
 //export next variable for react
 export var AimEditor = function (
   userWindow,
@@ -20,7 +18,8 @@ export var AimEditor = function (
   tachingDivParent
 ) {
   //this.mapObjCodeValueParent = new Map();
-
+  const mode = sessionStorage.getItem("mode");
+  
   var self = this;
   var selectid = 0;
   this.loadingAimFlag = false;

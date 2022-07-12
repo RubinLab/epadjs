@@ -24,7 +24,7 @@ const SubSpecialityFilter = props => {
     });
 
     const clickHandler = (e) => {
-        if (!document.getElementById('subSpecDrop').contains(e.target) && e.target.id !== 'subSpecDrop')
+        if (e.target.id !== 'subSpecDrop' && e.target.id !== 'subSpecTog' && e.target.id !== 'noClose')
             setShow(false);
     }
 
@@ -44,19 +44,16 @@ const SubSpecialityFilter = props => {
         setShow(false);
     }
 
-    const toggleHandler = (e) => {
-        if (firstRun) {
-            setSubSpecialities(getSubSpecialities);
-            setFirstRun(false);
-        }
-        setSelecteds(props.selectedSubs);
-        handleToggle();
-    }
-
     const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
-        <button data-bs-display="static" id='subSpecDrop' type="button" className="btn btn-dark btn-sm dropdown-toggle color-schema" ref={ref}
+        <button data-bs-display="static" id='subSpecTog' type="button" className="btn btn-dark btn-sm dropdown-toggle color-schema" ref={ref}
             onClick={(e) => {
                 e.preventDefault();
+                if (firstRun) {
+                    setSubSpecialities(getSubSpecialities);
+                    setFirstRun(false);
+                }
+                setSelecteds(props.selectedSubs);
+                handleToggle();
                 onClick(e);
             }}>
             {children}
@@ -81,20 +78,28 @@ const SubSpecialityFilter = props => {
             setShow(true)
     }
 
+    const CustomMenu = React.forwardRef(({ children, className, id }, ref) => {
+        return (<div id={id} className={className} ref={ref}>
+            {children}
+        </div>
+        )
+    },
+    );
+
     return (
-        <Dropdown id='subSpecDrop' className="d-inline mx-1" show={show} >
-            <Dropdown.Toggle as={CustomToggle} onClick={toggleHandler}>
+        <Dropdown id='subSpecTog' className="d-inline mx-2" show={show} >
+            <Dropdown.Toggle as={CustomToggle}>
                 Subspecialty
             </Dropdown.Toggle>
-            <Dropdown.Menu className="p-2 dropdown-menu-dark subspecialty" >
+            <Dropdown.Menu id='subSpecDrop' as={CustomMenu} className="p-2 dropdown-menu-dark subspecialty" >
                 {subSpecialities2D?.map((specialities, y) => {
                     return (
                         <div key={y} className="row">
                             {specialities.map((speciality, i) => {
                                 return (
-                                    <div key={i} className="mb-3 col-md-6">
-                                        <input className="form-check-input filter-input" type="checkbox" value={speciality} id="flexCheckDefault" checked={selecteds.includes(speciality)} onChange={handleChange} />
-                                        <label className="form-check-label title-case" style={{ paddingLeft: '0.3rem' }} htmlFor="flexCheckDefault">
+                                    <div id='noClose' key={i} className="mb-3 col-md-6">
+                                        <input id='noClose' className="form-check-input filter-input" type="checkbox" value={speciality} checked={selecteds.includes(speciality)} onChange={handleChange} />
+                                        <label id='noClose' className="form-check-label title-case" style={{ paddingLeft: '0.3rem' }} htmlFor="noClose">
                                             {speciality}
                                         </label>
                                     </div>

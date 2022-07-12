@@ -12,14 +12,16 @@ import "./menuStyle.css";
 import Header from "./common/managementHeader";
 import { scanDataFolder } from "./dataFolderScan";
 
-const mode = sessionStorage.getItem("mode");
-
 class MainMenu extends React.Component {
-  state = {
-    selection: "",
-    isModalOpen: false,
-    coordinate: "50%",
-  };
+  constructor(props) {
+    super(props);
+    const mode = sessionStorage.getItem("mode");
+    this.state = {
+      selection: "",
+      isModalOpen: false,
+      coordinate: "50%",
+    };
+  }
 
   componentDidMount = () => {
     this.updateDimensions();

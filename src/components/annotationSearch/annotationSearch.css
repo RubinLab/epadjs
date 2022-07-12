@@ -269,3 +269,7 @@ td i{text-align: center;}
 th > span{
   cursor:pointer;
 }
+
+.form-check-label{
+  color: rgba(255,255,255,.55);
+}
