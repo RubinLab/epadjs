@@ -24,7 +24,7 @@ const SubSpecialityFilter = props => {
     });
 
     const clickHandler = (e) => {
-        if (!document.getElementById('subSpecDrop').contains(e.target) && e.target.id !== 'subSpecDrop' && e.target.id !== 'subSpecTog' && e.target.id !== 'noClose')
+        if (e.target.id !== 'subSpecDrop' && e.target.id !== 'subSpecTog' && e.target.id !== 'noClose')
             setShow(false);
     }
 
@@ -42,15 +42,6 @@ const SubSpecialityFilter = props => {
         const { setSelectedSubs } = props;
         setSelectedSubs(selecteds);
         setShow(false);
-    }
-
-    const toggleHandler = (e) => {
-        if (firstRun) {
-            setSubSpecialities(getSubSpecialities);
-            setFirstRun(false);
-        }
-        setSelecteds(props.selectedSubs);
-        handleToggle();
     }
 
     const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
