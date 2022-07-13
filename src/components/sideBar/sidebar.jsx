@@ -94,18 +94,21 @@ class Sidebar extends Component {
         let nonassignedIndex;
         let all = [];
         let nonassigned = [];
-        projects.forEach((el, i) => {
-          if (el.id === "all") allIndex = i;
-          if (el.id === "nonassigned") nonassignedIndex = i;
-        });
+        if (mode !== 'teaching') {
+          projects.forEach((el, i) => {
+            if (el.id === "all") allIndex = i;
+            if (el.id === "nonassigned") nonassignedIndex = i;
+          });
 
-        if (allIndex !== undefined) all = projects.splice(allIndex, 1);
+          if (allIndex !== undefined) all = projects.splice(allIndex, 1);
 
-        nonassignedIndex !== undefined && nonassignedIndex > allIndex
-          ? (nonassigned = projects.splice(nonassignedIndex - 1, 1))
-          : (nonassigned = projects.splice(nonassignedIndex + 1, 1));
+          nonassignedIndex !== undefined && nonassignedIndex > allIndex
+            ? (nonassigned = projects.splice(nonassignedIndex - 1, 1))
+            : (nonassigned = projects.splice(nonassignedIndex + 1, 1));
 
-        projects = projects.concat(all, nonassigned);
+          projects = projects.concat(all, nonassigned);
+        }
+
 
         // const pid = projects[0].id;
         // this.setState({ projects, pid, selected: pid });
