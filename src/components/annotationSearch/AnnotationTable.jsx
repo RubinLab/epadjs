@@ -384,16 +384,19 @@ function AnnotationTable(props) {
   };
 
   const displaySeries = async selected => {
+    console.log("Selected", selected);
     setSelected(selected);
     if (props.openSeries.length === maxPort) {
       setShowSelectSeriesModal(true);
     } else {
       const { subjectID: patientID, studyUID } = selected;
       let seriesArr = await getSeriesData(selected);
+      console.log("Series Arr", seriesArr);
       //get extraction of the series (extract unopen series)
       if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
       //check if there is enough room
       if (seriesArr.length + props.openSeries.length > maxPort) {
+        console.log("There is not enoug port. Open series : ", props.openSeries);
         //if there is not bring the modal
         setShowSelectSeriesModal(true);
         setSelected(seriesArr);
