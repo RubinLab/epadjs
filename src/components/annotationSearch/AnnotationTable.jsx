@@ -299,7 +299,7 @@ function AnnotationTable(props) {
     patientID = patientID ? patientID : subjectID;
     try {
       const { data: series } = await getSeries(projectID, patientID, studyUID);
-      props.dispatch(loadCompleted());
+      await props.dispatch(loadCompleted());
       return series;
     } catch (err) {
       props.dispatch(annotationsLoadingError(err));
@@ -392,6 +392,7 @@ function AnnotationTable(props) {
       const { subjectID: patientID, studyUID } = selected;
       let seriesArr = await getSeriesData(selected);
       console.log("Series Arr", seriesArr);
+      console.log("Return array length is", seriesArr.length);
       //get extraction of the series (extract unopen series)
       if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
       //check if there is enough room
@@ -406,6 +407,7 @@ function AnnotationTable(props) {
         //add serie to the grid
         const promiseArr = [];
         for (let serie of seriesArr) {
+          console.log("Serie", serie);
           props.dispatch(addToGrid(serie));
           promiseArr.push(props.dispatch(getSingleSerie(serie)));
         }
