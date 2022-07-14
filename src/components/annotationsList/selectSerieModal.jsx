@@ -220,15 +220,18 @@ class selectSerieModal extends React.Component {
 
   setPreSelecteds = () => {
     const { seriesPassed, openSeries } = this.props;
-    if (openSeries.length === this.maxPort)
-      return;
+    // if (openSeries.length === this.maxPort)
+    //   return;
     let selectedToDisplay = {};
     let selectedCount = 0;
     let series = Object.values(seriesPassed);
     let count = 0;
     for (let i = 0; i < series.length; i++) {
+      console.log("series", series);
       for (let k = 0; k < series[i].length; k++) {
+        console.log("I, K, series", i, k, series[i][k]);
         if (openSeries.length + selectedCount >= this.maxPort) {
+          console.log("Early return");
           this.setState({ selectedToDisplay }, () => {
             this.setState({ limit: this.updateLimit() });
           });
@@ -241,12 +244,14 @@ class selectSerieModal extends React.Component {
         //   selectedCount++;
         // }
         if (series[i][k].significanceOrder && !this.isSerieOpen(series[i][k].seriesUID)) {
+          console.log("In");
           selectedToDisplay[series[i][k].seriesUID] = true;
           selectedCount++;
         }
       }
       count += series[i].length;
     }
+    console.log("selected to display", selectedToDisplay);
     this.setState({ selectedToDisplay }, () => {
       this.setState({ limit: this.updateLimit() });
     });
