@@ -297,13 +297,18 @@ function AnnotationTable(props) {
     const { projectID, studyUID } = selected;
     let { patientID, subjectID } = selected;
     patientID = patientID ? patientID : subjectID;
-    try {
-      const { data: series } = await getSeries(projectID, patientID, studyUID);
-      await props.dispatch(loadCompleted());
-      return series;
-    } catch (err) {
-      props.dispatch(annotationsLoadingError(err));
-    }
+
+    const { data: series } = await getSeries(projectID, patientID, studyUID);
+    await props.dispatch(loadCompleted());
+    return new Promise((resolve, reject) => {
+      if (series)
+        resolve(series);
+      else {
+        let err = new Error("Error getting series data")
+        props.dispatch(annotationsLoadingError(err));
+        reject(err);
+      }
+    })
   };
 
   const excludeOpenSeries = allSeriesArr => {
