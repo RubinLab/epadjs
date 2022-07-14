@@ -397,10 +397,11 @@ function AnnotationTable(props) {
     else {
       const { subjectID: patientID, studyUID } = selected;
       let seriesArr = await getSeriesData(selected);
-      console.log("Series Arr", seriesArr);
-      console.log("Return array length is", seriesArr.length);
       //get extraction of the series (extract unopen series)
       if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
+      console.log("Excluded Series Arr", seriesArr);
+      console.log("Return array length is", seriesArr.length);
+      console.log("all params", seriesArr.length, props.openSeries.length, maxPort, (seriesArr.length + props.openSeries.length) > maxPort)
       //check if there is enough room
       if ((seriesArr.length + props.openSeries.length) > maxPort) {
         console.log("checking num of series", seriesArr.length, props.openSeries.length);
