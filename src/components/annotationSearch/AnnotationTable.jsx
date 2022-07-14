@@ -488,6 +488,7 @@ function AnnotationTable(props) {
         {
           Header: 'Modality',
           accessor: 'modality',
+          style: { 'text-transform': 'uppercase' },
         },
         {
           Header: 'Study Date',
