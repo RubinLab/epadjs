@@ -7,9 +7,10 @@ const worklistSelect = ({ list, handleRoute, selected, type }) => {
     const isSelected = (selected === workListID && type === "progress");
     const completeness = progress >= 0 ? Math.round(progress) + "%" : null;
     result.push(
-      <div className="progress-text" onClick={() => {
-        handleRoute("progress", workListID);
-      }}
+      <div className="progress-text"
+        style={{ cursor: 'pointer' }} onClick={() => {
+          handleRoute("progress", workListID);
+        }}
         key={workListID}>
         <ul style={{ listStyle: 'none' }}><li><b>{name}</b></li></ul>
         Due: {duedate}
