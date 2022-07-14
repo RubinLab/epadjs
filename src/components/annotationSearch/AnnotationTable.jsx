@@ -388,7 +388,8 @@ function AnnotationTable(props) {
     setSelected(selected);
     if (props.openSeries.length === maxPort) {
       setShowSelectSeriesModal(true);
-    } else {
+    }
+    else {
       const { subjectID: patientID, studyUID } = selected;
       let seriesArr = await getSeriesData(selected);
       console.log("Series Arr", seriesArr);
@@ -396,7 +397,8 @@ function AnnotationTable(props) {
       //get extraction of the series (extract unopen series)
       if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
       //check if there is enough room
-      if (seriesArr.length + props.openSeries.length > maxPort) {
+      if ((seriesArr.length + props.openSeries.length) > maxPort) {
+        console.log("checking num of series", seriesArr.length, props.openSeries.length);
         console.log("There is not enoug port. Open series : ", props.openSeries);
         //if there is not bring the modal
         setShowSelectSeriesModal(true);
@@ -413,7 +415,7 @@ function AnnotationTable(props) {
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => { })
+          .then(() => { props.switchToDisplay(); })
           .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
