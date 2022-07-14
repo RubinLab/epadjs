@@ -47,14 +47,14 @@
 } */
 
 .Collapsible__contentInner {
-  padding: 10px;
+  /* padding: 10px; */
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-top: 0;
   width: inherit;
 }
 
 .Collapsible__contentOuter{
-  width: inherit;
+  /* width: inherit; */
 }
 
 .Collapsible__contentInner p {
@@ -79,7 +79,7 @@
   color: white;
 }
 
-.Collapsible__trigger.is-open {
+/* .Collapsible__trigger.is-open {
   display: block;
   font-weight: 400;
   text-decoration: none;
@@ -90,6 +90,18 @@
   background: #861737;
   color: white;
   width: inherit;
+} */
+
+.Collapsible__trigger.is-open {
+  display: block;
+  font-weight: 400;
+  text-decoration: none;
+  color: #3a3f44;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  background: #3a3f44;
+  color: white;
 }
 
 .Collapsible__trigger:after {
