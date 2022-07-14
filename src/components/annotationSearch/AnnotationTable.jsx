@@ -298,18 +298,13 @@ function AnnotationTable(props) {
     const { projectID, studyUID } = selected;
     let { patientID, subjectID } = selected;
     patientID = patientID ? patientID : subjectID;
-
-    const { data: series } = await getSeries(projectID, patientID, studyUID);
-    await props.dispatch(loadCompleted());
-    return new Promise((resolve, reject) => {
-      if (series)
-        resolve(series);
-      else {
-        let err = new Error("Error getting series data")
-        props.dispatch(annotationsLoadingError(err));
-        reject(err);
-      }
-    })
+    try {
+      const { data: series } = await getSeries(projectID, patientID, studyUID);
+      props.dispatch(loadCompleted());
+      return series;
+    } catch (err) {
+      props.dispatch(annotationsLoadingError(err));
+    }
   };
 
   const excludeOpenSeries = allSeriesArr => {
@@ -390,23 +385,16 @@ function AnnotationTable(props) {
   };
 
   const displaySeries = async selected => {
-    console.log("Selected", selected);
     setSelected(selected);
     if (props.openSeries.length === maxPort) {
       setShowSelectSeriesModal(true);
-    }
-    else {
+    } else {
       const { subjectID: patientID, studyUID } = selected;
       let seriesArr = await getSeriesData(selected);
       //get extraction of the series (extract unopen series)
       if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
-      console.log("Excluded Series Arr", seriesArr);
-      console.log("Return array length is", seriesArr.length);
-      console.log("all params", seriesArr.length, props.openSeries.length, maxPort, (seriesArr.length + props.openSeries.length) > maxPort)
       //check if there is enough room
-      if ((seriesArr.length + props.openSeries.length) > maxPort) {
-        console.log("checking num of series", seriesArr.length, props.openSeries.length);
-        console.log("There is not enoug port. Open series : ", props.openSeries);
+      if (seriesArr.length + props.openSeries.length > maxPort) {
         //if there is not bring the modal
         setShowSelectSeriesModal(true);
         setSelected(seriesArr);
@@ -416,13 +404,12 @@ function AnnotationTable(props) {
         //add serie to the grid
         const promiseArr = [];
         for (let serie of seriesArr) {
-          console.log("Serie", serie);
           props.dispatch(addToGrid(serie));
           promiseArr.push(props.dispatch(getSingleSerie(serie)));
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => { props.switchToDisplay(); })
+          .then(() => { })
           .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
