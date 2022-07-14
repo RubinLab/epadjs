@@ -385,44 +385,44 @@ function AnnotationTable(props) {
   };
 
   const displaySeries = async selected => {
-    setSelected(selected);
+    const { subjectID: patientID, studyUID } = selected;
+    let seriesArr = await getSeriesData(selected);
+    setSelected(seriesArr);
     if (props.openSeries.length === maxPort) {
       setShowSelectSeriesModal(true);
-    } else {
-      const { subjectID: patientID, studyUID } = selected;
-      let seriesArr = await getSeriesData(selected);
-      //get extraction of the series (extract unopen series)
-      if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
-      //check if there is enough room
-      if (seriesArr.length + props.openSeries.length > maxPort) {
-        //if there is not bring the modal
-        setShowSelectSeriesModal(true);
-        setSelected(seriesArr);
-        // TODO show toast
-      } else {
-        //if there is enough room
-        //add serie to the grid
-        const promiseArr = [];
-        for (let serie of seriesArr) {
-          props.dispatch(addToGrid(serie));
-          promiseArr.push(props.dispatch(getSingleSerie(serie)));
-        }
-        //getsingleSerie
-        Promise.all(promiseArr)
-          .then(() => { })
-          .catch(err => console.error(err));
-
-        //if patient doesnot exist get patient
-        // -----> Delete after v1.0 <-----
-        // if (!patientExists) {
-        //   // this.props.dispatch(getWholeData(null, selected));
-        //   getWholeData(null, selected);
-        // } else {
-        //   //check if study exist
-        //   props.dispatch(updatePatient('study', true, patientID, studyUID));
-        // }
-      }
+      return;
     }
+    //get extraction of the series (extract unopen series)
+    if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
+    //check if there is enough room
+    if (seriesArr.length + props.openSeries.length > maxPort) {
+      //if there is not bring the modal
+      setShowSelectSeriesModal(true);
+      // TODO show toast
+    } else {
+      //if there is enough room
+      //add serie to the grid
+      const promiseArr = [];
+      for (let serie of seriesArr) {
+        props.dispatch(addToGrid(serie));
+        promiseArr.push(props.dispatch(getSingleSerie(serie)));
+      }
+      //getsingleSerie
+      Promise.all(promiseArr)
+        .then(() => { })
+        .catch(err => console.error(err));
+
+      //if patient doesnot exist get patient
+      // -----> Delete after v1.0 <-----
+      // if (!patientExists) {
+      //   // this.props.dispatch(getWholeData(null, selected));
+      //   getWholeData(null, selected);
+      // } else {
+      //   //check if study exist
+      //   props.dispatch(updatePatient('study', true, patientID, studyUID));
+      // }
+    }
+
   };
 
   const { patientName } = props.filters;
