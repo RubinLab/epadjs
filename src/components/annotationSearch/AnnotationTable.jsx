@@ -553,10 +553,6 @@ function AnnotationTable(props) {
         {
           Header: 'Comment',
           accessor: 'userComment'
-        },
-        {
-          Header: 'Project',
-          accessor: 'projectName'
         }
       ],
       [props.selectedAnnotations, data]

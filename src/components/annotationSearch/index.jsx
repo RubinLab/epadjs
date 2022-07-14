@@ -1432,12 +1432,13 @@ const AnnotationSearch = props => {
               sort[0] === '-name' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
               <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('name', target)} value={filters.name} />
             </th>
-            <th><span onClick={() => handleSort('age')}>Age </span>{
-              sort[0] === 'age' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
-              sort[0] === '-age' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
+            <th style={{ width: '3.5rem' }} >
+              <span onClick={() => handleSort('age')}>Age </span>{
+                sort[0] === 'age' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
+                sort[0] === '-age' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
               <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('age', target)} value={filters.age} />
             </th>
-            <th>
+            <th style={{ width: '3rem' }}>
               <span onClick={() => handleSort('sex')}>Sex </span>{
                 sort[0] === 'sex' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
                 sort[0] === '-sex' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
@@ -1488,12 +1489,6 @@ const AnnotationSearch = props => {
               sort[0] === 'userComment' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
               sort[0] === '-userComment' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
               <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('userComment', target)} value={filters.comment} />
-            </th>
-            <th>
-              <span onClick={() => handleSort('projectName')}>Project </span>{
-                sort[0] === 'projectName' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
-                sort[0] === '-projectName' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('projectName', target)} value={filters.project} />
             </th>
           </tr>
         </thead>
