@@ -11,11 +11,11 @@ import Connections from "./connections";
 import "./menuStyle.css";
 import Header from "./common/managementHeader";
 import { scanDataFolder } from "./dataFolderScan";
+let mode;
 
 class MainMenu extends React.Component {
   constructor(props) {
     super(props);
-    const mode = sessionStorage.getItem("mode");
     this.state = {
       selection: "",
       isModalOpen: false,
@@ -24,6 +24,7 @@ class MainMenu extends React.Component {
   }
 
   componentDidMount = () => {
+    mode = sessionStorage.getItem("mode");
     this.updateDimensions();
     window.addEventListener("resize", this.updateDimensions);
   };
@@ -135,9 +136,10 @@ class MainMenu extends React.Component {
             >
               Templates
             </div>
-            <div className="mng-menu__option" onClick={this.handleSelection}>
+            {mode !== 'teaching' && (<div className="mng-menu__option" onClick={this.handleSelection}>
               Plugins
-            </div>
+            </div>)}
+
             {false && (
               <div className="mng-menu__option" onClick={this.handleSelection}>
                 Pluginstore
