@@ -139,7 +139,6 @@ class MainMenu extends React.Component {
             {mode !== 'teaching' && (<div className="mng-menu__option" onClick={this.handleSelection}>
               Plugins
             </div>)}
-
             {false && (
               <div className="mng-menu__option" onClick={this.handleSelection}>
                 Pluginstore
