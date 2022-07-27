@@ -640,6 +640,12 @@ class App extends Component {
           sessionStorage.setItem("waterfallOptions", waterfallOptions);
         }
 
+        if(mode==='teaching'){
+          document.title = "Stella";
+          document.getElementById("favicon");
+          favicon.href = "/stella.png"
+        }
+
         this.setState({ mode, apiUrl, wadoUrl, authMode });
         const keycloakData = await results[1].json();
         const auth =

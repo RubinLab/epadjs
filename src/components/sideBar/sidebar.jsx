@@ -28,6 +28,7 @@ import "./style.css";
 import SidebarContent from "./sidebarContent";
 import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
+import './style.css';
 
 let mode;
 

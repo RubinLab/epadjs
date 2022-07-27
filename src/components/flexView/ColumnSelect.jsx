@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 const ColumnSelect = (props) => {
@@ -15,12 +15,19 @@ const ColumnSelect = (props) => {
     </button>
   ));
 
+  const CustomMenu = React.forwardRef(({ children, className, id }, ref) => {
+    return (<div id={id} className={className} ref={ref}>
+      {children}
+    </div>
+    )
+  })
+
   return (
     <Dropdown id='subSpecDrop' className="d-inline mx-2">
       <Dropdown.Toggle as={CustomToggle}>
         Select Columns
       </Dropdown.Toggle>
-      <Dropdown.Menu className="dropdown-menu p-2 dropdown-menu-dark" popperConfig={{ strategy: "fixed" }} >
+      <Dropdown.Menu as={CustomMenu} className="dropdown-menu p-2 dropdown-menu-dark" >
         {studyColumns?.map((column, y) => {
           return (
             <div key={y} className="row">

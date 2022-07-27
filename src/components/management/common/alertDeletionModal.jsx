@@ -9,7 +9,7 @@ const alertDeletionModal = ({ message, onCancel, onDelete, error, show }) => {
       centered show={show} onHide={onCancel}>
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">
-          Confirm Annotation Deletion
+          Confirm Deletion
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>

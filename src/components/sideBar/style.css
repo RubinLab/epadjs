@@ -151,6 +151,10 @@ body {
   background-color: '';
 }
 
+.element_de_selected:hover {
+  background-color: #3a3f44;
+}
+
 .element_number {
   background-color: #ececec;
   border: 1px solid #777;
@@ -180,6 +184,11 @@ body {
   list-style-type: none !important;
   text-transform: capitalize;
 }
+
+.progress-text:hover{
+  background-color: #3a3f44;
+}
+
 .progress-text ul li b{
   color: #fff47e;
   font-weight: 400;
@@ -228,7 +237,7 @@ body {
   /* width: calc(100% - 200px); */
   padding: 1px;
   /* display: flex; */
-  color: white;
+  /* color: white; */
 }
 
 .mainView-closed {
