@@ -17,7 +17,7 @@ import {
   RiCheckboxMultipleBlankFill,
   RiCloseCircleFill
 } from 'react-icons/ri';
-import { FcAbout } from 'react-icons/fc';
+import { FcAbout, FcClearFilters } from 'react-icons/fc';
 import { BiSearch, BiX, BiTrash, BiDownload } from 'react-icons/bi';
 import { BsEyeFill } from 'react-icons/bs';
 import { AiOutlineSortAscending, AiOutlineSortDescending } from 'react-icons/ai';
@@ -1350,7 +1350,22 @@ const AnnotationSearch = props => {
               <div className="input-group input-group-sm mb-3">
                 <input className="form-control" type="text" placeholder="Enter Search Terms and/or Use Filters at Right" aria-label="default input example" onChange={e => { setQuery(e.target.value) }} value={query} />
                 <span className="input-group-text" id="basic-addon1"><BiSearch /></span>
+
+                <div>
+                  <button data-for='clearAll' className="btn btn-dark btn-sm color-schema" style={{ marginLeft: '0.5rem' }} >
+                    <FcClearFilters />
+                  </button>
+                </div>
+                <ReactTooltip
+                  id="clearAll"
+                  place="right"
+                  type="info"
+                  delayShow={1000}
+                >
+                  <span className="filter-label">Clear all filters</span>
+                </ReactTooltip>
               </div>
+
             </div>
             <TeachingFilters selectedAnatomies={selectedAnatomies}
               setSelectedAnatomies={setSelectedAnatomies}
