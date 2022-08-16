@@ -1351,7 +1351,7 @@ const AnnotationSearch = props => {
                 <span className="input-group-text" id="basic-addon1"><BiSearch /></span>
 
                 <div>
-                  <button data-for='clearAll' className="btn btn-dark btn-sm color-schema" style={{ marginLeft: '0.5rem' }} >
+                  <button data-tip data-for='clearAll' className="btn btn-dark btn-sm color-schema" style={{ marginLeft: '0.5rem' }} >
                     <FcClearFilters />
                   </button>
                 </div>
@@ -1361,7 +1361,7 @@ const AnnotationSearch = props => {
                   type="info"
                   delayShow={1000}
                 >
-                  <span className="filter-label">Clear all filters</span>
+                  Clear all filters
                 </ReactTooltip>
               </div>
 
