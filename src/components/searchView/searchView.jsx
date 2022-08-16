@@ -146,6 +146,7 @@ class SearchView extends Component {
   };
 
   handleTeachingFilesModal = event => {
+    console.log("Handling teaching file Moda ", event);
     const { seriesArray, args, packedData } = event.detail;
     const seriesList = [seriesArray];
     this.setState({ isSerieSelectionOpen: true, seriesList, isTeachingFile: true, encArgs: args, decrArgs: packedData });

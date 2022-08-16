@@ -36,4 +36,4 @@ export const formatDates = (timeStamp) => {
 
 export const teachingFileTempUid =
   "2.25.182468981370271895711046628549377576999";
-export const teachingFileTempCode = "99EPAD_948";
+export const teachingFileTempCode = "99EPAD_947";

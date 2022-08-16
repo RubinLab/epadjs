@@ -773,6 +773,7 @@ class App extends Component {
         this.displaySeries(packedData);
       } else {
         const seriesArray = await this.getSeriesData(packedData);
+        console.log("Will fire open modal ", seriesArray, args, packedData);
         window.dispatchEvent(
           new CustomEvent("openTeachingFilesModal", {
             detail: { seriesArray, args, packedData },
