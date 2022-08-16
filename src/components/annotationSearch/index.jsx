@@ -34,7 +34,6 @@ import { clearSelection, selectAnnotation } from '../annotationsList/action';
 import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
 import UploadModal from '../searchView/uploadModal';
 import DeleteAlert from '../management/common/alertDeletionModal';
-import ellipse from 'cornerstone-tools/util/ellipse/index.js';
 import {
   getPluginsForProject,
   addPluginsToQueue,
@@ -424,7 +423,7 @@ const AnnotationSearch = props => {
         />
         <button
           className={`btn btn-secondary`}
-          style={styles.buttonStyles}
+          // style={styles.buttonStyles}
           onClick={addPartialToQuery}
           type="button"
           name="add-button"
