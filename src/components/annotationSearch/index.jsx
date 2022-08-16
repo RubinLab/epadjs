@@ -479,6 +479,7 @@ const AnnotationSearch = props => {
   };
 
   const getFieldSearchResults = (pageIndex, afterDelete) => {
+    console.log("Filter", filters);
     setShowSpinner(true);
     const bm = pageIndex ? bookmark : '';
     let body = {};
@@ -1332,11 +1333,16 @@ const AnnotationSearch = props => {
   };
   // cavit
 
-  const clearAll = () => {
+  const clearAllTeachingFilers = () => {
     setSelectedSubs([]);
     setSelectedMods([]);
     setSelectedDiagnosis([]);
     setSelectedAnatomies([]);
+  }
+
+  const clearAllFilters = () => {
+    setFilters({});
+    clearAllTeachingFilers();
   }
 
   return (
@@ -1351,7 +1357,7 @@ const AnnotationSearch = props => {
                 <span className="input-group-text" id="basic-addon1"><BiSearch /></span>
 
                 <div>
-                  <button data-tip data-for='clearAll' className="btn btn-dark btn-sm color-schema" style={{ marginLeft: '0.5rem' }} >
+                  <button data-tip data-for='clearAll' className="btn btn-dark btn-sm color-schema" style={{ marginLeft: '0.5rem' }} onClick={clearAllFilters}>
                     <FcClearFilters />
                   </button>
                 </div>
@@ -1395,7 +1401,7 @@ const AnnotationSearch = props => {
                 return (<button key={diagnose} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearDiagnosis(diagnose)} > {diagnose
                 } < BiX /></button>);
               })}
-              {(selectedSubs.length + selectedMods.length + selectedAnatomies.length + selectedDiagnosis) > 1 && (<button type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={clearAll}>Clear All Filters <BiX /></button>)}
+              {(selectedSubs.length + selectedMods.length + selectedAnatomies.length + selectedDiagnosis) > 1 && (<button type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={clearAllTeachingFilers}>Clear All Filters <BiX /></button>)}
             </div>)
           }
         </div>
@@ -1428,7 +1434,7 @@ const AnnotationSearch = props => {
               <span onClick={() => handleSort('patientName')}>Patient Name </span>{
                 sort[0] === 'patientName' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
                 sort[0] === '-patientName' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)} < br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('patientName', target)} value={filters.patientName} />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('patientName', target)} value={filters.patientName || ""} />
             </th>
             <th>
               <span onClick={() => handleSort('subjectID')}>MRN </span>{
