@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import "../menuStyle.css";
-import { teachingDefTempCode } from "../../../constants";
+import { teachingFileTempCode } from "../../../constants";
 
 const projectCreationForm = ({
   onCancel,
@@ -80,7 +80,7 @@ const projectCreationForm = ({
             className="add-project__modal--select"
             onChange={onType}
             id="projectTemplate"
-            defaultValue={mode === 'teaching' ? teachingDefTempCode : null}
+            defaultValue={mode === 'teaching' ? teachingFileTempCode : null}
           >
             {options}
           </select>
