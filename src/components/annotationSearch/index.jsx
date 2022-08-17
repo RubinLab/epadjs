@@ -43,7 +43,7 @@ import TeachingFilters from './TeachingFilters.jsx';
 import AddToWorklist from '../searchView/addWorklist';
 import Projects from '../searchView/addToProject';
 import Spinner from 'react-bootstrap/Spinner';
-import ProjectModal from '../annotationsList/selectSerieModal';
+import SeriesModal from '../annotationsList/selectSerieModal';
 
 import './annotationSearch.css';
 
@@ -231,7 +231,6 @@ const AnnotationSearch = props => {
   }, [handleTeachingFilesModal]);
 
   const handleTeachingFilesModal = event => {
-    console.log("Handling teaching file Modal ", event);
     const { seriesArray, args, packedData } = event.detail;
     const seriesList = [seriesArray];
     setShowSelectSeries(true);
@@ -1573,7 +1572,7 @@ const AnnotationSearch = props => {
       />
 
       {showSelectSeries && (
-        <ProjectModal
+        <SeriesModal
           seriesPassed={seriesList}
           onCancel={() => { setShowSelectSeries(false) }}
           isTeachingFile={true}
