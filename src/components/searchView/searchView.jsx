@@ -133,9 +133,8 @@ class SearchView extends Component {
         expandLevel
       });
       window.addEventListener('openSeriesModal', this.handleSeriesModal);
-      window.addEventListener('openTeachingFilesModal', this.handleTeachingFilesModal);
     } catch (err) {
-      console.err(err);
+      conosle.err(err);
     }
   };
 
@@ -182,7 +181,6 @@ class SearchView extends Component {
 
   componentWillUnmount() {
     window.removeEventListener('openSeriesModal', this.handleSeriesModal);
-    window.removeEventListener('openTeachingFilesModal', this.handleTeachingFilesModal);
   }
 
   checkForAllAndUnassigned = () => {
