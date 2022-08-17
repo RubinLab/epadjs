@@ -43,6 +43,7 @@ import TeachingFilters from './TeachingFilters.jsx';
 import AddToWorklist from '../searchView/addWorklist';
 import Projects from '../searchView/addToProject';
 import Spinner from 'react-bootstrap/Spinner';
+import ProjectModal from '../annotationsList/selectSerieModal';
 
 import './annotationSearch.css';
 
@@ -140,6 +141,10 @@ const AnnotationSearch = props => {
   const [showWorklist, setShowWorklist] = useState(false);
   const [showProjects, setShowProjects] = useState(false);
   const [showDownload, setShowDownload] = useState(false);
+  const [showSelectSeries, setShowSelectSeries] = useState(false);
+  const [seriesList, setSeriesList] = useState([]);
+  const [encArgs, setEncArgs] = useState('');
+  const [decrArgs, setDecrArgs] = useState('');
 
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -217,6 +222,23 @@ const AnnotationSearch = props => {
       window.removeEventListener('keydown', handleUserKeyPress);
     };
   }, [handleUserKeyPress]);
+
+  useEffect(() => {
+    window.addEventListener('openTeachingFilesModal', handleTeachingFilesModal);
+    return () => {
+      window.removeEventListener('openTeachingFilesModal', handleTeachingFilesModal);
+    };
+  }, [handleTeachingFilesModal]);
+
+  const handleTeachingFilesModal = event => {
+    console.log("Handling teaching file Modal ", event);
+    const { seriesArray, args, packedData } = event.detail;
+    const seriesList = [seriesArray];
+    setShowSelectSeries(true);
+    setSeriesList(seriesList);
+    setEncArgs(args);
+    setDecrArgs(packedData);
+  }
 
   const useDebouncedEffect = (effect, deps, delay) => {
     useEffect(() => {
@@ -1549,6 +1571,16 @@ const AnnotationSearch = props => {
         projectID={selectedProject}
         show={showDownload}
       />
+
+      {showSelectSeries && (
+        <ProjectModal
+          seriesPassed={seriesList}
+          onCancel={() => { setShowSelectSeries(false) }}
+          isTeachingFile={true}
+          encrUrlArgs={encArgs}
+          decrArgs={decrArgs}
+        />
+      )}
 
     </>
   );
