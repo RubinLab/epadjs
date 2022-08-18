@@ -15,7 +15,8 @@ export var AimEditor = function (
   setAimDirty,
   lastSavedAim,
   isTeachingFlag,
-  tachingDivParent
+  tachingDivParent,
+  fontcolor = "black"
 ) {
   //this.mapObjCodeValueParent = new Map();
   const mode = sessionStorage.getItem("mode");
@@ -25,7 +26,7 @@ export var AimEditor = function (
   this.loadingAimFlag = false;
   this.handlerSetAimDirty = setAimDirty;
   this.activateDirtyCheck = false;
-  this.fontcolor = "black";
+  this.fontcolor = fontcolor;
   // this.fontcolor = "#c9cdd4";
   this.fontsize = "13px";
   this.fontweight = "1500";

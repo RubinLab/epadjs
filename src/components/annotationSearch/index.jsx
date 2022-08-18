@@ -1552,6 +1552,15 @@ const AnnotationSearch = props => {
             />
           )}
         </tbody>
+        {showSelectSeries && (
+          <SeriesModal
+            seriesPassed={seriesList}
+            onCancel={() => { setShowSelectSeries(false) }}
+            isTeachingFile={true}
+            encrUrlArgs={encArgs}
+            decrArgs={decrArgs}
+          />
+        )}
       </table>
       <DeleteAlert
         message={explanation.deleteSelected}
@@ -1570,17 +1579,6 @@ const AnnotationSearch = props => {
         projectID={selectedProject}
         show={showDownload}
       />
-
-      {showSelectSeries && (
-        <SeriesModal
-          seriesPassed={seriesList}
-          onCancel={() => { setShowSelectSeries(false) }}
-          isTeachingFile={true}
-          encrUrlArgs={encArgs}
-          decrArgs={decrArgs}
-        />
-      )}
-
     </>
   );
 };

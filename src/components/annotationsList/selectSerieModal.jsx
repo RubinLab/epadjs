@@ -76,7 +76,8 @@ class selectSerieModal extends React.Component {
         {},
         null,
         true, // is teachinng flag
-        newElement // the new div which holds only teaching components for aim editor
+        newElement, // the new div which holds only teaching components for aim editor
+        "#ccc"
       );
       const { data: templates } = await getTemplate(teachingFileTempUid);
       this.semanticAnswers.loadTemplates({
@@ -399,22 +400,19 @@ class selectSerieModal extends React.Component {
 
   render = () => {
     const { openSeries, isTeachingFile } = this.props;
-    const title = isTeachingFile ? "Create Teaching File" : "Not enough viewports to display series"
+    const title = isTeachingFile ? "Create STELLA Teaching File" : "Not enough viewports to display series"
     const selections = Object.keys(this.state.selectedToDisplay);
     const list = this.renderSelection();
     return (
-      <Modal.Dialog id="modal-fix">
-        <Modal.Header>
-          <Modal.Title className="selectSerie__header">
+      <Modal.Dialog id="series-modal" className="series-modal">
+        < Modal.Header className="select-serie-header">
+          <Modal.Title className="select-serie-title">
             {title}
           </Modal.Title>
-        </Modal.Header>
-        <Modal.Body
-          className="selectSerie-container"
-          style={{ textAlign: "start" }}
-        >
-          {isTeachingFile && (<div><div id="questionaire"> </div>
-            <div id="questionaire2"> </div></div>)}
+        </Modal.Header >
+        <Modal.Body className="select-serie-body">
+          {isTeachingFile && (<div><div id="questionaire" style={{ color: 'White' }}> </div>
+            <div id="questionaire2" style={{ color: 'White' }}> </div></div>)}
           <div>Maximum {this.maxPort} series can be viewed at a time.</div>
           {openSeries.length > 0 && (
             <div>
@@ -456,7 +454,7 @@ class selectSerieModal extends React.Component {
             </div>
           )}
         </Modal.Footer>
-      </Modal.Dialog>
+      </Modal.Dialog >
     );
   };
 }
