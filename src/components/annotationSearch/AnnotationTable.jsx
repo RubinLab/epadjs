@@ -386,7 +386,6 @@ function AnnotationTable(props) {
   };
 
   const displaySeries = async selected => {
-    console.log("Selected", selected);
     const { subjectID: patientID, studyUID, aimID } = selected;
     let seriesArr = await getSeriesData(selected);
     setSelected(seriesArr);
@@ -414,14 +413,13 @@ function AnnotationTable(props) {
       //   promiseArr.push(props.dispatch(getSingleSerie(serie)));
       // }
       for (let i = 0; i < seriesArr.length; i++) {
-        if (i === seriesArr.length - 1) {
-          console.log("here", i,);
-          props.dispatch(addToGrid(seriesArr[i], aimID));
-          promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i], aimID)));
-        } else {
-          props.dispatch(addToGrid(seriesArr[i]));
-          promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i])));
-        }
+        // if (i === seriesArr.length - 1) {
+        props.dispatch(addToGrid(seriesArr[i], aimID));
+        promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i], aimID)));
+        // } else {
+        //   props.dispatch(addToGrid(seriesArr[i]));
+        //   promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i])));
+        // }
       }
       //getsingleSerie
       Promise.all(promiseArr)

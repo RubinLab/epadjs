@@ -233,6 +233,8 @@ class DisplayView extends Component {
     window.removeEventListener("deleteAim", this.deleteAimHandler);
     window.removeEventListener("resize", this.setSubComponentHeights);
     window.removeEventListener('keydown', this.handleKeyPressed);
+    // clear all aimID of openseries so aim editor doesn't open next time
+    this.props.dispatch(clearAimId());
     clearInterval(this.state.tokenRefresh)
   }
 
@@ -476,7 +478,6 @@ class DisplayView extends Component {
   }
 
   shouldOpenAimEditor = (notShowAimEditor = false) => {
-    console.log("should open");
     const { series } = this.props;
     series.forEach(({ aimID, seriesUID }) => {
       if (aimID && !notShowAimEditor) this.openAimEditor(aimID, seriesUID);
