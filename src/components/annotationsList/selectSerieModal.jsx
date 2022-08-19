@@ -4,7 +4,8 @@ import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 import { toast } from "react-toastify";
 import ReactTooltip from "react-tooltip";
-import { Modal } from "react-bootstrap";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 import {
   clearGrid,
   getWholeData,
@@ -66,7 +67,9 @@ class selectSerieModal extends React.Component {
     const { isTeachingFile } = this.props;
     if (isTeachingFile) {
       const element = document.getElementById("questionaire");
-      const newElement = document.getElementById("questionaire2");
+      const speciality = document.getElementById("speciality");
+      const anatomy = document.getElementById("anatomy");
+      const diagnosis = document.getElementById("diagnosis");
 
       this.semanticAnswers = new questionaire.AimEditor(
         element,
@@ -76,7 +79,7 @@ class selectSerieModal extends React.Component {
         {},
         null,
         true, // is teachinng flag
-        newElement, // the new div which holds only teaching components for aim editor
+        { speciality, anatomy, diagnosis }, // the new div which holds only teaching components for aim editor
         "#ccc"
       );
       const { data: templates } = await getTemplate(teachingFileTempUid);
@@ -411,9 +414,26 @@ class selectSerieModal extends React.Component {
           </Modal.Title>
         </Modal.Header >
         <Modal.Body className="select-serie-body">
-          {isTeachingFile && (<div><div id="questionaire" style={{ color: 'White' }}> </div>
-            <div id="questionaire2" style={{ color: 'White' }}> </div></div>)}
-          <div>Maximum {this.maxPort} series can be viewed at a time.</div>
+          {isTeachingFile &&
+            (<div id="questionaire" className={"field-grid"}>
+              <row>
+                <div id="anatomy"></div>
+                <div id="diagnosis"></div>
+              </row>
+              <row>
+                <div id="speciality"></div>
+                <div id="comment">
+                  {/* <i class="dropdown icon"></i>
+                  <div className="title active" style={{ color: "rgb(204, 204, 204)", fontSize: "13px" }}>Narrative</div>
+                  <div>
+                    <input className="comment ui input"></input>
+                  </div> */}
+                </div>
+              </row>
+            </div>
+            )}
+          <br />
+          <div className={"max-series"}>Please select up to {this.maxPort} series to display:</div>
           {openSeries.length > 0 && (
             <div>
               You can close open series to open veiwport space for new one.
@@ -439,18 +459,18 @@ class selectSerieModal extends React.Component {
           )}
           <div>{list}</div>
         </Modal.Body>
-        <Modal.Footer className="modal-footer__buttons">
+        <Modal.Footer className="select-serie-footer">
           {isTeachingFile && (
             <div>
-              <button onClick={() => { this.saveTeachingFile(); this.handleCancel() }}>Save Teaching File</button>
-              <button onClick={this.saveTeachingFileAndDisplay}>Save Teaching File & Display</button>
-              <button onClick={this.handleCancel}>Discard</button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => { this.saveTeachingFile(); this.handleCancel() }}>Save Teaching File</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.saveTeachingFileAndDisplay}>Save Teaching File & Display</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Discard</Button>
             </div>
           )}
           {!isTeachingFile && (
             <div>
-              <button onClick={this.displaySelection} disabled={!selections.length}>Display selection</button>
-              <button onClick={this.handleCancel}>Cancel</button>
+              <Button variant="secondary" size="sm" onClick={this.displaySelection} disabled={!selections.length}>Display selection</Button>
+              <Button variant="secondary" size="sm" onClick={this.handleCancel}>Cancel</Button>
             </div>
           )}
         </Modal.Footer>

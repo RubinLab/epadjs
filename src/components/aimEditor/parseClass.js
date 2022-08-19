@@ -15,7 +15,7 @@ export var AimEditor = function (
   setAimDirty,
   lastSavedAim,
   isTeachingFlag,
-  tachingDivParent,
+  teachingDivParent,
   fontcolor = "black"
 ) {
   //this.mapObjCodeValueParent = new Map();
@@ -465,16 +465,23 @@ export var AimEditor = function (
 
         // below line adds all components to the div passed from caller. Rectifiying for teaching file
         //  document.getElementById("accordion1").appendChild(componentDiv);
-        if (
-          (component.label === "Radiology Specialty" ||
-            component.label === "Anatomy Core" ||
-            component.label === "Findings and Diagnosis") &&
-          isTeachingFlag
-        ) {
-          tachingDivParent.appendChild(componentDiv);
-          tachingDivParent.appendChild(labelDiv);
-          tachingDivParent.appendChild(commentDiv);
-        } else {
+        if (component.label === "Anatomy Core" && isTeachingFlag ) {
+          teachingDivParent.anatomy.appendChild(componentDiv);
+          teachingDivParent.anatomy.appendChild(labelDiv);
+          teachingDivParent.anatomy.appendChild(commentDiv);
+        } 
+        else if (component.label === "Radiology Specialty" && isTeachingFlag ) {
+          console.log("teaching", teachingDivParent);
+          teachingDivParent.speciality.appendChild(componentDiv);
+          teachingDivParent.speciality.appendChild(labelDiv);
+          teachingDivParent.speciality.appendChild(commentDiv);
+        } 
+         else if (component.label === "Findings and Diagnosis" && isTeachingFlag ) {
+          teachingDivParent.diagnosis.appendChild(componentDiv);
+          teachingDivParent.diagnosis.appendChild(labelDiv);
+          teachingDivParent.diagnosis.appendChild(commentDiv);
+        } 
+        else {
           document.getElementById("accordion1").appendChild(componentDiv);
         }
 

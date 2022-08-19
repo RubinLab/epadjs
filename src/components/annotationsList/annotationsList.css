@@ -481,7 +481,8 @@ th{
 
 #series-modal {
   background-color: #555555;
-  width:50%;
+  width:40% !important;
+  max-width: none !important;
   position: absolute;
   top: 20%;
   left: 30%;
@@ -505,3 +506,26 @@ th{
   color:#ccc !important
 }
 
+.select-serie-footer{
+  background-color: #444 !important;
+  border: none !important;
+  color:#ccc !important
+}
+
+.modal-button{
+  margin: 0.2rem;
+}
+
+.field-grid {  display: grid;
+  grid-template-columns: 49% 49%;
+  gap: 1em 1em;
+  grid-auto-flow: row;
+}
+
+.max-series{
+  width: 100%;
+  background-color: #666 !important;
+  
+  line-height: 2rem;
+  padding: 0.3rem;
+}
