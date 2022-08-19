@@ -529,3 +529,7 @@ th{
   line-height: 2rem;
   padding: 0.3rem;
 }
+
+.significant-series {
+  color:#EADDB2;
+}

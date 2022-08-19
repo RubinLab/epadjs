@@ -299,6 +299,7 @@ class selectSerieModal extends React.Component {
 
       for (let k = 0; k < series[i].length; k++) {
         const { seriesUID } = series[i][k];
+        let isSignificant = false;
         let alreadyOpen = this.isSerieOpen(seriesUID);
         let disabled =
           !selectedToDisplay[seriesUID] &&
@@ -306,6 +307,7 @@ class selectSerieModal extends React.Component {
         let desc = series[i][k].seriesDescription || "Unnamed Serie";
         if (series[i][k].significanceOrder) {
           desc = desc + " (S)";
+          isSignificant = true;
           significantExplanation = true;
         }
         item = alreadyOpen ? (
@@ -335,6 +337,7 @@ class selectSerieModal extends React.Component {
             disabled={disabled}
             key={k + "_" + seriesUID}
             isChecked={selectedToDisplay[seriesUID] || false}
+            isSignificant={isSignificant}
           />
         );
         innerList.push(item);
@@ -348,7 +351,7 @@ class selectSerieModal extends React.Component {
       count += series[i].length;
     }
     if (significantExplanation)
-      selectionList.push(<div key={"explanation"}><br />(S): Significant series</div>);
+      selectionList.push(<div key={"explanation"} className={"significant-series"}><br />(S): Significant series</div>);
     return selectionList;
   };
 
