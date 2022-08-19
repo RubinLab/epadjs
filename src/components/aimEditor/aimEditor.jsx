@@ -267,17 +267,17 @@ class AimEditor extends Component {
           <div className="aim-editor-button-group">
             <button
               className="btn btn-sm btn-outline-light aim-editor-button"
+              onClick={() => this.props.onCancel(true)}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-sm btn-outline-light aim-editor-button"
               onClick={this.save}
             >
               Save
             </button>
             &nbsp;
-            <button
-              className="btn btn-sm btn-outline-light aim-editor-button"
-              onClick={() => this.props.onCancel(true)}
-            >
-              Cancel
-            </button>
           </div>
         )}
       </div>

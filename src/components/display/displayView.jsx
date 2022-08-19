@@ -233,6 +233,8 @@ class DisplayView extends Component {
     window.removeEventListener("deleteAim", this.deleteAimHandler);
     window.removeEventListener("resize", this.setSubComponentHeights);
     window.removeEventListener('keydown', this.handleKeyPressed);
+    // clear all aimID of openseries so aim editor doesn't open next time
+    this.props.dispatch(clearAimId());
     clearInterval(this.state.tokenRefresh)
   }
 
@@ -610,7 +612,8 @@ class DisplayView extends Component {
         const aimJson = aimList[seriesUID][aimID].json;
         aimJson.aimID = aimID;
         const markupTypes = this.getMarkupTypesForAim(aimID);
-        aimJson["markupType"] = [...markupTypes];
+        if (markupTypes)
+          aimJson["markupType"] = [...markupTypes];
         aimJson["aimId"] = aimID;
         if (this.hasSegmentation(aimJson)) {
           this.setState({ hasSegmentation: true });
@@ -619,10 +622,12 @@ class DisplayView extends Component {
         if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
           this.setState({ showAimEditor: false });
         this.setState({ showAimEditor: true, selectedAim: aimJson });
-        setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
+        if (markupTypes)
+          setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
         this.refreshAllViewports();
       }
-    } catch (error) {
+    } catch (err) {
+      console.error(err);
     }
   };
 

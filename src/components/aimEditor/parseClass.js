@@ -15,7 +15,8 @@ export var AimEditor = function (
   setAimDirty,
   lastSavedAim,
   isTeachingFlag,
-  tachingDivParent
+  teachingDivParent,
+  fontcolor = "black"
 ) {
   //this.mapObjCodeValueParent = new Map();
   const mode = sessionStorage.getItem("mode");
@@ -25,7 +26,7 @@ export var AimEditor = function (
   this.loadingAimFlag = false;
   this.handlerSetAimDirty = setAimDirty;
   this.activateDirtyCheck = false;
-  this.fontcolor = "black";
+  this.fontcolor = fontcolor;
   // this.fontcolor = "#c9cdd4";
   this.fontsize = "13px";
   this.fontweight = "1500";
@@ -390,7 +391,10 @@ export var AimEditor = function (
     var label = document.createElement("label");
     annotationNameLabelDiv.className = "comment";
     annotationNameLabelDiv.style.paddingTop = "0.5rem";
-    label.textContent = "Comment";
+    if (mode === "teaching")
+      label.textContent = "Narrative";
+    else
+      label.textContent = "Comment";
     labelDiv.className = "comment";
     labelDiv.style.paddingTop = "0.5rem";
 
@@ -464,16 +468,22 @@ export var AimEditor = function (
 
         // below line adds all components to the div passed from caller. Rectifiying for teaching file
         //  document.getElementById("accordion1").appendChild(componentDiv);
-        if (
-          (component.label === "Radiology Specialty" ||
-            component.label === "Anatomy Core" ||
-            component.label === "Findings and Diagnosis") &&
-          isTeachingFlag
-        ) {
-          tachingDivParent.appendChild(componentDiv);
-          tachingDivParent.appendChild(labelDiv);
-          tachingDivParent.appendChild(commentDiv);
-        } else {
+        if (component.label === "Anatomy Core" && isTeachingFlag ) {
+          teachingDivParent.anatomy.appendChild(componentDiv);
+          teachingDivParent.anatomy.appendChild(labelDiv);
+          teachingDivParent.anatomy.appendChild(commentDiv);
+        } 
+        else if (component.label === "Radiology Specialty" && isTeachingFlag ) {
+          teachingDivParent.speciality.appendChild(componentDiv);
+          teachingDivParent.speciality.appendChild(labelDiv);
+          teachingDivParent.speciality.appendChild(commentDiv);
+        } 
+         else if (component.label === "Findings and Diagnosis" && isTeachingFlag ) {
+          teachingDivParent.diagnosis.appendChild(componentDiv);
+          teachingDivParent.diagnosis.appendChild(labelDiv);
+          teachingDivParent.diagnosis.appendChild(commentDiv);
+        } 
+        else {
           document.getElementById("accordion1").appendChild(componentDiv);
         }
 

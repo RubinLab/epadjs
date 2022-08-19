@@ -1,5 +1,5 @@
 .rightsidenav {
-  height: calc(100% - 40px);
+  height: calc(100% - 64px);
   width: 0;
   position: fixed;
   z-index: 1;

@@ -460,6 +460,8 @@ svg {
 .annsLink-table.__tbody.--row,
 .annsLink-table.__header{
   border-bottom: 1px solid #272b30;
+  color: #ccc !important;
+  font-size: small;
 }
 
 .annsLink-table.__tbody.--row:last-of-type {
@@ -475,4 +477,64 @@ table{
 
 th{
   border: none !important;
+}
+
+
+
+#series-modal {
+  background-color: #555555;
+  width:40% !important;
+  max-width: none !important;
+  position: absolute;
+  top: 20%;
+  left: 30%;
+  border: 2px solid grey;
+  z-index: 100;
+}
+
+.select-serie-header{
+  background-color: #666 !important;
+  border: none !important;
+  height: 2.5rem;
+}
+
+.select-serie-title{
+  color:#d3d3d3 !important;
+  font-size: 1.2rem !important;
+}
+
+.select-serie-body{
+  background-color: #444 !important;
+  color:#ccc !important
+}
+
+.select-serie-footer{
+  background-color: #444 !important;
+  border: none !important;
+  color:#ccc !important
+}
+
+.modal-button{
+  margin: 0.2rem;
+}
+
+.field-grid {  display: grid;
+  grid-template-columns: 49% 49%;
+  gap: 1em 1em;
+  grid-auto-flow: row;
+}
+
+.max-series{
+  width: 100%;
+  background-color: #666 !important;
+  line-height: 2rem;
+  padding: 0.3rem;
+}
+
+.significant-series {
+  color:#EADDB2;
+}
+
+.modal-content {
+  padding: 0 !important;
 }

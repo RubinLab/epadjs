@@ -273,3 +273,7 @@ th > span{
 .form-check-label{
   color: rgba(255,255,255,.55);
 }
+
+.modality-capital{
+  text-transform: uppercase !important;
+}

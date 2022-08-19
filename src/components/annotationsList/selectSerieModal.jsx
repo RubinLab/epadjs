@@ -4,7 +4,8 @@ import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 import { toast } from "react-toastify";
 import ReactTooltip from "react-tooltip";
-import { Modal } from "react-bootstrap";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 import {
   clearGrid,
   getWholeData,
@@ -18,7 +19,6 @@ import { getSeries, setSignificantSeries } from "../../services/seriesServices";
 import { getTemplate } from "../../services/templateServices";
 import { uploadAim } from "services/annotationServices";
 import "./annotationsList.css";
-import { isSupportedModality } from "../../Utils/aid.js";
 import { extendWith } from "lodash";
 import { TiEject } from "react-icons/ti";
 import * as questionaire from "../aimEditor/parseClass";
@@ -66,7 +66,9 @@ class selectSerieModal extends React.Component {
     const { isTeachingFile } = this.props;
     if (isTeachingFile) {
       const element = document.getElementById("questionaire");
-      const newElement = document.getElementById("questionaire2");
+      const speciality = document.getElementById("speciality");
+      const anatomy = document.getElementById("anatomy");
+      const diagnosis = document.getElementById("diagnosis");
 
       this.semanticAnswers = new questionaire.AimEditor(
         element,
@@ -76,7 +78,8 @@ class selectSerieModal extends React.Component {
         {},
         null,
         true, // is teachinng flag
-        newElement // the new div which holds only teaching components for aim editor
+        { speciality, anatomy, diagnosis }, // the new div which holds only teaching components for aim editor
+        "#ccc"
       );
       const { data: templates } = await getTemplate(teachingFileTempUid);
       this.semanticAnswers.loadTemplates({
@@ -140,7 +143,7 @@ class selectSerieModal extends React.Component {
     }
   }
 
-  displaySelection = async () => {
+  displaySelection = async (aimID) => {
     let studies = Object.values(this.props.seriesPassed);
     const { selectedToDisplay } = this.state;
     let series = [];
@@ -163,11 +166,17 @@ class selectSerieModal extends React.Component {
         significanceOrder++;
       }
       let serie = this.findSerieFromSeries(key, series);
-      this.props.dispatch(addToGrid(serie, serie.aimID));
+      if (aimID)
+        this.props.dispatch(addToGrid(serie, aimID));
+      else
+        this.props.dispatch(addToGrid(serie, serie.aimID));
       if (this.state.selectionType === "aim") {
         this.props.dispatch(getSingleSerie(serie, serie.aimID));
       } else {
-        this.props.dispatch(getSingleSerie(serie));
+        if (aimID)
+          this.props.dispatch(getSingleSerie(serie, aimID));
+        else
+          this.props.dispatch(getSingleSerie(serie));
       }
     }
     // for (let i = 0; i < Object.keys(selectedToDisplay).length; i++) {
@@ -285,16 +294,17 @@ class selectSerieModal extends React.Component {
     let count = 0;
     let significantExplanation = false; //Explanations at the bottom of the modal
 
-    // filter the series according to displayable modalities
-    for (let i = 0; i < series.length; i++) {
-      series[i] = series[i].filter(isSupportedModality);
-    }
+    // // filter the series according to displayable modalities
+    // for (let i = 0; i < series.length; i++) {
+    //   series[i] = series[i].filter(isSupportedModality);
+    // }
 
     for (let i = 0; i < series.length; i++) {
       let innerList = [];
 
       for (let k = 0; k < series[i].length; k++) {
         const { seriesUID } = series[i][k];
+        let isSignificant = false;
         let alreadyOpen = this.isSerieOpen(seriesUID);
         let disabled =
           !selectedToDisplay[seriesUID] &&
@@ -302,6 +312,7 @@ class selectSerieModal extends React.Component {
         let desc = series[i][k].seriesDescription || "Unnamed Serie";
         if (series[i][k].significanceOrder) {
           desc = desc + " (S)";
+          isSignificant = true;
           significantExplanation = true;
         }
         item = alreadyOpen ? (
@@ -331,6 +342,7 @@ class selectSerieModal extends React.Component {
             disabled={disabled}
             key={k + "_" + seriesUID}
             isChecked={selectedToDisplay[seriesUID] || false}
+            isSignificant={isSignificant}
           />
         );
         innerList.push(item);
@@ -344,7 +356,7 @@ class selectSerieModal extends React.Component {
       count += series[i].length;
     }
     if (significantExplanation)
-      selectionList.push(<div key={"explanation"}><br />(S): Significant series</div>);
+      selectionList.push(<div key={"explanation"} className={"significant-series"}><br />(S): Significant series</div>);
     return selectionList;
   };
 
@@ -368,6 +380,7 @@ class selectSerieModal extends React.Component {
       updatedAimId,
       trackingUId
     );
+    const { root: result } = aim.uniqueIdentifier;
     const aimJson = aim.getAim();
     let aimSaved = JSON.parse(aimJson);
     const isUpdate = false;
@@ -382,6 +395,7 @@ class selectSerieModal extends React.Component {
           pauseOnHover: true,
           draggable: true,
         });
+        return result;
       })
       .catch((error) => {
         deleteStudy({ projectID, patientID, studyUID }, '?all=true');
@@ -394,28 +408,42 @@ class selectSerieModal extends React.Component {
 
   saveTeachingFileAndDisplay = async () => {
     let result = await this.saveTeachingFile();
-    this.displaySelection();
+    this.displaySelection(result);
   }
 
   render = () => {
     const { openSeries, isTeachingFile } = this.props;
-    const title = isTeachingFile ? "Create Teaching File" : "Not enough viewports to display series"
+    const title = isTeachingFile ? "Create STELLA Teaching File" : "Not enough viewports to display series"
     const selections = Object.keys(this.state.selectedToDisplay);
     const list = this.renderSelection();
     return (
-      <Modal.Dialog id="modal-fix">
-        <Modal.Header>
-          <Modal.Title className="selectSerie__header">
+      <Modal.Dialog id="series-modal" className="series-modal">
+        < Modal.Header className="select-serie-header">
+          <Modal.Title className="select-serie-title">
             {title}
           </Modal.Title>
-        </Modal.Header>
-        <Modal.Body
-          className="selectSerie-container"
-          style={{ textAlign: "start" }}
-        >
-          {isTeachingFile && (<div><div id="questionaire"> </div>
-            <div id="questionaire2"> </div></div>)}
-          <div>Maximum {this.maxPort} series can be viewed at a time.</div>
+        </Modal.Header >
+        <Modal.Body className="select-serie-body">
+          {isTeachingFile &&
+            (<div id="questionaire" className={"field-grid"}>
+              <row>
+                <div id="anatomy"></div>
+                <div id="diagnosis"></div>
+              </row>
+              <row>
+                <div id="speciality"></div>
+                <div id="comment">
+                  {/* <i class="dropdown icon"></i>
+                  <div className="title active" style={{ color: "rgb(204, 204, 204)", fontSize: "13px" }}>Narrative</div>
+                  <div>
+                    <input className="comment ui input"></input>
+                  </div> */}
+                </div>
+              </row>
+            </div>
+            )}
+          <br />
+          <div className={"max-series"}>Please select up to {this.maxPort} series to display:</div>
           {openSeries.length > 0 && (
             <div>
               You can close open series to open veiwport space for new one.
@@ -441,22 +469,22 @@ class selectSerieModal extends React.Component {
           )}
           <div>{list}</div>
         </Modal.Body>
-        <Modal.Footer className="modal-footer__buttons">
+        <Modal.Footer className="select-serie-footer">
           {isTeachingFile && (
             <div>
-              <button onClick={() => { this.saveTeachingFile(); this.handleCancel() }}>Save Teaching File</button>
-              <button onClick={this.saveTeachingFileAndDisplay}>Save Teaching File & Display</button>
-              <button onClick={this.handleCancel}>Discard</button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => { this.saveTeachingFile(); this.handleCancel() }}>Save Teaching File</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.saveTeachingFileAndDisplay}>Save Teaching File & Display</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Discard</Button>
             </div>
           )}
           {!isTeachingFile && (
             <div>
-              <button onClick={this.displaySelection} disabled={!selections.length}>Display selection</button>
-              <button onClick={this.handleCancel}>Cancel</button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.displaySelection} disabled={!selections.length}>Display selection</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Cancel</Button>
             </div>
           )}
         </Modal.Footer>
-      </Modal.Dialog>
+      </Modal.Dialog >
     );
   };
 }

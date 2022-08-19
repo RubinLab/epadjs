@@ -1,6 +1,7 @@
 import React from 'react';
 
 const aimEntityData = ({ aimData, id }) => {
+  const mode = sessionStorage.getItem("mode");
   let observationEnt = aimData.imagingObservationEntityCollection
     ? aimData.imagingObservationEntityCollection.ImagingObservationEntity
     : null;
@@ -73,6 +74,15 @@ const aimEntityData = ({ aimData, id }) => {
       </li>
     );
   });
+  if (mode === "teaching") {
+    const comment = aimData.comment.value;
+    const textComment = comment.split("/")[3].replaceAll("~", "");
+    listArr.push(
+      <li key={"narrative"}>
+        <b>Narrative:</b> {textComment}
+      </li>
+    );
+  }
   return <ul>{listArr}</ul>;
 };
 
