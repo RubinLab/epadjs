@@ -460,6 +460,8 @@ svg {
 .annsLink-table.__tbody.--row,
 .annsLink-table.__header{
   border-bottom: 1px solid #272b30;
+  color: #ccc !important;
+  font-size: small;
 }
 
 .annsLink-table.__tbody.--row:last-of-type {
