@@ -19,7 +19,6 @@ import { getSeries, setSignificantSeries } from "../../services/seriesServices";
 import { getTemplate } from "../../services/templateServices";
 import { uploadAim } from "services/annotationServices";
 import "./annotationsList.css";
-import { isSupportedModality } from "../../Utils/aid.js";
 import { extendWith } from "lodash";
 import { TiEject } from "react-icons/ti";
 import * as questionaire from "../aimEditor/parseClass";
@@ -144,7 +143,7 @@ class selectSerieModal extends React.Component {
     }
   }
 
-  displaySelection = async () => {
+  displaySelection = async (aimID) => {
     let studies = Object.values(this.props.seriesPassed);
     const { selectedToDisplay } = this.state;
     let series = [];
@@ -167,11 +166,17 @@ class selectSerieModal extends React.Component {
         significanceOrder++;
       }
       let serie = this.findSerieFromSeries(key, series);
-      this.props.dispatch(addToGrid(serie, serie.aimID));
+      if (aimID)
+        this.props.dispatch(addToGrid(serie, aimID));
+      else
+        this.props.dispatch(addToGrid(serie, serie.aimID));
       if (this.state.selectionType === "aim") {
         this.props.dispatch(getSingleSerie(serie, serie.aimID));
       } else {
-        this.props.dispatch(getSingleSerie(serie));
+        if (aimID)
+          this.props.dispatch(getSingleSerie(serie, aimID));
+        else
+          this.props.dispatch(getSingleSerie(serie));
       }
     }
     // for (let i = 0; i < Object.keys(selectedToDisplay).length; i++) {
@@ -289,10 +294,10 @@ class selectSerieModal extends React.Component {
     let count = 0;
     let significantExplanation = false; //Explanations at the bottom of the modal
 
-    // filter the series according to displayable modalities
-    for (let i = 0; i < series.length; i++) {
-      series[i] = series[i].filter(isSupportedModality);
-    }
+    // // filter the series according to displayable modalities
+    // for (let i = 0; i < series.length; i++) {
+    //   series[i] = series[i].filter(isSupportedModality);
+    // }
 
     for (let i = 0; i < series.length; i++) {
       let innerList = [];
@@ -375,8 +380,8 @@ class selectSerieModal extends React.Component {
       updatedAimId,
       trackingUId
     );
+    const { root: result } = aim.uniqueIdentifier;
     const aimJson = aim.getAim();
-    console.log("Aim json", aimJson);
     let aimSaved = JSON.parse(aimJson);
     const isUpdate = false;
 
@@ -390,6 +395,7 @@ class selectSerieModal extends React.Component {
           pauseOnHover: true,
           draggable: true,
         });
+        return result;
       })
       .catch((error) => {
         deleteStudy({ projectID, patientID, studyUID }, '?all=true');
@@ -402,7 +408,7 @@ class selectSerieModal extends React.Component {
 
   saveTeachingFileAndDisplay = async () => {
     let result = await this.saveTeachingFile();
-    this.displaySelection();
+    this.displaySelection(result);
   }
 
   render = () => {
