@@ -8,8 +8,14 @@
 }
 
 .aim-editor-button {
-  width: 100px;
-  margin-right: 10px;
+  width: 179px;
+  margin: 10px;
+  margin-top: 0px;
+}
+
+.aim-editor-button:hover{
+  background-color: white;
+  color: gray;
 }
 
 .base-line-selection {
