@@ -224,7 +224,7 @@ const asyncReducer = (state = initialState, action) => {
         }
         for (let serie of imageAddedSeries) {
           if (serie.seriesUID !== action.payload.serID) {
-            serie.aimID = null;
+            // serie.aimID = null;
           }
         }
 

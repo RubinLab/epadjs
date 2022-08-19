@@ -471,7 +471,6 @@ export var AimEditor = function (
           teachingDivParent.anatomy.appendChild(commentDiv);
         } 
         else if (component.label === "Radiology Specialty" && isTeachingFlag ) {
-          console.log("teaching", teachingDivParent);
           teachingDivParent.speciality.appendChild(componentDiv);
           teachingDivParent.speciality.appendChild(labelDiv);
           teachingDivParent.speciality.appendChild(commentDiv);

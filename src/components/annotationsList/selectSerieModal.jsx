@@ -376,6 +376,7 @@ class selectSerieModal extends React.Component {
       trackingUId
     );
     const aimJson = aim.getAim();
+    console.log("Aim json", aimJson);
     let aimSaved = JSON.parse(aimJson);
     const isUpdate = false;
 
@@ -472,8 +473,8 @@ class selectSerieModal extends React.Component {
           )}
           {!isTeachingFile && (
             <div>
-              <Button variant="secondary" size="sm" onClick={this.displaySelection} disabled={!selections.length}>Display selection</Button>
-              <Button variant="secondary" size="sm" onClick={this.handleCancel}>Cancel</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.displaySelection} disabled={!selections.length}>Display selection</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Cancel</Button>
             </div>
           )}
         </Modal.Footer>

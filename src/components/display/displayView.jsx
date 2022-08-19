@@ -476,6 +476,7 @@ class DisplayView extends Component {
   }
 
   shouldOpenAimEditor = (notShowAimEditor = false) => {
+    console.log("should open");
     const { series } = this.props;
     series.forEach(({ aimID, seriesUID }) => {
       if (aimID && !notShowAimEditor) this.openAimEditor(aimID, seriesUID);
@@ -610,7 +611,8 @@ class DisplayView extends Component {
         const aimJson = aimList[seriesUID][aimID].json;
         aimJson.aimID = aimID;
         const markupTypes = this.getMarkupTypesForAim(aimID);
-        aimJson["markupType"] = [...markupTypes];
+        if (markupTypes)
+          aimJson["markupType"] = [...markupTypes];
         aimJson["aimId"] = aimID;
         if (this.hasSegmentation(aimJson)) {
           this.setState({ hasSegmentation: true });
@@ -619,10 +621,12 @@ class DisplayView extends Component {
         if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
           this.setState({ showAimEditor: false });
         this.setState({ showAimEditor: true, selectedAim: aimJson });
-        setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
+        if (markupTypes)
+          setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
         this.refreshAllViewports();
       }
-    } catch (error) {
+    } catch (err) {
+      console.error(err);
     }
   };
 

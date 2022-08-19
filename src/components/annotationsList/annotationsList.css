@@ -525,11 +525,14 @@ th{
 .max-series{
   width: 100%;
   background-color: #666 !important;
-  
   line-height: 2rem;
   padding: 0.3rem;
 }
 
 .significant-series {
   color:#EADDB2;
+}
+
+.modal-content {
+  padding: 0 !important;
 }
