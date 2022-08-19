@@ -391,7 +391,10 @@ export var AimEditor = function (
     var label = document.createElement("label");
     annotationNameLabelDiv.className = "comment";
     annotationNameLabelDiv.style.paddingTop = "0.5rem";
-    label.textContent = "Comment";
+    if (mode === "teaching")
+      label.textContent = "Narrative";
+    else
+      label.textContent = "Comment";
     labelDiv.className = "comment";
     labelDiv.style.paddingTop = "0.5rem";
 
