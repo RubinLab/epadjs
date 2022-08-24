@@ -400,7 +400,7 @@ function AnnotationTable(props) {
     seriesArr = seriesArr.filter(isSupportedModality);
 
     //check if there is enough room
-    if (seriesArr.length + props.openSeries.length > 5) {
+    if (seriesArr.length + props.openSeries.length > 4) {
       //if there is not bring the modal
       setShowSelectSeriesModal(true);
       // TODO show toast
@@ -586,7 +586,7 @@ function AnnotationTable(props) {
                 checked={
                   props.selectedAnnotations[row.original.aimID] ? true : false
                 }
-                onClick={() => { props.updateSelectedAims(row.original); alert("hop") }}
+                onClick={() => { props.updateSelectedAims(row.original) }}
               />
             );
           }
