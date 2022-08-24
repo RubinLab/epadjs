@@ -730,7 +730,7 @@ class App extends Component {
       // THIS IS APIKEY
       sessionStorage.setItem("authMode", "apiKey");
       sessionStorage.setItem("API_KEY", API_KEY);
-      sessionStorage.setItem("userName", user);
+      sessionStorage.setItem("username", user);
       sessionStorage.setItem("displayName", user);
     }
 

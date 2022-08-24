@@ -29,7 +29,7 @@ export function setLoginKeycloak(keycloak) {
 }
 
 export function setLoginSession(username) {
-  sessionStorage.setItem("userName", username.user);
+  sessionStorage.setItem("username", username.user);
   sessionStorage.setItem("displayName", username.displayname); //TODO: change with fullname
 }
 

@@ -169,7 +169,7 @@ class Sidebar extends Component {
 
   getWorklistandProgressData = async () => {
     const { data: worklistsAssigned } = await getWorklistsOfAssignee(
-      sessionStorage.getItem("username")
+      sessionStorage.getItem("userame")
     );
     const { data: worklistsCreated } = await getWorklistsOfCreator();
     this.getProgressTotal(worklistsCreated, "worklistsCreated");
