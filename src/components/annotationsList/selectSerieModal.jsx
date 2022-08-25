@@ -47,6 +47,7 @@ class selectSerieModal extends React.Component {
   componentDidMount = async () => {
     let selectionType = "";
     let { selectedStudies, selectedSeries, selectedAnnotations } = this.props;
+    console.log("props", this.props);
     selectedStudies = Object.values(selectedStudies);
     selectedSeries = Object.values(selectedSeries);
     selectedAnnotations = Object.values(selectedAnnotations);
@@ -166,6 +167,7 @@ class selectSerieModal extends React.Component {
         significanceOrder++;
       }
       let serie = this.findSerieFromSeries(key, series);
+      console.log("serie", serie);
       if (aimID)
         this.props.dispatch(addToGrid(serie, aimID));
       else

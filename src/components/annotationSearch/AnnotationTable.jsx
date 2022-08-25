@@ -387,6 +387,7 @@ function AnnotationTable(props) {
 
   const displaySeries = async selected => {
     const { subjectID: patientID, studyUID, aimID } = selected;
+    console.log("selected", selected);
     let seriesArr = await getSeriesData(selected);
     setSelected(seriesArr);
     if (props.openSeries.length === maxPort) {
@@ -408,33 +409,14 @@ function AnnotationTable(props) {
       //if there is enough room
       //add serie to the grid
       const promiseArr = [];
-      // for (let serie of seriesArr) {
-      //   props.dispatch(addToGrid(serie));
-      //   promiseArr.push(props.dispatch(getSingleSerie(serie)));
-      // }
       for (let i = 0; i < seriesArr.length; i++) {
-        // if (i === seriesArr.length - 1) {
         props.dispatch(addToGrid(seriesArr[i], aimID));
         promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i], aimID)));
-        // } else {
-        //   props.dispatch(addToGrid(seriesArr[i]));
-        //   promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i])));
-        // }
       }
       //getsingleSerie
       Promise.all(promiseArr)
         .then(() => { props.switchToDisplay(); })
         .catch(err => console.error(err));
-
-      //if patient doesnot exist get patient
-      // -----> Delete after v1.0 <-----
-      // if (!patientExists) {
-      //   // this.props.dispatch(getWholeData(null, selected));
-      //   getWholeData(null, selected);
-      // } else {
-      //   //check if study exist
-      //   props.dispatch(updatePatient('study', true, patientID, studyUID));
-      // }
     }
 
   };
