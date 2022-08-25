@@ -387,7 +387,6 @@ function AnnotationTable(props) {
 
   const displaySeries = async selected => {
     const { subjectID: patientID, studyUID, aimID } = selected;
-    console.log("selected", selected);
     let seriesArr = await getSeriesData(selected);
     setSelected(seriesArr);
     if (props.openSeries.length === maxPort) {
@@ -418,7 +417,6 @@ function AnnotationTable(props) {
         .then(() => { props.switchToDisplay(); })
         .catch(err => console.error(err));
     }
-
   };
 
   const { patientName } = props.filters;
