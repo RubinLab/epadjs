@@ -12,7 +12,7 @@ import {
   reverseCarets
 } from "./helperMethods";
 
-const StudyTable = ({ data, order, showSeriesTable }) => {
+const StudyTable = ({ data, order, displaySeries }) => {
   const [sortedCol, setSortedCol] = useState(null);
   const [sortOrder, setSortOrder] = useState(null);
 
@@ -442,7 +442,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       getTdProps={(state, rowInfo, column) => ({
         onDoubleClick: e => {
           const { projectID, patientID, studyUID } = rowInfo.original;
-          showSeriesTable(projectID, patientID, studyUID);
+          displaySeries(projectID, patientID, studyUID);
         }
       })}
     />

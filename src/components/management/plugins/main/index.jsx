@@ -98,8 +98,6 @@ class Plugins extends React.Component {
 
     const plugins = pluginList.data;
     projectList = projectList.data;
-    console.log("session:", sessionStorage.getItem("username"));
-    console.log("session owner is admin:", user.admin);
     this.setState({ plugins, projectList, templateList, isAdmin: user.admin });
 
     console.log("plugin list to check is admin :", this.state.isAdmin);
@@ -120,13 +118,13 @@ class Plugins extends React.Component {
 
   addProject = (projectArray, tableSelectedData) => {
     // if (this.state.isAdmin === true) {
-      const tempProjectMap = arrayToMap(projectArray);
-      this.setState({
-        hasAddProjectClicked: true,
-        selectedProjectsAsMap: tempProjectMap,
-        tableSelectedData: tableSelectedData,
-        selectedProjects: projectArray,
-      });
+    const tempProjectMap = arrayToMap(projectArray);
+    this.setState({
+      hasAddProjectClicked: true,
+      selectedProjectsAsMap: tempProjectMap,
+      tableSelectedData: tableSelectedData,
+      selectedProjects: projectArray,
+    });
     // } else {
     //   toast.info("user has no right to add project. Admin required", {
     //     position: "top-right",
@@ -164,8 +162,8 @@ class Plugins extends React.Component {
     projectsToRemove = oldProjects.filter(
       (prid) => !newProjects.includes(prid)
     );
-    console.log("checking adding project for plugin :projectsToAdd",projectsToAdd);
-    console.log("checking adding project for plugin :projectsToRemove",projectsToRemove);
+    console.log("checking adding project for plugin :projectsToAdd", projectsToAdd);
+    console.log("checking adding project for plugin :projectsToRemove", projectsToRemove);
     const projectsArrayAsResponse = await updateProjectsForPlugin(
       selectedPluginId,
       {
@@ -458,7 +456,7 @@ class Plugins extends React.Component {
       let editimage_tag = "";
       let editimage_id = "";
       let edit_processmultipleaims = "";
-      console.log("double check process multiple aims when edit fporm open : ",selectedPluginData.original.processmultipleaims);
+      console.log("double check process multiple aims when edit fporm open : ", selectedPluginData.original.processmultipleaims);
       if (selectedPluginData.original.image_name != null) {
         editimage_name = selectedPluginData.original.image_name;
       }
@@ -513,7 +511,7 @@ class Plugins extends React.Component {
     this.setState({ editPluginClicked: false, errorMessage: null });
   };
   handleEditPluginSave = async () => {
-    console.log("edit plugin save clicked",pluginform);
+    console.log("edit plugin save clicked", pluginform);
     //this.setState({ editPluginClicked: false });
     const pluginform = this.state.pluginFormElements;
     if (
@@ -866,9 +864,9 @@ class Plugins extends React.Component {
             onSave={this.handleDefaultParameterSave}
             pluginid={this.state.selectedplugindbidfordefparams}
             notifyParameterParent={this.handleNotifyParentForParemeterSituation}
-            //onChange={this.handleParameterChange}
-            //error={this.handleParameterError}
-            //parameterFormElements={this.state.parameterFormElements}
+          //onChange={this.handleParameterChange}
+          //error={this.handleParameterError}
+          //parameterFormElements={this.state.parameterFormElements}
           />
         )}
       </div>

@@ -473,13 +473,13 @@ class selectSerieModal extends React.Component {
           {isTeachingFile && (
             <div>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => { this.saveTeachingFile(); this.handleCancel() }}>Save Teaching File</Button>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.saveTeachingFileAndDisplay}>Save Teaching File & Display</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()}>Save Teaching File & Display</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Discard</Button>
             </div>
           )}
           {!isTeachingFile && (
             <div>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.displaySelection} disabled={!selections.length}>Display selection</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.displaySelection()} disabled={!selections.length}>Display selection</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Cancel</Button>
             </div>
           )}
