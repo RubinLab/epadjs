@@ -44,6 +44,7 @@ import { FiMessageSquare } from "react-icons/fi";
 import { errorMonitor } from "events";
 import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
 import getVPDimensions from "./ViewportCalculations";
+import SeriesDropDown from './SeriesDropDown';
 
 let mode;
 
@@ -1684,26 +1685,31 @@ class DisplayView extends Component {
                     <label>{series[i].seriesUID}</label>
                   </div> */}
                   <div className={"column middle-right"}>
-                    <Form inline className="slice-form">
-                      <Form.Group className="slice-number">
-                        <Form.Label htmlFor="imageNum" className="slice-label" style={{ color: 'white' }}>
-                          {"Slice # "}
-                        </Form.Label>
-                        <Form.Control
-                          type="number"
-                          min="1"
-                          value={parseInt(data.stack.currentImageIdIndex) + 1}
-                          className={"slice-field"}
-                          onChange={(event) => this.handleJumpChange(i, event)}
-                          style={{
-                            width: "60px",
-                            height: "10px",
-                            opacity: 1,
-                            display: 'inline'
-                          }}
-                        />
-                      </Form.Group>
-                    </Form>
+                    <div>
+                      <Form inline className="slice-form">
+                        <Form.Group className="slice-number">
+                          <Form.Label htmlFor="imageNum" className="slice-label" style={{ color: 'white' }}>
+                            {"Slice # "}
+                          </Form.Label>
+                          <Form.Control
+                            type="number"
+                            min="1"
+                            value={parseInt(data.stack.currentImageIdIndex) + 1}
+                            className={"slice-field"}
+                            onChange={(event) => this.handleJumpChange(i, event)}
+                            style={{
+                              width: "60px",
+                              height: "10px",
+                              opacity: 1,
+                              display: 'inline'
+                            }}
+                          />
+                        </Form.Group>
+                      </Form>
+                    </div>
+                    <div className={"series-dd"}>
+                      <SeriesDropDown serie={series[i]} />
+                    </div>
                   </div>
                   <div className={"column right"}>
                     <span

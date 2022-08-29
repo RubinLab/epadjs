@@ -42,6 +42,7 @@ import {
   SEG_UPLOAD_REMOVE,
   AIM_DELETE,
   SAVE_PATIENT_FILTER,
+  ADD_STUDY_TO_GRID,
   colors,
   commonLabels,
 } from "./types";
@@ -75,6 +76,7 @@ const initialState = {
   reports: [],
   isSegUploaded: {},
   patientFilter: {},
+  openStudies:[]
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -466,6 +468,16 @@ const asyncReducer = (state = initialState, action) => {
           ...state,
           openSeries: newOpenSeries,
           activePort: newOpenSeries.length - 1,
+          openStudies: newOpenStudies
+        };
+
+      case ADD_STUDY_TO_GRID:
+        const newStudy = { ...action.reference };
+
+        let newOpenStudies = {...state.openStudies, ...newStudy};
+        return { 
+          ...state,
+          openStudies: newOpenStudies,
         };
       // -----> Delete after v1.0 <-----
       // case UPDATE_PATIENT:
