@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 
-const alertDeletionModal = ({ message, onCancel, onDelete, error, show }) => {
+const alertDeletionModal = ({ message, onCancel, onDelete, error, show = true }) => {
   return (
     <Modal size="lg"
       aria-labelledby="contained-modal-title-vcenter"
