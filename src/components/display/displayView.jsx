@@ -481,15 +481,12 @@ class DisplayView extends Component {
   }
 
   handleSerieReplace = ({ detail: viewportId }) => {
-    console.log("Props", this.props);
     const { series } = this.props;
-    console.log("Serie diplayde", series[viewportId], viewportId);
     var promises = [];
 
     const promise = this.getImageStack(series[viewportId], viewportId);
     promises.push(promise);
     Promise.all(promises).then((res) => {
-      console.log("Resulted", res);
       const newData = [...this.state.data];
       newData[viewportId] = res[0];
       this.setState(

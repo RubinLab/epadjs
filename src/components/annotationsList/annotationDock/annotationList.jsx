@@ -207,7 +207,7 @@ class AnnotationsList extends React.Component {
           ? [...imageAnnotations, ...noMarkupAnnotations]
           : noMarkupAnnotations;
       }
-      if (imageAnnotations) {
+      if (imageAnnotations && Object.keys(annotations).length) {
         for (let aim of imageAnnotations) {
           let { aimUid } = aim;
           annotations[aimUid]

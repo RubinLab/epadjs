@@ -186,7 +186,6 @@ const asyncReducer = (state = initialState, action) => {
         }
 
         if(!shouldStudyExist){
-          console.log("In the if");
           delete delOpenStudies[delStudyUID];
           return {
             ...state,
@@ -196,7 +195,6 @@ const asyncReducer = (state = initialState, action) => {
             activePort: delActivePort,
           };
         }
-        console.log("Outside of the if");
         return {
           ...state,
           openSeries: delGrid,
@@ -489,7 +487,6 @@ const asyncReducer = (state = initialState, action) => {
       case ADD_STUDY_TO_GRID:
         const newStudy = { ...action.seriesOfStudy  };
         let newOpenStudies = {...state.openStudies, ...newStudy};
-        console.log("New open studied", newOpenStudies);
         return { 
           ...state,
           openStudies: newOpenStudies,

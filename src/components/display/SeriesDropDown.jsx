@@ -8,12 +8,8 @@ import { addStudyToGrid, replaceInGrid, getSingleSerie } from 'components/annota
 
 const SeriesDropDown = (props) => {
     const [seriesList, setSeriesList] = useState([]);
-    const [firstRun, setFirstRun] = useState(true);
 
     useEffect(() => {
-        // console.log("neler oluyor");
-        // if (!firstRun)
-        //     return;
         const { studyUID, projectID, patientID } = props.serie;
         const { openStudies } = props;
         async function fetchData() {
@@ -21,24 +17,18 @@ const SeriesDropDown = (props) => {
             return seriesOfStudy;
         }
         if (openStudies && openStudies.hasOwnProperty(studyUID)) {
-            console.log("Didn't fetch results");
             setSeriesList(openStudies[studyUID]);
-            // setFirstRun(false);
         }
         else {
             fetchData().then(result => {
-                console.log("restuls", result);
                 props.dispatch(addStudyToGrid({ [studyUID]: result }));
-                // setSeriesList(result);
             });
-            // setFirstRun(false);
         }
     }, [props.openStudies]);
 
     const handleSelect = (e) => {
         const serie = seriesList.find(element => element.seriesUID == e);
-        console.log("Found serie", serie);
-        props.dispatch(replaceInGrid(e));
+        props.dispatch(replaceInGrid(serie));
         props.dispatch(getSingleSerie(serie));
         window.dispatchEvent(
             new CustomEvent("serieReplaced", {
@@ -57,7 +47,7 @@ const SeriesDropDown = (props) => {
                 title="Other Series"
             >
                 {seriesList && seriesList.length && seriesList.map(({ seriesDescription, seriesUID, i }) => {
-                    return (<Dropdown.Item eventKey={seriesUID} onSelect={handleSelect}>{seriesDescription?.length ? seriesDescription : "No Description"}</Dropdown.Item>);
+                    return (<Dropdown.Item key={i} eventKey={seriesUID} onSelect={handleSelect}>{seriesDescription?.length ? seriesDescription : "No Description"}</Dropdown.Item>);
                 })}
             </DropdownButton>
         </div >

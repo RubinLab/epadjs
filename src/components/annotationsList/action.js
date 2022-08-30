@@ -348,8 +348,12 @@ export const addToGrid = (serie, annotation) => {
   return { type: ADD_TO_GRID, reference };
 };
 
-export const replaceInGrid = (seriesUID) => {
-  return {type: REPLACE_IN_GRID, seriesUID};
+export const replaceInGrid = (serie) => {
+  let {seriesUID} = serie;
+  // return async(dispatch)=>{
+  //   await dispatch(getSingleSerie(serie));
+    return {type: REPLACE_IN_GRID, seriesUID};
+  // } 
 }
 
 // Adds the series list of study to grid. Series sdropdown in the viewpoert uses this.
