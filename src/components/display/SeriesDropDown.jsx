@@ -1,11 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { connect } from "react-redux";
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import { getSeries } from '../../services/seriesServices';
-import { addStudyToGrid, replaceInGrid } from 'components/annotationsList/action';
+import { addStudyToGrid, replaceInGrid, getSingleSerie } from 'components/annotationsList/action';
 
 const SeriesDropDown = (props) => {
     const [seriesList, setSeriesList] = useState([]);
@@ -37,8 +36,10 @@ const SeriesDropDown = (props) => {
     }, [props.openStudies]);
 
     const handleSelect = (e) => {
-        console.log("Acive port", props.activePort);
+        const serie = seriesList.find(element => element.seriesUID == e);
+        console.log("Found serie", serie);
         props.dispatch(replaceInGrid(e));
+        props.dispatch(getSingleSerie(serie));
         window.dispatchEvent(
             new CustomEvent("serieReplaced", {
                 detail: props.activePort
