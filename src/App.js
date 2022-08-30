@@ -988,9 +988,9 @@ class App extends Component {
         // this.setState({ treeData: {} });
         localStorage.setItem("treeData", JSON.stringify({}));
         this.setState({ pid });
-        if (this.props.openSeries.length === 0) {
-          this.props.history.push(`/list/${pid}`);
-        }
+        // if (this.props.openSeries.length === 0) {
+        //   this.props.history.push(`/list/${pid}`);
+        // }
       }
       this.setState({ notifications });
       const stringified = JSON.stringify(notifications);
