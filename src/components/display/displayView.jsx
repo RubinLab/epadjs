@@ -182,6 +182,7 @@ class DisplayView extends Component {
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
     window.addEventListener('keydown', this.handleKeyPressed);
+    window.addEventListener('serieReplaced', this.handleSerieReplace);
     if (this.props.keycloak && series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
@@ -234,6 +235,7 @@ class DisplayView extends Component {
     window.removeEventListener("deleteAim", this.deleteAimHandler);
     window.removeEventListener("resize", this.setSubComponentHeights);
     window.removeEventListener('keydown', this.handleKeyPressed);
+    window.removeEventListener('serieReplaced', this.handleSerieReplace);
     // clear all aimID of openseries so aim editor doesn't open next time
     this.props.dispatch(clearAimId());
     clearInterval(this.state.tokenRefresh)
@@ -476,6 +478,25 @@ class DisplayView extends Component {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  handleSerieReplace = ({ detail: viewportId }) => {
+    console.log("Props", this.props);
+    const { series } = this.props;
+    console.log("Serie diplayde", series[viewportId], viewportId);
+    var promises = [];
+
+    const promise = this.getImageStack(series[viewportId], viewportId);
+    promises.push(promise);
+    Promise.all(promises).then((res) => {
+      console.log("Resulted", res);
+      const newData = [...this.state.data];
+      newData[viewportId] = res[0];
+      this.setState(
+        {
+          data: newData
+        })
+    })
   }
 
   shouldOpenAimEditor = (notShowAimEditor = false) => {

@@ -5,7 +5,7 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import { getSeries } from '../../services/seriesServices';
-import { addStudyToGrid } from 'components/annotationsList/action';
+import { addStudyToGrid, replaceInGrid } from 'components/annotationsList/action';
 
 const SeriesDropDown = (props) => {
     const [seriesList, setSeriesList] = useState([]);
@@ -36,6 +36,16 @@ const SeriesDropDown = (props) => {
         }
     }, [props.openStudies]);
 
+    const handleSelect = (e) => {
+        console.log("Acive port", props.activePort);
+        props.dispatch(replaceInGrid(e));
+        window.dispatchEvent(
+            new CustomEvent("serieReplaced", {
+                detail: props.activePort
+            })
+        );
+    }
+
     return (
         <div>
             <DropdownButton
@@ -45,8 +55,8 @@ const SeriesDropDown = (props) => {
                 variant="secondary"
                 title="Other Series"
             >
-                {seriesList && seriesList.length && seriesList.map(({ seriesDescription, i }) => {
-                    return (<Dropdown.Item eventKey={i}>{seriesDescription?.length ? seriesDescription : "No Description"}</Dropdown.Item>);
+                {seriesList && seriesList.length && seriesList.map(({ seriesDescription, seriesUID, i }) => {
+                    return (<Dropdown.Item eventKey={seriesUID} onSelect={handleSelect}>{seriesDescription?.length ? seriesDescription : "No Description"}</Dropdown.Item>);
                 })}
             </DropdownButton>
         </div >
@@ -56,6 +66,7 @@ const SeriesDropDown = (props) => {
 const mapStateToProps = (state) => {
     return {
         openStudies: state.annotationsListReducer.openStudies,
+        activePort: state.annotationsListReducer.activePort,
     };
 };
 export default (connect(mapStateToProps)(SeriesDropDown));

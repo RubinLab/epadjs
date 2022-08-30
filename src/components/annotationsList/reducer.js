@@ -43,6 +43,7 @@ import {
   AIM_DELETE,
   SAVE_PATIENT_FILTER,
   ADD_STUDY_TO_GRID,
+  REPLACE_IN_GRID,
   colors,
   commonLabels,
 } from "./types";
@@ -161,28 +162,22 @@ const asyncReducer = (state = initialState, action) => {
 
         return { ...state, openSeries: openSeriesToUpdate };
       case CLOSE_SERIE:
+      console.log("In close");
         let delSeriesUID = state.openSeries[state.activePort].seriesUID;
         let delStudyUID = state.openSeries[state.activePort].studyUID;
-        let delPatientID = state.openSeries[state.activePort].patientID;
+        let delOpenStudies = {...state.openStudies};
         const delAims = { ...state.aimsList };
         delete delAims[delSeriesUID];
         let delGrid = state.openSeries.slice(0, state.activePort);
         delGrid = delGrid.concat(state.openSeries.slice(state.activePort + 1));
-        let shouldPatientExist = false;
+        let shouldStudyExist = false;
         for (let item of delGrid) {
-          if (item.patientID === delPatientID) {
-            shouldPatientExist = true;
+          if (item.studyUID === delStudyUID) {
+            shouldStudyExist = true;
             break;
           }
         }
-        // const delPatients = { ...state.patients };
-        // if (shouldPatientExist) {
-        //   delPatients[delPatientID].studies[delStudyUID].series[
-        //     delSeriesUID
-        //   ].isDisplayed = false;
-        // } else {
-        //   delete delPatients[delPatientID];
-        // }
+
         let delActivePort;
         if (delGrid.length === 0) {
           delActivePort = null;
@@ -190,6 +185,18 @@ const asyncReducer = (state = initialState, action) => {
           delActivePort = delGrid.length - 1;
         }
 
+        if(!shouldStudyExist){
+          console.log("In the if");
+          delete delOpenStudies[delStudyUID];
+          return {
+            ...state,
+            openSeries: delGrid,
+            aimsList: delAims,
+            openStudies: delOpenStudies,
+            activePort: delActivePort,
+          };
+        }
+        console.log("Outside of the if");
         return {
           ...state,
           openSeries: delGrid,
@@ -360,10 +367,10 @@ const asyncReducer = (state = initialState, action) => {
 
         return {
           ...state,
-          // patients: clearedPatients,
           openSeries: [],
           aimsList: {},
           activePort: 0,
+          openStudies:{}
         };
       case CLEAR_SELECTION:
         let selectionState = { ...state };
@@ -470,8 +477,17 @@ const asyncReducer = (state = initialState, action) => {
           activePort: newOpenSeries.length - 1
         };
 
+      case REPLACE_IN_GRID:
+        const replacedOpenSeries = [...state.openSeries];
+        replacedOpenSeries[state.activePort].seriesUID = action.seriesUID;
+
+        return {
+          ...state,
+          openSeries: replacedOpenSeries,
+        };
+
       case ADD_STUDY_TO_GRID:
-        const newStudy = { ...action.seriesOfStudy };
+        const newStudy = { ...action.seriesOfStudy  };
         let newOpenStudies = {...state.openStudies, ...newStudy};
         console.log("New open studied", newOpenStudies);
         return { 

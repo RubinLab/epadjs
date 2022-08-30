@@ -57,6 +57,7 @@ export const SEG_UPLOAD_REMOVE = "epadjs/annotationList/SEG_UPLOAD_REMOVE";
 export const AIM_DELETE = "epadjs/annotationList/AIM_DELETE";
 export const SAVE_PATIENT_FILTER = "epadjs/annotationList/SAVE_PATIENT_FILTER";
 export const ADD_STUDY_TO_GRID = "epadjs/annotationList/ADD_STUDY_TO_GRID";
+export const REPLACE_IN_GRID = "epadjs/annotationList/REPLACE_IN_GRID";
 
 export const commonLabels = {
   button: { background: "#c0c0c0", color: "black" },

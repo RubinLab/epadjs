@@ -43,6 +43,7 @@ import {
   AIM_DELETE,
   SAVE_PATIENT_FILTER,
   ADD_STUDY_TO_GRID,
+  REPLACE_IN_GRID,
   colors,
   commonLabels,
 } from "./types";
@@ -346,6 +347,10 @@ export const addToGrid = (serie, annotation) => {
   };
   return { type: ADD_TO_GRID, reference };
 };
+
+export const replaceInGrid = (seriesUID) => {
+  return {type: REPLACE_IN_GRID, seriesUID};
+}
 
 // Adds the series list of study to grid. Series sdropdown in the viewpoert uses this.
 export const addStudyToGrid = (seriesOfStudy) => {
