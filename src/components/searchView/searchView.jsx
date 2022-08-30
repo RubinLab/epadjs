@@ -134,7 +134,7 @@ class SearchView extends Component {
       });
       window.addEventListener('openSeriesModal', this.handleSeriesModal);
     } catch (err) {
-      conosle.err(err);
+      console.error(err);
     }
   };
 
