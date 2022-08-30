@@ -42,6 +42,8 @@ import {
   SEG_UPLOAD_REMOVE,
   AIM_DELETE,
   SAVE_PATIENT_FILTER,
+  ADD_STUDY_TO_GRID,
+  REPLACE_IN_GRID,
   colors,
   commonLabels,
 } from "./types";
@@ -346,6 +348,19 @@ export const addToGrid = (serie, annotation) => {
   return { type: ADD_TO_GRID, reference };
 };
 
+export const replaceInGrid = (serie) => {
+  let {seriesUID} = serie;
+  // return async(dispatch)=>{
+  //   await dispatch(getSingleSerie(serie));
+    return {type: REPLACE_IN_GRID, seriesUID};
+  // } 
+}
+
+// Adds the series list of study to grid. Series sdropdown in the viewpoert uses this.
+export const addStudyToGrid = (seriesOfStudy) => {
+  return {type: ADD_STUDY_TO_GRID, seriesOfStudy};
+}
+
 // toggle annotation details at the right side bar in display view
 export const showAnnotationWindow = () => {
   return { type: SHOW_ANNOTATION_WINDOW };
@@ -600,26 +615,24 @@ const getRequiredFields = (arr, type, selectedID) => {
 //   }
 // };
 
-// -----> Delete after v1.0 <-----
-// TODO: it may be deleted after getWholeData discarded
-// const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
-//   try {
-//     const { data: series } = await getSeries(projectID, patientID, studyID);
-//     const formattedSeries = getRequiredFields(series, "serie", selectedID);
-//     return new Promise((resolve, reject) => {
-//       resolve(formattedSeries);
-//     });
-//   } catch (err) {
-//     return new Promise((resolve, reject) => {
-//       reject(
-//         new Error(
-//           `Error while getting series data ${err}`,
-//           "src/components/annotationList/action.js"
-//         )
-//       );
-//     });
-//   }
-// };
+const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
+  try {
+    const { data: series } = await getSeries(projectID, patientID, studyID);
+    const formattedSeries = getRequiredFields(series, "serie", selectedID);
+    return new Promise((resolve, reject) => {
+      resolve(formattedSeries);
+    });
+  } catch (err) {
+    return new Promise((resolve, reject) => {
+      reject(
+        new Error(
+          `Error while getting series data ${err}`,
+          "src/components/annotationList/action.js"
+        )
+      );
+    });
+  }
+};
 
 // -----> Delete after v1.0 <-----
 // TODO: it may be deleted after getWholeData discarded
