@@ -349,7 +349,6 @@ export const addToGrid = (serie, annotation) => {
 
 // Adds the series list of study to grid. Series sdropdown in the viewpoert uses this.
 export const addStudyToGrid = (seriesOfStudy) => {
-  console.log("In the action", seriesOfStudy);
   return {type: ADD_STUDY_TO_GRID, seriesOfStudy};
 }
 

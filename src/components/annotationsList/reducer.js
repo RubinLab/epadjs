@@ -76,7 +76,7 @@ const initialState = {
   reports: [],
   isSegUploaded: {},
   patientFilter: {},
-  openStudies:[]
+  openStudies:{},
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -467,14 +467,13 @@ const asyncReducer = (state = initialState, action) => {
         return {
           ...state,
           openSeries: newOpenSeries,
-          activePort: newOpenSeries.length - 1,
-          openStudies: newOpenStudies
+          activePort: newOpenSeries.length - 1
         };
 
       case ADD_STUDY_TO_GRID:
-        const newStudy = { ...action.reference };
-
+        const newStudy = { ...action.seriesOfStudy };
         let newOpenStudies = {...state.openStudies, ...newStudy};
+        console.log("New open studied", newOpenStudies);
         return { 
           ...state,
           openStudies: newOpenStudies,

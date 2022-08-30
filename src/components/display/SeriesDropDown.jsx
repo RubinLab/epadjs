@@ -12,26 +12,29 @@ const SeriesDropDown = (props) => {
     const [firstRun, setFirstRun] = useState(true);
 
     useEffect(() => {
-        if (!firstRun)
-            return;
-        const { openStudies, studyUID, projectID, patientID } = props.serie;
+        // console.log("neler oluyor");
+        // if (!firstRun)
+        //     return;
+        const { studyUID, projectID, patientID } = props.serie;
+        const { openStudies } = props;
         async function fetchData() {
             const { data: seriesOfStudy } = await getSeries(projectID, patientID, studyUID);
             return seriesOfStudy;
         }
         if (openStudies && openStudies.hasOwnProperty(studyUID)) {
+            console.log("Didn't fetch results");
             setSeriesList(openStudies[studyUID]);
-            setFirstRun(false);
+            // setFirstRun(false);
         }
         else {
             fetchData().then(result => {
                 console.log("restuls", result);
                 props.dispatch(addStudyToGrid({ [studyUID]: result }));
-                setSeriesList(result);
+                // setSeriesList(result);
             });
-            setFirstRun(false);
+            // setFirstRun(false);
         }
-    });
+    }, [props.openStudies]);
 
     return (
         <div>
