@@ -477,11 +477,14 @@ const asyncReducer = (state = initialState, action) => {
 
       case REPLACE_IN_GRID:
         const replacedOpenSeries = [...state.openSeries];
+        const newAimsList = {...state.aimsList};
+        delete newAimsList[replacedOpenSeries[state.activePort].seriesUID];
         replacedOpenSeries[state.activePort].seriesUID = action.seriesUID;
 
         return {
           ...state,
           openSeries: replacedOpenSeries,
+          aimsList: newAimsList
         };
 
       case ADD_STUDY_TO_GRID:
@@ -489,7 +492,7 @@ const asyncReducer = (state = initialState, action) => {
         let newOpenStudies = {...state.openStudies, ...newStudy};
         return { 
           ...state,
-          openStudies: newOpenStudies,
+          openStudies: newOpenStudies
         };
       // -----> Delete after v1.0 <-----
       // case UPDATE_PATIENT:

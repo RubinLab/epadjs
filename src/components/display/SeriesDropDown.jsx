@@ -40,7 +40,7 @@ const SeriesDropDown = (props) => {
     return (
         <div>
             <DropdownButton
-                key='1'
+                key='button'
                 id={`dropdown-button-drop-1`}
                 size="sm"
                 variant="secondary"
