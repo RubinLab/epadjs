@@ -27,6 +27,7 @@ import { decryptAndAdd } from "services/decryptUrlService";
 import { getSingleStudy, deleteStudy } from '../../services/studyServices';
 import { Aim, enumAimType } from "aimapi";
 import { teachingFileTempUid, teachingFileTempCode } from '../../constants';
+import { isSupportedModality } from '../../Utils/aid';
 
 class selectSerieModal extends React.Component {
   // _isMounted = false;

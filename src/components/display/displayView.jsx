@@ -1502,9 +1502,10 @@ class DisplayView extends Component {
 
   closeAimEditor = (isCancel, message = "") => {
     const { dirty } = this.state;
+    console.log("Is dirty", dirty);
     if (dirty) {
       const unsavedData = this.checkUnsavedData(isCancel, message);
-      if (!unsavedData) return;
+      if (!unsavedData) return -1;
     }
     // if aim editor has been cancelled ask to user
     // if (this.state.dirty && !this.checkUnsavedData(isCancel, message)) return;
@@ -1726,7 +1727,7 @@ class DisplayView extends Component {
                       </Form>
                     </div>
                     <div className={"series-dd"}>
-                      <SeriesDropDown serie={series[i]} />
+                      <SeriesDropDown serie={series[i]} isAimEditorShowing={this.state.showAimEditor} onCloseAimEditor={this.closeAimEditor} />
                     </div>
                   </div>
                   <div className={"column right"}>

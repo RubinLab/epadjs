@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import { getSeries } from '../../services/seriesServices';
-import { addStudyToGrid, replaceInGrid, getSingleSerie } from 'components/annotationsList/action';
+import { addStudyToGrid, replaceInGrid, getSingleSerie, clearActivePortAimID } from 'components/annotationsList/action';
 
 const SeriesDropDown = (props) => {
     const [seriesList, setSeriesList] = useState([]);
@@ -28,6 +28,11 @@ const SeriesDropDown = (props) => {
 
     const handleSelect = (e) => {
         const serie = seriesList.find(element => element.seriesUID == e);
+        if (props.isAimEditorShowing) {
+            console.log("Sonuc", props.onCloseAimEditor(true))
+            // if (!props.onCloseAimEditor(true))
+            //     return;
+        }
         props.dispatch(replaceInGrid(serie));
         props.dispatch(getSingleSerie(serie));
         window.dispatchEvent(
