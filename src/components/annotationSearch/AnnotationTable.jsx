@@ -482,7 +482,9 @@ function AnnotationTable(props) {
         {
           Header: 'Modality',
           accessor: 'modality',
-          class: 'modality-capital',
+          Cell: ({ row: { original: { modality } } }) => {
+            return <div className={'modality-capital'}>{modality}</div>;
+          }
         },
         {
           Header: 'Study Date',
