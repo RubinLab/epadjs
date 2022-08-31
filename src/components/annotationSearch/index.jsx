@@ -534,6 +534,10 @@ const AnnotationSearch = props => {
   }
 
   const getNewData = (pageIndex, afterDelete) => {
+    if (mode === 'teaching') {
+      getFieldSearchResults();
+      return;
+    }
     if (query) {
       getSearchResult(pageIndex, afterDelete);
     } else {
