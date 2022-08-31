@@ -548,7 +548,7 @@ function AnnotationTable(props) {
           style: { whiteSpace: 'normal' },
         },
         {
-          Header: 'Comment',
+          Header: 'Narrative',
           accessor: 'userComment'
         }
       ],
