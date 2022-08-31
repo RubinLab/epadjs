@@ -294,10 +294,10 @@ class selectSerieModal extends React.Component {
     let count = 0;
     let significantExplanation = false; //Explanations at the bottom of the modal
 
-    // // filter the series according to displayable modalities
-    // for (let i = 0; i < series.length; i++) {
-    //   series[i] = series[i].filter(isSupportedModality);
-    // }
+    // filter the series according to displayable modalities
+    for (let i = 0; i < series.length; i++) {
+      series[i] = series[i].filter(isSupportedModality);
+    }
 
     for (let i = 0; i < series.length; i++) {
       let innerList = [];
