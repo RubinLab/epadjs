@@ -25,7 +25,7 @@ class ProgressView extends React.Component {
     this.setState({ data });
   };
 
-  componentWillUnmount = () => {};
+  componentWillUnmount = () => { };
 
   clearCarets = string => {
     if (string) {
@@ -210,7 +210,7 @@ class ProgressView extends React.Component {
           className="progressView"
           data={this.state.data}
           columns={this.defineColumns()}
-          pageSize={this.defineColumns().length}
+          // pageSize={this.defineColumns().length}
           pivotBy={view === "User" ? ["assignee"] : ["subject_name"]}
           showPagination={false}
         />
