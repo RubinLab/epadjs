@@ -145,6 +145,7 @@ const AnnotationSearch = props => {
   const [seriesList, setSeriesList] = useState([]);
   const [encArgs, setEncArgs] = useState('');
   const [decrArgs, setDecrArgs] = useState('');
+  const [allSelected, setAllSelected] = useState(false);
 
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -378,6 +379,8 @@ const AnnotationSearch = props => {
   };
 
   const updateSelectedAims = aimData => {
+    if (props.selectedAnnotations[aimData.aimID])
+      setAllSelected(false);
     props.dispatch(selectAnnotation(aimData));
   };
 
@@ -528,6 +531,7 @@ const AnnotationSearch = props => {
     searchAnnotations(body, bm)
       .then(res => {
         populateSearchResult(res, pageIndex, afterDelete);
+        setRows(res.data.total_rows);
         setShowSpinner(false);
       })
       .catch(err => { console.error(err); setShowSpinner(false); });
@@ -851,6 +855,17 @@ const AnnotationSearch = props => {
     });
     return options;
   };
+
+  const handleSelectDeselectAll = ({ target: { checked } }) => {
+    if (checked) {
+      handleMultipleSelect('selectPageAll');
+      setAllSelected(true);
+    }
+    else {
+      handleMultipleSelect('unselectPageAll');
+      setAllSelected(false);
+    }
+  }
 
   const handleMultipleSelect = action => {
     const pages = Math.ceil(props.rows / pageSize);
@@ -1452,7 +1467,7 @@ const AnnotationSearch = props => {
           <tr>
             <th className="select_row">
               <div className="form-check">
-                <input className="form-check-input" type="checkbox" value="Select" id="flexCheckDefault" />
+                <input className="form-check-input" type="checkbox" checked={allSelected} id="flexCheckDefault" onChange={handleSelectDeselectAll} />
               </div>
             </th>
             <th>
