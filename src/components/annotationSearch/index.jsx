@@ -1572,7 +1572,10 @@ const AnnotationSearch = props => {
       <AnnotationDownloadModal
         onSubmit={() => {
           setShowDownload(false);
-          getSearchResult();
+          if (mode === 'teaching')
+            getFieldSearchResults();
+          else
+            getSearchResult();
         }}
         onCancel={() => setShowDownload(false)}
         // updateStatus={() => console.log('update status')}
