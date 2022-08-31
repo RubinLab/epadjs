@@ -534,6 +534,10 @@ const AnnotationSearch = props => {
   }
 
   const getNewData = (pageIndex, afterDelete) => {
+    if (mode === 'teaching') {
+      getFieldSearchResults();
+      return;
+    }
     if (query) {
       getSearchResult(pageIndex, afterDelete);
     } else {
@@ -1572,7 +1576,10 @@ const AnnotationSearch = props => {
       <AnnotationDownloadModal
         onSubmit={() => {
           setShowDownload(false);
-          getSearchResult();
+          if (mode === 'teaching')
+            getFieldSearchResults();
+          else
+            getSearchResult();
         }}
         onCancel={() => setShowDownload(false)}
         // updateStatus={() => console.log('update status')}
