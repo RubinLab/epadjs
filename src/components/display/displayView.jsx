@@ -1703,8 +1703,8 @@ class DisplayView extends Component {
                   {/* <div className={"column middle"}>
                     <label>{series[i].seriesUID}</label>
                   </div> */}
-                  <div className={"column middle-right"}>
-                    <div>
+                  <div className={"column middle-right"} style={{ paddingTop: '0px' }}>
+                    <div style={{ paddingTop: '10px' }}>
                       <Form inline className="slice-form">
                         <Form.Group className="slice-number">
                           <Form.Label htmlFor="imageNum" className="slice-label" style={{ color: 'white' }}>
@@ -1727,7 +1727,7 @@ class DisplayView extends Component {
                       </Form>
                     </div>
                     <div className={"series-dd"}>
-                      <SeriesDropDown serie={series[i]} isAimEditorShowing={this.state.showAimEditor} onCloseAimEditor={this.closeAimEditor} />
+                      <SeriesDropDown style={{ lineHeight: "1" }} serie={series[i]} isAimEditorShowing={this.state.showAimEditor} onCloseAimEditor={this.closeAimEditor} />
                     </div>
                   </div>
                   <div className={"column right"}>
