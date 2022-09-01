@@ -144,20 +144,11 @@ class selectSerieModal extends React.Component {
     }
   }
 
-  displaySelection = async (aimID) => {
-    let studies = Object.values(this.props.seriesPassed);
+  setSignificantSeries = (series) => {
     const { selectedToDisplay } = this.state;
-    let series = [];
     let significantSeries = [];
     let significanceOrder = 1;
-    // TODO: what is the logic here?
-    studies.forEach(arr => {
-      series = series.concat(arr);
-    });
     let significanceSet = series.some(serie => serie.significanceOrder > 0);
-
-    // let series = Object.values(this.props.seriesPassed)[0];
-    //concatanete all arrays to getther
     for (let key of Object.keys(selectedToDisplay)) {
       if (!significanceSet) {
         significantSeries.push({
@@ -166,6 +157,27 @@ class selectSerieModal extends React.Component {
         });
         significanceOrder++;
       }
+    }
+    const { projectID, patientID, studyUID, subjectID } = series[0];
+    const subID = patientID ? patientID : subjectID;
+
+    if (!significanceSet) {
+      setSignificantSeries(projectID, subID, studyUID, significantSeries);
+    }
+  }
+
+  displaySelection = async (aimID) => {
+    let studies = Object.values(this.props.seriesPassed);
+    const { selectedToDisplay } = this.state;
+    let series = [];
+    // TODO: what is the logic here?
+    studies.forEach(arr => {
+      series = series.concat(arr);
+    });
+    setSignificantSeries(series);
+
+    //concatanete all arrays to getther
+    for (let key of Object.keys(selectedToDisplay)) {
       let serie = this.findSerieFromSeries(key, series);
       if (aimID)
         this.props.dispatch(addToGrid(serie, aimID));
@@ -179,30 +191,6 @@ class selectSerieModal extends React.Component {
         else
           this.props.dispatch(getSingleSerie(serie));
       }
-    }
-    // for (let i = 0; i < Object.keys(selectedToDisplay).length; i++) {
-    //   // if (this.state.selectedToDisplay[i]) {
-    //   // If significance order is not set before we 
-    //   if (!significanceSet) {
-    //     significantSeries.push({
-    //       seriesUID: series[i].seriesUID,
-    //       significanceOrder
-    //     });
-    //     significanceOrder++;
-    //   }
-    //   this.props.dispatch(addToGrid(series[i], series[i].aimID));
-    //   if (this.state.selectionType === "aim") {
-    //     this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
-    //   } else {
-    //     this.props.dispatch(getSingleSerie(series[i]));
-    //   }
-    //   // }
-    // }
-    const { projectID, patientID, studyUID, subjectID } = series[0];
-    const subID = patientID ? patientID : subjectID;
-
-    if (!significanceSet) {
-      setSignificantSeries(projectID, subID, studyUID, significantSeries);
     }
     this.props.history.push("/display");
     this.handleCancel();
@@ -409,6 +397,12 @@ class selectSerieModal extends React.Component {
 
   saveTeachingFileAndDisplay = async () => {
     let result = await this.saveTeachingFile();
+    let studies = Object.values(this.props.seriesPassed);
+    let series = [];
+    studies.forEach(arr => {
+      series = series.concat(arr);
+    });
+    setSignificantSeries(series);
     this.displaySelection(result);
   }
 
