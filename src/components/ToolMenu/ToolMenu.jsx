@@ -105,6 +105,7 @@ const tools = [
   { name: "Brush3DHUGated" },
   { name: "BrushSphericalHUGated" },
   { name: "Brush3DAutoGated" },
+  { name: "ArrowAnnotate" },
 ];
 
 class ToolMenu extends Component {
@@ -162,6 +163,12 @@ class ToolMenu extends Component {
         name: "Line",
         icon: <FaRulerHorizontal />,
         tool: "Length",
+        teaching: true,
+      },
+      {
+        name: "Arrow",
+        icon: <FaRulerHorizontal />,
+        tool: "ArrowAnnotate",
         teaching: true,
       },
       {
@@ -370,6 +377,7 @@ class ToolMenu extends Component {
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
       this.setToolStateForAllElements(tool, "active");
     });
+    console.log("tools :", cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState());
 
   };
 

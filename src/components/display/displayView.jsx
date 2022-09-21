@@ -62,6 +62,7 @@ const tools = [
   },
   { name: "Probe", modeOptions: { mouseButtonMasks: 1 }, mode: "passive" },
   { name: "Length", modeOptions: { mouseButtonMasks: 1 }, mode: "passive" },
+  { name: "ArrowAnnotate", modeOptions: { mouseButtonMasks: 1 }, mode: "passive" },
   // {
   //   name: "EllipticalRoi",
   //   configuration: {
