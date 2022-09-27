@@ -96,6 +96,7 @@ class AimEditor extends Component {
     });
     this.semanticAnswers.createViewerWindow();
     const { aimId } = this.props;
+    console.log("AYIM", aimId);
     if (aimId != null && Object.entries(aimId).length) {
       try {
         this.semanticAnswers.loadAimJson(aimId);
@@ -132,7 +133,9 @@ class AimEditor extends Component {
   }
 
   loadAim = (event) => {
+    console.log("here");
     const { aimID } = event.detail;
+    console.log("Aim ID", aimID);
     try {
       this.semanticAnswers.loadAimJson(aimID);
     } catch (error) {

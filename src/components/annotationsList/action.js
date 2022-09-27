@@ -441,6 +441,7 @@ export const changeActivePort = (portIndex) => {
 
 // helpeer method
 export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann) => {
+  console.log("Aim data", aimsData);
   return {
     type: LOAD_SERIE_SUCCESS,
     payload: { ref, aimsData, serID, imageData, ann },
@@ -507,6 +508,8 @@ const getAimListFields = (aims, ann) => {
         typeCode,
         trackingUniqueIdentifier,
       } = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
+      const user = aim.ImageAnnotationCollection.user.name.value;
+      const userLoginName = aim.ImageAnnotationCollection.user.loginName.value;
       const aimFields = {
         name,
         comment,
@@ -516,13 +519,15 @@ const getAimListFields = (aims, ann) => {
         segmentationEntityCollection,
         typeCode,
         trackingUniqueIdentifier: trackingUniqueIdentifier?.root,
+        user,
+        userLoginName
       };
-      const user = aim.ImageAnnotationCollection.user.name.value;
       const id = aim.ImageAnnotationCollection.uniqueIdentifier.root;
       result[aim.ImageAnnotationCollection.uniqueIdentifier.root] = {
         name: aimName,
         id,
         user,
+        userLoginName,
         // json1: aim,
         json: aimFields,
         isDisplayed: displayStatus,
