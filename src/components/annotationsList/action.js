@@ -508,8 +508,12 @@ const getAimListFields = (aims, ann) => {
         typeCode,
         trackingUniqueIdentifier,
       } = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
-      const user = aim.ImageAnnotationCollection.user.name.value;
-      const userLoginName = aim.ImageAnnotationCollection.user.loginName.value;
+      let user = aim.ImageAnnotationCollection.user.name.value;
+      let userLoginName = aim.ImageAnnotationCollection.user.loginName.value;
+      if(!Array.isArray(user))
+        user = [user];
+      if(!Array.isArray(userLoginName))
+        userLoginName = [userLoginName];
       const aimFields = {
         name,
         comment,
