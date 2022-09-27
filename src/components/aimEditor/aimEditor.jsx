@@ -26,12 +26,13 @@ import { Modal } from "react-bootstrap";
 import "./aimEditor.css";
 
 let mode;
-const defaultAimName = sessionStorage.getItem('defaultAimName');
+let defaultAimName;
 
 class AimEditor extends Component {
   constructor(props) {
     super(props);
     mode = sessionStorage.getItem('mode');
+    defaultAimName = sessionStorage.getItem('defaultAimName');
     this.image = this.getImage();
     this.semanticAnswers = {};
     this.state = {
