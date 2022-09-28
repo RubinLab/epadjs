@@ -441,7 +441,6 @@ export const changeActivePort = (portIndex) => {
 
 // helpeer method
 export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann) => {
-  console.log("Aim data", aimsData);
   return {
     type: LOAD_SERIE_SUCCESS,
     payload: { ref, aimsData, serID, imageData, ann },
@@ -511,11 +510,9 @@ const getAimListFields = (aims, ann) => {
       let users = aim.ImageAnnotationCollection.user;
       if(!Array.isArray(users))
         users = [users];
-      console.log("Users", users);
       let flattenAuthorList = users.map(user=>{
         return user.name.value;
       })
-      console.log("flat", flattenAuthorList);
       const aimFields = {
         name,
         comment,

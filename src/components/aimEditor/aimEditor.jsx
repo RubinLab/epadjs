@@ -96,7 +96,6 @@ class AimEditor extends Component {
     });
     this.semanticAnswers.createViewerWindow();
     const { aimId } = this.props;
-    console.log("AYIM", aimId);
     if (aimId != null && Object.entries(aimId).length) {
       try {
         this.semanticAnswers.loadAimJson(aimId);
@@ -134,7 +133,6 @@ class AimEditor extends Component {
 
   loadAim = (event) => {
     const { aimID } = event.detail;
-    console.log("Aim ID", aimID);
     try {
       this.semanticAnswers.loadAimJson(aimID);
     } catch (error) {
@@ -414,7 +412,6 @@ class AimEditor extends Component {
     else
       user = getUserForAim();
     // try {
-    console.log("User in editor", user);
     if (hasSegmentation) {
       // if (!this.checkSegmentationFrames()) return;
       // segmentation and markups
@@ -430,7 +427,6 @@ class AimEditor extends Component {
       // markups without segmentation
       const image = this.getAimSeedDataFromMarkup(markupsToSave);
       const aimData = { image, answers, user };
-      console.log("aimData", aimData);
       const aim = new Aim(
         aimData,
         enumAimType.imageAnnotation,
