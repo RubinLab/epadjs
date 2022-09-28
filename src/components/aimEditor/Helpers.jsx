@@ -127,8 +127,21 @@ export function prepAimForParseClass(aimJson) {
   }
 }
 
-export function getUserForAim() {
-  return { name: sessionStorage.getItem("displayName"), loginName: sessionStorage.getItem("username") };
+export function getUserForAim(authors) {
+  const name = sessionStorage.getItem("displayName")
+  const loginName = sessionStorage.getItem("username");
+  // if users array don't exist first time creating the aim
+  if (!authors?.length)
+    return [{ "name": { "value": name }, "loginName": { "value": loginName } }];
+
+  for (let i = 0; i < authors.length; i++) {
+    // author is alreadry in the author list, no need to add
+    if (authors[i].loginName.value === loginName)
+      return authors;
+  }
+  // add the new author to li
+  authors.push({ "name": { "value": name }, "loginName": { "value": loginName } });
+  return authors;
 };
 
 // export function createStudyAim({ study, answers, updatedAimId, trackingUId }) {
