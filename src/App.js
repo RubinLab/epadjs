@@ -658,6 +658,12 @@ class App extends Component {
           process.env.REACT_APP_AUTH_URL || keycloakData["auth-server-url"];
         keycloakJson.clientId =
           process.env.REACT_APP_AUTH_RESOURCE || keycloakData.resource;
+        // added for teaching SSO connection. required for PHI
+        if (mode === "teaching")
+          keycloakJson.credentials = {
+            secret: process.env.REACT_APP_AUTH_SECRET || keycloakData["client-secret"]
+          };
+        // ---
         sessionStorage.setItem("auth", auth);
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
         if (mode === "lite") this.setState({ pid: "lite" });
