@@ -897,6 +897,9 @@ class App extends Component {
             let userData;
             try {
               userData = await getUser(username);
+              // check if userData exists if not alert and logout
+              // if teaching "User doesn't exist, you should login from Sectra first."
+              // "User doesn't exist, contact your administrator."
               userData = userData.data;
               this.setState({ admin: userData.admin });
             } catch (err) {

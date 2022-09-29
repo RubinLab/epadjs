@@ -30,6 +30,7 @@ import {
   FaDotCircle,
   FaTimes
 } from "react-icons/fa";
+import { BsArrowUpLeft } from "react-icons/bs";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
 import { MdLoop, MdPanTool } from "react-icons/md";
@@ -167,7 +168,7 @@ class ToolMenu extends Component {
       },
       {
         name: "Arrow",
-        icon: <FaRulerHorizontal />,
+        icon: <BsArrowUpLeft />,
         tool: "ArrowAnnotate",
         teaching: true,
       },
