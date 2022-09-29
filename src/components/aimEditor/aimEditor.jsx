@@ -523,7 +523,6 @@ class AimEditor extends Component {
   createAimMarkups = (aim, markupsToSave) => {
     Object.entries(markupsToSave).forEach(([key, values]) => {
       values.map((value) => {
-        console.log("value", value)
         const { type, markup, shapeIndex, imageId, frameNum } = value;
         switch (type) {
           case "point":

@@ -29,6 +29,7 @@ import { MenuProvider } from "react-contexify";
 import CornerstoneViewport from "react-cornerstone-viewport";
 import { freehand } from "./Freehand";
 import { line } from "./Line";
+import { arrow } from "./Arrow";
 import { probe } from "./Probe";
 import { circle } from "./Circle";
 import { bidirectional } from "./Bidirectional";
@@ -1354,6 +1355,10 @@ class DisplayView extends Component {
         this.renderPolygon(imageId, markup, color, seriesUid, studyUid);
         break;
       case "TwoDimensionMultiPoint":
+        if (markup?.lineStyle?.value === "Arrow") {
+          this.renderArrow(imageId, markup, color, seriesUid, studyUid);
+          break;
+        }
         this.renderLine(imageId, markup, color, seriesUid, studyUid);
         break;
       case "TwoDimensionCircle":
@@ -1403,6 +1408,20 @@ class DisplayView extends Component {
     // need to set the text box coordinates for this too
     data.handles.textBox.x = points[0].x.value;
     data.handles.textBox.y = points[0].y.value;
+  };
+
+  renderArrow = (imageId, markup, color) => {
+    const data = JSON.parse(JSON.stringify(arrow));
+    data.color = markup.color ? markup.color : color;
+    data.aimId = markup.aimUid;
+    data.invalidated = true;
+    this.createLinePoints(data, markup.coordinates);
+    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    this.checkNCreateToolForImage(currentState, imageId, "ArrowAnnotate");
+    currentState[imageId]["ArrowAnnotate"].data.push(data);
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+      currentState
+    );
   };
 
   renderLine = (imageId, markup, color) => {
@@ -1503,7 +1522,6 @@ class DisplayView extends Component {
 
   closeAimEditor = (isCancel, message = "") => {
     const { dirty } = this.state;
-    console.log("Is dirty", dirty);
     if (dirty) {
       const unsavedData = this.checkUnsavedData(isCancel, message);
       if (!unsavedData) return -1;
