@@ -378,8 +378,6 @@ class ToolMenu extends Component {
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
       this.setToolStateForAllElements(tool, "active");
     });
-    console.log("tools :", cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState());
-
   };
 
   selectFreehand = () => {
