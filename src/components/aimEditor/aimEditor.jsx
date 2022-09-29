@@ -523,6 +523,7 @@ class AimEditor extends Component {
   createAimMarkups = (aim, markupsToSave) => {
     Object.entries(markupsToSave).forEach(([key, values]) => {
       values.map((value) => {
+        console.log("value", value)
         const { type, markup, shapeIndex, imageId, frameNum } = value;
         switch (type) {
           case "point":
@@ -530,6 +531,9 @@ class AimEditor extends Component {
             break;
           case "line":
             this.addLineToAim(aim, markup, shapeIndex, imageId, frameNum);
+            break;
+          case "arrow":
+            this.addArrowToAim(aim, markup, shapeIndex, imageId, frameNum);
             break;
           case "circle":
             this.addCircleToAim(aim, markup, shapeIndex, imageId, frameNum);
@@ -751,6 +755,26 @@ class AimEditor extends Component {
               }
             });
             break;
+          case "ArrowAnnotate":
+            const arrows = markUps[tool].data;
+            arrows.map((arrow) => {
+              if (!arrow.aimId || arrow.aimId === this.updatedAimId) {
+                //dont save the same markup to different aims
+                this.storeMarkupsToBeSaved(
+                  CSImageId,
+                  {
+                    type: "arrow",
+                    markup: arrow,
+                    shapeIndex,
+                    imageId,
+                    frameNum,
+                  },
+                  markupsToSave
+                );
+                shapeIndex++;
+              }
+            });
+            break;
           case "Probe":
             const points = markUps[tool].data;
             points.map((point) => {
@@ -916,7 +940,18 @@ class AimEditor extends Component {
 
     const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit: _calcUnit });
     aim.createImageAnnotationStatement(1, markupId, stdDevId);
+  };
 
+  addArrowToAim = (aim, arrow, shapeIndex, imageId, frameNum) => {
+    const { start, end } = arrow.handles;
+    aim.addMarkupEntity(
+      "TwoDimensionMultiPoint",
+      shapeIndex,
+      [start, end],
+      imageId,
+      frameNum,
+      "Arrow"
+    );
   };
 
   addCircleToAim = (aim, circle, shapeIndex, imageId, frameNum) => {
