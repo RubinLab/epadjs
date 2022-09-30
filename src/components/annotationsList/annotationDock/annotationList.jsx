@@ -207,7 +207,8 @@ class AnnotationsList extends React.Component {
           ? [...imageAnnotations, ...noMarkupAnnotations]
           : noMarkupAnnotations;
       }
-      if (imageAnnotations && Object.keys(annotations).length) {
+      // if (imageAnnotations && Object.keys(annotations).length) {
+      if (imageAnnotations) {
         for (let aim of imageAnnotations) {
           let { aimUid } = aim;
           annotations[aimUid]
@@ -257,6 +258,7 @@ class AnnotationsList extends React.Component {
         );
       }
     });
+
     return (
       <React.Fragment>
         <div className="annotationList-container" style={{ paddingTop: '5px' }}>
