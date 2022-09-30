@@ -17,9 +17,9 @@ import { state } from "cornerstone-tools/store/index.js";
 
 class AnnotationsList extends React.Component {
   state = {
-    labelDisplayAll: true,
+    labelDisplayAll: false,
     annsDisplayAll: true,
-    showCalculations: true
+    showCalculations: false
   };
 
   componentDidUpdate = prevProps => {
