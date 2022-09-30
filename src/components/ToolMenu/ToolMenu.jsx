@@ -30,6 +30,7 @@ import {
   FaDotCircle,
   FaTimes
 } from "react-icons/fa";
+import { BsArrowUpLeft } from "react-icons/bs";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
 import { MdLoop, MdPanTool } from "react-icons/md";
@@ -105,6 +106,7 @@ const tools = [
   { name: "Brush3DHUGated" },
   { name: "BrushSphericalHUGated" },
   { name: "Brush3DAutoGated" },
+  { name: "ArrowAnnotate" },
 ];
 
 class ToolMenu extends Component {
@@ -162,6 +164,12 @@ class ToolMenu extends Component {
         name: "Line",
         icon: <FaRulerHorizontal />,
         tool: "Length",
+        teaching: true,
+      },
+      {
+        name: "Arrow",
+        icon: <BsArrowUpLeft />,
+        tool: "ArrowAnnotate",
         teaching: true,
       },
       {
@@ -370,7 +378,6 @@ class ToolMenu extends Component {
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
       this.setToolStateForAllElements(tool, "active");
     });
-
   };
 
   selectFreehand = () => {

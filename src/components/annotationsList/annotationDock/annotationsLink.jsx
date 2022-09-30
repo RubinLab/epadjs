@@ -14,8 +14,6 @@ const annotationsLink = (props) => {
   let list = [];
   let header = [];
 
-
-
   if (aimsList[seriesUID]) {
     const seriesAims = Object.values(aimsList[seriesUID]);
     header = [
@@ -35,9 +33,9 @@ const annotationsLink = (props) => {
       // </th>,
     ];
 
-    list = seriesAims.map((aim, i) => {
+    seriesAims.forEach((aim, i) => {
       if (!props.imageAims[aim.id]) {
-        return (
+        list.push((
           <tr key={aim.id} className="annsLink-table __tbody --row">
             <td
               data-id={aim.id}
@@ -49,10 +47,13 @@ const annotationsLink = (props) => {
             </td>
             {/* <td className="annsLink-table __tbody --cell2">{slideNo}</td> */}
           </tr>
-        );
+        ));
       }
     });
   }
+
+  if (!list.length)
+    return ("");
 
   return (
     <React.Fragment>

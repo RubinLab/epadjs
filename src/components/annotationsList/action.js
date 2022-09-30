@@ -493,9 +493,9 @@ const getAimListFields = (aims, ann) => {
         aimName = aimName.substring(0, ind);
       }
 
-      let displayStatus = ann
-        ? ann === aim.ImageAnnotationCollection.uniqueIdentifier.root
-        : !ann;
+      // let displayStatus = ann
+      //   ? ann === aim.ImageAnnotationCollection.uniqueIdentifier.root
+      //   : !ann;
 
       const {
         name,
@@ -507,6 +507,12 @@ const getAimListFields = (aims, ann) => {
         typeCode,
         trackingUniqueIdentifier,
       } = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
+      let users = aim.ImageAnnotationCollection.user;
+      if(!Array.isArray(users))
+        users = [users];
+      let flattenAuthorList = users.map(user=>{
+        return user.name.value;
+      })
       const aimFields = {
         name,
         comment,
@@ -516,17 +522,17 @@ const getAimListFields = (aims, ann) => {
         segmentationEntityCollection,
         typeCode,
         trackingUniqueIdentifier: trackingUniqueIdentifier?.root,
+        users,
       };
-      const user = aim.ImageAnnotationCollection.user.name.value;
       const id = aim.ImageAnnotationCollection.uniqueIdentifier.root;
       result[aim.ImageAnnotationCollection.uniqueIdentifier.root] = {
         name: aimName,
         id,
-        user,
+        user:flattenAuthorList.join(),
         // json1: aim,
         json: aimFields,
-        isDisplayed: displayStatus,
-        showLabel: true,
+        isDisplayed: true,
+        showLabel: false,
         cornerStoneTools: [],
         // color,
         type,

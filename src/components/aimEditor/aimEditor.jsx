@@ -401,9 +401,16 @@ class AimEditor extends Component {
   // };
 
   createAim = async (answers) => {
-    const { hasSegmentation } = this.props;
+    const { hasSegmentation, aimId: aim } = this.props;
     const markupsToSave = this.getNewMarkups();
     const templateType = this.semanticAnswers.getSelectedTemplateType();
+    let user;
+    const { isUpdate } = this.state;
+    if (isUpdate) {
+      user = getUserForAim(aim.users);
+    }
+    else
+      user = getUserForAim();
     // try {
     if (hasSegmentation) {
       // if (!this.checkSegmentationFrames()) return;
@@ -419,7 +426,7 @@ class AimEditor extends Component {
     } else if (Object.entries(markupsToSave).length !== 0) {
       // markups without segmentation
       const image = this.getAimSeedDataFromMarkup(markupsToSave);
-      const aimData = { image, answers, user: getUserForAim() };
+      const aimData = { image, answers, user };
       const aim = new Aim(
         aimData,
         enumAimType.imageAnnotation,
@@ -435,7 +442,7 @@ class AimEditor extends Component {
       if (isStudyAim) { //Study annotation
         const { openSeries, activePort } = this.props;
         const { data: study } = await getSingleStudy(openSeries[activePort].studyUID);
-        aimData = { study, answers, user: getUserForAim() };
+        aimData = { study, answers, user };
         aim = new Aim(
           aimData,
           enumAimType.studyAnnotation,
@@ -447,7 +454,7 @@ class AimEditor extends Component {
         const { activePort } = this.props;
         const { element } = cornerstone.getEnabledElements()[activePort];
         const image = cornerstone.getImage(element);
-        aimData = { image, answers, user: getUserForAim() };
+        aimData = { image, answers, user };
         aim = new Aim(
           aimData,
           enumAimType.imageAnnotation,
@@ -523,6 +530,9 @@ class AimEditor extends Component {
             break;
           case "line":
             this.addLineToAim(aim, markup, shapeIndex, imageId, frameNum);
+            break;
+          case "arrow":
+            this.addArrowToAim(aim, markup, shapeIndex, imageId, frameNum);
             break;
           case "circle":
             this.addCircleToAim(aim, markup, shapeIndex, imageId, frameNum);
@@ -744,6 +754,26 @@ class AimEditor extends Component {
               }
             });
             break;
+          case "ArrowAnnotate":
+            const arrows = markUps[tool].data;
+            arrows.map((arrow) => {
+              if (!arrow.aimId || arrow.aimId === this.updatedAimId) {
+                //dont save the same markup to different aims
+                this.storeMarkupsToBeSaved(
+                  CSImageId,
+                  {
+                    type: "arrow",
+                    markup: arrow,
+                    shapeIndex,
+                    imageId,
+                    frameNum,
+                  },
+                  markupsToSave
+                );
+                shapeIndex++;
+              }
+            });
+            break;
           case "Probe":
             const points = markUps[tool].data;
             points.map((point) => {
@@ -909,7 +939,18 @@ class AimEditor extends Component {
 
     const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit: _calcUnit });
     aim.createImageAnnotationStatement(1, markupId, stdDevId);
+  };
 
+  addArrowToAim = (aim, arrow, shapeIndex, imageId, frameNum) => {
+    const { start, end } = arrow.handles;
+    aim.addMarkupEntity(
+      "TwoDimensionMultiPoint",
+      shapeIndex,
+      [start, end],
+      imageId,
+      frameNum,
+      "Arrow"
+    );
   };
 
   addCircleToAim = (aim, circle, shapeIndex, imageId, frameNum) => {
