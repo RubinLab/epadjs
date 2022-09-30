@@ -800,6 +800,7 @@ class DisplayView extends Component {
       "Length",
       "CircleRoi",
       "FreehandRoi3DTool",
+      "ArrowAnnotate"
     ];
     if (toolsOfInterest.includes(toolName) || toolType === "Bidirectional") {
       this.setState({ showAimEditor: true });

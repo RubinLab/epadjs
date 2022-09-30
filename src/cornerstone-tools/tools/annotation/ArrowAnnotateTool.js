@@ -57,14 +57,14 @@ export default class ArrowAnnotateTool extends BaseAnnotationTool {
       color: undefined,
       handles: {
         start: {
-          x: evt.detail.currentPoints.image.x,
-          y: evt.detail.currentPoints.image.y,
+          x: evt.startPoints.image.x,
+          y: evt.startPoints.image.y,
           highlight: true,
           active: false,
         },
         end: {
-          x: evt.detail.currentPoints.image.x,
-          y: evt.detail.currentPoints.image.y,
+          x: evt.lastPoints.image.x,
+          y: evt.lastPoints.image.y,
           highlight: true,
           active: false,
         },
@@ -237,38 +237,39 @@ export default class ArrowAnnotateTool extends BaseAnnotationTool {
     }
   }
 
-  addNewMeasurement(evt, interactionType) {
-    const element = evt.detail.element;
-    const measurementData = this.createNewMeasurement(evt);
+  // addNewMeasurement(evt, interactionType) {
+  //   console.log("creatonf", evt);
+  //   const element = evt.detail.element;
+  //   const measurementData = this.createNewMeasurement(evt);
 
-    // Associate this data with this imageId so we can render it and manipulate it
-    addToolState(element, this.name, measurementData);
-    external.cornerstone.updateImage(element);
+  //   // Associate this data with this imageId so we can render it and manipulate it
+  //   addToolState(element, this.name, measurementData);
+  //   external.cornerstone.updateImage(element);
 
-    moveNewHandle(
-      evt.detail,
-      this.name,
-      measurementData,
-      measurementData.handles.end,
-      this.options,
-      interactionType,
-      () => {
-        if (measurementData.text === undefined) {
-          this.configuration.getTextCallback(text => {
-            if (text) {
-              measurementData.text = text;
-            } else {
-              removeToolState(element, this.name, measurementData);
-            }
+  //   moveNewHandle(
+  //     evt.detail,
+  //     this.name,
+  //     measurementData,
+  //     measurementData.handles.end,
+  //     this.options,
+  //     interactionType,
+  //     // () => {
+  //     //   if (measurementData.text === undefined) {
+  //     //     this.configuration.getTextCallback(text => {
+  //     //       if (text) {
+  //     //         measurementData.text = text;
+  //     //       } else {
+  //     //         removeToolState(element, this.name, measurementData);
+  //     //       }
 
-            measurementData.active = false;
-            external.cornerstone.updateImage(element);
-          });
-        }
-        external.cornerstone.updateImage(element);
-      }
-    );
-  }
+  //     //       measurementData.active = false;
+  //     //       external.cornerstone.updateImage(element);
+  //     //     });
+  //     //   }
+  //     //   external.cornerstone.updateImage(element);
+  //     // }
+  //   );
+  // }
 
   doubleClickCallback(evt) {
     return this._updateTextForNearbyAnnotation(evt);
