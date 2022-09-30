@@ -493,9 +493,9 @@ const getAimListFields = (aims, ann) => {
         aimName = aimName.substring(0, ind);
       }
 
-      let displayStatus = ann
-        ? ann === aim.ImageAnnotationCollection.uniqueIdentifier.root
-        : !ann;
+      // let displayStatus = ann
+      //   ? ann === aim.ImageAnnotationCollection.uniqueIdentifier.root
+      //   : !ann;
 
       const {
         name,
@@ -531,8 +531,8 @@ const getAimListFields = (aims, ann) => {
         user:flattenAuthorList.join(),
         // json1: aim,
         json: aimFields,
-        isDisplayed: displayStatus,
-        showLabel: true,
+        isDisplayed: true,
+        showLabel: false,
         cornerStoneTools: [],
         // color,
         type,

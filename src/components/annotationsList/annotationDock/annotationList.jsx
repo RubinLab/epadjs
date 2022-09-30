@@ -138,8 +138,7 @@ class AnnotationsList extends React.Component {
       const { imageID } = openSeries[activePort];
       let imageAnnotations;
       if (openSeries[activePort].imageAnnotations) {
-        imageAnnotations = openSeries[activePort]
-          .imageAnnotations[imageID];
+        imageAnnotations = openSeries[activePort].imageAnnotations[imageID];
         if (!imageAnnotations)
           imageAnnotations =
             openSeries[activePort].imageAnnotations[imageID + "&frame=1"];
@@ -207,7 +206,6 @@ class AnnotationsList extends React.Component {
           ? [...imageAnnotations, ...noMarkupAnnotations]
           : noMarkupAnnotations;
       }
-      // if (imageAnnotations && Object.keys(annotations).length) {
       if (imageAnnotations) {
         for (let aim of imageAnnotations) {
           let { aimUid } = aim;
@@ -258,7 +256,6 @@ class AnnotationsList extends React.Component {
         );
       }
     });
-
     return (
       <React.Fragment>
         <div className="annotationList-container" style={{ paddingTop: '5px' }}>
@@ -287,7 +284,7 @@ class AnnotationsList extends React.Component {
           </div>
         </div>
         <div>{annList}</div>
-        {Object.keys(imageAims).length && (<AnnotationsLink imageAims={imageAims} />)}
+        <AnnotationsLink imageAims={imageAims} />
       </React.Fragment >
     );
   };
