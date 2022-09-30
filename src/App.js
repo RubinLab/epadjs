@@ -897,12 +897,19 @@ class App extends Component {
         .then(async (result) => {
           try {
             const username =
-              result.userInfo.preferred_username || result.userInfo.email;
+              result.userInfo.preferred_username || result.userInfo.uid || result.userInfo.email;
 
             await auth.setLoginKeycloak(result.keycloak);
             let userData;
             try {
               userData = await getUser(username);
+              if(!userData){
+                if(mode==="teaching")
+                  alert("User doesn't exist, you should login from Sectra first.");
+                else
+                  alert("User doesn't exist, contact your administrator.");
+                this.onLogout();
+              }
               // check if userData exists if not alert and logout
               // if teaching "User doesn't exist, you should login from Sectra first."
               // "User doesn't exist, contact your administrator."
