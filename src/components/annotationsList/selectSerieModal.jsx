@@ -376,6 +376,7 @@ class selectSerieModal extends React.Component {
 
     return uploadAim(aimSaved, projectID, isUpdate)
       .then(() => {
+
         toast.success("Teaching File succesfully saved.", {
           position: "top-right",
           autoClose: 5000,
@@ -384,6 +385,12 @@ class selectSerieModal extends React.Component {
           pauseOnHover: true,
           draggable: true,
         });
+        let studies = Object.values(this.props.seriesPassed);
+        let series = [];
+        studies.forEach(arr => {
+          series = series.concat(arr);
+        });
+        setSignificantSeries(series);
         return result;
       })
       .catch((error) => {
@@ -397,12 +404,6 @@ class selectSerieModal extends React.Component {
 
   saveTeachingFileAndDisplay = async () => {
     let result = await this.saveTeachingFile();
-    let studies = Object.values(this.props.seriesPassed);
-    let series = [];
-    studies.forEach(arr => {
-      series = series.concat(arr);
-    });
-    setSignificantSeries(series);
     this.displaySelection(result);
   }
 
