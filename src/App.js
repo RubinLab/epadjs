@@ -114,6 +114,7 @@ class App extends Component {
       metric: null,
       searchQuery: "",
       pairs: {},
+      leftMenuState:"open"
     };
   }
 
@@ -1241,6 +1242,11 @@ class App extends Component {
     }
   };
 
+  closeLeftMenu = () => {
+    console.log("setting", this.state.leftMenuState);
+    this.setState({ leftMenuState:"closed" });
+  }
+
   render() {
     const {
       notifications,
@@ -1341,6 +1347,7 @@ class App extends Component {
               pid={this.state.pid}
               clearTreeExpand={this.clearTreeExpand}
               projectAdded={this.state.projectAdded}
+              openClose={this.state.leftMenuState}
             >
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
@@ -1354,6 +1361,7 @@ class App extends Component {
                       updateTreeDataOnSave={this.updateTreeDataOnSave}
                       keycloak={this.state.keycloak}
                       onSwitchView={this.switchView}
+                      closeLeftMenu={this.closeLeftMenu}
                     />
                   )}
                 />
@@ -1493,6 +1501,7 @@ class App extends Component {
                     updateTreeDataOnSave={this.updateTreeDataOnSave}
                     keycloak={this.state.keycloak}
                     onSwitchView={this.switchView}
+                    closeLeftMenu={this.closeLeftMenu}
                   />
                 )}
               />

@@ -14,7 +14,6 @@ class Rightsidebar extends Component {
     super(props);
 
     let x = window.matchMedia("(max-width: 1080px)");
-    console.log("X", x);
     let rightDim = x.matches ? "320px" : "420px";
     this.state = {
       rightDim,

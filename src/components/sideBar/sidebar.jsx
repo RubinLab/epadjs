@@ -234,6 +234,11 @@ class Sidebar extends Component {
     } catch (error) {
       console.error(error);
     }
+    // console.log(this.props.openClose, prevProps.openClose);
+    // if (this.props.shouldClose === "closed" && prevProps.openClose === "open") {
+    //   this.setState({ open: false });
+    //   this.handleOpenClose();
+    // }
   };
 
   handleOpenClose = () => {
