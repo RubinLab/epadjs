@@ -192,6 +192,7 @@ class DisplayView extends Component {
     // const element = document.getElementById("petViewport");
     // console.log("element is", cornerstone);
     // cornerstone.enable(element);
+    // this.props.closeLeftMenu();
   }
 
   async componentDidUpdate(prevProps, prevState) {

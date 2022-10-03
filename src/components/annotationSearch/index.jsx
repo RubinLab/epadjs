@@ -1459,11 +1459,11 @@ const AnnotationSearch = props => {
           <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
         </div>
       </div>
-      <table className="table table-dark table-striped table-hover title-case" >
+      <table className="table table-dark table-striped table-hover title-case" style={{ "height": "100%" }}>
         <colgroup><col className="select_row" />
           <col span="15" />
         </colgroup>
-        <thead>
+        <thead className="sticky">
           <tr>
             <th className="select_row">
               <div className="form-check">

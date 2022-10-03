@@ -238,6 +238,8 @@ body {
   padding: 1px;
   /* display: flex; */
   /* color: white; */
+  display: block;
+  overflow-x: auto;
 }
 
 .mainView-closed {
