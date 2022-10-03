@@ -152,7 +152,12 @@ nav {
   }
 .body-dk{background-color: #222222; color:rgba(255, 255, 255, 0.55);  padding: 1em;}
 table, tbody{background-color: #222; font-weight: 400; font-size: .9em;}
-thead{background-color: #333; }
+.sticky{
+  position: relative;
+  position: sticky !important;
+  top: 0;
+  background-color: #333; 
+}
 
 thead th {background-color: #333 !important; color: #eaddb2; border-bottom: #222 solid 2px !important; border-right: #222 solid 5px; font-weight: 400}
 td i{text-align: center;}

@@ -13,9 +13,13 @@ class Rightsidebar extends Component {
   constructor(props) {
     super(props);
 
+    let x = window.matchMedia("(max-width: 1080px)");
+    console.log("X", x);
+    let rightDim = x.matches ? "320px" : "420px";
     this.state = {
-      width: "420px",
-      marginRight: "420px",
+      rightDim,
+      width: rightDim,
+      marginRight: rightDim,
       buttonDisplay: "block",
       open: true,
     };
@@ -24,7 +28,8 @@ class Rightsidebar extends Component {
   async componentDidMount() { }
 
   handleToggle = () => {
-    if (this.state.open) {
+    const { rightDim, open } = this.state;
+    if (open) {
       this.setState({
         width: "0px",
         marginRight: "0",
@@ -32,8 +37,8 @@ class Rightsidebar extends Component {
       });
     } else {
       this.setState({
-        width: "420px",
-        marginRight: "420px",
+        width: rightDim,
+        marginRight: rightDim,
         open: true,
       });
     }
@@ -78,7 +83,7 @@ class Rightsidebar extends Component {
         <div
           className={this.state.open ? "mainView" : "mainView-closed"}
           style={{
-            marginRight: (open ? '455px' : '35px'),
+            marginRight: (open ? (this.state.rightDim === "420px") ? '455px' : '355px' : '35px'),
             height: "calc(100% - 5px)",
           }}
         >
