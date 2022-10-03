@@ -385,6 +385,7 @@ class Sidebar extends Component {
     return (
       <div>
         <Collapsible
+          open={true}
           trigger="Created by me"
           onOpen={() => this.handleCollapse(0, true)}
           onClose={() => this.handleCollapse(0, false)}
@@ -399,6 +400,7 @@ class Sidebar extends Component {
           />
         </Collapsible>
         <Collapsible
+          open={true}
           trigger="Assigned to me"
           onOpen={() => this.handleCollapse(1, true)}
           onClose={() => this.handleCollapse(1, false)}
