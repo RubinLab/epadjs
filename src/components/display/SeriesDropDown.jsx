@@ -28,6 +28,8 @@ const SeriesDropDown = (props) => {
     }, [props.openStudies]);
 
     const handleSelect = (e) => {
+        if (props.openSeries[props.activePort].seriesUID === e)
+            return;
         const serie = seriesList.find(element => element.seriesUID == e);
         if (props.isAimEditorShowing) {
             // if (!props.onCloseAimEditor(true))
@@ -52,7 +54,8 @@ const SeriesDropDown = (props) => {
                 title="Other Series"
             >
                 {seriesList && seriesList.length && seriesList.map(({ seriesDescription, seriesUID, seriesNo, i }) => {
-                    return (<Dropdown.Item key={i} eventKey={seriesUID} onSelect={handleSelect} style={{ textAlign: "left !important" }}>{seriesNo ? seriesNo : "#NA"}  {seriesDescription?.length ? seriesDescription : "No Description"}</Dropdown.Item>);
+                    let isCurrent = props.openSeries[props.activePort].seriesUID === seriesUID;
+                    return (<Dropdown.Item key={i} eventKey={seriesUID} onSelect={handleSelect} style={{ textAlign: "left !important" }}>{seriesNo ? seriesNo : "#NA"}  {seriesDescription?.length ? seriesDescription : "No Description"} {isCurrent ? "(Current)" : ""}</Dropdown.Item>);
                 })}
             </DropdownButton>
         </div >
@@ -62,6 +65,7 @@ const SeriesDropDown = (props) => {
 const mapStateToProps = (state) => {
     return {
         openStudies: state.annotationsListReducer.openStudies,
+        openSeries: state.annotationsListReducer.openSeries,
         activePort: state.annotationsListReducer.activePort,
     };
 };
