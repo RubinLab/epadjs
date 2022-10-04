@@ -660,10 +660,9 @@ class App extends Component {
         keycloakJson.clientId =
           process.env.REACT_APP_AUTH_RESOURCE || keycloakData.resource;
         // added for teaching SSO connection. required for PHI
-        if (mode === "teaching")
-          keycloakJson.credentials = {
-            secret: process.env.REACT_APP_AUTH_SECRET || keycloakData["client-secret"]
-          };
+        // SSO requires PKCE
+        const pkce = process.env.REACT_APP_PKCE || keycloakData.pkce;
+        if (pkce) sessionStorage.setItem("pkce", pkce);
         // ---
         sessionStorage.setItem("auth", auth);
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
@@ -867,9 +866,10 @@ class App extends Component {
         const keycloak = Keycloak(
           JSON.parse(sessionStorage.getItem("keycloakJson"))
         );
+        const pkce =  sessionStorage.getItem("pkce");
         getAuthUser = new Promise((resolve, reject) => {
           keycloak
-            .init({ onLoad: "login-required" })
+            .init({ onLoad: "login-required", ...(pkce && pkce === "true" ? {pkceMethod: 'S256' }:{}) })
             .then((authenticated) => {
               keycloak
                 .loadUserInfo()
