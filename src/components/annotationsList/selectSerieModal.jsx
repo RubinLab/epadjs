@@ -350,6 +350,12 @@ class selectSerieModal extends React.Component {
   };
 
   saveTeachingFile = async () => {
+    if (this.semanticAnswers.checkFormSaveReady()) {
+      window.alert(
+        "Please fill name/title and all required answers or use required geometric shape"
+      );
+      return -1;
+    }
     const { encrUrlArgs, decrArgs } = this.props;
     const { projectID, patientID, studyUID } = decrArgs;
     let updatedAimId, trackingUId; //should be undefined for creating new aim
@@ -404,6 +410,9 @@ class selectSerieModal extends React.Component {
 
   saveTeachingFileAndDisplay = async () => {
     let result = await this.saveTeachingFile();
+    console.log("Result", result);
+    if (result === -1)
+      return;
     this.displaySelection(result);
   }
 
@@ -468,7 +477,7 @@ class selectSerieModal extends React.Component {
         <Modal.Footer className="select-serie-footer">
           {isTeachingFile && (
             <div>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => { this.saveTeachingFile(); this.handleCancel() }}>Save Teaching File</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) this.handleCancel() }}>Save Teaching File</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()}>Save Teaching File & Display</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Discard</Button>
             </div>
