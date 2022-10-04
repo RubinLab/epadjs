@@ -5,6 +5,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import { getSeries } from '../../services/seriesServices';
 import { addStudyToGrid, replaceInGrid, getSingleSerie, clearActivePortAimID } from 'components/annotationsList/action';
+import "./SeriesDropDown.css";
 
 const SeriesDropDown = (props) => {
     const [seriesList, setSeriesList] = useState([]);
@@ -29,7 +30,6 @@ const SeriesDropDown = (props) => {
     const handleSelect = (e) => {
         const serie = seriesList.find(element => element.seriesUID == e);
         if (props.isAimEditorShowing) {
-            console.log("Sonuc", props.onCloseAimEditor(true))
             // if (!props.onCloseAimEditor(true))
             //     return;
         }
@@ -51,8 +51,8 @@ const SeriesDropDown = (props) => {
                 variant="secondary"
                 title="Other Series"
             >
-                {seriesList && seriesList.length && seriesList.map(({ seriesDescription, seriesUID, i }) => {
-                    return (<Dropdown.Item key={i} eventKey={seriesUID} onSelect={handleSelect}>{seriesDescription?.length ? seriesDescription : "No Description"}</Dropdown.Item>);
+                {seriesList && seriesList.length && seriesList.map(({ seriesDescription, seriesUID, seriesNo, i }) => {
+                    return (<Dropdown.Item key={i} eventKey={seriesUID} onSelect={handleSelect} style={{ textAlign: "left !important" }}>{seriesNo ? seriesNo : "#NA"}  {seriesDescription?.length ? seriesDescription : "No Description"}</Dropdown.Item>);
                 })}
             </DropdownButton>
         </div >
