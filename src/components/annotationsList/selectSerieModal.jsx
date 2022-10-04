@@ -410,7 +410,6 @@ class selectSerieModal extends React.Component {
 
   saveTeachingFileAndDisplay = async () => {
     let result = await this.saveTeachingFile();
-    console.log("Result", result);
     if (result === -1)
       return;
     this.displaySelection(result);
