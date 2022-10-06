@@ -346,24 +346,22 @@ class WorklistCreationForm extends React.Component {
           )}
           {error ? <div className="err-message">{error}</div> : null}
         </Modal.Body>
-        <Modal.Footer >
-          <div className="create-user__modal--buttons">
+        <Modal.Footer className="modal-footer__buttons">
+          <Button variant="secondary"
+            onClick={button1Func}
+            disabled={page === 0}
+          >{button1Text}</Button>
+          <Button variant="secondary"
+            onClick={button2Func}
+            disabled={page === 0 ? disableNext : disableSubmit}
+            id="next-btn"
+          >{button2Text}</Button>
+          {mode === 'teaching' && this.state.page === 1 && (
             <Button variant="secondary"
-              onClick={button1Func}
-              disabled={page === 0}
-            >{button1Text}</Button>
-            <Button variant="secondary"
-              onClick={button2Func}
-              disabled={page === 0 ? disableNext : disableSubmit}
+              onClick={this.handleSaveWorklist}
               id="next-btn"
-            >{button2Text}</Button>
-            {mode === 'teaching' && this.state.page === 1 && (
-              <Button variant="secondary"
-                onClick={this.handleSaveWorklist}
-                id="next-btn"
-              >Submit</Button>)}
-            <Button variant="secondary" onClick={button3Func}>{button3Text}</Button>
-          </div>
+            >Submit</Button>)}
+          <Button variant="secondary" onClick={button3Func}>{button3Text}</Button>
         </Modal.Footer>
       </Modal.Dialog >
     );
