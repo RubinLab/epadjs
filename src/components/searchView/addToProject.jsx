@@ -56,7 +56,7 @@ const ProjectAdd = ({ projectMap, onSave, onClose, className, annotations }) => 
         console.error(e);
       }
     }
-    onClose();
+    // onClose();
   }
 
   const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (

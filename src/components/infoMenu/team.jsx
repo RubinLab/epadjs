@@ -1,16 +1,15 @@
 import React from "react";
-import { Modal } from "react-bootstrap";
-const mode = sessionStorage.getItem("mode");
-
-// import "../menuStyle.css";
+import { Modal, Button } from "react-bootstrap";
+import "./infoMenu.css";
 
 const team = props => {
+  const mode = sessionStorage.getItem("mode");
   return (
     <Modal id="modal-fix" show={true}>
-      <Modal.Header>
+      <Modal.Header className="modal-header">
         <Modal.Title>ePAD Team</Modal.Title>
       </Modal.Header>
-      <Modal.Body >
+      <Modal.Body className="notification-modal" >
         <>
           <p >
             Development of ePAD has been supported through a number of funding
@@ -30,9 +29,9 @@ const team = props => {
         </>
       </Modal.Body>
       <Modal.Footer >
-        <button variant="secondary" onClick={props.onOK}>
+        <Button variant="secondary" onClick={props.onOK}>
           OK
-        </button>
+        </Button>
       </Modal.Footer>
     </Modal>
   );

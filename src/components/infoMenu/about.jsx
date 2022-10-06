@@ -1,12 +1,16 @@
 import React from "react";
-import { Modal } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 import http from "../../services/httpService";
-const mode = sessionStorage.getItem("mode");
-const apiUrl = sessionStorage.getItem("apiUrl");
+import "./infoMenu.css";
+
+let mode;
+let apiUrl;
 
 class About extends React.Component {
   state = { data: {} };
   componentDidMount = () => {
+    mode = sessionStorage.getItem("mode");
+    apiUrl = sessionStorage.getItem("apiUrl");
     if (mode !== "lite") {
       this.getData();
     }
@@ -23,10 +27,10 @@ class About extends React.Component {
     return (
       // <Modal.Dialog dialogClassName="info-about__modal">
       <Modal id="modal-fix" show={true}>
-        <Modal.Header>
+        <Modal.Header className="modal-header">
           <Modal.Title>About ePAD {mode === "lite" ? "Lite" : ""}</Modal.Title>
         </Modal.Header>
-        <Modal.Body >
+        <Modal.Body className={"notification-modal"}>
           <div >
             A web-based platform for quantitative imaging in the clinical
             workflow.
@@ -95,9 +99,9 @@ class About extends React.Component {
         </Modal.Body>
 
         <Modal.Footer>
-          <button variant="secondary" onClick={this.props.onOK}>
+          <Button variant="secondary" onClick={this.props.onOK}>
             OK
-          </button>
+          </Button>
         </Modal.Footer>
       </Modal>
     );

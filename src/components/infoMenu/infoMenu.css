@@ -1,0 +1,24 @@
+.modal-title {
+    color: #d3d3d3 !important;
+    margin-bottom: 0;
+    line-height: 1.5;
+}
+
+.modal-header{
+    background-color: #666 !important;
+    border: none !important;    
+}
+
+.modal-footer{
+    background-color: #444 !important;
+    border: none !important;    
+}
+
+.modal{
+    color: #d3d3d3 !important;
+    font-size: 1.2rem !important;
+}
+
+.notification-modal{
+    background-color: #444 !important;
+}
