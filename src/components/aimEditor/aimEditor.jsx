@@ -86,11 +86,7 @@ class AimEditor extends Component {
     const projectTemplates = Object.keys(allTemplates)
       .filter((key) => templates.includes(key))
       .reduce((arr, key) => {
-        // Do not add the teaching file template to drop down as a work around
-        // to limit one one teaching file for one study
-        if (mode === "teaching" && key !== teachingFileTempCode) {
-          arr.push(allTemplates[key]);
-        }
+        arr.push(allTemplates[key]);
         return arr;
       }, []);
 

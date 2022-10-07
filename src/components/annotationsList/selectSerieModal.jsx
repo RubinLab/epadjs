@@ -175,7 +175,7 @@ class selectSerieModal extends React.Component {
     studies.forEach(arr => {
       series = series.concat(arr);
     });
-    setSignificantSeries(series);
+    this.setSignificantSeries(series);
 
     //concatanete all arrays to getther
     for (let key of Object.keys(selectedToDisplay)) {
@@ -352,12 +352,12 @@ class selectSerieModal extends React.Component {
   };
 
   saveTeachingFile = async () => {
-    if (this.semanticAnswers.checkFormSaveReady()) {
-      window.alert(
-        "Please fill name/title and all required answers or use required geometric shape"
-      );
-      return -1;
-    }
+    // if (this.semanticAnswers.checkFormSaveReady()) {
+    //   window.alert(
+    //     "Please fill name/title and all required answers or use required geometric shape"
+    //   );
+    //   return -1;
+    // }
     const { encrUrlArgs, decrArgs } = this.props;
     const { projectID, patientID, studyUID } = decrArgs;
     let updatedAimId, trackingUId; //should be undefined for creating new aim
@@ -398,7 +398,7 @@ class selectSerieModal extends React.Component {
         studies.forEach(arr => {
           series = series.concat(arr);
         });
-        setSignificantSeries(series);
+        this.setSignificantSeries(series);
         return result;
       })
       .catch((error) => {
@@ -478,7 +478,7 @@ class selectSerieModal extends React.Component {
         <Modal.Footer className="select-serie-footer">
           {isTeachingFile && (
             <div>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) this.handleCancel() }}>Save Teaching File</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) this.handleCancel(); this.props.onSave() }}>Save Teaching File</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()}>Save Teaching File & Display</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Discard</Button>
             </div>
