@@ -370,6 +370,7 @@ class selectSerieModal extends React.Component {
     const answers = this.semanticAnswers.saveAim();
     answers.name.value = "Teaching File";
     const { data: study } = await getSingleStudy(studyUID);
+    console.log("Study", study);
     const aimData = { study, answers, user: getUserForAim() };
     const aim = new Aim(
       aimData,

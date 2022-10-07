@@ -85,7 +85,6 @@ const AddToWorklist = (props) => {
 
   const addAnnotationsToWorklist = async (annotations, worklist) => {
     const aimIDs = Object.keys(annotations);
-    console.log("Event", worklist);
     try {
       await addAimsToWorklist(worklist, aimIDs);
       toast.success("Annotation(s) succesfully added to worklist.", {
