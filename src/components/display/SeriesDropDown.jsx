@@ -3,12 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { connect } from "react-redux";
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
+import { getStudyAims } from '../../services/studyServices';
 import { getSeries } from '../../services/seriesServices';
 import { addStudyToGrid, replaceInGrid, getSingleSerie, clearActivePortAimID } from 'components/annotationsList/action';
 import "./SeriesDropDown.css";
 
 const SeriesDropDown = (props) => {
     const [seriesList, setSeriesList] = useState([]);
+    const [aimCounts, setAimCounts] = useState({});
 
     useEffect(() => {
         const { studyUID, projectID, patientID } = props.serie;
@@ -44,9 +46,19 @@ const SeriesDropDown = (props) => {
         );
     }
 
+    const handleToggle = async (show) => {
+        if (!show)
+            return;
+        const { studyUID, projectID, patientID } = props.serie;
+        const isCountQuery = true;
+        const { data: aimCounts } = await getStudyAims(patientID, studyUID, projectID, isCountQuery);
+        setAimCounts(aimCounts);
+    }
+
     return (
         <div>
             <DropdownButton
+                onToggle={handleToggle}
                 key='button'
                 id={`dropdown-button-drop-1`}
                 size="sm"
@@ -55,7 +67,8 @@ const SeriesDropDown = (props) => {
             >
                 {seriesList && seriesList.length && seriesList.map(({ seriesDescription, seriesUID, seriesNo, i }) => {
                     let isCurrent = props.openSeries[props.activePort].seriesUID === seriesUID;
-                    return (<Dropdown.Item key={i} eventKey={seriesUID} onSelect={handleSelect} style={{ textAlign: "left !important" }}>{seriesNo ? seriesNo : "#NA"}  {seriesDescription?.length ? seriesDescription : "No Description"} {isCurrent ? "(Current)" : ""}</Dropdown.Item>);
+                    let counts = aimCounts[seriesUID] ? `- ${aimCounts[seriesUID]} Ann -` : ""
+                    return (<Dropdown.Item key={i} eventKey={seriesUID} onSelect={handleSelect} style={{ textAlign: "left !important" }}>{seriesNo ? seriesNo : "#NA"} {counts} {seriesDescription?.length ? seriesDescription : "No Description"} {isCurrent ? "(Current)" : ""}</Dropdown.Item>);
                 })}
             </DropdownButton>
         </div >

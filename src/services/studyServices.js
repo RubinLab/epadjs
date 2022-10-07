@@ -45,8 +45,9 @@ export function deleteStudy(study, delSys) {
   return http.delete(url);
 }
 
-export function getStudyAims(subjectID, studyUID, projectID = "lite") {
-  return http.get(
+export function getStudyAims(subjectID, studyUID, projectID = "lite", countQuery=false) {
+  if (countQuery)
+    return http.get(
     http.apiUrl() +
       "/projects/" +
       encodeURIComponent(projectID) +
@@ -54,8 +55,19 @@ export function getStudyAims(subjectID, studyUID, projectID = "lite") {
       encodeURIComponent(subjectID) +
       "/studies/" +
       encodeURIComponent(studyUID) +
-      "/aims"
+      "/aims?format=count"
   );
+  else 
+    return http.get(
+      http.apiUrl() +
+        "/projects/" +
+        encodeURIComponent(projectID) +
+        "/subjects/" +
+        encodeURIComponent(subjectID) +
+        "/studies/" +
+        encodeURIComponent(studyUID) +
+        "/aims"
+    );
 }
 
 export function saveStudy(projectID, subjectID, studyUid, studyDesc) {
