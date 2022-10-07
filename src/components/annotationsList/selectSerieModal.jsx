@@ -42,6 +42,7 @@ class selectSerieModal extends React.Component {
       list: []
     };
     this.maxPort = parseInt(sessionStorage.getItem("maxPort"));
+    this.mode = sessionStorage.getItem("mode");
   }
 
   //get the serie list
@@ -338,7 +339,8 @@ class selectSerieModal extends React.Component {
       }
       selectionList.push(
         <div key={keys[i]}>
-          <div className="serieSelection-title">{this.getTitle(series[i][0])}</div>
+          {this.mode !== "teaching" && (<div className="serieSelection-title">{this.getTitle(series[i][0])}</div>)}
+          {this.mode === "teaching" && (<p></p>)}
           <div>{innerList}</div>
         </div>
       );
