@@ -904,8 +904,8 @@ class App extends Component {
             let userData;
             try {
               userData = await getUser(username);
-              if(!userData){
-                if(mode==="teaching")
+              if(!userData?.data?.username){
+                if(this.state.mode==="teaching")
                   alert("User doesn't exist, you should login from Sectra first.");
                 else
                   alert("User doesn't exist, contact your administrator.");

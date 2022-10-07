@@ -379,8 +379,10 @@ const AnnotationSearch = props => {
   };
 
   const updateSelectedAims = aimData => {
-    if (props.selectedAnnotations[aimData.aimID])
+    if (props.selectedAnnotations[aimData.aimID]) {
       setAllSelected(false);
+    }
+
     props.dispatch(selectAnnotation(aimData));
   };
 
@@ -857,6 +859,9 @@ const AnnotationSearch = props => {
   };
 
   const handleSelectDeselectAll = ({ target: { checked } }) => {
+    console.log("select all", allSelected);
+    console.log("handle select deselect all", checked);
+    console.trace();
     if (checked) {
       handleMultipleSelect('selectPageAll');
       setAllSelected(true);
