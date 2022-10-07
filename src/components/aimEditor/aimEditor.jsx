@@ -22,7 +22,7 @@ import { prepAimForParseClass, getMarkups, getUserForAim } from "./Helpers";
 import * as questionaire from "./parseClass.js";
 import * as dcmjs from "dcmjs";
 import Switch from "react-switch";
-import { Modal } from "react-bootstrap";
+import { teachingFileTempCode } from "../../constants";
 import "./aimEditor.css";
 
 let mode;
@@ -86,7 +86,11 @@ class AimEditor extends Component {
     const projectTemplates = Object.keys(allTemplates)
       .filter((key) => templates.includes(key))
       .reduce((arr, key) => {
-        arr.push(allTemplates[key]);
+        // Do not add the teaching file template to drop down as a work around
+        // to limit one one teaching file for one study
+        if (mode === "teaching" && key !== teachingFileTempCode) {
+          arr.push(allTemplates[key]);
+        }
         return arr;
       }, []);
 
