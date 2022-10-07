@@ -1578,6 +1578,7 @@ const AnnotationSearch = props => {
             isTeachingFile={true}
             encrUrlArgs={encArgs}
             decrArgs={decrArgs}
+            onSave={getNewData}
           />
         )}
       </table>
