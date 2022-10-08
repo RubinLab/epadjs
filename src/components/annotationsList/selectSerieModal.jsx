@@ -371,6 +371,12 @@ class selectSerieModal extends React.Component {
     answers.name.value = "Teaching File";
     const { data: study } = await getSingleStudy(studyUID);
     console.log("Study", study);
+    let examTypes;
+    ({ examTypes } = study);
+    if (examTypes?.length === 1 && examTypes[0].includes("\\")) {
+      examTypes = examTypes[0].split("\\");
+    }
+    console.log("Exam types", examTypes);
     const aimData = { study, answers, user: getUserForAim() };
     const aim = new Aim(
       aimData,
