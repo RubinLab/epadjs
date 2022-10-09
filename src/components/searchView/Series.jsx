@@ -195,7 +195,7 @@ function Series(props) {
         props.dispatch(addToGrid(selected));
         props
           .dispatch(getSingleSerie(selected))
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.error(err));
         //if grid is NOT full check if patient data exists
         // -----> Delete after v1.0 <-----
@@ -281,9 +281,9 @@ function Series(props) {
                 }}
               >
                 {row.isExpanded ||
-                props.treeExpand[props.patientIndex][props.studyIndex][
+                  props.treeExpand[props.patientIndex][props.studyIndex][
                   row.index
-                ] ? (
+                  ] ? (
                   <span>&#x25BC;</span>
                 ) : (
                   <span>&#x25B6;</span>
@@ -480,7 +480,7 @@ function Series(props) {
         studyIndex={props.studyIndex}
         getTreeExpandSingle={props.getTreeExpandSingle}
         update={props.update}
-        // progressUpdated={this.props.progressUpdated}
+      // progressUpdated={this.props.progressUpdated}
       />
       {showSelectSerie && (
         <SelectSerieModal

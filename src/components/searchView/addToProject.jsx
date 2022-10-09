@@ -1,14 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
 import Dropdown from 'react-bootstrap/Dropdown';
 import { BiDownload } from 'react-icons/bi';
 import { addAimsToProject } from "../../services/projectServices";
+import { setShadow } from "cornerstone-tools/drawing";
 
-const ProjectAdd = ({ projectMap, onSave, onClose, className, annotations }) => {
+const ProjectAdd = ({ projectMap, onSave, onClose, className, annotations, deselect }) => {
   const projectNames = Object.values(projectMap);
   const projectIDs = Object.keys(projectMap);
   // let wrapperRef = useRef(null);
+
+  const [show, setShow] = useState(false);
 
   const element = document.getElementsByClassName(className);
 
@@ -44,6 +47,7 @@ const ProjectAdd = ({ projectMap, onSave, onClose, className, annotations }) => 
           pauseOnHover: true,
           draggable: false,
         });
+        deselect();
       } catch (e) {
         toast.fail("Error moving annotation(s).", {
           position: "top-right",
@@ -56,12 +60,12 @@ const ProjectAdd = ({ projectMap, onSave, onClose, className, annotations }) => 
         console.error(e);
       }
     }
-    // onClose();
+    setShow(false);
   }
 
-  const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
-    <button type="button" className="btn btn-sm color-schema" ref={ref}
-      onClick={(e) => {
+  const CustomToggle2 = React.forwardRef(({ children, onClick }, ref2) => (
+    <button type="button" className="btn btn-sm color-schema" ref={ref2}
+      onClick={e => {
         onClick(e);
       }}>
       <BiDownload /><br />
@@ -70,16 +74,16 @@ const ProjectAdd = ({ projectMap, onSave, onClose, className, annotations }) => 
   ));
 
   return (
-    <Dropdown className="d-inline" >
-      <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
+    <Dropdown id="2" className="d-inline">
+      <Dropdown.Toggle as={CustomToggle2} id="dropdown-custom-components2">
         Copy To Project
       </Dropdown.Toggle>
 
-      <Dropdown.Menu className="dropdown-menu p-2 dropdown-menu-dark" style={{ backgroundColor: '#333', borderColor: 'white' }} >
+      <Dropdown.Menu id="2-2" className="dropdown-menu p-2 dropdown-menu-dark" style={{ backgroundColor: '#333', borderColor: 'white' }}>
         {projectNames?.map(({ projectName }, y) => {
           return (
             <div key={y} id={projectIDs[y]} className="row" onClick={addSelectionToProject}>
-              <label id={projectIDs[y]} className="form-check-label title-case" style={{ paddingLeft: '0.3rem', cursor: 'pointer' }} htmlFor="flexCheckDefault">
+              <label id={projectIDs[y]} className="form-check-label title-case" style={{ paddingLeft: '0.3rem', cursor: 'pointer' }} htmlFor="flexCheckDefault" >
                 {projectName}
               </label>
             </div>

@@ -1,13 +1,15 @@
 import React from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 import {
   downloadAnnotations,
   downloadAllAnnotations
 } from "../../services/annotationServices";
 import { ToastContainer, toast } from "react-toastify";
 import { clearSelection } from "../annotationsList/action";
+import "../infoMenu/infoMenu.css";
+
 const support = false;
 
 class AnnnotationDownloadModal extends React.Component {
@@ -72,12 +74,12 @@ class AnnnotationDownloadModal extends React.Component {
       <Modal size="sm"
         aria-labelledby="contained-modal-title-vcenter"
         centered show={show}>
-        <Modal.Header>
+        <Modal.Header className={"modal-header"}>
           <Modal.Title id="contained-modal-title-vcenter" className="annDownload__header">
             Select Download Format
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body className="annDownload-container">
+        <Modal.Body className="annDownload-container notification-modal">
           <div className="annDownload-option">
             <input
               type="checkbox"
@@ -139,14 +141,14 @@ class AnnnotationDownloadModal extends React.Component {
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
           {disabled ? (
-            <button onClick={this.onDownload} disabled>
+            <Button variant="secondary" onClick={this.onDownload} disabled>
               Submit
-            </button>
+            </Button>
           ) : (
-            <button onClick={this.onDownload}>Submit</button>
+            <Button variant="secondary" onClick={this.onDownload}>Submit</Button>
           )}
 
-          <button onClick={this.props.onCancel}>Cancel</button>
+          <Button variant="secondary" onClick={this.props.onCancel}>Cancel</Button>
         </Modal.Footer>
       </Modal>
     );

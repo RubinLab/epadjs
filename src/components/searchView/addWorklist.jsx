@@ -85,7 +85,6 @@ const AddToWorklist = (props) => {
 
   const addAnnotationsToWorklist = async (annotations, worklist) => {
     const aimIDs = Object.keys(annotations);
-    console.log("Event", worklist);
     try {
       await addAimsToWorklist(worklist, aimIDs);
       toast.success("Annotation(s) succesfully added to worklist.", {
@@ -96,6 +95,7 @@ const AddToWorklist = (props) => {
         pauseOnHover: true,
         draggable: false,
       });
+      props.deselect();
     } catch (e) {
       toast.error("Error adding annotation(s) to worklist.", {
         position: "top-right",
@@ -107,7 +107,6 @@ const AddToWorklist = (props) => {
       });
       console.error(e);
     }
-    setShow(false);
   }
 
   const fillWorklists = async () => {
@@ -126,8 +125,8 @@ const AddToWorklist = (props) => {
     }
   };
 
-  const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
-    <button type="button" className="btn btn-sm color-schema" ref={ref}
+  const CustomToggle3 = React.forwardRef(({ children, onClick }, ref3) => (
+    <button type="button" className="btn btn-sm color-schema" ref={ref3}
       onClick={e => {
         if (firstRun) {
           fillWorklists();
@@ -141,12 +140,12 @@ const AddToWorklist = (props) => {
   ));
 
   return (
-    <Dropdown className="d-inline" >
-      <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
+    <Dropdown id="1" className="d-inline">
+      <Dropdown.Toggle as={CustomToggle3} id="dropdown-custom-components">
         Add To Worklist
       </Dropdown.Toggle>
 
-      <Dropdown.Menu className="dropdown-menu p-2 dropdown-menu-dark" style={{ backgroundColor: '#333', borderColor: 'white' }} >
+      <Dropdown.Menu id="1-1" className="dropdown-menu p-2 dropdown-menu-dark" style={{ backgroundColor: '#333', borderColor: 'white' }} >
         {worklists?.map(({ name, workListID }, y) => {
           return (
             <div key={y} id={workListID} className="row" onClick={onSelect}>

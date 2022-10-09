@@ -274,7 +274,6 @@ export const selectSerie = (selectedSerieObj, studyDescription) => {
 
   return {
     type: SELECT_SERIE,
-
     serie: {
       seriesUID,
       studyUID,

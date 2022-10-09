@@ -856,14 +856,14 @@ const AnnotationSearch = props => {
     return options;
   };
 
-  const handleSelectDeselectAll = ({ target: { checked } }) => {
+  const handleSelectDeselectAll = (checked) => {
     if (checked) {
       handleMultipleSelect('selectPageAll');
-      setAllSelected(true);
+      setAllSelected(checked);
     }
     else {
       handleMultipleSelect('unselectPageAll');
-      setAllSelected(false);
+      setAllSelected(checked);
     }
   }
 
@@ -1452,8 +1452,8 @@ const AnnotationSearch = props => {
           <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
           {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
           {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
-          <AddToWorklist />
-          <Projects />
+          <AddToWorklist deselect={() => handleSelectDeselectAll(false)} />
+          <Projects deselect={() => handleSelectDeselectAll(false)} />
           {/* <button type="button" className="btn btn-sm" onClick={() => { setShowProjects(!showProjects) }}><BiDownload /><br />Copy to Project</button>
           {showProjects && (<Projects className='btn btn-sm worklist' onClose={() => { setShowProjects(false) }} />)} */}
           <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
@@ -1467,7 +1467,7 @@ const AnnotationSearch = props => {
           <tr>
             <th className="select_row">
               <div className="form-check">
-                <input className="form-check-input" type="checkbox" checked={allSelected} id="flexCheckDefault" onChange={handleSelectDeselectAll} />
+                <input className="form-check-input" type="checkbox" checked={allSelected} onChange={({ target: { checked } }) => handleSelectDeselectAll(checked)} />
               </div>
             </th>
             <th>
