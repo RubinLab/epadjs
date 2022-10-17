@@ -69,6 +69,7 @@ class Sidebar extends Component {
     } catch (error) {
       console.error(error);
     }
+    window.addEventListener("refreshProjects", this.getProjectsData);
   };
 
   setTabHeight = () => {
@@ -83,6 +84,7 @@ class Sidebar extends Component {
 
   componentWillUnmount = () => {
     // window.removeEventListener("resize", this.setTabHeight);
+    window.removeEventListener("refreshProjects", this.getProjectsData);
   };
 
   getProjectsData = async () => {
