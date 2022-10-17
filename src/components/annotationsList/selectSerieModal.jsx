@@ -352,12 +352,12 @@ class selectSerieModal extends React.Component {
   };
 
   saveTeachingFile = async () => {
-    // if (this.semanticAnswers.checkFormSaveReady()) {
-    //   window.alert(
-    //     "Please fill name/title and all required answers or use required geometric shape"
-    //   );
-    //   return -1;
-    // }
+    if (this.semanticAnswers.checkFormSaveReady()) {
+      window.alert(
+        "Please fill all required fields!"
+      );
+      return -1;
+    }
     const { encrUrlArgs, decrArgs } = this.props;
     const { projectID, patientID, studyUID } = decrArgs;
     let updatedAimId, trackingUId; //should be undefined for creating new aim
