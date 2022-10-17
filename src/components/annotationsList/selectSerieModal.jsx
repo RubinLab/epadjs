@@ -391,7 +391,7 @@ class selectSerieModal extends React.Component {
 
     return uploadAim(aimSaved, projectID, isUpdate)
       .then(() => {
-
+        window.dispatchEvent(new Event("refreshProjects"));
         toast.success("Teaching File succesfully saved.", {
           position: "top-right",
           autoClose: 5000,
