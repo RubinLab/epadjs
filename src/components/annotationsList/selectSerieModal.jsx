@@ -352,12 +352,12 @@ class selectSerieModal extends React.Component {
   };
 
   saveTeachingFile = async () => {
-    // if (this.semanticAnswers.checkFormSaveReady()) {
-    //   window.alert(
-    //     "Please fill name/title and all required answers or use required geometric shape"
-    //   );
-    //   return -1;
-    // }
+    if (this.semanticAnswers.checkFormSaveReady()) {
+      window.alert(
+        "Please fill all required fields!"
+      );
+      return -1;
+    }
     const { encrUrlArgs, decrArgs } = this.props;
     const { projectID, patientID, studyUID } = decrArgs;
     let updatedAimId, trackingUId; //should be undefined for creating new aim
@@ -372,11 +372,12 @@ class selectSerieModal extends React.Component {
     const { data: study } = await getSingleStudy(studyUID);
     console.log("Study", study);
     let examTypes;
+    console.log("Exam types original", study.examTypes);
     ({ examTypes } = study);
     if (examTypes?.length === 1 && examTypes[0].includes("\\")) {
       examTypes = examTypes[0].split("\\");
     }
-    console.log("Exam types", examTypes);
+    console.log("Exam types after split", examTypes);
     const aimData = { study, answers, user: getUserForAim() };
     const aim = new Aim(
       aimData,

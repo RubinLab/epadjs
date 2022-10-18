@@ -1018,6 +1018,7 @@ class App extends Component {
   };
 
   onLogout = (e) => {
+    console.log("Logging out");
     auth.logout();
     // sessionStorage.removeItem("annotations");
     sessionStorage.setItem("notifications", JSON.stringify([]));
@@ -1350,7 +1351,9 @@ class App extends Component {
               openClose={this.state.leftMenuState}
             >
               <Switch className="splitted-mainview">
-                <Route path="/logout" component={Logout} />
+                <Route path="/logout" render={(props) => (
+                  <Logout logout={this.onLogout}/>
+                )}/>
                 <ProtectedRoute
                   path="/display"
                   render={(props) => (
