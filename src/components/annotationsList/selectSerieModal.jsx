@@ -83,12 +83,15 @@ class selectSerieModal extends React.Component {
         { speciality, anatomy, diagnosis }, // the new div which holds only teaching components for aim editor
         "#ccc"
       );
+      console.log("Loading templates");
       const { data: templates } = await getTemplate(teachingFileTempUid);
+      console.log("Loaded templates now rendering");
       this.semanticAnswers.loadTemplates({
         default: teachingFileTempCode,
         all: [templates],
       });
       this.semanticAnswers.createViewerWindow();
+      console.log("rendered");
 
     };// end teaching file related part
   }

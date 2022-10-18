@@ -904,19 +904,19 @@ class App extends Component {
             let userData;
             try {
               userData = await getUser(username);
-              if(!userData?.data?.username){
-                if(this.state.mode==="teaching")
-                  alert("User doesn't exist, you should login from Sectra first.");
-                else
-                  alert("User doesn't exist, contact your administrator.");
-                this.onLogout();
-              }
               // check if userData exists if not alert and logout
               // if teaching "User doesn't exist, you should login from Sectra first."
               // "User doesn't exist, contact your administrator."
               userData = userData.data;
               this.setState({ admin: userData.admin });
             } catch (err) {
+              if(err.statusCode === 401){
+                if(this.state.mode==="teaching")
+                  alert("User doesn't exist, you should login from Sectra first.");
+                else
+                  alert("User doesn't exist, contact your administrator.");
+                this.onLogout();
+              }
               console.error(err);
             }
             let displayname = userData.firstname.concat(' ',userData.lastname);

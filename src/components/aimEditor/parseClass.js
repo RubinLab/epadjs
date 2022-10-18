@@ -326,6 +326,7 @@ export var AimEditor = function (
     document.getElementById("tlist").children[0].style.width = "100%";
     self.templateSelect.style.width = "100%";
     templateDiv.style.width = "100%";
+    console.log("Window created");
   };
 
   this.extractTemplate = function (json) {
@@ -357,6 +358,12 @@ export var AimEditor = function (
 
     var labelAnnotationName = document.createElement("label");
     var labelAnnotationNameInput = document.createElement("INPUT");
+    labelAnnotationNameInput.setAttribute("id", "annotationName");
+
+    // To put red circle for name
+    // var headerCheckIcon = document.createElement("i");
+    // headerCheckIcon.className = "red check circle outline icon";
+    // headerCheckIcon.id = labelAnnotationNameInput.id;
 
     if (mode === "teaching" && templateCode === teachingFileTempCode) {
       labelAnnotationName.textContent = "Case Title";
@@ -385,6 +392,7 @@ export var AimEditor = function (
     annotationNameDiv.appendChild(labelAnnotationName);
     annotationNameDiv.appendChild(labelAnnotationNameInput);
     annotationNameLabelDiv.appendChild(labelAnnotationName);
+    // annotationNameLabelDiv.appendChild(headerCheckIcon);
     annotationNameDiv.className = "comment ui input";
     annotationNameDiv.style.width = "100%";
 
