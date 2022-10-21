@@ -3705,15 +3705,17 @@ export var AimEditor = function (
         objs[i].className = "green check circle outline icon";
     }
   };
-  this.checkFormSaveReady = function () {
+  this.checkFormSaveReady = function ({isTeachingModal=false}) {
     var countRedCircle = 0;
     var objs = document.getElementsByTagName("i");
+    console.log("Objs", objs);
 
     for (var i = 0; i < objs.length; i++) {
       if (objs[i].className == "red check circle outline icon")
         countRedCircle++;
     }
-    if (document.getElementById("annotationName").value === "")
+    // Annotation name is not mandotory when creating aim from teaching popup
+    if (document.getElementById("annotationName").value === "" && !isTeachingModal)
       countRedCircle++;
     return countRedCircle;
   };

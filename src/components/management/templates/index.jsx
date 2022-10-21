@@ -462,22 +462,42 @@ class Templates extends React.Component {
     const pageSize =
       templates.length < 10 ? 10 : templates.length >= 40 ? 50 : 20;
     return (
-      <div className="templates menu-display" id="template">
-        <ToolBar
-          onDelete={this.handleDeleteAll}
-          selected={checkboxSelected}
-          onUpload={this.handleUpload}
-          onDownload={this.handleDownload}
-        />
-        <ReactTable
-          NoDataComponent={() => null}
-          className="pro-table"
-          data={templates}
-          columns={this.defineColumns()}
-          pageSizeOptions={[10, 20, 50]}
-          defaultPageSize={pageSize}
-        />
-
+      <>
+        <div className="templates menu-display" id="template">
+          <ToolBar
+            onDelete={this.handleDeleteAll}
+            selected={checkboxSelected}
+            onUpload={this.handleUpload}
+            onDownload={this.handleDownload}
+          />
+          <ReactTable
+            NoDataComponent={() => null}
+            className="pro-table"
+            data={templates}
+            columns={this.defineColumns()}
+            pageSizeOptions={[10, 20, 50]}
+            defaultPageSize={pageSize}
+          />
+          {uploadClicked && (
+            <UploadModal
+              onCancel={this.handleCancel}
+              onSubmit={this.handleSubmitUpload}
+              pid={this.props.pid}
+              className="mng-upload"
+            />
+          )}
+          {hasEditClicked && (
+            <EditTemplates
+              projectList={projectList}
+              onCancel={this.handleCancel}
+              templateProjects={tempProjects}
+              onSubmit={this.handleTemplateProjectSubmit}
+              onSelect={this.handleTemplateProjectSelect}
+              selected={tempProSelect}
+              templateName={templateName}
+            />
+          )}
+        </div>
         {(delAll || delOne) && (
           <DeleteAlert
             message={
@@ -490,26 +510,7 @@ class Templates extends React.Component {
             error={errorMessage}
           />
         )}
-        {uploadClicked && (
-          <UploadModal
-            onCancel={this.handleCancel}
-            onSubmit={this.handleSubmitUpload}
-            pid={this.props.pid}
-            className="mng-upload"
-          />
-        )}
-        {hasEditClicked && (
-          <EditTemplates
-            projectList={projectList}
-            onCancel={this.handleCancel}
-            templateProjects={tempProjects}
-            onSubmit={this.handleTemplateProjectSubmit}
-            onSelect={this.handleTemplateProjectSelect}
-            selected={tempProSelect}
-            templateName={templateName}
-          />
-        )}
-      </div>
+      </>
     );
   };
 }

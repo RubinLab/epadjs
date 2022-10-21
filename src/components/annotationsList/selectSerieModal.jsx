@@ -355,7 +355,7 @@ class selectSerieModal extends React.Component {
   };
 
   saveTeachingFile = async () => {
-    if (this.semanticAnswers.checkFormSaveReady()) {
+    if (this.semanticAnswers.checkFormSaveReady({ isTeachingModal: true })) {
       window.alert(
         "Please fill all required fields!"
       );
