@@ -430,7 +430,7 @@ class selectSerieModal extends React.Component {
 
   render = () => {
     const { openSeries, isTeachingFile } = this.props;
-    const title = isTeachingFile ? "Create STELLA Teaching File" : "Not enough viewports to display series"
+    const title = isTeachingFile ? "Create STELLA Teaching File" : "Series Selection Window"
     const selections = Object.keys(this.state.selectedToDisplay);
     const list = this.renderSelection();
     return (
@@ -463,7 +463,7 @@ class selectSerieModal extends React.Component {
           <div className={"max-series"}>Please select up to {this.maxPort} series to display:</div>
           {openSeries.length > 0 && (
             <div>
-              You can close open series to open veiwport space for new one.
+              Four viewports in use - close some or all to open new series.
               <br />
               <button
                 size="lg"
