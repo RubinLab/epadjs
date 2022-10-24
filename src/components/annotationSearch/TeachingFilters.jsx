@@ -25,7 +25,7 @@ class TeachingFilters extends React.Component {
                 <div className="col-3" style={{ fontSize: '.9em', float: 'right' }}>
                     <div className="form-check form-check-inline" >
                         <label className="form-check-label" htmlFor="flexCheckChecked" style={{ color: "rgba(255,255,255,.55)", paddingLeft: '0px', paddingRight: '5px' }}>Inc Significant Images</label>
-                        <input className="form-check-input" type="checkbox" id="flexCheckChecked" key={"tfOnly"} checked={tfOnly} onChange={e => setTfOnly(!e.target.checked)} />
+                        <input className="form-check-input" type="checkbox" id="flexCheckChecked" key={"tfOnly"} checked={!tfOnly} onChange={e => setTfOnly(!e.target.checked)} />
                     </div>
                     <div className="form-check form-check-inline">
                         <label className="form-check-label" htmlFor="flexCheckChecked" style={{ color: "rgba(255,255,255,.55)", paddingLeft: '0px' }}>Only My Cases</label>
