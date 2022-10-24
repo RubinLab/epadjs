@@ -430,7 +430,7 @@ class selectSerieModal extends React.Component {
 
   render = () => {
     const { openSeries, isTeachingFile } = this.props;
-    const title = isTeachingFile ? "Create STELLA Teaching File" : "Not enough viewports to display series"
+    const title = isTeachingFile ? "Create STELLA Teaching File" : "Series Selection Window"
     const selections = Object.keys(this.state.selectedToDisplay);
     const list = this.renderSelection();
     return (
