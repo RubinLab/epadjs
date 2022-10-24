@@ -463,7 +463,7 @@ class selectSerieModal extends React.Component {
           <div className={"max-series"}>Please select up to {this.maxPort} series to display:</div>
           {openSeries.length > 0 && (
             <div>
-              You can close open series to open veiwport space for new one.
+              Four viewports in use - close some or all to open new series.
               <br />
               <button
                 size="lg"
