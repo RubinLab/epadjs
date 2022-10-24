@@ -501,7 +501,7 @@ h5.add-subject__modal--label,
   left: 30%;
   border: 2px solid grey;
   box-shadow: 1rem 1rem 1rem grey;
-  z-index: 100;
+  z-index: 1000000;
 }
 
 .notifications {
