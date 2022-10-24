@@ -74,16 +74,16 @@ const aimEntityData = ({ aimData, id }) => {
       </li>
     );
   });
-  if (mode === "teaching") {
-    const comment = aimData.comment.value;
-    const textComment = comment.split("/")[3].replaceAll("~", "");
-    listArr.push(
-      <li key={"narrative"}>
-        <b>Narrative:</b> {textComment}
-      </li>
-    );
-  }
-  return <ul>{listArr}</ul>;
+  // if (mode === "teaching") {
+  //   const comment = aimData.comment.value;
+  //   const textComment = comment.split("/")[3].replaceAll("~", "");
+  //   listArr.push(
+  //     <li key={"narrative"}>
+  //       <b>Narrative:</b> {textComment}
+  //     </li>
+  //   );
+  // }
+  return listArr;
 };
 
 export default aimEntityData;

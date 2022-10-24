@@ -28,21 +28,14 @@ const calculationLabel = ({ calculations, name }) => {
                 ? "Min"
                 : calcArr[i].type;
         labelArr.push(
-          <div
-            className="-calculation__label--el"
-            key={k + i + calcArr[i].type}
-          >
-            <div className={classDesc}>{`${type}: `}</div>
-            <div className={classDesc}>
-              {val}
-              {unit}
-            </div>
-          </div>
+          <li key={k + i + calcArr[i].type}>
+            <b>{`${type}`}:</b> {val}{unit}
+          </li>
         );
       }
     }
   }
-  return <div className="annotation-calculation__label">{labelArr}</div>;
+  return labelArr;
 };
 
 export default calculationLabel;

@@ -10,6 +10,7 @@ import AimEntityData from "./aimEntityData";
 import CalculationLabel from "./calculationLabel";
 
 const annotation = (props) => {
+  const mode = sessionStorage.getItem("mode");
   //conditional borderstyling
   let buttonStyle = { ...props.style.button };
   let labelStyle = { ...props.style.label };
@@ -39,6 +40,11 @@ const annotation = (props) => {
   let displayEyeIcon = true;
   if (props.aim.markupType && props.aim.markupType[0])
     displayEyeIcon = true;
+
+  let comment = props.aim.comment.value;
+  console.log("comment", comment);
+  let narrative = comment.split("~~")[1];
+  console.log("Narrative", narrative);
   return (
     <>
       {/* <div className={className} style={finalButtonStyle}> */}
@@ -71,17 +77,31 @@ const annotation = (props) => {
         <div className={'annotation-back'} style={labelStyle}>
           <div className="annotation-text">
             {props.user} - {props.aim.typeCode[0].code}
+            <ul>
 
-            {hasEntityData && (
-              <AimEntityData aimData={props.aim} id={props.id} />
-            )}
-            {/* {calculations.length > 0 && calculations.length <= 10 && ( */}
-            <CalculationLabel
-              calculations={props.label}
-              name={props.name}
-              markupType={props.markupType}
-            />
-            {/* )} */}
+              {hasEntityData && (
+                <AimEntityData aimData={props.aim} id={props.id} />
+              )}
+              {/* {calculations.length > 0 && calculations.length <= 10 && ( */}
+              <CalculationLabel
+                calculations={props.label}
+                name={props.name}
+                markupType={props.markupType}
+              />
+              {/* )} */}
+
+              {mode === "teaching" && narrative && narrative !== "" && (
+
+                <li key={"narrative"}>
+                  <b>Narrative:</b> {narrative}
+                </li>
+
+              )}
+            </ul>
+
+
+
+
           </div>
         </div>
       )}
