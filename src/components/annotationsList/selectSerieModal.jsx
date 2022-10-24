@@ -381,6 +381,7 @@ class selectSerieModal extends React.Component {
       examTypes = examTypes[0].split("\\");
     }
     console.log("Exam types after split", examTypes);
+    study.examTypes = examTypes;
     const aimData = { study, answers, user: getUserForAim() };
     const aim = new Aim(
       aimData,
