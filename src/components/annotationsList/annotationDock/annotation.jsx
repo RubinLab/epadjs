@@ -42,9 +42,7 @@ const annotation = (props) => {
     displayEyeIcon = true;
 
   let comment = props.aim.comment.value;
-  console.log("comment", comment);
   let narrative = comment.split("~~")[1];
-  console.log("Narrative", narrative);
   return (
     <>
       {/* <div className={className} style={finalButtonStyle}> */}
