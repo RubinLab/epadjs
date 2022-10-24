@@ -3705,10 +3705,9 @@ export var AimEditor = function (
         objs[i].className = "green check circle outline icon";
     }
   };
-  this.checkFormSaveReady = function ({isTeachingModal=false}) {
+  this.checkFormSaveReady = function ({isTeachingModal}={}) {
     var countRedCircle = 0;
     var objs = document.getElementsByTagName("i");
-    console.log("Objs", objs);
 
     for (var i = 0; i < objs.length; i++) {
       if (objs[i].className == "red check circle outline icon")

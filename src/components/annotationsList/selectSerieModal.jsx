@@ -489,7 +489,7 @@ class selectSerieModal extends React.Component {
         <Modal.Footer className="select-serie-footer">
           {isTeachingFile && (
             <div>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) this.handleCancel(); this.props.onSave() }}>Save Teaching File</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) { this.handleCancel(); this.props.onSave() } }}>Save Teaching File</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()}>Save Teaching File & Display</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Discard</Button>
             </div>
