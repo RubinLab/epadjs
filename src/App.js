@@ -963,6 +963,15 @@ class App extends Component {
             );
             resolve();
           } catch (err) {
+            console.log("Error in catch", err);
+              if(err.statusCode === 401){
+                if(this.state.mode==="teaching")
+                  alert("User doesn't exist, you should login from Sectra first.");
+                else
+                  alert("User doesn't exist, contact your administrator.");
+                this.onLogout();
+              }
+              console.error(err);
             reject("Error in user retrieval!", err);
           }
         })
@@ -1035,6 +1044,8 @@ class App extends Component {
         this.setState({
           keycloak: null,
         });
+        console.log("clearing token");
+        this.state.keycloak.clearToken();
         auth.logout();
       });
     else console.log("No logout in external authentication mode");
