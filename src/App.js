@@ -1044,6 +1044,8 @@ class App extends Component {
         this.setState({
           keycloak: null,
         });
+        console.log("clearing token");
+        this.state.keycloak.clearToken();
         auth.logout();
       });
     else console.log("No logout in external authentication mode");
