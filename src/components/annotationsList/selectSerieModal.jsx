@@ -382,6 +382,7 @@ class selectSerieModal extends React.Component {
     }
     console.log("Exam types after split", examTypes);
     study.examTypes = examTypes;
+    console.log("Study sent to aim creation", study);
     const aimData = { study, answers, user: getUserForAim() };
     const aim = new Aim(
       aimData,
