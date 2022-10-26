@@ -478,7 +478,7 @@ class selectSerieModal extends React.Component {
           {this.state.limit > this.maxPort && !openSeries.length && (
             <div>Please select only {this.maxPort} series to open!</div>
           )}
-          <div>{list}</div>
+          <div style={{ paddingLeft: "0.5em", maxHeight: "500px", overflowY: "auto" }}>{list}</div>
         </Modal.Body>
         <Modal.Footer className="select-serie-footer">
           {isTeachingFile && (
