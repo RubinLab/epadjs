@@ -361,6 +361,7 @@ export var AimEditor = function (
     labelAnnotationNameInput.setAttribute("id", "annotationName");
 
     // To put red circle for name
+    console.log("Is teaching dile flag", isTeachingFlag);
     if(!isTeachingFlag){
       var headerCheckIcon = document.createElement("i");
       headerCheckIcon.className = "red check circle outline icon";
@@ -383,10 +384,12 @@ export var AimEditor = function (
 
     labelAnnotationNameInput.onkeyup = function () {
       // make sure aim has name 
-      let iconToChange =  document.getElementById("annotationNameIcon");
-      if(labelAnnotationNameInput.value.length)
-        iconToChange.className = "green check circle outline icon"
-      else iconToChange.className = "red check circle outline icon";
+      if(!isTeachingFlag){
+        let iconToChange =  document.getElementById("annotationNameIcon");
+        if(labelAnnotationNameInput.value.length)
+          iconToChange.className = "green check circle outline icon"
+        else iconToChange.className = "red check circle outline icon";
+      }
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
       }
@@ -399,7 +402,7 @@ export var AimEditor = function (
     annotationNameDiv.appendChild(labelAnnotationName);
     annotationNameDiv.appendChild(labelAnnotationNameInput);
     annotationNameLabelDiv.appendChild(labelAnnotationName);
-    annotationNameLabelDiv.appendChild(headerCheckIcon);
+    if(!isTeachingFlag) annotationNameLabelDiv.appendChild(headerCheckIcon);
     annotationNameDiv.className = "comment ui input";
     annotationNameDiv.style.width = "100%";
 
@@ -3727,7 +3730,7 @@ export var AimEditor = function (
   };
 
   this.checkAnnotationShapes = function (prmtrShapeArray) {
-    if (typeof prmtrShapeArray === undefined) {
+    if (typeof prmtrShapeArray === "undefined") {
       return;
     }
     let anyShapeFlag = false;
@@ -4217,16 +4220,16 @@ export var AimEditor = function (
         document.getElementById("annotationName").value =
           annotationNameArray[0];
         self.aimName = annotationNameArray[0];
-        // if (self.aimName === "Teaching File") {
-        //   document.getElementById("annotationName").value = "";
-        // }
+        if (self.aimName === "Teaching File") {
+          document.getElementById("annotationName").value = "";
+        }
       } else {
         document.getElementById("annotationName").value = annotationName;
         self.aimName = annotationName;
-        // if (self.aimName === "Teaching File") {
-        //   self.aimName = "";
-        //   document.getElementById("annotationName").value = "";
-        // }
+        if (self.aimName === "Teaching File") {
+          self.aimName = "";
+          document.getElementById("annotationName").value = "";
+        }
       }
 
       self.traverseJsonOnLoad(imagingPhysicalEntityCollection);
