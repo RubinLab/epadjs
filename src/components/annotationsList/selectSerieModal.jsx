@@ -388,8 +388,7 @@ class selectSerieModal extends React.Component {
     const isUpdate = false;
 
     return uploadAim(aimSaved, projectID, isUpdate)
-      .then(() => {
-        window.dispatchEvent(new Event("refreshProjects"));
+      .then(async () => {
         toast.success("Teaching File succesfully saved.", {
           position: "top-right",
           autoClose: 5000,
@@ -403,7 +402,8 @@ class selectSerieModal extends React.Component {
         studies.forEach(arr => {
           series = series.concat(arr);
         });
-        this.setSignificantSeries(series);
+        await this.setSignificantSeries(series);
+        window.dispatchEvent(new Event("refreshProjects"));
         return result;
       })
       .catch((error) => {
