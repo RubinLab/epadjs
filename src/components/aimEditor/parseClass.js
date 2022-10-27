@@ -4228,6 +4228,9 @@ export var AimEditor = function (
           self.aimName = "";
           document.getElementById("annotationName").value = "";
         }
+        if(self.aimName !== ""){
+          document.getElementById("annotationNameIcon").className = "green check circle outline icon"
+        }
       }
 
       self.traverseJsonOnLoad(imagingPhysicalEntityCollection);
