@@ -326,7 +326,6 @@ export var AimEditor = function (
     document.getElementById("tlist").children[0].style.width = "100%";
     self.templateSelect.style.width = "100%";
     templateDiv.style.width = "100%";
-    console.log("Window created");
   };
 
   this.extractTemplate = function (json) {
@@ -361,7 +360,6 @@ export var AimEditor = function (
     labelAnnotationNameInput.setAttribute("id", "annotationName");
 
     // To put red circle for name
-    console.log("Is teaching dile flag", isTeachingFlag);
     if(!isTeachingFlag){
       var headerCheckIcon = document.createElement("i");
       headerCheckIcon.className = "red check circle outline icon";
