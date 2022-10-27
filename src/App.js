@@ -964,7 +964,7 @@ class App extends Component {
             resolve();
           } catch (err) {
             
-            reject("Error in user retrieval 2!", err);
+            // reject("Error in user retrieval 2!", err);
               if(err.statusCode === 401){
                 if(this.state.mode==="teaching")
                   alert("User doesn't exist, you should login from Sectra first.");
