@@ -326,7 +326,6 @@ export var AimEditor = function (
     document.getElementById("tlist").children[0].style.width = "100%";
     self.templateSelect.style.width = "100%";
     templateDiv.style.width = "100%";
-    console.log("Window created");
   };
 
   this.extractTemplate = function (json) {
@@ -361,12 +360,14 @@ export var AimEditor = function (
     labelAnnotationNameInput.setAttribute("id", "annotationName");
 
     // To put red circle for name
-    // var headerCheckIcon = document.createElement("i");
-    // headerCheckIcon.className = "red check circle outline icon";
-    // headerCheckIcon.id = labelAnnotationNameInput.id;
+    if(!isTeachingFlag){
+      var headerCheckIcon = document.createElement("i");
+      headerCheckIcon.className = "red check circle outline icon";
+      headerCheckIcon.setAttribute("id", "annotationNameIcon");
+    }
 
     if (mode === "teaching" && templateCode === teachingFileTempCode) {
-      labelAnnotationName.textContent = "Case Title";
+      labelAnnotationName.textContent = "Case Title:";
       labelAnnotationNameInput.placeholder = "Ex: 39 year old with knee pain";
     } else {
       labelAnnotationName.textContent = "Annotation Name";
@@ -380,6 +381,13 @@ export var AimEditor = function (
     labelAnnotationNameInput.style.width = "94%";
 
     labelAnnotationNameInput.onkeyup = function () {
+      // make sure aim has name 
+      if(!isTeachingFlag){
+        let iconToChange =  document.getElementById("annotationNameIcon");
+        if(labelAnnotationNameInput.value.length)
+          iconToChange.className = "green check circle outline icon"
+        else iconToChange.className = "red check circle outline icon";
+      }
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
       }
@@ -392,7 +400,7 @@ export var AimEditor = function (
     annotationNameDiv.appendChild(labelAnnotationName);
     annotationNameDiv.appendChild(labelAnnotationNameInput);
     annotationNameLabelDiv.appendChild(labelAnnotationName);
-    // annotationNameLabelDiv.appendChild(headerCheckIcon);
+    if(!isTeachingFlag) annotationNameLabelDiv.appendChild(headerCheckIcon);
     annotationNameDiv.className = "comment ui input";
     annotationNameDiv.style.width = "100%";
 
@@ -3720,7 +3728,7 @@ export var AimEditor = function (
   };
 
   this.checkAnnotationShapes = function (prmtrShapeArray) {
-    if (typeof prmtrShapeArray === undefined) {
+    if (typeof prmtrShapeArray === "undefined") {
       return;
     }
     let anyShapeFlag = false;
@@ -4219,6 +4227,9 @@ export var AimEditor = function (
         if (self.aimName === "Teaching File") {
           self.aimName = "";
           document.getElementById("annotationName").value = "";
+        }
+        if(self.aimName !== ""){
+          document.getElementById("annotationNameIcon").className = "green check circle outline icon"
         }
       }
 

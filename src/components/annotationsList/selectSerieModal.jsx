@@ -83,16 +83,12 @@ class selectSerieModal extends React.Component {
         { speciality, anatomy, diagnosis }, // the new div which holds only teaching components for aim editor
         "#ccc"
       );
-      console.log("Loading templates");
       const { data: templates } = await getTemplate(teachingFileTempUid);
-      console.log("Loaded templates now rendering");
       this.semanticAnswers.loadTemplates({
         default: teachingFileTempCode,
         all: [templates],
       });
       this.semanticAnswers.createViewerWindow();
-      console.log("rendered");
-
     };// end teaching file related part
   }
   componentWillUnmount = () => {
@@ -373,16 +369,12 @@ class selectSerieModal extends React.Component {
     const answers = this.semanticAnswers.saveAim();
     answers.name.value = "Teaching File";
     const { data: study } = await getSingleStudy(studyUID);
-    console.log("Study", study);
     let examTypes;
-    console.log("Exam types original", study.examTypes);
     ({ examTypes } = study);
     if (examTypes?.length === 1 && examTypes[0].includes("\\")) {
       examTypes = examTypes[0].split("\\");
     }
-    console.log("Exam types after split", examTypes);
     study.examTypes = examTypes;
-    console.log("Study sent to aim creation", study);
     const aimData = { study, answers, user: getUserForAim() };
     const aim = new Aim(
       aimData,
@@ -486,7 +478,7 @@ class selectSerieModal extends React.Component {
           {this.state.limit > this.maxPort && !openSeries.length && (
             <div>Please select only {this.maxPort} series to open!</div>
           )}
-          <div>{list}</div>
+          <div style={{ paddingLeft: "0.5em", maxHeight: "500px", overflowY: "auto" }}>{list}</div>
         </Modal.Body>
         <Modal.Footer className="select-serie-footer">
           {isTeachingFile && (

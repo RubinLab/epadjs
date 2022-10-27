@@ -90,7 +90,6 @@ class Sidebar extends Component {
   getProjectsData = async () => {
     try {
       let { data: projects } = await getProjects();
-      console.log("Got project data", projects);
       if (projects.length > 0) {
         // get the project all and unassigned
         // push them to the end of the projects

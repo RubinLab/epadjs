@@ -276,7 +276,7 @@ class DisplayView extends Component {
   checkTokenExpire = async () => {
     const { keycloak } = this.props;
     if (keycloak.isTokenExpired(5)) {
-      window.alert("Are you still there?");
+      window.alert("Are you still editing?");
       await this.updateToken(keycloak, 5);
     }
   };
