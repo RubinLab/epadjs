@@ -910,15 +910,15 @@ class App extends Component {
               userData = userData.data;
               this.setState({ admin: userData.admin });
             } catch (err) {
-              console.log("Error in catch", err);
-              // if(err.statusCode === 401){
-                if(this.state.mode==="teaching")
-                  alert("User doesn't exist, you should login from Sectra first.");
-                else
-                  alert("User doesn't exist, contact your administrator.");
-                this.onLogout();
-              // }
-              console.error(err);
+              // console.log("Error in catch", err);
+              // // if(err.statusCode === 401){
+              //   if(this.state.mode==="teaching")
+              //     alert("User doesn't exist, you should login from Sectra first.");
+              //   else
+              //     alert("User doesn't exist, contact your administrator.");
+              //   this.onLogout();
+              // // }
+              // console.error(err);
             }
             let displayname = userData.firstname.concat(' ',userData.lastname);
             let user = {
