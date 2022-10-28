@@ -12,6 +12,8 @@ export const DISP_MODALITIES = [
   "OCT",
 ];
 
+export const COMP_MODALITIES = {"RID10341":"PET-CT", "RID10342":"PET-MR", "RID49581":"US-RF"};
+
 export const formatDates = (timeStamp) => {
   //split it by space
   timeStamp = timeStamp + "";
