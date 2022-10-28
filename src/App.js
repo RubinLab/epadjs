@@ -911,13 +911,13 @@ class App extends Component {
               this.setState({ admin: userData.admin });
             } catch (err) {
               console.log("Error in catch", err);
-              if(err.statusCode === 401){
+              // if(err.statusCode === 401){
                 if(this.state.mode==="teaching")
                   alert("User doesn't exist, you should login from Sectra first.");
                 else
                   alert("User doesn't exist, contact your administrator.");
                 this.onLogout();
-              }
+              // }
               console.error(err);
             }
             let displayname = userData.firstname.concat(' ',userData.lastname);
@@ -965,13 +965,13 @@ class App extends Component {
           } catch (err) {
             
             // reject("Error in user retrieval 2!", err);
-              if(err.statusCode === 401){
+              // if(err.statusCode === 401){
                 if(this.state.mode==="teaching")
                   alert("User doesn't exist, you should login from Sectra first.");
                 else
                   alert("User doesn't exist, contact your administrator.");
                 this.onLogout();
-              }
+              // }
               console.error(err);
               this.completeAutorization();
           }
