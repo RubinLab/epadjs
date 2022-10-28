@@ -285,7 +285,7 @@ class DisplayView extends Component {
     try {
       clearInterval(this.state.tokenRefresh);
       await refreshToken(this.props.keycloak, 5);
-      const tokenRefresh = setInterval(this.checkTokenExpire, 500);
+      const tokenRefresh = setInterval(this.checkTokenExpire, 1000);
       this.setState({ tokenRefresh });
     } catch (err) {
       console.error(err);
