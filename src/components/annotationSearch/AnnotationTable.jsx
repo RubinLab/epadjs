@@ -26,6 +26,7 @@ import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
 import SelectSerieModal from '../annotationsList/selectSerieModal';
 import { isSupportedModality } from "../../Utils/aid.js";
+import { COMP_MODALITIES as compModality } from "../../constants.js";
 const defaultPageSize = 200;
 
 let maxPort;
@@ -483,12 +484,8 @@ function AnnotationTable(props) {
           Header: 'Modality',
           accessor: 'modality',
           Cell: ({ row: { original: { modality } } }) => {
-            if (modality.length === 7) { //check the length to make the comparison faster
-              if (modality === "RID10341") return "PET-CT";
-              if (modality === "RID10342") return "PET-MR";
-              if (modality === "RID49581") return "US-RF";
-            }
-            return <div className={'modality-capital'}>{modality}</div>;
+            if (compModality[modality]) return <div className={'modality-capital'}>{compModality[modality]}</div>;
+            else return <div className={'modality-capital'}>{modality}</div>;
           }
         },
         {
