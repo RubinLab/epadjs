@@ -483,6 +483,11 @@ function AnnotationTable(props) {
           Header: 'Modality',
           accessor: 'modality',
           Cell: ({ row: { original: { modality } } }) => {
+            if (modality.length === 7) { //check the length to make the comparison faster
+              if (modality === "RID10341") return "PET-CT";
+              if (modality === "RID10342") return "PET-MR";
+              if (modality === "RID49581") return "US-RF";
+            }
             return <div className={'modality-capital'}>{modality}</div>;
           }
         },
