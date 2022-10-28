@@ -239,7 +239,7 @@ body {
   /* display: flex; */
   /* color: white; */
   display: block;
-  overflow-x: auto;
+  /* overflow-x: scroll; */
 }
 
 .mainView-closed {
