@@ -973,7 +973,7 @@ class App extends Component {
                 this.onLogout();
               // }
               console.error(err);
-              this.completeAutorization();
+              // this.completeAutorization();
           }
         })
         .catch((err2) => {

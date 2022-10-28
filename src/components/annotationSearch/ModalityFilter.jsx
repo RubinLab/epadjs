@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { DISP_MODALITIES as dispModalities } from "../../constants.js";
+import { DISP_MODALITIES as dispModalities, COMP_MODALITY_VALS as compModality } from "../../constants.js";
 import Dropdown from 'react-bootstrap/Dropdown';
 
 const ModalityFilter = (props) => {
-    const [modalities,] = useState(dispModalities);
+    const [modalities,] = useState([...dispModalities, "PET-CT", "PET-MR", "US-RF"]);
     const [selecteds, setSelecteds] = useState(props.selectedMods);
     const [show, setShow] = useState(false);
 
@@ -79,7 +79,7 @@ const ModalityFilter = (props) => {
                             {modalities.map((modality, i) => {
                                 return (
                                     <div id='noClose' key={i} className="mb-3 col-md-4">
-                                        <input id='noClose' className="form-check-input" type="checkbox" value={modality} checked={selecteds.includes(modality)} onChange={handleChange} />
+                                        <input id='noClose' className="form-check-input" type="checkbox" value={compModality[modality] ? compModality[modality] : modality} checked={selecteds.includes(compModality[modality] ? compModality[modality] : modality)} onChange={handleChange} />
                                         <label id='noClose' className="form-check-label title-case" style={{ paddingLeft: '0.3em' }} htmlFor="noCLose">
                                             {modality}
                                         </label>
