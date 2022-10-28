@@ -69,7 +69,7 @@ class Sidebar extends Component {
     } catch (error) {
       console.error(error);
     }
-    window.addEventListener("refreshProjects", this.getProjectsData);
+    window.addEventListener("refreshProjects", this.refreshProjects);
   };
 
   setTabHeight = () => {
@@ -87,9 +87,15 @@ class Sidebar extends Component {
     window.removeEventListener("refreshProjects", this.getProjectsData);
   };
 
+  refreshProjects = async () => {
+    const projects = await this.getProjectsData();
+    this.setStateProjectData(projects, true);
+  }
+
   getProjectsData = async () => {
     try {
       let { data: projects } = await getProjects();
+      console.log()
       if (projects.length > 0) {
         // get the project all and unassigned
         // push them to the end of the projects
