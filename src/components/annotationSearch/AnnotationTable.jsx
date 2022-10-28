@@ -483,7 +483,7 @@ function AnnotationTable(props) {
         {
           Header: 'Modality',
           accessor: 'modality',
-          Cell: (compModality, { row: { original: { modality } } }) => {
+          Cell: ({ row: { original: { modality } } }, compModality) => {
             console.log("In row", modality, compModality[modality]);
             if (compModality[modality]) return <div className={'modality-capital'}>{compModality[modality]}</div>;
             else return <div className={'modality-capital'}>{modality}</div>;
