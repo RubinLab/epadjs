@@ -919,6 +919,7 @@ class DisplayView extends Component {
   };
 
   setDirtyFlag = () => {
+    console.log("Called");
     if (!this.state.dirty) this.setState({ dirty: true });
   };
 
@@ -995,8 +996,10 @@ class DisplayView extends Component {
   };
 
   setActive = async (i) => {
-    if (this.props.activePort !== i) {
+    const { activePort, series } = this.props;
+    if (activePort !== i) {
       if (this.state.showAimEditor) {
+
         if (!this.closeAimEditor(true)) {
           //means going to another viewport in the middle of creating/editing an aim
           return;

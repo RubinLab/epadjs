@@ -963,7 +963,7 @@ class App extends Component {
             );
             resolve();
           } catch (err) {
-            
+            console.error(err);
             // reject("Error in user retrieval 2!", err);
               // if(err.statusCode === 401){
                 if(this.state.mode==="teaching")
@@ -977,7 +977,8 @@ class App extends Component {
           }
         })
         .catch((err2) => {
-          reject("Authentication failed!", err2);
+          console.log("Err 2", err2);
+          // reject("Authentication failed!", err2);
         });
     });
 
