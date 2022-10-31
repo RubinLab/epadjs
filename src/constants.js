@@ -12,7 +12,7 @@ export const DISP_MODALITIES = [
   "OCT",
 ];
 
-export const COMP_MODALITIES = {"RID10341":"PET-CT", "RID10342":"PET-MR", "RID49581":"US-RF"};
+export const COMP_MODALITIES = {"rid10341":"PET-CT", "rid10342":"PET-MR", "rid49581":"US-RF"};
 
 export const COMP_MODALITY_VALS = {"PET-CT":"RID10341", "PET-MR":"RID10342", "US-RF":"RID49581"};
 
