@@ -1433,7 +1433,7 @@ const AnnotationSearch = props => {
                 return (<button key={sub} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearSubspecialty(sub)} > {sub} < BiX /></button>);
               })}
               {selectedMods.map(mod => {
-                return (<button key={mod} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearModality(mod)} > {compModality[mod] ? compModality[mod] : mod} < BiX /></button>);
+                return (<button key={mod} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearModality(mod)} > {compModality[mod.toLowerCase()] ? compModality[mod.toLowerCase()] : mod} < BiX /></button>);
               })}
               {selectedAnatomies.map(anatomy => {
                 return (<button key={anatomy} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearAnatomy(anatomy)} > {anatomy} < BiX /></button>);
