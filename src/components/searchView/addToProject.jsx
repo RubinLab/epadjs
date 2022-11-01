@@ -50,7 +50,7 @@ const ProjectAdd = ({ projectMap, onSave, onClose, className, annotations, desel
         });
         deselect();
       } catch (e) {
-        toast.fail("Error moving annotation(s).", {
+        toast.error("Error moving annotation(s).", {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
