@@ -869,14 +869,16 @@ class App extends Component {
         const pkce =  sessionStorage.getItem("pkce");
         getAuthUser = new Promise((resolve, reject) => {
           keycloak
-            .init({ onLoad: "login-required", ...(pkce && pkce === "true" ? {pkceMethod: 'S256' }:{}) })
+            .init({ onLoad: "check-sso", checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? {pkceMethod: 'S256' }:{}) })
             .then((authenticated) => {
-              keycloak
-                .loadUserInfo()
-                .then((userInfo) => {
-                  resolve({ userInfo, keycloak, authenticated });
-                })
-                .catch((err) => reject(err));
+              if (authenticated)
+                keycloak
+                  .loadUserInfo()
+                  .then((userInfo) => {
+                    resolve({ userInfo, keycloak, authenticated });
+                  })
+                  .catch((err) => reject(err));
+              else keycloak.login();
             })
             .catch((err) => reject(err));
         });
