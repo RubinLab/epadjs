@@ -868,8 +868,23 @@ class App extends Component {
         );
         const pkce =  sessionStorage.getItem("pkce");
         getAuthUser = new Promise((resolve, reject) => {
-          keycloak
-            .init({ onLoad: "check-sso", checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? {pkceMethod: 'S256' }:{}) })
+          if (this.mode === 'teaching'){
+            keycloak
+              .init({ onLoad: "check-sso", checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? {pkceMethod: 'S256' }:{}) })
+              .then((authenticated) => {
+                if (authenticated)
+                  keycloak
+                    .loadUserInfo()
+                    .then((userInfo) => {
+                      resolve({ userInfo, keycloak, authenticated });
+                    })
+                    .catch((err) => reject(err));
+                // else keycloak.login();
+              })
+              .catch((err) => reject(err));
+          } 
+          else { keycloak
+            .init({onLoad: "login-required"  })
             .then((authenticated) => {
               if (authenticated)
                 keycloak
@@ -881,6 +896,7 @@ class App extends Component {
               // else keycloak.login();
             })
             .catch((err) => reject(err));
+          }
         });
       } else {
         // authMode is external ask backend for user
