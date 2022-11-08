@@ -28,6 +28,7 @@ import { getSingleStudy, deleteStudy } from '../../services/studyServices';
 import { Aim, enumAimType } from "aimapi";
 import { teachingFileTempUid, teachingFileTempCode } from '../../constants';
 import { isSupportedModality } from '../../Utils/aid';
+import { DISP_MODALITIES } from '../../constants';
 
 class selectSerieModal extends React.Component {
   // _isMounted = false;
@@ -369,13 +370,13 @@ class selectSerieModal extends React.Component {
     const answers = this.semanticAnswers.saveAim();
     answers.name.value = "Teaching File";
     const { data: study } = await getSingleStudy(studyUID);
+    console.log("Study", study);
     let examTypes;
     ({ examTypes } = study);
     if (examTypes?.length === 1 && examTypes[0].includes("\\")) {
       examTypes = examTypes[0].split("\\");
     }
-    study.examTypes = examTypes;
-    console.log("Study: ", study);
+    study.examTypes = examTypes.filter(type => DISP_MODALITIES.includes(type));
     const aimData = { study, answers, user: getUserForAim() };
     const aim = new Aim(
       aimData,
