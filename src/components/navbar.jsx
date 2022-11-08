@@ -115,7 +115,7 @@ const NavBar = ({
           <ul className="navbar-nav ms-auto">
             {!user && (
               <li className="nav-item pull-right">
-                <NavLink className="nav-link" to="/login">
+                <NavLink className="nav-link" to="/">
                   Login
                 </NavLink>
               </li>

@@ -847,6 +847,7 @@ class App extends Component {
     }
   };
 
+  // This is func is serious mess, needs refactoring
   completeAutorization = () =>
     new Promise((resolve, reject) => {
       let getAuthUser = null;
@@ -879,7 +880,6 @@ class App extends Component {
                       resolve({ userInfo, keycloak, authenticated });
                     })
                     .catch((err) => reject(err));
-                // else keycloak.login();
               })
               .catch((err) => reject(err));
           } 
@@ -893,7 +893,6 @@ class App extends Component {
                     resolve({ userInfo, keycloak, authenticated });
                   })
                   .catch((err) => reject(err));
-              // else keycloak.login();
             })
             .catch((err) => reject(err));
           }
