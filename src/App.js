@@ -869,7 +869,7 @@ class App extends Component {
         );
         const pkce =  sessionStorage.getItem("pkce");
         getAuthUser = new Promise((resolve, reject) => {
-          if (this.mode === 'teaching'){
+          if (this.state.mode === 'teaching'){
             keycloak
               .init({ onLoad: "check-sso", checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? {pkceMethod: 'S256' }:{}) })
               .then((authenticated) => {
@@ -1369,7 +1369,7 @@ class App extends Component {
         {this.state.minReportsArr}
 
         {!this.state.authenticated && mode !== "lite" && (
-          <Route path="/login" component={LoginForm} />
+          <Route path="/login" onEnter={()=> keycloak.login()} />
         )}
         {this.state.authenticated && mode !== "lite" && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
