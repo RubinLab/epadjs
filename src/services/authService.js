@@ -33,6 +33,11 @@ export function setLoginSession(username) {
   sessionStorage.setItem("displayName", username.displayname); //TODO: change with fullname
 }
 
+export function login() {
+  console.log('in auth ', this.keycloak);
+  if (this.keycloak) this.keycloak.login();
+}
+
 export function logout() {
   const mode = sessionStorage.getItem("mode");
   sessionStorage.removeItem("username");
@@ -79,6 +84,7 @@ export async function getAuthHeader() {
 }
 
 export default {
+  login,
   logout,
   getCurrentUser,
   getAuthHeader,

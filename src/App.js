@@ -17,6 +17,7 @@ import ProgressView from "./components/progressView";
 import FlexView from "./components/flexView";
 import NotFound from "./components/notFound";
 import LoginForm from "./components/loginForm";
+import Login from "./components/login";
 import Logout from "./components/logout";
 import ProtectedRoute from "./components/common/protectedRoute";
 import Cornerstone from "./components/cornerstone/cornerstone";
@@ -872,7 +873,9 @@ class App extends Component {
           if (this.state.mode === 'teaching'){
             keycloak
               .init({ onLoad: "check-sso", checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? {pkceMethod: 'S256' }:{}) })
-              .then((authenticated) => {
+              .then(async (authenticated) => {
+                // set keycloak object
+                await auth.setLoginKeycloak(keycloak);
                 if (authenticated)
                   keycloak
                     .loadUserInfo()
@@ -885,7 +888,9 @@ class App extends Component {
           } 
           else { keycloak
             .init({onLoad: "login-required"  })
-            .then((authenticated) => {
+            .then(async (authenticated) => {
+              // set keycloak object
+              await auth.setLoginKeycloak(keycloak);
               if (authenticated)
                 keycloak
                   .loadUserInfo()
@@ -917,7 +922,6 @@ class App extends Component {
             const username =
               result.userInfo.preferred_username || result.userInfo.uid || result.userInfo.email;
 
-            await auth.setLoginKeycloak(result.keycloak);
             let userData;
             try {
               userData = await getUser(username);
@@ -1046,6 +1050,10 @@ class App extends Component {
       console.error(err);
     }
   };
+
+  onLogin = (e) => {
+    auth.login();
+  }
 
   onLogout = (e) => {
     console.log("Logging out");
@@ -1369,7 +1377,9 @@ class App extends Component {
         {this.state.minReportsArr}
 
         {!this.state.authenticated && mode !== "lite" && (
-          <Route path="/login" onEnter={()=> keycloak.login()} />
+          <Route path="/login" render={(props) => (
+            <Login login={this.onLogin}/>
+          )}/>
         )}
         {this.state.authenticated && mode !== "lite" && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
