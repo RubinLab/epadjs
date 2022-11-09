@@ -46,6 +46,7 @@ export function logout() {
     sessionStorage.removeItem("header");
   }
   sessionStorage.removeItem("lastSavedAim");
+  if (this.keycloak) this.keycloak.logout();
 }
 
 export function getCurrentUser() {
