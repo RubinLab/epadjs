@@ -376,7 +376,9 @@ class selectSerieModal extends React.Component {
     if (examTypes?.length === 1 && examTypes[0].includes("\\")) {
       examTypes = examTypes[0].split("\\");
     }
+    console.log("Exam types", examTypes);
     study.examTypes = examTypes.filter(type => DISP_MODALITIES.includes(type));
+    console.log("Study after", study);
     const aimData = { study, answers, user: getUserForAim() };
     const aim = new Aim(
       aimData,

@@ -57,6 +57,7 @@ import MinimizedReport from "./components/searchView/MinimizedReport";
 import { FaJoint } from "react-icons/fa";
 import { isSupportedModality } from "./Utils/aid.js";
 import { teachingFileTempCode } from './constants';
+import { render } from 'react-dom';
 
 const messages = {
   noPatient: {
@@ -869,21 +870,22 @@ class App extends Component {
         );
         const pkce =  sessionStorage.getItem("pkce");
         getAuthUser = new Promise((resolve, reject) => {
-          if (this.state.mode === 'teaching'){
-            keycloak
-              .init({ onLoad: "check-sso", checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? {pkceMethod: 'S256' }:{}) })
-              .then((authenticated) => {
-                if (authenticated)
-                  keycloak
-                    .loadUserInfo()
-                    .then((userInfo) => {
-                      resolve({ userInfo, keycloak, authenticated });
-                    })
-                    .catch((err) => reject(err));
-              })
-              .catch((err) => reject(err));
-          } 
-          else { keycloak
+          // if (this.state.mode === 'teaching'){
+          //   keycloak
+          //     .init({ onLoad: "check-sso", checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? {pkceMethod: 'S256' }:{}) })
+          //     .then((authenticated) => {
+          //       if (authenticated)
+          //         keycloak
+          //           .loadUserInfo()
+          //           .then((userInfo) => {
+          //             resolve({ userInfo, keycloak, authenticated });
+          //           })
+          //           .catch((err) => reject(err));
+          //     })
+          //     .catch((err) => reject(err));
+          // } 
+          // else { keycloak
+          keycloak
             .init({onLoad: "login-required"  })
             .then((authenticated) => {
               if (authenticated)
@@ -895,7 +897,7 @@ class App extends Component {
                   .catch((err) => reject(err));
             })
             .catch((err) => reject(err));
-          }
+          // }
         });
       } else {
         // authMode is external ask backend for user
@@ -1369,7 +1371,7 @@ class App extends Component {
         {this.state.minReportsArr}
 
         {!this.state.authenticated && mode !== "lite" && (
-          <Route path="/login" onEnter={()=> keycloak.login()} />
+          <Route path="/login" render={()=> Keycloak(JSON.parse(sessionStorage.getItem("keycloakJson")))?.login()} />
         )}
         {this.state.authenticated && mode !== "lite" && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
