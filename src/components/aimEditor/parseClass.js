@@ -360,11 +360,9 @@ export var AimEditor = function (
     labelAnnotationNameInput.setAttribute("id", "annotationName");
 
     // To put red circle for name
-    if(!isTeachingFlag){
-      var headerCheckIcon = document.createElement("i");
-      headerCheckIcon.className = "red check circle outline icon";
-      headerCheckIcon.setAttribute("id", "annotationNameIcon");
-    }
+    var headerCheckIcon = document.createElement("i");  
+    headerCheckIcon.setAttribute("id", "annotationNameIcon");
+    headerCheckIcon.className = "green check circle outline icon";
 
     if (mode === "teaching" && templateCode === teachingFileTempCode) {
       labelAnnotationName.textContent = "Case Title:";
@@ -4228,8 +4226,8 @@ export var AimEditor = function (
           self.aimName = "";
           document.getElementById("annotationName").value = "";
         }
-        if(self.aimName !== ""){
-          document.getElementById("annotationNameIcon").className = "green check circle outline icon"
+        if(self.aimName === ""){
+          document.getElementById("annotationNameIcon").className = "red check circle outline icon"
         }
       }
 

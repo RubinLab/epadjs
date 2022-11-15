@@ -1006,7 +1006,6 @@ class App extends Component {
       if (res.data === "heartbeat") {
         return;
       }
-      console.log("Message from server", res);
       const parsedRes = JSON.parse(res.data);
       const { lastEventId } = res;
       const { params, createdtime, projectID, error, refresh } =

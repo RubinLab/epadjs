@@ -4,7 +4,6 @@ import { toast } from "react-toastify";
 import Dropdown from 'react-bootstrap/Dropdown';
 import { BiDownload } from 'react-icons/bi';
 import { addAimsToProject } from "../../services/projectServices";
-import { setShadow } from "cornerstone-tools/drawing";
 
 const ProjectAdd = ({ projectMap, onSave, onClose, className, annotations, deselect }) => {
   const projectNames = Object.values(projectMap);
@@ -64,23 +63,30 @@ const ProjectAdd = ({ projectMap, onSave, onClose, className, annotations, desel
     setShow(false);
   }
 
-  const CustomToggle2 = React.forwardRef(({ children, onClick }, ref2) => (
-    <button type="button" className="btn btn-sm color-schema" ref={ref2}
+  const CustomToggle2 = React.forwardRef(({ children, onClick }, ref) => (
+    <button type="button" className="btn btn-sm color-schema" ref={ref}
       onClick={e => {
         onClick(e);
+        setShow(!show);
       }}>
       <BiDownload /><br />
       {children}
     </button>
   ));
 
+  const CustomMenu2 = React.forwardRef(({ children, className, id }, ref) => (
+    <div id={id} className={className} ref={ref}>
+      {children}
+    </div>
+  ));
+
   return (
-    <Dropdown id="2" className="d-inline">
-      <Dropdown.Toggle as={CustomToggle2} id="dropdown-custom-components2">
+    <Dropdown id="copy2Project" className="d-inline" show={show}>
+      <Dropdown.Toggle as={CustomToggle2} id="dropdown-custom-components">
         Copy To Project
       </Dropdown.Toggle>
 
-      <Dropdown.Menu id="2-2" className="dropdown-menu p-2 dropdown-menu-dark" style={{ backgroundColor: '#333', borderColor: 'white' }}>
+      <Dropdown.Menu as={CustomMenu2} id='projectMenu' className="dropdown-menu p-2 dropdown-menu-dark" style={{ backgroundColor: '#333', borderColor: 'white' }}>
         {projectNames?.map(({ projectName }, y) => {
           return (
             <div key={y} id={projectIDs[y]} className="row" onClick={addSelectionToProject}>
