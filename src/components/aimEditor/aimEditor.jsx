@@ -23,6 +23,7 @@ import * as questionaire from "./parseClass.js";
 import * as dcmjs from "dcmjs";
 import Switch from "react-switch";
 import { teachingFileTempCode } from "../../constants";
+import { DISP_MODALITIES } from '../../constants';
 import "./aimEditor.css";
 
 let mode;
@@ -442,6 +443,12 @@ class AimEditor extends Component {
       if (isStudyAim) { //Study annotation
         const { openSeries, activePort } = this.props;
         const { data: study } = await getSingleStudy(openSeries[activePort].studyUID);
+        let examTypes;
+        ({ examTypes } = study);
+        if (examTypes?.length === 1 && examTypes[0].includes("\\")) {
+          examTypes = examTypes[0].split("\\");
+        }
+        study.examTypes = examTypes.filter(type => DISP_MODALITIES.includes(type));
         aimData = { study, answers, user };
         aim = new Aim(
           aimData,
