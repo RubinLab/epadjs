@@ -1,43 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
 import Dropdown from 'react-bootstrap/Dropdown';
 import { BiDownload } from 'react-icons/bi';
 import { addAimsToProject } from "../../services/projectServices";
 
-const ProjectAdd = ({ projectMap, onSave, onClose, className, annotations, deselect }) => {
+const ProjectAdd = ({ projectMap, onSave, className, annotations, deselect }) => {
   const projectNames = Object.values(projectMap);
   const projectIDs = Object.keys(projectMap);
-  // let wrapperRef = useRef(null);
 
-  const [show, setShow] = useState(false);
-
-  const element = document.getElementsByClassName(className);
-
-  // const handleClickOutside = (event) => {
-  //   if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-  //     onClose();
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   document.addEventListener("keydown", handleClickOutside);
-  //   return function cleanup() {
-  //     document.removeEventListener("mousedown", handleClickOutside);
-  //     document.removeEventListener("keydown", handleClickOutside);
-  //   };
-  // });
-
-  const addSelectionToProject = async (e) => {
+  const addSelectionToProject = async (projectId) => {
     // If selected are not annotations, search is view is handling it (by props on Save)
     if (!annotations.length && onSave)
-      onSave(e);
+      onSave(projectId);
     else {
-      const { id } = e.target;
       const aimIDs = Object.keys(annotations);
       try {
-        await addAimsToProject(id, aimIDs);
+        await addAimsToProject(projectId, aimIDs);
         window.dispatchEvent(new Event('refreshProjects'));
         toast.success("Annotation(s) succesfully copied.", {
           position: "top-right",
@@ -60,59 +39,49 @@ const ProjectAdd = ({ projectMap, onSave, onClose, className, annotations, desel
         console.error(e);
       }
     }
-    setShow(false);
   }
 
-  const CustomToggle2 = React.forwardRef(({ children, onClick }, ref) => (
+  const ProjectMenu = React.forwardRef(({ children, style, className }, ref) => {
+    return (
+      <div
+        ref={ref}
+        style={style}
+        className={className}
+      >
+        {children}
+      </div>
+    )
+  });
+
+  const CustomToggle3 = React.forwardRef(({ children, onClick }, ref) => (
     <button type="button" className="btn btn-sm color-schema" ref={ref}
       onClick={e => {
+        e.preventDefault();
         onClick(e);
-        setShow(!show);
       }}>
       <BiDownload /><br />
       {children}
     </button>
   ));
 
-  const CustomMenu2 = React.forwardRef(({ children, className, id }, ref) => (
-    <div id={id} className={className} ref={ref}>
-      {children}
-    </div>
-  ));
-
   return (
-    <Dropdown id="copy2Project" className="d-inline" show={show}>
-      <Dropdown.Toggle as={CustomToggle2} id="dropdown-custom-components">
+    <Dropdown id="1" className="d-inline">
+      <Dropdown.Toggle as={CustomToggle3}>
         Copy To Project
       </Dropdown.Toggle>
 
-      <Dropdown.Menu as={CustomMenu2} id='projectMenu' className="dropdown-menu p-2 dropdown-menu-dark" style={{ backgroundColor: '#333', borderColor: 'white' }}>
+      <Dropdown.Menu as={ProjectMenu} className="dropdown-menu p-2 dropdown-menu-dark" style={{ backgroundColor: '#333', borderColor: 'white', minWidth: '15rem' }} >
         {projectNames?.map(({ projectName }, y) => {
           return (
-            <div key={y} id={projectIDs[y]} className="row" onClick={addSelectionToProject}>
-              <label id={projectIDs[y]} className="form-check-label title-case" style={{ paddingLeft: '0.3rem', cursor: 'pointer' }} htmlFor="flexCheckDefault" >
-                {projectName}
-              </label>
-            </div>
+            <Dropdown.Item key={y} eventKey={projectIDs[y]} onSelect={eventKey => addSelectionToProject(eventKey)}>{projectName}</Dropdown.Item>
           )
         })
         }
       </Dropdown.Menu>
-    </Dropdown>
+    </Dropdown >
   );
 
-  return (
-    <div ref={wrapperRef}>
-      <div
-        className="projects-popup"
-        style={{ left: rect.right - 5, top: rect.bottom - 5 }}
-      >
-        {projects}
-      </div>
-    </div>
-  );
-};
-
+}
 const mapStateToProps = (state) => {
   return {
     patients: state.annotationsListReducer.selectedPatients,
