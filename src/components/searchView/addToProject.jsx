@@ -70,7 +70,7 @@ const ProjectAdd = ({ projectMap, onSave, className, annotations, deselect }) =>
         Copy To Project
       </Dropdown.Toggle>
 
-      <Dropdown.Menu as={ProjectMenu} className="dropdown-menu p-2 dropdown-menu-dark" style={{ backgroundColor: '#333', borderColor: 'white', minWidth: '15rem' }} >
+      <Dropdown.Menu as={ProjectMenu} className="dropdown-menu p-2 dropdown-menu-dark" style={{ backgroundColor: '#333', borderColor: 'white', minWidth: '15rem', fontSize: '11px' }} >
         {projectNames?.map(({ projectName }, y) => {
           return (
             <Dropdown.Item key={y} eventKey={projectIDs[y]} onSelect={eventKey => addSelectionToProject(eventKey)}>{projectName}</Dropdown.Item>
