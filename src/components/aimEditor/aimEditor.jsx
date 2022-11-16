@@ -23,6 +23,7 @@ import * as questionaire from "./parseClass.js";
 import * as dcmjs from "dcmjs";
 import Switch from "react-switch";
 import { teachingFileTempCode } from "../../constants";
+import { DISP_MODALITIES } from '../../constants';
 import "./aimEditor.css";
 
 let mode;
