@@ -60,8 +60,7 @@ const ModalityFilter = (props) => {
             {children}
         </div>
         )
-    },
-    );
+    },);
 
     const handleToggle = () => {
         setShow(!show)

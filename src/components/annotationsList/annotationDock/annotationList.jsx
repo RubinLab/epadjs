@@ -168,6 +168,7 @@ class AnnotationsList extends React.Component {
   };
 
   render = () => {
+    // try {
     const { openSeries, aimsList } = this.props;
     let { activePort } = this.props;
     activePort = activePort || activePort === 0 ? activePort : 0;
@@ -207,12 +208,14 @@ class AnnotationsList extends React.Component {
           : noMarkupAnnotations;
       }
       if (imageAnnotations) {
-        for (let aim of imageAnnotations) {
-          let { aimUid } = aim;
-          annotations[aimUid]
-            ? annotations[aimUid].push(aimsList[seriesUID][aim.aimUid])
-            : (annotations[aimUid] = [aimsList[seriesUID][aim.aimUid]]);
-        }
+        try {
+          for (let aim of imageAnnotations) {
+            let { aimUid } = aim;
+            annotations?.[aimUid]
+              ? annotations[aimUid].push(aimsList[seriesUID][aim.aimUid])
+              : (annotations[aimUid] = [aimsList[seriesUID][aim.aimUid]]);
+          }
+        } catch (e) { }
       }
     }
     const calculations = this.getLabelArray();
@@ -256,6 +259,9 @@ class AnnotationsList extends React.Component {
         );
       }
     });
+    // } catch (e) {
+    //   console.log("Error: ", e);
+    // }
     return (
       <React.Fragment>
         <div className="annotationList-container" style={{ paddingTop: '5px' }}>
