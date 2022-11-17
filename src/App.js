@@ -664,6 +664,8 @@ class App extends Component {
         // SSO requires PKCE
         const pkce = process.env.REACT_APP_PKCE || keycloakData.pkce;
         if (pkce) sessionStorage.setItem("pkce", pkce);
+        const checkSso = process.env.REACT_APP_SSO || keycloakData.sso;
+        if (checkSso) sessionStorage.setItem("sso", checkSso);
         // ---
         sessionStorage.setItem("auth", auth);
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
@@ -869,35 +871,36 @@ class App extends Component {
           JSON.parse(sessionStorage.getItem("keycloakJson"))
         );
         const pkce =  sessionStorage.getItem("pkce");
+        const sso =  sessionStorage.getItem("sso");
         getAuthUser = new Promise((resolve, reject) => {
-          // if (this.state.mode === 'teaching'){
-          //   keycloak
-          //     .init({ onLoad: "check-sso", checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? {pkceMethod: 'S256' }:{}) })
-          //     .then((authenticated) => {
-          //       if (authenticated)
-          //         keycloak
-          //           .loadUserInfo()
-          //           .then((userInfo) => {
-          //             resolve({ userInfo, keycloak, authenticated });
-          //           })
-          //           .catch((err) => reject(err));
-          //     })
-          //     .catch((err) => reject(err));
-          // } 
-          // else { keycloak
-          keycloak
-            .init({onLoad: "login-required"  })
-            .then((authenticated) => {
-              if (authenticated)
-                keycloak
-                  .loadUserInfo()
-                  .then((userInfo) => {
-                    resolve({ userInfo, keycloak, authenticated });
-                  })
-                  .catch((err) => reject(err));
-            })
-            .catch((err) => reject(err));
-          // }
+          if (sso && sso === 'true'){
+            keycloak
+              .init({ onLoad: "check-sso", checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? {pkceMethod: 'S256' }:{}) })
+              .then((authenticated) => {
+                if (authenticated)
+                  keycloak
+                    .loadUserInfo()
+                    .then((userInfo) => {
+                      resolve({ userInfo, keycloak, authenticated });
+                    })
+                    .catch((err) => reject(err));
+              })
+              .catch((err) => reject(err));
+          } 
+          else { 
+            keycloak
+              .init({onLoad: "login-required"  })
+              .then((authenticated) => {
+                if (authenticated)
+                  keycloak
+                    .loadUserInfo()
+                    .then((userInfo) => {
+                      resolve({ userInfo, keycloak, authenticated });
+                    })
+                    .catch((err) => reject(err));
+              })
+              .catch((err) => reject(err));
+          }
         });
       } else {
         // authMode is external ask backend for user
@@ -1049,7 +1052,6 @@ class App extends Component {
   };
 
   onLogout = (e) => {
-    console.log("Logging out");
     auth.logout();
     // sessionStorage.removeItem("annotations");
     sessionStorage.setItem("notifications", JSON.stringify([]));
@@ -1065,8 +1067,6 @@ class App extends Component {
         this.setState({
           keycloak: null,
         });
-        console.log("clearing token");
-        this.state.keycloak.clearToken();
         auth.logout();
       });
     else console.log("No logout in external authentication mode");
