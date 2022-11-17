@@ -14,33 +14,8 @@ const AddToWorklist = (props) => {
 
   const [worklists, setWorklist] = useState([]);
   const [firstRun, setFirstRun] = useState(true);
-  const [show, setShow] = useState(false);
 
-  const setWrapperRef = node => {
-    this.wrapperRef = node;
-  };
-
-  // componentDidMount = async () => {
-  //   const { data: worklists } = await getWorklistsOfCreator();
-  //   this.setState({ worklists });
-  //   document.addEventListener("mousedown", this.handleClickOutside);
-  //   document.addEventListener('keydown', this.handleClickOutside);
-  // };
-
-
-
-  // componentWillUnmount() {
-  //   document.removeEventListener("mousedown", this.handleClickOutside);
-  //   document.removeEventListener('keydown', this.handleClickOutside);
-  // }
-
-  // handleClickOutside = event => {
-  //   if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
-  //     this.props.onClose();
-  //   }
-  // };
-
-  const addStudyToWorklist = e => {
+  const addStudyToWorklist = workListID => {
     const studies = Object.values(props.selectedStudies);
     const promises = [];
     studies.forEach((el, index) => {
@@ -52,7 +27,7 @@ const AddToWorklist = (props) => {
         studyDescription,
       } = el;
       promises.push(
-        addStudyToWorklist(e.target.id, projectID, patientID, studyUID, {
+        addStudyToWorklist(workListID, projectID, patientID, studyUID, {
           studyDesc: studyDescription,
           subjectName: patientName,
         })
@@ -65,13 +40,13 @@ const AddToWorklist = (props) => {
       .catch(err => console.log(err));
   };
 
-  const addSubjectToWorklist = e => {
+  const addSubjectToWorklist = workListID => {
     const subjects = Object.values(props.selectedPatients);
     const promises = [];
     subjects.forEach((el, index) => {
       const { projectID, patientID, subjectName } = el;
       promises.push(
-        addSubjectToWorklist(e.target.id, projectID, patientID, {
+        addSubjectToWorklist(workListID, projectID, patientID, {
           subjectName,
         })
       );
@@ -114,19 +89,31 @@ const AddToWorklist = (props) => {
     setWorklist(worklists);
   }
 
-  const onSelect = (e) => {
+  const onSelect = (workListID) => {
     const { selectedStudies, selectedPatients, selectedAnnotations } = props;
     if (Object.values(selectedStudies).length > 0) {
-      addStudyToWorklist(e);
+      addStudyToWorklist(workListID);
     } else if (Object.values(selectedPatients).length > 0) {
-      addSubjectToWorklist(e);
+      addSubjectToWorklist(workListID);
     } else if (Object.values(selectedAnnotations).length > 0) {
-      addAnnotationsToWorklist(selectedAnnotations, e.target.id);
+      addAnnotationsToWorklist(selectedAnnotations, workListID);
     }
   };
 
-  const CustomToggle3 = React.forwardRef(({ children, onClick }, ref3) => (
-    <button type="button" className="btn btn-sm color-schema" ref={ref3}
+  const WorklistMenu = React.forwardRef(({ children, style, className }, ref) => {
+    return (
+      <div
+        ref={ref}
+        style={style}
+        className={className}
+      >
+        {children}
+      </div>
+    )
+  });
+
+  const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
+    <button type="button" className="btn btn-sm color-schema" ref={ref}
       onClick={e => {
         if (firstRun) {
           fillWorklists();
@@ -141,18 +128,14 @@ const AddToWorklist = (props) => {
 
   return (
     <Dropdown id="1" className="d-inline">
-      <Dropdown.Toggle as={CustomToggle3} id="dropdown-custom-components">
+      <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
         Add To Worklist
       </Dropdown.Toggle>
 
-      <Dropdown.Menu id="1-1" className="dropdown-menu p-2 dropdown-menu-dark" style={{ backgroundColor: '#333', borderColor: 'white' }} >
+      <Dropdown.Menu as={WorklistMenu} className="dropdown-menu p-2 dropdown-menu-dark" style={{ backgroundColor: '#333', borderColor: 'white', minWidth: '15rem', fontSize: '11px' }} >
         {worklists?.map(({ name, workListID }, y) => {
           return (
-            <div key={y} id={workListID} className="row" onClick={onSelect}>
-              <label id={workListID} className="form-check-label title-case" style={{ paddingLeft: '0.3rem', cursor: 'pointer' }} htmlFor="flexCheckDefault">
-                {name}
-              </label>
-            </div>
+            <Dropdown.Item key={y} id={workListID} onSelect={() => onSelect(workListID)}>{name}</Dropdown.Item>
           )
         })
         }
@@ -160,35 +143,6 @@ const AddToWorklist = (props) => {
     </Dropdown>
   );
 
-  // render() {
-  //   const element = document.getElementsByClassName(this.props.className);
-
-  //   var rect = element[0].getBoundingClientRect();
-  //   const worklists = [];
-  //   this.state.worklists.forEach((el, i) => {
-  //     worklists.push(
-  //       <div
-  //         className="worklist__option"
-  //         onClick={this.onSelect}
-  //         id={el.workListID}
-  //         key={`${el.workListID} - ${i}`}
-  //       >
-  //         {el.name}
-  //       </div>
-  //     );
-  //   });
-
-  //   return (
-  //     <div ref={this.setWrapperRef}>
-  //       <div
-  //         className="worklist-popup"
-  //         style={{ left: rect.right - 5, top: rect.bottom - 5 }}
-  //       >
-  //         {worklists}
-  //       </div>
-  //     </div>
-  //   );
-  // }
 }
 
 const mapStateToProps = state => {
