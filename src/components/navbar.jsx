@@ -136,10 +136,11 @@ const NavBar = ({
                   </a>
                 </li>
                 <li className="nav-item" style={{ paddingRight: '0px' }}><a className="user-profile nav-link" onClick={e => openUser(e)}>{user.displayname}</a></li>
-                <li className="nav-item" style={{ paddingRight: '0px' }}>
+                {/* logout is not working in teaching servers so disable the button for teaching mode */}
+                {mode !== 'teaching' && (<li className="nav-item" style={{ paddingRight: '0px' }}>
                   <a className="nav-link" onClick={logout} style={{ paddingRight: '0px' }}>
                     <BsBoxArrowInRight /></a>
-                </li>
+                </li>)}
               </>
             )}
             {mode === 'teaching' && (<li> <a className="navbar-brand" href="#"><img src={stanford} style={{ maxHeight: '40px', textAlign: 'right', paddingLeft: '1em' }} /></a></li>)}
