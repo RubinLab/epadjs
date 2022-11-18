@@ -49,6 +49,7 @@ const NavBar = ({
                 <a className={
                   path.includes('search') ? 'nav-link active' : 'nav-link'
                 }
+                  style={{ cursor: 'pointer' }}
                   onClick={() => {
                     onSwitchView('annotations');
                   }} aria-current="page">Search</a>
@@ -63,6 +64,7 @@ const NavBar = ({
                 <a className={
                   path.includes('display') ? 'nav-link active' : 'nav-link'
                 }
+                  style={{ cursor: 'pointer' }}
                   onClick={() => {
                     onSwitchView('display');
                   }} aria-current="page">Display</a>
@@ -74,7 +76,7 @@ const NavBar = ({
               <li className="nav-item" >
                 <a className={
                   path.includes('list') ? 'nav-link active' : 'nav-link'
-                }
+                } style={{ cursor: 'pointer' }}
                   onClick={() => {
                     onSearchViewClick();
                     onSwitchView('search', true);
@@ -90,14 +92,14 @@ const NavBar = ({
                 <a className={
                   path.includes('search') ? 'nav-link active' : 'nav-link'
                 }
+                  style={{ cursor: 'pointer' }}
                   onClick={() => {
                     onSwitchView('annotations');
                   }} aria-current="page">Annotations</a>
               </li>
               <li className="nav-item" id="navbarReports">
-                <a className={
-                  path.includes('flex') ? 'nav-link active' : 'nav-link'
-                }
+                <a className={/*path.includes('flex') ? 'nav-link active' :*/ 'nav-link'}
+                  style={{ cursor: 'pointer' }}
                   onClick={() => {
                     onReports();
                   }} aria-current="page">Analysis</a>
@@ -106,6 +108,7 @@ const NavBar = ({
                 <a className={
                   path.includes('display') ? 'nav-link active' : 'nav-link'
                 }
+                  style={{ cursor: 'pointer' }}
                   onClick={() => {
                     onSwitchView('display');
                   }} aria-current="page">Display</a>

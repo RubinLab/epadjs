@@ -13,7 +13,7 @@ const SelectModalMenu = ({ list, onClick }) => {
 
   useEffect(() => {
     let { right, bottom } = getLocation();
-    setLocation({ x: right - 10, y: bottom + 3 });
+    setLocation({ x: right - 80, y: bottom + 13 });
   }, []);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const SelectModalMenu = ({ list, onClick }) => {
     <div>
       <div
         className="selectModalMenu"
-        style={{ left: location.x, top: location.y }}
+        style={{ left: location.x, top: location.y, minHeight: '150px' }}
       >
         {options}
       </div>
