@@ -1,30 +1,30 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 
 
 const confirmationModal = props => {
   return (
     <Modal.Dialog id="modal-fix">
-      <Modal.Body className="-maxView-container">
+      <Modal.Body className="-maxView-container notification-modal">
         <div className="-maxView__header">
-          <div className="-maxView__header__text" style={{color: 'orangered'}} >{props.title}</div>
+          <div className="-maxView__header__text" style={{ color: 'orangered' }} >{props.title}</div>
           <h4 className="-maxView__message--exp">{props.message}</h4>
         </div>
       </Modal.Body>
-      <Modal.Footer className="modal-footer__buttons">
-        <button
+      <Modal.Footer className="modal-footer__buttons notification-modal">
+        <Button
           variant="secondary"
           onClick={props.onSubmit}
         >
           {props.button || "Submit"}
-        </button>
-        <button
+        </Button>
+        <Button
           variant="secondary"
           onClick={props.onCancel}
         >
           Cancel
-        </button>
+        </Button>
       </Modal.Footer>
     </Modal.Dialog>
   );

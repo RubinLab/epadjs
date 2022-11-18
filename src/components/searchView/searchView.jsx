@@ -114,13 +114,16 @@ class SearchView extends Component {
 
   componentDidMount = async () => {
     try {
-      const { pid } = this.props;
+      const { pid, treeData } = this.props;
       if (mode === 'thick' && !pid) {
         this.props.history.push(`/list/${pid}`);
       }
-      let subjects = Object.values(this.props.treeData);
-      if (subjects.length > 0) {
-        subjects = subjects.map(el => el.data);
+      let subjects;
+      if (treeData) {
+        subjects = Object.values(treeData);
+        if (subjects.length > 0) {
+          subjects = subjects.map(el => el.data);
+        }
       } else if (pid) {
         subjects = await this.getData();
         // this.props.getTreeData("subject", subjects);
@@ -128,7 +131,7 @@ class SearchView extends Component {
       const { expandLevel } = this.props;
 
       this.setState({
-        numOfsubjects: subjects.length,
+        numOfsubjects: subjects?.length,
         subjects,
         expandLevel
       });

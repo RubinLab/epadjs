@@ -422,6 +422,9 @@ function AnnotationTable(props) {
 
   const { patientName } = props.filters;
 
+  // TODOOOOOO: instead of creating the column array according to mode, mode attribute should be
+  // added to columns and filtered that way
+
   let columns = [];
   if (mode === 'teaching') {
     columns = React.useMemo(
@@ -562,99 +565,57 @@ function AnnotationTable(props) {
       () => [
         {
           Header: 'Select',
-          id: 'study-desc',
+          id: 'select',
+          class: 'select_row',
           Cell: ({ row }) => {
             return (
               <input
                 type="checkbox"
+                className='form-check-input'
                 checked={
                   props.selectedAnnotations[row.original.aimID] ? true : false
                 }
-                onClick={() => { props.updateSelectedAims(row.original) }}
+                onChange={() => props.updateSelectedAims(row.original)}
               />
             );
           }
         },
         {
-          Header: 'Open',
-          sortable: false,
-          resizable: false,
-          style: { display: 'flex', justifyContent: 'center' },
-          Cell: ({ row }) => {
-            return (
-              // <Link className="open-link" to={'/display'}>
-              <div
-                onClick={() => {
-                  if (
-                    row.original.seriesUID === 'noseries' ||
-                    !row.original.seriesUID
-                  ) {
-                    // study aim opening
-                    displaySeries(row.original);
-                  } else {
-                    // series opening
-                    openAnnotation(row.original);
-                  }
-                }}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  width: '1rem'
-                }}
-              >
-                <FaRegEye className="menu-clickable" />
-              </div>
-              // </Link>
-            );
-          }
-        },
-        {
-          // Header: 'Patient Name',
-          Header: ({ column }) => { return <div>Patient Name<input type="text" placeholder="search column" onInput={({ target }) => props.handleFilter(column.id, target)} value={patientName} /></div> },
+          Header: 'Patient Name',
           accessor: 'patientName',
-          sortable: true,
-          resizable: true,
           Cell: ({ row }) => {
-            return <div>{clearCarets(row.original.patientName)}</div>;
+            return <div onClick={() => {
+              if (
+                row.original.seriesUID === 'noseries' ||
+                !row.original.seriesUID
+              ) {
+                // study aim opening
+                displaySeries(row.original);
+              } else {
+                // series opening
+                openAnnotation(row.original);
+              }
+            }} style={{ textDecoration: 'underline', cursor: 'pointer' }}>{clearCarets(row.original.patientName)}</div >;
           }
         },
         {
-          Header: mode == 'teaching' ? 'MRN' : 'Patient Id',
+          Header: 'Patient Id',
           accessor: 'subjectID',
-          sortable: true,
-          resizable: true,
-        },
-        {
-          Header: 'Acc No',
-          accessor: 'accessionNumber',
-          sortable: true,
-          resizable: true,
-          isTeaching: true
         },
         {
           Header: 'Annotation Name',
           accessor: 'name',
-          sortable: true,
-          resizable: true
         },
         {
           Header: 'Age',
           accessor: 'age',
-          sortable: true,
-          resizable: true,
-          isTeaching: true,
         },
         {
           Header: 'Sex',
           accessor: 'sex',
-          sortable: true,
-          resizable: true,
-          isTeaching: true,
         },
         {
           Header: 'Modality',
-          sortable: true,
-          resizable: true,
           accessor: 'modality',
         },
         {
@@ -672,36 +633,6 @@ function AnnotationTable(props) {
               'studyDate'
             ).split(' ');
             return <div>{formatDate(studyDateArr[0])}</div>;
-          }
-        },
-        {
-          Header: 'Anatomy',
-          sortable: true,
-          resizable: true,
-          accessor: 'anatomy',
-          Cell: ({ row }) => {
-            return (
-              <div>
-                {Array.isArray(row.original.anatomy)
-                  ? row.original.anatomy.join(', ')
-                  : row.original.anatomy}
-              </div>
-            );
-          }
-        },
-        {
-          Header: 'Observation',
-          sortable: true,
-          resizable: true,
-          accessor: 'observation',
-          Cell: ({ row }) => {
-            return (
-              <div>
-                {Array.isArray(row.original.observation)
-                  ? row.original.observation.join(', ')
-                  : row.original.observation}
-              </div>
-            );
           }
         },
         {
@@ -723,60 +654,15 @@ function AnnotationTable(props) {
         {
           Header: 'Template',
           accessor: 'template',
-          resizable: true,
-          sortable: true
         },
-        // {
-        //   accessor: 'comment',
-        //   sortable: true,
-        //   resizable: true,
-        //   className: 'wrapped',
-        //   style: { whiteSpace: 'normal' },
-        //   Header: () => {
-        //     if (mode !== 'teaching')
-        //       return (
-        //         <div className="mng-anns__header-flex">
-        //           <div>Modality / Series /</div>
-        //           <div>Slice / Series #</div>
-        //         </div>
-        //       );
-        //     else return 'Modality'
-        //   }
-        // },
         {
           Header: 'User',
           accessor: 'fullName',
           style: { whiteSpace: 'normal' },
-          resizable: true,
-          sortable: true
         },
-        // {
-        //   Header: () => {
-        //     return (
-        //       <div className="mng-anns__header-flex">
-        //         <div>Created</div>
-        //         <div>Time</div>
-        //       </div>
-        //     );
-        //   },
-        //   sortable: false,
-        //   id: 'time',
-        //   filterMethod: (filter, rows) =>
-        //     matchSorter(rows, filter.value, { keys: ['time'] }),
-        //   filterAll: true,
-        //   Cell: ({ row }) => {
-        //     const studyDateArr = convertDateFormat(
-        //       row.original.date,
-        //       'date'
-        //     ).split(' ');
-        //     return <div>{studyDateArr[1]}</div>;
-        //   }
-        // },
         {
           Header: 'Comment',
-          sortable: true,
-          resizable: true,
-          accessor: 'comment'
+          accessor: 'userComment'
         }
       ],
       [props.selectedAnnotations, data]

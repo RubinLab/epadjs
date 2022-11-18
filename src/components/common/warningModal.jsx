@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 
 const warningModal = props => {
   return (
@@ -10,7 +10,7 @@ const warningModal = props => {
         {/* <div className="-maxView__header--icon">
           <FaExclamationTriangle />
         </div> */}
-        <div className="-maxView__header">
+        <div className="-maxView__header notification-modal">
           <div
             className="-maxView__header__text"
             style={{ color: "orangered" }}
@@ -21,9 +21,9 @@ const warningModal = props => {
         </div>
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
-        <button variant="secondary" onClick={props.onOK}>
+        <Button variant="secondary" onClick={props.onOK}>
           OK
-        </button>
+        </Button>
       </Modal.Footer>
     </Modal.Dialog>
   );
