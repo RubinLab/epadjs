@@ -134,8 +134,8 @@ const AnnotationSearch = props => {
   const [selectedMods, setSelectedMods] = useState([]);
   const [selectedAnatomies, setSelectedAnatomies] = useState([]);
   const [selectedDiagnosis, setSelectedDiagnosis] = useState([]);
-  const [tfOnly, setTfOnly] = useState(true);
-  const [myCases, setMyCases] = useState(false);
+  const [tfOnly, setTfOnly] = useState(mode === 'teaching' ? true : false);
+  const [myCases, setMyCases] = useState(mode === 'teaching' ? false : true);
   const [filters, setFilters] = useState({});
   const [sort, setSort] = useState([]);
   const [showSpinner, setShowSpinner] = useState(false);
@@ -521,7 +521,7 @@ const AnnotationSearch = props => {
       fields['anatomy'] = selectedAnatomies
     if (selectedDiagnosis.length)
       fields['diagnosis'] = selectedDiagnosis;
-    if (tfOnly)
+    if (mode === 'teaching' && tfOnly)
       fields['teachingFiles'] = tfOnly;
     if (myCases)
       fields['myCases'] = myCases;
@@ -1413,7 +1413,7 @@ const AnnotationSearch = props => {
               </div>
 
             </div>
-            <TeachingFilters selectedAnatomies={selectedAnatomies}
+            {mode === 'teaching' && (<TeachingFilters selectedAnatomies={selectedAnatomies}
               setSelectedAnatomies={setSelectedAnatomies}
               selectedDiagnosis={selectedDiagnosis}
               setSelectedDiagnosis={setSelectedDiagnosis}
@@ -1424,7 +1424,7 @@ const AnnotationSearch = props => {
               tfOnly={tfOnly}
               setTfOnly={setTfOnly}
               myCases={myCases}
-              setMyCases={setMyCases} />
+              setMyCases={setMyCases} />)}
           </div>
           {(selectedSubs.length + selectedMods.length + selectedAnatomies.length + selectedDiagnosis.length) > 0 &&
             (<div className="filter-control" style={{ paddingLeft: '0.9rem', paddingTop: '0.9rem' }}>
@@ -1478,17 +1478,17 @@ const AnnotationSearch = props => {
               <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('patientName', target)} value={filters.patientName || ""} />
             </th>
             <th>
-              <span onClick={() => handleSort('subjectID')}>MRN </span>{
+              <span onClick={() => handleSort('subjectID')}>{mode === 'teaching' ? 'MRN' : 'Patient Id'} </span>{
                 sort[0] === 'subjectID' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
                 sort[0] === '-subjectID' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)} <br />
               <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('subjectID', target)} value={filters.subjectID || ""} />
             </th>
-            <th><span onClick={() => handleSort('accessionNumber')}>Accession # </span>{
+            {mode === 'teaching' && (<th><span onClick={() => handleSort('accessionNumber')}>Accession # </span>{
               sort[0] === 'accessionNumber' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
               sort[0] === '-accessionNumber' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)} < br />
               <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('accessionNumber', target)} value={filters.accessionNumber || ""} />
-            </th>
-            <th><span onClick={() => handleSort('name')}>Case Title </span>{
+            </th>)}
+            <th><span onClick={() => handleSort('name')}>{mode === 'teaching' ? 'Case Title' : 'Annotation Name'} </span>{
               sort[0] === 'name' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
               sort[0] === '-name' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
               <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('name', target)} value={filters.name || ""} />
@@ -1517,17 +1517,17 @@ const AnnotationSearch = props => {
                 sort[0] === '-studyDate' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
               <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('studyDate', target)} value={filters.studyDate || ""} />
             </th>
-            <th>
+            {mode === 'teaching' && (<th>
               <span onClick={() => handleSort('anatomy')}>Anatomy </span>{
                 sort[0] === 'anatomy' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
                 sort[0] === '-anatomy' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
               <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('anatomy', target)} value={filters.anatomy || ""} />
-            </th>
-            <th><span onClick={() => handleSort('observation')}>Observation </span>{
+            </th>)}
+            {mode === 'teaching' && (<th><span onClick={() => handleSort('observation')}>Observation </span>{
               sort[0] === 'observation' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
               sort[0] === '-observation' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
               <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('observation', target)} value={filters.observation || ""} />
-            </th>
+            </th>)}
             <th>
               <span onClick={() => handleSort('date')}>Created </span>{
                 sort[0] === 'date' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
@@ -1546,7 +1546,7 @@ const AnnotationSearch = props => {
                 sort[0] === '-fullName' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
               <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('fullName', target)} value={filters.fullName || ""} />
             </th>
-            <th><span onClick={() => handleSort('userComment')}>Narrative </span>{
+            <th><span onClick={() => handleSort('userComment')}>{mode === 'teaching' ? 'Narrative' : 'Comment'} </span>{
               sort[0] === 'userComment' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
               sort[0] === '-userComment' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
               <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('userComment', target)} value={filters.userComment || ""} />

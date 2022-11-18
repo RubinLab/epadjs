@@ -564,7 +564,7 @@ function Subjects(props) {
   };
 
   const sortSubjectName = list => {
-    let result = list.sort(function(a, b) {
+    let result = list.sort(function (a, b) {
       if (a.subjectName < b.subjectName) {
         return -1;
       }
@@ -638,7 +638,7 @@ function Subjects(props) {
 
   return (
     <>
-      <label>
+      <label style={{ color: 'white' }}>
         Find patient:
         <input
           type="text"
