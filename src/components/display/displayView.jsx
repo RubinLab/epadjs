@@ -919,7 +919,6 @@ class DisplayView extends Component {
   };
 
   setDirtyFlag = () => {
-    console.log("Called");
     if (!this.state.dirty) this.setState({ dirty: true });
   };
 
