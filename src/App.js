@@ -877,23 +877,17 @@ class App extends Component {
             keycloak
               .init({ onLoad: "check-sso", checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? {pkceMethod: 'S256' }:{}) })
               .then((authenticated) => {
-                if (authenticated) {
-                  console.log('in if');
+                if (authenticated) 
                   keycloak
                     .loadUserInfo()
                     .then((userInfo) => {
                       resolve({ userInfo, keycloak, authenticated });
                     })
                     .catch((err) => reject(err));
-                } else {
-                  console.log('in else');
+                else 
                   keycloak.login();
-                }
               })
-              .catch((err) => {
-                console.log('err', err);
-                reject(err);
-              });
+              .catch((err) => reject(err));
           } 
           else { 
             keycloak
