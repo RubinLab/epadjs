@@ -873,21 +873,15 @@ class App extends Component {
         const pkce =  sessionStorage.getItem("pkce");
         const sso =  sessionStorage.getItem("sso");
         getAuthUser = new Promise((resolve, reject) => {
-          console.log('sso', sso, typeof sso);
-          console.log('pkce', pkce, typeof pkce);
-          console.log('init', JSON.stringify({ onLoad: "check-sso", checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? {pkceMethod: 'S256' }:{}) }));
-          console.log({ onLoad: "check-sso", checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? {pkceMethod: 'S256' }:{}) });
           if (sso && sso === 'true'){
             keycloak
               .init({ onLoad: "check-sso", checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? {pkceMethod: 'S256' }:{}) })
               .then((authenticated) => {
-                console.log('authenticated', authenticated);
                 if (authenticated) {
                   console.log('in if');
                   keycloak
                     .loadUserInfo()
                     .then((userInfo) => {
-                      console.log('userinfo', userInfo);
                       resolve({ userInfo, keycloak, authenticated });
                     })
                     .catch((err) => reject(err));
