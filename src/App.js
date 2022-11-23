@@ -877,7 +877,7 @@ class App extends Component {
             keycloak
               .init({ onLoad: "check-sso", checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? {pkceMethod: 'S256' }:{}) })
               .then((authenticated) => {
-                if (authenticated) 
+                if (authenticated)
                   keycloak
                     .loadUserInfo()
                     .then((userInfo) => {
