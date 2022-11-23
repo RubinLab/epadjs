@@ -887,7 +887,7 @@ class App extends Component {
                   keycloak
                     .loadUserInfo()
                     .then((userInfo) => {
-                      console.log('userinfo', userinfo);
+                      console.log('userinfo', userInfo);
                       resolve({ userInfo, keycloak, authenticated });
                     })
                     .catch((err) => reject(err));
