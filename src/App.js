@@ -884,6 +884,8 @@ class App extends Component {
                       resolve({ userInfo, keycloak, authenticated });
                     })
                     .catch((err) => reject(err));
+                else 
+                  keycloak.login();
               })
               .catch((err) => reject(err));
           } 
