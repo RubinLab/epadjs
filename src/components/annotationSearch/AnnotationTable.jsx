@@ -20,7 +20,8 @@ import {
   updatePatient,
   startLoading,
   loadCompleted,
-  annotationsLoadingError
+  annotationsLoadingError,
+  updateSearchTableIndex
 } from '../annotationsList/action';
 import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
@@ -248,16 +249,14 @@ function AnnotationTable(props) {
   maxPort = parseInt(sessionStorage.getItem('maxPort'));
   mode = sessionStorage.getItem('mode');
   const [pageCount, setPageCount] = useState(0);
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [data, setData] = useState([]);
   const [showSelectSeriesModal, setShowSelectSeriesModal] = useState(false);
   const [selected, setSelected] = useState({});
   const [listOfSelecteds, setListOfSelecteds] = useState([]);
 
   const handlePageIndex = act => {
-    let newIndex = act === 'prev' ? currentPageIndex - 1 : currentPageIndex + 1;
-    setCurrentPageIndex(newIndex);
-    props.setPageIndex(newIndex);
+    let newIndex = act === 'prev' ? props.searchTableIndex - 1 : props.searchTableIndex + 1;
+    props.dispatch(updateSearchTableIndex(newIndex));
   };
 
   // Render the UI for your table
@@ -284,16 +283,14 @@ function AnnotationTable(props) {
   }, [props.selectedAnnotations]);
 
   useEffect(() => {
-    preparePageData(props.data);
-    setCurrentPageIndex(0);
+    preparePageData(props.data, defaultPageSize, props.searchTableIndex);
   }, [props.pid, props.data]);
 
   useEffect(() => {
-    if (props.data.length <= defaultPageSize * currentPageIndex) {
-      preparePageData(props.data, defaultPageSize, 0);
-      setCurrentPageIndex(0);
+    if (props.data.length <= defaultPageSize * props.searchTableIndex) {
+      preparePageData(props.data, defaultPageSize, props.searchTableIndex);
     }
-  }, [props.noOfRows, props.data]);
+  }, [props.noOfRows, props.data, props.searchTableIndex]);
 
   const getSeriesData = async selected => {
     props.dispatch(startLoading());
@@ -671,15 +668,13 @@ function AnnotationTable(props) {
 
   const fetchData = useCallback(
     ({ pageIndex }) => {
-      // setCurrentPageIndex(pageIndex);
-      // props.setPageIndex(pageIndex);
       if (props.data.length <= pageIndex * defaultPageSize) {
         props.getNewData(pageIndex);
       } else {
-        preparePageData(props.data, defaultPageSize, pageIndex);
+        preparePageData(props.data, defaultPageSize, props.searchTableIndex);
       }
     },
-    [props.bookmark]
+    [props.bookmark, props.searchTableIndex]
   );
 
   return (
@@ -692,7 +687,7 @@ function AnnotationTable(props) {
         noOfRows={props.noOfRows}
         fetchData={fetchData}
         updateSelectedAims={props.updateSelectedAims}
-        controlledPageIndex={currentPageIndex}
+        controlledPageIndex={props.searchTableIndex}
         handlePageIndex={handlePageIndex}
         listOfSelecteds={listOfSelecteds}
         handleSort={props.handleSort}
@@ -720,7 +715,8 @@ const mapsStateToProps = state => {
     lastEventId: state.annotationsListReducer.lastEventId,
     refresh: state.annotationsListReducer.refresh,
     projectMap: state.annotationsListReducer.projectMap,
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
+    searchTableIndex: state.annotationsListReducer.searchTableIndex
   };
 };
 

@@ -44,6 +44,7 @@ import {
   SAVE_PATIENT_FILTER,
   ADD_STUDY_TO_GRID,
   REPLACE_IN_GRID,
+  UPDATE_SEARCH_TABLE_INDEX,
   colors,
   commonLabels,
 } from "./types";
@@ -58,6 +59,10 @@ import {
 import { getAllTemplates } from "../../services/templateServices";
 import { getImageIdAnnotations } from "aimapi";
 import { ConsoleWriter } from "istanbul-lib-report";
+
+export const updateSearchTableIndex = searchTableIndex => {
+  return { type: UPDATE_SEARCH_TABLE_INDEX, searchTableIndex }
+}
 
 export const savePatientFilter = (patientSearch, pageSize, pageIndex) => {
   return {
@@ -348,16 +353,16 @@ export const addToGrid = (serie, annotation) => {
 };
 
 export const replaceInGrid = (serie) => {
-  let {seriesUID} = serie;
+  let { seriesUID } = serie;
   // return async(dispatch)=>{
   //   await dispatch(getSingleSerie(serie));
-    return {type: REPLACE_IN_GRID, seriesUID};
+  return { type: REPLACE_IN_GRID, seriesUID };
   // } 
 }
 
 // Adds the series list of study to grid. Series sdropdown in the viewpoert uses this.
 export const addStudyToGrid = (seriesOfStudy) => {
-  return {type: ADD_STUDY_TO_GRID, seriesOfStudy};
+  return { type: ADD_STUDY_TO_GRID, seriesOfStudy };
 }
 
 // toggle annotation details at the right side bar in display view
@@ -466,7 +471,7 @@ const getAimListFields = (aims, ann) => {
 
       const markupColor =
         aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-          ?.markupEntityCollection?.MarkupEntity[0]?.lineColor?.value; //if aim has markup colors make the first markup"s color aim"s color
+          ?.markupEntityCollection ?.MarkupEntity[0] ?.lineColor ?.value; //if aim has markup colors make the first markup"s color aim"s color
       let color;
 
       if (imgAimUID) {
@@ -481,11 +486,11 @@ const getAimListFields = (aims, ann) => {
       let type = imgAimUID
         ? "image"
         : serieAimUID && !imgAimUID
-        ? "serie"
-        : "study";
+          ? "serie"
+          : "study";
 
       let aimName =
-        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]?.name
+        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0] ?.name
           .value;
       let ind = aimName.indexOf("~");
       if (ind >= 0) {
@@ -507,9 +512,9 @@ const getAimListFields = (aims, ann) => {
         trackingUniqueIdentifier,
       } = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
       let users = aim.ImageAnnotationCollection.user;
-      if(!Array.isArray(users))
+      if (!Array.isArray(users))
         users = [users];
-      let flattenAuthorList = users.map(user=>{
+      let flattenAuthorList = users.map(user => {
         return user.name.value;
       })
       const aimFields = {
@@ -520,14 +525,14 @@ const getAimListFields = (aims, ann) => {
         inferenceEntityCollection,
         segmentationEntityCollection,
         typeCode,
-        trackingUniqueIdentifier: trackingUniqueIdentifier?.root,
+        trackingUniqueIdentifier: trackingUniqueIdentifier ?.root,
         users,
       };
       const id = aim.ImageAnnotationCollection.uniqueIdentifier.root;
       result[aim.ImageAnnotationCollection.uniqueIdentifier.root] = {
         name: aimName,
         id,
-        user:flattenAuthorList.join(),
+        user: flattenAuthorList.join(),
         // json1: aim,
         json: aimFields,
         isDisplayed: true,

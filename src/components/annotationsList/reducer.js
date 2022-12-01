@@ -44,6 +44,7 @@ import {
   SAVE_PATIENT_FILTER,
   ADD_STUDY_TO_GRID,
   REPLACE_IN_GRID,
+  UPDATE_SEARCH_TABLE_INDEX,
   colors,
   commonLabels,
 } from "./types";
@@ -77,7 +78,8 @@ const initialState = {
   reports: [],
   isSegUploaded: {},
   patientFilter: {},
-  openStudies:{},
+  openStudies: {},
+  searchTableIndex: 0
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -95,7 +97,8 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
-
+      case UPDATE_SEARCH_TABLE_INDEX:
+        return { ...state, searchTableIndex: action.searchTableIndex }
       case SAVE_PATIENT_FILTER:
         return {
           ...state,
@@ -162,10 +165,10 @@ const asyncReducer = (state = initialState, action) => {
 
         return { ...state, openSeries: openSeriesToUpdate };
       case CLOSE_SERIE:
-      console.log("In close");
+        console.log("In close");
         let delSeriesUID = state.openSeries[state.activePort].seriesUID;
         let delStudyUID = state.openSeries[state.activePort].studyUID;
-        let delOpenStudies = {...state.openStudies};
+        let delOpenStudies = { ...state.openStudies };
         const delAims = { ...state.aimsList };
         delete delAims[delSeriesUID];
         let delGrid = state.openSeries.slice(0, state.activePort);
@@ -185,7 +188,7 @@ const asyncReducer = (state = initialState, action) => {
           delActivePort = delGrid.length - 1;
         }
 
-        if(!shouldStudyExist){
+        if (!shouldStudyExist) {
           delete delOpenStudies[delStudyUID];
           return {
             ...state,
@@ -243,15 +246,15 @@ const asyncReducer = (state = initialState, action) => {
         const colorAimsList =
           newDataKeys.length >= stateKeys.length
             ? persistColorInSaveAim(
-                state.aimsList[action.payload.serID] || {},
-                action.payload.aimsData,
-                colors
-              )
+              state.aimsList[action.payload.serID] || {},
+              action.payload.aimsData,
+              colors
+            )
             : persistColorInDeleteAim(
-                state.aimsList[action.payload.serID] || {},
-                action.payload.aimsData,
-                colors
-              );
+              state.aimsList[action.payload.serID] || {},
+              action.payload.aimsData,
+              colors
+            );
 
         const result = Object.assign({}, state, {
           loading: false,
@@ -368,7 +371,7 @@ const asyncReducer = (state = initialState, action) => {
           openSeries: [],
           aimsList: {},
           activePort: 0,
-          openStudies:{}
+          openStudies: {}
         };
       case CLEAR_SELECTION:
         let selectionState = { ...state };
@@ -477,7 +480,7 @@ const asyncReducer = (state = initialState, action) => {
 
       case REPLACE_IN_GRID:
         const replacedOpenSeries = [...state.openSeries];
-        const newAimsList = {...state.aimsList};
+        const newAimsList = { ...state.aimsList };
         delete newAimsList[replacedOpenSeries[state.activePort].seriesUID];
         replacedOpenSeries[state.activePort].seriesUID = action.seriesUID;
 
@@ -488,9 +491,9 @@ const asyncReducer = (state = initialState, action) => {
         };
 
       case ADD_STUDY_TO_GRID:
-        const newStudy = { ...action.seriesOfStudy  };
-        let newOpenStudies = {...state.openStudies, ...newStudy};
-        return { 
+        const newStudy = { ...action.seriesOfStudy };
+        let newOpenStudies = { ...state.openStudies, ...newStudy };
+        return {
           ...state,
           openStudies: newOpenStudies
         };

@@ -58,60 +58,62 @@ export const AIM_DELETE = "epadjs/annotationList/AIM_DELETE";
 export const SAVE_PATIENT_FILTER = "epadjs/annotationList/SAVE_PATIENT_FILTER";
 export const ADD_STUDY_TO_GRID = "epadjs/annotationList/ADD_STUDY_TO_GRID";
 export const REPLACE_IN_GRID = "epadjs/annotationList/REPLACE_IN_GRID";
+export const UPDATE_SEARCH_TABLE_INDEX = "epadjs/annotationList/UPDATE_SEARCH_TABLE_INDEX ";
+
 
 export const commonLabels = {
   button: { background: "#c0c0c0", color: "black" },
   label: { background: "#858585", color: "white" },
 };
 
-export const colors= [
+export const colors = [
   {
     button: { background: "#f84170" },
-    label: { background: "#750e29"},
+    label: { background: "#750e29" },
   },
   {
     button: { background: "#ed679f" },
-    label: { background: "#773350"},
+    label: { background: "#773350" },
   },
   {
     button: { background: "#f0614a" },
-    label: { background: "#783226"},
+    label: { background: "#783226" },
   },
   {
     button: { background: "#f9a45a" },
-    label: { background: "#7d522d"},
+    label: { background: "#7d522d" },
   },
   {
     button: { background: "#fff06a" },
-    label: { background: "#807835"},
+    label: { background: "#807835" },
   },
   {
     button: { background: "#72ba6f" },
-    label: { background: "#395e38"},
+    label: { background: "#395e38" },
   },
   {
     button: { background: "#00994b" },
-    label: { background: "#004d26"},
+    label: { background: "#004d26" },
   },
   {
     button: { background: "#00b7ed" },
-    label: { background: "#005b76"},
+    label: { background: "#005b76" },
   },
   {
     button: { background: "#066ffa" },
-    label: { background: "#03387d"},
+    label: { background: "#03387d" },
   },
   {
     button: { background: "#9e5c9c" },
-    label: { background: "#4f2e4e"},
+    label: { background: "#4f2e4e" },
   },
-   {
+  {
     button: { background: "#872981" },
-    label: { background: "#431541"},
+    label: { background: "#431541" },
   },
-   {
+  {
     button: { background: "#008484" },
-    label: { background: "#004242"},
+    label: { background: "#004242" },
   }
 ]
 
