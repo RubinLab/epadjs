@@ -30,7 +30,7 @@ import {
   deleteAnnotationsList
 } from '../../services/annotationServices.js';
 import AnnotationTable from './AnnotationTable.jsx';
-import { clearSelection, selectAnnotation } from '../annotationsList/action';
+import { clearSelection, selectAnnotation, updateSearchTableIndex } from '../annotationsList/action';
 import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
 import UploadModal from '../searchView/uploadModal';
 import DeleteAlert from '../management/common/alertDeletionModal';
@@ -121,7 +121,6 @@ const AnnotationSearch = props => {
   const [uploadClicked, setUploadClicked] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [checkboxSelected, setCheckboxSelected] = useState(false);
-  const [pageIndex, setPageIndex] = useState(0);
   // cavit
   const [showPlugins, setShowPluginDropdown] = useState(false);
   const [pluginListArray, setpluginListArray] = useState([]);
@@ -209,11 +208,10 @@ const AnnotationSearch = props => {
     if (e.key === 'Enter') {
       if (mode !== 'teaching') {
         getSearchResult();
-        setPageIndex(0);
-      }
-      else {
+        props.dispatch(updateSearchTableIndex(0));
+      } else {
         getFieldSearchResults();
-        setPageIndex(0);
+        props.dispatch(updateSearchTableIndex(0));
       }
     }
   });
@@ -259,7 +257,7 @@ const AnnotationSearch = props => {
       return;
     }
     getFieldSearchResults();
-    setPageIndex(0);
+    props.dispatch(updateSearchTableIndex(0));
     return persistSearch;
   }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid, query, sort, filters], 500)
 
@@ -467,7 +465,7 @@ const AnnotationSearch = props => {
   };
 
   const getSearchResult = (pageIndex, afterDelete) => {
-    setPageIndex(0);
+    props.dispatch(updateSearchTableIndex(0));
     if (query.length === 0) {
       getAnnotationsOfProjets(pageIndex, afterDelete);
     }
@@ -493,7 +491,6 @@ const AnnotationSearch = props => {
         };
         props.setQuery(queryToSave);
         const bm = pageIndex ? bookmark : '';
-
         searchAnnotations({ query: escapeSlashesQuery(searchQuery) }, bm)
           .then(res => {
             populateSearchResult(res, pageIndex, afterDelete);
@@ -540,9 +537,10 @@ const AnnotationSearch = props => {
 
   const getNewData = (pageIndex, afterDelete) => {
     if (mode === 'teaching') {
-      getFieldSearchResults();
+      getFieldSearchResults(props.searchTableIndex);
       return;
     }
+
     if (query) {
       getSearchResult(pageIndex, afterDelete);
     } else {
@@ -870,9 +868,9 @@ const AnnotationSearch = props => {
 
   const handleMultipleSelect = action => {
     const pages = Math.ceil(props.rows / pageSize);
-    const indexStart = pageIndex * pageSize;
+    const indexStart = props.searchTableIndex * pageSize;
     const indexEnd =
-      pageIndex + 1 === pages ? rows : pageSize * (pageIndex + 1);
+      props.searchTableIndex + 1 === pages ? rows : pageSize * (props.searchTableIndex + 1);
     const arrayToSelect = data.slice(indexStart, indexEnd);
     if (action === 'selectPageAll') {
       arrayToSelect.forEach(el => {
@@ -1193,7 +1191,7 @@ const AnnotationSearch = props => {
 
     Promise.all(promiseArr)
       .then(() => {
-        getNewData(pageIndex, true);
+        getNewData(props.searchTableIndex, true);
       })
       .catch(error => {
         if (
@@ -1202,7 +1200,7 @@ const AnnotationSearch = props => {
           error.response.data.message
         )
           toast.error(error.response.data.message, { autoClose: false });
-        getNewData(pageIndex, true);
+        getNewData(props.searchTableIndex, true);
       });
     setShowDeleteModal(false);
     props.dispatch(clearSelection());
@@ -1564,8 +1562,6 @@ const AnnotationSearch = props => {
               bookmark={bookmark}
               switchToDisplay={() => props.history.push('/display')}
               pid={props.pid}
-              setPageIndex={setPageIndex}
-              indexFromParent={pageIndex}
               handleSort={handleSort}
               handleFilter={handleFilter}
               filters={filters}
@@ -1611,7 +1607,8 @@ const mapsStateToProps = state => {
   return {
     projectMap: state.annotationsListReducer.projectMap,
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
-    openSeries: state.annotationsListReducer.openSeries
+    openSeries: state.annotationsListReducer.openSeries,
+    searchTableIndex: state.annotationsListReducer.searchTableIndex
   };
 };
 
