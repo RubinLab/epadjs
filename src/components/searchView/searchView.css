@@ -525,6 +525,7 @@ h5.add-subject__modal--label,
 .updateAssignee__mbody.modal-body {
   height: 20rem;
   overflow: auto;
+  background: #444;
 }
 
 #modal-fix.modal-dialog.in-modal.mini-modal {
