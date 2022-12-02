@@ -504,6 +504,10 @@ h5.add-subject__modal--label,
   z-index: 1000000;
 }
 
+.assigneeDeletionWarning {
+  background: #444;
+}
+
 .notifications {
   min-width: 30rem;
 }
