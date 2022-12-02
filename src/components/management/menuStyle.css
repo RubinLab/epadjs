@@ -201,6 +201,10 @@
   color: black;
 }
 
+.updateDueDate__mbody {
+  background: #444;
+}
+
 .add-project__modal--input,
 .add-connection__modal--input,
 .edit-project__modal--input,
