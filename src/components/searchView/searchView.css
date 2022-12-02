@@ -286,6 +286,14 @@
   min-width: 100%;
 }
 
+.updateReq__mbody.modal-body,
+.edit-userRole.project_user.modal-body,
+.create-user__modal.--body.modal-body
+{
+  background: #444;
+}
+/* edit-userRole project_user modal-body */
+
 #worklist #modal-fix {
   overflow: auto;
   min-width: 30rem;
@@ -504,6 +512,10 @@ h5.add-subject__modal--label,
   z-index: 1000000;
 }
 
+.assigneeDeletionWarning {
+  background: #444;
+}
+
 .notifications {
   min-width: 30rem;
 }
@@ -525,6 +537,7 @@ h5.add-subject__modal--label,
 .updateAssignee__mbody.modal-body {
   height: 20rem;
   overflow: auto;
+  background: #444;
 }
 
 #modal-fix.modal-dialog.in-modal.mini-modal {
