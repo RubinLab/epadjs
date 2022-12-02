@@ -287,7 +287,9 @@
 }
 
 .updateReq__mbody.modal-body,
-.edit-userRole.project_user.modal-body {
+.edit-userRole.project_user.modal-body,
+.create-user__modal.--body.modal-body
+{
   background: #444;
 }
 /* edit-userRole project_user modal-body */
