@@ -276,11 +276,15 @@ class WorkList extends React.Component {
     });
   };
 
-  selectAssignee = e => {
-    const { name, checked } = e.target;
-    const newAssigneeMap = { ...this.state.assigneeMap };
-    newAssigneeMap[name] = checked;
-    this.setState({ assigneeMap: newAssigneeMap });
+  selectAssignee = (e, map) => {
+   if (e) { 
+      const { name, checked } = e.target;
+      const newAssigneeMap = { ...this.state.assigneeMap };
+      newAssigneeMap[name] = checked;
+      this.setState({ assigneeMap: newAssigneeMap });
+    } else {
+      this.setState({ assigneeMap: map });
+    }
   };
 
   submitUpdateAssignees = () => {

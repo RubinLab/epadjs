@@ -6,7 +6,26 @@ import AssgineeDeletetionWarning from "./assigneeDeletionWarning";
 import "../menuStyle.css";
 
 class UpdateAssignee extends React.Component {
-  state = { showWarning: false, warningList: [] };
+  state = { showWarning: false, warningList: [], selectAll: 0 };
+
+  toggleSelectAll() {
+    let newSelected = {};
+    if (this.state.selectAll === 0) {
+      this.state.data.forEach(project => {
+        newSelected[project.id] = true;
+      });
+    }
+
+    this.setState({
+      selected: newSelected,
+      selectAll: this.state.selectAll === 0 ? 1 : 0
+    });
+    // if all selected iterate over the props.users and push all  as username = true 
+    // and call selectAssignee as (null, object)
+    // is unselects the checkbox call selectAssignee(null, {});
+    
+  }
+
   checkWorklistDeletion = () => {
     const warningList = [];
     const assigneeList = Object.keys(this.props.assigneeList);
@@ -46,6 +65,7 @@ class UpdateAssignee extends React.Component {
             <UserList
               users={this.props.users}
               onChange={this.props.selectAssignee}
+              selectAll={() => console.log("select all here!!!")}
               assignees={this.props.assigneeList}
             />
           </>
