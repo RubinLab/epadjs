@@ -54,13 +54,17 @@ const SubSpecialityFilter = props => {
         <button data-bs-display="static" id='subSpecTog' type="button" className="btn btn-dark btn-sm dropdown-toggle color-schema" ref={ref}
             onClick={(e) => {
                 e.preventDefault();
-                if (firstRun) {
-                    setSubSpecialities(getSubSpecialities);
-                    setFirstRun(false);
+                if (props?.templates[teachingFileTempCode] === undefined) {
+                    setShowWarning(true);
+                } else {
+                    if (firstRun) {
+                        setSubSpecialities(getSubSpecialities);
+                        setFirstRun(false);
+                    }
+                    setSelecteds(props.selectedSubs);
+                    handleToggle();
+                    onClick(e);
                 }
-                setSelecteds(props.selectedSubs);
-                handleToggle();
-                onClick(e);
             }}>
             {children}
         </button>
