@@ -2,19 +2,25 @@ import React, { useState } from 'react';
 import { connect } from "react-redux";
 import Dropdown from 'react-bootstrap/Dropdown';
 import FormControl from 'react-bootstrap/FormControl';
+import WarningModal from '../common/warningModal';
 import { getAllowedTermsOfTemplateComponent } from "Utils/aid";
 import { teachingFileTempCode } from '../../constants.js';
 
 const componentLabel = "Anatomy Detail";
+const mode = sessionStorage.getItem('mode')
+const warning = { message: `You don't have the required template for the ${mode} mode. Please contact to your admin` }
 
 const AnatomyFilter = (props) => {
-
     const [anatomies, setAnatomies] = useState([]);
     const [firstRun, setFirstRun] = useState(true);
+    const [showWarning, setShowWarning] = useState(false);
 
     function getAnatomies() {
-        const { Template } = props.templates[teachingFileTempCode].TemplateContainer;
-        return getAllowedTermsOfTemplateComponent(Template, componentLabel);
+        const temp = props ?.templates[teachingFileTempCode];
+        if (temp) {
+            const { Template } = props.templates[teachingFileTempCode].TemplateContainer;
+            return getAllowedTermsOfTemplateComponent(Template, componentLabel); 
+        } 
     }
 
     const handleSelect = (selection) => {
@@ -25,12 +31,16 @@ const AnatomyFilter = (props) => {
     const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
         <button type="button" className="btn btn-dark btn-sm dropdown-toggle color-schema" ref={ref}
             onClick={(e) => {
-                if (firstRun) {
-                    setAnatomies(getAnatomies());
-                    setFirstRun(false);
+                if (props?.templates[teachingFileTempCode] === undefined) {
+                    setShowWarning(true);
+                } else {
+                    if (firstRun) {
+                        setAnatomies(getAnatomies());
+                        setFirstRun(false);
+                    }
+                    e.preventDefault();
+                    onClick(e);
                 }
-                e.preventDefault();
-                onClick(e);
             }}>
             {children}
         </button>
@@ -71,20 +81,23 @@ const AnatomyFilter = (props) => {
     );
 
     return (
-        <Dropdown className="d-inline mx-1">
-            <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
-                Anatomy
-            </Dropdown.Toggle>
-
-            <Dropdown.Menu as={AnatomyMenu} className='p-2 dropdown-menu-dark modality'>
-                {anatomies?.map((anatomy, i) => {
-                    return (
-                        <Dropdown.Item key={i} eventKey={anatomy} onSelect={eventKey => handleSelect(eventKey)}>{anatomy}</Dropdown.Item>
-                    )
-                })
+        <>
+            <Dropdown className="d-inline mx-1">
+                <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
+                    Anatomy
+                </Dropdown.Toggle>
+                { props.templates[teachingFileTempCode] && <Dropdown.Menu as={AnatomyMenu} className='p-2 dropdown-menu-dark modality'>
+                    {anatomies?.map((anatomy, i) => {
+                        return (
+                            <Dropdown.Item key={i} eventKey={anatomy} onSelect={eventKey => handleSelect(eventKey)}>{anatomy}</Dropdown.Item>
+                        )
+                    })
+                    }
+                </Dropdown.Menu> 
                 }
-            </Dropdown.Menu>
-        </Dropdown>
+            </Dropdown>
+            {showWarning && <WarningModal message={warning.message} onOK={() => setShowWarning(false)} />}
+        </>
 
     );
 }
