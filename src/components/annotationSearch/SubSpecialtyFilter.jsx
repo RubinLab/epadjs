@@ -7,7 +7,7 @@ import WarningModal from '../common/warningModal';
 
 const componentLabel = "Radiology Specialty";
 const mode = sessionStorage.getItem('mode')
-const warning = { message: `You don't have the template for ${mode} mode. Please contact to your admin` }
+const warning = { message: `You don't have the required template for the ${mode} mode. Please contact to your admin` }
 
 const SubSpecialityFilter = props => {
     const [subSpecialities, setSubSpecialities] = useState([]);
@@ -21,7 +21,7 @@ const SubSpecialityFilter = props => {
         if (temp) {
             const { Template } = props ?.templates[teachingFileTempCode] ?.TemplateContainer;
             if (Template) return getAllowedTermsOfTemplateComponent(Template, componentLabel);
-        } else[]
+        } 
     }
 
     useEffect(() => {
