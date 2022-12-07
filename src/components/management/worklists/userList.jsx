@@ -3,6 +3,13 @@ import PropTypes from "prop-types";
 import Table from "react-table-v6";
 
 const userList = props => {
+
+  const checkUserSelected = (obj) => {
+    if (props.assignees[obj.username] &&  props.isSelectedAll !== 0) return true;
+    else if (props.isSelectedAll === 1) return true;
+    else return false;
+  }
+
   const columns = [
     {
       Header: (
@@ -10,6 +17,11 @@ const userList = props => {
           type="checkbox"
           onChange={props.selectAll}
           checked={props.isSelectedAll}
+          ref={input => {
+            if (input) {
+              input.indeterminate = props.isSelectedAll === 2;
+            }
+          }}
         /> Select All</div>
       ),
       sortable: true,
@@ -20,7 +32,7 @@ const userList = props => {
           type="checkbox"
           onChange={props.onChange}
           name={original.row.username}
-          checked={props.assignees[original.row.username]}
+          checked={checkUserSelected(original.row)}
           id={original.row.username}
           style={{ textAlign: "right" }}
         />

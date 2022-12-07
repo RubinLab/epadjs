@@ -4,26 +4,48 @@ import { Modal } from "react-bootstrap";
 import UserList from "./userList";
 import AssgineeDeletetionWarning from "./assigneeDeletionWarning";
 import "../menuStyle.css";
+import userList from "./userList";
 
 class UpdateAssignee extends React.Component {
-  state = { showWarning: false, warningList: [], selectAll: 0 };
+  constructor(props) {
+    super(props);
+    this.state = { showWarning: false, warningList: [], isSelectedAll: 0 };
+  }
 
-  toggleSelectAll() {
-    let newSelected = {};
-    if (this.state.selectAll === 0) {
-      this.state.data.forEach(project => {
-        newSelected[project.id] = true;
-      });
+
+  componentDidMount = () => {
+    if (Object.keys(this.props.assigneeList).length === this.props.users.length) {
+      this.setState({ isSelectedAll: 1})
+    } else if (Object.keys(this.props.assigneeList).length > 0) {
+      this.setState({ isSelectedAll: 2})
+    } else {
+      this.setState({ isSelectedAll: 0})
     }
-
-    this.setState({
-      selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
-    });
+  }
+  
+  toggleSelectAll = (e) => {  
+    let newSelected = {};
+    let event = e;
+    if (e.target.checked) {
+      event = null;
+      this.setState({ isSelectedAll: 1 });
+      newSelected = this.props.users.reduce((all, item) => {
+        all[item.username] = true;
+        return all;
+      }, {});
+    } else {
+      this.setState({ isSelectedAll: 0 });
+      this.props.selectAssignee(event, newSelected);
+    }
     // if all selected iterate over the props.users and push all  as username = true 
     // and call selectAssignee as (null, object)
     // is unselects the checkbox call selectAssignee(null, {});
     
+  }
+
+  selectAssignee = (e) => {
+    this.setState({ isSelectedAll: 2});
+    this.props.selectAssignee(e);
   }
 
   checkWorklistDeletion = () => {
@@ -44,6 +66,7 @@ class UpdateAssignee extends React.Component {
 
   handleCancel = () => {
     this.setState({ showWarning: false, warningList: [] });
+
   };
 
   render = () => {
@@ -64,9 +87,10 @@ class UpdateAssignee extends React.Component {
             )}
             <UserList
               users={this.props.users}
-              onChange={this.props.selectAssignee}
-              selectAll={() => console.log("select all here!!!")}
+              onChange={this.selectAssignee}
+              selectAll={this.toggleSelectAll}
               assignees={this.props.assigneeList}
+              isSelectedAll={this.state.isSelectedAll}
             />
           </>
         </Modal.Body>
