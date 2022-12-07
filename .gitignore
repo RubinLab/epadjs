@@ -23,5 +23,9 @@ yarn-debug.log*
 yarn-error.log*
 
 .vscode/*
+.vs/*
 .eslintcache
 false
+public/config.json
+public/keycloak.json
+src/index.js

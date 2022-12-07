@@ -8,6 +8,7 @@ import ColormapSelector from "./ColormapSelector";
 import FuseSelector from "./FuseSelector";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
+import MediaExport from "../MediaExport/MediaExport";
 import {
   FaLocationArrow,
   FaEraser,
@@ -28,7 +29,8 @@ import {
   FaPalette,
   FaObjectUngroup,
   FaDotCircle,
-  FaTimes
+  FaTimes,
+  FaCamera
 } from "react-icons/fa";
 import { BsArrowUpLeft } from "react-icons/bs";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
@@ -107,6 +109,7 @@ const tools = [
   { name: "BrushSphericalHUGated" },
   { name: "Brush3DAutoGated" },
   { name: "ArrowAnnotate" },
+  { name: "MediaExport" },
 ];
 
 class ToolMenu extends Component {
@@ -123,6 +126,7 @@ class ToolMenu extends Component {
       showBrushMenu: false,
       showPresets: false,
       showMetaData: false,
+      showMediaExport: false,
       playing: false,
       customBrush: {
         min: -1000,
@@ -151,6 +155,7 @@ class ToolMenu extends Component {
       // { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
       { name: "Color", icon: <FaPalette />, tool: "colorLut" },
       { name: "Fusion", icon: <FaObjectUngroup />, tool: "fuse" },
+      { name: "Media Export", icon: <FaCamera />, tool: "MediaExport", teaching: true },
     ];
 
     this.markupTools = [
@@ -374,7 +379,6 @@ class ToolMenu extends Component {
         this.props.onSwitchView("annotations");
       return;
     } else if (tool === "Presets") {
-      poooop
       this.showPresets();
       return;
     } else if (tool === "Invert") {
@@ -414,6 +418,9 @@ class ToolMenu extends Component {
       this.setState({ showFuse: true });
       return;
       this.selectFreehand();
+    } else if (tool === "MediaExport") {
+      this.setState({ showMediaExport: true });
+      return;
     }
     // else if (tool === "FreehandRoiTool") {
     //   this.selectFreehand();
@@ -508,6 +515,14 @@ class ToolMenu extends Component {
     this.setState({ showMetaData: !this.state.showMetaData });
   };
 
+  showMediaExport = () => {
+    this.setState({ showMediaExport: !this.state.showMediaExport });
+  };
+
+  saveMediaData = (obj) => {
+    this.state.mediaExportData = obj;
+  }
+
   handleClip = () => {
     const element = cornerstone.getEnabledElements()[this.props.activePort]
       .element;
@@ -567,6 +582,7 @@ class ToolMenu extends Component {
         })}
 
         {this.state.showMetaData && (<MetaData onClose={this.showMetaData} />)}
+        {this.state.showMediaExport && (<MediaExport data={this.state.mediaExportData} saveData={this.saveMediaData} onClose={this.showMediaExport} />)}
         {/*<div
           id="angle"
           tabIndex="7"

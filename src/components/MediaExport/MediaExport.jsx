@@ -1,11 +1,12 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import { connect } from "react-redux";
 import Draggable from "react-draggable";
 import cornerstone from "cornerstone-core";
 import * as dcmjs from "dcmjs";
 import { uids } from "./uids";
+import { pptWrapper } from "./pptWrapper";
 
-import "./MetaData.css";
+import "../MetaData/MetaData.css";
 
 const mapStateToProps = state => {
   return {
@@ -13,9 +14,21 @@ const mapStateToProps = state => {
   };
 };
 
-class MetaData extends Component {
+class MediaExport extends Component {
   constructor(props) {
     super(props);
+    this.pptTags = ['(0008,0050)', '(0008,0020)', '(0010,0040)', '(0010,1010)', '(0008,103E)', '(0018,0080)', '(0018,0081)'];
+    this.pptw = this.props.data;
+    if (this.pptw === undefined) {
+      this.pptw = new pptWrapper();
+      this.props.saveData(this.pptw);
+    }
+    this.canv = document.getElementsByClassName('cornerstone-canvas')[0];
+    const x = document.getElementsByClassName('viewportContainer selected')[0];
+    if (x !== undefined) {
+      this.canv = x.getElementsByClassName('cornerstone-canvas')[0];
+    }
+    this.slideNotes = ''
     this.state = {
       output: [],
       input: ""
@@ -24,22 +37,20 @@ class MetaData extends Component {
   }
   componentDidMount() {
     const { activePort } = this.props;
+    // console.log(this.props);
+    // In theory this.props has all of the information needed to export
+    // high quality screenshots. In practice, you need cornerstone to 
+    // handle that for you.
     const { element } = cornerstone.getEnabledElements()[activePort];
     const image = cornerstone.getImage(element);
     // const { elements } = image.data;
-    const tempOutput = [];
-    this.dumpDataSet(image.data, tempOutput);
-    this.setState({ output: tempOutput });
-    // console.log("image", image);
-
-    // // const dataset = dcmjs.data.DicomMetaDictionary.namifyDataset(elements);
-    // Object.keys(elements).forEach(tag => {
-    //   const data = Object.assign({}, elements[tag]);
-    //   Object.keys(data.Value).forEach(index => {
-    //     console.log("inner", data.Value[index], index);
-    //   });
-    // });
-    // console.log("namedDataset", namedDataset);
+    // const tempOutput = [];
+    // this.dumpDataSet(image.data, tempOutput);
+    this.dumpDataSet(image.data);
+    // this.setState({ output: tempOutput });
+    // let canv = document.getElementsByClassName('cornerstone-canvas')[0];
+    this.pptw.updateDisplayText('pptInfo');
+    this.pptw.updateCanvasPreview('pptPreview');
   }
 
   // helper function to see if a string only has ascii characters in it
@@ -72,9 +83,60 @@ class MetaData extends Component {
     return text;
   }
 
+  clearPpt = () => {
+    if (window.confirm('Are you sure you want to clear the whole presentation?')) {
+      this.pptw = new pptWrapper();
+      this.pptw.updateDisplayText('pptInfo');
+      this.pptw.updateCanvasPreview('pptPreview');
+    }
+  }
+
+  addToPpt = () => {
+    const x = document.getElementsByClassName('viewportContainer selected')[0];
+    if (x !== undefined) {
+      this.canv = x.getElementsByClassName('cornerstone-canvas')[0];
+    }
+    this.pptw.addImageToSlide(
+      this.canv.toDataURL(),
+      this.canv.width,
+      this.canv.height
+    );
+    this.pptw.updateDisplayText('pptInfo');
+    this.pptw.updateCanvasPreview('pptPreview');
+  }
+
+  removeFromPpt = () => {
+    this.pptw.removeImageFromSlide();
+    this.pptw.updateDisplayText('pptInfo');
+    this.pptw.updateCanvasPreview('pptPreview');
+  }
+
+  deletePptSlide = () => {
+    this.pptw.removeCurrentSlide();
+    this.pptw.updateDisplayText('pptInfo');
+    this.pptw.updateCanvasPreview('pptPreview');
+  }
+
+  savePpt = () => {
+    this.pptw.setSlideNotes(this.slideNotes);
+    this.pptw.exportPresentation();
+  }
+
+  nextPptSlide = () => {
+    this.pptw.nextSlide();
+    this.pptw.updateDisplayText('pptInfo');
+    this.pptw.updateCanvasPreview('pptPreview');
+  }
+
+  prevPptSlide = () => {
+    this.pptw.prevSlide();
+    this.pptw.updateDisplayText('pptInfo');
+    this.pptw.updateCanvasPreview('pptPreview');
+  }
+
   // This function iterates through dataSet recursively and adds new HTML strings
   // to the output array passed into it
-  dumpDataSet = (dataSet, output) => {
+  dumpDataSet = (dataSet) => {
     const maxLength = 128;
     const untilTag = "";
     const showGroupElement = false;
@@ -113,11 +175,14 @@ class MetaData extends Component {
           continue;
         }
         var text = "";
-        var title = "";
+        // var title = "";
 
-        var color = 'black';
+        // var color = 'black';
 
         var tag = this.getTag(element.tag);
+        if (tag === undefined || !this.pptTags.includes(tag.tag)) {
+          continue;
+        }
 
         // The output string begins with the element name (or tag if not in data dictionary), length and VR (if present).  VR is undefined for
         // implicit transfer syntaxes
@@ -133,7 +198,7 @@ class MetaData extends Component {
             text += lengthText + "; ";
           }
 
-          title += lengthText;
+          // title += lengthText;
 
           var vrText = "";
           if (element.vr) {
@@ -143,13 +208,13 @@ class MetaData extends Component {
           if (showVR) {
             text += vrText + "; ";
           }
-          if (vrText) {
-            title += "; " + vrText;
-          }
+          //if (vrText) {
+          //  title += "; " + vrText;
+          //}
 
-          title += "; dataOffset=" + element.dataOffset;
+          // title += "; dataOffset=" + element.dataOffset;
           // make text lighter since this is an unknown attribute
-          color = '#C8C8C8';
+          // color = '#C8C8C8';
         }
         else {
           text += tag.name;
@@ -158,7 +223,7 @@ class MetaData extends Component {
           }
           text += " : ";
 
-          title += "(" + element.tag + ")";
+          // title += "(" + element.tag + ")";
 
           var lengthText = " length=" + element.length;
           if (element.hadUndefinedLength) {
@@ -168,7 +233,7 @@ class MetaData extends Component {
           if (showLength === true) {
             text += lengthText + "; ";
           }
-          title += "; " + lengthText;
+          // title += "; " + lengthText;
 
           var vrText = "";
           if (element.vr) {
@@ -178,11 +243,11 @@ class MetaData extends Component {
           if (showVR) {
             text += vrText + "; ";
           }
-          if (vrText) {
-            title += "; " + vrText;
-          }
+          //if (vrText) {
+          //  title += "; " + vrText;
+          //}
 
-          title += "; dataOffset=" + element.dataOffset;
+          // title += "; dataOffset=" + element.dataOffset;
 
         }
 
@@ -190,14 +255,14 @@ class MetaData extends Component {
         // element object for elements that don't have SQ VR type.  Note that implicit little endian
         // sequences will are currently not parsed.
         if (element.items) {
-          output.push('<li>' + text + '</li>');
-          output.push('<ul>');
+          // output.push('<li>' + text + '</li>');
+          // output.push('<ul>');
 
           // each item contains its own data set so we iterate over the items
           // and recursively call this function
-          var itemNumber = 0;
+          // var itemNumber = 0;
           element.items.forEach(function (item) {
-            output.push('<li>Item #' + itemNumber++ + ' ' + item.tag);
+            // output.push('<li>Item #' + itemNumber++ + ' ' + item.tag);
             var lengthText = " length=" + item.length;
             if (item.hadUndefinedLength) {
               lengthText += " (-1)";
@@ -205,66 +270,66 @@ class MetaData extends Component {
 
             if (showLength === true) {
               text += lengthText + "; ";
-              output.push(lengthText);
+              // output.push(lengthText);
             }
-            output.push('</li>');
-            output.push('<ul>');
+            // output.push('</li>');
+            // output.push('<ul>');
             // this.dumpDataSet(item.dataSet, output);
-            output.push('</ul>');
+            // output.push('</ul>');
           });
-          output.push('</ul>');
+          // output.push('</ul>');
         }
         else if (element.fragments) {
           text += "encapsulated pixel data with " + element.basicOffsetTable.length + " offsets and " +
             element.fragments.length + " fragments";
           text += this.sha1Text(dataSet.byteArray, element.dataOffset, element.length);
 
-          output.push("<li title='" + title + "'=>" + text + '</li>');
+          // output.push("<li title='" + title + "'=>" + text + '</li>');
 
-          if (showFragments && element.encapsulatedPixelData) {
-            output.push('Fragments:<br>');
-            output.push('<ul>');
-            var itemNumber = 0;
-            element.fragments.forEach((fragment) => {
-              var str = '<li>Fragment #' + itemNumber++ + ' dataOffset = ' + fragment.position;
-              str += '; offset = ' + fragment.offset;
-              str += '; length = ' + fragment.length;
-              str += this.sha1Text(dataSet.byteArray, fragment.position, fragment.length);
-              str += '</li>';
+          // if (showFragments && element.encapsulatedPixelData) {
+          //   output.push('Fragments:<br>');
+          //   output.push('<ul>');
+          //   var itemNumber = 0;
+          //   element.fragments.forEach((fragment) => {
+          //     var str = '<li>Fragment #' + itemNumber++ + ' dataOffset = ' + fragment.position;
+          //     str += '; offset = ' + fragment.offset;
+          //     str += '; length = ' + fragment.length;
+          //     str += this.sha1Text(dataSet.byteArray, fragment.position, fragment.length);
+          //     str += '</li>';
 
-              output.push(str);
-            });
-            output.push('</ul>');
-          }
-          if (showFrames && element.encapsulatedPixelData) {
-            output.push('Frames:<br>');
-            output.push('<ul>');
-            var bot = element.basicOffsetTable;
-            // if empty bot and not RLE, calculate it
-            if (bot.length === 0) {
-              bot = dicomParser.createJPEGBasicOffsetTable(dataSet, element);
-            }
+          //     output.push(str);
+          //   });
+          //   output.push('</ul>');
+          // }
+          //if (showFrames && element.encapsulatedPixelData) {
+          //  output.push('Frames:<br>');
+          //  output.push('<ul>');
+          //  var bot = element.basicOffsetTable;
+          //  // if empty bot and not RLE, calculate it
+          //  if (bot.length === 0) {
+          //    bot = dicomParser.createJPEGBasicOffsetTable(dataSet, element);
+          //  }
 
-            function imageFrameLink(frameIndex) {
-              var linkText = "<a class='imageFrameDownload' ";
-              linkText += "data-frameIndex='" + frameIndex + "'";
-              linkText += " href='#'> Frame #" + frameIndex + "</a>";
-              return linkText;
-            }
+          //  function imageFrameLink(frameIndex) {
+          //    var linkText = "<a class='imageFrameDownload' ";
+          //    linkText += "data-frameIndex='" + frameIndex + "'";
+          //    linkText += " href='#'> Frame #" + frameIndex + "</a>";
+          //    return linkText;
+          //  }
 
-            for (var frameIndex = 0; frameIndex < bot.length; frameIndex++) {
-              var str = "<li>";
-              str += imageFrameLink(frameIndex, "Frame #" + frameIndex);
-              str += ' dataOffset = ' + (element.fragments[0].position + bot[frameIndex]);
-              str += '; offset = ' + (bot[frameIndex]);
-              var imageFrame = dicomParser.readEncapsulatedImageFrame(dataSet, element, frameIndex, bot);
-              str += '; length = ' + imageFrame.length;
-              str += this.sha1Text(imageFrame);
-              str += '</li>';
-              output.push(str);
-            }
-            output.push('</ul>');
-          }
+          //  for (var frameIndex = 0; frameIndex < bot.length; frameIndex++) {
+          //    var str = "<li>";
+          //    str += imageFrameLink(frameIndex, "Frame #" + frameIndex);
+          //    str += ' dataOffset = ' + (element.fragments[0].position + bot[frameIndex]);
+          //    str += '; offset = ' + (bot[frameIndex]);
+          //    var imageFrame = dicomParser.readEncapsulatedImageFrame(dataSet, element, frameIndex, bot);
+          //    str += '; length = ' + imageFrame.length;
+          //    str += this.sha1Text(imageFrame);
+          //    str += '</li>';
+          //    output.push(str);
+          //  }
+          //  output.push('</ul>');
+          //}
         }
         else {
           // use VR to display the right value
@@ -317,7 +382,7 @@ class MetaData extends Component {
                 if (element.length !== 2 && element.length !== 4) {
                   color = '#C8C8C8';
                   // If it is some other length and we have no string
-                  text += "<i>binary data</i>";
+                  text += "binary data";
                 }
               }
             }
@@ -357,9 +422,9 @@ class MetaData extends Component {
                 }
                 else {
                   if (element.length !== 2 && element.length !== 4) {
-                    color = '#C8C8C8';
+                    // color = '#C8C8C8';
                     // If it is some other length and we have no string
-                    text += "<i>binary data</i>";
+                    text += "binary data";
                   }
                 }
               }
@@ -401,14 +466,14 @@ class MetaData extends Component {
               }
               else if (vr === 'OB' || vr === 'OW' || vr === 'UN' || vr === 'OF' || vr === 'UT') {
                 color = '#C8C8C8';
-                // If it is some other length and we have no string
-                // if (element.length === 2) {
-                //   text += "<i>" + dataDownloadLink(element, "binary data") + " of length " + element.length + " as uint16: " + dataSet.uint16(propertyName);
-                // } else if (element.length === 4) {
-                //   text += "<i>" + dataDownloadLink(element, "binary data") + " of length " + element.length + " as uint32: " + dataSet.uint32(propertyName);
-                // } else {
-                //   text += "<i>" + dataDownloadLink(element, "binary data") + " of length " + element.length + " and VR " + vr + "</i>";
-                // }
+                 // If it is some other length and we have no string
+                 if (element.length === 2) {
+                   text += dataDownloadLink(element, "binary data") + " of length " + element.length + " as uint16: " + dataSet.uint16(propertyName);
+                 } else if (element.length === 4) {
+                   text += dataDownloadLink(element, "binary data") + " of length " + element.length + " as uint32: " + dataSet.uint32(propertyName);
+                 } else {
+                   text += dataDownloadLink(element, "binary data") + " of length " + element.length + " and VR " + vr;
+                 }
               }
               else if (vr === 'AT') {
                 var group = dataSet.uint16(propertyName, 0);
@@ -421,32 +486,32 @@ class MetaData extends Component {
               }
               else {
                 // If it is some other length and we have no string
-                text += "<i>no display code for VR " + vr + " yet, sorry!</i>";
+                text += "no display code for VR " + vr + " yet, sorry!";
               }
             }
 
-            if (element.length === 0) {
-              color = '#C8C8C8';
-            }
+            //if (element.length === 0) {
+            //  color = '#C8C8C8';
+            //}
           }
-          // else {
+          else {
           //   color = '#C8C8C8';
 
-          //   // Add text saying the data is too long to show...
-          //   text += "<i>" + dataDownloadLink(element, "data");
-          //   text += " of length " + element.length + " for VR " + vr + " too long to show</i>";
-          //   text += this.sha1Text(dataSet.byteArray, element.dataOffset, element.length);
-          // }
+             // Add text saying the data is too long to show...
+             text += dataDownloadLink(element, "data");
+             text += " of length " + element.length + " for VR " + vr + " too long to show";
+             text += this.sha1Text(dataSet.byteArray, element.dataOffset, element.length);
+           }
           // finally we add the string to our output array surrounded by li elements so it shows up in the
           // DOM as a list
-          output.push('<li style="color:' + color + ';" title="' + title + '">' + text + '</li>');
-
+          // output.push('<li style="color:' + color + ';" title="' + title + '">' + text + '</li>');
+          this.slideNotes = this.slideNotes + text + '\n';
+          // console.log(text);
         }
       }
     } catch (err) {
       var ex = {
-        exception: err,
-        output: output
+        exception: err
       }
       console.warn(ex);
     }
@@ -470,20 +535,24 @@ class MetaData extends Component {
             <a href="#">X</a>
           </div>
           <div id="handle" className="buttonLabel">
-            <span>Meta Data of Image</span>
+            <span>Export Media</span>
           </div>
-          <hr />
-          <div> Filter :
-            <input value={this.state.input} type="text" onChange={this.onChangeHandler} />
-          </div>
-          <div>
-            {output.length && (<ul dangerouslySetInnerHTML={listHtml} />)}
-          </div>
+          <button onClick={this.clearPpt}>Clear presentation</button>
+          <button onClick={this.addToPpt}>Add image to slide</button>
+          <button onClick={this.removeFromPpt}>Remove image from slide</button>
+          <button onClick={this.deletePptSlide}>Delete slide</button>
+          <button onClick={this.savePpt}>Save presentation</button>
+          <br />
+          <button onClick={this.nextPptSlide}>Next slide</button>
+          <button onClick={this.prevPptSlide}>Previous slide</button>
+          <p id="pptInfo"></p>
+          Slide preview:
+          <br />
+          <canvas id="pptPreview" width="320" height="180"></canvas>
         </div>
-        {/*  */}
       </Draggable>
     );
   }
 }
 
-export default connect(mapStateToProps)(MetaData);
+export default connect(mapStateToProps)(MediaExport);

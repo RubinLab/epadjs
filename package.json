@@ -26,6 +26,7 @@
     "lodash.debounce": "^4.0.8",
     "match-sorter": "^3.1.1",
     "moment": "^2.29.3",
+    "pptxgenjs": "^3.10.0",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-bootstrap": "^1.6.4",
