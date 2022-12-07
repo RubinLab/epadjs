@@ -69,7 +69,21 @@ const StudyTable = ({ data, order, displaySeries }) => {
     }
   };
 
-  const filterArray = (filter, row) => {
+  const filterExam = (filter, row) => {
+    try {
+      const keyLowercase = filter.value.toLowerCase();
+      const keyUppercase = filter.value.toUpperCase();
+      const str = Array.isArray(row[filter.id]) ? row[filter.id].join() : row[filter.id];
+      return (
+        str.includes(keyLowercase) ||
+        str.includes(keyUppercase)
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const filterStringIncludes = (filter, row) => {
     try {
       const keyLowercase = filter.value.toLowerCase();
       const keyUppercase = filter.value.toUpperCase();
@@ -78,9 +92,24 @@ const StudyTable = ({ data, order, displaySeries }) => {
         row[filter.id].includes(keyUppercase)
       );
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
-  };
+  }
+
+  const filterStartsWith = (filter, row) => {
+    try {
+      const keyLowercase = filter.value.toLowerCase();
+      const keyUppercase = filter.value.toUpperCase();
+      let data = row[filter.id];
+      data = typeof data === 'number' ? '' + data : data;
+      return (
+        data.startsWith(keyLowercase) ||
+        data.startsWith(keyUppercase)
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   const columns = [
     {
@@ -90,7 +119,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       resizable: true,
       sortable: false,
       show: true,
-      filterMethod: (filter, row) => filterArray(filter, row),
+      filterMethod: (filter, row) => filterExam(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor: sortedCol === "examTypes-id" ? "#3a3f44" : null
@@ -112,7 +141,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       sortable: true,
       show: true,
       style: { color: 'white' },
-      filterMethod: (filter, row) => filterString(filter, row),
+      filterMethod: (filter, row) => filterStringIncludes(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor: sortedCol === "patientName-id" ? "#3a3f44" : null
@@ -129,7 +158,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       resizable: true,
       sortable: true,
       show: true,
-      filterMethod: (filter, row) => filterString(filter, row),
+      filterMethod: (filter, row) => filterStartsWith(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor: sortedCol === "patientID-id" ? "#3a3f44" : null
@@ -157,7 +186,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       resizable: true,
       sortable: true,
       show: true,
-      filterMethod: (filter, row) => filterString(filter, row),
+      filterMethod: (filter, row) => filterStringIncludes(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor:
@@ -229,7 +258,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       resizable: true,
       sortable: true,
       show: true,
-      filterMethod: (filter, row) => filterString(filter, row),
+      filterMethod: (filter, row) => filterStringIncludes(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor: sortedCol === "studyUID-id" ? "#3a3f44" : null
@@ -243,7 +272,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       resizable: true,
       sortable: true,
       show: true,
-      filterMethod: (filter, row) => row[filter.id] >= filter.value,
+      filterMethod: (filter, row) => filterStartsWith(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor:
@@ -258,7 +287,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       resizable: true,
       sortable: true,
       show: true,
-      filterMethod: (filter, row) => row[filter.id] >= filter.value,
+      filterMethod: (filter, row) => filterStartsWith(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor: sortedCol === "numberOfImages-id" ? "#3a3f44" : null
@@ -272,7 +301,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       resizable: true,
       sortable: true,
       show: true,
-      filterMethod: (filter, row) => row[filter.id] >= filter.value,
+      filterMethod: (filter, row) => filterStartsWith(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor: sortedCol === "numberOfSeries-id" ? "#3a3f44" : null
@@ -366,7 +395,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       resizable: true,
       sortable: true,
       show: true,
-      filterMethod: (filter, row) => filterString(filter, row),
+      filterMethod: (filter, row) => filterStringIncludes(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor: sortedCol === "projectID-id" ? "#3a3f44" : null
@@ -380,7 +409,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       resizable: true,
       sortable: true,
       show: true,
-      filterMethod: (filter, row) => filterString(filter, row),
+      filterMethod: (filter, row) => filterStringIncludes(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor:
@@ -401,7 +430,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
             sortedCol === "studyAccessionNumber-id" ? "#3a3f44" : null
         }
       }),
-      filterMethod: (filter, row) => filterString(filter, row)
+      filterMethod: (filter, row) => filterStartsWith(filter, row),
     },
     {
       Header: "Study ID",
@@ -415,7 +444,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
           backgroundColor: sortedCol === "studyID-id" ? "#3a3f44" : null
         }
       }),
-      filterMethod: (filter, row) => filterString(filter, row)
+      filterMethod: (filter, row) => filterStringIncludes(filter, row)
     }
   ];
 
