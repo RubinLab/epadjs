@@ -25,9 +25,8 @@ class UpdateAssignee extends React.Component {
   
   toggleSelectAll = (e) => {  
     let newSelected = {};
-    let event = e;
+    const event = null;
     if (e.target.checked) {
-      event = null;
       this.setState({ isSelectedAll: 1 });
       newSelected = this.props.users.reduce((all, item) => {
         all[item.username] = true;
@@ -35,11 +34,8 @@ class UpdateAssignee extends React.Component {
       }, {});
     } else {
       this.setState({ isSelectedAll: 0 });
-      this.props.selectAssignee(event, newSelected);
     }
-    // if all selected iterate over the props.users and push all  as username = true 
-    // and call selectAssignee as (null, object)
-    // is unselects the checkbox call selectAssignee(null, {});
+    this.props.selectAssignee(event, newSelected);
     
   }
 
