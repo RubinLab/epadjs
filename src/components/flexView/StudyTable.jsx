@@ -12,6 +12,8 @@ import {
   reverseCarets
 } from "./helperMethods";
 
+const nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
 const StudyTable = ({ data, order, displaySeries }) => {
   const [sortedCol, setSortedCol] = useState(null);
   const [sortOrder, setSortOrder] = useState(null);
@@ -22,24 +24,6 @@ const StudyTable = ({ data, order, displaySeries }) => {
       tableColumns.push(columns[item]);
     }
     return tableColumns;
-  };
-
-  const filterString = (filter, row) => {
-    try {
-      const attrWithCarets = ["studyDescription-id", "patientName-id"];
-      const { id, value } = filter;
-      const valueLowercase = row[id].toLowerCase();
-      const keyLowercaseControlled = attrWithCarets.includes(id)
-        ? reverseCarets(value).toLowerCase()
-        : value.toLowerCase();
-      const keyLowercase = value.toLowerCase();
-      return (
-        valueLowercase.includes(keyLowercaseControlled) ||
-        valueLowercase.includes(keyLowercase)
-      );
-    } catch (err) {
-      console.log(err);
-    }
   };
 
   const getTheadThProps = (table, row, col) => {
@@ -55,18 +39,6 @@ const StudyTable = ({ data, order, displaySeries }) => {
     //   }
     // };
     return { className: 'select_row', style: { color: '#eaddb2' } };
-  };
-
-  const filterDateAndTime = (filter, row, type) => {
-    try {
-      const formattedKey =
-        type === "date"
-          ? filter.value.split("-").join("")
-          : filter.value.split(":").join("");
-      return row[filter.id].includes(formattedKey);
-    } catch (err) {
-      console.log(err);
-    }
   };
 
   const filterExam = (filter, row) => {
@@ -106,6 +78,25 @@ const StudyTable = ({ data, order, displaySeries }) => {
         data.startsWith(keyLowercase) ||
         data.startsWith(keyUppercase)
       );
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const filterMatch = (filter, row) => {
+    try {
+      const keyLowercase = filter.value.toLowerCase();
+      const keyUppercase = filter.value.toUpperCase();
+      return (row[filter.id] === keyLowercase || row[filter.id] === keyUppercase);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const filterDateAndTime = (filter, row) => {
+    try {
+      const val = filter.value.split('').reduce((all, item) => nums.includes(item)? all += item : all += '', '');
+      return row[filter.id] ? row[filter.id].includes(val) || row[filter.id].includes(filter.value) : false; 
     } catch (err) {
       console.error(err);
     }
@@ -172,7 +163,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       resizable: true,
       sortable: true,
       show: true,
-      filterMethod: (filter, row) => filterString(filter, row),
+      filterMethod: (filter, row) => filterMatch(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor: sortedCol === "sex-id" ? "#3a3f44" : null
@@ -207,7 +198,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       resizable: true,
       sortable: true,
       show: true,
-      filterMethod: (filter, row) => filterDateAndTime(filter, row, "date"),
+      filterMethod: (filter, row) => filterDateAndTime(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor: sortedCol === "insertDate-id" ? "#3a3f44" : null
@@ -224,7 +215,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       resizable: true,
       sortable: true,
       show: true,
-      filterMethod: (filter, row) => filterDateAndTime(filter, row, "date"),
+      filterMethod: (filter, row) => filterDateAndTime(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor: sortedCol === "studyDate-id" ? "#3a3f44" : null
@@ -315,7 +306,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       resizable: true,
       sortable: true,
       show: true,
-      filterMethod: (filter, row) => filterDateAndTime(filter, row, "date"),
+      filterMethod: (filter, row) => filterDateAndTime(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor: sortedCol === "createdTime-id" ? "#3a3f44" : null
@@ -332,7 +323,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       resizable: true,
       sortable: true,
       show: true,
-      filterMethod: (filter, row) => filterDateAndTime(filter, row, "date"),
+      filterMethod: (filter, row) => filterDateAndTime(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor: sortedCol === "birthdate-id" ? "#3a3f44" : null
@@ -342,52 +333,6 @@ const StudyTable = ({ data, order, displaySeries }) => {
         return <div>{formatDate(row.original.birthdate)}</div>;
       }
     },
-    // {
-    //   Header: "First Series Date Acquired",
-    //   accessor: "firstSeriesDateAcquired",
-    //   id: "firstSeriesDateAcquired-id",
-    //   resizable: true,
-    //   sortable: true,
-    //   show: true,
-    //   filterMethod: (filter, row) => filterDateAndTime(filter, row, "date"),
-    //   getProps: (state, rowInfo) => ({
-    //     style: {
-    //       backgroundColor:
-    //         sortedCol === "firstSeriesDateAcquired-id" ? "#3a3f44" : null,
-    //     },
-    //   }),
-    //   Cell: (row) => {
-    //     return <div>{formatDate(row.original.firstSeriesDateAcquired)}</div>;
-    //   },
-    // },
-    // {
-    //   Header: "First Series UID",
-    //   accessor: "firstSeriesUID",
-    //   id: "firstSeriesUID-id",
-    //   resizable: true,
-    //   sortable: true,
-    //   show: true,
-    //   filterMethod: (filter, row) => filterString(filter, row),
-    //   getProps: (state, rowInfo) => ({
-    //     style: {
-    //       backgroundColor: sortedCol === "firstSeriesUID-id" ? "#3a3f44" : null,
-    //     },
-    //   }),
-    // },
-    // {
-    //   Header: "Physician Name",
-    //   accessor: "physicianName",
-    //   id: "physicianName-id",
-    //   resizable: true,
-    //   sortable: true,
-    //   show: true,
-    //   filterMethod: (filter, row) => filterString(filter, row),
-    //   getProps: (state, rowInfo) => ({
-    //     style: {
-    //       backgroundColor: sortedCol === "physicianName-id" ? "#3a3f44" : null,
-    //     },
-    //   }),
-    // },
     {
       Header: "Project ID",
       accessor: "projectID",
@@ -458,7 +403,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       data={data}
       filterable
       sortable={true}
-      defaultFilterMethod={(filter, row) => filterString(filter, row)}
+      defaultFilterMethod={(filter, row) => filterStartsWith(filter, row)}
       NoDataComponent={() => null}
       className="table table-dark table-striped table-hover title-case"
       columns={defineColumns()}
