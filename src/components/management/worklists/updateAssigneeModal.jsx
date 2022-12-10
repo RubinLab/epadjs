@@ -6,7 +6,43 @@ import AssgineeDeletetionWarning from "./assigneeDeletionWarning";
 import "../menuStyle.css";
 
 class UpdateAssignee extends React.Component {
-  state = { showWarning: false, warningList: [] };
+  constructor(props) {
+    super(props);
+    this.state = { showWarning: false, warningList: [], isSelectedAll: 0 };
+  }
+
+
+  componentDidMount = () => {
+    if (Object.keys(this.props.assigneeList).length === this.props.users.length) {
+      this.setState({ isSelectedAll: 1})
+    } else if (Object.keys(this.props.assigneeList).length > 0) {
+      this.setState({ isSelectedAll: 2})
+    } else {
+      this.setState({ isSelectedAll: 0})
+    }
+  }
+  
+  toggleSelectAll = (e) => {  
+    let newSelected = {};
+    const event = null;
+    if (e.target.checked) {
+      this.setState({ isSelectedAll: 1 });
+      newSelected = this.props.users.reduce((all, item) => {
+        all[item.username] = true;
+        return all;
+      }, {});
+    } else {
+      this.setState({ isSelectedAll: 0 });
+    }
+    this.props.selectAssignee(event, newSelected);
+    
+  }
+
+  selectAssignee = (e) => {
+    this.setState({ isSelectedAll: 2});
+    this.props.selectAssignee(e);
+  }
+
   checkWorklistDeletion = () => {
     const warningList = [];
     const assigneeList = Object.keys(this.props.assigneeList);
@@ -25,6 +61,7 @@ class UpdateAssignee extends React.Component {
 
   handleCancel = () => {
     this.setState({ showWarning: false, warningList: [] });
+
   };
 
   render = () => {
@@ -45,8 +82,10 @@ class UpdateAssignee extends React.Component {
             )}
             <UserList
               users={this.props.users}
-              onChange={this.props.selectAssignee}
+              onChange={this.selectAssignee}
+              selectAll={this.toggleSelectAll}
               assignees={this.props.assigneeList}
+              isSelectedAll={this.state.isSelectedAll}
             />
           </>
         </Modal.Body>
