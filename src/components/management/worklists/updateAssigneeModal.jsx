@@ -4,7 +4,6 @@ import { Modal } from "react-bootstrap";
 import UserList from "./userList";
 import AssgineeDeletetionWarning from "./assigneeDeletionWarning";
 import "../menuStyle.css";
-import userList from "./userList";
 
 class UpdateAssignee extends React.Component {
   constructor(props) {
