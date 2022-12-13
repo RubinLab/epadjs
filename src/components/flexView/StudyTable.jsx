@@ -312,9 +312,6 @@ const StudyTable = ({ data, order, displaySeries }) => {
           backgroundColor: sortedCol === "createdTime-id" ? "#3a3f44" : null
         }
       }),
-      Cell: row => {
-        return <div>{formatTime(row.original.createdTime)}</div>;
-      }
     },
     {
       Header: "Birth date",
