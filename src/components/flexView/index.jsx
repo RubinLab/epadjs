@@ -37,7 +37,7 @@ class FlexView extends React.Component {
     "PatientID",
     "Sex",
     "Description",
-    "Insert Date",
+    // "Insert Date",
     "Study Date",
     "Study Time",
     "Study UID",
