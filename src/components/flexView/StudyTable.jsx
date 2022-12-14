@@ -191,23 +191,23 @@ const StudyTable = ({ data, order, displaySeries }) => {
         return <div>{clearCarets(desc)}</div>;
       }
     },
-    {
-      Header: "Insert Date",
-      accessor: "insertDate",
-      id: "insertDate-id",
-      resizable: true,
-      sortable: true,
-      show: true,
-      filterMethod: (filter, row) => filterDateAndTime(filter, row),
-      getProps: (state, rowInfo) => ({
-        style: {
-          backgroundColor: sortedCol === "insertDate-id" ? "#3a3f44" : null
-        }
-      }),
-      Cell: row => {
-        return <div>{formatDate(row.original.insertDate)}</div>;
-      }
-    },
+    // {
+    //   Header: "Insert Date",
+    //   accessor: "insertDate",
+    //   id: "insertDate-id",
+    //   resizable: true,
+    //   sortable: true,
+    //   show: true,
+    //   filterMethod: (filter, row) => filterDateAndTime(filter, row),
+    //   getProps: (state, rowInfo) => ({
+    //     style: {
+    //       backgroundColor: sortedCol === "insertDate-id" ? "#3a3f44" : null
+    //     }
+    //   }),
+    //   Cell: row => {
+    //     return <div>{formatDate(row.original.insertDate)}</div>;
+    //   }
+    // },
     {
       Header: "Study Date",
       accessor: "studyDate",
@@ -312,9 +312,6 @@ const StudyTable = ({ data, order, displaySeries }) => {
           backgroundColor: sortedCol === "createdTime-id" ? "#3a3f44" : null
         }
       }),
-      Cell: row => {
-        return <div>{formatTime(row.original.createdTime)}</div>;
-      }
     },
     {
       Header: "Birth date",
