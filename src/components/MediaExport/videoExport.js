@@ -12,6 +12,8 @@ export function videoExport() {
   const ffmpeg = createFFmpeg({
     log: false
   });
+  // Following line is to test CORS.
+  ffmpeg.load();
   let handleDataAvailable = function(event) {
     // console.log("data-available");
     if (event.data.size > 0) {
