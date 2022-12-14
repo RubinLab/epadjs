@@ -5,6 +5,7 @@ import cornerstone from "cornerstone-core";
 import * as dcmjs from "dcmjs";
 import { uids } from "./uids";
 import { pptWrapper } from "./pptWrapper";
+import { videoExport } from "./videoExport";
 
 import "../MetaData/MetaData.css";
 
@@ -28,6 +29,7 @@ class MediaExport extends Component {
     if (x !== undefined) {
       this.canv = x.getElementsByClassName('cornerstone-canvas')[0];
     }
+    this.vid = new videoExport();
     this.slideNotes = ''
     this.state = {
       output: [],
@@ -37,6 +39,7 @@ class MediaExport extends Component {
   }
   componentDidMount() {
     const { activePort } = this.props;
+    this.vid.initializeRecorder(this.canv);
     // console.log(this.props);
     // In theory this.props has all of the information needed to export
     // high quality screenshots. In practice, you need cornerstone to 
@@ -81,6 +84,10 @@ class MediaExport extends Component {
     }
     var text = "; SHA1 " + sha1(byteArray, position, length);
     return text;
+  }
+
+  recordVideo = () => {
+    this.vid.startRecording(1000);
   }
 
   clearPpt = () => {
@@ -549,6 +556,7 @@ class MediaExport extends Component {
           Slide preview:
           <br />
           <canvas id="pptPreview" width="320" height="180"></canvas>
+          <button onClick={this.recordVideo}>Record video</button>
         </div>
       </Draggable>
     );

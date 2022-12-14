@@ -29,3 +29,6 @@ false
 public/config.json
 public/keycloak.json
 src/index.js
+public/config.json
+public/keycloak.json
+src/index.js
