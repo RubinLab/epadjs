@@ -49,8 +49,8 @@ import NewMenu from './newMenu';
 import SubjectCreationModal from './subjectCreationModal.jsx';
 import StudyCreationModal from './studyCreationModal.jsx';
 import SeriesCreationModal from './seriesCreationModal.jsx';
-import Worklists from './addWorklist';
-import Projects from './addToProject';
+// import Worklists from './addWorklist';
+// import Projects from './addToProject';
 import WarningModal from '../common/warningModal';
 import AnnotationCreationModal from './annotationCreationModal.jsx';
 import UpLoadWizard from '../tagEditor/uploadWizard';
@@ -100,7 +100,7 @@ class SearchView extends Component {
       noOfNotDeleted: 0,
       expandLevel: 0,
       showUploadWizard: false,
-      showProjects: false,
+      showOldProjects: false,
       editingTags: false,
       isTeachingFile: false,
       encArgs: "",
@@ -827,8 +827,8 @@ class SearchView extends Component {
   };
 
   handleWorklistClick = () => {
-    // if (this.state.showWorklists) this.props.dispatch(clearSelection());
-    this.setState(state => ({ showWorklists: !state.showWorklists }));
+    // if (this.state.showOldWorklists) this.props.dispatch(clearSelection());
+    this.setState(state => ({ showOldWorklists: !state.showOldWorklists }));
   };
 
   updateTreeView = () => {
@@ -896,7 +896,7 @@ class SearchView extends Component {
   };
 
   handleProjectClick = () => {
-    this.setState(state => ({ showProjects: !state.showProjects }));
+    this.setState(state => ({ showOldProjects: !state.showOldProjects }));
   };
 
   verifyObject = object => {
@@ -923,7 +923,7 @@ class SearchView extends Component {
       }
       await Promise.all(promises);
       localStorage.setItem('treeData', JSON.stringify({}));
-      this.setState({ showProjects: false });
+      this.setState({ showOldProjects: false });
       this.props.clearTreeExpand();
       this.props.dispatch(clearSelection());
       this.props.history.push(`/list/${id}`);
@@ -974,11 +974,11 @@ class SearchView extends Component {
       showUploadFileModal,
       showDeleteAlert,
       showNew,
-      showWorklists,
+      showOldWorklists,
       newUser,
       openItemsDeleted,
       newSelected,
-      showProjects,
+      showOldProjects,
       noOfNotDeleted,
       showDeleteFromSysAlert
     } = this.state;
@@ -1005,6 +1005,8 @@ class SearchView extends Component {
           admin={this.props.admin}
           hideEyeIcon={hideEyeIcon}
           expandLevel={this.props.expandLevel}
+          updateProgress={this.props.updateProgress}
+          className="searchView-toolbar__icon worklist-icon"
         // expanding={expanding}
         />
         {(this.props.showSeriesModal ||
@@ -1087,20 +1089,21 @@ class SearchView extends Component {
           />
         )}
 
-        {showWorklists && (
+        {/* {showOldWorklists && (
           <Worklists
             onClose={this.handleWorklistClick}
             updateProgress={this.props.updateProgress}
             className="searchView-toolbar__icon worklist-icon"
+
           />
-        )}
-        {showProjects && (
+        )} */}
+        {/* {showOldProjects && (
           <Projects
             onClose={this.handleProjectClick}
             onSave={this.addSelectionToProject}
             className="searchView-toolbar__icon project-icon"
           />
-        )}
+        )} */}
         {newUser && (
           <WarningModal
             onOK={this.handleOK}
