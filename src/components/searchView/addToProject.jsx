@@ -2,10 +2,11 @@ import React from "react";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
 import Dropdown from 'react-bootstrap/Dropdown';
-import { BiDownload } from 'react-icons/bi';
+import { FaProjectDiagram } from 'react-icons/fa';
+import ReactTooltip from 'react-tooltip';
 import { addAimsToProject } from "../../services/projectServices";
 
-const ProjectAdd = ({ projectMap, onSave, className, annotations, deselect }) => {
+const ProjectAdd = ({ projectMap, onSave, className, annotations, deselect, parent, showAddTo }) => {
   const projectNames = Object.values(projectMap);
   const projectIDs = Object.keys(projectMap);
 
@@ -59,14 +60,45 @@ const ProjectAdd = ({ projectMap, onSave, className, annotations, deselect }) =>
         e.preventDefault();
         onClick(e);
       }}>
-      <BiDownload /><br />
+      <FaProjectDiagram /><br />
       {children}
     </button>
   ));
 
+  const CustomToggleList = React.forwardRef(({ children, onClick }, ref) => (
+    <div
+      className={
+        showAddTo
+          ? 'searchView-toolbar__icon project-icon'
+          : 'hide-delete'
+      }
+      onClick={e => {
+        e.preventDefault();
+        onClick(e);
+      }}
+      ref={ref}
+    >
+      <div>
+        <FaProjectDiagram
+          style={{ fontSize: '1.2rem' }}
+          data-tip
+          data-for="project-icon"
+        />
+      </div>
+      <ReactTooltip
+        id="project-icon"
+        place="bottom"
+        type="info"
+        delayShow={1500}
+      >
+        <span>Add to project</span>
+      </ReactTooltip>
+    </div>
+  ));
+
   return (
     <Dropdown id="1" className="d-inline">
-      <Dropdown.Toggle as={CustomToggle3}>
+      <Dropdown.Toggle as={parent !== "patientList" ? CustomToggle3 : CustomToggleList}>
         Copy To Project
       </Dropdown.Toggle>
 
