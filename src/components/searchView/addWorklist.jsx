@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
 import Dropdown from 'react-bootstrap/Dropdown';
-import { BiDownload } from 'react-icons/bi';
+import ReactTooltip from 'react-tooltip';
+import { FaClipboardList } from 'react-icons/fa';
 import {
   getWorklistsOfCreator,
   addStudyToWorklist,
@@ -112,7 +113,8 @@ const AddToWorklist = (props) => {
     )
   });
 
-  const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
+
+  const CustomToggleSearch = React.forwardRef(({ children, onClick }, ref) => (
     <button type="button" className="btn btn-sm color-schema" ref={ref}
       onClick={e => {
         if (firstRun) {
@@ -121,14 +123,44 @@ const AddToWorklist = (props) => {
         }
         onClick(e);
       }}>
-      <BiDownload /><br />
+      <FaClipboardList /> <br />
       {children}
     </button>
   ));
 
+  const CustomToggleList = React.forwardRef(({ children, onClick }, ref) => (
+    <div
+      className={props.showAddTo && props.project !== 'all' ? 'searchView-toolbar__icon worklist-icon' : 'hide-delete'}
+      onClick={e => {
+        if (firstRun) {
+          fillWorklists();
+          setFirstRun(false);
+        }
+        onClick(e);
+      }}
+      ref={ref}
+    >
+      <div>
+        <FaClipboardList
+          style={{ fontSize: '1.2rem' }}
+          data-tip
+          data-for="worklist-icon"
+        />
+      </div>
+      <ReactTooltip
+        id="worklist-icon"
+        place="bottom"
+        type="info"
+        delayShow={1500}
+      >
+        <span>Add to worklist</span>
+      </ReactTooltip>
+    </div>
+  ));
+
   return (
     <Dropdown id="1" className="d-inline">
-      <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
+      <Dropdown.Toggle as={props.parent !== "patientList" ? CustomToggleSearch : CustomToggleList} id="dropdown-custom-components">
         Add To Worklist
       </Dropdown.Toggle>
 
