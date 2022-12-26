@@ -181,6 +181,8 @@ const toolBar = props => {
       </div>
       {/* </div>
       )} */}
+      <Worklists parent="patientList" showAddTo={props.showAddTo} project={props.project} />
+      {mode !== 'lite' && <Projects parent="patientList" showAddTo={props.showAddTo} onSave={props.onSaveToProject} />}
       {/* <div
         className={
           props.showAddTo && project !== 'all'
@@ -297,8 +299,7 @@ const toolBar = props => {
           </>
         )}
       </div>
-      <Worklists parent="patientList" showAddTo={props.showAddTo} project={props.project} />
-      {mode !== 'lite' && <Projects parent="patientList" showAddTo={props.showAddTo} /> }
+
     </div>
   );
 };

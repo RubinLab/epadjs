@@ -903,9 +903,8 @@ class SearchView extends Component {
     return object.constructor === Object;
   };
 
-  addSelectionToProject = async e => {
+  addSelectionToProject = async (projectId) => {
     try {
-      const { id } = e.target;
       const { pid } = this.props;
       let promises = [];
       let patientIDs = new Set();
@@ -913,12 +912,12 @@ class SearchView extends Component {
       const studies = Object.values(this.props.selectedStudies);
       if (patients.length > 0) {
         patients.forEach(el => {
-          promises.push(addSubjectToProject(id, el.patientID, pid));
+          promises.push(addSubjectToProject(projectId, el.patientID, pid));
         });
       }
       if (studies.length > 0) {
         studies.forEach(el => {
-          promises.push(addStudyToProject(id, el.patientID, el.studyUID, pid));
+          promises.push(addStudyToProject(projectId, el.patientID, el.studyUID, pid));
         });
       }
       await Promise.all(promises);
@@ -926,7 +925,7 @@ class SearchView extends Component {
       this.setState({ showOldProjects: false });
       this.props.clearTreeExpand();
       this.props.dispatch(clearSelection());
-      this.props.history.push(`/list/${id}`);
+      this.props.history.push(`/list/${projectId}`);
     } catch (err) {
       console.log(err);
     }
@@ -1002,6 +1001,7 @@ class SearchView extends Component {
           showTagEditor={lengthOfSeries > 0}
           project={this.props.match.params.pid}
           onAddProject={this.handleProjectClick}
+          onSaveToProject={this.addSelectionToProject}
           admin={this.props.admin}
           hideEyeIcon={hideEyeIcon}
           expandLevel={this.props.expandLevel}
