@@ -604,6 +604,7 @@
 }
 
 #proModal-content {
+  background: #444;
   display: flex;
 }
 
