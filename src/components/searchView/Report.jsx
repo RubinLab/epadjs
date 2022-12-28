@@ -35,7 +35,7 @@ const style = {
   height: 'auto'
 };
 const Report = props => {
-  const [resizeListener, sizes] = useResizeAware();
+  // const [resizeListener, sizes] = useResizeAware();
   const [node, setNode] = useState(null);
   const [data, setData] = useState({});
   const [users, setUsers] = useState([]);
@@ -272,7 +272,7 @@ const Report = props => {
     wordExport(subjectName, 'recisttbl' + index);
   };
 
-  useEffect(() => { }, [sizes.width, sizes.height]);
+  // useEffect(() => { }, [sizes.width, sizes.height]);
 
   const updateImageIDs = async () => {
     const { openSeries } = props;
@@ -532,11 +532,11 @@ const Report = props => {
               </div>
               {data.series && data.series.length >= 0 && (
                 <div style={{ position: 'relative', background: '#FFFFFF' }}>
-                  {resizeListener}
+                  {/* {resizeListener} */}
                   <WaterfallReact
                     data={data}
                     waterfallSelect={waterfallClickOn}
-                    width={sizes.width}
+                    // width={sizes.width}
                   />
                 </div>
               )}
