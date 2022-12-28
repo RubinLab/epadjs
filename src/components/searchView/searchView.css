@@ -641,3 +641,7 @@ h5.add-subject__modal--label,
 body{
   color:white !important;
 }
+
+.add-subject__mbody, .add-study__mbody, .add-series__mbody {
+  background: #444;
+}
