@@ -5,7 +5,7 @@ import Table from "react-table-v6";
 const userList = props => {
 
   const checkUserSelected = (obj) => {
-    if (props.assignees[obj.username] &&  props.isSelectedAll !== 0) return true;
+    if (props.assignees[obj.username] && props.isSelectedAll !== 0) return true;
     else if (props.isSelectedAll === 1) return true;
     else return false;
   }
@@ -28,28 +28,35 @@ const userList = props => {
       resizable: true,
       maxWidth: 80,
       Cell: original => (
-        <input
-          type="checkbox"
-          onChange={props.onChange}
-          name={original.row.username}
-          checked={checkUserSelected(original.row)}
-          id={original.row.username}
-          style={{ textAlign: "right" }}
-        />
-      )
+          <input
+            type="checkbox"
+            onChange={props.onChange}
+            name={original.row.username}
+            checked={checkUserSelected(original.row)}
+            id={original.row.username}
+            style={{ textAlign: "right" }}
+          />
+        )
     },
     {
-      accessor: "username",
-      sortable: true,
-      resizable: true,
-      show: false
+    Header: 'User',
+    accessor: "username",
+    sortable: true,
+    resizable: true,
+    Cell: original => { 
+      return (
+        <div style={{ textAlign: "center" }}>
+          {original.row.username ? original.row.username : original.row.email}
+        </div>
+    )}
     },
-    {
-      accessor: "displayname",
-      sortable: true,
-      resizable: true,
-      minWidth: 250
-    }
+    // {
+    //   Header: 'User',
+    //   accessor: "displayname",
+    //   sortable: true,
+    //   resizable: true,
+    //   minWidth: 250
+    // }
   ];
   return (
     <div>
