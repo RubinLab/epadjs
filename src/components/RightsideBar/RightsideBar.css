@@ -136,6 +136,7 @@
 .AimEditor-Wrapper {
   overflow-y: auto;
   padding-left: 0.5rem;
+  height: calc(100% - 0px);
 }
 
 .right-tab-menu {
