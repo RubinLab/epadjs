@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ReactTable from "react-table-v6";
 import { FaSortDown, FaSortUp } from "react-icons/fa";
+import { AiOutlineSortAscending, AiOutlineSortDescending } from 'react-icons/ai';
 import find from "lodash/find";
 // import "./flexView.css";
 import '../annotationSearch/annotationSearch.css';
@@ -32,13 +33,13 @@ const StudyTable = ({ data, order, displaySeries }) => {
       ? `inset 0px ${sortedCol.desc ? -3 : 3}px 0px 0px orangered`
       : "";
     const background = sortedCol ? "#3a3f44" : "";
-    // return {
-    //   style: {
-    //     boxShadow,
-    //     background
-    //   }
-    // };
-    return { className: 'select_row', style: { color: '#eaddb2' } };
+    return {
+      style: {
+        boxShadow,
+        background
+      }
+    };
+    // return { className: 'select_row', style: { color: '#eaddb2' } };
   };
 
   const filterExam = (filter, row) => {
@@ -102,9 +103,22 @@ const StudyTable = ({ data, order, displaySeries }) => {
     }
   }
 
+  const returnHeader = (header, id) => {
+    const headerParts = [];
+    headerParts.push(<span>{header}</span>)
+    if (sortedCol === id) {
+      if (sortOrder)
+        headerParts.push(<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)
+      else   
+        headerParts.push(<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />)
+    } 
+    return <>{headerParts}</>
+  }
+
   const columns = [
     {
-      Header: "Exam",
+      // Header: "Exam",
+      Header: () => returnHeader('Exam', 'examTypes-id'),
       accessor: "examTypes",
       id: "examTypes-id",
       resizable: true,
@@ -125,7 +139,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
       }
     },
     {
-      Header: () => <span> Patient Name</span>,
+      // Header: () => <span>Patient Name</span>,
+      Header: () => returnHeader('Patient Name', 'patientName-id'),
       accessor: "patientName",
       id: "patientName-id",
       resizable: true,
@@ -143,7 +158,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
       }
     },
     {
-      Header: "PatientID",
+      // Header: "PatientID",
+      Header: () => returnHeader('PatientID', 'patientID-id'),
       accessor: "patientID",
       id: "patientID-id",
       resizable: true,
@@ -157,7 +173,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
       })
     },
     {
-      Header: "Sex",
+      // Header: "Sex",
+      Header: () => returnHeader('Sex', 'sex-id'),
       accessor: "sex",
       id: "sex-id",
       resizable: true,
@@ -171,7 +188,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
       })
     },
     {
-      Header: "Description",
+      // Header: "Description",
+      Header: () => returnHeader('Description', 'studyDescription-id'),
       accessor: "studyDescription",
       id: "studyDescription-id",
       resizable: true,
@@ -209,7 +227,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
     //   }
     // },
     {
-      Header: "Study Date",
+      // Header: "Study Date",
+      Header: () => returnHeader('Study Date', 'studyDate-id'),
       accessor: "studyDate",
       id: "studyDate-id",
       resizable: true,
@@ -226,7 +245,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
       }
     },
     {
-      Header: "Study Time",
+      // Header: "Study Time",
+      Header: () => returnHeader('Study Time', 'studyTime-id'),
       accessor: "studyTime",
       id: "studyTime-id",
       resizable: true,
@@ -243,7 +263,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
       }
     },
     {
-      Header: "Study UID",
+      // Header: "Study UID",
+      Header: () => returnHeader('Study UID', 'studyUID-id'),
       accessor: "studyUID",
       id: "studyUID-id",
       resizable: true,
@@ -257,7 +278,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
       })
     },
     {
-      Header: "# of Aims",
+      // Header: "# of Aims",
+      Header: () => returnHeader('# of Aims', 'numberOfAnnotations-id'),
       accessor: "numberOfAnnotations",
       id: "numberOfAnnotations-id",
       resizable: true,
@@ -272,7 +294,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
       })
     },
     {
-      Header: "# Of Img",
+      // Header: "# Of Img",
+      Header: () => returnHeader('# of Img', 'numberOfImages-id'),
       accessor: "numberOfImages",
       id: "numberOfImages-id",
       resizable: true,
@@ -286,7 +309,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
       })
     },
     {
-      Header: "# Of Series",
+      // Header: "# Of Series",
+      Header: () => returnHeader('# of Series', 'numberOfSeries-id'),
       accessor: "numberOfSeries",
       id: "numberOfSeries-id",
       resizable: true,
@@ -300,7 +324,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
       })
     },
     {
-      Header: "Created Time",
+      // Header: "Created Time",
+      Header: () => returnHeader('Created Time', 'createdTime-id'),
       accessor: "createdTime",
       id: "createdTime-id",
       resizable: true,
@@ -314,7 +339,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
       }),
     },
     {
-      Header: "Birth date",
+      // Header: "Birth date",
+      Header: () => returnHeader('Birth date', 'birthdate-id'),
       accessor: "birthdate",
       id: "birthdate-id",
       resizable: true,
@@ -331,7 +357,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
       }
     },
     {
-      Header: "Project ID",
+      // Header: "Project ID",
+      Header: () => returnHeader('Project ID', 'projectID-id'),
       accessor: "projectID",
       id: "projectID-id",
       resizable: true,
@@ -345,7 +372,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
       })
     },
     {
-      Header: "Referring Physician Name",
+      // Header: "Referring Physician Name",
+      Header: () => returnHeader('Referring Physician Name', 'referringPhysicianName-id'),
       accessor: "referringPhysicianName",
       id: "referringPhysicianName-id",
       resizable: true,
@@ -360,7 +388,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
       })
     },
     {
-      Header: `Study Accession Number`,
+      // Header: `Study Accession Number`,
+      Header: () => returnHeader('Study Accession Number', 'studyAccessionNumber-id'),
       accessor: "studyAccessionNumber",
       id: "studyAccessionNumber-id",
       resizable: true,
@@ -375,7 +404,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
       filterMethod: (filter, row) => filterStartsWith(filter, row),
     },
     {
-      Header: "Study ID",
+      // Header: "Study ID",
+      Header: () => returnHeader('Study ID', 'studyID-id'),
       accessor: "studyID",
       id: "studyID-id",
       resizable: true,
