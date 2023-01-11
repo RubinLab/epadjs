@@ -163,15 +163,16 @@ const AnnotationSearch = props => {
 
   const getAnnotationsOfProjets = (pageIndex, afterdelete) => {
     const bm = pageIndex ? bookmark : '';
-    const promise =
-      props.pid === 'all'
-        ? getAllAnnotations(bm)
-        : getSummaryAnnotations(props.pid, bm);
-    Promise.all([promise])
-      .then(res => {
-        populateSearchResult(res, pageIndex, afterdelete);
-      })
-      .catch(err => console.error(err));
+    // const promise =
+    //   props.pid === 'all'
+    //     ? getAllAnnotations(bm)
+    //     : getSummaryAnnotations(props.pid, bm);
+    // Promise.all([promise])
+    //   .then(res => {
+    //     populateSearchResult(res, pageIndex, afterdelete);
+    //   })
+    //   .catch(err => console.error(err));
+    getFieldSearchResults();
   };
 
   useEffect(() => {
@@ -195,7 +196,7 @@ const AnnotationSearch = props => {
         })
         .catch(err => console.error(err));
     } else {
-      getAnnotationsOfProjets();
+      // getAnnotationsOfProjets();
     }
     // cavit
     setShowRunPluginButton(false);

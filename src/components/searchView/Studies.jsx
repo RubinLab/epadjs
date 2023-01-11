@@ -330,7 +330,8 @@ function Studies(props) {
               <span
                 data-tip
                 data-for={id}
-                className="searchView-row__desc"
+                // className="searchView-row__desc"
+                className="searchView-table__cell"
                 style={{ paddingLeft: '10px' }}
                 onDoubleClick={() => displaySeries(row.original)}
               >
@@ -357,7 +358,10 @@ function Studies(props) {
             {row.original.numberOfAnnotations === 0 ? (
               ''
             ) : (
-              <span className="badge badge-secondary">
+              <span 
+              // className="badge badge-secondary"
+              className="searchView-table__cell"
+              >
                 {row.original.numberOfAnnotations}
               </span>
             )}
@@ -373,7 +377,10 @@ function Studies(props) {
             {row.original.numberOfSeries === 0 ? (
               ''
             ) : (
-              <span className="badge badge-secondary">
+              <span 
+              // className="badge badge-secondary"
+              className="searchView-table__cell"
+              >
                 {row.original.numberOfSeries}
               </span>
             )}

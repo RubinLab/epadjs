@@ -197,12 +197,13 @@ function Table({
       </table> */}</>)}
       {
         pageCount > 1 && (
-          <div className="pagination">
+          <div className="pagination-search">
             <button
               onClick={() => {
                 handlePageIndex('prev');
               }}
               disabled={!canPreviousPage}
+              className={!canPreviousPage ? 'disabled' : ''}
             >
               {'<'}
             </button>
