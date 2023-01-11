@@ -191,7 +191,8 @@ function Annotations(props) {
               <div
                 data-tip
                 data-for={id}
-                className="searchView-row__desc"
+                // className="searchView-row__desc"
+                className="searchView-table__cell --left"
                 onDoubleClick={() =>
                   displayAnnotations({
                     ...row.original,
