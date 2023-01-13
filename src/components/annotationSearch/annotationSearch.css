@@ -200,7 +200,7 @@ td i{text-align: center;}
   --bs-dropdown-border: 3px;  
   /* --bs-dropdown-box-shadow: 0px 24px 24px rgba(0, 0, 0, 0.75) !important;
   --bs-dropdown-link-color: #dee2e6; */
-  --bs-dropdown-link-hover-color: #ececec !important;;
+  --bs-dropdown-link-hover-color: #ececec !important;
   --bs-dropdown-divider-bg: var(--bs-border-color-translucent);
   --bs-dropdown-link-hover-bg: rgba(255, 255, 255, 0.15);
   --bs-dropdown-link-active-color: #fff;
