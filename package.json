@@ -68,6 +68,7 @@
   ],
   "devDependencies": {
     "assert": "^2.0.0",
+    "browserify-fs": "^1.0.0",
     "buffer": "^6.0.3",
     "chai": "^4.3.4",
     "chromedriver": "^92.0.1",
@@ -80,6 +81,7 @@
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
     "react-app-rewired": "^2.2.1",
+    "react-error-overlay": "^6.0.9",
     "react-scripts": "^5.0.0",
     "selenium-webdriver": "^4.0.0-beta.3",
     "stream-browserify": "^3.0.0",
