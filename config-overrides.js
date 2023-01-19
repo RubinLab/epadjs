@@ -18,11 +18,16 @@ module.exports = function override(config) {
 
     })
     config.resolve.fallback = fallback;
+    config.resolve.extensions = [...config.resolve.extensions, ".ts", ".js"]
     config.plugins = (config.plugins || []).concat([
         new webpack.ProvidePlugin({
-            // process: 'process/browser',
+            process: 'process/browser',
             Buffer: ['buffer', 'Buffer']
-        })
+        }),
+        // new webpack.ProvidePlugin({
+        //     // process: 'process/browser',
+        //     Buffer: ['buffer', 'Buffer']
+        // })
     ])
     config.module.rules.push({
         test: /\.m?js/,
@@ -30,5 +35,7 @@ module.exports = function override(config) {
             fullySpecified: false
         }
     })
+    console.log(config.resolve);
+    console.log(config.plugins);
     return config;
 }
