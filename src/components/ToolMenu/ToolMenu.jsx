@@ -374,7 +374,6 @@ class ToolMenu extends Component {
         this.props.onSwitchView("annotations");
       return;
     } else if (tool === "Presets") {
-      poooop
       this.showPresets();
       return;
     } else if (tool === "Invert") {
