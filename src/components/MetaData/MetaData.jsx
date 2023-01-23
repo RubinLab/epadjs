@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import Draggable from "react-draggable";
 import cornerstone from "cornerstone-core";
+import DOMPurify from 'dompurify'
 import * as dcmjs from "dcmjs";
 import { uids } from "./uids";
 
@@ -488,7 +489,7 @@ class MetaData extends Component {
     const lowerInput = input.toLowerCase();
     const list = output.filter(d => input === '' || d.toLowerCase().includes(lowerInput));
 
-    const listHtml = { __html: list.join('') };
+    const listHtml = { __html: DOMPurify.sanitize(list.join('')) };
     return (this.state.imageDownloaded ? <Draggable handle="#handle">
       <div className="md-pop-up">
         <div className="close-meta-data-menu" onClick={this.props.onClose}>
