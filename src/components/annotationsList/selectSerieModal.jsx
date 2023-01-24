@@ -432,12 +432,15 @@ class selectSerieModal extends React.Component {
       <Modal.Dialog id="series-modal" className="series-modal">
         < Modal.Header className="select-serie-header">
           <Modal.Title className="select-serie-title">
-            {title}
+           {title}
           </Modal.Title>
         </Modal.Header >
         <Modal.Body className="select-serie-body">
           {isTeachingFile &&
             (<div id="questionaire" className={"field-grid"}>
+              <row>
+              <div id="stella-beta-warning">This is a Beta version, not intended for clinical purposes</div>
+              </row>
               <row>
                 <div id="anatomy"></div>
                 <div id="diagnosis"></div>
