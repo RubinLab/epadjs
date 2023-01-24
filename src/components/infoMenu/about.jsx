@@ -45,7 +45,7 @@ class About extends React.Component {
                 );
               }}
             >
-              Info about ePAD
+              More info about ePAD
             </button>
           <div>Version {version}</div>
           <div>

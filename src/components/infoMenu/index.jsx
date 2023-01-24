@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import About from "./about";
+import Help from "./help";
 import Team from "./team";
 import Admin from "./admin";
 import Modal from "../management/common/customModal";
@@ -52,12 +53,7 @@ class InfoMenu extends React.Component {
       case "About":
         return <About onOK={this.handleCloseModal} />;
       case "Help":
-        window.open(
-          "https://epad.stanford.edu/documentation/user",
-          "_blank",
-          ""
-        );
-        return;
+        return <Help onOK={this.handleCloseModal} />;
       case "What's New":
         window.open("https://epad.stanford.edu/", "_blank", "");
         return;
