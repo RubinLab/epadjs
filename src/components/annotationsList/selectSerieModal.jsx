@@ -439,7 +439,7 @@ class selectSerieModal extends React.Component {
           {isTeachingFile &&
             (<div id="questionaire" className={"field-grid"}>
               <row>
-              <div id="stella-beta-warning">This is a Beta version, not intended for clinical purposes</div>
+              <div id="stella-beta-warning">Warning! Beta Software, Not For Routine Use During Preclinical Testing</div>
               </row>
               <row>
                 <div id="anatomy"></div>
