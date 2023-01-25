@@ -75,10 +75,9 @@ class Help extends React.Component {
                 Report an issue
               </button>
             </div>
-            <div>
+            {mode === 'teaching' && (<div>
               If you need to resolve your issue as soon as possible, please call the service desk
               <div>
-
                 <button
                   className="info-about__button"
                   onClick={() => console.log("help desk")}
@@ -86,7 +85,7 @@ class Help extends React.Component {
                   Service Desk
                 </button>
               </div>
-            </div>
+            </div>)}
           </div>
         </Modal.Body>
         <Modal.Footer>
