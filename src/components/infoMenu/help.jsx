@@ -7,28 +7,16 @@ let apiUrl;
 
 class Help extends React.Component {
 
-  triggerBrowserDownload = (blob, fileName) => {
-    console.log(blob);
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    document.body.appendChild(link);
-    link.style = 'display: none';
-    link.href = url;
-    link.download = `${fileName}.pdf`;
-    link.click();
-    window.URL.revokeObjectURL(url);
-  };
-
   downloadManual = async () => {
-    try {
-      const result = await fetch(`${process.env.PUBLIC_URL}/STELLA_User_Manual.pdf`)
-      const json = await result.json();
-      console.log(json);
-      let blob = new Blob([json], { type: 'application/pdf' });
-      this.triggerBrowserDownload(blob, `STELLA_User_Manual`);
-    } catch (err) {
-      console.error("Reading STELLA_User_Manual", err);
-    }
+    fetch(`${process.env.PUBLIC_URL}/STELLA_User_Manual.pdf`).then(response => {
+      response.blob().then(blob => {
+        const fileURL = window.URL.createObjectURL(blob);
+        let alink = document.createElement('a');
+        alink.href = fileURL;
+        alink.download = 'SamplePDF.pdf';
+        alink.click();
+      }).catch(error => console.error('Reading STELLA_User_Manual', error))
+    }).catch(err => console.error("Downloading STELLA_User_Manual", err))
   }
 
   render = () => {
