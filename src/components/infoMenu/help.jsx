@@ -13,7 +13,7 @@ class Help extends React.Component {
         const fileURL = window.URL.createObjectURL(blob);
         let alink = document.createElement('a');
         alink.href = fileURL;
-        alink.download = 'SamplePDF.pdf';
+        alink.download = 'STELLA_User_Manual.pdf';
         alink.click();
       }).catch(error => console.error('Reading STELLA_User_Manual', error))
     }).catch(err => console.error("Downloading STELLA_User_Manual", err))

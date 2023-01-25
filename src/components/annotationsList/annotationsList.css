@@ -543,4 +543,5 @@ th{
   color: #E83879 ;
   font-size: 1rem;
   font-weight: bold;
+  width: max-content;
 }
