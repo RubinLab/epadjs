@@ -63,12 +63,12 @@ class Help extends React.Component {
                         "https://epad.stanford.edu/ways-contact-us",
                         "_blank",
                         ""
-                      ) :
-                        window.open(
-                          feedback,
-                          "_blank",
-                          ""
-                        )
+                      ) : null
+                        // window.open(
+                        //   feedback,
+                        //   "_blank",
+                        //   ""
+                        // )
                     }
                   }}
                 >
