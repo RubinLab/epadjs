@@ -156,7 +156,7 @@ class SearchView extends Component {
   }
 
   componentDidUpdate = async prevProps => {
-    const { uploadedPid, lastEventId, expandLevel } = this.props;
+    const { uploadedPid, lastEventId, expandLevel, update } = this.props;
     const { pid } = this.props.match.params;
     const samePid = mode !== 'lite' && uploadedPid === pid;
     let subjects;
@@ -166,7 +166,7 @@ class SearchView extends Component {
       this.setState({ numOfsubjects: subjects.length, subjects });
     }
 
-    if ((samePid || mode === 'lite') && prevProps.lastEventId !== lastEventId) {
+    if ((samePid || mode === 'lite') && prevProps.lastEventId !== lastEventId || prevProps.update !== update) {
       this.setState(state => ({ update: state.update + 1 }));
     }
     if (expandLevel !== prevProps.expandLevel) {
