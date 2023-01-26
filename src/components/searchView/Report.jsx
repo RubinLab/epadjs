@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import ReactHtmlParser from 'react-html-parser';
 import { Rnd } from 'react-rnd';
-import useResizeAware from 'react-resize-aware';
 import { renderTable, wordExport } from './recist';
 import ConfirmationModal from '../common/confirmationModal';
 import WaterfallReact from './WaterfallReact';
@@ -46,6 +45,7 @@ const Report = props => {
   const [isNonTarget, setIsNonTarget] = useState(false);
   const [filteredPatients, setFilteredPatients] = useState({});
   const [selectedSeries, setSelectedSeries] = useState([]);
+  const [sizes, setSizes] = useState({});
 
   const constructPairs = object => {
     const result = [];
@@ -272,6 +272,7 @@ const Report = props => {
     wordExport(subjectName, 'recisttbl' + index);
   };
 
+
   // useEffect(() => { }, [sizes.width, sizes.height]);
 
   const updateImageIDs = async () => {
@@ -469,7 +470,13 @@ const Report = props => {
           y: 50
         }}
         enableUserSelectHack={false}
-      >
+        onResizeStop={(e, direction, ref, delta, position) => {
+          setSizes({
+            width: ref.style.width,
+            height: ref.style.height,
+          });
+        }}
+        >
         <div
           id="report"
           style={props.report === 'Waterfall' ? style : {}}
@@ -536,7 +543,8 @@ const Report = props => {
                   <WaterfallReact
                     data={data}
                     waterfallSelect={waterfallClickOn}
-                    // width={sizes.width}
+                    width={sizes.width}
+                    height={sizes.height}
                   />
                 </div>
               )}
