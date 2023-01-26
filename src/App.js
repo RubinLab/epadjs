@@ -115,7 +115,8 @@ class App extends Component {
       metric: null,
       searchQuery: "",
       pairs: {},
-      leftMenuState: "open"
+      leftMenuState: "open",
+      update: 0
     };
   }
 
@@ -181,13 +182,15 @@ class App extends Component {
     if (nullCount === arr.length) {
       this.props.dispatch(clearSelection());
       if (
-        this.props.openSeries.length === 0 ||
         this.props.location.pathname.includes("display")
       ) {
         this.props.history.push(`/display`);
       } else if (this.props.location.pathname.includes("/list/")) {
         const newPid = this.props.location.pathname.split("/").pop();
         this.setState({ pid: newPid });
+        this.setState(state => ({
+          update: state.update + 1
+        }));
       } else {
         this.props.history.push(this.props.location.pathname);
       }
@@ -1432,6 +1435,7 @@ class App extends Component {
                       pid={this.state.pid}
                       admin={this.state.admin}
                       collapseSubjects={this.collapseSubjects}
+                      update={this.state.update}
                     />
                   )}
                 />
@@ -1502,6 +1506,7 @@ class App extends Component {
                         pid={this.state.pid}
                         admin={this.state.admin}
                         collapseSubjects={this.collapseSubjects}
+                        update={this.state.update}
                       />
                     )}
                   />
@@ -1597,6 +1602,7 @@ class App extends Component {
                     closeAllCounter={this.state.closeAll}
                     admin={this.state.admin}
                     collapseSubjects={this.collapseSubjects}
+                    update={this.state.update}
                   />
                 )}
               />
