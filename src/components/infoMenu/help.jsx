@@ -30,7 +30,7 @@ class Help extends React.Component {
         </Modal.Header>
         <Modal.Body className={"notification-modal"}>
           <div>
-            {`To read more about the features of ${mode === 'teaching' ? 'STELLA' : 'EPAD'}`}
+            {`Learning to use ${mode === 'teaching' ? 'STELLA' : 'ePAD'}?`}
             <div >
               {mode !== 'teaching' && (
                 <button
@@ -49,40 +49,45 @@ class Help extends React.Component {
                 className="info-about__button"
                 onClick={this.downloadManual}
               >
-                Get help with STELLA
+                Online User Manual
               </button>)}
             </div>
             <div>
-
-              To give feedback, recommandations, or report issues
-              <button
-                className="info-about__button"
-                onClick={() => {
-                  {
-                    mode !== 'teaching' ? window.open(
-                      "https://epad.stanford.edu/ways-contact-us",
-                      "_blank",
-                      ""
-                    ) :
-                      window.open(
-                        feedback,
+              {`Please give your feedback on ${mode === 'teaching' ? 'STELLA' : 'ePAD'} and recommendations for improvements`}
+              <div>
+                <button
+                  className="info-about__button"
+                  onClick={() => {
+                    {
+                      mode !== 'teaching' ? window.open(
+                        "https://epad.stanford.edu/ways-contact-us",
                         "_blank",
                         ""
-                      )
-                  }
-                }}
-              >
-                Report an issue
-              </button>
+                      ) : feedback !== 'undefined' ?
+                        window.open(
+                          feedback,
+                          "_blank",
+                          ""
+                        )
+                        : null
+                    }
+                  }}
+                >
+                  {mode === 'teaching' ? 'Open Feedback Form' : 'Report an issue'}
+                </button>
+              </div>
             </div>
             {mode === 'teaching' && (<div>
-              If you need to resolve your issue as soon as possible, please call the service desk
+              <p>
+                Having technical issues such as login or crashes? <br />
+                Please submit a Help Ticket to IT
+              </p>
               <div>
                 <button
                   className="info-about__button"
                   onClick={() => console.log("help desk")}
                 >
-                  Service Desk
+                  Submit Help Ticket
                 </button>
               </div>
             </div>)}
