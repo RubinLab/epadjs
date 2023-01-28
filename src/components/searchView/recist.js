@@ -586,16 +586,17 @@ function makeTable(data, filteredTable, modality, numofHeaderCols, hideCols) {
         hideCols
       )
     )
-    .append(
-      addRow(
-        data,
-        'RR from Minimum',
-        data.tRRMin,
-        '%',
-        numofHeaderCols,
-        hideCols
-      )
-    )
+    // removing rrmin
+    // .append(
+    //   addRow(
+    //     data,
+    //     'RR from Minimum',
+    //     data.tRRMin,
+    //     '%',
+    //     numofHeaderCols,
+    //     hideCols
+    //   )
+    // )
     .attr('border', 1)
     .css('background-color', '#666666')
     .css('color', '#d4dadd');
@@ -702,7 +703,8 @@ function responseCatsTable(data, numofHeaderCols, hideCols) {
     )
     .attr('border', 1)
     .css('border-top', 'solid 2px #4d4d4d')
-    .css('background-color', '#666666');
+    .css('background-color', '#666666')
+    .css('color', '#d4dadd');
 }
 
 function openAllAimsOfLesion(row, patientID, projectID) {
@@ -1051,9 +1053,10 @@ function fillInTables(
   if (data.tSums == null) {
     data.tSums = calcSums(filteredTable, data.stTimepoints, numofHeaderCols);
     data.tRRBaseline = calcRRBaseline(sums, data.stTimepoints);
-    data.tRRMin = calcRRMin(sums, data.stTimepoints);
+    // data.tRRMin = calcRRMin(sums, data.stTimepoints);
+    // use rrbaseline for response cats
     data.tResponseCats = calcResponseCat(
-      data.tRRMin,
+      data.tRRBaseline,
       data.stTimepoints,
       isThereANewLesion(data),
       sums
@@ -1149,12 +1152,13 @@ function makeCalcs(shrinkedData, numofHeaderCols) {
     shrinkedData.tSums,
     shrinkedData.stTimepoints
   );
-  shrinkedData.tRRMin = calcRRMin(
-    shrinkedData.tSums,
-    shrinkedData.stTimepoints
-  );
+  // shrinkedData.tRRMin = calcRRMin(
+  //   shrinkedData.tSums,
+  //   shrinkedData.stTimepoints
+  // );
+  // use rrbaseline for response cats
   shrinkedData.tResponseCats = calcResponseCat(
-    shrinkedData.tRRMin,
+    shrinkedData.tRRBaseline,
     shrinkedData.stTimepoints,
     isThereANewLesion(shrinkedData),
     shrinkedData.tSums
