@@ -38,12 +38,24 @@ export function pptWrapper() {
   this.slides = [[]];
   this.currentSlide = 0;
 
-  // Sets the default notes which every slide has
+  /**
+   * Returns true if the presentation is empty
+   */
+  this.isEmpty = function () {
+    return (this.slides.length == 1 && this.slides[0].length == 0);
+  }
+
+  /**
+   * Sets default slide notes.
+   * @param {string} text
+   */
   this.setSlideNotes = function (text) {
     defaultSlideNotes = text;
   }
 
-  // Moves to the next slide, initializing the next slide if necessary.
+  /**
+   * Moves to the next slide, initializing it if necessary.
+   */
   this.nextSlide = function () {
     this.currentSlide++;
     if (this.slides.length <= this.currentSlide) {
@@ -51,20 +63,23 @@ export function pptWrapper() {
     }
   }
 
-  // Moves to the previous slide. Does nothing if the current slide is the first slide.
+  /**
+   * Moves to the previous slide. Does nothing if the current slide is the first slide.
+   */
   this.prevSlide = function () {
     this.currentSlide = Math.min(this.currentSlide - 1, 0);
   }
 
-  // Adds an image to the current slide. Throws an error if that would cause there to be more 
-  // than maxImagesPerSlide images.
-  // dataURL: the base64 dataURL of the image
-  // width: the width of the image
-  // height: the height of the image
-  // imageNotes: notes that accompany the image, to be added in the slide notes
-  // 
-  // In practice, you'll likely want to do
-  // addImageToSlide(someCanvas.toDataURL(), someCanvas.width, someCanvas.height);
+  /**
+   * Adds an image to the current slide. Throws an error if that would cause there to be more
+   * than maxImagesPerSlide, a value hardcoded in pptWrapper.js. In practice, you'll likely
+   * want to do something like:
+   * addImageToSlide(canv.toDataURL(), canv.width, canv.height);
+   * @param {string} dataURL The dataURL of the image to add.
+   * @param {int} width The width of the image.
+   * @param {int} height The height of the image.
+   * @param {string} imageNotes Slide notes to be included with the image.
+   */
   this.addImageToSlide = function (dataURL, width, height, imageNotes = '') {
     //if (this.slides[this.currentSlide].length >= maxImagesPerSlide) {
     //  window.alert("Limit of " + maxImagesPerSlide + " images per slide! This image was not added.");
@@ -73,8 +88,10 @@ export function pptWrapper() {
     this.slides[this.currentSlide].push({ b64: dataURL, w: width, h: height, notes: imageNotes });
   }
 
-  // Removes the current slide. If this slide is the only slide, then clears this slide.
-  // If the current slide is the last slide, then sets the current slide to the new last slide.
+  /**
+   * Removes the current slide. If this slide is the only slide, then clears this slide.
+   * If the current slide is the last slide, then sets the current slide to the new last slide.
+   * */
   this.removeCurrentSlide = function () {
     if (this.slides.length == 1) {
       this.slides = [[]];
@@ -84,13 +101,12 @@ export function pptWrapper() {
     this.currentSlide = Math.min(this.currentSlide, this.slides.length - 1);
   }
 
-  // Removes the nth image from the slide. The images are ordered by the order in which
-  // they were added. Starts at 0, so if there are two images, then 
-  // removeImageFromSlide(1) removes the one added more recently, and removeImageFromSlide(0)
-  // removes the one added first.
-  // If there are no images in this slide, then this does nothing.
-  // If n is negative or not given, then the last image is removed.
-  // If n is too large, then this method does nothing.
+  /**
+   * Removes the nth image from the slide, provided that n is a valid index.
+   * The images are ordered chronologically, starting at 0.
+   * If n is negative or not given, then this removes the last image.
+   * @param {int} n The index of the image to remove
+   */
   this.removeImageFromSlide = function (n = -1) {
     let slide = this.slides[this.currentSlide];
     if (slide.length == 0) {
@@ -104,13 +120,11 @@ export function pptWrapper() {
     }
   }
 
-  // Given the id of an HTML element, writes text to that element describing the current 
-  // status of the presentation.
-  // Example text:
-  /*
-    Currently on slide 2 of 2.
-    This slide has 3 images.
-  */
+  /**
+   * Given the id of an HTML element, sets the innerHTML of that object to be text describing
+   * the current status of the presentation.
+   * @param {string} elementId
+   */
   this.updateDisplayText = function (elementId) {
     let nSlides = this.currentSlide + 1;
     let x = 'Currently on slide ' + nSlides + ' of ' + this.slides.length + '.<br>';
@@ -122,12 +136,11 @@ export function pptWrapper() {
     document.getElementById(elementId).innerHTML = x;
   }
 
-  // Given the id of an HTML canvas, updates the canvas to show a rough preview of the presentation.
-  // updateCanvasPreview(canvas) displays the current slide,
-  // updateCanvasPreview(canvas, 0) displays the first slide,
-  // updateCanvasPreview(canvas, 1) displays the second slide, and so on.
-  // If slideToDisplay is negative or not provided, it displays the current slide.
-  // If slideToDisplay is too large, it displays the last slide.
+  /**
+   * Updates the desired canvas to show a rough preview of one slide of the presentation.
+   * @param {string} canvasId The id of the desired canvas
+   * @param {int} slideToDisplay Defaults to the current slide. If too large, shows the last slide
+   */
   this.updateCanvasPreview = function (canvasId, slideToDisplay = -1) {
     slideToDisplay = Math.min(slideToDisplay, this.slides.length - 1);
     if (slideToDisplay == -1) {
@@ -135,7 +148,9 @@ export function pptWrapper() {
     }
     let canv = document.getElementById(canvasId);
     let ctx = canv.getContext('2d');
-    ctx.clearRect(0, 0, canv.width, canv.height);
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canv.width, canv.height);
+    //ctx.clearRect(0, 0, canv.width, canv.height);
     let n = this.slides[slideToDisplay].length;
     let nRows = n;
     if (n > 3) {
@@ -157,10 +172,13 @@ export function pptWrapper() {
     }
   }
 
-  // Exports the presentation. If the presentation is empty, then you get an empty presentation.
+  /**
+   * Exports the current presentation.
+   * @param {string} nameOfFile
+   */
   this.exportPresentation = function (nameOfFile = 'Stella images.pptx') {
     for (let i = 0; i < this.slides.length; i++) {
-      let slideNotes = defaultSlideNotes;
+      let slideNotes = '';
       let slideArray = this.slides[i];
       if (slideArray.length == 0 && ignoreEmptySlides) {
         continue;
@@ -194,11 +212,13 @@ export function pptWrapper() {
           Image 5: bla bla bla
           */
           let x = parseInt(j) + 1;
-          slideNotes += 'Image ' + x + ': ' + slideArray[j].notes + '\n';
+          slideNotes += 'Image ' + x + ':\n' + slideArray[j].notes;
         }
       }
       if (slideNotes.length > 0) {
         newSlide.addNotes(slideNotes);
+      } else {
+        newSlide.addNotes(defaultSlideNotes);
       }
     }
     this.pres.writeFile({ fileName: nameOfFile });

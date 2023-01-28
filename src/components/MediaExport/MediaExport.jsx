@@ -6,8 +6,10 @@ import * as dcmjs from "dcmjs";
 import { uids } from "./uids";
 import { pptWrapper } from "./pptWrapper";
 import { videoExport } from "./videoExport";
+import cornerstoneTools from "cornerstone-tools";
+import { getToolState } from "cornerstone-tools/stateManagement/toolState"
 
-import "../MetaData/MetaData.css";
+import "./MediaExport.css";
 
 const mapStateToProps = state => {
   return {
@@ -15,20 +17,43 @@ const mapStateToProps = state => {
   };
 };
 
+const scrollToIndex = cornerstoneTools.importInternal("util/scrollToIndex");
+
+/**
+ * Handles media exporting. This class saves its data using the saveData parameter.
+ * When you construct a new instance of this class, take the most recent input of
+ * saveData and pass it to this class as the 'data' parameter.
+ * @param {Function} onClose Method called when this class closes
+ * @param {Function} saveData When saveData is passed obj, save obj somewhere.
+ * @param {Object} data An object that has been passed to the saveData method.
+ */
 class MediaExport extends Component {
   constructor(props) {
     super(props);
-    this.pptTags = ['(0008,0050)', '(0008,0020)', '(0010,0040)', '(0010,1010)', '(0008,103E)', '(0018,0080)', '(0018,0081)'];
-    this.pptw = this.props.data;
-    if (this.pptw === undefined) {
+    // Any DICOM data whose tag is included in pptTags should have its data
+    // included in the presentation.
+    this.pptTags = ['(0008,0050)', '(0008,0020)', '(0010,0040)', '(0010,1010)',
+                    '(0008,103E)', '(0018,0080)', '(0018,0081)'];
+    // The following lines give this class a way to export and import the current 
+    // presentation and gif, so that you can close and re-open the class dialog
+    // without losing progress.
+    if (this.props.data === undefined) {
       this.pptw = new pptWrapper();
-      this.props.saveData(this.pptw);
+      this.gifData = {
+        ready: false,
+        text: '',
+        width: -1,
+        height: -1
+      }
+      this.props.saveData({
+        pptw: this.pptw,
+        gifData: this.gifData
+      });
+    } else {
+      this.pptw = this.props.data.pptw;
+      this.gifData = this.props.data.gifData;
     }
-    this.canv = document.getElementsByClassName('cornerstone-canvas')[0];
-    const x = document.getElementsByClassName('viewportContainer selected')[0];
-    if (x !== undefined) {
-      this.canv = x.getElementsByClassName('cornerstone-canvas')[0];
-    }
+    this.gifData.setReady = this.setGifReady;
     this.vid = new videoExport();
     this.slideNotes = ''
     this.state = {
@@ -39,21 +64,16 @@ class MediaExport extends Component {
   }
   componentDidMount() {
     const { activePort } = this.props;
-    this.vid.initializeRecorder(this.canv);
     // console.log(this.props);
     // In theory this.props has all of the information needed to export
     // high quality screenshots. In practice, you need cornerstone to 
     // handle that for you.
     const { element } = cornerstone.getEnabledElements()[activePort];
-    const image = cornerstone.getImage(element);
-    // const { elements } = image.data;
-    // const tempOutput = [];
-    // this.dumpDataSet(image.data, tempOutput);
-    this.dumpDataSet(image.data);
-    // this.setState({ output: tempOutput });
-    // let canv = document.getElementsByClassName('cornerstone-canvas')[0];
+    this.canv = element.getElementsByClassName('cornerstone-canvas')[0];
+    // this.vid.initializeRecorder(this.canv);
     this.pptw.updateDisplayText('pptInfo');
     this.pptw.updateCanvasPreview('pptPreview');
+    this.gifData.setReady(this.gifData.ready);
   }
 
   // helper function to see if a string only has ascii characters in it
@@ -86,64 +106,175 @@ class MediaExport extends Component {
     return text;
   }
 
-  recordVideo = () => {
-    this.vid.startRecording(1000);
+  /**
+   * Updates the UI, telling it whether or not a gif is ready to download.
+   * This toggles visibility of the loading indicator and the buttons for
+   * downloading the gif or adding it to the presentation.
+   * @param {Boolean} val True means gif is ready
+   */
+  setGifReady = (val) => {
+    this.gifData.ready = val;
+    const x = document.getElementById('gifReadyButtons');
+    const y = document.getElementById('gifLoadingIndicator');
+    if (val) {
+      x.style.display = 'block';
+      y.style.display = 'none';
+    } else {
+      x.style.display = 'none';
+    }
   }
 
+  /**
+   * Records a gif of the active cornerstone canvas, using the settings taken from
+   * the sliders in the UI.
+   */
+  recordGif = () => {
+    this.gifData.setReady(false);
+    const x = document.getElementById('gifRecordingIndicator');
+    x.innerHTML = 'Recording progress: 0%'
+    const y = document.getElementById('gifLoadingIndicator');
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort];
+    const image = cornerstone.getImage(element);
+    let stringArray = [''];
+    this.dumpDataSet(image.data, stringArray);
+    this.gifData.text = stringArray[0];
+    this.canv = element.getElementsByClassName('cornerstone-canvas')[0];
+    this.gifData.width = this.canv.width;
+    this.gifData.height = this.canv.height;
+    const duration = parseInt(document.getElementById('gifDurationSlider').value);
+    const frameRate = parseInt(document.getElementById('gifFramerateSlider').value);
+    let progress = 0;
+    let i = 0;
+    const afterFrame = () => {
+      i = i + 1;
+      if (Math.floor(i / (duration * frameRate) * 10) > progress) {
+        progress = Math.floor(i / (duration * frameRate) * 10);
+        x.innerHTML = 'Recording progress: ' + progress*10 + '%'
+      }
+    }
+    this.vid.recordGif(this.canv, duration, frameRate, this.gifData, 1, afterFrame);
+    setTimeout(
+      function Timer() {
+        x.innerHTML = 'Recording finished. ';
+        y.style.display = 'block';
+      }, duration * 1000)
+  }
+
+  // TODO: Make a custom modal instead of using window.confirm
+  // Possible change: Only confirm if there are multiple slides (see deletePptSlide)
+  /**
+   * Clears the presentation.
+   */
   clearPpt = () => {
-    if (window.confirm('Are you sure you want to clear the whole presentation?')) {
+    if (!this.pptw.isEmpty() && window.confirm('Are you sure you want to clear the whole presentation?')) {
       this.pptw = new pptWrapper();
+      this.props.saveData({ pptw: this.pptw, gifData: this.gifData });
       this.pptw.updateDisplayText('pptInfo');
       this.pptw.updateCanvasPreview('pptPreview');
     }
   }
 
+  /**
+   * Adds a screenshot of the active cornerstone canvas to the presentation.
+   * When this comment was written, the active canvas had a red border, and could be changed
+   * by clicking on a different canvas.
+   */
   addToPpt = () => {
-    const x = document.getElementsByClassName('viewportContainer selected')[0];
-    if (x !== undefined) {
-      this.canv = x.getElementsByClassName('cornerstone-canvas')[0];
-    }
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort];
+    this.canv = element.getElementsByClassName('cornerstone-canvas')[0];
+    const image = cornerstone.getImage(element);
+    let stringArray = [''];
+    this.dumpDataSet(image.data, stringArray);
     this.pptw.addImageToSlide(
       this.canv.toDataURL(),
       this.canv.width,
-      this.canv.height
+      this.canv.height,
+      stringArray[0]
     );
     this.pptw.updateDisplayText('pptInfo');
     this.pptw.updateCanvasPreview('pptPreview');
   }
 
+  /**
+   * Takes and downloads a screenshot of the active cornerstone canvas.
+   * */
+  saveScreenshot = () => {
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort];
+    this.canv = element.getElementsByClassName('cornerstone-canvas')[0];
+    const a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    a.href = this.canv.toDataURL('image/jpeg');
+    a.download = "STELLA image.jpg";
+    a.click();
+    a.remove();
+  }
+
+  /**
+   * Removes the last image on the current slide from the presentation.
+   */
   removeFromPpt = () => {
     this.pptw.removeImageFromSlide();
     this.pptw.updateDisplayText('pptInfo');
     this.pptw.updateCanvasPreview('pptPreview');
   }
 
+  // Possible change: ask the user to confirm if the slide is not empty
+  // (or if it contains 2 + images)
+  // (see clearPpt)
+  /**
+   * Deletes the current slide from the presentation.
+   */
   deletePptSlide = () => {
     this.pptw.removeCurrentSlide();
     this.pptw.updateDisplayText('pptInfo');
     this.pptw.updateCanvasPreview('pptPreview');
   }
 
+  /**
+   * Downloads the presentation. This occurs instantly, as the presentation is handled locally.
+   */
   savePpt = () => {
-    this.pptw.setSlideNotes(this.slideNotes);
     this.pptw.exportPresentation();
   }
 
+  /**
+   * Moves to the next slide. Creates a new slide if none exist.
+   */
   nextPptSlide = () => {
     this.pptw.nextSlide();
     this.pptw.updateDisplayText('pptInfo');
     this.pptw.updateCanvasPreview('pptPreview');
   }
 
+  /**
+   * Moves to the previous slide. Does nothing if on the first slide.
+   */
   prevPptSlide = () => {
     this.pptw.prevSlide();
     this.pptw.updateDisplayText('pptInfo');
     this.pptw.updateCanvasPreview('pptPreview');
   }
 
+  /**
+   * Debug method for use in development.
+   */
+  logElement = () => {
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort];
+    const image = cornerstone.getImage(element);
+    console.log(image);
+    console.log(this.props);
+  }
+
   // This function iterates through dataSet recursively and adds new HTML strings
-  // to the output array passed into it
-  dumpDataSet = (dataSet) => {
+  // to the output array passed into it.
+  // I took this function from MetaData.jsx, modified it a bit, and stripped out all of the 
+  // parts that weren't needed.
+  dumpDataSet = (dataSet, array) => {
     const maxLength = 128;
     const untilTag = "";
     const showGroupElement = false;
@@ -512,7 +643,8 @@ class MediaExport extends Component {
           // finally we add the string to our output array surrounded by li elements so it shows up in the
           // DOM as a list
           // output.push('<li style="color:' + color + ';" title="' + title + '">' + text + '</li>');
-          this.slideNotes = this.slideNotes + text + '\n';
+          // this.slideNotes = this.slideNotes + text + '\n';
+          array[0] += '  ' + text + '\n';
           // console.log(text);
         }
       }
@@ -529,6 +661,168 @@ class MediaExport extends Component {
     })
   }
 
+  /**
+   * Updates the text that accompanies the framerate slider.
+   */
+  updateFramerateDisplay = () => {
+    document.getElementById("gifFramerateText").innerHTML = document.getElementById('gifFramerateSlider').value + ' frames per second';
+  }
+
+  /**
+   * Updates the text that accompanies the duration slider.
+   */
+  updateDurationDisplay = () => {
+    const duration = document.getElementById('gifDurationSlider').value;
+    if (duration == 1) {
+      document.getElementById("gifDurationText").innerHTML = 'Duration: 1 second';
+    } else {
+      document.getElementById("gifDurationText").innerHTML = `Duration: ${duration} seconds`;
+    }
+  }
+
+  /**
+   * Toggles display of the gif settings and the status of the toggle button.
+   */
+  toggleHideGifSettings = () => {
+    const x = document.getElementById("gifSettings");
+    const b = document.getElementById("gifSettingsButton");
+    if (x.style.display != "block") {
+      x.style.display = "block";
+      b.innerHTML = "Hide movie settings";
+    } else {
+      x.style.display = "none";
+      b.innerHTML = "Show movie settings";
+    }
+  }
+
+  /**
+   * Downloads the processed gif.
+   */
+  downloadGif = () => {
+    // It's a little hacky but it's the best way I could come up with, and
+    // the people on stackoverflow said to do this.
+    const a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    a.href = this.gifData.url;
+    a.download = "STELLA gif.gif";
+    a.click();
+  }
+
+  /**
+   * Adds the processed gif to the presentation, along some metadata.
+   * Note that the presentation preview shows a static image, but the
+   * presentation itself still contains an animated gif.
+   */
+  addGif = () => {
+    const f = new FileReader();
+    f.onload = (dataURL) => {
+      this.pptw.addImageToSlide(
+        dataURL.target.result,
+        this.gifData.width,
+        this.gifData.height,
+        this.gifData.text
+      );
+      this.pptw.updateDisplayText('pptInfo');
+      this.pptw.updateCanvasPreview('pptPreview');
+    }
+    f.readAsDataURL(this.gifData.blob);
+  }
+
+  recordStack = () => {
+    // scrollToIndex(element, 0) scrolls to the first image,
+    // scrollToIndex(element, 1) to the second image,
+    // scrollToIndex(element, -1) to the last image,
+    // scrollToIndex(element, -2) to the second to last image, etc.
+    const x = document.getElementById('gifRecordingIndicator');
+    x.innerHTML = 'Recording progress: 0%'
+    const y = document.getElementById('gifLoadingIndicator');
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort];
+    const image = cornerstone.getImage(element);
+    const duration = parseInt(document.getElementById('gifDurationSlider').value);
+    let frameRate = parseInt(document.getElementById('gifFramerateSlider').value);
+    let numImages = -1;
+    let n = 1;
+    // There isn't any simple way to figure out the number of images in a series from here.
+    // scrollToIndex method figures it out by calling getToolState, a method internal to
+    // cornerstone-tools. I have imported it and am using it here. I am not sure about the
+    // specifics of importing it that way, because I noticed that cornerstone-tools is
+    // included in /epadjs/src instead of being imported through npm. If that changes, my method
+    // of importing getToolState may break, but hopefully my code should be resilient enough to
+    // keep functioning if that happens.
+    try {
+      numImages = getToolState(element, 'stack').data[0].imageIds.length;
+    } catch (error) {
+      // Exponential search to find the maximum allowed index. This is hacky but it should 
+      // work as a backup.
+      console.warn('MediaExport could not figure out the number of images in this series. ' +
+        'This is because of the following error:\n', error);
+      let lowerBound = 0;
+      let upperBound = 1;
+      let loopDone = false;
+      while (!loopDone) {
+        try {
+          scrollToIndex(element, upperBound);
+          lowerBound = upperBound;
+          upperBound = upperBound * 2;
+        } catch (e) {
+          loopDone = true;
+        }
+      }
+      while (lowerBound != upperBound) {
+        let middleIndex = Math.ceil(lowerBound / 2 + upperBound / 2);
+        try {
+          scrollToIndex(element, middleIndex);
+          lowerBound = middleIndex;
+        } catch (e) {
+          upperBound = Math.min(middleIndex, upperBound-1);
+        }
+      }
+      numImages = lowerBound + 1;
+    }
+    // We want the resulting gif to be the duration specified by the user, without
+    // exceeding the specified framerate, so we skip frames until we can fit the
+    // whole video in the desired duration, then we reduce the framerate to
+    // ensure that the video has the correct duration.
+    while (n <= 1000) {
+      if (frameRate * duration >= Math.floor(numImages / n)) {
+        frameRate = Math.floor(numImages / n) / duration;
+        break;
+      }
+      n++;
+    }
+    // Record the gif:
+    let stringArray = [''];
+    this.dumpDataSet(image.data, stringArray);
+    this.gifData.text = stringArray[0];
+    this.canv = element.getElementsByClassName('cornerstone-canvas')[0];
+    this.gifData.width = this.canv.width;
+    this.gifData.height = this.canv.height;
+    let i = 0;
+    scrollToIndex(element, 0);
+    let progress = 0;
+    const afterFrame = () => {
+      i = i + n;
+      if (Math.floor(i / numImages * 10) > progress) {
+        progress = Math.floor(i / numImages * 10);
+        x.innerHTML = 'Recording progress: ' + progress*10 + '%'
+      }
+      if (i < numImages) {
+        scrollToIndex(element, i);
+      }
+    }
+    // Arbitrarily chosen. I tested this on my computer and it struggles to keep up past
+    // about 20 frames per second.
+    const k = Math.max(20/frameRate, 1);
+    this.vid.recordGif(this.canv, duration / k, frameRate * k, this.gifData, k, afterFrame);
+    setTimeout(
+      function Timer() {
+        x.innerHTML = 'Recording finished. ';
+        y.style.display = 'block';
+      }, duration / k * 1000);
+  }
+
   render() {
     const { output, input } = this.state;
     const lowerInput = input.toLowerCase();
@@ -536,29 +830,60 @@ class MediaExport extends Component {
 
     const listHtml = { __html: list.join('') };
     return (
-      <Draggable handle="#handle">
-        <div className="md-pop-up">
-          <div className="close-meta-data-menu" onClick={this.props.onClose}>
-            <a href="#">X</a>
-          </div>
-          <div id="handle" className="buttonLabel">
-            <span>Export Media</span>
-          </div>
-          <button onClick={this.clearPpt}>Clear presentation</button>
-          <button onClick={this.addToPpt}>Add image to slide</button>
-          <button onClick={this.removeFromPpt}>Remove image from slide</button>
-          <button onClick={this.deletePptSlide}>Delete slide</button>
-          <button onClick={this.savePpt}>Save presentation</button>
-          <br />
-          <button onClick={this.nextPptSlide}>Next slide</button>
-          <button onClick={this.prevPptSlide}>Previous slide</button>
-          <p id="pptInfo"></p>
-          Slide preview:
-          <br />
-          <canvas id="pptPreview" width="320" height="180"></canvas>
-          <button onClick={this.recordVideo}>Record video</button>
+      <div className="media-export-pop-up">
+        {/*<div className="close-media-export-menu" onClick={this.props.onClose}>*/}
+        {/*  <a href="#">X</a>*/}
+        {/*</div>*/}
+        {/*<div id="media-export-handle" className="buttonLabel">*/}
+        {/*  <span>Export Media</span>*/}
+        {/*</div>*/}
+        <button onClick={this.clearPpt}>Clear presentation</button>
+        <button onClick={this.addToPpt}>Add image to slide</button>
+        <button onClick={this.saveScreenshot}>Save image of slide</button>
+        <button onClick={this.removeFromPpt}>Remove image from slide</button>
+        <button onClick={this.deletePptSlide}>Delete slide</button>
+        <button onClick={this.savePpt}>Save presentation</button>
+        <br />
+        <button onClick={this.nextPptSlide}>Next slide</button>
+        <button onClick={this.prevPptSlide}>Previous slide</button>
+        <p id="pptInfo"></p>
+        Slide preview:
+        <br />
+        <canvas id="pptPreview" width="320" height="180"></canvas>
+        <br />
+        <button onClick={this.recordStack}>Make quick movie</button>
+        <button onClick={this.recordGif}>Make custom movie</button>
+        <br />
+        <button id="gifSettingsButton" onClick={this.toggleHideGifSettings}>Show movie settings</button>
+        <div id="gifSettings">
+          <div id="gifFramerateText">10 frames per second</div>
+          <input type="range" id="gifFramerateSlider" min="5" max="30" step="5" list="gifFPSlist" defaultValue="10" onChange={this.updateFramerateDisplay} />
+          <datalist id="gifFPSlist">
+            <option>5</option>
+            <option>10</option>
+            <option>15</option>
+            <option>20</option>
+            <option>25</option>
+            <option>30</option>
+          </datalist>
+          <div id="gifDurationText">Duration: 3 seconds</div>
+          <input type="range" id="gifDurationSlider" min="1" max="5" step="1" list="gifDurationList" defaultValue="3" onChange={this.updateDurationDisplay} />
+          <datalist id="gifDurationList">
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+          </datalist>
         </div>
-      </Draggable>
+        <div id="gifRecordingIndicator"></div>
+        <div id="gifLoadingIndicator">Loading</div>
+        <div id="gifReadyButtons">
+          <button id="gifDownloadButton" onClick={this.downloadGif}>Save movie</button>
+          <button onClick={this.addGif}>Add movie to presentation</button>
+        </div>
+        {/*<button onClick={this.logElement}>Log</button>*/}
+      </div>
     );
   }
 }

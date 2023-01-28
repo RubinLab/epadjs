@@ -162,7 +162,10 @@ class DisplayView extends Component {
       redirect: this.props.series.length < 1 ? true : false,
       containerHeight: 0,
       tokenRefresh: null,
-      activeTool: ''
+      activeTool: '',
+      siblingCommunication: {
+        mediaExportButton: null
+      }
     };
   }
 
@@ -1687,8 +1690,12 @@ class DisplayView extends Component {
           updateProgress={updateProgress}
           updateTreeDataOnSave={updateTreeDataOnSave}
           setAimDirty={this.setDirtyFlag}
+          communicate={this.state.siblingCommunication}
         >
-          <ToolMenu onSwitchView={this.props.onSwitchView} />
+          <ToolMenu
+            onSwitchView={this.props.onSwitchView}
+            communicate={this.state.siblingCommunication}
+          />
           {!this.state.isLoading &&
             Object.entries(series).length &&
             data.map((data, i) => (

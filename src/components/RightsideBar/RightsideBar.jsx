@@ -6,6 +6,7 @@ import { BsArrowBarLeft, BsArrowBarRight } from "react-icons/bs";
 import Collapsible from "react-collapsible";
 import AnnotationList from "../annotationsList/annotationDock/annotationList";
 import AimEditor from "../aimEditor/aimEditor";
+import MediaExport from "../MediaExport/MediaExport";
 
 import "./RightsideBar.css";
 
@@ -21,6 +22,7 @@ class Rightsidebar extends Component {
       marginRight: rightDim,
       buttonDisplay: "block",
       open: true,
+      showMediaExport: false
     };
   }
 
@@ -33,6 +35,7 @@ class Rightsidebar extends Component {
         width: "0px",
         marginRight: "0",
         open: false,
+        showMediaExport: false
       });
     } else {
       this.setState({
@@ -43,9 +46,30 @@ class Rightsidebar extends Component {
     }
   };
 
+  showMediaExport = () => {
+    if (!this.state.open) {
+      this.handleToggle();
+    }
+    if (!this.state.showMediaExport || this.props.showAimEditor) {
+      if (this.props.onCancel(true, 'All unsaved annotation data will be lost! Do you want to continue?') == 1) {
+        if (!this.state.open) {
+          this.handleToggle();
+        }
+        this.setState({ showMediaExport: true });
+      }
+    } else {
+      this.setState({ showMediaExport: false });
+    }
+  };
+
+  saveMediaData = (obj) => {
+    this.state.mediaExportData = obj;
+  }
+
   render() {
     const { selectedAim, showAimEditor } = this.props;
     const { open, width, marginRight } = this.state;
+    this.props.communicate.mediaExportButton = this.showMediaExport;
     return (
       <React.Fragment>
         <div>
@@ -60,6 +84,7 @@ class Rightsidebar extends Component {
           className="rightsidenav"
           style={{ width: width }}
         >
+          {!showAimEditor && this.state.showMediaExport && (<MediaExport data={this.state.mediaExportData} saveData={this.saveMediaData} onClose={this.showMediaExport} />)}
           {showAimEditor && (
             <div className="AimEditor-Wrapper">
               <AimEditor

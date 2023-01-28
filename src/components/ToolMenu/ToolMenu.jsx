@@ -155,7 +155,7 @@ class ToolMenu extends Component {
       // { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
       { name: "Color", icon: <FaPalette />, tool: "colorLut" },
       { name: "Fusion", icon: <FaObjectUngroup />, tool: "fuse" },
-      { name: "Media Export", icon: <FaCamera />, tool: "MediaExport", teaching: true },
+      // { name: "Media Export", icon: <FaCamera />, tool: "MediaExport", teaching: true },
     ];
 
     this.markupTools = [
@@ -419,7 +419,8 @@ class ToolMenu extends Component {
       return;
       this.selectFreehand();
     } else if (tool === "MediaExport") {
-      this.setState({ showMediaExport: true });
+      //this.setState({ showMediaExport: true });
+      this.showMediaExport();
       return;
     }
     // else if (tool === "FreehandRoiTool") {
@@ -516,7 +517,12 @@ class ToolMenu extends Component {
   };
 
   showMediaExport = () => {
-    this.setState({ showMediaExport: !this.state.showMediaExport });
+    if (this.props.communicate != null && this.props.communicate.mediaExportButton != null) {
+      this.props.communicate.mediaExportButton()
+    } else {
+      console.log('oops');
+      this.setState({ showMediaExport: !this.state.showMediaExport });
+    }
   };
 
   saveMediaData = (obj) => {
@@ -848,6 +854,14 @@ class ToolMenu extends Component {
                         </div>
                     </div> */}
         {/* </Collapsible> */}
+        <ToolMenuItem
+          key={"Media Export"}
+          name={"Media Export"}
+          icon={<FaCamera />}
+          index={22}
+          isActive={this.state.activeToolIdx === 22}
+          onClick={() => this.handleToolClicked(22, "MediaExport")}
+        />
         {(this.state.activeTool === "Brush3D" ||
           this.state.activeTool === "SphericalBrush" ||
           this.state.activeTool === "Brush3DHUGated" ||
