@@ -5,7 +5,7 @@ Number.prototype.times = function(fn) {
   for (var r = [], i = 0; i < this; i++) r.push(fn(i));
   return r;
 };
-
+var legacyReporting = false;
 var linkColor = '#ccf';
 var errorColor = 'rgb(207, 72, 88)';
 var baselineColor = 'rgb(40, 163, 46)';
@@ -587,16 +587,16 @@ function makeTable(data, filteredTable, modality, numofHeaderCols, hideCols) {
       )
     )
     // removing rrmin
-    // .append(
-    //   addRow(
-    //     data,
-    //     'RR from Minimum',
-    //     data.tRRMin,
-    //     '%',
-    //     numofHeaderCols,
-    //     hideCols
-    //   )
-    // )
+    .append(
+      addRow(
+        data,
+        'RR from Minimum',
+        data.tRRMin,
+        '%',
+        numofHeaderCols,
+        hideCols
+      )
+    )
     .attr('border', 1)
     .css('background-color', '#666666')
     .css('color', '#d4dadd');
@@ -1053,10 +1053,10 @@ function fillInTables(
   if (data.tSums == null) {
     data.tSums = calcSums(filteredTable, data.stTimepoints, numofHeaderCols);
     data.tRRBaseline = calcRRBaseline(sums, data.stTimepoints);
-    // data.tRRMin = calcRRMin(sums, data.stTimepoints);
-    // use rrbaseline for response cats
+    data.tRRMin = calcRRMin(sums, data.stTimepoints);
+    // use rrbaseline for response cats of not legacyReporting (rrmin and best response)
     data.tResponseCats = calcResponseCat(
-      data.tRRBaseline,
+      legacyReporting ? data.tRRMin : data.tRRBaseline,
       data.stTimepoints,
       isThereANewLesion(data),
       sums
@@ -1152,13 +1152,14 @@ function makeCalcs(shrinkedData, numofHeaderCols) {
     shrinkedData.tSums,
     shrinkedData.stTimepoints
   );
-  // shrinkedData.tRRMin = calcRRMin(
-  //   shrinkedData.tSums,
-  //   shrinkedData.stTimepoints
-  // );
-  // use rrbaseline for response cats
+  shrinkedData.tRRMin = calcRRMin(
+    shrinkedData.tSums,
+    shrinkedData.stTimepoints
+  );
+
+  // use rrbaseline for response cats of not legacyReporting (rrmin and best response)
   shrinkedData.tResponseCats = calcResponseCat(
-    shrinkedData.tRRBaseline,
+    legacyReporting ? shrinkedData.tRRMin : shrinkedData.tRRBaseline,
     shrinkedData.stTimepoints,
     isThereANewLesion(shrinkedData),
     shrinkedData.tSums
@@ -1339,8 +1340,11 @@ export async function renderTable(
   hidecols,
   loadFilter,
   index,
-  refreshFilter
+  refreshFilter,
+  legacyReportingIn
 ) {
+  legacyReporting = legacyReportingIn;
+
   //check the existing ids and create a unique id for this recist table
   // var id = 'recisttbl';
   var recisttable = null;

@@ -637,6 +637,7 @@ class App extends Component {
           process.env.REACT_APP_DEFAULT_AIM_NAME || defaultAimName;
         feedback =
           process.env.REACT_APP_FEEDBACK || feedback;
+        const legacyReporting = (process.env.REACT_APP_LEGACY_REPORTING && process.env.REACT_APP_LEGACY_REPORTING === "true") || false;
         sessionStorage.setItem("mode", mode);
         sessionStorage.setItem("apiUrl", apiUrl);
         sessionStorage.setItem("wadoUrl", wadoUrl);
@@ -644,6 +645,7 @@ class App extends Component {
         sessionStorage.setItem("maxPort", maxPort);
         sessionStorage.setItem("defaultAimName", defaultAimName);
         sessionStorage.setItem("feedback", feedback);
+        sessionStorage.setItem("legacyReporting", legacyReporting);
         if (waterfallOptions) {
           sessionStorage.setItem("waterfallOptions", waterfallOptions);
         }
