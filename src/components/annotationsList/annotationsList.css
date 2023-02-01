@@ -540,8 +540,8 @@ th{
 }
 
 #stella-beta-warning {
-  color: #E83879 ;
+  color: #DB2828;
   font-size: 1rem;
   font-weight: bold;
-  width: max-content;
+  margin: 0.3rem;
 }
