@@ -432,30 +432,31 @@ class selectSerieModal extends React.Component {
       <Modal.Dialog id="series-modal" className="series-modal">
         < Modal.Header className="select-serie-header">
           <Modal.Title className="select-serie-title">
-           {title}
+            {title}
           </Modal.Title>
         </Modal.Header >
         <Modal.Body className="select-serie-body">
           {isTeachingFile &&
-            (<div id="questionaire" className={"field-grid"}>
-              <row>
-              <div id="stella-beta-warning">Warning! Beta Software, Not For Routine Use During Preclinical Testing</div>
-              </row>
-              <row>
-                <div id="anatomy"></div>
-                <div id="diagnosis"></div>
-              </row>
-              <row>
-                <div id="speciality"></div>
-                <div id="comment">
-                  {/* <i class="dropdown icon"></i>
+            (
+              <>
+                <div id="stella-beta-warning">Warning! Beta Software, Not For Routine Use During Preclinical Testing</div>
+                <div id="questionaire" className={"field-grid"}>
+                  <row>
+                    <div id="anatomy"></div>
+                    <div id="diagnosis"></div>
+                  </row>
+                  <row>
+                    <div id="speciality"></div>
+                    <div id="comment">
+                      {/* <i class="dropdown icon"></i>
                   <div className="title active" style={{ color: "rgb(204, 204, 204)", fontSize: "13px" }}>Narrative</div>
                   <div>
-                    <input className="comment ui input"></input>
-                  </div> */}
+                  <input className="comment ui input"></input>
+                </div> */}
+                    </div>
+                  </row>
                 </div>
-              </row>
-            </div>
+              </>
             )}
           <br />
           <div className={"max-series"}>Please select up to {this.maxPort} series to display:</div>
