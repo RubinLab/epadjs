@@ -376,6 +376,9 @@ class selectSerieModal extends React.Component {
       examTypes = examTypes[0].split("\\");
     }
     study.examTypes = examTypes.filter(type => DISP_MODALITIES.includes(type));
+    study.birthdate = study.birthdate.split('-').join('');
+    study.insertDate = study.insertDate.split('-').join('');
+    study.studyDate = study.studyDate.split('-').join('');
     const aimData = { study, answers, user: getUserForAim() };
     const aim = new Aim(
       aimData,
