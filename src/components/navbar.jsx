@@ -3,7 +3,8 @@ import { Link, NavLink } from 'react-router-dom';
 import { BsFillGearFill, BsInfoCircleFill, BsBoxArrowInRight } from 'react-icons/bs';
 import { FaBell } from 'react-icons/fa';
 import logo from '../images/logo.png';
-import stella from '../images/stella-logo-temp-02.png';
+// import stella from '../images/stella-logo-temp-02.png';
+import stella from '../images/stella-beta.png';
 import stanford from '../images/stanford-rad-allwhite.png';
 import { connect } from 'react-redux';
 

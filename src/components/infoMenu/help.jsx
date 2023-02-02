@@ -85,7 +85,7 @@ class Help extends React.Component {
               <div>
                 <button
                   className="info-about__button"
-                  onClick={() => console.log("help desk")}
+                  onClick={() => window.open("https://itcare.stanfordhealthcare.org/", "_blank", "")}
                 >
                   Submit Help Ticket
                 </button>
