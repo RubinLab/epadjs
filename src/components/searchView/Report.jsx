@@ -135,7 +135,8 @@ const Report = props => {
             hideCols,
             loadFilter,
             props.index,
-            refreshFilter
+            refreshFilter,
+            sessionStorage.getItem('legacyReporting')
           );
         }
         reportTable = ReactHtmlParser(reportTable);
