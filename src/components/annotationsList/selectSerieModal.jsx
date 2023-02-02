@@ -420,6 +420,7 @@ class selectSerieModal extends React.Component {
     let result = await this.saveTeachingFile();
     if (result === -1)
       return;
+
     this.displaySelection(result);
   }
 
