@@ -377,8 +377,6 @@ class selectSerieModal extends React.Component {
     }
     study.examTypes = examTypes.filter(type => DISP_MODALITIES.includes(type));
     const aimData = { study, answers, user: getUserForAim() };
-    console.log(' ---> aimdata');
-    console.log(aimData);
     const aim = new Aim(
       aimData,
       enumAimType.studyAnnotation,
@@ -388,8 +386,6 @@ class selectSerieModal extends React.Component {
     const { root: result } = aim.uniqueIdentifier;
     const aimJson = aim.getAim();
     let aimSaved = JSON.parse(aimJson);
-    console.log(' ---> aimSaved');
-    console.log(aimSaved);
     const isUpdate = false;
 
     return uploadAim(aimSaved, projectID, isUpdate)
@@ -409,8 +405,6 @@ class selectSerieModal extends React.Component {
         });
         await this.setSignificantSeries(series);
         window.dispatchEvent(new Event("refreshProjects"));
-        console.log(" ---> result in upload aim");
-        console.log(result);
         return result;
       })
       .catch((error) => {
@@ -424,8 +418,6 @@ class selectSerieModal extends React.Component {
 
   saveTeachingFileAndDisplay = async () => {
     let result = await this.saveTeachingFile();
-    console.log(' ===> saveTeachingFileAndDisplay result');
-    console.log(result);
     if (result === -1)
       return;
 
