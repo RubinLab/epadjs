@@ -134,7 +134,8 @@ const AnnotationSearch = props => {
   const [selectedAnatomies, setSelectedAnatomies] = useState([]);
   const [selectedDiagnosis, setSelectedDiagnosis] = useState([]);
   const [tfOnly, setTfOnly] = useState(mode === 'teaching' ? true : false);
-  const [myCases, setMyCases] = useState(mode === 'teaching' ? false : true);
+  // const [myCases, setMyCases] = useState(mode === 'teaching' ? false : true);
+  const [myCases, setMyCases] = useState(false);
   const [filters, setFilters] = useState({});
   const [sort, setSort] = useState([]);
   const [showSpinner, setShowSpinner] = useState(false);
