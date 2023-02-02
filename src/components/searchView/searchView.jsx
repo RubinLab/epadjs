@@ -1050,6 +1050,7 @@ class SearchView extends Component {
             updateStatus={this.updateDownloadStatus}
             onSubmit={this.handleSubmitDownload}
             pid={this.props.pid}
+            show={this.state.showAnnotationModal}
           />
         )}
 
