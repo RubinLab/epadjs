@@ -34,6 +34,7 @@ export class WindowLevel extends Component {
     const vp = this.getCurrentWL(element);
     vp.voi.windowCenter = preset.level;
     vp.voi.windowWidth = preset.window;
+    vp.voiLUT = undefined;
     cornerstone.setViewport(element, vp);
     this.setState({ name, level, window });
     this.props.onClose(name);
