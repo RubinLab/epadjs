@@ -13,7 +13,7 @@ module.exports = function override(config) {
         // "process": require.resolve("process"),
         // "fs": false,
         "fs": require.resolve('browserify-fs'),
-        "buffer": require.resolve("buffer/"),
+        "buffer": require.resolve("buffer"),
         // "process": require.resolve('process/browser'),  // <- this
 
     })

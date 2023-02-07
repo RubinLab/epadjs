@@ -34,6 +34,7 @@ const config = {
     ]
   },
   // plugins: [htmlWebpackPlugin],
+<<<<<<< Updated upstream
   plugins: [htmlWebpackPlugin,
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
@@ -44,6 +45,19 @@ const config = {
   ],
   resolve: {
     extensions: ['.ts', '.js'],
+=======
+  plugins: [htmlWebpackPlugin, 
+    
+    new webpack.ProvidePlugin({
+    Buffer: ['buffer', 'Buffer'],
+  }),
+    new webpack.ProvidePlugin({
+    process: 'process/browser',
+  }),
+],
+  resolve: {
+    extensions: [ '.ts', '.js' ],
+>>>>>>> Stashed changes
     fallback: {
       "stream": require.resolve("stream-browserify"),
       "buffer": require.resolve("buffer/")
