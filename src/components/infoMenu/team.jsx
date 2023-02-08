@@ -1,23 +1,21 @@
 import React from "react";
-import { Modal } from "react-bootstrap";
-const mode = sessionStorage.getItem("mode");
-
-// import "../menuStyle.css";
+import { Modal, Button } from "react-bootstrap";
+import "./infoMenu.css";
 
 const team = props => {
+  const mode = sessionStorage.getItem("mode");
   return (
-    // <Modal.Dialog dialogClassName="info-team__modal">
-    <Modal.Dialog id="modal-fix">
-      <Modal.Header>
+    <Modal id="modal-fix" show={true}>
+      <Modal.Header className="modal-header">
         <Modal.Title>ePAD Team</Modal.Title>
       </Modal.Header>
-      <Modal.Body className="info-team__mbody">
+      <Modal.Body className="notification-modal" >
         <>
-          <p className="info-team__desc">
+          <p >
             Development of ePAD has been supported through a number of funding
             mechanisms and sources.
           </p>
-          <p className="info-team__desc">
+          <p >
             Major contributors for the ePAD{" "}
             {mode === "lite" ? "Lite Beta " : "4.x "}
             release include (in alphabetic order):
@@ -30,12 +28,12 @@ const team = props => {
           </ul>
         </>
       </Modal.Body>
-      <Modal.Footer className="modal-footer__buttons">
-        <button variant="secondary" onClick={props.onOK}>
+      <Modal.Footer >
+        <Button variant="secondary" onClick={props.onOK}>
           OK
-        </button>
+        </Button>
       </Modal.Footer>
-    </Modal.Dialog>
+    </Modal>
   );
 };
 

@@ -1,13 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 
 const alertDeletionModal = ({ title, message, onCancel, onDelete, error }) => {
   return (
     // <Modal.Dialog dialogClassName="alert-delete__modal">
     <Modal.Dialog id="modal-fix">
       <Modal.Body>
-        <div className="-maxView__header">
+        <div className="-maxView__header" style={{ background: '#444' }}>
           <div
             className="-maxView__header__text"
             style={{ color: "orangered" }}
@@ -20,13 +20,13 @@ const alertDeletionModal = ({ title, message, onCancel, onDelete, error }) => {
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
         {!error && (
-          <button variant="primary" onClick={onDelete}>
+          <Button variant="secondary" onClick={() => { onDelete(); window.dispatchEvent("refreshProjects") }}>
             Delete
-          </button>
+          </Button>
         )}
-        <button variant="secondary" onClick={onCancel}>
+        <Button variant="secondary" onClick={onCancel}>
           Cancel
-        </button>
+        </Button>
       </Modal.Footer>
     </Modal.Dialog>
   );

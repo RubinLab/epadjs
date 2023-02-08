@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Modal } from 'react-bootstrap';
+import { Modal, Button } from 'react-bootstrap';
 import {
   getProjects,
   uploadFileToProject
@@ -11,9 +11,10 @@ import { uploadFileToStudy } from '../../services/studyServices';
 import { uploadFileToSeries } from '../../services/seriesServices';
 import { getTemplates } from '../annotationsList/action';
 
-const mode = sessionStorage.getItem('mode');
+let mode;
 
 class UploadModal extends React.Component {
+  mode = sessionStorage.getItem('mode');
   state = {
     tiff: false,
     osirix: false,
@@ -50,8 +51,8 @@ class UploadModal extends React.Component {
           nonSelectablePid && projects.length > 0
             ? projects[0].id
             : !nonSelectablePid
-            ? pid
-            : '';
+              ? pid
+              : '';
         this.setState({ projects, projectID });
       }
     } catch (err) {
@@ -222,10 +223,10 @@ class UploadModal extends React.Component {
     const { projects } = this.state;
     return (
       <Modal.Dialog id="modal-fix">
-        <Modal.Header>
-          <Modal.Title className="upload__header">Upload</Modal.Title>
+        <Modal.Header className="modal-header">
+          <Modal.Title>Upload</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="upload-container">
+        <Modal.Body className="notification-modal">
           {mode === 'lite' && this.renderUploadFileButton()}
           {mode !== 'lite' &&
             (projects.length > 0 ? (
@@ -241,10 +242,10 @@ class UploadModal extends React.Component {
             ))}
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
-          <button onClick={this.onUpload} disabled={disabled}>
+          <Button variant="secondary" onClick={this.onUpload} disabled={disabled}>
             Submit
-          </button>
-          <button onClick={this.props.onCancel}>Cancel</button>
+          </Button>
+          <Button variant="secondary" onClick={this.props.onCancel}>Cancel</Button>
         </Modal.Footer>
       </Modal.Dialog>
     );
@@ -260,7 +261,7 @@ UploadModal.propTypes = {
   selectedPatients: PropTypes.object,
   selectedSeries: PropTypes.object,
   selectedStudies: PropTypes.object,
-  clearTreeExpand:PropTypes.func
+  clearTreeExpand: PropTypes.func
 
 };
 

@@ -52,7 +52,7 @@ const Cornerstone = ({ dispatch }) => {
   cornerstoneTools.toolColors.setActiveColor("rgb(255, 255, 0)");
 
   cornerstoneTools.store.state.touchProximity = 40;
-  cornerstoneTools.store.state.showCalculations = true;
+  cornerstoneTools.store.state.showCalculations = false;
 
   const config = {
     globalToolSyncEnabled: true,
@@ -77,7 +77,7 @@ const Cornerstone = ({ dispatch }) => {
   cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
 
   cornerstoneWADOImageLoader.configure({
-    beforeSend: function(xhr) {
+    beforeSend: function (xhr) {
       // Add custom headers here
       auth
         .getAuthHeader()

@@ -6,7 +6,7 @@
   left: 0;
   height: 100%;
   width: 100%;
-  z-index: 1000;
+  z-index: 10;
 }
 
 /* body {
@@ -21,7 +21,7 @@
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 10000;
+  z-index: 1000;
   text-align: center;
   overflow: auto;
   padding: 2rem;
@@ -67,7 +67,7 @@
 .mng-menu,
 .info-menu,
 .userProfile-menu {
-  z-index: 15;
+  z-index: 100000;
   display: flex;
   flex-direction: column;
   width: fit-content;
@@ -190,6 +190,7 @@
   display: flex;
   flex-direction: column;
   align-items: left;
+  background: #444;
 }
 
 .updateAssignee__modal.modal-dialog,
@@ -199,6 +200,10 @@
 
 .updateDueDate__mbody input {
   color: black;
+}
+
+.updateDueDate__mbody {
+  background: #444;
 }
 
 .add-project__modal--input,
@@ -599,6 +604,7 @@
 }
 
 #proModal-content {
+  background: #444;
   display: flex;
 }
 

@@ -1,9 +1,7 @@
 import React from "react";
 import { Fragment } from "react";
-import { Modal } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 import { registerServerForAppKey } from "../../services/registerServices";
-const mode = sessionStorage.getItem("mode");
-const apiUrl = sessionStorage.getItem("apiUrl");
 
 class Register extends React.Component {
   state = {
@@ -54,7 +52,7 @@ class Register extends React.Component {
       tmpState.registerFormElements.email !== "" &&
       tmpState.registerFormElements.emailagain !== "" &&
       tmpState.registerFormElements.email !==
-        tmpState.registerFormElements.emailagain
+      tmpState.registerFormElements.emailagain
     ) {
       tmpFormError = `${tmpFormError}email and retype email fields don't match`;
     }
@@ -109,10 +107,10 @@ class Register extends React.Component {
     };
     return (
       <Modal.Dialog id="modal-fix">
-        <Modal.Header>
+        <Modal.Header className="notification-modal">
           <Modal.Title>Register to ePAD</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body className="notification-modal">
           <div className={registerAppstyle}>
             <table style={{ width: "400px" }}>
               <tbody>
@@ -257,13 +255,13 @@ class Register extends React.Component {
           </div>
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
-          <button variant="secondary" onClick={this.props.onOK}>
-            close
-          </button>
+          <Button variant="secondary" onClick={this.props.onOK}>
+            Close
+          </Button>
           {!this.state.apikeysent && (
-            <button variant="secondary" onClick={this.submitForm}>
-              submit
-            </button>
+            <Button variant="secondary" onClick={this.submitForm}>
+              Submit
+            </Button>
           )}
         </Modal.Footer>
       </Modal.Dialog>

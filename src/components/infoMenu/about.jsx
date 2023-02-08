@@ -1,12 +1,16 @@
 import React from "react";
-import { Modal } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 import http from "../../services/httpService";
-const mode = sessionStorage.getItem("mode");
-const apiUrl = sessionStorage.getItem("apiUrl");
+import "./infoMenu.css";
+
+let mode;
+let apiUrl;
 
 class About extends React.Component {
   state = { data: {} };
   componentDidMount = () => {
+    mode = sessionStorage.getItem("mode");
+    apiUrl = sessionStorage.getItem("apiUrl");
     if (mode !== "lite") {
       this.getData();
     }
@@ -22,17 +26,16 @@ class About extends React.Component {
       : "beta";
     return (
       // <Modal.Dialog dialogClassName="info-about__modal">
-      <Modal.Dialog id="modal-fix">
-        <Modal.Header>
+      <Modal id="modal-fix" show={true}>
+        <Modal.Header className="modal-header">
           <Modal.Title>About ePAD {mode === "lite" ? "Lite" : ""}</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="info-about__mbody">
-          <div className="info-about__desc">
+        <Modal.Body className={"notification-modal"}>
+          <div >
             A web-based platform for quantitative imaging in the clinical
             workflow.
           </div>
-          <div className="info-about__buttonCont">
-            <button
+          <button
               className="info-about__button"
               onClick={() => {
                 window.open(
@@ -42,32 +45,19 @@ class About extends React.Component {
                 );
               }}
             >
-              Get help with ePAD
+              More info about ePAD
             </button>
-            <button
-              className="info-about__button"
-              onClick={() => {
-                window.open(
-                  "https://epad.stanford.edu/ways-contact-us",
-                  "_blank",
-                  ""
-                );
-              }}
-            >
-              Report an issue
-            </button>
-          </div>
-
-          <div className="info-about__desc">Version {version}</div>
-          <div className="info-about__desc">
+          <div>Version {version}</div>
+          <div>
             ePAD Copyright 2016 Stanford University. All rights reserved.
           </div>
-          <div className="info-about__desc">
+          <div>
             ePAD is made possible by the{" "}
             <a
               href="https://rubinlab.stanford.edu/"
               target="_blank"
               className="info-about__link"
+              style={{ color: '#E83879' }}
             >
               Rubin Lab
             </a>{" "}
@@ -76,11 +66,11 @@ class About extends React.Component {
               href="https://www.stanford.edu/"
               target="_blank"
               className="info-about__link"
-            >
+              style={{ color: '#E83879' }}>
               Stanford University.
             </a>{" "}
           </div>
-          <div className="info-about__desc">
+          <div>
             ePAD{" "}
             <a
               href="https://epad.stanford.edu/license"
@@ -93,12 +83,12 @@ class About extends React.Component {
           </div>
         </Modal.Body>
 
-        <Modal.Footer className="modal-footer__buttons">
-          <button variant="secondary" onClick={this.props.onOK}>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={this.props.onOK}>
             OK
-          </button>
+          </Button>
         </Modal.Footer>
-      </Modal.Dialog>
+      </Modal>
     );
   };
 }

@@ -1,23 +1,31 @@
 import React from "react";
+import { connect } from "react-redux";
 import ReactTable from "react-table-v6";
 import treeTableHOC from "react-table-v6/lib/hoc/treeTable";
 import _ from "lodash";
 import { Button } from "react-bootstrap";
 import { getSeries } from "../../services/seriesServices";
 import { getStudies } from "../../services/projectServices";
-import DropDownMenu from "./dropdownMenu";
+import ColumnSelect from "./ColumnSelect.jsx";
 import StudyTable from "./StudyTable";
+import SelectSerieModal from "../annotationsList/selectSerieModal";
 import SeriesTable from "./SeriesTable";
+import { isSupportedModality } from "../../Utils/aid.js";
+import { addToGrid, getSingleSerie } from '../annotationsList/action';
 import 'react-table-v6/react-table.css';
-import "./flexView.css";
+// import "../annotationSearch/annotationSearch.css";
+// import "./flexView.css";
 
 const TreeTable = treeTableHOC(ReactTable);
+let mode;
+let maxPort;
 
 class FlexView extends React.Component {
+  mode = sessionStorage.getItem('mode');
+  maxPort = sessionStorage.getItem('maxPort');
   state = {
     columns: [],
-    order: [1, 4, 0, 10, 11, 6],
-    dropdownSelected: false,
+    order: mode === 'teaching' ? [1, 8, 16, 4, 6, 9, 13, 3] : [1, 4, 0, 10, 11, 6],
     expanded: {},
     seriesTableOpen: false,
     series: [],
@@ -29,7 +37,7 @@ class FlexView extends React.Component {
     "PatientID",
     "Sex",
     "Description",
-    "Insert Date",
+    // "Insert Date",
     "Study Date",
     "Study Time",
     "Study UID",
@@ -75,13 +83,56 @@ class FlexView extends React.Component {
     });
   };
 
-  showSeriesTable = async (projectID, patientID, studyUID) => {
+  displaySeries = async (projectID, patientID, studyUID) => {
+    let series;
     try {
-      const { data } = await getSeries(projectID, patientID, studyUID);
-      this.setState({ showSeriesTable: true, series: data });
+      ({ data: series } = await getSeries(projectID, patientID, studyUID));
     } catch (err) {
-      console.log(err);
+      console.log("Error getting series of the study", err);
     }
+    if (this.props.openSeries.length === this.maxPort) {
+      this.setState({ showSeriesTable: true, series });
+      return;
+    }
+    //get only unopen series
+    if (series.length > 0) series = this.excludeOpenSeries(series);
+    // filter series that have displayable modality
+    series = series.filter(isSupportedModality);
+    //check if there is enough room
+    if (series.length + this.props.openSeries.length > this.maxPort) {
+      //if there is not bring the modal
+      this.setState({ showSeriesTable: true, series });
+      // TODO show toast
+    } else {
+      //if there is enough room
+      //add serie to the grid
+      const promiseArr = [];
+      for (let i = 0; i < series.length; i++) {
+        this.props.dispatch(addToGrid(series[i]));
+        promiseArr.push(this.props.dispatch(getSingleSerie(series[i])));
+      }
+      //getsingleSerie
+      Promise.all(promiseArr)
+        .then(() => { this.props.history.push('/display') })
+        .catch(err => console.error(err));
+    }
+  };
+
+  excludeOpenSeries = allSeriesArr => {
+    const result = [];
+    //get all series number in an array
+    const idArr = this.props.openSeries.reduce((all, item, index) => {
+      all.push(item.seriesUID);
+      return all;
+    }, []);
+    //if array doesnot include that serie number
+    allSeriesArr.forEach(serie => {
+      if (!idArr.includes(serie.seriesUID)) {
+        //push that serie in the result arr
+        result.push(serie);
+      }
+    });
+    return result;
   };
 
   closeSeriesTable = () => {
@@ -89,6 +140,9 @@ class FlexView extends React.Component {
   };
 
   componentDidMount = async () => {
+    const order = JSON.parse(sessionStorage.getItem('studyListColumns'));
+    if (order && order.length)
+      this.setState({ order });
     try {
       if (this.props.pid) {
         await this.getData(this.props.pid);
@@ -96,14 +150,14 @@ class FlexView extends React.Component {
         this.mountEvents();
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
   componentDidUpdate = async (prevProps) => {
     try {
-      if (prevProps.match.params.pid !== this.props.match.params.pid) {
-        await this.getData(this.props.match.params.pid);
+      if (prevProps.pid !== this.props.pid) {
+        await this.getData(this.props.pid);
         await this.defineColumns();
       }
     } catch (err) {
@@ -115,7 +169,9 @@ class FlexView extends React.Component {
     this.setState({ data: studies });
   };
 
-  componentWillUnmount = () => {};
+  componentWillUnmount = () => {
+    sessionStorage.setItem('studyListColumns', JSON.stringify(this.state.order));
+  };
 
   defineColumns = () => {
     const { order } = this.state;
@@ -126,11 +182,11 @@ class FlexView extends React.Component {
     this.setState({ columns: tableColumns });
   };
 
-  selectDropdown = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    this.setState((state) => ({ dropdownSelected: !state.dropdownSelected }));
-  };
+  // selectDropdown = (e) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   this.setState((state) => ({ dropdownSelected: !state.dropdownSelected }));
+  // };
 
   toggleColumn = async (e) => {
     const index = this.state.order.findIndex(
@@ -155,38 +211,28 @@ class FlexView extends React.Component {
   };
   render = () => {
     const {
-      dropdownSelected,
       order,
       data,
       series,
       showSeriesTable,
     } = this.state;
     return (
-      <div className="flexView">
-        <Button
-          onClick={this.selectDropdown}
-          variant="secondary"
-          id="flexMenu-button"
-        >
-          Select columns
-        </Button>
+      <div className="flexView" style={{ fontSize: '12px' }}>
         {showSeriesTable && (
-          <SeriesTable series={series} onClose={this.closeSeriesTable} />
+          // <SeriesTable series={series} onClose={this.closeSeriesTable} />
+          <SelectSerieModal seriesPassed={[series]} onCancel={this.closeSeriesTable} />
         )}
-        {dropdownSelected && (
-          <DropDownMenu
-            selected={dropdownSelected}
-            order={order}
-            onChecked={this.toggleColumn}
-            studyColumns={this.studyColumns}
-            onClose={this.selectDropdown}
-          />
-        )}
+        <ColumnSelect
+          order={order}
+          onChecked={this.toggleColumn}
+          studyColumns={this.studyColumns}
+          onClose={this.selectDropdown}
+        />
         {this.state.data && (
           <StudyTable
             data={data}
             order={order}
-            showSeriesTable={this.showSeriesTable}
+            displaySeries={this.displaySeries}
           />
         )}
       </div>
@@ -194,32 +240,11 @@ class FlexView extends React.Component {
   };
 }
 
-export default FlexView;
+const mapStateToProps = (state) => {
+  return {
+    openSeries: state.annotationsListReducer.openSeries,
+  };
+};
 
-// <TreeTable
-//   NoDataComponent={() => null}
-//   className="flexView-table"
-//   data={this.state.data}
-//   columns={this.state.columns}
-//   showPagination={false}
-//   pageSize={this.state.data.length}
-//   expanded={this.state.expanded}
-//   onExpandedChange={this.handleExpand}
-//   onSortedChange={() => {
-//     this.onSortedChange();
-//   }}
-//   SubComponent={row => {
-//     return (
-//       <div style={{ paddingLeft: 40 }}>
-//         <Series
-//           // data={this.state.data}
-//           order={this.state.order}
-//           projectId={row.original.projectID}
-//           subjectId={row.original.patientID}
-//           studyId={row.original.studyUID}
-//           studyColumns={this.studyColumns}
-//         />
-//       </div>
-//     );
-//   }}
-// />
+export default (connect(mapStateToProps)(FlexView));
+

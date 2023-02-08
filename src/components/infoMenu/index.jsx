@@ -1,13 +1,14 @@
 import React from "react";
 import { connect } from "react-redux";
 import About from "./about";
+import Help from "./help";
 import Team from "./team";
 import Admin from "./admin";
 import Modal from "../management/common/customModal";
 import Notifications from "./notifications";
 import Register from "./register";
 import { FaExclamation } from "react-icons/fa";
-const mode = sessionStorage.getItem("mode");
+let mode;
 
 class InfoMenu extends React.Component {
   state = {
@@ -17,6 +18,7 @@ class InfoMenu extends React.Component {
   };
 
   componentDidMount = async () => {
+    mode = sessionStorage.getItem("mode");
     this.updateDimensions();
     // console.log(this.props.user);
     if (mode !== "lite") {
@@ -51,12 +53,7 @@ class InfoMenu extends React.Component {
       case "About":
         return <About onOK={this.handleCloseModal} />;
       case "Help":
-        window.open(
-          "https://epad.stanford.edu/documentation/user",
-          "_blank",
-          ""
-        );
-        return;
+        return <Help onOK={this.handleCloseModal} />;
       case "What's New":
         window.open("https://epad.stanford.edu/", "_blank", "");
         return;
@@ -115,15 +112,18 @@ class InfoMenu extends React.Component {
             <div className="info-menu__option" onClick={this.handleSelection}>
               Help
             </div>
-            <div className="info-menu__option" onClick={this.handleSelection}>
-              What's New
-            </div>
+            {mode !== 'teaching' && (
+              <div className="info-menu__option" onClick={this.handleSelection}>
+                What's New
+              </div>
+            )}
             <div className="info-menu__option" onClick={this.handleSelection}>
               Team
             </div>
-            <div className="info-menu__option" onClick={this.handleSelection}>
+            {mode !== 'teaching' && (<div className="info-menu__option" onClick={this.handleSelection}>
               Register
             </div>
+            )}
             {this.state.isAdmin && (
               <>
                 <div className="info-menu__break" />

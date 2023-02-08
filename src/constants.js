@@ -12,6 +12,10 @@ export const DISP_MODALITIES = [
   "OCT",
 ];
 
+export const COMP_MODALITIES = {"rid10341":"PET-CT", "rid10342":"PET-MR", "rid49581":"US-RF"};
+
+export const COMP_MODALITY_VALS = {"PET-CT":"RID10341", "PET-MR":"RID10342", "US-RF":"RID49581"};
+
 export const formatDates = (timeStamp) => {
   //split it by space
   timeStamp = timeStamp + "";
@@ -33,3 +37,7 @@ export const formatDates = (timeStamp) => {
     return date + " " + hour;
   }
 };
+
+export const teachingFileTempUid =
+  "2.25.182468981370271895711046628549377576999";
+export const teachingFileTempCode = "99EPAD_947";

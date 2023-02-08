@@ -1,6 +1,7 @@
 import React from 'react';
 
 const aimEntityData = ({ aimData, id }) => {
+  const mode = sessionStorage.getItem("mode");
   let observationEnt = aimData.imagingObservationEntityCollection
     ? aimData.imagingObservationEntityCollection.ImagingObservationEntity
     : null;
@@ -62,19 +63,27 @@ const aimEntityData = ({ aimData, id }) => {
         : comment.typeCode &&
           comment.typeCode.constructor === Object &&
           comment.typeCode['iso:displayName']
-        ? comment.typeCode['iso:displayName'].value
-        : comment['xsi:type'] && comment['xsi:type'] === 'Scale'
-        ? comment.valueLabel.value
-        : '';
+          ? comment.typeCode['iso:displayName'].value
+          : comment['xsi:type'] && comment['xsi:type'] === 'Scale'
+            ? comment.valueLabel.value
+            : '';
 
     listArr.push(
-      <li className="aimEntity-item" key={id + 'ind-' + i}>
-        <span className="aimEntity-question">{comment.label.value}:</span>
-        <span className="aimEntity-answer">{value}</span>
+      <li key={i}>
+        <b>{comment.label.value}:</b> {value}
       </li>
     );
   });
-  return <div className="aimEntity-list">{listArr}</div>;
+  // if (mode === "teaching") {
+  //   const comment = aimData.comment.value;
+  //   const textComment = comment.split("/")[3].replaceAll("~", "");
+  //   listArr.push(
+  //     <li key={"narrative"}>
+  //       <b>Narrative:</b> {textComment}
+  //     </li>
+  //   );
+  // }
+  return listArr;
 };
 
 export default aimEntityData;

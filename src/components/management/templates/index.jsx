@@ -19,9 +19,10 @@ import UploadModal from '../../searchView/uploadModal';
 import EditTemplates from './projectTable';
 import { getTemplates } from '../../annotationsList/action';
 
-const mode = sessionStorage.getItem('mode');
+let mode;
 
 class Templates extends React.Component {
+  mode = sessionStorage.getItem('mode');
   state = {
     templates: [],
     projectList: {},
@@ -80,7 +81,7 @@ class Templates extends React.Component {
         const { data: templates } = await getTemplatesUniversal();
         this.setState({ templates });
       }
-    } catch (err) {}
+    } catch (err) { }
   };
 
   toggleRow = async (id, projectID) => {
@@ -365,11 +366,10 @@ class Templates extends React.Component {
         const text =
           projects.length > 0
             ? projects.reduce((all, item, i) => {
-                const comma = projects.length - 1 > i ? ', ' : '';
-                return `${all}${
-                  projectMap[item] ? projectMap[item].projectName : item
+              const comma = projects.length - 1 > i ? ', ' : '';
+              return `${all}${projectMap[item] ? projectMap[item].projectName : item
                 }${comma}`;
-              }, '')
+            }, '')
             : 'Add template to a project';
         return (
           <>
@@ -383,13 +383,13 @@ class Templates extends React.Component {
               <p className={className}>{text}</p>
             </div>
             <ReactTooltip
-                id="template-project-relation"
-                place="left"
-                type="info"
-                delayShow={1000}
-              >
-                <span className="filter-label">Assign template to a project</span>
-              </ReactTooltip>
+              id="template-project-relation"
+              place="left"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Assign template to a project</span>
+            </ReactTooltip>
           </>
         );
       }
@@ -462,22 +462,42 @@ class Templates extends React.Component {
     const pageSize =
       templates.length < 10 ? 10 : templates.length >= 40 ? 50 : 20;
     return (
-      <div className="templates menu-display" id="template">
-        <ToolBar
-          onDelete={this.handleDeleteAll}
-          selected={checkboxSelected}
-          onUpload={this.handleUpload}
-          onDownload={this.handleDownload}
-        />
-        <ReactTable
-          NoDataComponent={() => null}
-          className="pro-table"
-          data={templates}
-          columns={this.defineColumns()}
-          pageSizeOptions={[10, 20, 50]}
-          defaultPageSize={pageSize}
-        />
-
+      <>
+        <div className="templates menu-display" id="template">
+          <ToolBar
+            onDelete={this.handleDeleteAll}
+            selected={checkboxSelected}
+            onUpload={this.handleUpload}
+            onDownload={this.handleDownload}
+          />
+          <ReactTable
+            NoDataComponent={() => null}
+            className="pro-table"
+            data={templates}
+            columns={this.defineColumns()}
+            pageSizeOptions={[10, 20, 50]}
+            defaultPageSize={pageSize}
+          />
+          {uploadClicked && (
+            <UploadModal
+              onCancel={this.handleCancel}
+              onSubmit={this.handleSubmitUpload}
+              pid={this.props.pid}
+              className="mng-upload"
+            />
+          )}
+          {hasEditClicked && (
+            <EditTemplates
+              projectList={projectList}
+              onCancel={this.handleCancel}
+              templateProjects={tempProjects}
+              onSubmit={this.handleTemplateProjectSubmit}
+              onSelect={this.handleTemplateProjectSelect}
+              selected={tempProSelect}
+              templateName={templateName}
+            />
+          )}
+        </div>
         {(delAll || delOne) && (
           <DeleteAlert
             message={
@@ -490,26 +510,7 @@ class Templates extends React.Component {
             error={errorMessage}
           />
         )}
-        {uploadClicked && (
-          <UploadModal
-            onCancel={this.handleCancel}
-            onSubmit={this.handleSubmitUpload}
-            pid={this.props.pid}
-            className="mng-upload"
-          />
-        )}
-        {hasEditClicked && (
-          <EditTemplates
-            projectList={projectList}
-            onCancel={this.handleCancel}
-            templateProjects={tempProjects}
-            onSubmit={this.handleTemplateProjectSubmit}
-            onSelect={this.handleTemplateProjectSelect}
-            selected={tempProSelect}
-            templateName={templateName}
-          />
-        )}
-      </div>
+      </>
     );
   };
 }

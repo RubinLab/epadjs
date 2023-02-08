@@ -1,13 +1,15 @@
 import React from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 import {
   downloadAnnotations,
   downloadAllAnnotations
 } from "../../services/annotationServices";
 import { ToastContainer, toast } from "react-toastify";
 import { clearSelection } from "../annotationsList/action";
+import "../infoMenu/infoMenu.css";
+
 const support = false;
 
 class AnnnotationDownloadModal extends React.Component {
@@ -26,7 +28,7 @@ class AnnnotationDownloadModal extends React.Component {
         ? this.props.selectedAnnotations
         : this.props.selected;
     const aimList = Object.keys(annsToDownload);
-    this.props.updateStatus();
+    // this.props.updateStatus();
     const promise =
       projectID || pid
         ? downloadAnnotations(optionObj, aimList, projectID || pid)
@@ -35,7 +37,7 @@ class AnnnotationDownloadModal extends React.Component {
       .then(result => {
         let blob = new Blob([result[0].data], { type: "application/zip" });
         this.triggerBrowserDownload(blob, "Annotations");
-        this.props.updateStatus();
+        // this.props.updateStatus();
         this.props.onSubmit();
       })
       .catch(err => {
@@ -66,15 +68,18 @@ class AnnnotationDownloadModal extends React.Component {
       ? `${className} ${this.props.className}`
       : className;
     let disabled = !summary && !aim && !seg;
+    const { show } = this.props;
     return (
       // <Modal.Dialog dialogClassName={className}>
-      <Modal.Dialog id="modal-fix" className="modal-minwidth">
-        <Modal.Header>
-          <Modal.Title className="annDownload__header">
+      <Modal size="sm"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered show={show}>
+        <Modal.Header className={"modal-header"}>
+          <Modal.Title id="contained-modal-title-vcenter" className="annDownload__header">
             Select Download Format
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body className="annDownload-container">
+        <Modal.Body className="annDownload-container notification-modal">
           <div className="annDownload-option">
             <input
               type="checkbox"
@@ -136,16 +141,16 @@ class AnnnotationDownloadModal extends React.Component {
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
           {disabled ? (
-            <button onClick={this.onDownload} disabled>
+            <Button variant="secondary" onClick={this.onDownload} disabled>
               Submit
-            </button>
+            </Button>
           ) : (
-            <button onClick={this.onDownload}>Submit</button>
+            <Button variant="secondary" onClick={this.onDownload}>Submit</Button>
           )}
 
-          <button onClick={this.props.onCancel}>Cancel</button>
+          <Button variant="secondary" onClick={this.props.onCancel}>Cancel</Button>
         </Modal.Footer>
-      </Modal.Dialog>
+      </Modal>
     );
   };
 }
@@ -163,7 +168,7 @@ export default connect(mapStateToProps)(AnnnotationDownloadModal);
 AnnnotationDownloadModal.propTypes = {
   selectedAnnotations: PropTypes.object,
   selected: PropTypes.object,
-  updateStatus: PropTypes.bool,
+  // updateStatus: PropTypes.bool,
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
   className: PropTypes.string

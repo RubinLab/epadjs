@@ -29,6 +29,7 @@ import { MenuProvider } from "react-contexify";
 import CornerstoneViewport from "react-cornerstone-viewport";
 import { freehand } from "./Freehand";
 import { line } from "./Line";
+import { arrow } from "./Arrow";
 import { probe } from "./Probe";
 import { circle } from "./Circle";
 import { bidirectional } from "./Bidirectional";
@@ -44,6 +45,9 @@ import { FiMessageSquare } from "react-icons/fi";
 import { errorMonitor } from "events";
 import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
 import getVPDimensions from "./ViewportCalculations";
+import SeriesDropDown from './SeriesDropDown';
+
+let mode;
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 } },
@@ -59,6 +63,7 @@ const tools = [
   },
   { name: "Probe", modeOptions: { mouseButtonMasks: 1 }, mode: "passive" },
   { name: "Length", modeOptions: { mouseButtonMasks: 1 }, mode: "passive" },
+  { name: "ArrowAnnotate", modeOptions: { mouseButtonMasks: 1 }, mode: "passive" },
   // {
   //   name: "EllipticalRoi",
   //   configuration: {
@@ -139,6 +144,7 @@ const mapStateToProps = (state) => {
 class DisplayView extends Component {
   constructor(props) {
     super(props);
+    mode = sessionStorage.getItem('mode');
     this.state = {
       width: "100%",
       height: "100%",
@@ -156,15 +162,15 @@ class DisplayView extends Component {
       redirect: this.props.series.length < 1 ? true : false,
       containerHeight: 0,
       tokenRefresh: null,
-      activeTool: undefined
+      activeTool: ''
     };
   }
 
   componentDidMount() {
     const { series, onSwitchView } = this.props;
-    if (series.length < 1) {
-      onSwitchView('search');
-    }
+    // if (series.length < 1) {
+    //   onSwitchView('search');
+    // }
     this.getViewports();
     this.getData();
     if (series.length > 0) {
@@ -178,6 +184,7 @@ class DisplayView extends Component {
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
     window.addEventListener('keydown', this.handleKeyPressed);
+    window.addEventListener('serieReplaced', this.handleSerieReplace);
     if (this.props.keycloak && series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
@@ -185,6 +192,7 @@ class DisplayView extends Component {
     // const element = document.getElementById("petViewport");
     // console.log("element is", cornerstone);
     // cornerstone.enable(element);
+    // this.props.closeLeftMenu();
   }
 
   async componentDidUpdate(prevProps, prevState) {
@@ -198,7 +206,8 @@ class DisplayView extends Component {
     const prevActiveSerie = prevSeries[prevActivePort];
 
     if (this.props.series.length < 1) {
-      if (pid) this.props.history.push(`/list/${pid}`);
+      if (mode === 'teaching') this.props.history.push('/search');
+      else if (pid) this.props.history.push(`/list/${pid}`);
       else return;
       return;
     }
@@ -229,6 +238,9 @@ class DisplayView extends Component {
     window.removeEventListener("deleteAim", this.deleteAimHandler);
     window.removeEventListener("resize", this.setSubComponentHeights);
     window.removeEventListener('keydown', this.handleKeyPressed);
+    window.removeEventListener('serieReplaced', this.handleSerieReplace);
+    // clear all aimID of openseries so aim editor doesn't open next time
+    this.props.dispatch(clearAimId());
     clearInterval(this.state.tokenRefresh)
   }
 
@@ -264,7 +276,7 @@ class DisplayView extends Component {
   checkTokenExpire = async () => {
     const { keycloak } = this.props;
     if (keycloak.isTokenExpired(5)) {
-      window.alert("Are you still there?");
+      window.alert("Are you still editing?");
       await this.updateToken(keycloak, 5);
     }
   };
@@ -273,7 +285,7 @@ class DisplayView extends Component {
     try {
       clearInterval(this.state.tokenRefresh);
       await refreshToken(this.props.keycloak, 5);
-      const tokenRefresh = setInterval(this.checkTokenExpire, 500);
+      const tokenRefresh = setInterval(this.checkTokenExpire, 1000);
       this.setState({ tokenRefresh });
     } catch (err) {
       console.error(err);
@@ -321,7 +333,7 @@ class DisplayView extends Component {
     if (aimList[seriesUID][aimID]) {
       const aimJson = aimList[seriesUID][aimID].json;
       const markupTypes = this.getMarkupTypesForAim(aimID);
-      aimJson["markupType"] = [...markupTypes];
+      aimJson["markupType"] = markupTypes ? [...markupTypes] : undefined;
       aimJson["aimId"] = aimID;
 
       // check if is already editing an aim
@@ -471,6 +483,22 @@ class DisplayView extends Component {
     }
   }
 
+  handleSerieReplace = ({ detail: viewportId }) => {
+    const { series } = this.props;
+    var promises = [];
+
+    const promise = this.getImageStack(series[viewportId], viewportId);
+    promises.push(promise);
+    Promise.all(promises).then((res) => {
+      const newData = [...this.state.data];
+      newData[viewportId] = res[0];
+      this.setState(
+        {
+          data: newData
+        })
+    })
+  }
+
   shouldOpenAimEditor = (notShowAimEditor = false) => {
     const { series } = this.props;
     series.forEach(({ aimID, seriesUID }) => {
@@ -606,7 +634,8 @@ class DisplayView extends Component {
         const aimJson = aimList[seriesUID][aimID].json;
         aimJson.aimID = aimID;
         const markupTypes = this.getMarkupTypesForAim(aimID);
-        aimJson["markupType"] = [...markupTypes];
+        if (markupTypes)
+          aimJson["markupType"] = [...markupTypes];
         aimJson["aimId"] = aimID;
         if (this.hasSegmentation(aimJson)) {
           this.setState({ hasSegmentation: true });
@@ -615,10 +644,12 @@ class DisplayView extends Component {
         if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
           this.setState({ showAimEditor: false });
         this.setState({ showAimEditor: true, selectedAim: aimJson });
-        setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
+        if (markupTypes)
+          setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
         this.refreshAllViewports();
       }
-    } catch (error) {
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -770,6 +801,7 @@ class DisplayView extends Component {
       "Length",
       "CircleRoi",
       "FreehandRoi3DTool",
+      "ArrowAnnotate"
     ];
     if (toolsOfInterest.includes(toolName) || toolType === "Bidirectional") {
       this.setState({ showAimEditor: true });
@@ -963,8 +995,10 @@ class DisplayView extends Component {
   };
 
   setActive = async (i) => {
-    if (this.props.activePort !== i) {
+    const { activePort, series } = this.props;
+    if (activePort !== i) {
       if (this.state.showAimEditor) {
+
         if (!this.closeAimEditor(true)) {
           //means going to another viewport in the middle of creating/editing an aim
           return;
@@ -1325,6 +1359,10 @@ class DisplayView extends Component {
         this.renderPolygon(imageId, markup, color, seriesUid, studyUid);
         break;
       case "TwoDimensionMultiPoint":
+        if (markup?.lineStyle?.value === "Arrow") {
+          this.renderArrow(imageId, markup, color, seriesUid, studyUid);
+          break;
+        }
         this.renderLine(imageId, markup, color, seriesUid, studyUid);
         break;
       case "TwoDimensionCircle":
@@ -1374,6 +1412,20 @@ class DisplayView extends Component {
     // need to set the text box coordinates for this too
     data.handles.textBox.x = points[0].x.value;
     data.handles.textBox.y = points[0].y.value;
+  };
+
+  renderArrow = (imageId, markup, color) => {
+    const data = JSON.parse(JSON.stringify(arrow));
+    data.color = markup.color ? markup.color : color;
+    data.aimId = markup.aimUid;
+    data.invalidated = true;
+    this.createLinePoints(data, markup.coordinates);
+    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    this.checkNCreateToolForImage(currentState, imageId, "ArrowAnnotate");
+    currentState[imageId]["ArrowAnnotate"].data.push(data);
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+      currentState
+    );
   };
 
   renderLine = (imageId, markup, color) => {
@@ -1476,7 +1528,7 @@ class DisplayView extends Component {
     const { dirty } = this.state;
     if (dirty) {
       const unsavedData = this.checkUnsavedData(isCancel, message);
-      if (!unsavedData) return;
+      if (!unsavedData) return -1;
     }
     // if aim editor has been cancelled ask to user
     // if (this.state.dirty && !this.checkUnsavedData(isCancel, message)) return;
@@ -1535,6 +1587,9 @@ class DisplayView extends Component {
     try {
       const imageAnnotations = this.props.series[this.props.activePort]
         .imageAnnotations;
+      if (!imageAnnotations) {
+        return undefined;
+      }
       Object.entries(imageAnnotations).forEach(([key, values]) => {
         values.forEach((value) => {
           if (value.aimUid === aimUid) markupTypes.push(value.markupType);
@@ -1618,8 +1673,9 @@ class DisplayView extends Component {
     const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
     const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
     // if (this.state.redirect) return <Redirect to="/list" />;
+    const redirect = (mode === 'teaching' ? 'search' : 'list');
     return !Object.entries(series).length ? (
-      <Redirect to="/list" />
+      <Redirect to={`/${redirect}`} />
     ) : (
       <React.Fragment>
         <RightsideBar
@@ -1670,26 +1726,32 @@ class DisplayView extends Component {
                   {/* <div className={"column middle"}>
                     <label>{series[i].seriesUID}</label>
                   </div> */}
-                  <div className={"column middle-right"}>
-                    <Form inline className="slice-form">
-                      <Form.Group className="slice-number">
-                        <Form.Label htmlFor="imageNum" className="slice-label">
-                          {"Slice # "}
-                        </Form.Label>
-                        <Form.Control
-                          type="number"
-                          min="1"
-                          value={parseInt(data.stack.currentImageIdIndex) + 1}
-                          className={"slice-field"}
-                          onChange={(event) => this.handleJumpChange(i, event)}
-                          style={{
-                            width: "60px",
-                            height: "10px",
-                            opacity: 1,
-                          }}
-                        />
-                      </Form.Group>
-                    </Form>
+                  <div className={"column middle-right"} style={{ paddingTop: '0px' }}>
+                    <div style={{ paddingTop: '10px' }}>
+                      <Form inline className="slice-form">
+                        <Form.Group className="slice-number">
+                          <Form.Label htmlFor="imageNum" className="slice-label" style={{ color: 'white' }}>
+                            {"Slice # "}
+                          </Form.Label>
+                          <Form.Control
+                            type="number"
+                            min="1"
+                            value={parseInt(data.stack.currentImageIdIndex) + 1}
+                            className={"slice-field"}
+                            onChange={(event) => this.handleJumpChange(i, event)}
+                            style={{
+                              width: "60px",
+                              height: "10px",
+                              opacity: 1,
+                              display: 'inline'
+                            }}
+                          />
+                        </Form.Group>
+                      </Form>
+                    </div>
+                    <div className={"series-dd"}>
+                      <SeriesDropDown style={{ lineHeight: "1" }} serie={series[i]} isAimEditorShowing={this.state.showAimEditor} onCloseAimEditor={this.closeAimEditor} />
+                    </div>
                   </div>
                   <div className={"column right"}>
                     <span

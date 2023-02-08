@@ -17,7 +17,10 @@ import {
   RiCheckboxMultipleBlankFill,
   RiCloseCircleFill
 } from 'react-icons/ri';
-import { FcAbout } from 'react-icons/fc';
+import { FcAbout, FcClearFilters } from 'react-icons/fc';
+import { BiSearch, BiX, BiTrash, BiDownload } from 'react-icons/bi';
+import { BsEyeFill } from 'react-icons/bs';
+import { AiOutlineSortAscending, AiOutlineSortDescending } from 'react-icons/ai';
 import ReactTooltip from 'react-tooltip';
 import {
   searchAnnotations,
@@ -25,19 +28,26 @@ import {
   getSummaryAnnotations,
   downloadProjectAnnotation,
   deleteAnnotationsList
-} from './../../services/annotationServices.js';
+} from '../../services/annotationServices.js';
 import AnnotationTable from './AnnotationTable.jsx';
-import './annotationSearch.css';
-import { clearSelection, selectAnnotation } from '../annotationsList/action';
+import { clearSelection, selectAnnotation, updateSearchTableIndex } from '../annotationsList/action';
 import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
 import UploadModal from '../searchView/uploadModal';
 import DeleteAlert from '../management/common/alertDeletionModal';
-import ellipse from 'cornerstone-tools/util/ellipse/index.js';
 import {
   getPluginsForProject,
   addPluginsToQueue,
   runPluginsQueue
 } from '../../services/pluginServices';
+import TeachingFilters from './TeachingFilters.jsx';
+import AddToWorklist from '../searchView/addWorklist';
+import Projects from '../searchView/addToProject';
+import Spinner from 'react-bootstrap/Spinner';
+import SeriesModal from '../annotationsList/selectSerieModal';
+import { COMP_MODALITIES as compModality } from "../../constants.js";
+
+import './annotationSearch.css';
+
 const lists = {
   organize: ['AND', 'OR', '(', ')'],
   paranthesis: ['(', ')'],
@@ -92,9 +102,10 @@ const styles = {
   }
 };
 
-const mode = sessionStorage.getItem('mode');
+let mode;
 
 const AnnotationSearch = props => {
+  mode = sessionStorage.getItem('mode');
   const [query, setQuery] = useState('');
   const [partialQuery, setPartialQuery] = useState({
     type: lists.type[0],
@@ -108,15 +119,34 @@ const AnnotationSearch = props => {
   const [error, setError] = useState('');
   const [bookmark, setBookmark] = useState('');
   const [uploadClicked, setUploadClicked] = useState(false);
-  const [deleteSelectedClicked, setDeleteSelectedClicked] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [checkboxSelected, setCheckboxSelected] = useState(false);
-  const [pageIndex, setPageIndex] = useState(0);
   // cavit
   const [showPlugins, setShowPluginDropdown] = useState(false);
   const [pluginListArray, setpluginListArray] = useState([]);
   const [selectedPluginDbId, setSelectedPluginDbId] = useState(-1);
   const [showRunPluginButton, setShowRunPluginButton] = useState(false);
   // cavit
+
+  const [firstRun, setFirstRun] = useState(true);
+  const [selectedSubs, setSelectedSubs] = useState([]);
+  const [selectedMods, setSelectedMods] = useState([]);
+  const [selectedAnatomies, setSelectedAnatomies] = useState([]);
+  const [selectedDiagnosis, setSelectedDiagnosis] = useState([]);
+  const [tfOnly, setTfOnly] = useState(mode === 'teaching' ? true : false);
+  // const [myCases, setMyCases] = useState(mode === 'teaching' ? false : true);
+  const [myCases, setMyCases] = useState(false);
+  const [filters, setFilters] = useState({});
+  const [sort, setSort] = useState([]);
+  const [showSpinner, setShowSpinner] = useState(false);
+  const [showWorklist, setShowWorklist] = useState(false);
+  const [showProjects, setShowProjects] = useState(false);
+  const [showDownload, setShowDownload] = useState(false);
+  const [showSelectSeries, setShowSelectSeries] = useState(false);
+  const [seriesList, setSeriesList] = useState([]);
+  const [encArgs, setEncArgs] = useState('');
+  const [decrArgs, setDecrArgs] = useState('');
+  const [allSelected, setAllSelected] = useState(false);
 
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -134,18 +164,21 @@ const AnnotationSearch = props => {
 
   const getAnnotationsOfProjets = (pageIndex, afterdelete) => {
     const bm = pageIndex ? bookmark : '';
-    const promise =
-      props.pid === 'all'
-        ? getAllAnnotations(bm)
-        : getSummaryAnnotations(props.pid, bm);
-    Promise.all([promise])
-      .then(res => {
-        populateSearchResult(res, pageIndex, afterdelete);
-      })
-      .catch(err => console.error(err));
+    // const promise =
+    //   props.pid === 'all'
+    //     ? getAllAnnotations(bm)
+    //     : getSummaryAnnotations(props.pid, bm);
+    // Promise.all([promise])
+    //   .then(res => {
+    //     populateSearchResult(res, pageIndex, afterdelete);
+    //   })
+    //   .catch(err => console.error(err));
+    getFieldSearchResults();
   };
 
   useEffect(() => {
+    if (mode === "teaching")
+      return;
     setSelectedProject(props.pid);
     setQuery('');
     setBookmark('');
@@ -164,7 +197,7 @@ const AnnotationSearch = props => {
         })
         .catch(err => console.error(err));
     } else {
-      getAnnotationsOfProjets();
+      // getAnnotationsOfProjets();
     }
     // cavit
     setShowRunPluginButton(false);
@@ -173,20 +206,132 @@ const AnnotationSearch = props => {
     // cavit
   }, [props.pid]);
 
-  const handleUserKeyPress = e => {
+  const handleUserKeyPress = (e => {
     if (e.key === 'Enter') {
-      getSearchResult();
-      setPageIndex(0);
+      if (mode !== 'teaching') {
+        getSearchResult();
+        props.dispatch(updateSearchTableIndex(0));
+      } else {
+        getFieldSearchResults();
+        props.dispatch(updateSearchTableIndex(0));
+      }
     }
-  };
+  });
 
   useEffect(() => {
     window.addEventListener('keydown', handleUserKeyPress);
-
     return () => {
       window.removeEventListener('keydown', handleUserKeyPress);
     };
   }, [handleUserKeyPress]);
+
+  useEffect(() => {
+    window.addEventListener('openTeachingFilesModal', handleTeachingFilesModal);
+    return () => {
+      window.removeEventListener('openTeachingFilesModal', handleTeachingFilesModal);
+    };
+  }, [handleTeachingFilesModal]);
+
+  const handleTeachingFilesModal = event => {
+    const { seriesArray, args, packedData } = event.detail;
+    const seriesList = [seriesArray];
+    setShowSelectSeries(true);
+    setSeriesList(seriesList);
+    setEncArgs(args);
+    setDecrArgs(packedData);
+  }
+
+  const useDebouncedEffect = (effect, deps, delay) => {
+    useEffect(() => {
+      const handler = setTimeout(() => effect(), delay);
+      return () => { persistSearch(); clearTimeout(handler) };
+    }, [...deps || [], delay]);
+  }
+
+  useDebouncedEffect(() => {
+    if (selectedProject !== props.pid)
+      setSelectedProject(props.pid);
+    if (firstRun) {
+      if (sessionStorage.searchState) {
+        loadSearchState();
+      }
+      setFirstRun(false);
+      return;
+    }
+    getFieldSearchResults();
+    props.dispatch(updateSearchTableIndex(0));
+    return persistSearch;
+  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid, query, sort, filters], 500)
+
+  const handleSort = (column) => {
+    if (!sort.length || (sort[0] !== column && sort[0] !== ("-" + column)))
+      setSort([column]);
+    else if (sort[0] === column) {
+      setSort(["-" + column]);
+    }
+    else if (sort[0] === ("-" + column))
+      setSort([]);
+  }
+
+  const handleFilter = (column, target) => {
+    const { value } = target;
+    const newFilters = { ...filters };
+    if (value.length)
+      newFilters[column] = value;
+    else if (newFilters[column] && value === '')
+      delete newFilters[column];
+    setFilters(newFilters);
+  }
+
+  const clearSubspecialty = (sub) => {
+    let index = selectedSubs.indexOf(sub);
+    setSelectedSubs(selectedSubs.filter((_, i) => i !== index));
+  }
+
+  const clearModality = (mod) => {
+    let index = selectedMods.indexOf(mod);
+    setSelectedMods(selectedMods.filter((_, i) => i !== index));
+  }
+
+  const clearAnatomy = (anatomy) => {
+    let index = selectedAnatomies.indexOf(anatomy);
+    setSelectedAnatomies(selectedAnatomies.filter((_, i) => i !== index));
+  }
+
+  const clearDiagnosis = (diagnose) => {
+    let index = selectedDiagnosis.indexOf(diagnose);
+    setSelectedDiagnosis(selectedDiagnosis.filter((_, i) => i !== index));
+  }
+
+  const persistSearch = () => {
+    const searchState = { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject, filters, sort };
+    sessionStorage.searchState = JSON.stringify(searchState);
+  }
+
+  const loadSearchState = () => {
+    const searchState = JSON.parse(sessionStorage.searchState);
+    const { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject, filters, sort } = searchState;
+    if (filters)
+      setFilters(filters);
+    if (tfOnly !== undefined)
+      setTfOnly(tfOnly);
+    if (myCases !== undefined)
+      setMyCases(myCases);
+    if (selectedSubs.length)
+      setSelectedSubs(selectedSubs);
+    if (selectedMods.length)
+      setSelectedMods(selectedMods);
+    if (selectedAnatomies)
+      setSelectedAnatomies(selectedAnatomies);
+    if (selectedDiagnosis)
+      setSelectedDiagnosis(selectedDiagnosis);
+    if (query)
+      setQuery(query);
+    if (selectedProject)
+      setSelectedProject(selectedProject);
+    if (sort.length)
+      setSort(sort);
+  }
 
   const insertIntoQueryOnSelection = el => {
     const field = document.getElementsByClassName(
@@ -235,6 +380,8 @@ const AnnotationSearch = props => {
   };
 
   const updateSelectedAims = aimData => {
+    if (props.selectedAnnotations[aimData.aimID])
+      setAllSelected(false);
     props.dispatch(selectAnnotation(aimData));
   };
 
@@ -301,7 +448,7 @@ const AnnotationSearch = props => {
         />
         <button
           className={`btn btn-secondary`}
-          style={styles.buttonStyles}
+          // style={styles.buttonStyles}
           onClick={addPartialToQuery}
           type="button"
           name="add-button"
@@ -320,10 +467,11 @@ const AnnotationSearch = props => {
   };
 
   const getSearchResult = (pageIndex, afterDelete) => {
-    setPageIndex(0);
+    props.dispatch(updateSearchTableIndex(0));
     if (query.length === 0) {
       getAnnotationsOfProjets(pageIndex, afterDelete);
-    } else {
+    }
+    else {
       let searchQuery = parseQuery();
       // setData([]);
       if (selectedProject) {
@@ -345,7 +493,6 @@ const AnnotationSearch = props => {
         };
         props.setQuery(queryToSave);
         const bm = pageIndex ? bookmark : '';
-
         searchAnnotations({ query: escapeSlashesQuery(searchQuery) }, bm)
           .then(res => {
             populateSearchResult(res, pageIndex, afterDelete);
@@ -355,7 +502,47 @@ const AnnotationSearch = props => {
     }
   };
 
+  const getFieldSearchResults = (pageIndex, afterDelete) => {
+    setShowSpinner(true);
+    const bm = pageIndex ? bookmark : '';
+    let body = {};
+    const fields = {};
+    body['fields'] = fields;
+    if (props.pid)
+      fields['project'] = props.pid;
+    if (query.length)
+      fields['query'] = query;
+    if (selectedSubs.length)
+      fields['subSpecialty'] = selectedSubs;
+    if (selectedMods.length)
+      fields['modality'] = selectedMods;
+    if (selectedAnatomies.length)
+      fields['anatomy'] = selectedAnatomies
+    if (selectedDiagnosis.length)
+      fields['diagnosis'] = selectedDiagnosis;
+    if (mode === 'teaching' && tfOnly)
+      fields['teachingFiles'] = tfOnly;
+    if (myCases)
+      fields['myCases'] = myCases;
+    if (sort.length)
+      body['sort'] = sort;
+    if (Object.keys(filters).length)
+      body['filter'] = filters;
+    searchAnnotations(body, bm)
+      .then(res => {
+        populateSearchResult(res, pageIndex, afterDelete);
+        setRows(res.data.total_rows);
+        setShowSpinner(false);
+      })
+      .catch(err => { console.error(err); setShowSpinner(false); });
+  }
+
   const getNewData = (pageIndex, afterDelete) => {
+    if (mode === 'teaching') {
+      getFieldSearchResults(props.searchTableIndex);
+      return;
+    }
+
     if (query) {
       getSearchResult(pageIndex, afterDelete);
     } else {
@@ -543,9 +730,9 @@ const AnnotationSearch = props => {
     let caretAddedQuery = '';
     let handleSingleChar = text.includes(' ')
       ? text
-          .split(' ')
-          .map(item => handleSingleLetter(item))
-          .join(' ')
+        .split(' ')
+        .map(item => handleSingleLetter(item))
+        .join(' ')
       : handleSingleLetter(text);
     if (wrappedInQuote && hasWhiteSpace) {
       caretAddedQuery = replaceWithCaret(handleSingleChar);
@@ -561,9 +748,8 @@ const AnnotationSearch = props => {
       const allArr = all.split(' ');
       const len = allArr.length;
       if (allArr[len - 1].length > 0 && allArr[len - 1].includes(':')) {
-        const str = `(${allArr[len - 1]}${parsedQueryArr[0]} OR ${
-          allArr[len - 1]
-        }${parsedQueryArr[1]})`;
+        const str = `(${allArr[len - 1]}${parsedQueryArr[0]} OR ${allArr[len - 1]
+          }${parsedQueryArr[1]})`;
         allArr.splice(len - 1, 1, str);
         all = allArr.join(' ');
       }
@@ -671,11 +857,22 @@ const AnnotationSearch = props => {
     return options;
   };
 
+  const handleSelectDeselectAll = (checked) => {
+    if (checked) {
+      handleMultipleSelect('selectPageAll');
+      setAllSelected(checked);
+    }
+    else {
+      handleMultipleSelect('unselectPageAll');
+      setAllSelected(checked);
+    }
+  }
+
   const handleMultipleSelect = action => {
     const pages = Math.ceil(props.rows / pageSize);
-    const indexStart = pageIndex * pageSize;
+    const indexStart = props.searchTableIndex * pageSize;
     const indexEnd =
-      pageIndex + 1 === pages ? rows : pageSize * (pageIndex + 1);
+      props.searchTableIndex + 1 === pages ? rows : pageSize * (props.searchTableIndex + 1);
     const arrayToSelect = data.slice(indexStart, indexEnd);
     if (action === 'selectPageAll') {
       arrayToSelect.forEach(el => {
@@ -838,7 +1035,7 @@ const AnnotationSearch = props => {
             </ReactTooltip>
           </>
           <>
-            <div onClick={() => setDeleteSelectedClicked(true)}>
+            <div onClick={() => setShowDeleteModal(true)}>
               <FaRegTrashAlt
                 className="tool-icon"
                 // className="tool-icon"
@@ -846,10 +1043,10 @@ const AnnotationSearch = props => {
                 style={
                   Object.keys(props.selectedAnnotations).length === 0
                     ? {
-                        fontSize: '1.1rem',
-                        color: 'rgb(107, 107, 107)',
-                        cursor: 'not-allowed'
-                      }
+                      fontSize: '1.1rem',
+                      color: 'rgb(107, 107, 107)',
+                      cursor: 'not-allowed'
+                    }
                     : null
                 }
                 data-tip
@@ -884,7 +1081,7 @@ const AnnotationSearch = props => {
                 if (e.target.checked === false) {
                   const project =
                     props.searchQuery &&
-                    Object.values(props.searchQuery)[0].project
+                      Object.values(props.searchQuery)[0].project
                       ? Object.values(props.searchQuery)[0].project
                       : props.pid;
                   setSelectedProject(project);
@@ -907,8 +1104,6 @@ const AnnotationSearch = props => {
           <div
             style={{ fontSize: '1.2rem', color: 'aliceblue' }}
             onClick={() => {
-              //  console.log(JSON.stringify(props.selectedAnnotations));
-              //  console.log(props.pid);
               getPluginProjects();
             }}
           >
@@ -998,7 +1193,7 @@ const AnnotationSearch = props => {
 
     Promise.all(promiseArr)
       .then(() => {
-        getNewData(pageIndex, true);
+        getNewData(props.searchTableIndex, true);
       })
       .catch(error => {
         if (
@@ -1007,15 +1202,13 @@ const AnnotationSearch = props => {
           error.response.data.message
         )
           toast.error(error.response.data.message, { autoClose: false });
-        getNewData(pageIndex, true);
+        getNewData(props.searchTableIndex, true);
       });
-    setDeleteSelectedClicked(false);
+    setShowDeleteModal(false);
     props.dispatch(clearSelection());
   };
   // cavit
   const prepareDropDownHtmlForPlugins = () => {
-    // console.log(showPlugins);
-    // console.log(pluginListArray);
     const list = pluginListArray;
     let options = [];
     for (let i = 0; i < list.length; i++) {
@@ -1041,7 +1234,6 @@ const AnnotationSearch = props => {
 
   const handleChangePlugin = e => {
     const tempSelectedPluign = parseInt(e.target.value);
-    console.log(parseInt(e.target.value));
     setSelectedPluginDbId(parseInt(e.target.value));
     if (tempSelectedPluign > -1) {
       setShowRunPluginButton(true);
@@ -1083,7 +1275,7 @@ const AnnotationSearch = props => {
 
       const resultAddQueue = await addPluginsToQueue(tempQueueObject);
       let responseRunPluginsQueue = null;
-      console.log('plugin running queue ', JSON.stringify(resultAddQueue));
+      // console.log('plugin running queue ', JSON.stringify(resultAddQueue));
       // if (resultAddQueue && resultAddQueue.data){
       //   if (Array.isArray(resultAddQueue.data)){
       //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
@@ -1180,198 +1372,236 @@ const AnnotationSearch = props => {
     // getSearchResult();
   };
   // cavit
+
+  const clearAllTeachingFilers = () => {
+    setSelectedSubs([]);
+    setSelectedMods([]);
+    setSelectedDiagnosis([]);
+    setSelectedAnatomies([]);
+  }
+
+  const clearAllFilters = () => {
+    setFilters({});
+    setQuery('');
+    clearAllTeachingFilers();
+  }
+
   return (
-    <div>
-      <div
-        className="form-group annotationSearch-container"
-        style={{
-          width: '-webkit-fill-available',
-          display: 'flex',
-          margin: '0.5rem 2rem'
-        }}
-      >
-        <div
-          className="input-group input-group-lg"
-          style={{
-            padding: '0.15rem',
-            height: 'fit-content',
-            fontSize: '1.2rem'
-          }}
-        >
-          <input
-            type="text"
-            autoComplete="off"
-            className="form-control annotationSearch-text"
-            aria-label="Large"
-            name="query"
-            onChange={e => setQuery(e.target.value)}
-            style={{
-              padding: '0.15rem',
-              height: 'fit-content',
-              fontSize: '1.2rem'
-            }}
-            value={query}
-          />
+    <>
+      <div className="container-fluid body-dk">
+        {/* search / filters */}
+        <div className="search_filter">
+          <div className="row">
+            <div className="col-4">
+              <div className="input-group input-group-sm mb-3">
+                <input className="form-control" type="text" placeholder="Enter Search Terms and/or Use Filters at Right" aria-label="default input example" onChange={e => { setQuery(e.target.value) }} value={query} />
+                <span className="input-group-text" id="basic-addon1"><BiSearch /></span>
+
+                <div>
+                  <button data-tip data-for='clearAll' className="btn btn-dark btn-sm color-schema" style={{ marginLeft: '0.5rem' }} onClick={clearAllFilters}>
+                    <FcClearFilters />
+                  </button>
+                </div>
+                <ReactTooltip
+                  id="clearAll"
+                  place="right"
+                  type="info"
+                  delayShow={1000}
+                >
+                  Clear all filters
+                </ReactTooltip>
+              </div>
+
+            </div>
+            {mode === 'teaching' && (<TeachingFilters selectedAnatomies={selectedAnatomies}
+              setSelectedAnatomies={setSelectedAnatomies}
+              selectedDiagnosis={selectedDiagnosis}
+              setSelectedDiagnosis={setSelectedDiagnosis}
+              selectedSubs={selectedSubs}
+              setSelectedSubs={setSelectedSubs}
+              selectedMods={selectedMods}
+              setSelectedMods={setSelectedMods}
+              tfOnly={tfOnly}
+              setTfOnly={setTfOnly}
+              myCases={myCases}
+              setMyCases={setMyCases} />)}
+          </div>
+          {(selectedSubs.length + selectedMods.length + selectedAnatomies.length + selectedDiagnosis.length) > 0 &&
+            (<div className="filter-control" style={{ paddingLeft: '0.9rem', paddingTop: '0.9rem' }}>
+              Filters Applied: &nbsp;
+              {selectedSubs.map(sub => {
+                return (<button key={sub} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearSubspecialty(sub)} > {sub} < BiX /></button>);
+              })}
+              {selectedMods.map(mod => {
+                return (<button key={mod} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearModality(mod)} > {compModality[mod.toLowerCase()] ? compModality[mod.toLowerCase()] : mod} < BiX /></button>);
+              })}
+              {selectedAnatomies.map(anatomy => {
+                return (<button key={anatomy} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearAnatomy(anatomy)} > {anatomy} < BiX /></button>);
+              })}
+              {selectedDiagnosis.map(diagnose => {
+                return (<button key={diagnose} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearDiagnosis(diagnose)} > {diagnose
+                } < BiX /></button>);
+              })}
+              {(selectedSubs.length + selectedMods.length + selectedAnatomies.length + selectedDiagnosis) > 1 && (<button type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={clearAllTeachingFilers}>Clear All Filters <BiX /></button>)}
+            </div>)
+          }
         </div>
-        <>
-          <FcAbout
-            data-tip
-            data-for="about-icon"
-            style={{ fontSize: '2rem' }}
-            className="annotationSearch-btn"
-          />
-          <ReactTooltip
-            id="about-icon"
-            place="bottom"
-            type="info"
-            delayShow={200}
-          >
-            <p>
-              <span>For exact match, use double quote: "7 3225"</span>
-            </p>
-            <p>For complex queries, combine terms with AND/OR:</p>
-            <p>RECIST_v2 AND CT</p>
-          </ReactTooltip>
-        </>
-        <button
-          className={`btn btn-secondary`}
-          type="button"
-          name="erase-button"
-          data-tip
-          data-for="erase-icon"
-          className="btn btn-secondary annotationSearch-btn"
-          onClick={() => {
-            setQuery('');
-            setCheckboxSelected(false);
-            getAnnotationsOfProjets();
-            props.dispatch(clearSelection());
-            props.setQuery('');
-            setPageIndex(0);
-          }}
-          // onClick={parseIt}
-          // disabled={index < count}
-          style={{
-            padding: '0.3rem 0.5rem',
-            height: 'fit-content',
-            fontSize: '1rem',
-            marginTop: '0.1rem',
-            width: '5%'
-          }}
-        >
-          <FaEraser />
-        </button>
-        <ReactTooltip
-          id="erase-icon"
-          place="bottom"
-          type="info"
-          delayShow={500}
-        >
-          <span>Clear query</span>
-        </ReactTooltip>
-        <button
-          className={`btn btn-secondary`}
-          type="button"
-          name="search-button"
-          data-tip
-          data-for="search-icon"
-          className="btn btn-secondary annotationSearch-btn"
-          onClick={() => {
-            getSearchResult();
-            setPageIndex(0);
-          }}
-          style={{
-            padding: '0.3rem 0.5rem',
-            height: 'fit-content',
-            fontSize: '1rem',
-            marginTop: '0.1rem',
-            width: '5%'
-          }}
-        >
-          <FaSearch />
-        </button>
-        <ReactTooltip
-          id="search-icon"
-          place="bottom"
-          type="info"
-          delayShow={500}
-        >
-          <span>Search</span>
-        </ReactTooltip>
+      </div >
+      <div className="icon_row">
+        <div className="icon_r">
+          {/* <button type="button" className="btn btn-sm" ><BsEyeFill /><br />View</button> */}
+          <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
+          {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
+          {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
+          <AddToWorklist deselect={() => handleSelectDeselectAll(false)} />
+          <Projects deselect={() => handleSelectDeselectAll(false)} />
+          {/* <button type="button" className="btn btn-sm" onClick={() => { setShowProjects(!showProjects) }}><BiDownload /><br />Copy to Project</button>
+          {showProjects && (<Projects className='btn btn-sm worklist' onClose={() => { setShowProjects(false) }} />)} */}
+          <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
+        </div>
       </div>
-      {error && <div style={styles.error}>{error}</div>}
-      <div
-        style={{
-          margin: '0.5rem 2rem'
-        }}
-      >
-        <Collapsible
-          trigger="Advanced search"
-          triggerClassName="advancedSearch__closed"
-          triggerOpenedClassName="advancedSearch__open"
-          contentInnerClassName="advancedSearch-content"
-        >
-          {renderQueryItem()}
-          {renderOrganizeItem('organize')}
-        </Collapsible>
-        {renderProjectSelect()}
-        {/* {Object.keys(props.selectedAnnotations).length !== 0 && (
-          <button
-            className={`btn btn-secondary`}
-            style={styles.downloadButton}
-            name="download"
-            onClick={() => setDownloadClicked(true)}
-            type="button"
-            disabled={Object.keys(props.selectedAnnotations).length === 0}
-          >
-            DOWNLOAD
-          </button>
-        )} */}
-        {data.length > 0 && (
-          <AnnotationTable
-            data={data}
-            selected={props.selectedAnnotations}
-            updateSelectedAims={updateSelectedAims}
-            noOfRows={rows}
-            getNewData={getNewData}
-            bookmark={bookmark}
-            switchToDisplay={() => props.history.push('/display')}
-            pid={props.pid}
-            setPageIndex={setPageIndex}
-            indexFromParent={pageIndex}
+      <table className="table table-dark table-striped table-hover title-case" style={{ "height": "100%" }}>
+        <colgroup><col className="select_row" />
+          <col span="15" />
+        </colgroup>
+        <thead className="sticky">
+          <tr>
+            <th className="select_row">
+              <div className="form-check">
+                <input className="form-check-input" type="checkbox" checked={allSelected} onChange={({ target: { checked } }) => handleSelectDeselectAll(checked)} />
+              </div>
+            </th>
+            <th>
+              <span onClick={() => handleSort('patientName')}>Patient Name </span>{
+                sort[0] === 'patientName' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
+                sort[0] === '-patientName' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)} < br />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('patientName', target)} value={filters.patientName || ""} />
+            </th>
+            <th>
+              <span onClick={() => handleSort('subjectID')}>{mode === 'teaching' ? 'MRN' : 'Patient Id'} </span>{
+                sort[0] === 'subjectID' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
+                sort[0] === '-subjectID' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)} <br />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('subjectID', target)} value={filters.subjectID || ""} />
+            </th>
+            {mode === 'teaching' && (<th><span onClick={() => handleSort('accessionNumber')}>Accession # </span>{
+              sort[0] === 'accessionNumber' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
+              sort[0] === '-accessionNumber' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)} < br />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('accessionNumber', target)} value={filters.accessionNumber || ""} />
+            </th>)}
+            <th><span onClick={() => handleSort('name')}>{mode === 'teaching' ? 'Case Title' : 'Annotation Name'} </span>{
+              sort[0] === 'name' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
+              sort[0] === '-name' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('name', target)} value={filters.name || ""} />
+            </th>
+            <th style={{ width: '3.5rem' }} >
+              <span onClick={() => handleSort('age')}>Age </span>{
+                sort[0] === 'age' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
+                sort[0] === '-age' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('age', target)} value={filters.age || ""} />
+            </th>
+            <th style={{ width: '3rem' }}>
+              <span onClick={() => handleSort('sex')}>Sex </span>{
+                sort[0] === 'sex' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
+                sort[0] === '-sex' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('sex', target)} value={filters.sex || ""} />
+            </th>
+            <th>
+              <span onClick={() => handleSort('modality')}>Modality </span>{
+                sort[0] === 'modality' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
+                sort[0] === '-modality' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('modality', target)} value={filters.modality || ""} />
+            </th>
+            <th>
+              <span onClick={() => handleSort('studyDate')}>Study Date </span>{
+                sort[0] === 'studyDate' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
+                sort[0] === '-studyDate' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('studyDate', target)} value={filters.studyDate || ""} />
+            </th>
+            {mode === 'teaching' && (<th>
+              <span onClick={() => handleSort('anatomy')}>Anatomy </span>{
+                sort[0] === 'anatomy' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
+                sort[0] === '-anatomy' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('anatomy', target)} value={filters.anatomy || ""} />
+            </th>)}
+            {mode === 'teaching' && (<th><span onClick={() => handleSort('observation')}>Observation </span>{
+              sort[0] === 'observation' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
+              sort[0] === '-observation' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('observation', target)} value={filters.observation || ""} />
+            </th>)}
+            <th>
+              <span onClick={() => handleSort('date')}>Created </span>{
+                sort[0] === 'date' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
+                sort[0] === '-date' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('date', target)} value={filters.date || ""} />
+            </th>
+            <th>
+              <span onClick={() => handleSort('templateType')}>Template </span>{
+                sort[0] === 'templateType' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
+                sort[0] === '-templateType' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('templateType', target)} value={filters.templateType || ""} />
+            </th>
+            <th>
+              <span onClick={() => handleSort('fullName')}>User </span>{
+                sort[0] === 'fullName' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
+                sort[0] === '-fullName' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('fullName', target)} value={filters.fullName || ""} />
+            </th>
+            <th><span onClick={() => handleSort('userComment')}>{mode === 'teaching' ? 'Narrative' : 'Comment'} </span>{
+              sort[0] === 'userComment' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
+              sort[0] === '-userComment' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
+              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('userComment', target)} value={filters.userComment || ""} />
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.length > 0 && !showSpinner && (
+            <AnnotationTable
+              data={data}
+              selected={props.selectedAnnotations}
+              updateSelectedAims={updateSelectedAims}
+              noOfRows={rows}
+              getNewData={getNewData}
+              bookmark={bookmark}
+              switchToDisplay={() => props.history.push('/display')}
+              pid={props.pid}
+              handleSort={handleSort}
+              handleFilter={handleFilter}
+              filters={filters}
+            />
+          )}
+        </tbody>
+        {showSelectSeries && (
+          <SeriesModal
+            seriesPassed={seriesList}
+            onCancel={() => { setShowSelectSeries(false) }}
+            isTeachingFile={true}
+            encrUrlArgs={encArgs}
+            decrArgs={decrArgs}
+            onSave={getNewData}
           />
         )}
-      </div>
-      {downloadClicked && (
-        <AnnotationDownloadModal
-          onSubmit={() => {
-            setDownloadClicked(false);
+      </table>
+      <DeleteAlert
+        message={explanation.deleteSelected}
+        onCancel={() => setShowDeleteModal(false)}
+        onDelete={deleteAllSelected}
+        error={explanation.errorMessage}
+        show={showDeleteModal}
+      />
+      <AnnotationDownloadModal
+        onSubmit={() => {
+          setShowDownload(false);
+          if (mode === 'teaching')
+            getFieldSearchResults();
+          else
             getSearchResult();
-          }}
-          onCancel={() => setDownloadClicked(false)}
-          updateStatus={() => console.log('update status')}
-          projectID={selectedProject}
-        />
-      )}
-      {uploadClicked && (
-        <UploadModal
-          onCancel={() => setUploadClicked(false)}
-          onResolve={handleSubmitUpload}
-          className="mng-upload"
-          // projectID={this.state.projectID}
-          pid={props.pid}
-          // clearTreeData={this.props.clearTreeData}
-          // clearTreeExpand={this.props.clearTreeExpand}
-        />
-      )}
-      {deleteSelectedClicked && (
-        <DeleteAlert
-          message={explanation.deleteSelected}
-          onCancel={() => setDeleteSelectedClicked(false)}
-          onDelete={deleteAllSelected}
-          error={explanation.errorMessage}
-        />
-      )}
-    </div>
+        }}
+        onCancel={() => setShowDownload(false)}
+        // updateStatus={() => console.log('update status')}
+        projectID={selectedProject}
+        show={showDownload}
+      />
+    </>
   );
 };
 
@@ -1379,7 +1609,8 @@ const mapsStateToProps = state => {
   return {
     projectMap: state.annotationsListReducer.projectMap,
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
-    openSeries: state.annotationsListReducer.openSeries
+    openSeries: state.annotationsListReducer.openSeries,
+    searchTableIndex: state.annotationsListReducer.searchTableIndex
   };
 };
 

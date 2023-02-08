@@ -46,13 +46,33 @@ class WorkList extends React.Component {
     duedate: null,
     updateRequirement: false,
     requirements: [],
-    newRequirement: {}
+    newRequirement: {},
+    userNameMap: {}
   };
+
+  createName = (user) => {
+    const { displayname, username, firstname, lastname } = user;
+    const fullName = firstname && lastname ? `${firstname} ${lastname}`
+      : lastname ? `${lastname}`
+        : firstname ? `${firstname}`
+          : null;
+    const name = fullName || displayname || username;
+    return name;
+  }
+
+  createUserNameMap = (users) => {
+    const userNameMap = users.reduce((all, item) => {
+      all[item.username] = this.createName(item);
+      return all;
+    }, {});
+    this.setState({ userNameMap });
+  }
 
   componentDidMount = async () => {
     this.getWorkListData();
     const { data: userList } = await getUsers();
     this.setState({ userList });
+    this.createUserNameMap(userList);
     document.addEventListener('mousedown', this.handleClickOutside);
     document.addEventListener('keydown', this.handleKeyboardEvent);
   };
@@ -201,7 +221,7 @@ class WorkList extends React.Component {
     fieldName === 'name'
       ? this.setState({ name: defaultValue })
       : // fieldName === "description"?
-        this.setState({ description: defaultValue });
+      this.setState({ description: defaultValue });
     // : this.setState({ duedate: defaultValue });
   };
 
@@ -237,7 +257,6 @@ class WorkList extends React.Component {
 
   getUpdate = e => {
     const { name, value } = e.target;
-    console.log(name, value);
     this.setState({ [name]: value });
   };
 
@@ -246,8 +265,8 @@ class WorkList extends React.Component {
     const body = name
       ? { name }
       : description === '' || description
-      ? { description }
-      : { duedate };
+        ? { description }
+        : { duedate };
     updateWorklist(worklistId, body)
       .then(() => this.getWorkListData())
       .catch(error =>
@@ -277,11 +296,15 @@ class WorkList extends React.Component {
     });
   };
 
-  selectAssignee = e => {
-    const { name, checked } = e.target;
-    const newAssigneeMap = { ...this.state.assigneeMap };
-    newAssigneeMap[name] = checked;
-    this.setState({ assigneeMap: newAssigneeMap });
+  selectAssignee = (e, map) => {
+    if (e) {
+      const { name, checked } = e.target;
+      const newAssigneeMap = { ...this.state.assigneeMap };
+      newAssigneeMap[name] = checked;
+      this.setState({ assigneeMap: newAssigneeMap });
+    } else {
+      this.setState({ assigneeMap: map });
+    }
   };
 
   submitUpdateAssignees = () => {
@@ -359,6 +382,12 @@ class WorkList extends React.Component {
         });
     }
   };
+
+  concatenateNames = (nameArr) => {
+    const fullNames = [];
+    nameArr.forEach(el => fullNames.push(this.state.userNameMap[el]))
+    return fullNames.join(', ')
+  }
 
   defineColumns = () => {
     return [
@@ -474,7 +503,7 @@ class WorkList extends React.Component {
                 className={className}
                 id={`assignees-${original.row.checkbox.workListID}`}
               >
-                {assignees.length > 0 ? assignees.join(', ') : `Add assignees`}
+                {assignees.length > 0 ? this.concatenateNames(assignees) : `Add assignees`}
               </div>
               <ReactTooltip
                 id="worklist-assignee"
@@ -680,14 +709,13 @@ class WorkList extends React.Component {
           pageSizeOptions={[10, 20, 50]}
           defaultPageSize={10}
         />
-        {this.state.deleteSingleClicked && (
-          <DeleteAlert
-            message={messages.deleteSingle}
-            onCancel={this.handleCancel}
-            onDelete={this.deleteSingleWorklist}
-            error={this.state.errorMessage}
-          />
-        )}
+        <DeleteAlert
+          show={this.state.deleteSingleClicked}
+          message={messages.deleteSingle}
+          onCancel={this.handleCancel}
+          onDelete={this.deleteSingleWorklist}
+          error={this.state.errorMessage}
+        />
         {this.state.hasAddClicked && (
           <CreationForm
             users={this.state.userList}
@@ -696,15 +724,13 @@ class WorkList extends React.Component {
             error={this.state.error}
           />
         )}
-
-        {this.state.deleteAllClicked && (
-          <DeleteAlert
-            message={messages.deleteSelected}
-            onCancel={this.handleCancel}
-            onDelete={this.deleteAllSelected}
-            error={this.state.errorMessage}
-          />
-        )}
+        <DeleteAlert
+          show={this.state.deleteAllClicked}
+          message={messages.deleteSelected}
+          onCancel={this.handleCancel}
+          onDelete={this.deleteAllSelected}
+          error={this.state.errorMessage}
+        />
         {this.state.updateAssignee && (
           <UpdateAssignee
             onCancel={this.handleCancel}

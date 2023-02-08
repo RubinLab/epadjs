@@ -72,6 +72,7 @@ export function getAnnotations2() {
 }
 
 export function searchAnnotations(body, bookmark) {
+  // body["fields"]={"teachingFiles":true};
   const url = `${http.apiUrl()}/search${
     bookmark ? `?bookmark=${bookmark}` : ``
   }`;

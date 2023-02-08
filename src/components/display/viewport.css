@@ -107,8 +107,15 @@
 } */
 
 .column.middle-right {
-    width: 65%;
-    float: left;
+  width: 65%;
+  display: grid; 
+  grid-template-columns: 10em 1fr; 
+  grid-template-rows: 1fr; 
+  gap: 0px 0px; 
+}
+
+.series-dd{
+    padding-top: none !important;
 }
 
 .column.right {

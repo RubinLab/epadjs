@@ -83,7 +83,7 @@
   /* margin-right: 0.5rem; */
   cursor: pointer;
   /* background: red; */
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .-serieButton__container {
@@ -146,21 +146,18 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  width: 95%;
-  height: auto;
-  max-width: 20rem;
-  min-width: 10rem;
   margin: 0 auto;
   margin-bottom: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 .annotation-button__container {
   display: flex;
   width: 100%;
   align-items: center;
-  border-top-left-radius: 1em;
-  border-top-right-radius: 1em;
+  border-top-left-radius: .2em;
+  border-top-right-radius: .2em;
   justify-content: space-between;
 }
 
@@ -179,21 +176,37 @@
 }
 .annotation-name__container {
   display: flex;
-  justify-content: center;
+  padding-left: 0.5rem;
   width: 84%;
   font-size: 1rem;
+  text-transform: capitalize;  
   /* align-items: center; */
 }
 
 .annotation-icon {
   cursor: pointer;
-  display: flex;
   justify-content: center;
-  font-size: 1.2rem;
+  font-size: .9rem;
   display: inline-block;
-  /* margin: 0 auto; */
-  width: 8%;
-  margin-right: 0.2rem;
+  margin-left: 7px;
+  /* margin-right: 0.2rem; */
+}
+
+.annotation-icon .tooltiptext {
+  opacity: 0;
+  transition: opacity 1s;
+  width: 30%;
+  background-color: gray;
+  color: #fff;
+  text-align: center;
+  padding: 2px 0;
+  border-radius: .2em;
+  position: absolute;
+  z-index: 1;
+}
+
+.annotation-icon:hover .tooltiptext {
+  opacity: 5;
 }
 
 .annotation__inner {
@@ -202,7 +215,7 @@
 }
 
 .showLabel {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   width: 10%;
 }
 
@@ -222,8 +235,8 @@ svg {
   pointer-events: none;
 }
 .annotation-label__container {
-  border-bottom-left-radius: 1em;
-  border-bottom-right-radius: 1em;
+  /* border-bottom-left-radius: 1em;
+  border-bottom-right-radius: 1em; */
   width: 100%;
   padding: 0.3rem;
 }
@@ -236,6 +249,7 @@ svg {
 
 .annotation__userName {
   margin-right: 0.5rem;
+  text-transform: capitalize;  
 }
 
 .annotation__type {
@@ -259,6 +273,7 @@ svg {
 .aimEntity-question {
   position: relative;
   left: -0.5rem;
+  font-weight: bold;
 }
 
 .annotation-calculation,
@@ -295,18 +310,16 @@ svg {
 .label-toggle {
   display: flex;
   margin: 0 auto;
-  margin-bottom: 1rem;
-  width: 90%;
-  justify-content: center;
-  justify-content: flex-start;
+  margin-bottom: .5rem;
+  /* justify-content: center;
+  justify-content: flex-start; */
 }
 
 .label-toggle__text {
-  font-size: 1.2rem;
+  font-size: .9rem;
   align-items: center;
-  margin-right: 1rem;
   display: flex;
-  width: 70%;
+  width: 60%;
 }
 
 .-maxView-container {
@@ -391,9 +404,9 @@ svg {
 
 .annsLink-table {
   width: fit-content;
-  margin: 10px auto;
+  margin: 1rem auto;
   table-layout: auto;
-  width: 85%;
+  width: 95%;
   /* table-layout: fixed; */
 }
 
@@ -404,7 +417,7 @@ svg {
 }
 
 .annsLink-table.__header.--cell {
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 .annsLink-table.__tbody.--cell,
@@ -439,7 +452,7 @@ svg {
 
 .annsLink-table.__tbody.--cell:hover {
   color: white;
-  font-size: 1.1rem;
+  font-size: 1rem;
   cursor: pointer;
   text-decoration: underline;
 }
@@ -447,8 +460,88 @@ svg {
 .annsLink-table.__tbody.--row,
 .annsLink-table.__header{
   border-bottom: 1px solid #272b30;
+  color: #ccc !important;
+  font-size: small;
 }
 
 .annsLink-table.__tbody.--row:last-of-type {
   border-bottom: none;
+}
+
+table{
+  background-color: #333 !important;
+  border: none;
+  text-transform: capitalize;
+  font-size: 1.1rem;
+}
+
+th{
+  border: none !important;
+}
+
+
+
+#series-modal {
+  background-color: #555555;
+  width:40% !important;
+  max-width: none !important;
+  position: absolute;
+  top: 20%;
+  left: 30%;
+  border: 2px solid grey;
+  z-index: 100;
+}
+
+.select-serie-header{
+  background-color: #666 !important;
+  border: none !important;
+  height: 2.5rem;
+}
+
+.select-serie-title{
+  color:#d3d3d3 !important;
+  font-size: 1.2rem !important;
+}
+
+.select-serie-body{
+  background-color: #444 !important;
+  color:#ccc !important
+}
+
+.select-serie-footer{
+  background-color: #444 !important;
+  border: none !important;
+  color:#ccc !important
+}
+
+.modal-button{
+  margin: 0.2rem;
+}
+
+.field-grid {  display: grid;
+  grid-template-columns: 49% 49%;
+  gap: 1em 1em;
+  grid-auto-flow: row;
+}
+
+.max-series{
+  width: 100%;
+  background-color: #666 !important;
+  line-height: 2rem;
+  padding: 0.3rem;
+}
+
+.significant-series {
+  color:#EADDB2;
+}
+
+.modal-content {
+  padding: 0 !important;
+}
+
+#stella-beta-warning {
+  color: #DB2828;
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 0.3rem;
 }

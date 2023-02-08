@@ -3,31 +3,21 @@ import "../progressView/proView.css";
 
 const worklistSelect = ({ list, handleRoute, selected, type }) => {
   const result = [];
-  list.forEach(worklist => {
-    const { workListID } = worklist;
-    const className =
-      selected === workListID && type === "progress"
-        ? "progress-wl __selected"
-        : "progress-wl";
-    const completeness =
-      worklist.progress >= 0 ? Math.round(worklist.progress) + "%" : null;
+  list.forEach(({ workListID, progress, name, duedate }) => {
+    const isSelected = (selected === workListID && type === "progress");
+    const completeness = progress >= 0 ? Math.round(progress) + "%" : null;
     result.push(
-      <div
-        className={className}
-        onClick={() => {
-          handleRoute("progress", worklist.workListID);
+      <div className="progress-text"
+        style={{ cursor: 'pointer' }} onClick={() => {
+          handleRoute("progress", workListID);
         }}
-        key={worklist.workListID}
-      >
-        <div className="__inner">
-          <span>{worklist.name}</span>
-          {/* <span>{completeness}</span> */}
-        </div>
-        <div className="__dueDate">Due: {worklist.duedate}</div>
+        key={workListID}>
+        <ul style={{ listStyle: 'none' }}><li><b>{name}</b></li></ul>
+        Due: {duedate}
       </div>
     );
   });
-  return result;
+  return <div className="progress-expanded">{result}</div>;
 };
 
 export default worklistSelect;

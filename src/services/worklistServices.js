@@ -38,10 +38,10 @@ export function saveWorklist(
 export function updateWorklistAssignee(user, id, body) {
   return http.put(
     http.apiUrl() +
-      "/worklists/" +
-      encodeURIComponent(id) +
-      "/users/" +
-      encodeURIComponent(user),
+    "/worklists/" +
+    encodeURIComponent(id) +
+    "/users/" +
+    encodeURIComponent(user),
     body
   );
 }
@@ -49,9 +49,9 @@ export function updateWorklistAssignee(user, id, body) {
 export function addWorklistRequirement(worklist, body) {
   return http.post(
     http.apiUrl() +
-      "/worklists/" +
-      encodeURIComponent(worklist) +
-      "/requirements",
+    "/worklists/" +
+    encodeURIComponent(worklist) +
+    "/requirements",
     body
   );
 }
@@ -59,10 +59,10 @@ export function addWorklistRequirement(worklist, body) {
 export function deleteWorklistRequirement(worklist, requirement) {
   return http.delete(
     http.apiUrl() +
-      "/worklists/" +
-      encodeURIComponent(worklist) +
-      "/requirements/" +
-      requirement
+    "/worklists/" +
+    encodeURIComponent(worklist) +
+    "/requirements/" +
+    requirement
   );
 }
 
@@ -73,11 +73,11 @@ export function updateWorklist(id, body) {
 export function getStudiesOfWorklist(user, id) {
   return http.get(
     http.apiUrl() +
-      "/worklists/" +
-      encodeURIComponent(id) +
-      "/users/" +
-      encodeURIComponent(user) +
-      "/studies"
+    "/worklists/" +
+    encodeURIComponent(id) +
+    "/users/" +
+    encodeURIComponent(user) +
+    "/studies"
   );
   // "/subjects/?annotationCount=true"
 }
@@ -91,6 +91,25 @@ export function addStudyToWorklist(
 ) {
   return http.put(
     http.apiUrl() +
+    "/worklists/" +
+    encodeURIComponent(worklistId) +
+    "/projects/" +
+    encodeURIComponent(projectID) +
+    "/subjects/" +
+    encodeURIComponent(patientID) +
+    "/studies/" +
+    encodeURIComponent(studyUID),
+    body
+  );
+}
+
+export function addStudiesToWorklist(
+  worklistId, arr
+) {
+  const promises = [];
+  arr.forEach(el => {
+    const { projectID, patientID, studyUID, body } = el;
+    const promise = http.put(http.apiUrl() +
       "/worklists/" +
       encodeURIComponent(worklistId) +
       "/projects/" +
@@ -99,21 +118,44 @@ export function addStudyToWorklist(
       encodeURIComponent(patientID) +
       "/studies/" +
       encodeURIComponent(studyUID),
-    body
-  );
+      body);
+    promises.push(promise);
+  }
+  )
+  return promises;
 }
 
 export function addSubjectToWorklist(worklistId, projectID, patientID, body) {
   return http.put(
     http.apiUrl() +
+    "/worklists/" +
+    encodeURIComponent(worklistId) +
+    "/projects/" +
+    encodeURIComponent(projectID) +
+    "/subjects/" +
+    encodeURIComponent(patientID),
+    body
+  );
+}
+
+export function addSubjectsToWorklist(
+  worklistId, arr
+) {
+  const promises = [];
+  arr.forEach(el => {
+    const { projectID, patientID, body } = el;
+    const promise = http.put(http.apiUrl() +
       "/worklists/" +
       encodeURIComponent(worklistId) +
       "/projects/" +
       encodeURIComponent(projectID) +
       "/subjects/" +
       encodeURIComponent(patientID),
-    body
-  );
+      body);
+    promises.push(promise);
+  }
+  )
+  return promises;
 }
 
 export function deleteStudyFromWorklist(worklist, data) {
@@ -138,15 +180,25 @@ export function updateWorklistProgressManually(
 ) {
   return http.put(
     http.apiUrl() +
-      "/worklists/" +
-      encodeURIComponent(worklist) +
-      "/projects/" +
-      encodeURIComponent(project) +
-      "/subjects/" +
-      encodeURIComponent(subject) +
-      "/studies/" +
-      encodeURIComponent(study) +
-      `?annotationStatus=` +
-      annotationStatus
+    "/worklists/" +
+    encodeURIComponent(worklist) +
+    "/projects/" +
+    encodeURIComponent(project) +
+    "/subjects/" +
+    encodeURIComponent(subject) +
+    "/studies/" +
+    encodeURIComponent(study) +
+    `?annotationStatus=` +
+    annotationStatus
+  );
+}
+
+export function addAimsToWorklist(worklist, body) {
+  return http.post(
+    http.apiUrl() +
+    "/worklists/" +
+    encodeURIComponent(worklist) +
+    "/aims",
+    body
   );
 }

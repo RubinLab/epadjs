@@ -3,13 +3,19 @@
 }
 
 .aim-editor-button-group {
-  padding-top: 35px;
-  padding-left: 20px;
+  padding-top: 1rem;
+  align-items: center;
 }
 
 .aim-editor-button {
-  width: 100px;
-  margin-right: 10px;
+  width: 179px;
+  margin: 10px;
+  margin-top: 0px;
+}
+
+.aim-editor-button:hover{
+  background-color: white;
+  color: gray;
 }
 
 .base-line-selection {
@@ -20,4 +26,15 @@
 
 .base-line-selection:hover {
   color: white;
+}
+
+label{
+  padding-left: 0.3rem;
+  color:black;
+}
+
+textarea{
+  border-radius: 0.4rem;
+  margin-left: 0.8rem !important;
+  width: 94% !important;
 }

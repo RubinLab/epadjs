@@ -1,6 +1,5 @@
 import React from "react";
 import { connect } from "react-redux";
-import Switch from "react-switch";
 import Annotation from "./annotation";
 import AnnotationsLink from "./annotationsLink";
 import {
@@ -18,9 +17,9 @@ import { state } from "cornerstone-tools/store/index.js";
 
 class AnnotationsList extends React.Component {
   state = {
-    labelDisplayAll: true,
+    labelDisplayAll: false,
     annsDisplayAll: true,
-    showCalculations: true
+    showCalculations: false
   };
 
   componentDidUpdate = prevProps => {
@@ -93,26 +92,26 @@ class AnnotationsList extends React.Component {
     }
   };
 
-  handleCalculations = checked => {
-    this.setState({ showCalculations: checked }, () => {
+  handleCalculations = ({ target }) => {
+    this.setState({ showCalculations: target.checked }, () => {
       state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
       this.refreshAllViewports();
     });
   };
 
-  handleToggleAllLabels = (checked, e, id) => {
-    this.setState({ labelDisplayAll: checked });
+  handleToggleAllLabels = ({ target }, e, id) => {
+    this.setState({ labelDisplayAll: target.checked });
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
-    this.props.dispatch(toggleAllLabels(seriesUID, checked));
+    this.props.dispatch(toggleAllLabels(seriesUID, target.checked));
   };
 
-  handleToggleAllAnnotations = (checked, e, id) => {
+  handleToggleAllAnnotations = ({ target }, e, id) => {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
-    this.props.dispatch(toggleAllAnnotations(seriesUID, checked));
+    this.props.dispatch(toggleAllAnnotations(seriesUID, target.checked));
     window.dispatchEvent(
-      new CustomEvent("toggleAnnotations", { detail: { isVisible: checked } })
+      new CustomEvent("toggleAnnotations", { detail: { isVisible: target.checked } })
     );
-    this.setState({ annsDisplayAll: checked });
+    this.setState({ annsDisplayAll: target.checked });
   };
 
   handleToggleSingleLabel = e => {
@@ -136,11 +135,10 @@ class AnnotationsList extends React.Component {
     const calculations = {};
     try {
       const { openSeries, activePort } = this.props;
-      const { imageID } = this.props.openSeries[this.props.activePort];
+      const { imageID } = openSeries[activePort];
       let imageAnnotations;
-      if (this.props.openSeries[this.props.activePort].imageAnnotations) {
-        imageAnnotations = this.props.openSeries[this.props.activePort]
-          .imageAnnotations[imageID];
+      if (openSeries[activePort].imageAnnotations) {
+        imageAnnotations = openSeries[activePort].imageAnnotations[imageID];
         if (!imageAnnotations)
           imageAnnotations =
             openSeries[activePort].imageAnnotations[imageID + "&frame=1"];
@@ -156,7 +154,7 @@ class AnnotationsList extends React.Component {
           } else {
             calculations[aim.aimUid] = {};
             calculations[aim.aimUid][aim.markupUid] = {
-              calculations: [...aim.calculations],
+              calculations: aim.calculations ? [...aim.calculations] : [],
               markupType: aim.markupType
             };
             // calculations[aim.markupUid].push({ markupType: aim.markupType });
@@ -170,11 +168,11 @@ class AnnotationsList extends React.Component {
   };
 
   render = () => {
+    // try {
     const { openSeries, aimsList } = this.props;
     let { activePort } = this.props;
     activePort = activePort || activePort === 0 ? activePort : 0;
     const { imageID } = openSeries[activePort];
-    const maxHeight = window.innerHeight * 0.6;
     const seriesUID = openSeries[activePort].seriesUID;
     let annotations = {};
     let aims = aimsList[seriesUID];
@@ -210,12 +208,14 @@ class AnnotationsList extends React.Component {
           : noMarkupAnnotations;
       }
       if (imageAnnotations) {
-        for (let aim of imageAnnotations) {
-          let { aimUid } = aim;
-          annotations[aimUid]
-            ? annotations[aimUid].push(aimsList[seriesUID][aim.aimUid])
-            : (annotations[aimUid] = [aimsList[seriesUID][aim.aimUid]]);
-        }
+        try {
+          for (let aim of imageAnnotations) {
+            let { aimUid } = aim;
+            annotations?.[aimUid]
+              ? annotations[aimUid].push(aimsList[seriesUID][aim.aimUid])
+              : (annotations[aimUid] = [aimsList[seriesUID][aim.aimUid]]);
+          }
+        } catch (e) { }
       }
     }
     const calculations = this.getLabelArray();
@@ -259,64 +259,39 @@ class AnnotationsList extends React.Component {
         );
       }
     });
+    // } catch (e) {
+    //   console.log("Error: ", e);
+    // }
     return (
       <React.Fragment>
-        <div className="annotationList-container">
-          <div className="label-toggle">
-            <div className="label-toggle__text">Show Calculations</div>
-            <Switch
-              onChange={this.handleCalculations}
-              checked={this.state.showCalculations}
-              onColor="#86d3ff"
-              onHandleColor="#1986d9"
-              handleDiameter={22}
-              uncheckedIcon={false}
-              checkedIcon={false}
-              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
-              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-              height={15}
-              width={36}
-              className="react-switch"
-            />
+        <div className="annotationList-container" style={{ paddingTop: '5px' }}>
+          <div className="checkbox-row">
+            <div className="label-toggle">
+              <div className="form-check form-switch form-check-inline">
+                <input className="form-check-input" type="checkbox" role="switch" id="showAnnotations" onChange={this.handleCalculations}
+                  checked={this.state.showCalculations} />
+                <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Calculations</label>
+              </div>
+            </div>
+            <div className="label-toggle">
+              <div className="form-check form-switch form-check-inline">
+                <input className="form-check-input" type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllLabels}
+                  checked={this.state.labelDisplayAll} />
+                <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Details</label>
+              </div>
+            </div>
+            <div className="label-toggle">
+              <div className="form-check form-switch form-check-inline">
+                <input className="form-check-input" type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllAnnotations}
+                  checked={this.state.annsDisplayAll} />
+                <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Markups</label>
+              </div>
+            </div>
           </div>
-          <div className="label-toggle">
-            <div className="label-toggle__text">Show All Labels</div>
-            <Switch
-              onChange={this.handleToggleAllLabels}
-              checked={this.state.labelDisplayAll}
-              onColor="#86d3ff"
-              onHandleColor="#1986d9"
-              handleDiameter={22}
-              uncheckedIcon={false}
-              checkedIcon={false}
-              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
-              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-              height={15}
-              width={36}
-              className="react-switch"
-            />
-          </div>
-          <div className="label-toggle">
-            <div className="label-toggle__text">Show All Annotations</div>
-            <Switch
-              onChange={this.handleToggleAllAnnotations}
-              checked={this.state.annsDisplayAll}
-              onColor="#86d3ff"
-              onHandleColor="#1986d9"
-              handleDiameter={22}
-              uncheckedIcon={false}
-              checkedIcon={false}
-              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
-              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-              height={15}
-              width={36}
-              className="react-switch"
-            />
-          </div>
-          <div style={{ maxHeight, overflow: "scroll" }}>{annList}</div>
-          <AnnotationsLink imageAims={imageAims} />
         </div>
-      </React.Fragment>
+        <div>{annList}</div>
+        <AnnotationsLink imageAims={imageAims} />
+      </React.Fragment >
     );
   };
 }

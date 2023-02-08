@@ -2,19 +2,17 @@ import React from "react";
 import { connect } from "react-redux";
 import "../annotationsList.css";
 
-const handleJumpToAim = aimId => {  
-    window.dispatchEvent(
-      new CustomEvent("jumpToAimImage", { detail: aimId })
-    );
-  };
+const handleJumpToAim = aimId => {
+  window.dispatchEvent(
+    new CustomEvent("jumpToAimImage", { detail: aimId })
+  );
+};
 
 const annotationsLink = (props) => {
   const { openSeries, activePort, aimsList } = props;
   const { seriesUID } = openSeries[activePort];
   let list = [];
   let header = [];
-
-  
 
   if (aimsList[seriesUID]) {
     const seriesAims = Object.values(aimsList[seriesUID]);
@@ -24,7 +22,7 @@ const annotationsLink = (props) => {
         key="anns-header"
         id="annsHeader"
       >
-        Other aims in series
+        Other Image Annotations in Series
       </th>,
       // <th
       //   className="annsLink-table __header --cell"
@@ -35,9 +33,9 @@ const annotationsLink = (props) => {
       // </th>,
     ];
 
-    list = seriesAims.map((aim, i) => {
+    seriesAims.forEach((aim, i) => {
       if (!props.imageAims[aim.id]) {
-        return (
+        list.push((
           <tr key={aim.id} className="annsLink-table __tbody --row">
             <td
               data-id={aim.id}
@@ -49,19 +47,22 @@ const annotationsLink = (props) => {
             </td>
             {/* <td className="annsLink-table __tbody --cell2">{slideNo}</td> */}
           </tr>
-        );
+        ));
       }
     });
   }
+
+  if (!list.length)
+    return ("");
 
   return (
     <React.Fragment>
       {aimsList[seriesUID] && (
         <table className="annsLink-table">
           <thead className="annsLink-table __header">
-            <tr className="annsLink-table __header --row">{header}</tr>
+            <tr className="annsLink-table __header --row" >{header}</tr>
           </thead>
-          <tbody className="annsLink-table __tbody">{list}</tbody>
+          <tbody className="annsLink-table __tbody" style={{ backgroundColor: '#333' }}>{list}</tbody>
         </table>
       )}
     </React.Fragment>

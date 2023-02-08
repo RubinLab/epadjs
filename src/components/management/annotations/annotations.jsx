@@ -34,7 +34,7 @@ import '../menuStyle.css';
 import { getSeries } from '../../../services/seriesServices';
 import SelectSeriesModal from '../../annotationsList/selectSerieModal';
 
-const mode = sessionStorage.getItem('mode');
+let mode;
 const maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
 const messages = {
@@ -52,6 +52,7 @@ const messages = {
 };
 
 class Annotations extends React.Component {
+  mode = sessionStorage.getItem('mode');
   state = {
     annotations: [],
     projectList: [],

@@ -14,10 +14,13 @@ import {
 import { FiMinimize2 } from 'react-icons/fi';
 import ReactTooltip from 'react-tooltip';
 import { BarLoader } from 'react-spinners';
+import Worklists from './addWorklist';
+import Projects from './addToProject';
 
-const mode = sessionStorage.getItem('mode');
+let mode;
 
 const toolBar = props => {
+  mode = sessionStorage.getItem('mode');
   const { project } = props;
   const noUpload = project === 'all' || project === 'nonassigned';
   const disabledStyle = {
@@ -178,7 +181,9 @@ const toolBar = props => {
       </div>
       {/* </div>
       )} */}
-      <div
+      <Worklists parent="patientList" showAddTo={props.showAddTo} project={props.project} />
+      {mode !== 'lite' && <Projects parent="patientList" showAddTo={props.showAddTo} onSave={props.onSaveToProject} />}
+      {/* <div
         className={
           props.showAddTo && project !== 'all'
             ? 'searchView-toolbar__icon worklist-icon'
@@ -201,9 +206,9 @@ const toolBar = props => {
         >
           <span>Add to worklist</span>
         </ReactTooltip>
-      </div>
+      </div> */}
 
-      {mode !== 'lite' && (
+      {/* {mode !== 'lite' && (
         <div
           className={
             props.showAddTo
@@ -228,7 +233,7 @@ const toolBar = props => {
             <span>Add to project</span>
           </ReactTooltip>
         </div>
-      )}
+      )} */}
       {/* <div className="searchView-toolbar__icon">
         <div>
           <TiPencil
@@ -294,6 +299,7 @@ const toolBar = props => {
           </>
         )}
       </div>
+
     </div>
   );
 };

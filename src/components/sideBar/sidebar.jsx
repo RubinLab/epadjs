@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { FiZoomIn } from "react-icons/fi";
+import { BsArrowBarLeft, BsArrowBarRight } from "react-icons/bs";
 // import { Tabs, Nav, Content } from "react-tiny-tabs";
 import WorklistSelect from "./worklistSelect";
 import { getProjects } from "../../services/projectServices";
@@ -22,19 +23,19 @@ import {
   getTemplates
 } from "../annotationsList/action";
 // import { getPacs } from "../../services/pacsServices";
-import "./w2.css";
+import "./style.css";
 // import { throws } from "assert";
 import SidebarContent from "./sidebarContent";
 import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
+import './style.css';
 
-const mode = sessionStorage.getItem("mode");
+let mode;
 
 class Sidebar extends Component {
   constructor(props) {
     super(props);
-    this.handleClose = this.handleClose.bind(this);
-    this.handleOpen = this.handleOpen.bind(this);
+    mode = sessionStorage.getItem("mode");
     this.handleRoute = this.handleRoute.bind(this);
 
     this.state = {
@@ -42,29 +43,33 @@ class Sidebar extends Component {
       worklistsAssigned: [],
       worklistsCreated: [],
       pacs: [],
-      width: mode === "thick" ? "200px" : "0",
-      marginLeft: mode === "thick" ? "200px" : "0",
-      buttonDisplay: mode === "thick" ? "none" : "block",
-      open: mode === "thick",
+      width: mode !== "lite" ? "205px" : "0",
+      tabMarginLeft: "170px",
+      marginLeft: mode !== "lite" ? "205px" : "0",
+      buttonDisplay: mode !== "lite" ? "none" : "block",
+      open: mode !== "lite",
       index: 0,
       pid: null,
       progressView: [false, false],
       selected: null,
       type: "",
-      height: 200
+      height: 200,
+      tab: 'projects'
     };
   }
 
   componentDidMount = async () => {
+    mode = sessionStorage.getItem("mode");
     try {
-      this.setTabHeight();
+      // this.setTabHeight();
       const projects = await this.getProjectsData();
       this.setStateProjectData(projects, true);
       this.getWorklistandProgressData();
-      window.addEventListener("resize", this.setTabHeight);
+      // window.addEventListener("resize", this.setTabHeight);
     } catch (error) {
       console.error(error);
     }
+    window.addEventListener("refreshProjects", this.refreshProjects);
   };
 
   setTabHeight = () => {
@@ -78,12 +83,19 @@ class Sidebar extends Component {
   };
 
   componentWillUnmount = () => {
-    window.removeEventListener("resize", this.setTabHeight);
+    // window.removeEventListener("resize", this.setTabHeight);
+    window.removeEventListener("refreshProjects", this.getProjectsData);
   };
+
+  refreshProjects = async () => {
+    const projects = await this.getProjectsData();
+    this.setStateProjectData(projects, true);
+  }
 
   getProjectsData = async () => {
     try {
       let { data: projects } = await getProjects();
+      console.log()
       if (projects.length > 0) {
         // get the project all and unassigned
         // push them to the end of the projects
@@ -91,18 +103,21 @@ class Sidebar extends Component {
         let nonassignedIndex;
         let all = [];
         let nonassigned = [];
-        projects.forEach((el, i) => {
-          if (el.id === "all") allIndex = i;
-          if (el.id === "nonassigned") nonassignedIndex = i;
-        });
+        if (mode !== 'teaching') {
+          projects.forEach((el, i) => {
+            if (el.id === "all") allIndex = i;
+            if (el.id === "nonassigned") nonassignedIndex = i;
+          });
 
-        if (allIndex !== undefined) all = projects.splice(allIndex, 1);
+          if (allIndex !== undefined) all = projects.splice(allIndex, 1);
 
-        nonassignedIndex !== undefined && nonassignedIndex > allIndex
-          ? (nonassigned = projects.splice(nonassignedIndex - 1, 1))
-          : (nonassigned = projects.splice(nonassignedIndex + 1, 1));
+          nonassignedIndex !== undefined && nonassignedIndex > allIndex
+            ? (nonassigned = projects.splice(nonassignedIndex - 1, 1))
+            : (nonassigned = projects.splice(nonassignedIndex + 1, 1));
 
-        projects = projects.concat(all, nonassigned);
+          projects = projects.concat(all, nonassigned);
+        }
+
 
         // const pid = projects[0].id;
         // this.setState({ projects, pid, selected: pid });
@@ -135,7 +150,8 @@ class Sidebar extends Component {
     if (this.props.openSeries.length === 0 && setPid) {
       const pid = projects[0].id;
       this.setState({ pid, selected: pid });
-      this.props.history.push(`/list/${pid}`);
+      if (mode !== 'teaching')
+        this.props.history.push(`/list/${pid}`);
       this.props.getPidUpdate(pid);
     }
   };
@@ -226,29 +242,37 @@ class Sidebar extends Component {
     } catch (error) {
       console.error(error);
     }
+    // console.log(this.props.openClose, prevProps.openClose);
+    // if (this.props.shouldClose === "closed" && prevProps.openClose === "open") {
+    //   this.setState({ open: false });
+    //   this.handleOpenClose();
+    // }
   };
 
-  handleClose = () => {
-    this.setState({
-      width: "0",
-      marginLeft: "0",
-      buttonDisplay: "block",
-      open: false
-    });
-  };
-
-  handleOpen = () => {
-    this.setState({
-      width: "200px",
-      marginLeft: "200px",
-      buttonDisplay: "none",
-      open: true
-    });
+  handleOpenClose = () => {
+    const { open } = this.state;
+    if (open) {
+      this.setState({
+        width: "30px",
+        marginLeft: "30px",
+        tabMarginLeft: "0px",
+        buttonDisplay: "block",
+        open: false
+      });
+    } else {
+      this.setState({
+        width: "205px",
+        marginLeft: "205px",
+        tabMarginLeft: "170px",
+        buttonDisplay: "none",
+        open: true
+      });
+    }
   };
 
   handleRoute = (type, id) => {
     let index;
-    const isThick = mode === "thick";
+    const isThick = mode !== "lite";
     this.setState({ type });
     this.setState({ selected: null });
     this.props.dispatch(clearSelection());
@@ -256,10 +280,13 @@ class Sidebar extends Component {
       this.collapseAll();
     }
     if (type === "project" && this.props.type === "search") {
-      this.props.history.push(`/list/${id}`);
       this.setState({ index: 0 });
       this.props.getPidUpdate(id);
       this.props.clearTreeExpand();
+      if (mode === 'teaching')
+        this.props.history.push(`/search`);
+      else
+        this.props.history.push(`/list/${id}`);
     } else if (type === "project" && this.props.type === "flex") {
       this.props.history.push(`/flex/${id}`);
       this.setState({ index: 0 });
@@ -279,7 +306,7 @@ class Sidebar extends Component {
     const state = [...this.state.progressView];
     state[index] = open;
     this.setState({ progressView: state });
-    const conditionalIndex = mode === "thick" ? 2 : 1;
+    const conditionalIndex = mode !== "lite" ? 2 : 1;
     if (open) this.setState({ index: conditionalIndex });
   };
 
@@ -289,7 +316,7 @@ class Sidebar extends Component {
   };
 
   renderNav = () => {
-    if (mode === "thick") {
+    if (mode !== "lite") {
       return [
         <div onClick={this.collapseAll} key="project">
           <FiZoomIn />
@@ -315,38 +342,29 @@ class Sidebar extends Component {
       let { pathname } = this.props.location;
       pathname = pathname.split("/").pop();
       // const pid = pathname.pop();
-      if (mode === "thick") {
-        const projectsList = projects.map(project => {
+      if (mode !== "lite") {
+        const projectsList = projects.map(({ id, name, numberOfSubjects }) => {
           const matchProject =
-            selected === project.id ||
-            pathname === project.id ||
-            this.props.pid === project.id;
-          const className = matchProject
-            ? "sidebar-row __selected"
-            : "sidebar-row";
+            selected === id ||
+            pathname === id ||
+            this.props.pid === id;
+          const styling = matchProject
+            ? "element_selected"
+            : "element";
           return (
-            <tr key={project.id} className={className}>
-              <td>
-                <p
-                  onClick={() => {
-                    this.handleRoute("project", project.id);
-                    this.props.getPidUpdate(project.id);
-                    this.setState({ selected: project.id });
-                  }}
-                  // style={{ padding: "0.6rem" }}
-                >
-                  {project.name}
-                  <span id="subjectCount" className="badge badge-secondary">
-                    {project.numberOfSubjects}
-                  </span>
-                </p>
-              </td>
-            </tr>
+            <li key={id} className={matchProject ? "element_selected" : "element_de_selected"} onClick={() => {
+              this.handleRoute("project", id);
+              this.props.getPidUpdate(id);
+              this.setState({ selected: id });
+            }} style={{ padding: "0.2rem" }}>
+              {name}
+              <div className={'element_number'}>
+                {numberOfSubjects}
+              </div>
+            </li>
           );
         });
-        return (
-          <SidebarContent key="projectContent">{projectsList}</SidebarContent>
-        );
+        return <ul className={'element'} style={{ listStyle: 'none' }}> {projectsList}</ul >;
       }
     } catch (err) {
       console.error(err);
@@ -355,33 +373,24 @@ class Sidebar extends Component {
 
   renderWorklists = () => {
     const { type, selected } = this.state;
-    const worklists = this.state.worklistsAssigned.map(worklist => {
-      const className =
-        worklist.workListID === selected && type === "worklist"
-          ? "sidebar-row __selected"
-          : "sidebar-row";
+    const worklists = this.state.worklistsAssigned.map(({ workListID, name, projectIDs }) => {
+      const isSelected = (workListID === selected && type === "worklist");
       return (
-        <tr key={worklist.workListID} className={className}>
-          <td>
-            <p
-              onClick={() => {
-                this.handleRoute("worklist", worklist.workListID);
-                this.setState({ selected: worklist.workListID });
-              }}
-              style={{ padding: "0.6rem" }}
-            >
-              {worklist.name}
-              {worklist.projectIDs.length ? (
-                <span className="badge badge-secondary worklist">
-                  {worklist.projectIDs.length}
-                </span>
-              ) : null}
-            </p>
-          </td>
-        </tr>
+        <li key={workListID} className={isSelected ? 'element_selected' : 'element_de_selected'}
+          onClick={() => {
+            this.handleRoute("worklist", workListID);
+            this.setState({ selected: workListID });
+          }} style={{ padding: "0.4rem" }}>
+          {name}
+          {projectIDs.length ? (
+            <div className="element_number">
+              {projectIDs.length}
+            </div>
+          ) : null}
+        </li>
       );
     });
-    return <SidebarContent key="worklistContent">{worklists}</SidebarContent>;
+    return <ul className={'element'} style={{ listStyle: 'none' }}> {worklists}</ul >;
   };
 
   renderProgress = () => {
@@ -389,11 +398,12 @@ class Sidebar extends Component {
     return (
       <div>
         <Collapsible
+          open={true}
           trigger="Created by me"
           onOpen={() => this.handleCollapse(0, true)}
           onClose={() => this.handleCollapse(0, false)}
           transitionTime={100}
-          // open={progressView[0]}
+        // open={progressView[0]}
         >
           <WorklistSelect
             list={this.state.worklistsCreated}
@@ -403,11 +413,12 @@ class Sidebar extends Component {
           />
         </Collapsible>
         <Collapsible
+          open={true}
           trigger="Assigned to me"
           onOpen={() => this.handleCollapse(1, true)}
           onClose={() => this.handleCollapse(1, false)}
           transitionTime={100}
-          // open={progressView[1]}
+        // open={progressView[1]}
         >
           <WorklistSelect
             list={this.state.worklistsAssigned}
@@ -429,7 +440,7 @@ class Sidebar extends Component {
         activeKey={this.state.activeTab}
         onSelect={index => this.setState({ index })}
       >
-        {mode === "thick" ? (
+        {mode !== "lite" ? (
           <Tab
             eventKey="0"
             title="Projects"
@@ -481,41 +492,53 @@ class Sidebar extends Component {
     // }
   };
   render = () => {
-    const { progressView } = this.state;
+    const { progressView, open, tab, marginLeft, width, tabMarginLeft } = this.state;
     return (
-      <React.Fragment>
-        <div
-          id="leftSidebar"
-          className="sidenav"
-          style={{ width: this.state.width }}
-        >
-          <button
-            to="#"
-            className="closebtn __leftBar"
-            onClick={this.handleClose}
-          >
-            <FaArrowAltCircleLeft />
-          </button>
-          {this.renderContent()}
+      <div>
+        <div className={open ? "left-open" : "left-closed"} style={{ width: width }}>
+          {open && (
+            <div className="left-editor-display">
+              <div className="tab-content" id="myTabContent">
+                <div className="tab-pane fade show active" id="projects-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabIndex="0">
+                  {tab === 'projects' &&
+                    this.renderProjects()
+                  }
+                  {tab === 'worklist' &&
+                    this.renderWorklists()
+                  }
+                  {tab === 'progress' &&
+                    this.renderProgress()
+                  }
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="drawer-control-left" onClick={this.handleOpenClose}>{open ? <BsArrowBarLeft className="bi bi-arrow-bar-left" /> : <BsArrowBarRight className="bi bi-arrow-bar-left" />}</div>
+          <div className={open ? "left-tabs" : "left-tabs-closed"} style={{ marginLeft: tabMarginLeft }}>
+            <ul className="nav nav-tabs flex-column" style={{ borderLeft: 'none', padding: '0px' }} id="myTab" role="tablist">
+              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation">
+                <button className={tab === 'projects' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'projects' })} id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects-tab-pane" type="button" role="tab" aria-controls="projects-tab-pane" aria-selected="false">Projects</button>
+              </li>
+              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation">
+                <button className={tab === 'worklist' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'worklist' })} id="worklists-tab" data-bs-toggle="tab" data-bs-target="#worklists-tab-pane" type="button" role="tab" aria-controls="worklists-tab-pane" aria-selected="true">Worklists</button>
+              </li>
+              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation">
+                <button className={tab === 'progress' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'progress' })} id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress-tab-pane" type="button" role="tab" aria-controls="progress-tab-pane" aria-selected="false">Progress</button>
+              </li>
+            </ul>
+          </div>
+
         </div>
         <div
-          className={this.state.open ? "mainView" : "mainView-closed"}
+          className={open ? "mainView" : "mainView-closed"}
           style={{
-            marginLeft: this.state.marginLeft,
-            height: "calc(100% - 50px)"
+            marginLeft: marginLeft
           }}
         >
-          <button
-            id="openNav"
-            style={{ display: this.state.buttonDisplay }}
-            onClick={this.handleOpen}
-          >
-            &#9776;
-          </button>
           {this.props.children}
           {/* {this.props.activePort !== null ? <AnnotationsList /> : null} */}
         </div>
-      </React.Fragment>
+      </div >
     );
   };
 }

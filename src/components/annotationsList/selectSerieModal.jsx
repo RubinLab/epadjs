@@ -2,8 +2,10 @@ import React from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
+import { toast } from "react-toastify";
 import ReactTooltip from "react-tooltip";
-import { Modal } from "react-bootstrap";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 import {
   clearGrid,
   getWholeData,
@@ -14,14 +16,19 @@ import {
 import SelectionItem from "./containers/selectionItem";
 import { FaRegCheckSquare } from "react-icons/fa";
 import { getSeries, setSignificantSeries } from "../../services/seriesServices";
+import { getTemplate } from "../../services/templateServices";
+import { uploadAim } from "services/annotationServices";
 import "./annotationsList.css";
-import { isSupportedModality } from "../../Utils/aid.js";
 import { extendWith } from "lodash";
 import { TiEject } from "react-icons/ti";
-
-const message = {
-  title: "Not enough ports to open series"
-};
+import * as questionaire from "../aimEditor/parseClass";
+import { getUserForAim } from "../aimEditor/Helpers";
+import { decryptAndAdd } from "services/decryptUrlService";
+import { getSingleStudy, deleteStudy } from '../../services/studyServices';
+import { Aim, enumAimType } from "aimapi";
+import { teachingFileTempUid, teachingFileTempCode } from '../../constants';
+import { isSupportedModality } from '../../Utils/aid';
+import { DISP_MODALITIES } from '../../constants';
 
 class selectSerieModal extends React.Component {
   // _isMounted = false;
@@ -36,6 +43,7 @@ class selectSerieModal extends React.Component {
       list: []
     };
     this.maxPort = parseInt(sessionStorage.getItem("maxPort"));
+    this.mode = sessionStorage.getItem("mode");
   }
 
   //get the serie list
@@ -56,12 +64,43 @@ class selectSerieModal extends React.Component {
     this.setPreSelecteds();
     const limit = this.updateLimit();
     this.setState({ limit });
-  };
 
+    // teaching file save related
+    const { isTeachingFile } = this.props;
+    if (isTeachingFile) {
+      const element = document.getElementById("questionaire");
+      const speciality = document.getElementById("speciality");
+      const anatomy = document.getElementById("anatomy");
+      const diagnosis = document.getElementById("diagnosis");
+
+      this.semanticAnswers = new questionaire.AimEditor(
+        element,
+        // this.validateForm,
+        this.renderButtons,
+        "",
+        {},
+        null,
+        true, // is teachinng flag
+        { speciality, anatomy, diagnosis }, // the new div which holds only teaching components for aim editor
+        "#ccc"
+      );
+      const { data: templates } = await getTemplate(teachingFileTempUid);
+      this.semanticAnswers.loadTemplates({
+        default: teachingFileTempCode,
+        all: [templates],
+      });
+      this.semanticAnswers.createViewerWindow();
+    };// end teaching file related part
+  }
   componentWillUnmount = () => {
     this._isMounted = false;
   };
 
+  // These two empty functions are necessary for aim editor
+  renderButtons = () => {
+  };
+  validateForm = () => {
+  };
 
   getSerieListData = async (projectID, patientID, studyUID) => {
     const { data: series } = await getSeries(projectID, patientID, studyUID);
@@ -106,20 +145,11 @@ class selectSerieModal extends React.Component {
     }
   }
 
-  displaySelection = async () => {
-    let studies = Object.values(this.props.seriesPassed);
+  setSignificantSeries = (series) => {
     const { selectedToDisplay } = this.state;
-    let series = [];
     let significantSeries = [];
     let significanceOrder = 1;
-    // TODO: what is the logic here?
-    studies.forEach(arr => {
-      series = series.concat(arr);
-    });
     let significanceSet = series.some(serie => serie.significanceOrder > 0);
-
-    // let series = Object.values(this.props.seriesPassed)[0];
-    //concatanete all arrays to getther
     for (let key of Object.keys(selectedToDisplay)) {
       if (!significanceSet) {
         significantSeries.push({
@@ -128,37 +158,40 @@ class selectSerieModal extends React.Component {
         });
         significanceOrder++;
       }
-      let serie = this.findSerieFromSeries(key, series);
-      this.props.dispatch(addToGrid(serie, serie.aimID));
-      if (this.state.selectionType === "aim") {
-        this.props.dispatch(getSingleSerie(serie, serie.aimID));
-      } else {
-        this.props.dispatch(getSingleSerie(serie));
-      }
     }
-    // for (let i = 0; i < Object.keys(selectedToDisplay).length; i++) {
-    //   // if (this.state.selectedToDisplay[i]) {
-    //   // If significance order is not set before we 
-    //   if (!significanceSet) {
-    //     significantSeries.push({
-    //       seriesUID: series[i].seriesUID,
-    //       significanceOrder
-    //     });
-    //     significanceOrder++;
-    //   }
-    //   this.props.dispatch(addToGrid(series[i], series[i].aimID));
-    //   if (this.state.selectionType === "aim") {
-    //     this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
-    //   } else {
-    //     this.props.dispatch(getSingleSerie(series[i]));
-    //   }
-    //   // }
-    // }
     const { projectID, patientID, studyUID, subjectID } = series[0];
     const subID = patientID ? patientID : subjectID;
 
     if (!significanceSet) {
       setSignificantSeries(projectID, subID, studyUID, significantSeries);
+    }
+  }
+
+  displaySelection = async (aimID) => {
+    let studies = Object.values(this.props.seriesPassed);
+    const { selectedToDisplay } = this.state;
+    let series = [];
+    // TODO: what is the logic here?
+    studies.forEach(arr => {
+      series = series.concat(arr);
+    });
+    this.setSignificantSeries(series);
+
+    //concatanete all arrays to getther
+    for (let key of Object.keys(selectedToDisplay)) {
+      let serie = this.findSerieFromSeries(key, series);
+      if (aimID)
+        this.props.dispatch(addToGrid(serie, aimID));
+      else
+        this.props.dispatch(addToGrid(serie, serie.aimID));
+      if (this.state.selectionType === "aim") {
+        this.props.dispatch(getSingleSerie(serie, serie.aimID));
+      } else {
+        if (aimID)
+          this.props.dispatch(getSingleSerie(serie, aimID));
+        else
+          this.props.dispatch(getSingleSerie(serie));
+      }
     }
     this.props.history.push("/display");
     this.handleCancel();
@@ -186,8 +219,6 @@ class selectSerieModal extends React.Component {
 
   setPreSelecteds = () => {
     const { seriesPassed, openSeries } = this.props;
-    if (openSeries.length === this.maxPort)
-      return;
     let selectedToDisplay = {};
     let selectedCount = 0;
     let series = Object.values(seriesPassed);
@@ -263,6 +294,7 @@ class selectSerieModal extends React.Component {
 
       for (let k = 0; k < series[i].length; k++) {
         const { seriesUID } = series[i][k];
+        let isSignificant = false;
         let alreadyOpen = this.isSerieOpen(seriesUID);
         let disabled =
           !selectedToDisplay[seriesUID] &&
@@ -270,6 +302,7 @@ class selectSerieModal extends React.Component {
         let desc = series[i][k].seriesDescription || "Unnamed Serie";
         if (series[i][k].significanceOrder) {
           desc = desc + " (S)";
+          isSignificant = true;
           significantExplanation = true;
         }
         item = alreadyOpen ? (
@@ -298,44 +331,142 @@ class selectSerieModal extends React.Component {
             index={count + k}
             disabled={disabled}
             key={k + "_" + seriesUID}
-            isChecked={selectedToDisplay[seriesUID]}
+            isChecked={selectedToDisplay[seriesUID] || false}
+            isSignificant={isSignificant}
           />
         );
         innerList.push(item);
       }
       selectionList.push(
         <div key={keys[i]}>
-          <div className="serieSelection-title">{this.getTitle(series[i][0])}</div>
+          {this.mode !== "teaching" && (<div className="serieSelection-title">{this.getTitle(series[i][0])}</div>)}
+          {this.mode === "teaching" && (<p></p>)}
           <div>{innerList}</div>
         </div>
       );
       count += series[i].length;
     }
     if (significantExplanation)
-      selectionList.push(<div><br />(S): Significant series</div>);
+      selectionList.push(<div key={"explanation"} className={"significant-series"}><br />(S): Significant series</div>);
     return selectionList;
   };
 
+  saveTeachingFile = async () => {
+    if (this.semanticAnswers.checkFormSaveReady({ isTeachingModal: true })) {
+      window.alert(
+        "Please fill all required fields!"
+      );
+      return -1;
+    }
+    const { encrUrlArgs, decrArgs } = this.props;
+    const { projectID, patientID, studyUID } = decrArgs;
+    let updatedAimId, trackingUId; //should be undefined for creating new aim
+    if (!encrUrlArgs) {
+      console.error("Error saving teaching file. No encrypted argument present");
+      return;
+    }
+
+    await decryptAndAdd(encrUrlArgs);
+    const answers = this.semanticAnswers.saveAim();
+    answers.name.value = "Teaching File";
+    const { data: study } = await getSingleStudy(studyUID);
+    let examTypes;
+    ({ examTypes } = study);
+    if (examTypes?.length === 1 && examTypes[0].includes("\\")) {
+      examTypes = examTypes[0].split("\\");
+    }
+    study.examTypes = examTypes.filter(type => DISP_MODALITIES.includes(type));
+    study.birthdate = study.birthdate.split('-').join('');
+    study.insertDate = study.insertDate.split('-').join('');
+    study.studyDate = study.studyDate.split('-').join('');
+    const aimData = { study, answers, user: getUserForAim() };
+    const aim = new Aim(
+      aimData,
+      enumAimType.studyAnnotation,
+      updatedAimId,
+      trackingUId
+    );
+    const { root: result } = aim.uniqueIdentifier;
+    const aimJson = aim.getAim();
+    let aimSaved = JSON.parse(aimJson);
+    const isUpdate = false;
+
+    return uploadAim(aimSaved, projectID, isUpdate)
+      .then(async () => {
+        toast.success("Teaching File succesfully saved.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        let studies = Object.values(this.props.seriesPassed);
+        let series = [];
+        studies.forEach(arr => {
+          series = series.concat(arr);
+        });
+        await this.setSignificantSeries(series);
+        window.dispatchEvent(new Event("refreshProjects"));
+        return result;
+      })
+      .catch((error) => {
+        deleteStudy({ projectID, patientID, studyUID }, '?all=true');
+        alert(
+          "Teaching file couldn't be saved! More information about the error can be found in the logs."
+        );
+        console.error(error);
+      });
+  }
+
+  saveTeachingFileAndDisplay = async () => {
+    let result = await this.saveTeachingFile();
+    if (result === -1)
+      return;
+
+    this.displaySelection(result);
+  }
+
   render = () => {
-    const { openSeries } = this.props;
+    const { openSeries, isTeachingFile } = this.props;
+    const title = isTeachingFile ? "Create STELLA Teaching File" : "Series Selection Window"
     const selections = Object.keys(this.state.selectedToDisplay);
     const list = this.renderSelection();
     return (
-      // <Modal.Dialog dialogClassName="alert-selectSerie">
-      <Modal.Dialog id="modal-fix">
-        <Modal.Header>
-          <Modal.Title className="selectSerie__header">
-            {message.title}
+      <Modal.Dialog id="series-modal" className="series-modal">
+        < Modal.Header className="select-serie-header">
+          <Modal.Title className="select-serie-title">
+            {title}
           </Modal.Title>
-        </Modal.Header>
-        <Modal.Body
-          className="selectSerie-container"
-          style={{ textAlign: "start" }}
-        >
-          <div>Maximum {this.maxPort} series can be viewed at a time.</div>
+        </Modal.Header >
+        <Modal.Body className="select-serie-body">
+          {isTeachingFile &&
+            (
+              <>
+                <div id="stella-beta-warning">Warning! Beta Software, Not For Routine Use During Preclinical Testing</div>
+                <div id="questionaire" className={"field-grid"}>
+                  <row>
+                    <div id="anatomy"></div>
+                    <div id="diagnosis"></div>
+                  </row>
+                  <row>
+                    <div id="speciality"></div>
+                    <div id="comment">
+                      {/* <i class="dropdown icon"></i>
+                  <div className="title active" style={{ color: "rgb(204, 204, 204)", fontSize: "13px" }}>Narrative</div>
+                  <div>
+                  <input className="comment ui input"></input>
+                </div> */}
+                    </div>
+                  </row>
+                </div>
+              </>
+            )}
+          <br />
+          <div className={"max-series"}>Please select up to {this.maxPort} series to display:</div>
           {openSeries.length > 0 && (
             <div>
-              You can close open series to open veiwport space for new one.
+              Four viewports in use - close some or all to open new series.
               <br />
               <button
                 size="lg"
@@ -356,13 +487,24 @@ class selectSerieModal extends React.Component {
           {this.state.limit > this.maxPort && !openSeries.length && (
             <div>Please select only {this.maxPort} series to open!</div>
           )}
-          <div>{list}</div>
+          <div style={{ paddingLeft: "0.5em", maxHeight: "500px", overflowY: "auto" }}>{list}</div>
         </Modal.Body>
-        <Modal.Footer className="modal-footer__buttons">
-          <button onClick={this.displaySelection} disabled={!selections.length}>Display selection</button>
-          <button onClick={this.handleCancel}>Cancel</button>
+        <Modal.Footer className="select-serie-footer">
+          {isTeachingFile && (
+            <div>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) { this.handleCancel(); this.props.onSave() } }}>Save Teaching File</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()}>Save Teaching File & Display</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Discard</Button>
+            </div>
+          )}
+          {!isTeachingFile && (
+            <div>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.displaySelection()} disabled={!selections.length}>Display selection</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Cancel</Button>
+            </div>
+          )}
         </Modal.Footer>
-      </Modal.Dialog>
+      </Modal.Dialog >
     );
   };
 }
@@ -373,7 +515,8 @@ const mapStateToProps = state => {
     selectedSeries: state.annotationsListReducer.selectedSeries,
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
     patients: state.annotationsListReducer.patients,
-    openSeries: state.annotationsListReducer.openSeries
+    openSeries: state.annotationsListReducer.openSeries,
+    activePort: state.annotationsListReducer.activePort,
   };
 };
 

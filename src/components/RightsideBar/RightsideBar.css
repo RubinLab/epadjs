@@ -1,10 +1,10 @@
 .rightsidenav {
-  height: calc(100% - 40px);
+  height: calc(100% - 64px);
   width: 0;
   position: fixed;
   z-index: 1;
   right: 0;
-  background-color: #3a3f44;
+  background-color: #777;
   overflow-x: hidden;
   transition: 0.4s;
 }
@@ -47,9 +47,14 @@
 } */
 
 .Collapsible__contentInner {
-  padding: 10px;
+  /* padding: 10px; */
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-top: 0;
+  width: inherit;
+}
+
+.Collapsible__contentOuter{
+  /* width: inherit; */
 }
 
 .Collapsible__contentInner p {
@@ -74,7 +79,7 @@
   color: white;
 }
 
-.Collapsible__trigger.is-open {
+/* .Collapsible__trigger.is-open {
   display: block;
   font-weight: 400;
   text-decoration: none;
@@ -83,6 +88,19 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 10px;
   background: #861737;
+  color: white;
+  width: inherit;
+} */
+
+.Collapsible__trigger.is-open {
+  display: block;
+  font-weight: 400;
+  text-decoration: none;
+  color: #3a3f44;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  background: #3a3f44;
   color: white;
 }
 
@@ -117,5 +135,105 @@
 
 .AimEditor-Wrapper {
   overflow-y: auto;
-  height: 400px;
+  padding-left: 0.5rem;
+  height: calc(100% - 0px);
+}
+
+.right-tab-menu {
+  max-width: 35px;
+  height: 100vh;
+  right: 0;
+  position: fixed;
+  background-color: #555;
+  margin-left: 7px;
+  margin-right: 0px;
+  font-size: .9em;
+  padding: 10px;
+  padding-top: 20px;
+  z-index: 100;
+  transition: 0.4s;
+}
+.drawer-control {
+  color: #ffffff;
+  text-align: left;
+}
+.right-tabs{
+  transform: rotate(90deg);
+  padding-top: 2em;
+  padding-bottom: 21px;
+  color: #fff;
+  text-shadow: 1px 2px 0px rgba(0, 0, 0, 0.25);
+}
+
+.form-check-input:checked {
+  background-color: #2541D8 !important;
+  border-color: #2541D8 !important;
+}
+.form-switch .form-check-input {
+  border: #777 1px solid !important;
+}
+
+.form-check-inline {
+  display: inline-block;
+  margin-right: 3px !important;
+}
+
+.form-check-label{
+  font-size: 12px;
+  color:black;
+}
+.right-editor-display::-webkit-scrollbar {
+  width: 7px;
+}
+ 
+.right-editor-display::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+ 
+.right-editor-display::-webkit-scrollbar-thumb {
+  background-color: #333;
+  outline: 1px solid #777;
+}
+
+.checkbox-row{
+  display: flex;
+}
+
+.annotation-text {
+  color: #fff;
+  font-size: 0.9rem;
+  text-transform: capitalize;
+}
+.annotation-text ul {
+  padding-left: 1.2rem !important;
+}
+.annotation-text ul li{
+  line-height: 1.2rem !important;
+}
+.annotation-text ul li b{
+  color: #fff47e;
+  font-weight: 300;
+}
+.annotation-back {
+  background-color: #555;
+  display:block;
+  padding: 7px;
+  margin: 0px 1rem;
+}
+
+.annotation-header{
+  margin: 0px 0.5rem;
+  margin-top: 0.5rem;
+  text-transform: capitalize;
+  padding: 7px;
+  color: white;
+  font-size: 0.95rem;
+  background-color: #555555;
+  font-family: "Open-Sans", sans-serif;
+  padding: 7px;
+}
+
+.clickable-icon{
+  font-size: 1.2rem;
+  margin-right: 5px;
 }

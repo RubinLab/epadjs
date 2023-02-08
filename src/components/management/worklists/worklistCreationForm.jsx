@@ -1,12 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 import { toast } from "react-toastify";
 import FormButton from "../users/formButton";
 import UserList from "./userList";
 import RequirementForm from "./requirementForm";
 import { saveWorklist } from "../../../services/worklistServices";
 import "../menuStyle.css";
+import "../../infoMenu/infoMenu.css";
+
+let mode;
 
 const messages = {
   fillRequiredFields: "Please fill the required fields",
@@ -17,16 +20,21 @@ const messages = {
 };
 
 class WorklistCreationForm extends React.Component {
-  state = {
-    page: 0,
-    assigneeList: {},
-    name: "",
-    id: "",
-    description: "",
-    duedate: "",
-    error: "",
-    requirements: {}
-  };
+  constructor(props) {
+    super(props);
+    mode = sessionStorage.getItem('mode');
+    this.state = {
+      page: 0,
+      assigneeList: {},
+      name: "",
+      id: "",
+      description: "",
+      duedate: "",
+      error: "",
+      requirements: {},
+      isSelectedAll: false,
+    };
+  }
 
   goPrevPage = () => {
     const { page } = this.state;
@@ -156,12 +164,45 @@ class WorklistCreationForm extends React.Component {
     this.setState({ [name]: value.trim() });
   };
 
+  handleNameChange = (e) => {
+    const name = e.target.value;
+    const idInput = document.getElementById("addWorklist-id");
+    const newId = name.replace(/[^a-z0-9_]/gi, '');
+    idInput.value = name.replace(/[^a-z0-9_]/gi, '');
+    this.setState({ id: newId });
+  }
+
   selectUser = e => {
     const assigneeList = { ...this.state.assigneeList };
     const { name, checked } = e.target;
     checked ? (assigneeList[name] = true) : delete assigneeList[name];
-    this.setState({ assigneeList });
+    this.setState({ assigneeList }, this.checkAllSelected);
   };
+
+  selectAll = () => {
+    const { users } = this.props;
+    const assigneeList = {};
+    if (!this.state.isSelectedAll) {
+      users.forEach(({ username }) => {
+        assigneeList[username] = true;
+      });
+      this.setState({ assigneeList, isSelectedAll: true });
+    } else {
+      users.forEach(({ username }) => {
+        assigneeList[username] = false;
+      })
+      console.log("Assignee list", assigneeList);
+      this.setState({ assigneeList, isSelectedAll: false });
+    }
+  }
+
+  checkAllSelected = () => {
+    const { assigneeList } = this.state;
+    const { users } = this.props;
+    if (Object.keys(assigneeList).length === users.length)
+      this.setState({ isSelectedAll: true });
+    else this.setState({ isSelectedAll: false });
+  }
 
   handleRequirementFormInput = e => {
     const { name, value } = e.target;
@@ -226,23 +267,23 @@ class WorklistCreationForm extends React.Component {
     return (
       // <Modal.Dialog dialogClassName="add-worklist__modal">
       <Modal.Dialog id="modal-fix" className="in-modal">
-        <Modal.Header>
-          <Modal.Title>New worklist</Modal.Title>
+        <Modal.Header className="modal-header">
+          <Modal.Title>Create worklist</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="add-worklist__mbody">
+        <Modal.Body className="notification-modal">
           {!this.state.page && (
             <form className="add-worklist__modal--form">
-              <h5 className="add-worklist__modal--label">Name*</h5>
+              <label className="add-worklist__modal--label">Name*</label>
               <input
                 onMouseDown={e => e.stopPropagation()}
                 className="add-worklist__modal--input"
                 name="name"
                 type="text"
-                onChange={this.handleFormInput}
+                onChange={(e) => { this.handleFormInput(e); this.handleNameChange(e) }}
                 id="addWorklist-name"
                 defaultValue={this.state.name}
               />
-              <h5 className="add-worklist__modal--label">ID*</h5>
+              <label className="add-worklist__modal--label">ID*</label>
               <input
                 onMouseDown={e => e.stopPropagation()}
                 className="add-worklist__modal--input"
@@ -252,10 +293,10 @@ class WorklistCreationForm extends React.Component {
                 defaultValue={this.state.id}
                 id="addWorklist-id"
               />
-              <h6 className="form-exp">
+              <span className="form-exp">
                 One word only, no special characters, "_" is OK
-              </h6>
-              <h5 className="form-exp add-worklist__modal--label">Due date:</h5>
+              </span>
+              <label className="form-exp add-worklist__modal--label">Due date:</label>
               <input
                 type="date"
                 name="duedate"
@@ -263,7 +304,7 @@ class WorklistCreationForm extends React.Component {
                 defaultValue={this.state.duedate}
                 id="addWorklist-due"
               />
-              <h5 className="add-worklist__modal--label">Description</h5>
+              <label className="add-worklist__modal--label">Description</label>
               <textarea
                 onMouseDown={e => e.stopPropagation()}
                 className="add-worklist__modal--input"
@@ -272,7 +313,7 @@ class WorklistCreationForm extends React.Component {
                 defaultValue={this.state.description}
                 id="addWorklist-desc"
               />
-              <h5 className="form-exp required">*Required</h5>
+              <span className="form-exp required">*Required</span>
             </form>
           )}
           {this.state.page === 1 && (
@@ -284,6 +325,8 @@ class WorklistCreationForm extends React.Component {
                 users={this.props.users}
                 onChange={this.selectUser}
                 assignees={this.state.assigneeList}
+                selectAll={this.selectAll}
+                isSelectedAll={this.state.isSelectedAll}
               />
             </>
           )}
@@ -304,22 +347,23 @@ class WorklistCreationForm extends React.Component {
           {error ? <div className="err-message">{error}</div> : null}
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
-          <div className="create-user__modal--buttons">
-            <FormButton
-              onClick={button1Func}
-              text={button1Text}
-              disabled={page === 0}
-            />
-            <FormButton
-              onClick={button2Func}
-              text={button2Text}
-              disabled={page === 0 ? disableNext : disableSubmit}
+          <Button variant="secondary"
+            onClick={button1Func}
+            disabled={page === 0}
+          >{button1Text}</Button>
+          <Button variant="secondary"
+            onClick={button2Func}
+            disabled={page === 0 ? disableNext : disableSubmit}
+            id="next-btn"
+          >{button2Text}</Button>
+          {mode === 'teaching' && this.state.page === 1 && (
+            <Button variant="secondary"
+              onClick={this.handleSaveWorklist}
               id="next-btn"
-            />
-            <FormButton onClick={button3Func} text={button3Text} />
-          </div>
+            >Submit</Button>)}
+          <Button variant="secondary" onClick={button3Func}>{button3Text}</Button>
         </Modal.Footer>
-      </Modal.Dialog>
+      </Modal.Dialog >
     );
   };
 }

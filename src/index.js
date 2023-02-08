@@ -5,9 +5,10 @@ import ReduxThunk from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension/developmentOnly";
 import { createStore, applyMiddleware } from "redux";
 import { Provider } from "react-redux";
-import "./index.css";
+// import "./index.css";
 import App from "./App";
 import registerServiceWorker from "./registerServiceWorker";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "font-awesome/css/font-awesome.css";
 import rootReducer from "./reducers";
 

@@ -60,24 +60,36 @@ class Projects extends React.Component {
     userRoles: [],
     newRoles: {},
     templates: [],
-    projectIndex: null
+    projectIndex: null,
+    userNameMap: {}
   };
 
   componentDidMount = () => {
     this.getProjectData();
     this.getTemplateData();
+    this.getUserData();
     this.setState({ user: sessionStorage.getItem('username') });
   };
 
   getDefaultTemplate = (e, template) => {
     e.target.checked
       ? this.setState({
-          defaulttemplate: template
-        })
+        defaulttemplate: template
+      })
       : this.setState({
-          defaulttemplate: null
-        });
+        defaulttemplate: null
+      });
   };
+
+  createName = (user) => {
+    const { displayname, username, firstname, lastname } = user;
+    const fullName = firstname && lastname ? `${firstname} ${lastname}`
+      : lastname ? `${lastname}`
+        : firstname ? `${firstname}`
+          : null;
+    const name = fullName || displayname || username;
+    return name;
+  }
 
   handleClickUSerRoles = async id => {
     const userRoles = [];
@@ -87,7 +99,8 @@ class Projects extends React.Component {
       for (let i = 0; i < users.length; i++) {
         for (let k = 0; k < roles.length; k++) {
           if (users[i].username === roles[k].username) {
-            userRoles.push({ name: users[i].username, role: roles[k].role });
+            const name = this.createName(users[i]);
+            userRoles.push({ name, role: roles[k].role });
             break;
           }
         }
@@ -106,6 +119,19 @@ class Projects extends React.Component {
     try {
       const { data } = await getProjects();
       this.setState({ data });
+    } catch (err) {
+      // this.setState({ error: true });
+    }
+  };
+
+  getUserData = async () => {
+    try {
+      const { data: users } = await getUsers();
+      const userNameMap = users.reduce((all, item) => {
+        all[item.username] = this.createName(item);
+        return all;
+      }, {});
+      this.setState({ userNameMap });
     } catch (err) {
       // this.setState({ error: true });
     }
@@ -302,7 +328,7 @@ class Projects extends React.Component {
     this.setState({ hasAddClicked: true });
   };
 
-  handleFormInput = e => {
+  handleFormInput = (e, isId = false) => {
     const { name, value } = e.target;
     if (name === 'defaulttemplate' && (value === 'none' || value === null)) {
       this.setState({ [name]: null });
@@ -337,6 +363,12 @@ class Projects extends React.Component {
         this.setState({ errorMessage: error.response.data.message });
       });
   };
+
+  concatenateNames = (nameArr) => {
+    const fullNames = [];
+    nameArr.forEach(el => fullNames.push(this.state.userNameMap[el]))
+    return fullNames.join(', ')
+  }
 
   defineColumns = () => {
     return [
@@ -432,7 +464,7 @@ class Projects extends React.Component {
           const className =
             loginNames.length > 0 ? 'wrapped' : 'wrapped click-to-add';
           const text =
-            loginNames.length > 0 ? loginNames.join(', ') : 'Add user';
+            loginNames.length > 0 ? this.concatenateNames(loginNames) : 'Add user';
           return (
             <>
               <p
@@ -556,22 +588,20 @@ class Projects extends React.Component {
           defaultPageSize={10}
           NoDataComponent={() => null}
         />
-        {this.state.hasDeleteAllClicked && (
-          <DeleteAlert
-            message={messages.deleteSelected}
-            onCancel={this.handleCancel}
-            onDelete={this.deleteAllSelected}
-            error={this.state.errorMessage}
-          />
-        )}
-        {this.state.hasDeleteSingleClicked && (
-          <DeleteAlert
-            message={messages.deleteSingle}
-            onCancel={this.handleCancel}
-            onDelete={this.deleteSingleProject}
-            error={this.state.errorMessage}
-          />
-        )}
+        <DeleteAlert
+          show={this.state.hasDeleteAllClicked}
+          message={messages.deleteSelected}
+          onCancel={this.handleCancel}
+          onDelete={this.deleteAllSelected}
+          error={this.state.errorMessage}
+        />
+        <DeleteAlert
+          show={this.state.hasDeleteSingleClicked}
+          message={messages.deleteSingle}
+          onCancel={this.handleCancel}
+          onDelete={this.deleteSingleProject}
+          error={this.state.errorMessage}
+        />
         {this.state.hasAddClicked && (
           <ProjectCreationForm
             onType={this.handleFormInput}

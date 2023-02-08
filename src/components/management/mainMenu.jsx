@@ -11,17 +11,20 @@ import Connections from "./connections";
 import "./menuStyle.css";
 import Header from "./common/managementHeader";
 import { scanDataFolder } from "./dataFolderScan";
-
-const mode = sessionStorage.getItem("mode");
+let mode;
 
 class MainMenu extends React.Component {
-  state = {
-    selection: "",
-    isModalOpen: false,
-    coordinate: "50%",
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      selection: "",
+      isModalOpen: false,
+      coordinate: "50%",
+    };
+  }
 
   componentDidMount = () => {
+    mode = sessionStorage.getItem("mode");
     this.updateDimensions();
     window.addEventListener("resize", this.updateDimensions);
   };
@@ -133,9 +136,9 @@ class MainMenu extends React.Component {
             >
               Templates
             </div>
-            <div className="mng-menu__option" onClick={this.handleSelection}>
+            {mode !== 'teaching' && (<div className="mng-menu__option" onClick={this.handleSelection}>
               Plugins
-            </div>
+            </div>)}
             {false && (
               <div className="mng-menu__option" onClick={this.handleSelection}>
                 Pluginstore
@@ -144,7 +147,7 @@ class MainMenu extends React.Component {
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Worklists
             </div>
-            {this.props.admin && (
+            {this.props.admin && mode !== "teaching" && (
               <div
                 className="mng-menu__option"
                 onClick={() => {

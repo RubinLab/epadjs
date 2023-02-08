@@ -1,42 +1,26 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
+import { toast } from "react-toastify";
+import Dropdown from 'react-bootstrap/Dropdown';
+import ReactTooltip from 'react-tooltip';
+import { FaClipboardList } from 'react-icons/fa';
 import {
   getWorklistsOfCreator,
-  addStudyToWorklist,
-  addSubjectToWorklist,
+  addStudiesToWorklist,
+  addSubjectsToWorklist,
+  addAimsToWorklist
 } from "../../services/worklistServices";
 
-class WorklistAdd extends React.Component {
-  state = { worklists: [] };
+const AddToWorklist = (props) => {
 
-  setWrapperRef = node => {
-    this.wrapperRef = node;
-  };
+  const [worklists, setWorklist] = useState([]);
+  const [firstRun, setFirstRun] = useState(true);
+  const [selectedData, setSelectedData] = useState([]);
 
-  componentDidMount = async () => {
-    const { data: worklists } = await getWorklistsOfCreator();
-    this.setState({ worklists });
-    document.addEventListener("mousedown", this.handleClickOutside);
-    document.addEventListener('keydown', this.handleClickOutside);
-  };
-
-
-  
-  componentWillUnmount() {
-    document.removeEventListener("mousedown", this.handleClickOutside);
-    document.removeEventListener('keydown', this.handleClickOutside);
-  }
-
-  handleClickOutside = event => {
-    if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
-      this.props.onClose();
-    }
-  };
-
-  addStudyToWorklist = e => {
-    const studies = Object.values(this.props.selectedStudies);
-    const promises = [];
-    studies.forEach((el, index) => {
+  const formStudyData = () => {
+    const studies = Object.values(props.selectedStudies);
+    const data = [];
+    studies.forEach(el => {
       const {
         projectID,
         patientID,
@@ -44,79 +28,204 @@ class WorklistAdd extends React.Component {
         patientName,
         studyDescription,
       } = el;
-      promises.push(
-        addStudyToWorklist(e.target.id, projectID, patientID, studyUID, {
+      data.push({
+        projectID, patientID, studyUID, body: {
           studyDesc: studyDescription,
-          subjectName: patientName,
-        })
-      );
-    });
-    Promise.all(promises)
-      .then(() => {
-        this.props.updateProgress();
+          subjectName: patientName
+        }
       })
-      .catch(err => console.log(err));
+      setSelectedData(data);
+    })
   };
 
-  addSubjectToWorklist = e => {
-    const subjects = Object.values(this.props.selectedPatients);
-    const promises = [];
-    subjects.forEach((el, index) => {
+  const formPatientData = () => {
+    const patients = Object.values(props.selectedPatients);
+    const data = [];
+    patients.forEach(el => {
       const { projectID, patientID, subjectName } = el;
-      promises.push(
-        addSubjectToWorklist(e.target.id, projectID, patientID, {
-          subjectName,
-        })
-      );
-    });
-
-    Promise.all(promises)
-      .then(() => {
-        this.props.updateProgress();
-      })
-      .catch(err => console.log(err));
+      data.push({ projectID, patientID, body: { subjectName } })
+      setSelectedData(data);
+    })
   };
 
-  onSelect = e => {
-    if (Object.values(this.props.selectedStudies).length > 0) {
-      this.addStudyToWorklist(e);
-      this.props.onClose();
-    } else if (Object.values(this.props.selectedPatients).length > 0) {
-      this.addSubjectToWorklist(e);
-      this.props.onClose();
+  useEffect(() => {
+    const studies = Object.values(props.selectedStudies);
+    const subjects = Object.values(props.selectedPatients);
+    if (studies.length > 0) {
+      formStudyData();
+    } else if (subjects.length > 0) {
+      formPatientData();
+    } else {
+      setSelectedData({});
+    }
+  }, [props.selectedPatients, props.selectedStudies])
+
+  const addAnnotationsToWorklist = async (annotations, worklist) => {
+    const aimIDs = Object.keys(annotations);
+    try {
+      await addAimsToWorklist(worklist, aimIDs);
+      toast.success("Annotation(s) succesfully added to worklist.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+      });
+      // props.deselect();
+    } catch (e) {
+      toast.error("Error adding annotation(s) to worklist.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+      });
+      console.error(e);
+    }
+  }
+
+  const addSelectedStudiesToWorklist = async (worklist) => {
+    try {
+      await addStudiesToWorklist(worklist, selectedData);
+      toast.success("Studies succesfully added to worklist.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+      });
+      // props.deselect();
+    } catch (e) {
+      toast.error("Error adding studies to worklist.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+      });
+      console.error(e);
+    }
+  }
+
+  const addSelectedSubjectsToWorklist = async (worklist) => {
+    try {
+      await addSubjectsToWorklist(worklist, selectedData);
+      toast.success("Subjects succesfully added to worklist.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+      });
+      // props.deselect();
+    } catch (e) {
+      toast.error("Error adding subjects to worklist.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+      });
+      console.error(e);
+    }
+  }
+
+  const fillWorklists = async () => {
+    const { data: worklists } = await getWorklistsOfCreator();
+    setWorklist(worklists);
+  }
+
+  const onSelect = (workListID) => {
+    const { selectedStudies, selectedPatients, selectedAnnotations } = props;
+    if (Object.values(selectedStudies).length > 0) {
+      addSelectedStudiesToWorklist(workListID, selectedData);
+    } else if (Object.values(selectedPatients).length > 0) {
+      addSelectedSubjectsToWorklist(workListID, selectedData);
+    } else if (Object.values(selectedAnnotations).length > 0) {
+      addAnnotationsToWorklist(selectedAnnotations, workListID);
     }
   };
-  render() {
-    const element = document.getElementsByClassName(
-      "searchView-toolbar__icon worklist-icon"
-    );
 
-    var rect = element[0].getBoundingClientRect();
-    const worklists = [];
-    this.state.worklists.forEach((el, i) => {
-      worklists.push(
-        <div
-          className="worklist__option"
-          onClick={this.onSelect}
-          id={el.workListID}
-          key={`${el.workListID} - ${i}`}
-        >
-          {el.name}
-        </div>
-      );
-    });
-
+  const WorklistMenu = React.forwardRef(({ children, style, className }, ref) => {
     return (
-      <div ref={this.setWrapperRef}>
-        <div
-          className="worklist-popup"
-          style={{ left: rect.right - 5, top: rect.bottom - 5 }}
-        >
-          {worklists}
-        </div>
+      <div
+        ref={ref}
+        style={style}
+        className={className}
+      >
+        {children}
       </div>
-    );
-  }
+    )
+  });
+
+
+  const CustomToggleSearch = React.forwardRef(({ children, onClick }, ref) => (
+    <button type="button" className="btn btn-sm color-schema" ref={ref}
+      onClick={e => {
+        if (firstRun) {
+          fillWorklists();
+          setFirstRun(false);
+        }
+        onClick(e);
+      }}>
+      <FaClipboardList /> <br />
+      {children}
+    </button>
+  ));
+
+  const CustomToggleList = React.forwardRef(({ children, onClick }, ref) => (
+    <div
+      className={props.showAddTo && props.project !== 'all' ? 'searchView-toolbar__icon worklist-icon' : 'hide-delete'}
+      onClick={e => {
+        if (firstRun) {
+          fillWorklists();
+          setFirstRun(false);
+        }
+        onClick(e);
+      }}
+      ref={ref}
+    >
+      <div>
+        <FaClipboardList
+          style={{ fontSize: '1.2rem' }}
+          data-tip
+          data-for="worklist-icon"
+        />
+      </div>
+      <ReactTooltip
+        id="worklist-icon"
+        place="bottom"
+        type="info"
+        delayShow={1500}
+      >
+        <span>Add to worklist</span>
+      </ReactTooltip>
+    </div>
+  ));
+
+  return (
+    <Dropdown id="1" className="d-inline">
+      <Dropdown.Toggle as={props.parent !== "patientList" ? CustomToggleSearch : CustomToggleList} id="dropdown-custom-components">
+        Add To Worklist
+      </Dropdown.Toggle>
+
+      <Dropdown.Menu as={WorklistMenu} className="dropdown-menu p-2 dropdown-menu-dark" style={{ backgroundColor: '#333', borderColor: 'white', minWidth: '15rem', fontSize: '11px' }} >
+        {worklists?.map(({ name, workListID }, y) => {
+          return (
+            <Dropdown.Item key={y} id={workListID} onSelect={() => onSelect(workListID)}>{name}</Dropdown.Item>
+          )
+        })
+        }
+      </Dropdown.Menu>
+    </Dropdown>
+  );
+
 }
 
 const mapStateToProps = state => {
@@ -124,6 +233,7 @@ const mapStateToProps = state => {
     selectedProjects: state.annotationsListReducer.selectedProjects,
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
   };
 };
-export default connect(mapStateToProps)(WorklistAdd);
+export default connect(mapStateToProps)(AddToWorklist);

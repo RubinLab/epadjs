@@ -42,6 +42,9 @@ import {
   SEG_UPLOAD_REMOVE,
   AIM_DELETE,
   SAVE_PATIENT_FILTER,
+  ADD_STUDY_TO_GRID,
+  REPLACE_IN_GRID,
+  UPDATE_SEARCH_TABLE_INDEX,
   colors,
   commonLabels,
 } from "./types";
@@ -56,6 +59,10 @@ import {
 import { getAllTemplates } from "../../services/templateServices";
 import { getImageIdAnnotations } from "aimapi";
 import { ConsoleWriter } from "istanbul-lib-report";
+
+export const updateSearchTableIndex = searchTableIndex => {
+  return { type: UPDATE_SEARCH_TABLE_INDEX, searchTableIndex }
+}
 
 export const savePatientFilter = (patientSearch, pageSize, pageIndex) => {
   return {
@@ -272,7 +279,6 @@ export const selectSerie = (selectedSerieObj, studyDescription) => {
 
   return {
     type: SELECT_SERIE,
-
     serie: {
       seriesUID,
       studyUID,
@@ -345,6 +351,19 @@ export const addToGrid = (serie, annotation) => {
   };
   return { type: ADD_TO_GRID, reference };
 };
+
+export const replaceInGrid = (serie) => {
+  let { seriesUID } = serie;
+  // return async(dispatch)=>{
+  //   await dispatch(getSingleSerie(serie));
+  return { type: REPLACE_IN_GRID, seriesUID };
+  // } 
+}
+
+// Adds the series list of study to grid. Series sdropdown in the viewpoert uses this.
+export const addStudyToGrid = (seriesOfStudy) => {
+  return { type: ADD_STUDY_TO_GRID, seriesOfStudy };
+}
 
 // toggle annotation details at the right side bar in display view
 export const showAnnotationWindow = () => {
@@ -452,7 +471,7 @@ const getAimListFields = (aims, ann) => {
 
       const markupColor =
         aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-          ?.markupEntityCollection?.MarkupEntity[0]?.lineColor?.value; //if aim has markup colors make the first markup"s color aim"s color
+          ?.markupEntityCollection ?.MarkupEntity[0] ?.lineColor ?.value; //if aim has markup colors make the first markup"s color aim"s color
       let color;
 
       if (imgAimUID) {
@@ -467,20 +486,20 @@ const getAimListFields = (aims, ann) => {
       let type = imgAimUID
         ? "image"
         : serieAimUID && !imgAimUID
-        ? "serie"
-        : "study";
+          ? "serie"
+          : "study";
 
       let aimName =
-        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]?.name
+        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0] ?.name
           .value;
       let ind = aimName.indexOf("~");
       if (ind >= 0) {
         aimName = aimName.substring(0, ind);
       }
 
-      let displayStatus = ann
-        ? ann === aim.ImageAnnotationCollection.uniqueIdentifier.root
-        : !ann;
+      // let displayStatus = ann
+      //   ? ann === aim.ImageAnnotationCollection.uniqueIdentifier.root
+      //   : !ann;
 
       const {
         name,
@@ -492,6 +511,12 @@ const getAimListFields = (aims, ann) => {
         typeCode,
         trackingUniqueIdentifier,
       } = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
+      let users = aim.ImageAnnotationCollection.user;
+      if (!Array.isArray(users))
+        users = [users];
+      let flattenAuthorList = users.map(user => {
+        return user.name.value;
+      })
       const aimFields = {
         name,
         comment,
@@ -500,18 +525,18 @@ const getAimListFields = (aims, ann) => {
         inferenceEntityCollection,
         segmentationEntityCollection,
         typeCode,
-        trackingUniqueIdentifier: trackingUniqueIdentifier?.root,
+        trackingUniqueIdentifier: trackingUniqueIdentifier ?.root,
+        users,
       };
-      const user = aim.ImageAnnotationCollection.user.name.value;
       const id = aim.ImageAnnotationCollection.uniqueIdentifier.root;
       result[aim.ImageAnnotationCollection.uniqueIdentifier.root] = {
         name: aimName,
         id,
-        user,
+        user: flattenAuthorList.join(),
         // json1: aim,
         json: aimFields,
-        isDisplayed: displayStatus,
-        showLabel: true,
+        isDisplayed: true,
+        showLabel: false,
         cornerStoneTools: [],
         // color,
         type,
@@ -600,26 +625,24 @@ const getRequiredFields = (arr, type, selectedID) => {
 //   }
 // };
 
-// -----> Delete after v1.0 <-----
-// TODO: it may be deleted after getWholeData discarded
-// const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
-//   try {
-//     const { data: series } = await getSeries(projectID, patientID, studyID);
-//     const formattedSeries = getRequiredFields(series, "serie", selectedID);
-//     return new Promise((resolve, reject) => {
-//       resolve(formattedSeries);
-//     });
-//   } catch (err) {
-//     return new Promise((resolve, reject) => {
-//       reject(
-//         new Error(
-//           `Error while getting series data ${err}`,
-//           "src/components/annotationList/action.js"
-//         )
-//       );
-//     });
-//   }
-// };
+const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
+  try {
+    const { data: series } = await getSeries(projectID, patientID, studyID);
+    const formattedSeries = getRequiredFields(series, "serie", selectedID);
+    return new Promise((resolve, reject) => {
+      resolve(formattedSeries);
+    });
+  } catch (err) {
+    return new Promise((resolve, reject) => {
+      reject(
+        new Error(
+          `Error while getting series data ${err}`,
+          "src/components/annotationList/action.js"
+        )
+      );
+    });
+  }
+};
 
 // -----> Delete after v1.0 <-----
 // TODO: it may be deleted after getWholeData discarded

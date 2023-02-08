@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Route, Switch, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import Keycloak from "keycloak-js";
 import _ from "lodash";
@@ -39,7 +39,7 @@ import {
   selectProject,
   getTemplates,
   segUploadCompleted,
-  annotationsLoadingError
+  annotationsLoadingError,
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
@@ -47,36 +47,38 @@ import Report from "./components/searchView/Report.jsx";
 import { getSubjects, getSubject } from "./services/subjectServices";
 import {
   decryptAndGrantAccess,
-  decryptAndAdd
+  decryptAndAdd,
 } from "./services/decryptUrlService";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { searchAnnotations } from "./services/annotationServices.js";
 import "react-toastify/dist/ReactToastify.css";
-import "./App.css";
+// import "./App.css";
 import RightsideBar from "./components/RightsideBar/RightsideBar";
 import MinimizedReport from "./components/searchView/MinimizedReport";
 import { FaJoint } from "react-icons/fa";
 import { isSupportedModality } from "./Utils/aid.js";
+import { teachingFileTempCode } from './constants';
+import { render } from 'react-dom';
 
 const messages = {
   noPatient: {
     title: "No Patient Selected",
-    message: "Select a patient to get a report!"
+    message: "Select a patient to get a report!",
   },
   multiplePatient: {
     title: "Multiple Patients Selected",
-    message: "Select only one patient to get the report!"
+    message: "Select only one patient to get the report!",
   },
   projectWaterfall: {
     title: "Project Selected",
-    message: "Waterfall report will be created for project "
-  }
+    message: "Waterfall report will be created for project ",
+  },
 };
 
 const reportsList = [
   { name: "ADLA" },
   { name: "Longitudinal" },
   { name: "RECIST" },
-  { name: "Waterfall" }
+  { name: "Waterfall" },
 ];
 class App extends Component {
   constructor(props) {
@@ -112,7 +114,9 @@ class App extends Component {
       hiddenReports: {},
       metric: null,
       searchQuery: "",
-      pairs: {}
+      pairs: {},
+      leftMenuState: "open",
+      update: 0
     };
   }
 
@@ -128,12 +132,12 @@ class App extends Component {
   };
 
   getProjectAdded = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       projectAdded: state.projectAdded + 1,
       refTree: {},
       // treeData: {},
       expandLevel: 0,
-      treeExpand: {}
+      treeExpand: {},
     }));
     localStorage.setItem("treeData", JSON.stringify({}));
   };
@@ -143,23 +147,23 @@ class App extends Component {
       showConfirmation: false,
       showWarning: false,
       title: "",
-      message: ""
+      message: "",
     });
   };
 
   handleReportsClick = () => {
-    this.setState(state => ({ showReportsMenu: !state.showReportsMenu }));
+    this.setState((state) => ({ showReportsMenu: !state.showReportsMenu }));
   };
 
-  countCurrentReports = arr => {
+  countCurrentReports = (arr) => {
     let nullCount = 0;
-    arr.forEach(el => {
+    arr.forEach((el) => {
       if (el === null) nullCount++;
     });
     return nullCount;
   };
 
-  closeReportModal = index => {
+  closeReportModal = (index) => {
     const arr = [...this.state.reportsCompArr];
     const pairs = { ...this.state.pairs };
     if (this.state.pairs[index]) {
@@ -170,7 +174,7 @@ class App extends Component {
       template: null,
       report: null,
       reportsCompArr: arr,
-      pairs
+      pairs,
     });
 
     // if there isn"t any report open clear selection
@@ -178,13 +182,15 @@ class App extends Component {
     if (nullCount === arr.length) {
       this.props.dispatch(clearSelection());
       if (
-        this.props.openSeries.length === 0 ||
         this.props.location.pathname.includes("display")
       ) {
         this.props.history.push(`/display`);
       } else if (this.props.location.pathname.includes("/list/")) {
         const newPid = this.props.location.pathname.split("/").pop();
         this.setState({ pid: newPid });
+        this.setState(state => ({
+          update: state.update + 1
+        }));
       } else {
         this.props.history.push(this.props.location.pathname);
       }
@@ -205,13 +211,13 @@ class App extends Component {
     this.setState({
       hiddenReports,
       minReportsArr,
-      pairs
+      pairs,
     });
 
     this.closeReportModal(reportIndex);
   };
 
-  handleMaximizeReport = e => {
+  handleMaximizeReport = (e) => {
     let { index, reportindex } = e.target.dataset;
     index = parseInt(index);
     reportindex = parseInt(reportindex);
@@ -225,7 +231,7 @@ class App extends Component {
     this.setState({
       hiddenReports,
       minReportsArr,
-      reportsCompArr
+      reportsCompArr,
     });
   };
 
@@ -251,7 +257,7 @@ class App extends Component {
     this.setState({ minReportsArr, reportsCompArr, hiddenReports });
   };
 
-  handleReportSelect = e => {
+  handleReportSelect = (e) => {
     const { projectMap, selectedPatients, openSeries, activePort } = this.props;
     const patients = Object.values(selectedPatients);
     const reportType = e.target.dataset.opt;
@@ -266,7 +272,7 @@ class App extends Component {
             title: messages.projectWaterfall.title,
             message:
               messages.projectWaterfall.message +
-              projectMap[this.state.pid].projectName
+              projectMap[this.state.pid].projectName,
           });
         }
       } else {
@@ -289,13 +295,13 @@ class App extends Component {
           this.setState({
             template: null,
             reportType,
-            reportsCompArr
+            reportsCompArr,
           });
         } else {
           this.setState({
             showWarning: true,
             title: messages.noPatient.title,
-            message: messages.noPatient.message
+            message: messages.noPatient.message,
           });
         }
       }
@@ -303,7 +309,7 @@ class App extends Component {
       this.setState({
         showWarning: true,
         title: messages.multiplePatient.title,
-        message: messages.multiplePatient.message
+        message: messages.multiplePatient.message,
       });
     } else {
       const reportsCompArr = [...this.state.reportsCompArr];
@@ -324,15 +330,15 @@ class App extends Component {
       this.setState({
         template: null,
         reportType,
-        reportsCompArr
+        reportsCompArr,
       });
     }
   };
 
-  getMetric = metric => {
+  getMetric = (metric) => {
     this.setState({ metric });
   };
-  handleWaterFallClickOnBar = async name => {
+  handleWaterFallClickOnBar = async (name) => {
     // find the patient selected
     // if project selected get patient details with call
     const { selectedProject, selectedPatients } = this.props;
@@ -359,7 +365,7 @@ class App extends Component {
       />
     );
     this.setState({
-      reportsCompArr
+      reportsCompArr,
     });
   };
 
@@ -385,7 +391,7 @@ class App extends Component {
       template: null,
       reportType: "Waterfall",
       showConfirmation: false,
-      reportsCompArr
+      reportsCompArr,
     });
   };
 
@@ -485,7 +491,7 @@ class App extends Component {
     });
   };
 
-  getTreeExpandSingle = async expandObj => {
+  getTreeExpandSingle = async (expandObj) => {
     try {
       const { patient, study, series } = expandObj;
       let treeExpand = { ...this.state.treeExpand };
@@ -523,18 +529,18 @@ class App extends Component {
     }
   };
 
-  getExpandLevel = expandLevel => {
+  getExpandLevel = (expandLevel) => {
     this.setState({ expandLevel });
   };
 
   handleShrink = async () => {
     const { expandLevel } = this.state;
     if (expandLevel > 0) {
-      await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
+      await this.setState((state) => ({ expandLevel: state.expandLevel - 1 }));
     }
   };
 
-  closeMenu = notification => {
+  closeMenu = (notification) => {
     // if (event && event.type === "keydown") {
     //   if (event.key === "Escape" || event.keyCode === 27) {
     //     this.setState({ openMng: false });
@@ -544,7 +550,7 @@ class App extends Component {
       openMng: false,
       openInfo: false,
       openUser: false,
-      openMenu: false
+      openMenu: false,
     });
     if (notification) this.updateNotificationSeen();
   };
@@ -562,50 +568,62 @@ class App extends Component {
           : this.props.history.push(`/list`);
       }
     } else if (viewType === "display") {
-      this.props.history.push(`/display`);
+      if (this.props.openSeries.length)
+        this.props.history.push(`/display`);
+      else {
+        toast.info("There is no open series to display", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
     } else if (viewType === "annotations") {
       this.props.history.push(`/search`);
     }
   };
 
   handleMngMenu = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       openInfo: false,
       openMng: !state.openMng,
-      openUser: false
+      openUser: false,
     }));
   };
 
   handleInfoMenu = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       openInfo: !state.openInfo,
       openMng: false,
-      openUser: false
+      openUser: false,
     }));
   };
 
   handleUserProfileMenu = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       openInfo: false,
       openMng: false,
-      openUser: !state.openUser
+      openUser: !state.openUser,
     }));
   };
 
   updateProgress = () => {
-    this.setState(state => ({ progressUpdated: state.progressUpdated + 1 }));
+    this.setState((state) => ({ progressUpdated: state.progressUpdated + 1 }));
   };
 
   async componentDidMount() {
     localStorage.setItem("treeData", JSON.stringify({}));
     Promise.all([
       fetch(`${process.env.PUBLIC_URL}/config.json`),
-      fetch(`${process.env.PUBLIC_URL}/keycloak.json`)
+      fetch(`${process.env.PUBLIC_URL}/keycloak.json`),
     ])
-      .then(async results => {
+      .then(async (results) => {
         const configData = await results[0].json();
 
-        let { mode, apiUrl, wadoUrl, authMode, maxPort } = configData;
+        let { mode, apiUrl, wadoUrl, authMode, maxPort, defaultAimName, feedback } =
+          configData;
         // check and use environment variables if any
         const authServerUrl =
           process.env.REACT_APP_AUTH_URL || Keycloak["auth-server-url"];
@@ -615,13 +633,27 @@ class App extends Component {
         authMode = process.env.REACT_APP_AUTH_MODE || authMode;
         const waterfallOptions = process.env.REACT_APP_WATERFALL_OPTS;
         maxPort = process.env.REACT_APP_MAX_PORT || maxPort || 6;
+        defaultAimName =
+          process.env.REACT_APP_DEFAULT_AIM_NAME || defaultAimName;
+        feedback =
+          process.env.REACT_APP_FEEDBACK || feedback;
+        const legacyReporting = (process.env.REACT_APP_LEGACY_REPORTING && process.env.REACT_APP_LEGACY_REPORTING === "true") || false;
         sessionStorage.setItem("mode", mode);
         sessionStorage.setItem("apiUrl", apiUrl);
         sessionStorage.setItem("wadoUrl", wadoUrl);
         sessionStorage.setItem("authMode", authMode);
         sessionStorage.setItem("maxPort", maxPort);
+        sessionStorage.setItem("defaultAimName", defaultAimName);
+        sessionStorage.setItem("feedback", feedback);
+        sessionStorage.setItem("legacyReporting", legacyReporting);
         if (waterfallOptions) {
           sessionStorage.setItem("waterfallOptions", waterfallOptions);
+        }
+
+        if (mode === 'teaching') {
+          document.title = "Stella";
+          document.getElementById("favicon");
+          favicon.href = "/stella.png"
         }
 
         this.setState({ mode, apiUrl, wadoUrl, authMode });
@@ -636,13 +668,20 @@ class App extends Component {
           process.env.REACT_APP_AUTH_URL || keycloakData["auth-server-url"];
         keycloakJson.clientId =
           process.env.REACT_APP_AUTH_RESOURCE || keycloakData.resource;
+        // added for teaching SSO connection. required for PHI
+        // SSO requires PKCE
+        const pkce = process.env.REACT_APP_PKCE || keycloakData.pkce;
+        if (pkce) sessionStorage.setItem("pkce", pkce);
+        const checkSso = process.env.REACT_APP_SSO || keycloakData.sso;
+        if (checkSso) sessionStorage.setItem("sso", checkSso);
+        // ---
         sessionStorage.setItem("auth", auth);
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
         if (mode === "lite") this.setState({ pid: "lite" });
         const args = this.getArguments();
         args ? this.handleArgs(args) : this.completeAutorization(apiUrl, args);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
       });
     //get notifications from sessionStorage and setState
@@ -656,7 +695,7 @@ class App extends Component {
     }
   }
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps) => {
     const uploaded = this.props.notificationAction.startsWith("Upload");
     const deleted = this.props.notificationAction.startsWith("Delete");
     if (
@@ -699,7 +738,7 @@ class App extends Component {
     return args;
   };
 
-  handleArgs = async args => {
+  handleArgs = async (args) => {
     const { data } = await decryptAndGrantAccess(args);
     const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
     const { openSeries } = this.props;
@@ -709,6 +748,7 @@ class App extends Component {
       sessionStorage.setItem("authMode", "apiKey");
       sessionStorage.setItem("API_KEY", API_KEY);
       sessionStorage.setItem("username", user);
+      sessionStorage.setItem("displayName", user);
     }
 
     await this.completeAutorization();
@@ -735,20 +775,37 @@ class App extends Component {
         .then(() => {
           this.props.history.push("/display");
         })
-        .catch(err => console.error(err));
+        .catch((err) => console.error(err));
     } else if (patientID && studyUID && projectID) {
-      await decryptAndAdd(args);
+      // This should be teaching files
       const packedData = {
         projectID,
         patientID,
         patientName: "patientName",
-        studyUID
+        studyUID,
       };
-      this.displaySeries(packedData);
+      // If study has teaching file it's already added so no need to add
+      const { data: TF } = await this.hasTeachingFiles(studyUID);
+      if (TF.total_rows) {
+        this.displaySeries(packedData);
+      } else {
+        const seriesArray = await this.getSeriesData(packedData);
+        window.dispatchEvent(
+          new CustomEvent("openTeachingFilesModal", {
+            detail: { seriesArray, args, packedData },
+          })
+        );
+      }
     }
   };
 
-  displaySeries = async studyData => {
+  hasTeachingFiles = (studyUID) => {
+    return searchAnnotations({
+      query: `(template_code:${teachingFileTempCode} AND study_uid:${studyUID}) AND project:lite`,
+    });
+  };
+
+  displaySeries = async (studyData) => {
     const rawSeriesArray = await this.getSeriesData(studyData);
     if (!rawSeriesArray) return;
     let seriesArr = rawSeriesArray.filter(isSupportedModality);
@@ -770,10 +827,10 @@ class App extends Component {
       .then(() => {
         this.props.history.push("/display");
       })
-      .catch(err => console.error(err));
+      .catch((err) => console.error(err));
   };
 
-  hasEnoughViewports = seriesArr => {
+  hasEnoughViewports = (seriesArr) => {
     const maxPort = parseInt(sessionStorage.getItem("maxPort"));
     if (!maxPort) {
       alert("Maximum allowable viewport number is not defined!");
@@ -782,7 +839,7 @@ class App extends Component {
     if (seriesArr.length + this.props.openSeries.length > maxPort) {
       window.dispatchEvent(
         new CustomEvent("openSeriesModal", {
-          detail: seriesArr
+          detail: seriesArr,
         })
       );
       return false;
@@ -790,17 +847,18 @@ class App extends Component {
     return true;
   };
 
-  getSeriesData = async studyData => {
+  getSeriesData = async (studyData) => {
     const { projectID, patientID, studyUID } = studyData;
     try {
       const { data: series } = await getSeries(projectID, patientID, studyUID);
       return series;
     } catch (err) {
-      console.log(err);
+      console.error(err);
       this.props.dispatch(annotationsLoadingError(err));
     }
   };
 
+  // This is func is serious mess, needs refactoring
   completeAutorization = () =>
     new Promise((resolve, reject) => {
       let getAuthUser = null;
@@ -809,69 +867,102 @@ class App extends Component {
 
       if (authMode === "apiKey") {
         const username = sessionStorage.getItem("username");
-        getAuthUser = new Promise(resolve => {
+        getAuthUser = new Promise((resolve) => {
           resolve({
             userInfo: { preferred_username: username },
             keycloak: null,
-            authenticated: true
+            authenticated: true,
           });
-        }).catch(err => reject(err));
+        }).catch((err) => reject(err));
       } else if (authMode !== "external") {
         const keycloak = Keycloak(
           JSON.parse(sessionStorage.getItem("keycloakJson"))
         );
+        const pkce = sessionStorage.getItem("pkce");
+        const sso = sessionStorage.getItem("sso");
         getAuthUser = new Promise((resolve, reject) => {
-          keycloak
-            .init({ onLoad: "login-required" })
-            .then(authenticated => {
-              keycloak
-                .loadUserInfo()
-                .then(userInfo => {
-                  resolve({ userInfo, keycloak, authenticated });
-                })
-                .catch(err => reject(err));
-            })
-            .catch(err => reject(err));
+          if (sso && sso === 'true') {
+            keycloak
+              .init({ onLoad: "check-sso", checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? { pkceMethod: 'S256' } : {}) })
+              .then((authenticated) => {
+                if (authenticated)
+                  keycloak
+                    .loadUserInfo()
+                    .then((userInfo) => {
+                      resolve({ userInfo, keycloak, authenticated });
+                    })
+                    .catch((err) => reject(err));
+                else
+                  keycloak.login();
+              })
+              .catch((err) => reject(err));
+          }
+          else {
+            keycloak
+              .init({ onLoad: "login-required" })
+              .then((authenticated) => {
+                if (authenticated)
+                  keycloak
+                    .loadUserInfo()
+                    .then((userInfo) => {
+                      resolve({ userInfo, keycloak, authenticated });
+                    })
+                    .catch((err) => reject(err));
+              })
+              .catch((err) => reject(err));
+          }
         });
       } else {
         // authMode is external ask backend for user
         getAuthUser = new Promise((resolve, reject) => {
           getUserInfo()
-            .then(userInfoResponse => {
+            .then((userInfoResponse) => {
               resolve({
                 userInfo: userInfoResponse.data,
                 keycloak: null,
-                authenticated: true
+                authenticated: true,
               });
             })
-            .catch(err => reject(err));
+            .catch((err) => reject(err));
         });
       }
       getAuthUser
-        .then(async result => {
+        .then(async (result) => {
           try {
             const username =
-              result.userInfo.preferred_username || result.userInfo.email;
+              result.userInfo.preferred_username || result.userInfo.uid || result.userInfo.email;
 
             await auth.setLoginKeycloak(result.keycloak);
             let userData;
             try {
               userData = await getUser(username);
+              // check if userData exists if not alert and logout
+              // if teaching "User doesn't exist, you should login from Sectra first."
+              // "User doesn't exist, contact your administrator."
               userData = userData.data;
               this.setState({ admin: userData.admin });
             } catch (err) {
-              console.error(err);
+              // console.log("Error in catch", err);
+              // // if(err.statusCode === 401){
+              //   if(this.state.mode==="teaching")
+              //     alert("User doesn't exist, you should login from Sectra first.");
+              //   else
+              //     alert("User doesn't exist, contact your administrator.");
+              //   this.onLogout();
+              // // }
+              // console.error(err);
             }
+            let displayname = userData.firstname.concat(' ', userData.lastname);
             let user = {
               user: userData.username,
-              displayname: `${userData.firstname} ${userData.lastname}`
+              displayname
             };
             await auth.setLoginSession(user, null);
             this.setState({
               keycloak: result.keycloak,
               authenticated: result.authenticated,
               id: result.userInfo.sub,
-              user
+              user,
             });
 
             if (authMode === "apiKey") {
@@ -881,8 +972,8 @@ class App extends Component {
                 `${apiUrl}/notifications?user=${user}`,
                 {
                   headers: {
-                    authorization: `apikey ${API_KEY}`
-                  }
+                    authorization: `apikey ${API_KEY}`,
+                  },
                 }
               );
             } else {
@@ -890,10 +981,10 @@ class App extends Component {
                 `${apiUrl}/notifications`,
                 result.keycloak.token
                   ? {
-                      headers: {
-                        authorization: `Bearer ${result.keycloak.token}`
-                      }
-                    }
+                    headers: {
+                      authorization: `Bearer ${result.keycloak.token}`,
+                    },
+                  }
                   : {}
               );
             }
@@ -904,28 +995,34 @@ class App extends Component {
             );
             resolve();
           } catch (err) {
-            reject("Error in user retrieval!", err);
+            // console.error(err);
+            // // reject("Error in user retrieval 2!", err);
+            //   // if(err.statusCode === 401){
+            //     if(this.state.mode==="teaching")
+            //       alert("User doesn't exist, you should login from Sectra first.");
+            //     else
+            //       alert("User doesn't exist, contact your administrator.");
+            //     this.onLogout();
+            //   // }
+            console.error(err);
+            // this.completeAutorization();
           }
         })
-        .catch(err2 => {
-          reject("Authentication failed!", err2);
+        .catch((err2) => {
+          console.log("Err 2", err2);
+          // reject("Authentication failed!", err2);
         });
     });
 
-  getMessageFromEventSrc = res => {
+  getMessageFromEventSrc = (res) => {
     try {
       if (res.data === "heartbeat") {
         return;
       }
       const parsedRes = JSON.parse(res.data);
       const { lastEventId } = res;
-      const {
-        params,
-        createdtime,
-        projectID,
-        error,
-        refresh
-      } = parsedRes.notification;
+      const { params, createdtime, projectID, error, refresh } =
+        parsedRes.notification;
       const action = parsedRes.notification.function;
       const message = params;
       // check if the notification is for successfull upload segmentation
@@ -943,7 +1040,7 @@ class App extends Component {
         time,
         seen: false,
         action,
-        error
+        error,
       });
       const tagEdited = action.startsWith("Tag");
       const uploaded = action.startsWith("Upload");
@@ -952,9 +1049,9 @@ class App extends Component {
         // this.setState({ treeData: {} });
         localStorage.setItem("treeData", JSON.stringify({}));
         this.setState({ pid });
-        if (this.props.openSeries.length === 0) {
-          this.props.history.push(`/list/${pid}`);
-        }
+        // if (this.props.openSeries.length === 0) {
+        //   this.props.history.push(`/list/${pid}`);
+        // }
       }
       this.setState({ notifications });
       const stringified = JSON.stringify(notifications);
@@ -964,7 +1061,7 @@ class App extends Component {
     }
   };
 
-  onLogout = e => {
+  onLogout = (e) => {
     auth.logout();
     // sessionStorage.removeItem("annotations");
     sessionStorage.setItem("notifications", JSON.stringify([]));
@@ -972,13 +1069,13 @@ class App extends Component {
       authenticated: false,
       id: null,
       name: null,
-      user: null
+      user: null,
     });
 
     if (sessionStorage.getItem("authMode") !== "external")
       this.state.keycloak.logout().then(() => {
         this.setState({
-          keycloak: null
+          keycloak: null,
         });
         auth.logout();
       });
@@ -987,7 +1084,7 @@ class App extends Component {
 
   updateNotificationSeen = () => {
     const notifications = [...this.state.notifications];
-    notifications.forEach(notification => {
+    notifications.forEach((notification) => {
       notification.seen = true;
     });
     this.setState({ notifications });
@@ -1002,9 +1099,9 @@ class App extends Component {
   handleCloseAll = () => {
     // let { closeAll } = this.state;
     // closeAll += 1;
-    this.setState(state => ({
+    this.setState((state) => ({
       expandLevel: 0,
-      closeAll: state.closeAll + 1
+      closeAll: state.closeAll + 1,
     }));
   };
 
@@ -1015,7 +1112,7 @@ class App extends Component {
       const patientIDs = [];
       if (level === "subject") {
         if (!treeData[projectID]) treeData[projectID] = {};
-        data.forEach(el => {
+        data.forEach((el) => {
           if (!treeData[projectID][el.subjectID]) {
             treeData[projectID][el.subjectID] = { data: el, studies: {} };
           }
@@ -1033,11 +1130,11 @@ class App extends Component {
       } else if (level === "studies") {
         const studyUIDs = [];
         const patientID = data[0].patientID;
-        data.forEach(el => {
+        data.forEach((el) => {
           if (!treeData[projectID][el.patientID].studies[el.studyUID]) {
             treeData[projectID][el.patientID].studies[el.studyUID] = {
               data: el,
-              series: {}
+              series: {},
             };
           }
           studyUIDs.push(el.studyUID);
@@ -1055,16 +1152,16 @@ class App extends Component {
         const patientID = data[0].patientID;
         const studyUID = data[0].studyUID;
         const seriesUIDs = [];
-        data.forEach(el => {
+        data.forEach((el) => {
           if (
             !treeData[projectID][el.patientID].studies[el.studyUID].series[
-              el.seriesUID
+            el.seriesUID
             ]
           ) {
             treeData[projectID][el.patientID].studies[el.studyUID].series[
               el.seriesUID
             ] = {
-              data: el
+              data: el,
             };
           }
           seriesUIDs.push(el.seriesUID);
@@ -1087,7 +1184,7 @@ class App extends Component {
     }
   };
 
-  getPidUpdate = pid => {
+  getPidUpdate = (pid) => {
     this.setState({ searchQuery: "" });
     this.setState({ pid });
   };
@@ -1097,7 +1194,7 @@ class App extends Component {
   };
 
   sortLevelArr = (arr, attribute) => {
-    return arr.sort(function(a, b) {
+    return arr.sort(function (a, b) {
       if (a.data[attribute] < b.data[attribute]) {
         return -1;
       }
@@ -1165,11 +1262,11 @@ class App extends Component {
   };
 
   findNonExisting = (arr, uid, level) => {
-    const result = arr.filter(el => el[level] === uid);
+    const result = arr.filter((el) => el[level] === uid);
     return result[0];
   };
 
-  checkIfSegUpload = params => {
+  checkIfSegUpload = (params) => {
     const { isSegUploaded } = this.props;
     const segsUploaded = Object.keys(isSegUploaded);
     for (let i = 0; i < segsUploaded.length; i++) {
@@ -1189,6 +1286,11 @@ class App extends Component {
     }
   };
 
+  closeLeftMenu = () => {
+    console.log("setting", this.state.leftMenuState);
+    this.setState({ leftMenuState: "closed" });
+  }
+
   render() {
     const {
       notifications,
@@ -1199,7 +1301,7 @@ class App extends Component {
       showWarning,
       showConfirmation,
       title,
-      message
+      message,
     } = this.state;
     let noOfUnseen;
     if (notifications) {
@@ -1278,7 +1380,7 @@ class App extends Component {
         {this.state.minReportsArr}
 
         {!this.state.authenticated && mode !== "lite" && (
-          <Route path="/login" component={LoginForm} />
+          <Route path="/login" render={() => Keycloak(JSON.parse(sessionStorage.getItem("keycloakJson")))?.login()} />
         )}
         {this.state.authenticated && mode !== "lite" && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
@@ -1289,12 +1391,15 @@ class App extends Component {
               pid={this.state.pid}
               clearTreeExpand={this.clearTreeExpand}
               projectAdded={this.state.projectAdded}
+              openClose={this.state.leftMenuState}
             >
               <Switch className="splitted-mainview">
-                <Route path="/logout" component={Logout} />
+                <Route path="/logout" render={(props) => (
+                  <Logout logout={this.onLogout} />
+                )} />
                 <ProtectedRoute
                   path="/display"
-                  render={props => (
+                  render={(props) => (
                     <DisplayView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -1302,12 +1407,13 @@ class App extends Component {
                       updateTreeDataOnSave={this.updateTreeDataOnSave}
                       keycloak={this.state.keycloak}
                       onSwitchView={this.switchView}
+                      closeLeftMenu={this.closeLeftMenu}
                     />
                   )}
                 />
                 <ProtectedRoute
                   path="/list/:pid?"
-                  render={props => (
+                  render={(props) => (
                     <SearchView
                       {...props}
                       clearTreeExpand={this.clearTreeExpand}
@@ -1331,6 +1437,7 @@ class App extends Component {
                       pid={this.state.pid}
                       admin={this.state.admin}
                       collapseSubjects={this.collapseSubjects}
+                      update={this.state.update}
                     />
                   )}
                 />
@@ -1341,22 +1448,26 @@ class App extends Component {
                 />
                 <ProtectedRoute
                   path="/flex/:pid?"
-                  render={props => <FlexView {...props} pid={this.state.pid} />}
+                  render={(props) => (
+                    <FlexView {...props} pid={this.state.pid} />
+                  )}
                 />
                 <ProtectedRoute
                   path="/search"
-                  render={props => (
+                  render={(props) => (
                     <AnnotationSearch
                       {...props}
                       pid={this.state.pid}
                       searchQuery={this.state.searchQuery}
-                      setQuery={query => this.setState({ searchQuery: query })}
+                      setQuery={(query) =>
+                        this.setState({ searchQuery: query })
+                      }
                     />
                   )}
                 />
                 <ProtectedRoute
                   path="/worklist/:wid?"
-                  render={props => (
+                  render={(props) => (
                     <Worklist
                       {...props}
                       getWorklistPatient={this.getWorklistPatient}
@@ -1368,37 +1479,47 @@ class App extends Component {
                 <Route path="/tools" />
                 <Route path="/edit" />
                 <Route path="/not-found" component={NotFound} />
-                <ProtectedRoute
-                  from="/"
-                  exact
-                  to="/list"
-                  render={props => (
-                    <SearchView
-                      {...props}
-                      clearTreeExpand={this.clearTreeExpand}
-                      updateProgress={this.updateProgress}
-                      progressUpdated={progressUpdated}
-                      expandLevel={this.state.expandLevel}
-                      getTreeExpandSingle={this.getTreeExpandSingle}
-                      closeBeforeDelete={this.closeBeforeDelete}
-                      getTreeExpandAll={this.getTreeExpandAll}
-                      treeExpand={treeExpand}
-                      getExpandLevel={this.getExpandLevel}
-                      // expandLoading={expandLoading}
-                      // updateExpandedLevelNums={this.updateExpandedLevelNums}
-                      onShrink={this.handleShrink}
-                      handleCloseAll={this.handleCloseAll}
-                      treeData={this.state.treeData}
-                      getTreeData={this.getTreeData}
-                      clearTreeData={this.clearTreeData}
-                      updateTreeDataOnSave={this.updateTreeDataOnSave}
-                      closeAllCounter={this.state.closeAll}
-                      pid={this.state.pid}
-                      admin={this.state.admin}
-                      collapseSubjects={this.collapseSubjects}
-                    />
-                  )}
-                />
+                {mode !== "teaching" && (
+                  <ProtectedRoute
+                    from="/"
+                    exact
+                    to="/list"
+                    render={(props) => (
+                      <SearchView
+                        {...props}
+                        clearTreeExpand={this.clearTreeExpand}
+                        updateProgress={this.updateProgress}
+                        progressUpdated={progressUpdated}
+                        expandLevel={this.state.expandLevel}
+                        getTreeExpandSingle={this.getTreeExpandSingle}
+                        closeBeforeDelete={this.closeBeforeDelete}
+                        getTreeExpandAll={this.getTreeExpandAll}
+                        treeExpand={treeExpand}
+                        getExpandLevel={this.getExpandLevel}
+                        // expandLoading={expandLoading}
+                        // updateExpandedLevelNums={this.updateExpandedLevelNums}
+                        onShrink={this.handleShrink}
+                        handleCloseAll={this.handleCloseAll}
+                        treeData={this.state.treeData}
+                        getTreeData={this.getTreeData}
+                        clearTreeData={this.clearTreeData}
+                        updateTreeDataOnSave={this.updateTreeDataOnSave}
+                        closeAllCounter={this.state.closeAll}
+                        pid={this.state.pid}
+                        admin={this.state.admin}
+                        collapseSubjects={this.collapseSubjects}
+                        update={this.state.update}
+                      />
+                    )}
+                  />
+                )}
+                {mode === "teaching" && (
+                  <Redirect
+                    from="/"
+                    to="/search"
+
+                  />
+                )}
 
                 <Redirect to="/not-found" />
               </Switch>
@@ -1420,7 +1541,7 @@ class App extends Component {
               <Route path="/logout" component={Logout} />
               <ProtectedRoute
                 path="/display"
-                render={props => (
+                render={(props) => (
                   <DisplayView
                     {...props}
                     updateProgress={this.updateProgress}
@@ -1428,13 +1549,14 @@ class App extends Component {
                     updateTreeDataOnSave={this.updateTreeDataOnSave}
                     keycloak={this.state.keycloak}
                     onSwitchView={this.switchView}
+                    closeLeftMenu={this.closeLeftMenu}
                   />
                 )}
               />
               <Route path="/not-found" component={NotFound} />
               <ProtectedRoute
                 path="/worklist/:wid?"
-                render={props => (
+                render={(props) => (
                   <Worklist
                     {...props}
                     getWorklistPatient={this.getWorklistPatient}
@@ -1445,22 +1567,22 @@ class App extends Component {
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute
                 path="/flex/:pid?"
-                render={props => <FlexView {...props} pid={this.state.pid} />}
+                render={(props) => <FlexView {...props} pid={this.state.pid} />}
               />
               <ProtectedRoute
                 path="/search"
-                render={props => (
+                render={(props) => (
                   <AnnotationSearch
                     {...props}
                     pid={this.state.pid}
                     searchQuery={this.state.searchQuery}
-                    setQuery={query => this.setState({ searchQuery: query })}
+                    setQuery={(query) => this.setState({ searchQuery: query })}
                   />
                 )}
               />
               <ProtectedRoute
                 path="/"
-                render={props => (
+                render={(props) => (
                   <SearchView
                     {...props}
                     clearTreeExpand={this.clearTreeExpand}
@@ -1482,6 +1604,7 @@ class App extends Component {
                     closeAllCounter={this.state.closeAll}
                     admin={this.state.admin}
                     collapseSubjects={this.collapseSubjects}
+                    update={this.state.update}
                   />
                 )}
               />
@@ -1498,7 +1621,7 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const {
     showGridFullAlert,
     showProjectModal,
@@ -1511,7 +1634,7 @@ const mapStateToProps = state => {
     projectMap,
     lastEventId,
     notificationAction,
-    isSegUploaded
+    isSegUploaded,
   } = state.annotationsListReducer;
   return {
     showGridFullAlert,
@@ -1526,7 +1649,7 @@ const mapStateToProps = state => {
     lastEventId,
     notificationAction,
     isSegUploaded,
-    selection: state.managementReducer.selection
+    selection: state.managementReducer.selection,
   };
 };
 export default withRouter(connect(mapStateToProps)(App));

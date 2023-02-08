@@ -1,26 +1,32 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
+import '../../infoMenu/infoMenu.css';
 
-const alertDeletionModal = ({ message, onCancel, onDelete, error }) => {
+const alertDeletionModal = ({ message, onCancel, onDelete, error, show = true }) => {
   return (
-    // <Modal.Dialog dialogClassName="alert-delete__modal">
-    <Modal.Dialog id="modal-fix">
-      <Modal.Body>
+    <Modal id="modal-fix" size="lg"
+      show={show} onHide={onCancel}>
+      <Modal.Header className="modal-header">
+        <Modal.Title className="modal-title">
+          Confirm Deletion
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body className="notification-modal">
         <p className="alert-delete__message">{message}</p>
         {error && <div className="err-message">{error}</div>}
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
         {!error && (
-          <button variant="primary" onClick={onDelete} id='modal-delete-button'>
+          <Button variant="secondary" onClick={onDelete} id='modal-delete-button'>
             Delete
-          </button>
+          </Button>
         )}
-        <button variant="secondary" onClick={onCancel}>
+        <Button variant="secondary" onClick={onCancel}>
           Cancel
-        </button>
+        </Button>
       </Modal.Footer>
-    </Modal.Dialog>
+    </Modal>
   );
 };
 

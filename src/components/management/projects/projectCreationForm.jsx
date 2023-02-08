@@ -1,7 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
+import { teachingFileTempCode } from "../../../constants";
 import "../menuStyle.css";
+import "../../infoMenu/infoMenu.css";
 
 const projectCreationForm = ({
   onCancel,
@@ -10,6 +12,7 @@ const projectCreationForm = ({
   error,
   templates,
 }) => {
+  const mode = sessionStorage.getItem('mode');
   const firstOption = (
     <option value={null} key="selectOpt">
       --Select template--
@@ -24,24 +27,33 @@ const projectCreationForm = ({
       </option>
     );
   });
+
+  const handleNameChange = (e) => {
+    const name = e.target.value;
+    const idInput = document.getElementById("projectID");
+    const newId = name.replace(/[^a-z0-9_]/gi, '');
+    idInput.value = newId;
+    onType({ target: { name: 'id', value: newId } });
+  }
+
   return (
     // <Modal.Dialog dialogClassName="add-project__modal">
     <Modal.Dialog id="modal-fix" className="in-modal">
-      <Modal.Header>
-        <Modal.Title>New Project</Modal.Title>
+      <Modal.Header className="modal-header">
+        <Modal.Title>Create Project</Modal.Title>
       </Modal.Header>
-      <Modal.Body className="add-project__mbody">
+      <Modal.Body className="notification-modal">
         <form className="add-project__modal--form">
-          <h5 className="add-project__modal--label">Name*</h5>
+          <label className="add-project__modal--label">Name*</label>
           <input
             onMouseDown={e => e.stopPropagation()}
             className="add-project__modal--input"
             name="name"
             type="text"
-            onChange={onType}
+            onChange={(e) => { onType(e); handleNameChange(e) }}
             id="projectName"
           />
-          <h5 className="add-project__modal--label">ID*</h5>
+          <label className="add-project__modal--label">ID*</label>
           <input
             onMouseDown={e => e.stopPropagation()}
             className="add-project__modal--input"
@@ -49,12 +61,11 @@ const projectCreationForm = ({
             type="text"
             onChange={onType}
             id="projectID"
-
           />
-          <h6 className="form-exp">
+          <span className="form-exp">
             One word only, no special characters, "_" is OK
-          </h6>
-          <h5 className="add-project__modal--label">Description</h5>
+          </span>
+          <label className="add-project__modal--label">Description</label>
           <textarea
             onMouseDown={e => e.stopPropagation()}
             className="add-project__modal--input"
@@ -63,40 +74,40 @@ const projectCreationForm = ({
             id="projectDescription"
 
           />
-          <h5 className="add-project__modal--label">Default Template</h5>
+          <label className="add-project__modal--label">Default Template</label>
           <select
             name="defaulttemplate"
             className="add-project__modal--select"
             onChange={onType}
             id="projectTemplate"
+            defaultValue={mode === 'teaching' ? teachingFileTempCode : null}
           >
             {options}
           </select>
-          <h5 className="add-project__modal--label">Type</h5>
+          <label className="add-project__modal--label">Type</label>
           <select
             name="type"
             className="add-project__modal--select"
             onChange={onType}
             defaultValue="Private"
             id="projectType"
-
           >
             <option value="Private" id="private">Private</option>
             <option value="Public" id="public">Public</option>
           </select>
-          <h5 className="form-exp required">*Required</h5>
+          <label className="form-exp required">*Required</label>
           {error && <div className="err-message">{error}</div>}
         </form>
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
-        <button variant="primary" onClick={onSubmit} id="submit-button">
+        <Button variant="secondary" onClick={onSubmit} id="submit-button">
           Submit
-        </button>
-        <button variant="secondary" onClick={onCancel}>
+        </Button>
+        <Button variant="secondary" onClick={onCancel}>
           Cancel
-        </button>
+        </Button>
       </Modal.Footer>
-    </Modal.Dialog>
+    </Modal.Dialog >
   );
 };
 

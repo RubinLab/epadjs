@@ -8,6 +8,7 @@ import {
   uploadAim,
   uploadSegmentation,
 } from "../../services/annotationServices";
+import { getSingleStudy } from "services/studyServices";
 import {
   updateSingleSerie,
   updatePatientOnAimSave,
@@ -16,23 +17,23 @@ import {
   segUploadRemove
 } from "../annotationsList/action";
 import RecistTable from "./RecistTable";
-import { Aim, getAimImageData, modalities } from "aimapi";
-import { prepAimForParseClass, getMarkups } from "./Helpers";
+import { Aim, enumAimType } from "aimapi";
+import { prepAimForParseClass, getMarkups, getUserForAim } from "./Helpers";
 import * as questionaire from "./parseClass.js";
 import * as dcmjs from "dcmjs";
 import Switch from "react-switch";
-import { Modal } from "react-bootstrap";
+import { teachingFileTempCode } from "../../constants";
+import { DISP_MODALITIES } from '../../constants';
 import "./aimEditor.css";
 
-const enumAimType = {
-  imageAnnotation: 1,
-  seriesAnnotation: 2,
-  studyAnnotation: 3,
-};
+let mode;
+let defaultAimName;
 
 class AimEditor extends Component {
   constructor(props) {
     super(props);
+    mode = sessionStorage.getItem('mode');
+    defaultAimName = sessionStorage.getItem('defaultAimName');
     this.image = this.getImage();
     this.semanticAnswers = {};
     this.state = {
@@ -65,7 +66,7 @@ class AimEditor extends Component {
     if (this.state.autoFill && Object.keys(lastSavedAim).length)
       this.semanticAnswers = new questionaire.AimEditor(
         element,
-        this.validateForm,
+        // this.validateForm,
         this.renderButtons,
         this.getDefaultLesionName(),
         setAimDirty,
@@ -74,7 +75,7 @@ class AimEditor extends Component {
     else
       this.semanticAnswers = new questionaire.AimEditor(
         element,
-        this.validateForm,
+        // this.validateForm,
         this.renderButtons,
         this.getDefaultLesionName(),
         setAimDirty
@@ -154,7 +155,7 @@ class AimEditor extends Component {
         totalNumShapes += shapesOnImage.length;
       });
     }
-    return `Lesion${totalNumShapes}`;
+    return `${defaultAimName}${totalNumShapes}`;
   };
 
   //cavit
@@ -163,24 +164,25 @@ class AimEditor extends Component {
   };
   //cavit end
   validateForm = (hasError) => {
-    if (hasError > 0) {
-      console.warn("Answer form has error/s!!!");
-      this.setState({
-        saveButtonIsActive: false,
-      });
-    } else {
-      this.setState({
-        saveButtonIsActive: true,
-      });
-    }
+    // if (hasError > 0) {
+    //   console.warn("Answer form has error/s!!!");
+    //   this.setState({
+    //     saveButtonIsActive: false,
+    //   });
+    // } else {
+    //   this.setState({
+    //     saveButtonIsActive: true,
+    //   });
+    // }
   };
 
   getImage = () => {
     const { activePort } = this.props;
-    if (cornerstone.getEnabledElements().length)
+    if (cornerstone.getEnabledElements().length) {
       return cornerstone.getImage(
         cornerstone.getEnabledElements()[activePort]["element"]
       );
+    }
     return "";
   };
 
@@ -205,57 +207,62 @@ class AimEditor extends Component {
   }
 
   render() {
-    const { openSeries, activePort } = this.props;
+    const { openSeries, activePort, aimId } = this.props;
     const { patientID, projectID } = openSeries[activePort];
+    let header = aimId ? "Edit Annotation" : "Create Annotation";
     return (
       <div className="editor-form">
-        AutoFill :
-        <Switch
-          onChange={this.setAutoFill}
-          checked={this.state.autoFill}
-          onColor="#86d3ff"
-          onHandleColor="#2693e6"
-          handleDiameter={10}
-          uncheckedIcon={
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "100%",
-                fontSize: 11,
-                color: "#861737",
-                paddingRight: 2,
-              }}
-            >
-              Off
-            </div>
-          }
-          checkedIcon={
-            <svg viewBox="0 0 10 10" height="100%" width="100%">
-              <circle r={3} cx={5} cy={5} />
-            </svg>
-          }
-          boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
-          activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-          // height={15}
-          // width={20}
-          className="react-switch"
-        />
-        <div
-          className="base-line-selection"
-          onClick={() => this.setState({ showRecist: true })}
-        >
-          Select Baseline
-        </div>
-        {this.state.showRecist && (
-          <RecistTable
-            subjectId={patientID}
-            projectId={projectID}
-            semanticAnswers={this.semanticAnswers}
-            onSelect={this.selectBaseline}
-            onClose={() => this.setState({ showRecist: false })}
+        <div className="annotation-header">{header}</div>
+        {mode !== 'teaching' && (<div>
+          <label>AutoFill :</label>
+          <Switch
+            onChange={this.setAutoFill}
+            checked={this.state.autoFill}
+            onColor="#86d3ff"
+            onHandleColor="#2693e6"
+            handleDiameter={10}
+            uncheckedIcon={
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100%",
+                  fontSize: 11,
+                  color: "#861737",
+                  paddingRight: 2,
+                }}
+              >
+                Off
+              </div>
+            }
+            checkedIcon={
+              <svg viewBox="0 0 10 10" height="100%" width="100%">
+                <circle r={3} cx={5} cy={5} />
+              </svg>
+            }
+            boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+            activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+            // height={15}
+            // width={20}
+            className="react-switch"
           />
+          <div
+            className="base-line-selection"
+            onClick={() => this.setState({ showRecist: true })}
+          >
+            Select Baseline
+          </div>
+          {this.state.showRecist && (
+            <RecistTable
+              subjectId={patientID}
+              projectId={projectID}
+              semanticAnswers={this.semanticAnswers}
+              onSelect={this.selectBaseline}
+              onClose={() => this.setState({ showRecist: false })}
+            />
+          )}
+        </div>
         )}
         <br />
         <div id="questionaire" />
@@ -263,17 +270,17 @@ class AimEditor extends Component {
           <div className="aim-editor-button-group">
             <button
               className="btn btn-sm btn-outline-light aim-editor-button"
+              onClick={() => this.props.onCancel(true)}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-sm btn-outline-light aim-editor-button"
               onClick={this.save}
             >
               Save
             </button>
             &nbsp;
-            <button
-              className="btn btn-sm btn-outline-light aim-editor-button"
-              onClick={() => this.props.onCancel(true)}
-            >
-              Cancel
-            </button>
           </div>
         )}
       </div>
@@ -306,9 +313,9 @@ class AimEditor extends Component {
     // Check if the template selected and if the selected template type is compatible to have markups
     if (!this.checkAimTemplate() || !this.checkMarkupsForTemplate()) return;
 
-    if (!this.state.saveButtonIsActive) {
+    if (this.semanticAnswers.checkFormSaveReady()) {
       window.alert(
-        "Please fill required answers or use required geometric shape"
+        "Please fill name/title and all required answers or use required geometric shape"
       );
       return;
     }
@@ -349,95 +356,128 @@ class AimEditor extends Component {
     return true;
   };
 
-  fixAimType = (aim, templateType) => {
-    if (
-      templateType === "Study" &&
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-        .imageReferenceEntityCollection
-    ) {
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.instanceUid.root =
-        "";
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.modality = {
-        code: "99EPADM0",
-        codeSystemName: "99EPAD",
-        "iso:displayName": {
-          "xmlns:iso": "uri:iso.org:21090",
-          value: "NA",
-        },
-      };
-    }
-    if (
-      (templateType === "Study" || templateType === "Series") &&
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-        .imageReferenceEntityCollection
-    ) {
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.imageCollection.Image[0].sopClassUid.root =
-        "";
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.imageCollection.Image[0].sopInstanceUid.root =
-        "";
-      // remove instance number from comment
-      if (
-        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-          .comment
-      ) {
-        const commentParts = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].comment.value.split(
-          "/"
-        );
-        if (commentParts.length > 3) {
-          commentParts[2] = " ";
-          aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].comment.value = commentParts.join(
-            "/"
-          );
-        }
-      }
-    }
-    return aim;
-  };
+  // Is handled in aimapi 04/05/2022
+  // fixAimType = (aim, templateType) => {
+  //   if (
+  //     templateType === "Study" &&
+  //     aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+  //       .imageReferenceEntityCollection
+  //   ) {
+  //     aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.instanceUid.root =
+  //       "";
+  //     aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.modality = {
+  //       code: "99EPADM0",
+  //       codeSystemName: "99EPAD",
+  //       "iso:displayName": {
+  //         "xmlns:iso": "uri:iso.org:21090",
+  //         value: "NA",
+  //       },
+  //     };
+  //   }
+  //   if (
+  //     (templateType === "Study" || templateType === "Series") &&
+  //     aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+  //       .imageReferenceEntityCollection
+  //   ) {
+  //     aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.imageCollection.Image[0].sopClassUid.root =
+  //       "";
+  //     aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.imageCollection.Image[0].sopInstanceUid.root =
+  //       "";
+  //     // remove instance number from comment
+  //     if (
+  //       aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+  //         .comment
+  //     ) {
+  //       const commentParts = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].comment.value.split(
+  //         "/"
+  //       );
+  //       if (commentParts.length > 3) {
+  //         commentParts[2] = " ";
+  //         aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].comment.value = commentParts.join(
+  //           "/"
+  //         );
+  //       }
+  //     }
+  //   }
+  //   return aim;
+  // };
 
   createAim = async (answers) => {
-    const { hasSegmentation } = this.props;
+    const { hasSegmentation, aimId: aim } = this.props;
     const markupsToSave = this.getNewMarkups();
     const templateType = this.semanticAnswers.getSelectedTemplateType();
-    try {
-      if (hasSegmentation) {
-        // if (!this.checkSegmentationFrames()) return;
-        // segmentation and markups
-        this.createAimSegmentation(answers).then(
-          ({ aim, segmentationBlob, segId }) => {
-            // also add the markups to aim if there is any
-            if (Object.entries(markupsToSave).length !== 0)
-              this.createAimMarkups(aim, markupsToSave);
-            this.saveAim(aim, templateType, segmentationBlob, segId);
-          }
-        );
-      } else if (Object.entries(markupsToSave).length !== 0) {
-        // markups without segmentation
-        const seedData = this.getAimSeedDataFromMarkup(markupsToSave, answers);
-        const aim = new Aim(
-          seedData,
-          enumAimType.imageAnnotation,
+    let user;
+    const { isUpdate } = this.state;
+    if (isUpdate) {
+      user = getUserForAim(aim.users);
+    }
+    else
+      user = getUserForAim();
+    // try {
+    if (hasSegmentation) {
+      // if (!this.checkSegmentationFrames()) return;
+      // segmentation and markups
+      this.createAimSegmentation(answers).then(
+        ({ aim, segmentationBlob, segId }) => {
+          // also add the markups to aim if there is any
+          if (Object.entries(markupsToSave).length !== 0)
+            this.createAimMarkups(aim, markupsToSave);
+          this.saveAim(aim, segmentationBlob, segId);
+        }
+      );
+    } else if (Object.entries(markupsToSave).length !== 0) {
+      // markups without segmentation
+      const image = this.getAimSeedDataFromMarkup(markupsToSave);
+      const aimData = { image, answers, user };
+      const aim = new Aim(
+        aimData,
+        enumAimType.imageAnnotation,
+        this.updatedAimId,
+        this.state.trackingUId
+      );
+      this.createAimMarkups(aim, markupsToSave);
+      this.saveAim(aim);
+    } else {
+      //Non markup annotation
+      let aimData, aim;
+      const isStudyAim = templateType === "Study" ? true : false;
+      if (isStudyAim) { //Study annotation
+        const { openSeries, activePort } = this.props;
+        const { data: study } = await getSingleStudy(openSeries[activePort].studyUID);
+        study.birthdate = study.birthdate.split('-').join('');
+        study.insertDate = study.insertDate.split('-').join('');
+        study.studyDate = study.studyDate.split('-').join('');
+        let examTypes;
+        ({ examTypes } = study);
+        if (examTypes?.length === 1 && examTypes[0].includes("\\")) {
+          examTypes = examTypes[0].split("\\");
+        }
+        study.examTypes = examTypes.filter(type => DISP_MODALITIES.includes(type));
+        aimData = { study, answers, user };
+        aim = new Aim(
+          aimData,
+          enumAimType.studyAnnotation,
           this.updatedAimId,
           this.state.trackingUId
         );
-        this.createAimMarkups(aim, markupsToSave);
-        this.saveAim(aim, templateType);
-      } else {
-        //Non markup image annotation
+      }
+      else { // Image Annotation, TODO:Might be series annotation too
         const { activePort } = this.props;
         const { element } = cornerstone.getEnabledElements()[activePort];
         const image = cornerstone.getImage(element);
-        const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
-        const aim = new Aim(
-          seedData,
+        aimData = { image, answers, user };
+        aim = new Aim(
+          aimData,
           enumAimType.imageAnnotation,
           this.updatedAimId,
           this.state.trackingUId
         );
-        this.saveAim(aim, templateType);
       }
-    } catch (error) {
-      throw new Error("Error creating aim", error);
+      this.saveAim(aim);
     }
+    // } catch (error) {
+    //   throw new Error("Error creating aim", error);
+    // }
   };
 
   getActiveElement = () => {
@@ -464,12 +504,9 @@ class AimEditor extends Component {
       image,
     } = await this.createSegmentation3D(activeLabelMapIndex, aimName);
 
-    // praper the seed data and create aim
-    const seedData = getAimImageData(image);
-    this.addSemanticAnswersToSeedData(seedData, answers);
-    this.addUserToSeedData(seedData);
+    const aimData = { image, answers, user: getUserForAim() };
     const aim = new Aim(
-      seedData,
+      aimData,
       enumAimType.imageAnnotation,
       this.updatedAimId,
       this.state.trackingUId
@@ -504,6 +541,9 @@ class AimEditor extends Component {
             break;
           case "line":
             this.addLineToAim(aim, markup, shapeIndex, imageId, frameNum);
+            break;
+          case "arrow":
+            this.addArrowToAim(aim, markup, shapeIndex, imageId, frameNum);
             break;
           case "circle":
             this.addCircleToAim(aim, markup, shapeIndex, imageId, frameNum);
@@ -544,26 +584,27 @@ class AimEditor extends Component {
     return markedImageIds;
   };
 
-  getAimSeedDataFromMarkup = (markupsToSave, answers) => {
+  getAimSeedDataFromMarkup = (markupsToSave) => {
     const cornerStoneImageId = Object.keys(markupsToSave)[0];
     const image = this.getCornerstoneImagebyId(cornerStoneImageId);
-    const seedData = getAimImageData(image);
-    this.addSemanticAnswersToSeedData(seedData, answers);
-    this.addUserToSeedData(seedData);
-    return seedData;
+    return image;
+    // const seedData = getAimImageData(image);
+    // addSemanticAnswersToSeedData(seedData, answers);
+    // addUserToSeedData(seedData);
+    // return seedData;
   };
 
-  getAimSeedDataFromCurrentImage = (image, answers) => {
-    const seedData = getAimImageData(image);
-    this.addSemanticAnswersToSeedData(seedData, answers);
-    this.addUserToSeedData(seedData);
-    return seedData;
-  };
+  // Not being called, commented out on 04/05/2022
+  // getAimSeedDataFromCurrentImage = (image, answers) => {
+  //   const seedData = getAimImageData(image);
+  //   addSemanticAnswersToSeedData(seedData, answers);
+  //   addUserToSeedData(seedData);
+  //   return seedData;
+  // };
 
-  saveAim = (aim, templateType, segmentationBlob, segId) => {
+  saveAim = (aim, segmentationBlob, segId) => {
     const aimJson = aim.getAim();
     let aimSaved = JSON.parse(aimJson);
-    const isStudyAim = templateType === "Study" ? true : false;
 
     // If file upload service will be used instead of aim save service reagrding
     // the aim size purposes then aim blob should be sent with the following code
@@ -571,7 +612,6 @@ class AimEditor extends Component {
     // const aimBlob = new Blob([aimJson], {
     //   type: "application/octet-stream",
     // });
-    aimSaved = this.fixAimType(aimSaved, templateType);
     const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
     const { openSeries, activePort } = this.props;
     const { patientID, projectID, seriesUID, studyUID } = openSeries[
@@ -583,6 +623,7 @@ class AimEditor extends Component {
     const comment =
       aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
         .comment.value;
+    const isStudyAim = aim.getType() === enumAimType.studyAnnotation ? true : false;
     const aimRefs = {
       aimID,
       patientID,
@@ -593,7 +634,6 @@ class AimEditor extends Component {
       comment,
       isStudyAim
     };
-
     uploadAim(aimSaved, projectID, this.state.isUpdate, this.updatedAimId)
       .then(() => {
         // Write the aim to session storage for further autoFill
@@ -725,6 +765,26 @@ class AimEditor extends Component {
               }
             });
             break;
+          case "ArrowAnnotate":
+            const arrows = markUps[tool].data;
+            arrows.map((arrow) => {
+              if (!arrow.aimId || arrow.aimId === this.updatedAimId) {
+                //dont save the same markup to different aims
+                this.storeMarkupsToBeSaved(
+                  CSImageId,
+                  {
+                    type: "arrow",
+                    markup: arrow,
+                    shapeIndex,
+                    imageId,
+                    frameNum,
+                  },
+                  markupsToSave
+                );
+                shapeIndex++;
+              }
+            });
+            break;
           case "Probe":
             const points = markUps[tool].data;
             points.map((point) => {
@@ -750,37 +810,11 @@ class AimEditor extends Component {
     });
     return markupsToSave;
   };
-
-  addModalityObjectToSeedData = (seedData) => {
-    const modality = modalities[seedData.series.modality];
-    seedData.series.modality = { ...modality };
-  };
-
-  addSemanticAnswersToSeedData = (seedData, answers) => {
-    const {
-      name,
-      comment,
-      imagingPhysicalEntityCollection,
-      imagingObservationEntityCollection,
-      inferenceEntity,
-      typeCode,
-    } = answers;
-    seedData.aim.name = name;
-    if (comment) seedData.aim.comment = comment;
-    if (imagingPhysicalEntityCollection)
-      seedData.aim.imagingPhysicalEntityCollection = imagingPhysicalEntityCollection;
-    if (imagingObservationEntityCollection)
-      seedData.aim.imagingObservationEntityCollection = imagingObservationEntityCollection;
-    if (inferenceEntity) seedData.aim.inferenceEntity = inferenceEntity;
-    if (typeCode) seedData.aim.typeCode = typeCode;
-  };
-
-  addUserToSeedData = (seedData) => {
-    let obj = {};
-    obj.loginName = sessionStorage.getItem("username");
-    obj.name = sessionStorage.getItem("displayName");
-    seedData.user = obj;
-  };
+  // Not being called, commented out at 04/05/2022
+  // addModalityObjectToSeedData = (seedData) => {
+  //   const modality = modalities[seedData.series.modality];
+  //   seedData.series.modality = { ...modality };
+  // };
 
   // get the image object by index
   getCornerstoneImagebyIdx = (imageIdx) => {
@@ -916,7 +950,18 @@ class AimEditor extends Component {
 
     const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit: _calcUnit });
     aim.createImageAnnotationStatement(1, markupId, stdDevId);
+  };
 
+  addArrowToAim = (aim, arrow, shapeIndex, imageId, frameNum) => {
+    const { start, end } = arrow.handles;
+    aim.addMarkupEntity(
+      "TwoDimensionMultiPoint",
+      shapeIndex,
+      [start, end],
+      imageId,
+      frameNum,
+      "Arrow"
+    );
   };
 
   addCircleToAim = (aim, circle, shapeIndex, imageId, frameNum) => {
@@ -1233,7 +1278,7 @@ class AimEditor extends Component {
     //     studyUID,
     //   })
     // );
-    
+
     // this.props.dispatch(updatePatientOnAimSave(aimRefs));
     this.props.updateTreeDataOnSave(aimRefs);
     this.props.onCancel(false); //close the aim editor

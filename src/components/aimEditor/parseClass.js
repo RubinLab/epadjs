@@ -4,28 +4,35 @@ import $ from "jquery/dist/jquery.js";
 import "./semantic/semantic.css";
 import "./semantic/semantic.js";
 import DOMPurify from "dompurify";
+import { teachingFileTempCode } from "../../constants";
+
 //export next variable for react
 export var AimEditor = function (
   userWindow,
-  varformCheckHandler,
+  // varformCheckHandler,
   varRenderButtonHandler,
   aimName,
   setAimDirty,
-  lastSavedAim
+  lastSavedAim,
+  isTeachingFlag,
+  teachingDivParent,
+  fontcolor = "black"
 ) {
   //this.mapObjCodeValueParent = new Map();
-
+  const mode = sessionStorage.getItem("mode");
+  
   var self = this;
   var selectid = 0;
   this.loadingAimFlag = false;
   this.handlerSetAimDirty = setAimDirty;
   this.activateDirtyCheck = false;
-  this.fontcolor = "#c9cdd4";
+  this.fontcolor = fontcolor;
+  // this.fontcolor = "#c9cdd4";
   this.fontsize = "13px";
   this.fontweight = "1500";
   this.fontfamily = "Lato, Helvetica Neue, Arial, Helvetica, sans-serif;";
   this.renderButtonhandler = varRenderButtonHandler;
-  this.formCheckHandler = varformCheckHandler;
+  // this.formCheckHandler = varformCheckHandler;
   this.userWindow = userWindow;
   this.arrayTemplates = [];
   this.arrayTemplatesJsonObjects = [];
@@ -138,7 +145,6 @@ export var AimEditor = function (
 
     keyvalue = keyvalue + "+" + String.fromCharCode(e.keyCode);
     if (self.mapShortCutKeys.get(keyvalue)) {
-
       if (self.mapShortCutKeys.get(keyvalue) !== null) {
         document.getElementById(self.mapShortCutKeys.get(keyvalue)).click();
       }
@@ -152,18 +158,17 @@ export var AimEditor = function (
   };
 
   this.loadTemplates = function (templateList) {
-    let defaultTempCodeVal = '';
-    let preOpenTempCodeValue = '';
+    let defaultTempCodeVal = "";
+    let preOpenTempCodeValue = "";
     if (templateList.default) {
       defaultTempCodeVal = templateList.default;
     }
-    if (templateList.preOpen && templateList.preOpen !== '' ) {
+    if (templateList.preOpen && templateList.preOpen !== "") {
       preOpenTempCodeValue = templateList.preOpen;
     }
     self.arrayTemplatesJsonObjects = JSON.parse(
       JSON.stringify(templateList.all)
     );
-
 
     if (self.arrayTemplatesJsonObjects.length > 0) {
       for (var i = 0; i < self.arrayTemplatesJsonObjects.length; i++) {
@@ -180,7 +185,7 @@ export var AimEditor = function (
               self.defaultTemplate = i + 1;
             }
           }
-          if (preOpenTempCodeValue !== '') {
+          if (preOpenTempCodeValue !== "") {
             if (preOpenTempCodeValue === object.codeValue) {
               self.preOpen = i + 1;
             }
@@ -196,7 +201,6 @@ export var AimEditor = function (
   };
 
   this.createViewerWindow = function () {
-
     self.renderButtonhandler(true);
     self.mainWindowDiv = document.createElement("div");
 
@@ -313,7 +317,7 @@ export var AimEditor = function (
     if (self.preOpen !== null) {
       self.templateSelect.selectedIndex = self.preOpen;
       self.templateSelect.onchange();
-    }else if (self.defaultTemplate !== null) {
+    } else if (self.defaultTemplate !== null) {
       self.templateSelect.selectedIndex = self.defaultTemplate;
       self.templateSelect.onchange();
     }
@@ -325,8 +329,13 @@ export var AimEditor = function (
   };
 
   this.extractTemplate = function (json) {
+    const templateCode = json["TemplateContainer"]["Template"][0]["codeValue"];
     var a = 0;
-
+    // to hide main aim editor components other than teaching components
+    if (isTeachingFlag) {
+      self.mainWindowDiv.style.visibility = "hidden"; // Hide
+      self.mainWindowDiv.style.display = "none";
+    }
     var subObject = null;
     var arrayLength = -1;
     let isArray = 0;
@@ -347,18 +356,36 @@ export var AimEditor = function (
     var annotationNameLabelDiv = document.createElement("div");
 
     var labelAnnotationName = document.createElement("label");
-
-    labelAnnotationName.textContent = "Annotation Name";
     var labelAnnotationNameInput = document.createElement("INPUT");
+    labelAnnotationNameInput.setAttribute("id", "annotationName");
+
+    // To put red circle for name
+    var headerCheckIcon = document.createElement("i");  
+    headerCheckIcon.setAttribute("id", "annotationNameIcon");
+    headerCheckIcon.className = "green check circle outline icon";
+
+    if (mode === "teaching" && templateCode === teachingFileTempCode) {
+      labelAnnotationName.textContent = "Case Title:";
+      labelAnnotationNameInput.placeholder = "Ex: 39 year old with knee pain";
+    } else {
+      labelAnnotationName.textContent = "Annotation Name";
+      labelAnnotationNameInput.value = this.aimName;
+    }
+
     labelAnnotationNameInput.style.fontFamily = self.fontfamily;
-    labelAnnotationNameInput.style.fontSize = "14px";
-    labelAnnotationNameInput.style.paddingLeft = "2px";
-    labelAnnotationNameInput.style.lineHeight = "14px";
-    labelAnnotationNameInput.style.width = "100%";
-    // Line below added by Mete to give default names
-    labelAnnotationNameInput.value = this.aimName;
+    labelAnnotationNameInput.style.fontSize = "0.9rem";
+    labelAnnotationNameInput.style.paddingLeft = "0.1rem";
+    // labelAnnotationNameInput.style.lineHeight = "12px";
+    labelAnnotationNameInput.style.width = "94%";
 
     labelAnnotationNameInput.onkeyup = function () {
+      // make sure aim has name 
+      if(!isTeachingFlag){
+        let iconToChange =  document.getElementById("annotationNameIcon");
+        if(labelAnnotationNameInput.value.length)
+          iconToChange.className = "green check circle outline icon"
+        else iconToChange.className = "red check circle outline icon";
+      }
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
       }
@@ -371,15 +398,19 @@ export var AimEditor = function (
     annotationNameDiv.appendChild(labelAnnotationName);
     annotationNameDiv.appendChild(labelAnnotationNameInput);
     annotationNameLabelDiv.appendChild(labelAnnotationName);
+    if(!isTeachingFlag) annotationNameLabelDiv.appendChild(headerCheckIcon);
     annotationNameDiv.className = "comment ui input";
     annotationNameDiv.style.width = "100%";
 
     var label = document.createElement("label");
     annotationNameLabelDiv.className = "comment";
-    annotationNameLabelDiv.style.paddingTop = "10px";
-    label.textContent = "Comment";
+    annotationNameLabelDiv.style.paddingTop = "0.5rem";
+    if (mode === "teaching")
+      label.textContent = "Narrative";
+    else
+      label.textContent = "Comment";
     labelDiv.className = "comment";
-    labelDiv.style.paddingTop = "10px";
+    labelDiv.style.paddingTop = "0.5rem";
 
     var textareaDomObject = document.createElement("textarea");
     labelDiv.appendChild(label);
@@ -410,10 +441,10 @@ export var AimEditor = function (
 
     document.getElementById("accordion1").appendChild(annotationNameLabelDiv);
     document.getElementById("accordion1").appendChild(annotationNameDiv);
-    document.getElementById("accordion1").appendChild(labelDiv);
-    document.getElementById("accordion1").appendChild(commentDiv);
     //end adding comment textarea for the template
     var a = 0;
+    // hiding the main aim editor to show only seperated components for teaching file
+
     for (var i = 0; i < arrayLength; i++) {
       a++;
       if (isArray === 1)
@@ -428,7 +459,7 @@ export var AimEditor = function (
           ""
         );
 
-        var componentDivLabel = document.createTextNode(cmplabel);
+        var componentDivLabel = document.createTextNode(cmplabel+": ");
         var componentDiv = document.createElement("div");
         componentDiv.className = " accordion mylbl";
         componentDiv.disabled = "true";
@@ -448,16 +479,36 @@ export var AimEditor = function (
         var headerCheckIcon = document.createElement("i");
         headerCheckIcon.className = "red check circle outline icon";
         headerCheckIcon.id = component.id;
-        document.getElementById("accordion1").appendChild(componentDiv);
+
+        // below line adds all components to the div passed from caller. Rectifiying for teaching file
+        //  document.getElementById("accordion1").appendChild(componentDiv);
+        if (component.label === "Anatomy Core" && isTeachingFlag ) {
+          teachingDivParent.anatomy.appendChild(componentDiv);
+          teachingDivParent.anatomy.appendChild(labelDiv);
+          teachingDivParent.anatomy.appendChild(commentDiv);
+        } 
+        else if (component.label === "Radiology Specialty" && isTeachingFlag ) {
+          teachingDivParent.speciality.appendChild(componentDiv);
+          teachingDivParent.speciality.appendChild(labelDiv);
+          teachingDivParent.speciality.appendChild(commentDiv);
+        } 
+         else if (component.label === "Findings and Diagnosis" && isTeachingFlag ) {
+          teachingDivParent.diagnosis.appendChild(componentDiv);
+          teachingDivParent.diagnosis.appendChild(labelDiv);
+          teachingDivParent.diagnosis.appendChild(commentDiv);
+        } 
+        else {
+          document.getElementById("accordion1").appendChild(componentDiv);
+        }
 
         var incontentDiv = document.createElement("div");
         incontentDiv.className = "content active";
         incontentDiv.id = ComponentDivId;
 
         componentDiv.appendChild(headerDiv);
-        headerDiv.appendChild(headerCheckIcon);
         headerDiv.appendChild(headerArrowIcon);
         headerDiv.appendChild(componentDivLabel);
+        headerDiv.appendChild(headerCheckIcon);
         self.checkIfCommentRequired(component, componentDiv);
         componentDiv.appendChild(incontentDiv);
 
@@ -513,6 +564,8 @@ export var AimEditor = function (
         }
       }
     }
+    document.getElementById("accordion1").appendChild(labelDiv);
+    document.getElementById("accordion1").appendChild(commentDiv);
 
     //uncomment below line for testing
     //self.mainButtonsDiv.innerHTML = "";
@@ -520,7 +573,7 @@ export var AimEditor = function (
     $('select[class^="ui dropdown"]').dropdown();
     $(".ui.accordion").accordion();
     self.checkShapes(self.runtimeUserShapes);
-    self.formCheckHandler(self.checkFormSaveReady());
+    // self.formCheckHandler(self.checkFormSaveReady());
   };
 
   this.QuestionType = function (
@@ -530,16 +583,15 @@ export var AimEditor = function (
     mapTagArray,
     parentTagTypeFromJson
   ) {
-      if (Array.isArray(object)) {
-        for (let cnt=0; cnt < object.length; cnt +=1){
-          object.select = 1;
-          let label = document.createElement("label");
-          label.textContent = "Question type : " + object[cnt].codeMeaning;
-          label.style.marginLeft = "20px";
-          parentDiv.appendChild(label);
-        }
+    if (Array.isArray(object)) {
+      for (let cnt = 0; cnt < object.length; cnt += 1) {
+        object.select = 1;
+        let label = document.createElement("label");
+        label.textContent = "Question type : " + object[cnt].codeMeaning;
+        label.style.marginLeft = "20px";
+        parentDiv.appendChild(label);
       }
-
+    }
   };
 
   this.Calculation = function (
@@ -571,9 +623,7 @@ export var AimEditor = function (
     parentDiv,
     mapTagArray,
     parentTagTypeFromJson
-  ) {
-
-  };
+  ) {};
 
   this.ValidTerm = function (
     parent,
@@ -1747,7 +1797,7 @@ export var AimEditor = function (
         self.DisableTillNext(prObject.id, "tillend", self.callDisable);
       }
 
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     };
 
     this.getelementHtml = function () {
@@ -1840,13 +1890,12 @@ export var AimEditor = function (
           );
       }
 
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     };
 
     this.getelementHtml = function () {
       return div;
     };
-
   };
 
   this.createOption = function (
@@ -1946,7 +1995,7 @@ export var AimEditor = function (
         }
       }
 
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     });
 
     this.getelementHtml = function () {
@@ -2023,7 +2072,7 @@ export var AimEditor = function (
         document.getElementById(vtPrObject.id).className =
           "red check circle outline icon";
       }
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     });
 
     this.getelementHtml = function () {
@@ -2124,8 +2173,7 @@ export var AimEditor = function (
           self.EnableTillNext(prObject.id, "tillend");
         }
       }
-
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     };
   };
 
@@ -2198,7 +2246,7 @@ export var AimEditor = function (
         document.getElementById(vtPrObject.id).className =
           "red check circle outline icon";
       }
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     };
   };
 
@@ -2211,7 +2259,6 @@ export var AimEditor = function (
         objectToCheckAnnConf.hasOwnProperty("name")
       ) {
         if (objectToCheckAnnConf.annotatorConfidence == true) {
-
           if (objectToCheckAnnConf.hasOwnProperty("label")) {
             var rangeid = objectToCheckAnnConf.label.replace(
               /[`~!@# $%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,
@@ -2352,8 +2399,7 @@ export var AimEditor = function (
 
   this.solveAimCompnent = function (object) {};
 
-  this.AfterClick = function (obj) {
-  };
+  this.AfterClick = function (obj) {};
 
   this.printXmlAim = function (data, xmlArray) {
     var oSerializer = new XMLSerializer();
@@ -2378,57 +2424,55 @@ export var AimEditor = function (
     Entitytype,
     jsonInner
   ) {
-          var QuestionTypes = itself.value;
-          let i = 0;
-          let arraySizeforAllowedTerms = -1;
-          let arrayCheckForAllowedTerms = false;
-          let instanceAllowedTerms = null;
+    var QuestionTypes = itself.value;
+    let i = 0;
+    let arraySizeforAllowedTerms = -1;
+    let arrayCheckForAllowedTerms = false;
+    let instanceAllowedTerms = null;
 
-          if (Array.isArray(QuestionTypes)) {
-            arraySizeforAllowedTerms = QuestionTypes.length;
-            arrayCheckForAllowedTerms = true;
-          } else {
-            arraySizeforAllowedTerms = 1;
-          }
-          let jsonAllowedTerm = {
-            questionTypeCode: [],
-          };
+    if (Array.isArray(QuestionTypes)) {
+      arraySizeforAllowedTerms = QuestionTypes.length;
+      arrayCheckForAllowedTerms = true;
+    } else {
+      arraySizeforAllowedTerms = 1;
+    }
+    let jsonAllowedTerm = {
+      questionTypeCode: [],
+    };
 
-          if (!jsonInner.hasOwnProperty("questiontypes")) jsonInner.questiontypes = [];
+    if (!jsonInner.hasOwnProperty("questiontypes"))
+      jsonInner.questiontypes = [];
 
-          for (i = 0; i < arraySizeforAllowedTerms; i++) {
-            if (arrayCheckForAllowedTerms == true) {
-              instanceAllowedTerms = QuestionTypes[i];
-            } else {
-              instanceAllowedTerms = QuestionTypes;
-            }
-                  let questionObj = {
-                      code: instanceAllowedTerms.codeValue,
-                      codeSystemName: instanceAllowedTerms.codingSchemeDesignator,
-                      codeSystemVersion: 'instanceAllowedTerms.codingSchemeVersion',
-                      "iso:displayName": {
-                        value: instanceAllowedTerms.codeMeaning,
-                        "xmlns:iso": "uri:iso.org:21090",
-                      },
-                    }
-                  jsonAllowedTerm.questionTypeCode.push(questionObj);
-
-            
-          }
-          if (self.emptyJson(jsonAllowedTerm)) {
-            if (parentObject.type === "Component") {
-
-              jsonAllowedTerm['label'] = {
-                "value":  parentObject.value.label
-              }
-              jsonInner.questiontypes.push(jsonAllowedTerm);
-            } else {
-              jsonAllowedTerm['label'] = {
-                "value":  parentObject.value.label
-              }
-              jsonInner.push(jsonAllowedTerm);
-            }
-          }
+    for (i = 0; i < arraySizeforAllowedTerms; i++) {
+      if (arrayCheckForAllowedTerms == true) {
+        instanceAllowedTerms = QuestionTypes[i];
+      } else {
+        instanceAllowedTerms = QuestionTypes;
+      }
+      let questionObj = {
+        code: instanceAllowedTerms.codeValue,
+        codeSystemName: instanceAllowedTerms.codingSchemeDesignator,
+        codeSystemVersion: "instanceAllowedTerms.codingSchemeVersion",
+        "iso:displayName": {
+          value: instanceAllowedTerms.codeMeaning,
+          "xmlns:iso": "uri:iso.org:21090",
+        },
+      };
+      jsonAllowedTerm.questionTypeCode.push(questionObj);
+    }
+    if (self.emptyJson(jsonAllowedTerm)) {
+      if (parentObject.type === "Component") {
+        jsonAllowedTerm["label"] = {
+          value: parentObject.value.label,
+        };
+        jsonInner.questiontypes.push(jsonAllowedTerm);
+      } else {
+        jsonAllowedTerm["label"] = {
+          value: parentObject.value.label,
+        };
+        jsonInner.push(jsonAllowedTerm);
+      }
+    }
   };
 
   this.saveAlgorithmType = function (
@@ -2640,11 +2684,12 @@ export var AimEditor = function (
 
     jsonCharacteristicQuantification.typeCode.code = defaultCode;
     jsonCharacteristicQuantification.typeCode.codeSystem = defaultCodeSystem;
-    jsonCharacteristicQuantification.typeCode.codeSystemName = defaultCodeSystemName;
-    jsonCharacteristicQuantification.typeCode.codeSystemVersion = defaultCodeSystemVersion;
-    jsonCharacteristicQuantification.typeCode[
-      "iso:displayName"
-    ].value = defaultCodeSystem;
+    jsonCharacteristicQuantification.typeCode.codeSystemName =
+      defaultCodeSystemName;
+    jsonCharacteristicQuantification.typeCode.codeSystemVersion =
+      defaultCodeSystemVersion;
+    jsonCharacteristicQuantification.typeCode["iso:displayName"].value =
+      defaultCodeSystem;
     jsonInner.push(jsonCharacteristicQuantification);
   };
 
@@ -3039,20 +3084,20 @@ export var AimEditor = function (
         commentvalue = instanceObject.commentSelect;
       }
       for (var key in instanceObject) {
-          if (typeof instanceObject[key] === "object") {
-            let subObject = {
-              type: key,
-              value: instanceObject[key],
-            };
-            self["save" + key](
-              prntObject,
-              subObject,
-              Entitytype,
-              tempjson.imagingObservationCharacteristicCollection
-            );
-          }
+        if (typeof instanceObject[key] === "object") {
+          let subObject = {
+            type: key,
+            value: instanceObject[key],
+          };
+          self["save" + key](
+            prntObject,
+            subObject,
+            Entitytype,
+            tempjson.imagingObservationCharacteristicCollection
+          );
+        }
       }
-      
+
       if (commentvalue !== "") {
         let lastImObCharColl =
           tempjson.imagingObservationCharacteristicCollection[
@@ -3085,7 +3130,6 @@ export var AimEditor = function (
       Entitytype,
       jsonInner.imagingPhysicalEntityCollection
     );
-
   };
 
   this.saveAnatomicEntityCharacteristic = function (
@@ -3131,21 +3175,20 @@ export var AimEditor = function (
       }
       for (var key in instanceObject) {
         if (typeof instanceObject[key] === "object") {
+          let subObject = {
+            type: key,
+            value: instanceObject[key],
+          };
 
-            let subObject = {
-              type: key,
-              value: instanceObject[key],
-            };
-
-            self["save" + key](
-              prntObject,
-              subObject,
-              Entitytype,
-              tempjson.imagingPhysicalEntityCharacteristicCollection
-            );
+          self["save" + key](
+            prntObject,
+            subObject,
+            Entitytype,
+            tempjson.imagingPhysicalEntityCharacteristicCollection
+          );
         }
       }
-      
+
       if (commentvalue !== "") {
         var lastImPhyCharColl =
           tempjson.imagingPhysicalEntityCharacteristicCollection[
@@ -3164,7 +3207,6 @@ export var AimEditor = function (
     Entitytype,
     jsonInner
   ) {
-
     var AllowedTerms = itself.value;
     let i = 0;
     let arraySizeforAllowedTerms = -1;
@@ -3265,7 +3307,6 @@ export var AimEditor = function (
   };
 
   this.saveValidTerm = function (parentObject, itself, Entitytype, jsonInner) {
-
     let prntObject = null;
 
     let ValidTerms = itself.value;
@@ -3335,7 +3376,6 @@ export var AimEditor = function (
         defaultCodeMeaning = "";
       }
     }
-
   };
 
   this.traverseComponentsToSave = function (o, jsonComponents) {
@@ -3360,7 +3400,7 @@ export var AimEditor = function (
       jsonInner = {};
       if (arrayCheckForComponents === true) {
         instanceComponent = Components[i];
-      }else instanceComponent = Components;
+      } else instanceComponent = Components;
 
       let componentObject = {
         type: "Component",
@@ -3401,7 +3441,6 @@ export var AimEditor = function (
           //Entitytype is used if the allowed term is connected directly to the component to define image or physical entity etc..
 
           try {
-
             self["save" + keyorder[counter]](
               componentObject,
               subObject,
@@ -3424,7 +3463,6 @@ export var AimEditor = function (
   };
 
   this.saveAim = function () {
-
     var jsonComponents = {};
     var finaljson = {};
     var mainHolder = [];
@@ -3453,11 +3491,10 @@ export var AimEditor = function (
       var keys = Object.keys(eachInnerJson);
 
       let modifiedKeysForAT = [...keys];
-      let indexLocation = modifiedKeysForAT.indexOf('questiontypes');
+      let indexLocation = modifiedKeysForAT.indexOf("questiontypes");
       if (indexLocation > -1) {
         modifiedKeysForAT.splice(indexLocation, 1);
-       }
-
+      }
 
       if (modifiedKeysForAT.length >= 2) {
         switch (modifiedKeysForAT[1]) {
@@ -3524,11 +3561,10 @@ export var AimEditor = function (
       }
 
       let modifiedKeysForQT = [...keys];
-      let indexLocationQT = modifiedKeysForQT.indexOf('allowedterms');
+      let indexLocationQT = modifiedKeysForQT.indexOf("allowedterms");
       if (indexLocationQT > -1) {
-       modifiedKeysForQT.splice(indexLocationQT, 1);
-       }
-
+        modifiedKeysForQT.splice(indexLocationQT, 1);
+      }
 
       if (modifiedKeysForQT.length >= 2) {
         switch (modifiedKeysForQT[1]) {
@@ -3545,11 +3581,9 @@ export var AimEditor = function (
 
         if (directQTlength > 0) {
           if (directQTlength >= 1) {
-
             if (eachInnerJson[nextComptype].length > 0) {
               var n;
               for (n = 0; n < directQTlength; n++) {
-
                 if (n < directQTlength - 1) {
                   eachInnerJson[nextComptype].push(
                     eachInnerJson["questiontypes"][n]
@@ -3603,9 +3637,10 @@ export var AimEditor = function (
           if (mapFinalJsonTags.get("imagingObservationEntityCollection")) {
             if (eachImOB != "" && typeof eachImOB != "undefined") {
               var mergeJson = [];
-              mergeJson = finaljson[
-                "imagingObservationEntityCollection"
-              ].concat(eachImOB);
+              mergeJson =
+                finaljson["imagingObservationEntityCollection"].concat(
+                  eachImOB
+                );
               finaljson["imagingObservationEntityCollection"] = [...mergeJson];
               eachImOB = "";
             }
@@ -3627,9 +3662,8 @@ export var AimEditor = function (
           if (mapFinalJsonTags.get("imagingPhysicalEntityCollection")) {
             if (eachImPhy != "" && typeof eachImPhy != "undefined") {
               var mergeJson = {};
-              mergeJson = finaljson["imagingPhysicalEntityCollection"].concat(
-                eachImPhy
-              );
+              mergeJson =
+                finaljson["imagingPhysicalEntityCollection"].concat(eachImPhy);
               finaljson["imagingPhysicalEntityCollection"] = mergeJson;
               eachImPhy = "";
             }
@@ -3661,9 +3695,7 @@ export var AimEditor = function (
     let loadButton = document.createElement("Button");
     let loadButtonText = document.createTextNode("load");
     loadButton.appendChild(loadButtonText);
-    loadButton.onclick = function () {
- 
-    };
+    loadButton.onclick = function () {};
 
     parentDiv.appendChild(saveButton);
     parentDiv.appendChild(loadButton);
@@ -3679,7 +3711,7 @@ export var AimEditor = function (
         objs[i].className = "green check circle outline icon";
     }
   };
-  this.checkFormSaveReady = function () {
+  this.checkFormSaveReady = function ({isTeachingModal}={}) {
     var countRedCircle = 0;
     var objs = document.getElementsByTagName("i");
 
@@ -3687,11 +3719,13 @@ export var AimEditor = function (
       if (objs[i].className == "red check circle outline icon")
         countRedCircle++;
     }
+    // Annotation name is not mandotory when creating aim from teaching popup
+    if (document.getElementById("annotationName").value === "" && !isTeachingModal)
+      countRedCircle++;
     return countRedCircle;
   };
 
   this.checkAnnotationShapes = function (prmtrShapeArray) {
-
     if (typeof prmtrShapeArray === "undefined") {
       return;
     }
@@ -3776,7 +3810,7 @@ export var AimEditor = function (
         }
       }
     }
-    self.formCheckHandler(self.checkFormSaveReady());
+    // self.formCheckHandler(self.checkFormSaveReady());
   };
 
   this.setAim = function (aimValue) {
@@ -3843,44 +3877,41 @@ export var AimEditor = function (
             let chartQuantfType = eachCharactQuantfObj["xsi:type"];
             switch (chartQuantfType) {
               case "Scale":
-                $(
-                  "#Select" + eachCharactQuantfObj.label.value
-                ).dropdown("set selected", [
-                  eachCharactQuantfObj.valueLabel.value,
-                ]);
+                $("#Select" + eachCharactQuantfObj.label.value).dropdown(
+                  "set selected",
+                  [eachCharactQuantfObj.valueLabel.value]
+                );
                 break;
               case "NonQuantifiable":
-                $(
-                  "#Select" + eachCharactQuantfObj.label.value
-                ).dropdown("set selected", [
-                  eachCharactQuantfObj.typeCode.codeSystem,
-                ]);
+                $("#Select" + eachCharactQuantfObj.label.value).dropdown(
+                  "set selected",
+                  [eachCharactQuantfObj.typeCode.codeSystem]
+                );
                 break;
               case "Numerical":
-                $(
-                  "#Select" + eachCharactQuantfObj.label.value
-                ).dropdown("set selected", [
-                  self.mathOperators.get(eachCharactQuantfObj.operator) +
-                    " " +
-                    eachCharactQuantfObj.valueLabel.value +
-                    " " +
-                    eachCharactQuantfObj.ucumString.value,
-                ]);
+                $("#Select" + eachCharactQuantfObj.label.value).dropdown(
+                  "set selected",
+                  [
+                    self.mathOperators.get(eachCharactQuantfObj.operator) +
+                      " " +
+                      eachCharactQuantfObj.valueLabel.value +
+                      " " +
+                      eachCharactQuantfObj.ucumString.value,
+                  ]
+                );
                 break;
               case "Quantile":
-                $(
-                  "#Select" + eachCharactQuantfObj.label.value
-                ).dropdown("set selected", [
-                  eachCharactQuantfObj.valueLabel.value,
-                ]);
+                $("#Select" + eachCharactQuantfObj.label.value).dropdown(
+                  "set selected",
+                  [eachCharactQuantfObj.valueLabel.value]
+                );
 
                 break;
               case "Interval":
-                $(
-                  "#Select" + eachCharactQuantfObj.label.value
-                ).dropdown("set selected", [
-                  eachCharactQuantfObj.valueLabel.value,
-                ]);
+                $("#Select" + eachCharactQuantfObj.label.value).dropdown(
+                  "set selected",
+                  [eachCharactQuantfObj.valueLabel.value]
+                );
                 break;
               default:
             }
@@ -3959,9 +3990,8 @@ export var AimEditor = function (
               /[`~!@# $%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,
               ""
             );
-            let returnAnnotConfDomId = self.mapLabelAnnotatorConfidence.get(
-              annotatorConflabel
-            );
+            let returnAnnotConfDomId =
+              self.mapLabelAnnotatorConfidence.get(annotatorConflabel);
 
             if (typeof returnAnnotConfDomId != "undefined") {
               let showannoConfDomid = "range" + annotatorConflabel;
@@ -3969,9 +3999,8 @@ export var AimEditor = function (
                 value.value * 100;
               document.getElementById(showannoConfDomid).value =
                 value.value * 100;
-              let annotconfJson = self.mapLabelAnnotConfJson.get(
-                annotatorConflabel
-              );
+              let annotconfJson =
+                self.mapLabelAnnotConfJson.get(annotatorConflabel);
               annotconfJson.selectac = value.value;
             }
           }
@@ -4011,9 +4040,7 @@ export var AimEditor = function (
     }
   };
 
-
   this.checkShapes = function (shapes) {
-
     let shapeKeys = Object.keys(shapes);
     let shapeKeysLength = 0;
     let runtimeUserShapesAll = Object.keys(self.runtimeUserShapes);
@@ -4061,7 +4088,6 @@ export var AimEditor = function (
         let arryDiffernce = "";
         let geoTemplateConditionDom = null;
         for (let cnt = 0; cnt < templateShapeLength; cnt++) {
-
           arryDiffernce = Object.keys(localShapes).filter(
             (eachShape) => eachShape !== self.templateShapeArray[cnt].shape
           );
@@ -4086,7 +4112,6 @@ export var AimEditor = function (
               linePos = arryDiffernce.indexOf("Line");
               if (linePos > -1) arryDiffernce.splice(linePos, 1);
             }
-
 
             if (arryDiffernce.length > 0) {
               if (geoTemplateConditionDom !== null) {
@@ -4140,10 +4165,9 @@ export var AimEditor = function (
         }
       }
     }
-    self.formCheckHandler(self.checkFormSaveReady());
+    // self.formCheckHandler(self.checkFormSaveReady());
   };
   this.loadAimJson = function (aimjson, isRecist) {
-
     //test
     // example test case const test = { circle : {count : 5, validate:""} , line:  {count : 5, validate:""}  };
     // console.log("show  test ", test);
@@ -4161,9 +4185,7 @@ export var AimEditor = function (
     );
 
     if (typeof templateIndex === "undefined") {
-
       return 1;
-
     } else {
       self.templateSelect.selectedIndex = templateIndex + 1;
       let evObj = document.createEvent("Events");
@@ -4194,9 +4216,19 @@ export var AimEditor = function (
         document.getElementById("annotationName").value =
           annotationNameArray[0];
         self.aimName = annotationNameArray[0];
+        if (self.aimName === "Teaching File") {
+          document.getElementById("annotationName").value = "";
+        }
       } else {
         document.getElementById("annotationName").value = annotationName;
         self.aimName = annotationName;
+        if (self.aimName === "Teaching File") {
+          self.aimName = "";
+          document.getElementById("annotationName").value = "";
+        }
+        if(self.aimName === ""){
+          document.getElementById("annotationNameIcon").className = "red check circle outline icon"
+        }
       }
 
       self.traverseJsonOnLoad(imagingPhysicalEntityCollection);
@@ -4219,8 +4251,8 @@ export var AimEditor = function (
 
   this.disableRecistSections = function () {
     // disable for recist
-    let recistAllChildNodes = document.getElementById("allowedTermType")
-      .childNodes;
+    let recistAllChildNodes =
+      document.getElementById("allowedTermType").childNodes;
     for (let cntRdios = 0; cntRdios < recistAllChildNodes.length; cntRdios++) {
       recistAllChildNodes[cntRdios].childNodes[0].disabled = true;
     }
@@ -4298,16 +4330,17 @@ export var AimEditor = function (
     //   event.preventDefault();
     //   event.stopPropagation();
     // });
-    let parentDivElementForLocation = document.getElementById("annotationName")
-      .parentElement;
+    let parentDivElementForLocation =
+      document.getElementById("annotationName").parentElement;
     let parentDivElementForLocationClass =
       parentDivElementForLocation.className;
     let parentDivElementForLocationClassDisabled =
       parentDivElementForLocationClass + " disabled";
-    parentDivElementForLocation.className = parentDivElementForLocationClassDisabled;
+    parentDivElementForLocation.className =
+      parentDivElementForLocationClassDisabled;
 
-    let subDivElementForLocation = document.getElementById("DropLocation")
-      .childNodes[0];
+    let subDivElementForLocation =
+      document.getElementById("DropLocation").childNodes[0];
     let subDivElementForLocationClass = subDivElementForLocation.className;
     let subDivElementForLocationClassDisabled =
       subDivElementForLocationClass + " disabled";
@@ -4382,7 +4415,6 @@ export var AimEditor = function (
     }
     if (aimJson.hasOwnProperty("imagingObservationEntityCollection")) {
       tempJson = aimJson["imagingObservationEntityCollection"];
-
 
       for (let i = 0; i < tempJson.length; i++) {
         if (
