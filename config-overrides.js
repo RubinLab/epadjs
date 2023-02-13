@@ -13,7 +13,7 @@ module.exports = function override(config) {
         // "process": require.resolve("process"),
         // "fs": false,
         "fs": require.resolve('browserify-fs'),
-        "buffer": require.resolve("buffer"),
+        "buffer": require.resolve("buffer/"),
         // "process": require.resolve('process/browser'),  // <- this
 
     })
@@ -22,12 +22,12 @@ module.exports = function override(config) {
     config.plugins = (config.plugins || []).concat([
         new webpack.ProvidePlugin({
             process: 'process/browser',
-            Buffer: ['buffer', 'Buffer']
+            // Buffer: ['buffer', 'Buffer']
         }),
-        // new webpack.ProvidePlugin({
-        //     // process: 'process/browser',
-        //     Buffer: ['buffer', 'Buffer']
-        // })
+        new webpack.ProvidePlugin({
+            // process: 'process/browser',
+            Buffer: ['buffer', 'Buffer']
+        })
     ])
     config.module.rules.push({
         test: /\.m?js/,
@@ -37,5 +37,6 @@ module.exports = function override(config) {
     })
     console.log(config.resolve);
     console.log(config.plugins);
+    // return;
     return config;
 }
