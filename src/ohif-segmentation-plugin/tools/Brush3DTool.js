@@ -1,4 +1,4 @@
-import { BrushTool, store } from "cornerstone-tools";
+import { BrushTool, store } from "../../cornerstone-tools";
 import generateBrushMetadata from "../util/generateBrushMetadata.js";
 
 const brushModule = store.modules.segmentation;

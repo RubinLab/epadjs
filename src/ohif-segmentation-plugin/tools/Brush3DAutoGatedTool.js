@@ -1,4 +1,4 @@
-import { getCircle, store } from "cornerstone-tools";
+import { getCircle, store } from "../../cornerstone-tools";
 import Brush3DHUGatedTool from "./Brush3DHUGatedTool.js";
 
 const brushModule = store.modules.segmentation;

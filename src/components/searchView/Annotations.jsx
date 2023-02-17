@@ -14,8 +14,8 @@ import {
   selectAnnotation,
   changeActivePort,
   addToGrid,
-  getWholeData,
-  updatePatient,
+  // getWholeData,
+  // updatePatient,
   jumpToAim
 } from '../annotationsList/action';
 

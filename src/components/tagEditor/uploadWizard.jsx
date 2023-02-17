@@ -116,7 +116,7 @@ class UploadWizard extends React.Component {
         }
       } else if (name === "save") {
         if (this.validateApplyAll()) {
-          const { treeData, seriesIndex } = this.state;
+          let { treeData, seriesIndex } = this.state;
           const { PatientID, SeriesInstanceUID, StudyInstanceUID } = treeData[
             seriesIndex
           ];

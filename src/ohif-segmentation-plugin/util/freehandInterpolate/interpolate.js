@@ -1,7 +1,7 @@
 import {
   globalImageIdSpecificToolStateManager,
   store,
-} from "cornerstone-tools";
+} from "../../../cornerstone-tools";
 
 import { Polygon } from "../classes/Polygon.js";
 import generateUID from "../generateUID.js";

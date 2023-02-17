@@ -1,4 +1,4 @@
-import cornerstoneTools from "cornerstone-tools";
+import cornerstoneTools from "../../cornerstone-tools";
 import { Aim, enumAimType } from "aimapi";
 
 const activeColor = "#ddd000";

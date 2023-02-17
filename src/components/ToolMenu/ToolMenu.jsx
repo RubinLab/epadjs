@@ -7,7 +7,7 @@ import { WindowLevel } from "../WindowLevel/WindowLevel";
 import ColormapSelector from "./ColormapSelector";
 import FuseSelector from "./FuseSelector";
 import cornerstone from "cornerstone-core";
-import cornerstoneTools from "cornerstone-tools";
+import cornerstoneTools from "../../cornerstone-tools";
 import {
   FaLocationArrow,
   FaEraser,

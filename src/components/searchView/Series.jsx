@@ -15,8 +15,8 @@ import {
   selectSerie,
   clearSelection,
   addToGrid,
-  getWholeData,
-  updatePatient,
+  // getWholeData,
+  // updatePatient,
   selectAnnotation
 } from '../annotationsList/action';
 

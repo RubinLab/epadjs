@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
-import cornerstoneTools from "cornerstone-tools";
+import cornerstoneTools from "../../cornerstone-tools";
 import InputRange from "react-input-range";
 import Draggable from "react-draggable";
 import "./SmartBrushMenu.css";

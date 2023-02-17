@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from "react-redux";
-import { getAllowedTermsOfTemplateComponent } from "Utils/aid"
+import { getAllowedTermsOfTemplateComponent } from "../../Utils/aid"
 import { teachingFileTempCode } from '../../constants.js';
 import Dropdown from 'react-bootstrap/Dropdown';
 import WarningModal from '../common/warningModal';

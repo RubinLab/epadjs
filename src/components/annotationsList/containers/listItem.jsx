@@ -10,9 +10,9 @@ import {
   getSingleSerie,
   alertViewPortFull,
   addToGrid,
-  updatePatient,
+  // updatePatient,
   jumpToAim,
-  showAnnotationDock
+  // showAnnotationDock
 } from "../action";
 
 const maxPort = parseInt(sessionStorage.getItem("maxPort"));

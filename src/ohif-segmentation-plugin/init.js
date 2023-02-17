@@ -1,4 +1,4 @@
-import { store, register, addTool } from "cornerstone-tools";
+import { store, register, addTool } from "../cornerstone-tools";
 import freehand3DModule from "./modules/freehand3DModule.js";
 import extendBrushModule from "./modules/extendBrushModule.js";
 

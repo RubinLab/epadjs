@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import cornerstoneTools from "cornerstone-tools";
+import cornerstoneTools from "../../cornerstone-tools";
 import Switch from "react-switch";
 import "./Interpolation.css";
 

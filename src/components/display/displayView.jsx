@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
-import cornerstoneTools from "cornerstone-tools";
+import cornerstoneTools from "../../cornerstone-tools";
 import {
   getImageIds,
   getWadoImagePath,
@@ -26,7 +26,7 @@ import {
 import { deleteAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
-import CornerstoneViewport from "react-cornerstone-viewport";
+import CornerstoneViewport from "../../react-cornerstone-viewport";
 import { freehand } from "./Freehand";
 import { line } from "./Line";
 import { arrow } from "./Arrow";

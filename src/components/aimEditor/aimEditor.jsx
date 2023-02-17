@@ -3,15 +3,15 @@ import { connect } from "react-redux";
 import { toast } from "react-toastify";
 import { getTemplates } from "../../services/templateServices";
 import cornerstone from "cornerstone-core";
-import cornerstoneTools from "cornerstone-tools";
+import cornerstoneTools from "../../cornerstone-tools";
 import {
   uploadAim,
   uploadSegmentation,
 } from "../../services/annotationServices";
-import { getSingleStudy } from "services/studyServices";
+import { getSingleStudy } from "../../services/studyServices";
 import {
   updateSingleSerie,
-  updatePatientOnAimSave,
+  // updatePatientOnAimSave,
   getSingleSerie,
   segUploadStarted,
   segUploadRemove

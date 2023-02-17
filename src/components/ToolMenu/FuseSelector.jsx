@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
-import cornerstoneTools from "cornerstone-tools";
+import cornerstoneTools from "../../cornerstone-tools";
 import Draggable from "react-draggable";
 import "./FuseSelector.css";
 

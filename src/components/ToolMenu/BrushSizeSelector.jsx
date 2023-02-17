@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import cornerstoneTools from "cornerstone-tools";
+import cornerstoneTools from "../../cornerstone-tools";
 import InputRange from "react-input-range";
 import "./BrushSizeSelector.css";
 

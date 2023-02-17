@@ -1,7 +1,7 @@
 import React from "react";
 
 import {
-  getDockerImages,
+  // getDockerImages,
   //  getAnnotationTemplates,
   //  getUniqueProjectsIfAnnotationExist,
   //  getProjects,

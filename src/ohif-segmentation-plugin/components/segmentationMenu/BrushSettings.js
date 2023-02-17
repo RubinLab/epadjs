@@ -1,5 +1,5 @@
 import React from "react";
-import cornerstoneTools from "cornerstone-tools";
+import cornerstoneTools from "../../../cornerstone-tools";
 const brushModule = cornerstoneTools.store.modules.segmentation;
 const brushState = brushModule.state;
 

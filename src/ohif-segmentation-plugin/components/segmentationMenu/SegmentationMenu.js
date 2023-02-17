@@ -4,7 +4,7 @@ import SegmentationMenuDeleteConfirmation from "./SegmentationMenuDeleteConfirma
 import SegmentationMenuListBody from "./SegmentationMenuListBody.js";
 import SegmentationMenuListHeader from "./SegmentationMenuListHeader.js";
 import BrushSettings from "./BrushSettings.js";
-import cornerstoneTools from "cornerstone-tools";
+import cornerstoneTools from "../../../cornerstone-tools";
 import { editSegmentInput } from "../../util/brushMetadataIO.js";
 import onIOCancel from "../common/helpers/onIOCancel.js";
 import onImportButtonClick from "../common/helpers/onImportButtonClick.js";

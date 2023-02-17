@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import Dropdown from 'react-bootstrap/Dropdown';
 import FormControl from 'react-bootstrap/FormControl';
 import WarningModal from '../common/warningModal';
-import { getAllowedTermsOfTemplateComponent } from "Utils/aid";
+import { getAllowedTermsOfTemplateComponent } from "../../Utils/aid";
 import { teachingFileTempCode } from '../../constants.js';
 
 const componentLabel = "Anatomy Detail";

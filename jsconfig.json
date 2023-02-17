@@ -1,6 +1,22 @@
 {
   "compilerOptions": {
-    "baseUrl": "src"
+    "baseUrl": "src",
+    // "target": "ESNext",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["vite/client", "vite-plugin-svgr/client"],
+    "jsx": "react-jsx",
+    "outDir": "dist",
+    "target": "ES2020",
+    "module": "ES2020",
+    "moduleResolution": "Node",
+    "strict": true,
+    "skipLibCheck": true,
+    "declaration": false,
+    "sourceMap": false,
+    "noUnusedLocals": true,
+    "esModuleInterop": true
+
   },
-  "include": ["src"]
+  "include": ["build.config.ts", "src", "__tests__"],
 }
+

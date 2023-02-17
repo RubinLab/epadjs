@@ -1,4 +1,4 @@
-import { store, globalImageIdSpecificToolStateManager } from 'cornerstone-tools';
+import { store, globalImageIdSpecificToolStateManager } from '../../cornerstone-tools';
 
 import getSeriesInstanceUidFromImageId from './getSeriesInstanceUidFromImageId.js';
 

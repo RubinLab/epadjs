@@ -18,9 +18,9 @@ import {
   loadCompleted,
   annotationsLoadingError,
   addToGrid,
-  getWholeData,
+  // getWholeData,
   alertViewPortFull,
-  updatePatient,
+  // updatePatient,
   selectSerie,
   selectAnnotation
 } from '../annotationsList/action';

@@ -1,7 +1,7 @@
 import {
   globalImageIdSpecificToolStateManager,
   getToolState,
-} from "cornerstone-tools";
+} from "../../../cornerstone-tools";
 
 const globalToolStateManager = globalImageIdSpecificToolStateManager;
 

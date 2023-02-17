@@ -5,7 +5,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import { getStudyAims } from '../../services/studyServices';
 import { getSeries } from '../../services/seriesServices';
-import { addStudyToGrid, replaceInGrid, getSingleSerie, clearActivePortAimID } from 'components/annotationsList/action';
+import { addStudyToGrid, replaceInGrid, getSingleSerie, clearActivePortAimID } from '../annotationsList/action';
 import "./SeriesDropDown.css";
 
 const SeriesDropDown = (props) => {

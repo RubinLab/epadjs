@@ -1,4 +1,4 @@
-import { store } from 'cornerstone-tools';
+import { store } from '../../cornerstone-tools';
 
 import generateBrushMetadata from './generateBrushMetadata.js';
 

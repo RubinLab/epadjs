@@ -8,7 +8,7 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import {
   clearGrid,
-  getWholeData,
+  // getWholeData,
   getSingleSerie,
   clearSelection,
   addToGrid
@@ -17,13 +17,13 @@ import SelectionItem from "./containers/selectionItem";
 import { FaRegCheckSquare } from "react-icons/fa";
 import { getSeries, setSignificantSeries } from "../../services/seriesServices";
 import { getTemplate } from "../../services/templateServices";
-import { uploadAim } from "services/annotationServices";
+import { uploadAim } from "../../services/annotationServices";
 import "./annotationsList.css";
 import { extendWith } from "lodash";
 import { TiEject } from "react-icons/ti";
 import * as questionaire from "../aimEditor/parseClass";
 import { getUserForAim } from "../aimEditor/Helpers";
-import { decryptAndAdd } from "services/decryptUrlService";
+import { decryptAndAdd } from "../../services/decryptUrlService";
 import { getSingleStudy, deleteStudy } from '../../services/studyServices';
 import { Aim, enumAimType } from "aimapi";
 import { teachingFileTempUid, teachingFileTempCode } from '../../constants';

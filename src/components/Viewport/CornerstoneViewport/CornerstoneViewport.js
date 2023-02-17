@@ -7,7 +7,7 @@ import ViewportOverlay from "../ViewportOverlay/ViewportOverlay.js";
 import LoadingIndicator from "../LoadingIndicator/LoadingIndicator.js";
 import ViewportOrientationMarkers from "../ViewportOrientationMarkers/ViewportOrientationMarkers.js";
 import cornerstone from "cornerstone-core";
-import cornerstoneTools from "cornerstone-tools";
+import cornerstoneTools from "../../../cornerstone-tools";
 
 import "./CornerstoneViewport.css";
 

@@ -1,10 +1,10 @@
-import { store, EVENTS, importInternal } from "cornerstone-tools";
+import { store, EVENTS, importInternal } from "../../cornerstone-tools";
 import cornerstone from "cornerstone-core";
 
 import Brush3DTool from "./Brush3DTool.js";
 import floodFill from "./n-dimensional-flood-fill.js";
 
-import { getCircle, drawBrushPixels } from "cornerstone-tools";
+import { getCircle, drawBrushPixels } from "../../cornerstone-tools";
 
 const brushModule = store.modules.segmentation;
 

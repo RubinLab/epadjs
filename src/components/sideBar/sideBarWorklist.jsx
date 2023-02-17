@@ -26,9 +26,9 @@ import SelectSeriesModal from "../annotationsList/selectSerieModal";
 import {
   addToGrid,
   getSingleSerie,
-  getWholeData,
+  // getWholeData,
   alertViewPortFull,
-  updatePatient,
+  // updatePatient,
   clearSelection,
   changeActivePort
 } from "../annotationsList/action";

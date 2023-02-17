@@ -19,7 +19,7 @@ import { getLogger } from "../../util/logger.js";
 import getPixelSpacing from "../../util/getPixelSpacing";
 import throttle from "../../util/throttle";
 import { state } from "../../store/index.js";
-import calculateLineStatistics from "cornerstone-tools/util/line/calculateLineStatistics.js";
+import calculateLineStatistics from "../../util/line/calculateLineStatistics.js";
 import numbersWithCommas from "../../util/numbersWithCommas.js";
 
 const logger = getLogger("tools:annotation:LengthTool");

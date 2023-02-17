@@ -1,4 +1,4 @@
-import { importInternal, store } from "cornerstone-tools";
+import { importInternal, store } from "../../cornerstone-tools";
 import getActiveViewportEnabledElement from "./getActiveViewportEnabledElement.js";
 
 const BaseBrushTool = importInternal("base/BaseBrushTool");

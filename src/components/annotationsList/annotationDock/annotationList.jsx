@@ -13,7 +13,8 @@ import {
 } from "../action";
 import { deleteAnnotation } from "../../../services/annotationServices";
 import cornerstone from "cornerstone-core";
-import { state } from "cornerstone-tools/store/index.js";
+import { state } from "../../../cornerstone-tools/store/index"
+// import { state } from "../../cornerstone-tools/store/index.js";
 
 class AnnotationsList extends React.Component {
   state = {

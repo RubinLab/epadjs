@@ -1,4 +1,4 @@
-import { store } from 'cornerstone-tools';
+import { store } from '../../cornerstone-tools';
 import getActiveViewportEnabledElement from './getActiveViewportEnabledElement.js';
 import Freehand3DRoiTool from '../tools/FreehandRoi3DTool.js';
 

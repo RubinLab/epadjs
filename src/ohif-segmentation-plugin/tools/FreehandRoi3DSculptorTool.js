@@ -3,8 +3,8 @@ import {
   toolColors,
   store,
   getToolState,
-} from "cornerstone-tools";
-import cornerstoneTools from "cornerstone-tools";
+} from "../../cornerstone-tools";
+import cornerstoneTools from "../../cornerstone-tools";
 import { updateImage } from "cornerstone-core";
 import interpolate from "../util/freehandInterpolate/interpolate.js";
 

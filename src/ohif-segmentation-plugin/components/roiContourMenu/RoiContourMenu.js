@@ -3,7 +3,7 @@ import MenuIOButtons from "../common/MenuIOButtons.js";
 import WorkingCollectionList from "./WorkingCollectionList.js";
 import LockedCollectionsList from "./LockedCollectionsList.js";
 import RoiContourSettings from "./RoiContourSettings.js";
-import cornerstoneTools from "cornerstone-tools";
+import cornerstoneTools from "../../../cornerstone-tools";
 import unlockStructureSet from "../../util/unlockStructureSet.js";
 import onIOCancel from "../common/helpers/onIOCancel.js";
 import onImportButtonClick from "../common/helpers/onImportButtonClick.js";

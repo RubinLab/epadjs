@@ -14,8 +14,8 @@ import {
   toolStyle,
   toolColors,
   EVENTS,
-} from "cornerstone-tools";
-import { state } from "cornerstone-tools/store/index.js";
+} from "../../cornerstone-tools";
+import { state } from "../../cornerstone-tools/store/index.js";
 
 import generateUID from "../util/generateUID.js";
 import interpolate from "../util/freehandInterpolate/interpolate.js";
