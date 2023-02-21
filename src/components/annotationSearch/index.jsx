@@ -1452,7 +1452,8 @@ const AnnotationSearch = props => {
       </div >
       <div className="icon_row" style={{
         'position': 'sticky',
-        'top': '84px'
+        'top': '84px',
+        'width': '100%'
       }}>
         <div className="icon_r">
           {/* <button type="button" className="btn btn-sm" ><BsEyeFill /><br />View</button> */}
