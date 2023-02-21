@@ -1388,7 +1388,10 @@ const AnnotationSearch = props => {
 
   return (
     <>
-      <div className="container-fluid body-dk">
+      <div className="container-fluid body-dk" style={{
+        'position': 'sticky',
+        'top': 0
+      }}>
         {/* search / filters */}
         <div className="search_filter">
           <div className="row">
@@ -1447,7 +1450,10 @@ const AnnotationSearch = props => {
           }
         </div>
       </div >
-      <div className="icon_row">
+      <div className="icon_row" style={{
+        'position': 'sticky',
+        'top': '84px'
+      }}>
         <div className="icon_r">
           {/* <button type="button" className="btn btn-sm" ><BsEyeFill /><br />View</button> */}
           <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
