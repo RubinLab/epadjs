@@ -281,7 +281,8 @@ class WorkList extends React.Component {
         Cell: original => {
           const isAuto = original.row._original.progressType === "AUTO";
           const variant = isAuto ? "info" : "light";
-          const text = isAuto ? <GrCalculator /> : <GrManual />;
+          const text = isAuto ? <GrCalculator style={{ 'fontSize': '0.9rem', 'filter': 'invert(100%) sepia(0%) saturate(7472%) hue-rotate(280deg) brightness(83%) contrast(91%)' }} /> :
+            <GrManual style={{ 'fontSize': '0.9rem', 'filter': 'invert(100%) sepia(0%) saturate(7472%) hue-rotate(280deg) brightness(83%) contrast(91%)' }} />;
           const tooltipText = isAuto
             ? "Progress by annotations"
             : "Progress manually";
@@ -318,28 +319,31 @@ class WorkList extends React.Component {
           let variant;
           let text;
           let tooltipText;
+          let filter;
           if (completeness === 0) {
             variant = "danger";
-            text = <GrDocumentMissing />;
+            text = <GrDocumentMissing style={{ 'filter': 'invert(35%) sepia(85%) saturate(2139%) hue-rotate(330deg) brightness(85%) contrast(104%)' }} />;
             tooltipText = "Not started";
+
           } else if (completeness === 100) {
             variant = "success";
-            text = <GrDocumentVerified />;
+            text = <GrDocumentVerified style={{ 'filter':  'invert(43%) sepia(37%) saturate(820%) hue-rotate(100deg) brightness(90%) contrast(92%)' }} />;
             tooltipText = "Completed";
+            // filter = "invert(43%) sepia(37%) saturate(820%) hue-rotate(100deg) brightness(90%) contrast(92%)";
           } else {
             variant = "warning";
-            text = <GrDocumentPerformance />;
+            text = <GrDocumentPerformance style={{ 'filter': 'invert(77%) sepia(73%) saturate(1638%) hue-rotate(354deg) brightness(101%) contrast(101%)' }} />;
             tooltipText = "In progress";
           }
           return (
             <div>
-              <Badge
+              <div
                 data-tip
                 data-for={`progress-badge${original.index}`}
                 variant={variant}
               >
                 {text}
-              </Badge>
+              </div>
               <ReactTooltip
                 id={`progress-badge${original.index}`}
                 place="right"
