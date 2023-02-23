@@ -1389,6 +1389,7 @@ const AnnotationSearch = props => {
   return (
     <>
       <div className="container-fluid body-dk" style={{
+        'zIndex': 6,
         'position': 'sticky',
         'top': 0
       }}>
@@ -1453,7 +1454,8 @@ const AnnotationSearch = props => {
       <div className="icon_row" style={{
         'position': 'sticky',
         'top': '84px',
-        'width': '100%'
+        'width': '100%', 
+        'zIndex': 5
       }}>
         <div className="icon_r">
           {/* <button type="button" className="btn btn-sm" ><BsEyeFill /><br />View</button> */}
