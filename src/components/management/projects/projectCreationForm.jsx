@@ -20,10 +20,10 @@ const projectCreationForm = ({
   );
   const options = [firstOption];
   templates.forEach((el, i) => {
-    const { templateCodeValue, templateUID } = el.Template[0];
+    const { templateCodeValue, templateUID, templateName } = el.Template[0];
     options.push(
       <option value={templateCodeValue} key={templateUID} id={templateUID}>
-        {templateCodeValue}
+        {`${templateName}`}
       </option>
     );
   });
