@@ -5,7 +5,7 @@ Number.prototype.times = function(fn) {
   for (var r = [], i = 0; i < this; i++) r.push(fn(i));
   return r;
 };
-
+var legacyReporting = false;
 var linkColor = '#ccf';
 var errorColor = 'rgb(207, 72, 88)';
 var baselineColor = 'rgb(40, 163, 46)';
@@ -586,6 +586,7 @@ function makeTable(data, filteredTable, modality, numofHeaderCols, hideCols) {
         hideCols
       )
     )
+    // removing rrmin
     .append(
       addRow(
         data,
@@ -702,7 +703,8 @@ function responseCatsTable(data, numofHeaderCols, hideCols) {
     )
     .attr('border', 1)
     .css('border-top', 'solid 2px #4d4d4d')
-    .css('background-color', '#666666');
+    .css('background-color', '#666666')
+    .css('color', '#d4dadd');
 }
 
 function openAllAimsOfLesion(row, patientID, projectID) {
@@ -1052,8 +1054,9 @@ function fillInTables(
     data.tSums = calcSums(filteredTable, data.stTimepoints, numofHeaderCols);
     data.tRRBaseline = calcRRBaseline(sums, data.stTimepoints);
     data.tRRMin = calcRRMin(sums, data.stTimepoints);
+    // use rrbaseline for response cats of not legacyReporting (rrmin and best response)
     data.tResponseCats = calcResponseCat(
-      data.tRRMin,
+      legacyReporting ? data.tRRMin : data.tRRBaseline,
       data.stTimepoints,
       isThereANewLesion(data),
       sums
@@ -1153,8 +1156,10 @@ function makeCalcs(shrinkedData, numofHeaderCols) {
     shrinkedData.tSums,
     shrinkedData.stTimepoints
   );
+
+  // use rrbaseline for response cats of not legacyReporting (rrmin and best response)
   shrinkedData.tResponseCats = calcResponseCat(
-    shrinkedData.tRRMin,
+    legacyReporting ? shrinkedData.tRRMin : shrinkedData.tRRBaseline,
     shrinkedData.stTimepoints,
     isThereANewLesion(shrinkedData),
     shrinkedData.tSums
@@ -1335,8 +1340,11 @@ export async function renderTable(
   hidecols,
   loadFilter,
   index,
-  refreshFilter
+  refreshFilter,
+  legacyReportingIn
 ) {
+  legacyReporting = legacyReportingIn;
+
   //check the existing ids and create a unique id for this recist table
   // var id = 'recisttbl';
   var recisttable = null;

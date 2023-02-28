@@ -35,8 +35,7 @@ class About extends React.Component {
             A web-based platform for quantitative imaging in the clinical
             workflow.
           </div>
-          <div >
-            <button
+          <button
               className="info-about__button"
               onClick={() => {
                 window.open(
@@ -46,22 +45,8 @@ class About extends React.Component {
                 );
               }}
             >
-              Get help with ePAD
+              More info about ePAD
             </button>
-            <button
-              className="info-about__button"
-              onClick={() => {
-                window.open(
-                  "https://epad.stanford.edu/ways-contact-us",
-                  "_blank",
-                  ""
-                );
-              }}
-            >
-              Report an issue
-            </button>
-          </div>
-
           <div>Version {version}</div>
           <div>
             ePAD Copyright 2016 Stanford University. All rights reserved.
@@ -72,7 +57,7 @@ class About extends React.Component {
               href="https://rubinlab.stanford.edu/"
               target="_blank"
               className="info-about__link"
-              style={{ color: 'red' }}
+              style={{ color: '#E83879' }}
             >
               Rubin Lab
             </a>{" "}
@@ -81,7 +66,7 @@ class About extends React.Component {
               href="https://www.stanford.edu/"
               target="_blank"
               className="info-about__link"
-              style={{ color: 'red' }}>
+              style={{ color: '#E83879' }}>
               Stanford University.
             </a>{" "}
           </div>

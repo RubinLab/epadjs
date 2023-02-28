@@ -334,7 +334,7 @@ function Subjects(props) {
       },
       {
         Header: (
-          <div className="search-header__col--left">Description/Name</div>
+          <div className="search-header__col --left">Description/Name</div>
         ),
         width: widthUnit * 13,
         id: 'searchView-desc',
@@ -347,6 +347,7 @@ function Subjects(props) {
           return (
             <>
               <span
+                className="searchView-table__cell"
                 data-tip
                 data-for={id}
                 style={{
@@ -380,7 +381,10 @@ function Subjects(props) {
               {row.original.numberOfAnnotations === 0 ? (
                 ''
               ) : (
-                <span className="badge badge-secondary">
+                <span 
+                // className="badge badge-secondary"
+                className="searchView-table__cell"
+                >
                   {row.original.numberOfAnnotations}
                 </span>
               )}
@@ -404,7 +408,10 @@ function Subjects(props) {
             {row.original.numberOfStudies === 0 ? (
               ''
             ) : (
-              <span className="badge badge-secondary">
+              <span 
+                // className="badge badge-secondary"
+                className="searchView-table__cell"
+              >
                 {row.original.numberOfStudies}
               </span>
             )}

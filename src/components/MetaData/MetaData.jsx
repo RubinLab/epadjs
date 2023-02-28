@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import Draggable from "react-draggable";
 import cornerstone from "cornerstone-core";
+import DOMPurify from 'dompurify'
 import * as dcmjs from "dcmjs";
 import { uids } from "./uids";
 
@@ -10,6 +11,7 @@ import "./MetaData.css";
 const mapStateToProps = state => {
   return {
     activePort: state.annotationsListReducer.activePort,
+    loading: state.annotationsListReducer.loading
   };
 };
 
@@ -18,20 +20,38 @@ class MetaData extends Component {
     super(props);
     this.state = {
       output: [],
-      input: ""
+      input: "",
+      imageDownloaded: false
     }
     this.dumpDataSet = this.dumpDataSet.bind(this);
+    this.getImageData = this.getImageData.bind(this);
+    this.fillImageData = this.fillImageData.bind(this);
   }
-  componentDidMount() {
-    const { activePort } = this.props;
-    const { element } = cornerstone.getEnabledElements()[activePort];
-    const image = cornerstone.getImage(element);
-    // const { elements } = image.data;
-    const tempOutput = [];
-    this.dumpDataSet(image.data, tempOutput);
-    this.setState({ output: tempOutput });
-    // console.log("image", image);
 
+  getImageData() {
+    const { activePort } = this.props;
+    const item = cornerstone.getEnabledElements()[activePort];
+    if (item) {
+      const { element } = item;
+      const image = cornerstone.getImage(element);
+      return image;
+    }
+    return null;
+  }
+
+  fillImageData() {
+    const image = this.getImageData();
+    const tempOutput = [];
+    if (image) {
+      const { elements } = image.data;
+      this.dumpDataSet(image.data, tempOutput);
+      this.setState({ imageDownloaded: true });
+    }
+    this.setState({ output: tempOutput });
+  }
+
+  componentDidMount() {
+    this.fillImageData();
     // // const dataset = dcmjs.data.DicomMetaDictionary.namifyDataset(elements);
     // Object.keys(elements).forEach(tag => {
     //   const data = Object.assign({}, elements[tag]);
@@ -41,6 +61,13 @@ class MetaData extends Component {
     // });
     // console.log("namedDataset", namedDataset);
   }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.loading !== this.props.loading && !imageDownloaded) {
+      this.fillImageData();
+    }
+  }
+
 
   // helper function to see if a string only has ascii characters in it
   isASCII = (str) => {
@@ -462,27 +489,26 @@ class MetaData extends Component {
     const lowerInput = input.toLowerCase();
     const list = output.filter(d => input === '' || d.toLowerCase().includes(lowerInput));
 
-    const listHtml = { __html: list.join('') };
-    return (
-      <Draggable handle="#handle">
-        <div className="md-pop-up">
-          <div className="close-meta-data-menu" onClick={this.props.onClose}>
-            <a href="#">X</a>
-          </div>
-          <div id="handle" className="buttonLabel">
-            <span>Meta Data of Image</span>
-          </div>
-          <hr />
-          <div> Filter :
-            <input value={this.state.input} type="text" onChange={this.onChangeHandler} />
-          </div>
-          <div>
-            {output.length && (<ul dangerouslySetInnerHTML={listHtml} />)}
-          </div>
+    const listHtml = { __html: DOMPurify.sanitize(list.join('')) };
+    return (this.state.imageDownloaded ? <Draggable handle="#handle">
+      <div className="md-pop-up">
+        <div className="close-meta-data-menu" onClick={this.props.onClose}>
+          <a href="#">X</a>
         </div>
-        {/*  */}
-      </Draggable>
-    );
+        <div id="handle" className="buttonLabel">
+          <span>Meta Data of Image</span>
+        </div>
+        <hr />
+        <div> Filter :
+          <input value={this.state.input} type="text" onChange={this.onChangeHandler} />
+        </div>
+        <div>
+          {output.length && (<ul dangerouslySetInnerHTML={listHtml} />)}
+        </div>
+      </div>
+      {/*  */}
+    </Draggable> : null)
+
   }
 }
 

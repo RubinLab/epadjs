@@ -46,13 +46,33 @@ class WorkList extends React.Component {
     duedate: null,
     updateRequirement: false,
     requirements: [],
-    newRequirement: {}
+    newRequirement: {},
+    userNameMap: {}
   };
+
+  createName = (user) => {
+    const { displayname, username, firstname, lastname } = user;
+    const fullName = firstname && lastname ? `${firstname} ${lastname}`
+      : lastname ? `${lastname}`
+        : firstname ? `${firstname}`
+          : null;
+    const name = fullName || displayname || username;
+    return name;
+  }
+
+  createUserNameMap = (users) => {
+    const userNameMap = users.reduce((all, item) => {
+      all[item.username] = this.createName(item);
+      return all;
+    }, {});
+    this.setState({ userNameMap });
+  }
 
   componentDidMount = async () => {
     this.getWorkListData();
     const { data: userList } = await getUsers();
     this.setState({ userList });
+    this.createUserNameMap(userList);
     document.addEventListener('mousedown', this.handleClickOutside);
     document.addEventListener('keydown', this.handleKeyboardEvent);
   };
@@ -276,11 +296,15 @@ class WorkList extends React.Component {
     });
   };
 
-  selectAssignee = e => {
-    const { name, checked } = e.target;
-    const newAssigneeMap = { ...this.state.assigneeMap };
-    newAssigneeMap[name] = checked;
-    this.setState({ assigneeMap: newAssigneeMap });
+  selectAssignee = (e, map) => {
+    if (e) {
+      const { name, checked } = e.target;
+      const newAssigneeMap = { ...this.state.assigneeMap };
+      newAssigneeMap[name] = checked;
+      this.setState({ assigneeMap: newAssigneeMap });
+    } else {
+      this.setState({ assigneeMap: map });
+    }
   };
 
   submitUpdateAssignees = () => {
@@ -358,6 +382,12 @@ class WorkList extends React.Component {
         });
     }
   };
+
+  concatenateNames = (nameArr) => {
+    const fullNames = [];
+    nameArr.forEach(el => fullNames.push(this.state.userNameMap[el]))
+    return fullNames.join(', ')
+  }
 
   defineColumns = () => {
     return [
@@ -473,7 +503,7 @@ class WorkList extends React.Component {
                 className={className}
                 id={`assignees-${original.row.checkbox.workListID}`}
               >
-                {assignees.length > 0 ? assignees.join(', ') : `Add assignees`}
+                {assignees.length > 0 ? this.concatenateNames(assignees) : `Add assignees`}
               </div>
               <ReactTooltip
                 id="worklist-assignee"

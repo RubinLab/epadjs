@@ -134,7 +134,8 @@ const AnnotationSearch = props => {
   const [selectedAnatomies, setSelectedAnatomies] = useState([]);
   const [selectedDiagnosis, setSelectedDiagnosis] = useState([]);
   const [tfOnly, setTfOnly] = useState(mode === 'teaching' ? true : false);
-  const [myCases, setMyCases] = useState(mode === 'teaching' ? false : true);
+  // const [myCases, setMyCases] = useState(mode === 'teaching' ? false : true);
+  const [myCases, setMyCases] = useState(false);
   const [filters, setFilters] = useState({});
   const [sort, setSort] = useState([]);
   const [showSpinner, setShowSpinner] = useState(false);
@@ -163,15 +164,16 @@ const AnnotationSearch = props => {
 
   const getAnnotationsOfProjets = (pageIndex, afterdelete) => {
     const bm = pageIndex ? bookmark : '';
-    const promise =
-      props.pid === 'all'
-        ? getAllAnnotations(bm)
-        : getSummaryAnnotations(props.pid, bm);
-    Promise.all([promise])
-      .then(res => {
-        populateSearchResult(res, pageIndex, afterdelete);
-      })
-      .catch(err => console.error(err));
+    // const promise =
+    //   props.pid === 'all'
+    //     ? getAllAnnotations(bm)
+    //     : getSummaryAnnotations(props.pid, bm);
+    // Promise.all([promise])
+    //   .then(res => {
+    //     populateSearchResult(res, pageIndex, afterdelete);
+    //   })
+    //   .catch(err => console.error(err));
+    getFieldSearchResults();
   };
 
   useEffect(() => {
@@ -195,7 +197,7 @@ const AnnotationSearch = props => {
         })
         .catch(err => console.error(err));
     } else {
-      getAnnotationsOfProjets();
+      // getAnnotationsOfProjets();
     }
     // cavit
     setShowRunPluginButton(false);

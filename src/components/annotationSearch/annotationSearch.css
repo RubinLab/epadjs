@@ -282,3 +282,19 @@ th > span{
 .modality-capital{
   text-transform: uppercase !important;
 }
+
+.pagination-search {
+  width: max-content
+}
+
+.pagination-search button {
+  color: white;
+}
+
+.pagination-search.disabled {
+  color: white;
+}
+
+.pagination-search select{
+  color: white;
+}

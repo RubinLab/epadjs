@@ -178,10 +178,11 @@ class AimEditor extends Component {
 
   getImage = () => {
     const { activePort } = this.props;
-    if (cornerstone.getEnabledElements().length)
+    if (cornerstone.getEnabledElements().length) {
       return cornerstone.getImage(
         cornerstone.getEnabledElements()[activePort]["element"]
       );
+    }
     return "";
   };
 
@@ -443,6 +444,9 @@ class AimEditor extends Component {
       if (isStudyAim) { //Study annotation
         const { openSeries, activePort } = this.props;
         const { data: study } = await getSingleStudy(openSeries[activePort].studyUID);
+        study.birthdate = study.birthdate.split('-').join('');
+        study.insertDate = study.insertDate.split('-').join('');
+        study.studyDate = study.studyDate.split('-').join('');
         let examTypes;
         ({ examTypes } = study);
         if (examTypes?.length === 1 && examTypes[0].includes("\\")) {
