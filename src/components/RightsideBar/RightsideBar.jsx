@@ -62,9 +62,10 @@ class Rightsidebar extends Component {
     }
   };
 
-  saveMediaData = (obj) => {
-    this.state.mediaExportData = obj;
-  }
+  //saveMediaData = (obj) => {
+  //  this.state.mediaExportData = obj;
+  //}
+  saveMediaData = this.props.saveData;
 
   render() {
     const { selectedAim, showAimEditor } = this.props;
@@ -84,7 +85,7 @@ class Rightsidebar extends Component {
           className="rightsidenav"
           style={{ width: width }}
         >
-          {!showAimEditor && this.state.showMediaExport && (<MediaExport data={this.state.mediaExportData} saveData={this.saveMediaData} onClose={this.showMediaExport} />)}
+          {!showAimEditor && this.state.showMediaExport && (<MediaExport data={this.props.savedData} saveData={this.saveMediaData} onClose={this.showMediaExport} />)}
           {showAimEditor && (
             <div className="AimEditor-Wrapper">
               <AimEditor

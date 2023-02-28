@@ -1691,6 +1691,8 @@ class DisplayView extends Component {
           updateTreeDataOnSave={updateTreeDataOnSave}
           setAimDirty={this.setDirtyFlag}
           communicate={this.state.siblingCommunication}
+          saveData={this.props.saveData}
+          savedData={this.props.savedData}
         >
           <ToolMenu
             onSwitchView={this.props.onSwitchView}

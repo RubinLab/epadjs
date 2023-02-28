@@ -34,10 +34,10 @@ class MediaExport extends Component {
     // included in the presentation.
     this.pptTags = ['(0008,0050)', '(0008,0020)', '(0010,0040)', '(0010,1010)',
                     '(0008,103E)', '(0018,0080)', '(0018,0081)'];
-    // The following lines give this class a way to export and import the current 
+    // The following lines give this class a way to export and import the current
     // presentation and gif, so that you can close and re-open the class dialog
     // without losing progress.
-    if (this.props.data === undefined) {
+    if (this.props.data === undefined || Object.keys(this.props.data).length == 0) {
       this.pptw = new pptWrapper();
       this.gifData = {
         ready: false,
@@ -263,11 +263,7 @@ class MediaExport extends Component {
    * Debug method for use in development.
    */
   logElement = () => {
-    const { activePort } = this.props;
-    const { element } = cornerstone.getEnabledElements()[activePort];
-    const image = cornerstone.getImage(element);
-    console.log(image);
-    console.log(this.props);
+    console.log(this.props.data);
   }
 
   // This function iterates through dataSet recursively and adds new HTML strings
@@ -882,7 +878,7 @@ class MediaExport extends Component {
           <button id="gifDownloadButton" onClick={this.downloadGif}>Save movie</button>
           <button onClick={this.addGif}>Add movie to presentation</button>
         </div>
-        {/*<button onClick={this.logElement}>Log</button>*/}
+        <button onClick={this.logElement}>Log</button>
       </div>
     );
   }

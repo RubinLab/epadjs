@@ -115,8 +115,13 @@ class App extends Component {
       metric: null,
       searchQuery: "",
       pairs: {},
-      leftMenuState:"open"
+      leftMenuState: "open",
+      savedMediaData: {}
     };
+  }
+
+  saveMediaData = (obj) => {
+    this.state.savedMediaData = obj;
   }
 
   getWorklistPatient = (patient, project) => {
@@ -1400,6 +1405,8 @@ class App extends Component {
                       keycloak={this.state.keycloak}
                       onSwitchView={this.switchView}
                       closeLeftMenu={this.closeLeftMenu}
+                      savedData={this.state.savedMediaData}
+                      saveData={this.saveMediaData}
                     />
                   )}
                 />
