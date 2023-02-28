@@ -241,7 +241,17 @@ class WorkList extends React.Component {
       studyUID,
       status
     )
-      .then(() => this.getWorkListData())
+      .then(() => {
+        toast.success("Progress successfully updated.", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        this.getWorkListData()
+      })
       .catch(err => console.error(err));
   };
 
