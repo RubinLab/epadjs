@@ -18,7 +18,7 @@ import {
   RiCloseCircleFill
 } from 'react-icons/ri';
 import { FcAbout, FcClearFilters } from 'react-icons/fc';
-import { BiSearch, BiX, BiTrash, BiDownload } from 'react-icons/bi';
+import { BiSearch, BiX, BiTrash, BiDownload, BiPlay } from 'react-icons/bi';
 import { BsEyeFill } from 'react-icons/bs';
 import { AiOutlineSortAscending, AiOutlineSortDescending } from 'react-icons/ai';
 import ReactTooltip from 'react-tooltip';
@@ -122,7 +122,7 @@ const AnnotationSearch = props => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [checkboxSelected, setCheckboxSelected] = useState(false);
   // cavit
-  const [showPlugins, setShowPluginDropdown] = useState(false);
+  const [showPlugins, setShowPluginDropdown] = useState(true);
   const [pluginListArray, setpluginListArray] = useState([]);
   const [selectedPluginDbId, setSelectedPluginDbId] = useState(-1);
   const [showRunPluginButton, setShowRunPluginButton] = useState(false);
@@ -1447,17 +1447,89 @@ const AnnotationSearch = props => {
           }
         </div>
       </div >
-      <div className="icon_row">
-        <div className="icon_r">
-          {/* <button type="button" className="btn btn-sm" ><BsEyeFill /><br />View</button> */}
-          <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
-          {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
+      <div style={{
+        'width': 'auto',
+        'display': 'flex',
+        'flexDirection': 'row',
+        'alignItems': 'center',
+      }}>
+        <div className="icon_row">
+          <div className="icon_r">
+            {/* <button type="button" className="btn btn-sm" ><BsEyeFill /><br />View</button> */}
+            <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
+            {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
           {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
-          <AddToWorklist deselect={() => handleSelectDeselectAll(false)} />
-          <Projects deselect={() => handleSelectDeselectAll(false)} />
-          {/* <button type="button" className="btn btn-sm" onClick={() => { setShowProjects(!showProjects) }}><BiDownload /><br />Copy to Project</button>
+            <AddToWorklist deselect={() => handleSelectDeselectAll(false)} />
+            <Projects deselect={() => handleSelectDeselectAll(false)} />
+            {/* <button type="button" className="btn btn-sm" onClick={() => { setShowProjects(!showProjects) }}><BiDownload /><br />Copy to Project</button>
           {showProjects && (<Projects className='btn btn-sm worklist' onClose={() => { setShowProjects(false) }} />)} */}
-          <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
+            <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
+          </div>
+        </div>
+        <div style={{
+          'textAlign': 'left',
+          'color': '#eaddb2',
+          'borderRight': '1px solid #ececec',
+          'backgroundColor': '#555',
+          'borderTop': '1px solid #ececec',
+          'marginRight': '3px',
+          'display': 'flex',
+          'height': "42.58px",
+          'alignItems': 'flex-end',
+        }}>
+
+          <div
+            style={{ padding: '5px 3px' }}
+          >
+            <div
+              style={{
+                color: '#eaddb2',
+                fontSize: '.8em'
+              }}
+              onClick={() => {
+                getPluginProjects();
+              }}
+            >
+
+              Select Plugin
+            </div>
+          </div>
+          {showPlugins && (
+            <div
+              style={{
+                fontSize: '0.8rem',
+                // marginLeft: '5px',
+                // marginRight: '10px'
+                margin: '5px 3px',
+              }}
+            >
+              <select
+                className="pluginaddqueueselect"
+                id="plugins"
+                onChange={handleChangePlugin}
+                value={selectedPluginDbId}
+                style={{ minWidth: '8rem' }}
+              >
+                <option key="-1" value="-1">
+                  select
+                </option>
+                {prepareDropDownHtmlForPlugins()}
+              </select>
+            </div>
+          )}
+
+          <button
+            style={{
+              height: '41.98px',
+              'color': '#eaddb2',
+            }}
+            className="btn btn-sm"
+            onClick={() => showRunPluginButton ? runPlugin() : null}
+          >
+            <BiPlay />
+            <br />Run
+          </button>
+
         </div>
       </div>
       <table className="table table-dark table-striped table-hover title-case" style={{ "height": "100%" }}>
