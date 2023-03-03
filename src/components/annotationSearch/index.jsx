@@ -122,7 +122,7 @@ const AnnotationSearch = props => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [checkboxSelected, setCheckboxSelected] = useState(false);
   // cavit
-  const [showPlugins, setShowPluginDropdown] = useState(true);
+  const [showPlugins, setShowPluginDropdown] = useState(false);
   const [pluginListArray, setpluginListArray] = useState([]);
   const [selectedPluginDbId, setSelectedPluginDbId] = useState(-1);
   const [showRunPluginButton, setShowRunPluginButton] = useState(false);
@@ -1466,7 +1466,7 @@ const AnnotationSearch = props => {
             <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
           </div>
         </div>
-        <div style={{
+        {(showPlugins && mode !== 'teaching') && (<div style={{
           'textAlign': 'left',
           'color': '#eaddb2',
           'borderRight': '1px solid #ececec',
@@ -1477,7 +1477,6 @@ const AnnotationSearch = props => {
           'height': "42.58px",
           'alignItems': 'flex-end',
         }}>
-
           <div
             style={{ padding: '5px 3px' }}
           >
@@ -1493,12 +1492,11 @@ const AnnotationSearch = props => {
 
               Select Plugin
             </div>
-          </div>
-          {showPlugins && (
+          </div>         
             <div
               style={{
                 fontSize: '0.8rem',
-                // marginLeft: '5px',
+                // marginLeft: '5px',ƒ
                 // marginRight: '10px'
                 margin: '5px 3px',
               }}
@@ -1516,7 +1514,7 @@ const AnnotationSearch = props => {
                 {prepareDropDownHtmlForPlugins()}
               </select>
             </div>
-          )}
+          
 
           <button
             style={{
@@ -1530,7 +1528,7 @@ const AnnotationSearch = props => {
             <br />Run
           </button>
 
-        </div>
+        </div>)}
       </div>
       <table className="table table-dark table-striped table-hover title-case" style={{ "height": "100%" }}>
         <colgroup><col className="select_row" />
