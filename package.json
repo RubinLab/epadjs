@@ -15,6 +15,7 @@
     "dompurify": "^2.2.6",
     "event-source-polyfill": "^1.0.15",
     "font-awesome": "^4.7.0",
+    "fs": "^0.0.1-security",
     "hammerjs": "^2.0.8",
     "highcharts": "^9.1.0",
     "highcharts-react-official": "^3.0.0",
@@ -27,6 +28,7 @@
     "match-sorter": "^3.1.1",
     "moment": "^2.29.3",
     "node-polyfill-webpack-plugin": "^2.0.1",
+    "process": "^0.11.10",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-bootstrap": "^1.6.4",
@@ -71,13 +73,17 @@
     "babel-preset-stage-2": "^6.24.1",
     "chai": "^4.3.4",
     "chromedriver": "^92.0.1",
-    "css-loader": "^2.1.1",
+    "css-loader": "^6.7.3",
     "geckodriver": "^3.2.0",
     "react-app-rewired": "^2.2.1",
     "react-error-overlay": "^6.0.9",
-    "react-scripts": "^5.0.0",
+    "react-scripts": "^5.0.1",
     "selenium-webdriver": "^4.0.0-beta.3",
     "stylus": "^0.54.7",
-    "stylus-loader": "^3.0.2"
+    "stylus-loader": "^3.0.2",
+    "webpack": "^5.75.0"
+  },
+  "resolutions": {
+    "webpack": "^5.75.0"
   }
 }

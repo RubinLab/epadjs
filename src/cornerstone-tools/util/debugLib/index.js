@@ -1,6 +1,9 @@
 /* eslint-env browser */
 
 import setup from './common.js';
+import process from 'process';
+// window.process = { browser: true, env: { ENVIRONMENT: 'BROWSER' } };
+
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -125,6 +128,11 @@ function useColors() {
     return false;
   } // Is webkit? http://stackoverflow.com/a/16459606/376773
   // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
+
+  console.log(" ---------- +++++++++++++++++++++")
+  console.log(window)
+  console.log(" ---------- +++++++++++++++++++++")
+
 
   return (
     (typeof document !== 'undefined' &&
