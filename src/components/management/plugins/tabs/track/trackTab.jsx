@@ -935,13 +935,17 @@ class TrackTab extends React.Component {
     const aims = this.state.showAimList.data.original.aim_uid;
     const aimHtmlArray = [];
     let cnt = 0;
+    const arr = Object.entries(aims);
     // console.log('aim ids for plugins: ', JSON.stringify(aims));
-    for (let [key, value] of Object.entries(aims)) {
-      // console.log(`${key}: ${value}`);
-      cnt = cnt + 1;
-      aimHtmlArray.push(<div key={cnt}>{value.name}--<font color="#00cc99">id:{value.aimID}</font></div>);
+    if (arr.length > 0) {
+      for (let [key, value] of Object.entries(aims)) {
+        // console.log(`${key}: ${value}`);
+        cnt = cnt + 1;
+        aimHtmlArray.push(<div key={cnt}>{value.name}--<font color="#00cc99">id:{value.aimID}</font></div>);
+      }
+      return aimHtmlArray;
     }
-    return aimHtmlArray;
+    else return <span style={{color: 'orangered', fontSize: '1.2rem'}}>There is not any selected aim for the process</span>;
   }
 
   render() {
@@ -1156,7 +1160,7 @@ class TrackTab extends React.Component {
         {this.state.showAimList.show && (
           <Modal.Dialog style={{ position: "absolute", left: "20%", top: "20%", boxShadow: "2rem 2rem 2rem #111" }}>
             <Modal.Header style={{ padding: '0rem 1rem' }}>
-              <Modal.Title>Aims Selected</Modal.Title>
+              <Modal.Title>Selected Aims</Modal.Title>
             </Modal.Header>
             <Modal.Body
               className="create-user__modal--body"
@@ -1164,7 +1168,7 @@ class TrackTab extends React.Component {
                 'maxHeight': `${this.state.showAimList.height - 30}px`,
                 overflow: 'auto',
                 background: '#343a40',
-                padding: '0rem 1rem',
+                padding: '0.5rem 1rem',
                 textAlign: 'left'
               }}>
               {this.renderAimsList()}
@@ -1176,7 +1180,7 @@ class TrackTab extends React.Component {
                   className="btn btn-sm btn-outline-light"
                   onClick={this.showAimListModal}
                 >
-                  close
+                  Close
                 </button>
               </div>
             </Modal.Footer>
