@@ -14,6 +14,7 @@ import {
   FaWindowClose,
   FaBuffer,
 } from "react-icons/fa";
+import { BsList } from "react-icons/bs";
 import {
   getPluginsQueue,
   runPluginsQueue,
@@ -474,7 +475,36 @@ class TrackTab extends React.Component {
         minWidth: 70,
         minResizeWidth: 20,
         Cell: (data) =>
-          (<div className="wrapped click-to-add" onClick={() => this.showAimListModal(data)}> see aims </div>),
+        (<div className="plugintracktoolbar">
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <button
+                    variant="primary"
+                    className="btn btn-sm btn-outline-light"
+                    onClick={() => this.showAimListModal(data)}
+                  >
+                    <BsList
+                      className="menu-clickable"
+                      data-tip
+                      data-for="showAims-icon"
+                    />
+                    <ReactTooltip
+                      id="showAims-icon"
+                      place="bottom"
+                      type="info"
+                      delayShow={1000}
+                    >
+                      <span>List aims</span>
+                    </ReactTooltip>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>),
+        // (<div className="wrapped click-to-add" onClick={() => this.showAimListModal(data)}> see aims </div>),
         sortable: true,
         resizable: true,
       },
@@ -1125,15 +1155,15 @@ class TrackTab extends React.Component {
 
         {this.state.showAimList.show && (
           <Modal.Dialog style={{ position: "absolute", left: "20%", top: "20%", boxShadow: "2rem 2rem 2rem #111" }}>
-            <Modal.Header style={{ padding: '0rem 1rem' }}>  
+            <Modal.Header style={{ padding: '0rem 1rem' }}>
               <Modal.Title>Aims Selected</Modal.Title>
             </Modal.Header>
             <Modal.Body
               className="create-user__modal--body"
               style={{
-                'maxHeight': `${this.state.showAimList.height - 30}px`, 
-                overflow: 'auto', 
-                background: '#212529', 
+                'maxHeight': `${this.state.showAimList.height - 30}px`,
+                overflow: 'auto',
+                background: '#343a40',
                 padding: '0rem 1rem',
                 textAlign: 'left'
               }}>
