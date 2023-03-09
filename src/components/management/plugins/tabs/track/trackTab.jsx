@@ -85,9 +85,13 @@ class TrackTab extends React.Component {
     if (newState.show) {
       newState.show = false;
       delete newState.data;
+      delete newState.height;
     } else {
       newState.show = true;
       newState.data = data;
+      const el = document.getElementsByClassName("rt-tbody")[0];
+      const height = el.clientHeight;
+      newState.height = height;
     }
     this.setState({ showAimList: newState });
   }
@@ -901,13 +905,13 @@ class TrackTab extends React.Component {
     const aims = this.state.showAimList.data.original.aim_uid;
     const aimHtmlArray = [];
     let cnt = 0;
-    console.log('aim ids for plugins: ', JSON.stringify(aims));
+    // console.log('aim ids for plugins: ', JSON.stringify(aims));
     for (let [key, value] of Object.entries(aims)) {
-      console.log(`${key}: ${value}`);
+      // console.log(`${key}: ${value}`);
       cnt = cnt + 1;
       aimHtmlArray.push(<div key={cnt}>{value.name}--<font color="#00cc99">id:{value.aimID}</font></div>);
     }
-    return aimHtmlArray
+    return aimHtmlArray;
   }
 
   render() {
@@ -1121,14 +1125,21 @@ class TrackTab extends React.Component {
 
         {this.state.showAimList.show && (
           <Modal.Dialog style={{ position: "absolute", left: "20%", top: "20%", boxShadow: "2rem 2rem 2rem #111" }}>
-            <Modal.Header>
+            <Modal.Header style={{ padding: '0rem 1rem' }}>  
               <Modal.Title>Aims Selected</Modal.Title>
             </Modal.Header>
-            <Modal.Body className="create-user__modal--body">
+            <Modal.Body
+              className="create-user__modal--body"
+              style={{
+                'maxHeight': `${this.state.showAimList.height - 30}px`, 
+                overflow: 'auto', 
+                background: '#212529', 
+                padding: '0rem 1rem',
+                textAlign: 'left'
+              }}>
               {this.renderAimsList()}
             </Modal.Body>
-
-            <Modal.Footer className="create-user__modal--footer">
+            <Modal.Footer className="create-user__modal--footer" >
               <div className="create-user__modal--buttons">
                 <button
                   variant="secondary"
