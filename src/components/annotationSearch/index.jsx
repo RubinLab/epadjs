@@ -77,8 +77,8 @@ const explanation = {
   noResult: 'Can not find any result!',
   downloadProject:
     'Preparing project for download. The link to the files will be sent with a notification after completion!',
-  pluginAnnotations: 'you need to select an annotation',
-  selectPlugin: 'you need to select a plugin'
+  pluginAnnotations: 'You need to select an annotation first.',
+  selectPlugin: 'You need to select a plugin first.'
 };
 
 const styles = {
@@ -112,7 +112,6 @@ const styles = {
     'color': '#eaddb2',
     cursor: 'default'
   }
-
 };
 
 let mode;
