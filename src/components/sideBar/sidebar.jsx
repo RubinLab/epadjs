@@ -162,10 +162,12 @@ class Sidebar extends Component {
       const { data: templates } = await getTemplatesUniversal();
       for (let template of templates) {
         const tempCode = template.Template[0].templateCodeValue;
-        for (let project of template.projects) {
-          prTempMap[project]
-            ? prTempMap[project].push(tempCode)
-            : (prTempMap[project] = [tempCode]);
+        if (template.projects) {
+          for (let project of template.projects) {
+            prTempMap[project]
+              ? prTempMap[project].push(tempCode)
+              : (prTempMap[project] = [tempCode]);
+          }
         }
       }
       return prTempMap;

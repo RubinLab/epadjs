@@ -14,7 +14,6 @@ const projectEditingForm = ({
   defaultTemplate,
   templates,
 }) => {
-  console.log(type);
   const firstOption = (
     <option value={null} key="selectOpt">
       none
@@ -45,7 +44,7 @@ const projectEditingForm = ({
             type="text"
             onChange={onType}
             id="form-first-element"
-            placeholder={name}
+            value={name}
           />
           <h5 className="edit-project__modal--label">Description</h5>
           <textarea
@@ -53,7 +52,7 @@ const projectEditingForm = ({
             className="edit-project__modal--input"
             name="description"
             onChange={onType}
-            placeholder={desc}
+            value={desc}
           />
           <h5 className="add-project__modal--label">Default Template</h5>
           <select

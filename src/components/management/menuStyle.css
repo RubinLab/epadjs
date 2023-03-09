@@ -994,6 +994,7 @@
 .edit-userPermission.__row {
   display: flex;
   flex-direction: row;
+  color: #d3d3d3;
 }
 
 .edit-permission__modal.modal-dialog,

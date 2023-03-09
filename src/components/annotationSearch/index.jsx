@@ -196,7 +196,7 @@ const AnnotationSearch = props => {
     setBookmark('');
     setCheckboxSelected(false);
     props.dispatch(clearSelection());
-
+    persistSearch();
     if (props.searchQuery) {
       const searchQueryFinal = Object.keys(props.searchQuery)[0];
       const searchQueryText = Object.values(props.searchQuery)[0].query;
@@ -1400,7 +1400,11 @@ const AnnotationSearch = props => {
 
   return (
     <>
-      <div className="container-fluid body-dk">
+      <div className="container-fluid body-dk" style={{
+        'zIndex': 6,
+        'position': 'sticky',
+        'top': 0
+      }}>
         {/* search / filters */}
         <div className="search_filter">
           <div className="row">
@@ -1465,11 +1469,16 @@ const AnnotationSearch = props => {
         'flexDirection': 'row',
         'alignItems': 'center',
       }}>
-        <div className="icon_row">
-          <div className="icon_r">
-            {/* <button type="button" className="btn btn-sm" ><BsEyeFill /><br />View</button> */}
-            <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
-            {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
+      <div className="icon_row" style={{
+        'position': 'sticky',
+        'top': '84px',
+        'width': '100%', 
+        'zIndex': 5
+      }}>
+        <div className="icon_r">
+          {/* <button type="button" className="btn btn-sm" ><BsEyeFill /><br />View</button> */}
+          <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
+          {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
           {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
             <AddToWorklist deselect={() => handleSelectDeselectAll(false)} />
             <Projects deselect={() => handleSelectDeselectAll(false)} />
