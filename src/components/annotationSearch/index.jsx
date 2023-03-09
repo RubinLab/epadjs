@@ -77,7 +77,8 @@ const explanation = {
   noResult: 'Can not find any result!',
   downloadProject:
     'Preparing project for download. The link to the files will be sent with a notification after completion!',
-  pluginAnnotations: 'you need to select an annotation'
+  pluginAnnotations: 'you need to select an annotation',
+  selectPlugin: 'you need to select a plugin'
 };
 
 const styles = {
@@ -99,7 +100,19 @@ const styles = {
     height: 'fit-content',
     fontSize: '1.2rem',
     margin: '0.3rem 2rem'
+  },
+  enabledRunButton: {
+    height: '41.98px',
+    'color': '#eaddb2',
+    cursor: 'pointer'
+  },
+  disabledRunButton:
+  {
+    height: '41.98px',
+    'color': '#eaddb2',
+    cursor: 'default'
   }
+
 };
 
 let mode;
@@ -1474,7 +1487,7 @@ const AnnotationSearch = props => {
           'borderTop': '1px solid #ececec',
           'marginRight': '3px',
           'display': 'flex',
-          'height': "42.58px",
+          // 'height': "42.58px",
           'alignItems': 'flex-end',
         }}>
           <div
@@ -1492,42 +1505,34 @@ const AnnotationSearch = props => {
 
               Select Plugin
             </div>
-          </div>         
-            <div
-              style={{
-                fontSize: '0.8rem',
-                // marginLeft: '5px',ƒ
-                // marginRight: '10px'
-                margin: '5px 3px',
-              }}
-            >
-              <select
-                className="pluginaddqueueselect"
-                id="plugins"
-                onChange={handleChangePlugin}
-                value={selectedPluginDbId}
-                style={{ minWidth: '8rem' }}
-              >
-                <option key="-1" value="-1">
-                  select
-                </option>
-                {prepareDropDownHtmlForPlugins()}
-              </select>
-            </div>
-          
-
-          <button
+          </div>
+          <div
             style={{
-              height: '41.98px',
-              'color': '#eaddb2',
+              fontSize: '0.8rem',
+              margin: '5px 3px',
             }}
+          >
+            <select
+              className="pluginaddqueueselect"
+              id="plugins"
+              onChange={handleChangePlugin}
+              value={selectedPluginDbId}
+              style={{ minWidth: '8rem' }}
+            >
+              <option key="-1" value="-1">
+                select
+              </option>
+              {prepareDropDownHtmlForPlugins()}
+            </select>
+          </div>
+          <button
+            style={showRunPluginButton ? styles.enabledRunButton : styles.disabledRunButton}
             className="btn btn-sm"
-            onClick={() => showRunPluginButton ? runPlugin() : null}
+            onClick={() => showRunPluginButton ? runPlugin() : toast.info(explanation.selectPlugin, { position: 'top-right' })}
           >
             <BiPlay />
             <br />Run
           </button>
-
         </div>)}
       </div>
       <table className="table table-dark table-striped table-hover title-case" style={{ "height": "100%" }}>
