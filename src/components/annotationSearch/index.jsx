@@ -1468,17 +1468,23 @@ const AnnotationSearch = props => {
         'display': 'flex',
         'flexDirection': 'row',
         'alignItems': 'center',
-      }}>
-      <div className="icon_row" style={{
+        'justifyContent': 'flex-start',
         'position': 'sticky',
         'top': '84px',
-        'width': '100%', 
-        'zIndex': 5
+        'width': '100%',
+        'zIndex': 5,
+        background: '#222222'
       }}>
-        <div className="icon_r">
-          {/* <button type="button" className="btn btn-sm" ><BsEyeFill /><br />View</button> */}
-          <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
-          {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
+        <div className="icon_row" style={{
+          // 'position': 'sticky',
+          // 'top': '84px',
+          // // 'width': '100%',
+          // 'zIndex': 5
+        }}>
+          <div className="icon_r">
+            {/* <button type="button" className="btn btn-sm" ><BsEyeFill /><br />View</button> */}
+            <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
+            {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
           {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
             <AddToWorklist deselect={() => handleSelectDeselectAll(false)} />
             <Projects deselect={() => handleSelectDeselectAll(false)} />
