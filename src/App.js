@@ -582,6 +582,10 @@ class App extends Component {
       }
     } else if (viewType === "annotations") {
       this.props.history.push(`/search`);
+    } else if (viewType === "flex") {
+      pid
+      ? this.props.history.push(`/flex/${pid}`)
+      : this.props.history.push(`/flex`);
     }
   };
 
