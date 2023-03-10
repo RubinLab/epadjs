@@ -91,10 +91,17 @@ const NavBar = ({
                   }} aria-current="page">Patient List</a>
               </li>
               <li className="nav-item" >
-                <NavLink className={
+                {/* <NavLink className={
                   path.includes('flex') ? 'nav-link active' : 'nav-link'
                 }
-                  to={pid ? `/flex/${pid}` : `/flex`} aria-current="page">Study List</NavLink>
+                  to={pid ? `/flex/${pid}` : `/flex`} aria-current="page">Study List</NavLink> */}
+                <a className={
+                  path.includes('flex') ? 'nav-link active' : 'nav-link'
+                }
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    onSwitchView('flex');
+                  }} aria-current="page">Study List</a>
               </li>
               <li className="nav-item" >
                 <a className={
