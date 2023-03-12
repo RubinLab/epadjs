@@ -52,7 +52,7 @@ const NavBar = ({
                 }
                   style={{ cursor: 'pointer' }}
                   onClick={() => {
-                    onSwitchView('annotations');
+                    onSwitchView('search');
                   }} aria-current="page">Search</a>
               </li>
               <li className="nav-item" >
@@ -87,7 +87,7 @@ const NavBar = ({
                 } style={{ cursor: 'pointer' }}
                   onClick={() => {
                     onSearchViewClick();
-                    onSwitchView('search', true);
+                    onSwitchView('list', true);
                   }} aria-current="page">Patient List</a>
               </li>
               <li className="nav-item" >
@@ -109,7 +109,7 @@ const NavBar = ({
                 }
                   style={{ cursor: 'pointer' }}
                   onClick={() => {
-                    onSwitchView('annotations');
+                    onSwitchView('search');
                   }} aria-current="page">Annotations</a>
               </li>
               <li className="nav-item" id="navbarReports">
