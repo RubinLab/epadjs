@@ -705,6 +705,9 @@ class App extends Component {
       this.props.dispatch(getTemplates());
       localStorage.setItem("treeData", JSON.stringify({}));
       this.clearTreeExpand();
+      this.setState(state => ({
+        update: state.update + 1
+      }));
     }
     const oldPid = prevProps.location.pathname.split("/").pop();
     const newPid = this.props.location.pathname.split("/").pop();
@@ -1453,10 +1456,11 @@ class App extends Component {
                   )}
                 />
                 <ProtectedRoute
-                  path="/search"
+                  path="/search/:pid?"
                   render={(props) => (
                     <AnnotationSearch
                       {...props}
+                      update={this.state.update}
                       pid={this.state.pid}
                       searchQuery={this.state.searchQuery}
                       setQuery={(query) =>
@@ -1570,11 +1574,12 @@ class App extends Component {
                 render={(props) => <FlexView {...props} pid={this.state.pid} />}
               />
               <ProtectedRoute
-                path="/search"
+                path="/search/:pid?"
                 render={(props) => (
                   <AnnotationSearch
                     {...props}
                     pid={this.state.pid}
+                    update={this.state.update}
                     searchQuery={this.state.searchQuery}
                     setQuery={(query) => this.setState({ searchQuery: query })}
                   />
