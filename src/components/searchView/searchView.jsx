@@ -441,6 +441,7 @@ class SearchView extends Component {
       localStorage.setItem('treeData', JSON.stringify({}));
       this.props.clearTreeExpand();
     }
+    // window.dispatchEvent("refreshProjects") ;
   };
 
   updateStoreOnAnnotationDelete = arr => {
