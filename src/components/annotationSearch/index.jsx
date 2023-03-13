@@ -204,7 +204,7 @@ const AnnotationSearch = props => {
     setSelectedPluginDbId(-1);
     getPluginProjects();
     // cavit
-  }, [props.pid]);
+  }, [props.pid, props.update]);
 
   const handleUserKeyPress = (e => {
     if (e.key === 'Enter') {
