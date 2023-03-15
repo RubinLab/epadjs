@@ -185,7 +185,7 @@ const AnnotationSearch = props => {
     //     populateSearchResult(res, pageIndex, afterdelete);
     //   })
     //   .catch(err => console.error(err));
-    getFieldSearchResults();
+    getFieldSearchResults(pageIndex);
   };
 
   useEffect(() => {
@@ -508,6 +508,8 @@ const AnnotationSearch = props => {
         searchAnnotations({ query: escapeSlashesQuery(searchQuery) }, bm)
           .then(res => {
             populateSearchResult(res, pageIndex, afterDelete);
+            // setRows(res.data.total_rows);
+            // setShowSpinner(false);
           })
           .catch(err => console.error(err));
       }
