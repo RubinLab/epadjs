@@ -173,7 +173,7 @@ const AnnotationSearch = props => {
     //     populateSearchResult(res, pageIndex, afterdelete);
     //   })
     //   .catch(err => console.error(err));
-    getFieldSearchResults();
+    getFieldSearchResults(pageIndex);
   };
 
   useEffect(() => {
