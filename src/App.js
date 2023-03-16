@@ -90,7 +90,7 @@ class App extends Component {
       authenticated: false,
       openInfo: false,
       openUser: false,
-      viewType: "search",
+      viewType: "list",
       lastEventId: null,
       showLog: false,
       admin: false,
@@ -660,6 +660,7 @@ class App extends Component {
           document.title = "Stella";
           document.getElementById("favicon");
           favicon.href = "/stella.png"
+          this.setState({ viewType: 'search' })
         }
 
         this.setState({ mode, apiUrl, wadoUrl, authMode });
