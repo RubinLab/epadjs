@@ -77,7 +77,8 @@ const explanation = {
   noResult: 'Can not find any result!',
   downloadProject:
     'Preparing project for download. The link to the files will be sent with a notification after completion!',
-  pluginAnnotations: 'you need to select an annotation'
+  pluginAnnotations: 'you need to select an annotation',
+  invalidQuery: 'This search query is not valid.'
 };
 
 const styles = {
@@ -212,7 +213,7 @@ const AnnotationSearch = props => {
         getSearchResult();
         props.dispatch(updateSearchTableIndex(0));
       } else {
-        getFieldSearchResults();
+        getFieldSearchResults(undefined, undefined, true);
         props.dispatch(updateSearchTableIndex(0));
       }
     }
@@ -502,7 +503,67 @@ const AnnotationSearch = props => {
     }
   };
 
-  const getFieldSearchResults = (pageIndex, afterDelete) => {
+  // Returns true if the string is valid, false otherwise.
+  const syntaxVerify = inputString => {
+    // Erase anything within quotes, because nothing in quotes can be invalid
+    // Replace fancy quotes with regular quotes
+    inputString = inputString.replace(/[\u201C\u201D]/g, '"').toLowerCase();
+    // Matches `""...""` where the `...` doesn't start or end with `"` and doesn't 
+    // contain any double quotes, ie `""a"a""`
+    inputString = inputString.replace(/""(?!"").+?""/g, '==');
+    // Matches anything in quotation marks.
+    inputString = inputString.replace(/"[^"]+?"/g, '##');
+    if (inputString.includes('"')) {
+      // Remaining quotes == quotation mark mismatch
+      return false;
+    }
+    return checkParens(inputString) && checkOperators(inputString);
+  }
+
+  // Returns false if it finds a problem with the string, true otherwise.
+  // This checks:
+  // 1. The number of '(' is the same as the number of ')'
+  // 2. The parentheses are a valid arrangement, so '(a)' is valid but ')a('
+  //    is not.
+  const checkParens = inputString => {
+    let netParens = 0;
+    for (const character of inputString) {
+      if (character == '(') {
+        netParens += 1;
+      } else if (character == ')') {
+        netParens -= 1;
+        if (netParens < 0) {
+          return false;
+        }
+      }
+    }
+    return netParens == 0;
+  }
+
+  // Returns false if it finds a problem with the string, true otherwise.
+  // Checks various things related to the search operators '(', ')', 'and', 'or', 'not'.
+  const checkOperators = inputString => {
+    const operatorRegex = new RegExp('\(' +
+      '\\( *\\)|' + // "()" and "( )" are invalid
+      '\\( *and|\\( *or|\\( *not|' + // ( then operator
+      'and *\\)|or *\\)|not *\\)|' + // ) then operator
+      '^ *and *$|^ *or *$|^ *not *$|' + // Whole query is an operator
+      '^ *and[ (]|^ *or[ (]|^ *not[ (]|' + // Unpaired operators at start of query
+      '[ )]and *$|[ )]or *$|[ )]not *$|' + // Unpaired operators at end of the query
+      'and +and|and +or|or +and|or +or|not +and|not +or|not +not' + // 2 operators other than "OR NOT", "AND NOT"
+      '\)')
+    return !operatorRegex.test(inputString);
+  }
+
+  const getFieldSearchResults = (pageIndex, afterDelete, enterPressed) => {
+    if (query.length) {
+      if (!syntaxVerify(query)) {
+        if (enterPressed) {
+          toast.info(explanation.invalidQuery, { position: 'top-right' });
+        }
+        return;
+      }
+    }
     setShowSpinner(true);
     const bm = pageIndex ? bookmark : '';
     let body = {};
@@ -510,8 +571,10 @@ const AnnotationSearch = props => {
     body['fields'] = fields;
     if (props.pid)
       fields['project'] = props.pid;
-    if (query.length)
+    if (query.length) {
+      // fields['query'] = reformatQuery(query);
       fields['query'] = query;
+    }
     if (selectedSubs.length)
       fields['subSpecialty'] = selectedSubs;
     if (selectedMods.length)
