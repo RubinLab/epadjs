@@ -560,7 +560,7 @@ class App extends Component {
     this.setState({ viewType });
     const { openSeries } = this.props;
     const portOpen = openSeries.length > 0;
-    if (viewType === "search") {
+    if (viewType === "list") {
       this.props.dispatch(clearSelection());
       if (!portOpen || force) {
         pid
@@ -580,8 +580,14 @@ class App extends Component {
           draggable: true,
         });
       }
-    } else if (viewType === "annotations") {
-      this.props.history.push(`/search`);
+    } else if (viewType === "search") {
+      pid
+        ? this.props.history.push(`/search/${pid}`)
+        : this.props.history.push(`/search`);
+    } else if (viewType === "flex") {
+      pid
+        ? this.props.history.push(`/flex/${pid}`)
+        : this.props.history.push(`/flex`);
     }
   };
 

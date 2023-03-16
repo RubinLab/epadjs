@@ -281,14 +281,19 @@ class Sidebar extends Component {
     if (type !== "progress") {
       this.collapseAll();
     }
-    if (type === "project" && this.props.type === "search") {
+    if (type === "project" && this.props.type === "search" && mode === 'teaching') {
+      this.setState({ index: 0 });
+      this.props.getPidUpdate(id);
+      this.props.history.push(`/search/${id}`);
+    } else if (type === "project" && this.props.type === "list" && mode !== 'teaching') {
       this.setState({ index: 0 });
       this.props.getPidUpdate(id);
       this.props.clearTreeExpand();
-      if (mode === 'teaching')
-        this.props.history.push(`/search`);
-      else
-        this.props.history.push(`/list/${id}`);
+      this.props.history.push(`/list/${id}`);
+    } else if (type === "project" && this.props.type === "search" && mode !== 'teaching') {  
+      this.setState({ index: 0 });
+      this.props.getPidUpdate(id);
+      this.props.history.push(`/search/${id}`);
     } else if (type === "project" && this.props.type === "flex") {
       this.props.history.push(`/flex/${id}`);
       this.setState({ index: 0 });
