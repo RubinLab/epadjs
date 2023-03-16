@@ -571,9 +571,8 @@ const AnnotationSearch = props => {
     body['fields'] = fields;
     if (props.pid)
       fields['project'] = props.pid;
-    if (query.length) {
+    if (query.length)
       fields['query'] = query;
-    }
     if (selectedSubs.length)
       fields['subSpecialty'] = selectedSubs;
     if (selectedMods.length)
