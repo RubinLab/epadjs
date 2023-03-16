@@ -734,8 +734,6 @@ class SearchView extends Component {
           this.setState({ downloading: false });
           console.log(err);
         });
-      this.setState(state => ({ update: state.update + 1 }));
-      this.props.dispatch(clearSelection());
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
     } else {
