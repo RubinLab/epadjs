@@ -572,7 +572,6 @@ const AnnotationSearch = props => {
     if (props.pid)
       fields['project'] = props.pid;
     if (query.length) {
-      // fields['query'] = reformatQuery(query);
       fields['query'] = query;
     }
     if (selectedSubs.length)
