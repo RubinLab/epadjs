@@ -887,8 +887,8 @@ class SearchView extends Component {
 
   handleSubmitDownload = () => {
     this.setState({ showAnnotationModal: false });
-    this.setState(state => ({ update: state.update + 1 }));
-    this.props.dispatch(clearSelection());
+    // this.setState(state => ({ update: state.update + 1 }));
+    // this.props.dispatch(clearSelection());
   };
 
   handleUploadWizardClick = () => {
