@@ -216,7 +216,7 @@ const AnnotationSearch = props => {
     setSelectedPluginDbId(-1);
     getPluginProjects();
     // cavit
-  }, [props.pid]);
+  }, [props.pid, props.update]);
 
   const handleUserKeyPress = (e => {
     if (e.key === 'Enter') {
@@ -273,7 +273,7 @@ const AnnotationSearch = props => {
     getFieldSearchResults();
     props.dispatch(updateSearchTableIndex(0));
     return persistSearch;
-  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid, query, sort, filters], 500)
+  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid, query, sort, filters, props.update], 500)
 
   const handleSort = (column) => {
     if (!sort.length || (sort[0] !== column && sort[0] !== ("-" + column)))
@@ -551,7 +551,7 @@ const AnnotationSearch = props => {
 
   const getNewData = (pageIndex, afterDelete) => {
     if (mode === 'teaching') {
-      getFieldSearchResults(props.searchTableIndex);
+      getFieldSearchResults(props.searchTableIndex, afterDelete);
       return;
     }
 
