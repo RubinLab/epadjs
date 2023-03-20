@@ -120,11 +120,13 @@ class App extends Component {
     };
   }
 
-  getWorklistPatient = (patient, project) => {
-    const pairsSelected = patient.reduce((all, item, index) => {
-      all.push({ subjectID: item, projectID: project[index] });
-      return all;
-    }, []);
+  getWorklistPatient = map => {
+    const keys = Object.keys(map);
+    const pairsSelected = [];
+    keys.forEach((item) => {
+      const idArr = item.split('-');
+      pairsSelected.push({subjectID: idArr[0], projectID: idArr[1]});
+    });
     const pairs = { ...this.state.pairs };
     const index = this.state.reportsCompArr.length;
     pairs[index] = pairsSelected;
