@@ -398,41 +398,6 @@ class WorkList extends React.Component {
               }
               id={original.id}
             />
-
-
-
-            // <div>
-            //   <Button
-            //     data-tip
-            //     data-for={`graph-badge${original.index}`}
-            //     variant={variant}
-            //     style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
-            //     onClick={() => {
-            //       if (variant === "success") {
-            //         newPatients.splice(indexOfSubject, 1);
-            //         newProjects.splice(indexOfProject, 1);
-            //       } else {
-            //         newPatients.push(subjectID);
-            //         newProjects.push(projectID);
-            //       }
-            //       this.setState({
-            //         patients: newPatients,
-            //         projects: newProjects
-            //       });
-            //       this.props.getWorklistPatient(newPatients, newProjects);
-            //     }}
-            //   >
-            //     {icon}
-            //   </Button>
-            //   <ReactTooltip
-            //     id={`graph-badge${original.index}`}
-            //     place="right"
-            //     type="light"
-            //     delayShow={1000}
-            //   >
-            //     <span>{text}</span>
-            //   </ReactTooltip>
-            // </div>
           );
         }
       },
