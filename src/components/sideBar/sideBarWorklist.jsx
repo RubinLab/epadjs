@@ -30,7 +30,8 @@ import {
   alertViewPortFull,
   updatePatient,
   clearSelection,
-  changeActivePort
+  changeActivePort,
+  selectPatient
 } from "../annotationsList/action";
 
 let mode;
@@ -392,6 +393,7 @@ class WorkList extends React.Component {
                   newMap[`${subjectID}-${projectID}`] = true;
                 this.setState({ patientsProjectMap: newMap });
                 this.props.getWorklistPatient(newMap);
+                this.props.dispatch(selectPatient(original.row._original));
               }
               }
               id={original.id}
