@@ -56,8 +56,7 @@ class WorkList extends React.Component {
     series: [],
     selectedSeries: {},
     error: null,
-    patients: [],
-    projects: [],
+    patientsProjectMap: {},
     studyName: ""
   };
 
@@ -69,17 +68,11 @@ class WorkList extends React.Component {
   componentDidUpdate = prevProps => {
     if (prevProps.match.params.wid !== this.props.match.params.wid) {
       this.getWorkListData(true);
-      this.setState({
-        patients: [],
-        projects: []
-      });
+      this.setState({ patientsProjectMap: {} });
     }
 
     if (prevProps.reports.length !== this.props.reports.length) {
-      this.setState({
-        patients: [],
-        projects: []
-      });
+      this.setState({ patientsProjectMap: {} });
     }
   };
 
@@ -256,17 +249,7 @@ class WorkList extends React.Component {
   };
 
   checkPairExist = (subjectID, projectID) => {
-    const indexOfSubject = this.state.patients.indexOf(subjectID);
-    const indexOfProject = this.state.projects.indexOf(projectID);
-    const matchPair =
-      indexOfSubject === indexOfProject ||
-      this.state.patients[indexOfProject] === subjectID;
-    const pairExists = indexOfSubject > -1 && indexOfProject > -1 && matchPair;
-    return {
-      indexOfSubject,
-      indexOfProject,
-      pairExists
-    };
+    return this.state.patientsProjectMap[`${subjectID}-${projectID}`] ? true : false;
   };
 
   defineColumns = () => {
@@ -394,37 +377,21 @@ class WorkList extends React.Component {
         sortable: false,
         resizable: false,
         Cell: original => {
-          const newPatients = [...this.state.patients];
-          const newProjects = [...this.state.projects];
           const { subjectID, projectID } = original.row._original;
-          const {
-            indexOfSubject,
-            indexOfProject,
-            pairExists
-          } = this.checkPairExist(subjectID, projectID);
-          const variant = pairExists ? "success" : "primary";
-          const icon = variant === "success" ? <GoCheck /> : <GoGraph />;
-          const text = variant === "success" ? "" : "";
+          const pairExists = this.checkPairExist(subjectID, projectID);
+          const newMap = { ...this.state.patientsProjectMap };
           return (
-
-
             <input
               type="checkbox"
               className="checkbox-cell"
               checked={pairExists}
               onChange={() => {
-                if (variant === "success") {
-                  newPatients.splice(indexOfSubject, 1);
-                  newProjects.splice(indexOfProject, 1);
-                } else {
-                  newPatients.push(subjectID);
-                  newProjects.push(projectID);
-                }
-                this.setState({
-                  patients: newPatients,
-                  projects: newProjects
-                });
-                this.props.getWorklistPatient(newPatients, newProjects);
+                if (pairExists)
+                  delete newMap[`${subjectID}-${projectID}`]
+                else
+                  newMap[`${subjectID}-${projectID}`] = true;
+                this.setState({ patientsProjectMap: newMap });
+                this.props.getWorklistPatient(newMap);
               }
               }
               id={original.id}
