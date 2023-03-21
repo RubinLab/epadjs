@@ -376,6 +376,9 @@ class selectSerieModal extends React.Component {
       examTypes = examTypes[0].split("\\");
     }
     study.examTypes = examTypes.filter(type => DISP_MODALITIES.includes(type));
+    study.birthdate = study.birthdate.split('-').join('');
+    study.insertDate = study.insertDate.split('-').join('');
+    study.studyDate = study.studyDate.split('-').join('');
     const aimData = { study, answers, user: getUserForAim() };
     const aim = new Aim(
       aimData,
@@ -420,6 +423,7 @@ class selectSerieModal extends React.Component {
     let result = await this.saveTeachingFile();
     if (result === -1)
       return;
+
     this.displaySelection(result);
   }
 
@@ -437,22 +441,26 @@ class selectSerieModal extends React.Component {
         </Modal.Header >
         <Modal.Body className="select-serie-body">
           {isTeachingFile &&
-            (<div id="questionaire" className={"field-grid"}>
-              <row>
-                <div id="anatomy"></div>
-                <div id="diagnosis"></div>
-              </row>
-              <row>
-                <div id="speciality"></div>
-                <div id="comment">
-                  {/* <i class="dropdown icon"></i>
+            (
+              <>
+                <div id="stella-beta-warning">Warning! Beta Software, Not For Routine Use During Preclinical Testing</div>
+                <div id="questionaire" className={"field-grid"}>
+                  <row>
+                    <div id="anatomy"></div>
+                    <div id="diagnosis"></div>
+                  </row>
+                  <row>
+                    <div id="speciality"></div>
+                    <div id="comment">
+                      {/* <i class="dropdown icon"></i>
                   <div className="title active" style={{ color: "rgb(204, 204, 204)", fontSize: "13px" }}>Narrative</div>
                   <div>
-                    <input className="comment ui input"></input>
-                  </div> */}
+                  <input className="comment ui input"></input>
+                </div> */}
+                    </div>
+                  </row>
                 </div>
-              </row>
-            </div>
+              </>
             )}
           <br />
           <div className={"max-series"}>Please select up to {this.maxPort} series to display:</div>

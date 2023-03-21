@@ -16,7 +16,7 @@ class RequirementForm extends React.Component {
       const templates = {};
       data.forEach((el, i) => {
         templates[el.Template[0].templateUID] =
-          el.Template[0].templateCodeValue;
+          el.Template[0].templateName;
       });
       this.setState({ templates });
     } catch (err) {

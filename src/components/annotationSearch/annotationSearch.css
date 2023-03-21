@@ -155,7 +155,7 @@ table, tbody{background-color: #222; font-weight: 400; font-size: .9em;}
 .sticky{
   position: relative;
   position: sticky !important;
-  top: 0;
+  top: 124px;
   background-color: #333; 
 }
 
@@ -227,15 +227,16 @@ td i{text-align: center;}
 .icon_row{
   text-align: left;
   color: #eaddb2;
-  border-right: 1px solid #ececec !important;
-  background-color: #555 !important;
-  border-top: 1px solid #ececec !important;
   margin-right: 3px;
   display:inline-flex;
+  background-color: #222
 }
 .icon_r{
+  background-color: #555 !important;
   display: inline-block;
   color: #eaddb2;
+  border-right: 1px solid #ececec !important;
+  border-top: 1px solid #ececec !important;
 }
 .icon_r button{
   display: inline-block;
