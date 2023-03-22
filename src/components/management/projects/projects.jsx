@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import Table from 'react-table-v6';
 import ReactTooltip from 'react-tooltip';
@@ -60,12 +61,14 @@ class Projects extends React.Component {
     userRoles: [],
     newRoles: {},
     templates: [],
-    projectIndex: null
+    projectIndex: null,
+    userNameMap: {}
   };
 
   componentDidMount = () => {
     this.getProjectData();
     this.getTemplateData();
+    this.getUserData();
     this.setState({ user: sessionStorage.getItem('username') });
   };
 
@@ -79,6 +82,16 @@ class Projects extends React.Component {
       });
   };
 
+  createName = (user) => {
+    const { displayname, username, firstname, lastname } = user;
+    const fullName = firstname && lastname ? `${firstname} ${lastname}`
+      : lastname ? `${lastname}`
+        : firstname ? `${firstname}`
+          : null;
+    const name = fullName || displayname || username;
+    return name;
+  }
+
   handleClickUSerRoles = async id => {
     const userRoles = [];
     try {
@@ -87,7 +100,8 @@ class Projects extends React.Component {
       for (let i = 0; i < users.length; i++) {
         for (let k = 0; k < roles.length; k++) {
           if (users[i].username === roles[k].username) {
-            userRoles.push({ name: users[i].username, role: roles[k].role });
+            const name = this.createName(users[i]);
+            userRoles.push({ name, role: roles[k].role });
             break;
           }
         }
@@ -106,6 +120,19 @@ class Projects extends React.Component {
     try {
       const { data } = await getProjects();
       this.setState({ data });
+    } catch (err) {
+      // this.setState({ error: true });
+    }
+  };
+
+  getUserData = async () => {
+    try {
+      const { data: users } = await getUsers();
+      const userNameMap = users.reduce((all, item) => {
+        all[item.username] = this.createName(item);
+        return all;
+      }, {});
+      this.setState({ userNameMap });
     } catch (err) {
       // this.setState({ error: true });
     }
@@ -338,6 +365,12 @@ class Projects extends React.Component {
       });
   };
 
+  concatenateNames = (nameArr) => {
+    const fullNames = [];
+    nameArr.forEach(el => fullNames.push(this.state.userNameMap[el]))
+    return fullNames.join(', ')
+  }
+
   defineColumns = () => {
     return [
       {
@@ -377,6 +410,7 @@ class Projects extends React.Component {
       {
         Header: 'Name',
         accessor: 'name',
+        id: 'namePr',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
@@ -385,9 +419,8 @@ class Projects extends React.Component {
       {
         Header: 'Open',
         sortable: true,
-        resizable: true,
         minResizeWidth: 20,
-        width: 50,
+        width: 30,
         Cell: original => (
           <Link className="open-link" to={'/list/' + original.row.checkbox.id}>
             <div onClick={this.props.onClose} data-tip data-for="project-open">
@@ -407,6 +440,7 @@ class Projects extends React.Component {
       {
         Header: 'Description',
         accessor: 'description',
+        id: 'descriptionPr',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
@@ -415,14 +449,16 @@ class Projects extends React.Component {
       {
         Header: 'Type',
         accessor: 'type',
+        id: 'typePr',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 20
+        minWidth: 40
       },
       {
         Header: 'Users',
         accessor: 'loginNames',
+        id: 'loginNamesnPr',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
@@ -430,9 +466,9 @@ class Projects extends React.Component {
         Cell: original => {
           const { loginNames } = original.row;
           const className =
-            loginNames.length > 0 ? 'wrapped' : 'wrapped click-to-add';
+            loginNames?.length > 0 ? 'wrapped' : 'wrapped click-to-add';
           const text =
-            loginNames.length > 0 ? loginNames.join(', ') : 'Add user';
+            loginNames?.length > 0 ? this.concatenateNames(loginNames) : 'Add user';
           return (
             <>
               <p
@@ -462,21 +498,24 @@ class Projects extends React.Component {
       },
       {
         Header: 'Template',
-        width: 80,
+        id: 'TemplatePr',
+        minWidth: 80,
         minResizeWidth: 20,
         resizable: true,
         Cell: original => {
           const { defaultTemplate } = original.row.checkbox;
           const none =
             defaultTemplate === 'null' || defaultTemplate === 'undefined';
-          return <div>{none ? '' : defaultTemplate}</div>;
+          const temp = defaultTemplate && !none ? this.props.templates[defaultTemplate] : null;
+          const templateName  = temp ? temp.TemplateContainer.Template[0].name : '';
+          return <div>{templateName }</div>;
         }
       },
       {
         Header: '',
         width: 45,
         minResizeWidth: 20,
-        resizable: true,
+        // resizable: true,
         Cell: original => {
           return (
             <>
@@ -513,7 +552,7 @@ class Projects extends React.Component {
         Header: '',
         width: 45,
         minResizeWidth: 20,
-        resizable: true,
+        // resizable: true,
         Cell: original => (
           <>
             <div
@@ -615,4 +654,11 @@ Projects.propTypes = {
   selection: PropTypes.string,
   onClose: PropTypes.func
 };
-export default Projects;
+
+const mapsStateToProps = state => {
+  return {
+    templates: state.annotationsListReducer.templates,
+  };
+};
+
+export default connect(mapsStateToProps)(Projects);

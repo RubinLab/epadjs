@@ -20,7 +20,10 @@ const alertDeletionModal = ({ title, message, onCancel, onDelete, error }) => {
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
         {!error && (
-          <Button variant="secondary" onClick={() => { onDelete(); window.dispatchEvent("refreshProjects") }}>
+          <Button variant="secondary" onClick={() => { 
+            onDelete(); 
+            // window.dispatchEvent("refreshProjects") 
+            }}>
             Delete
           </Button>
         )}

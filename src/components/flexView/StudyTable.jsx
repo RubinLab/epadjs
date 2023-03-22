@@ -45,12 +45,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
   const filterExam = (filter, row) => {
     try {
       const keyLowercase = filter.value.toLowerCase();
-      const keyUppercase = filter.value.toUpperCase();
       const str = Array.isArray(row[filter.id]) ? row[filter.id].join() : row[filter.id];
-      return (
-        str.includes(keyLowercase) ||
-        str.includes(keyUppercase)
-      );
+      return str.toLowerCase().includes(keyLowercase);
     } catch (err) {
       console.log(err);
     }
@@ -59,11 +55,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
   const filterStringIncludes = (filter, row) => {
     try {
       const keyLowercase = filter.value.toLowerCase();
-      const keyUppercase = filter.value.toUpperCase();
-      return (
-        row[filter.id].includes(keyLowercase) ||
-        row[filter.id].includes(keyUppercase)
-      );
+      const textLowercase = row[filter.id].toLowerCase();
+      return textLowercase.includes(keyLowercase);        
     } catch (err) {
       console.error(err);
     }
@@ -72,13 +65,9 @@ const StudyTable = ({ data, order, displaySeries }) => {
   const filterStartsWith = (filter, row) => {
     try {
       const keyLowercase = filter.value.toLowerCase();
-      const keyUppercase = filter.value.toUpperCase();
       let data = row[filter.id];
       data = typeof data === 'number' ? '' + data : data;
-      return (
-        data.startsWith(keyLowercase) ||
-        data.startsWith(keyUppercase)
-      );
+      return data.toLowerCase().startsWith(keyLowercase);
     } catch (err) {
       console.error(err);
     }
@@ -87,8 +76,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
   const filterMatch = (filter, row) => {
     try {
       const keyLowercase = filter.value.toLowerCase();
-      const keyUppercase = filter.value.toUpperCase();
-      return (row[filter.id] === keyLowercase || row[filter.id] === keyUppercase);
+      return row[filter.id].toLowerCase() === keyLowercase;
     } catch (err) {
       console.error(err);
     }
@@ -96,8 +84,8 @@ const StudyTable = ({ data, order, displaySeries }) => {
 
   const filterDateAndTime = (filter, row) => {
     try {
-      const val = filter.value.split('').reduce((all, item) => nums.includes(item)? all += item : all += '', '');
-      return row[filter.id] ? row[filter.id].includes(val) || row[filter.id].includes(filter.value) : false; 
+      const val = filter.value.split('').reduce((all, item) => nums.includes(item) ? all += item : all += '', '');
+      return row[filter.id] ? row[filter.id].includes(val) || row[filter.id].includes(filter.value) : false;
     } catch (err) {
       console.error(err);
     }
@@ -109,9 +97,9 @@ const StudyTable = ({ data, order, displaySeries }) => {
     if (sortedCol === id) {
       if (sortOrder)
         headerParts.push(<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)
-      else   
+      else
         headerParts.push(<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />)
-    } 
+    }
     return <>{headerParts}</>
   }
 

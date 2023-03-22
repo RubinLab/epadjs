@@ -538,3 +538,10 @@ th{
 .modal-content {
   padding: 0 !important;
 }
+
+#stella-beta-warning {
+  color: #DB2828;
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 0.3rem;
+}

@@ -3,7 +3,8 @@ import { Link, NavLink } from 'react-router-dom';
 import { BsFillGearFill, BsInfoCircleFill, BsBoxArrowInRight } from 'react-icons/bs';
 import { FaBell } from 'react-icons/fa';
 import logo from '../images/logo.png';
-import stella from '../images/stella-logo-temp-02.png';
+// import stella from '../images/stella-logo-temp-02.png';
+import stella from '../images/stella-beta.png';
 import stanford from '../images/stanford-rad-allwhite.png';
 import { connect } from 'react-redux';
 
@@ -51,14 +52,21 @@ const NavBar = ({
                 }
                   style={{ cursor: 'pointer' }}
                   onClick={() => {
-                    onSwitchView('annotations');
+                    onSwitchView('search');
                   }} aria-current="page">Search</a>
               </li>
               <li className="nav-item" >
-                <NavLink className={
+                {/* <NavLink className={
                   path.includes('flex') ? 'nav-link active' : 'nav-link'
                 }
-                  to={pid ? `/flex/${pid}` : `/flex`} aria-current="page">Study List</NavLink>
+                  to={pid ? `/flex/${pid}` : `/flex`} aria-current="page">Study List</NavLink> */}
+                <a className={
+                  path.includes('flex') ? 'nav-link active' : 'nav-link'
+                }
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    onSwitchView('flex');
+                  }} aria-current="page">Study List</a>
               </li>
               <li className="nav-item" >
                 <a className={
@@ -79,14 +87,21 @@ const NavBar = ({
                 } style={{ cursor: 'pointer' }}
                   onClick={() => {
                     onSearchViewClick();
-                    onSwitchView('search', true);
+                    onSwitchView('list', true);
                   }} aria-current="page">Patient List</a>
               </li>
               <li className="nav-item" >
-                <NavLink className={
+                {/* <NavLink className={
                   path.includes('flex') ? 'nav-link active' : 'nav-link'
                 }
-                  to={pid ? `/flex/${pid}` : `/flex`} aria-current="page">Study List</NavLink>
+                  to={pid ? `/flex/${pid}` : `/flex`} aria-current="page">Study List</NavLink> */}
+                <a className={
+                  path.includes('flex') ? 'nav-link active' : 'nav-link'
+                }
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    onSwitchView('flex');
+                  }} aria-current="page">Study List</a>
               </li>
               <li className="nav-item" >
                 <a className={
@@ -94,7 +109,7 @@ const NavBar = ({
                 }
                   style={{ cursor: 'pointer' }}
                   onClick={() => {
-                    onSwitchView('annotations');
+                    onSwitchView('search');
                   }} aria-current="page">Annotations</a>
               </li>
               <li className="nav-item" id="navbarReports">

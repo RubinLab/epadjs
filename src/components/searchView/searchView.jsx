@@ -156,7 +156,7 @@ class SearchView extends Component {
   }
 
   componentDidUpdate = async prevProps => {
-    const { uploadedPid, lastEventId, expandLevel } = this.props;
+    const { uploadedPid, lastEventId, expandLevel, update } = this.props;
     const { pid } = this.props.match.params;
     const samePid = mode !== 'lite' && uploadedPid === pid;
     let subjects;
@@ -166,7 +166,7 @@ class SearchView extends Component {
       this.setState({ numOfsubjects: subjects.length, subjects });
     }
 
-    if ((samePid || mode === 'lite') && prevProps.lastEventId !== lastEventId) {
+    if ((samePid || mode === 'lite') && prevProps.lastEventId !== lastEventId || prevProps.update !== update) {
       this.setState(state => ({ update: state.update + 1 }));
     }
     if (expandLevel !== prevProps.expandLevel) {
@@ -734,8 +734,6 @@ class SearchView extends Component {
           this.setState({ downloading: false });
           console.log(err);
         });
-      this.setState(state => ({ update: state.update + 1 }));
-      this.props.dispatch(clearSelection());
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
     } else {
@@ -887,8 +885,8 @@ class SearchView extends Component {
 
   handleSubmitDownload = () => {
     this.setState({ showAnnotationModal: false });
-    this.setState(state => ({ update: state.update + 1 }));
-    this.props.dispatch(clearSelection());
+    // this.setState(state => ({ update: state.update + 1 }));
+    // this.props.dispatch(clearSelection());
   };
 
   handleUploadWizardClick = () => {
@@ -1050,6 +1048,7 @@ class SearchView extends Component {
             updateStatus={this.updateDownloadStatus}
             onSubmit={this.handleSubmitDownload}
             pid={this.props.pid}
+            show={this.state.showAnnotationModal}
           />
         )}
 

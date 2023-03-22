@@ -10,6 +10,16 @@ const userList = props => {
     else return false;
   }
 
+  const createName = (user) => {
+    const { displayname, username, firstname, lastname } = user;
+    const fullName = firstname && lastname ? `${firstname} ${lastname}`
+      : lastname ? `${lastname}`
+        : firstname ? `${firstname}`
+          : null;
+    const name = fullName || displayname || username;
+    return name;
+  }
+
   const columns = [
     {
       Header: (
@@ -28,27 +38,29 @@ const userList = props => {
       resizable: true,
       maxWidth: 80,
       Cell: original => (
-          <input
-            type="checkbox"
-            onChange={props.onChange}
-            name={original.row.username}
-            checked={checkUserSelected(original.row)}
-            id={original.row.username}
-            style={{ textAlign: "right" }}
-          />
-        )
+        <input
+          type="checkbox"
+          onChange={props.onChange}
+          name={original.row.username}
+          checked={checkUserSelected(original.row)}
+          id={original.row.username}
+          style={{ textAlign: "right" }}
+        />
+      )
     },
     {
-    Header: 'User',
-    accessor: "username",
-    sortable: true,
-    resizable: true,
-    Cell: original => { 
-      return (
-        <div style={{ textAlign: "center" }}>
-          {original.row.username ? original.row.username : original.row.email}
-        </div>
-    )}
+      Header: 'User',
+      accessor: "username",
+      sortable: true,
+      resizable: true,
+      Cell: (original) => {
+        return (
+          <div style={{ textAlign: "center" }}>
+            {/* {original.row.username ? original.row.username : original.row.email} */}
+            {createName(original.original)}
+          </div>
+        )
+      }
     },
     // {
     //   Header: 'User',
