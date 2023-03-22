@@ -210,7 +210,7 @@ const AnnotationSearch = props => {
   const handleUserKeyPress = (e => {
     if (e.key === 'Enter') {
       if (mode !== 'teaching') {
-        getSearchResult();
+        getSearchResult(undefined, undefined, true);
         props.dispatch(updateSearchTableIndex(0));
       } else {
         getFieldSearchResults(undefined, undefined, true);
@@ -467,39 +467,58 @@ const AnnotationSearch = props => {
     );
   };
 
-  const getSearchResult = (pageIndex, afterDelete) => {
+  const getSearchResult = (pageIndex, afterDelete, enterPressed) => {
     props.dispatch(updateSearchTableIndex(0));
     if (query.length === 0) {
       getAnnotationsOfProjets(pageIndex, afterDelete);
     }
     else {
-      let searchQuery = parseQuery();
-      // setData([]);
-      if (selectedProject) {
-        const multiSearch =
-          searchQuery.includes('AND') || searchQuery.includes('OR');
-        const notHaveParanthesis =
-          searchQuery[0] !== '(' || searchQuery[searchQuery.length - 1] !== ')';
-        if (multiSearch && notHaveParanthesis)
-          searchQuery = `(${searchQuery}) AND project:${selectedProject}`;
-        else searchQuery += ` AND project:${selectedProject}`;
+      if (!syntaxVerify(query)) {
+        if (enterPressed) {
+          toast.info(explanation.invalidQuery, { position: 'top-right' });
+        }
+        return;
       }
-      if (searchQuery) {
-        // setError('');
-        const queryToSave = {
-          [searchQuery]: {
-            query,
-            project: selectedProject
-          }
-        };
-        props.setQuery(queryToSave);
-        const bm = pageIndex ? bookmark : '';
-        searchAnnotations({ query: escapeSlashesQuery(searchQuery) }, bm)
-          .then(res => {
-            populateSearchResult(res, pageIndex, afterDelete);
-          })
-          .catch(err => console.error(err));
-      }
+      const queryToSave = {
+        [query]: {
+          query,
+          project: selectedProject
+        }
+      };
+      props.setQuery(queryToSave);
+      const bm = pageIndex ? bookmark : '';
+      searchAnnotations({ query: query }, bm)
+        .then(res => {
+          populateSearchResult(res, pageIndex, afterDelete);
+        })
+        .catch(err => console.error(err));
+      //let searchQuery = parseQuery();
+      //// setData([]);
+      //if (selectedProject) {
+      //  const multiSearch =
+      //    searchQuery.includes('AND') || searchQuery.includes('OR');
+      //  const notHaveParanthesis =
+      //    searchQuery[0] !== '(' || searchQuery[searchQuery.length - 1] !== ')';
+      //  if (multiSearch && notHaveParanthesis)
+      //    searchQuery = `(${searchQuery}) AND project:${selectedProject}`;
+      //  else searchQuery += ` AND project:${selectedProject}`;
+      //}
+      //if (searchQuery) {
+      //  // setError('');
+      //  const queryToSave = {
+      //    [searchQuery]: {
+      //      query,
+      //      project: selectedProject
+      //    }
+      //  };
+      //  props.setQuery(queryToSave);
+      //  const bm = pageIndex ? bookmark : '';
+      //  searchAnnotations({ query: escapeSlashesQuery(searchQuery) }, bm)
+      //    .then(res => {
+      //      populateSearchResult(res, pageIndex, afterDelete);
+      //    })
+      //    .catch(err => console.error(err));
+      //}
     }
   };
 
@@ -555,6 +574,14 @@ const AnnotationSearch = props => {
     return !operatorRegex.test(inputString);
   }
 
+  const escapeFilter = (input) => {
+    input.replaceAll('\\\\', '\\');
+    const charsToEscape = ['{', '(', '/', '.'];
+    for (const char of charsToEscape) {
+      input.replaceAll(char, `\\${char}`);
+    }
+  }
+
   const getFieldSearchResults = (pageIndex, afterDelete, enterPressed) => {
     if (query.length) {
       if (!syntaxVerify(query)) {
@@ -562,6 +589,20 @@ const AnnotationSearch = props => {
           toast.info(explanation.invalidQuery, { position: 'top-right' });
         }
         return;
+      }
+    }
+    const filterArray = Object.entries(filters);
+    const newFilters = {};
+    if (filterArray.length > 0) {
+      for (const filt of filterArray) {
+        let filterText = filt[1];
+        filterText.replaceAll('\\\\', '\\');
+        const charsToEscape = ['+', '!', '{', '}', '[', ']', '^', '~',
+          '*', '?', ':', '/', '.', '$', '^', '(', ')'];
+        for (const char of charsToEscape) {
+          filterText = filterText.replaceAll(char, '\\' + char);
+        }
+        newFilters[filt[0]] = filterText;
       }
     }
     setShowSpinner(true);
@@ -578,7 +619,7 @@ const AnnotationSearch = props => {
     if (selectedMods.length)
       fields['modality'] = selectedMods;
     if (selectedAnatomies.length)
-      fields['anatomy'] = selectedAnatomies
+      fields['anatomy'] = selectedAnatomies;
     if (selectedDiagnosis.length)
       fields['diagnosis'] = selectedDiagnosis;
     if (mode === 'teaching' && tfOnly)
@@ -588,7 +629,7 @@ const AnnotationSearch = props => {
     if (sort.length)
       body['sort'] = sort;
     if (Object.keys(filters).length)
-      body['filter'] = filters;
+      body['filter'] = newFilters;
     searchAnnotations(body, bm)
       .then(res => {
         populateSearchResult(res, pageIndex, afterDelete);
