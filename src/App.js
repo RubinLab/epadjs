@@ -1,4 +1,3 @@
-window.Buffer = window.Buffer || require("buffer").Buffer;
 import React, { Component } from "react";
 import { Route, Switch, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
@@ -6,10 +5,6 @@ import { ToastContainer, toast } from "react-toastify";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import Keycloak from "keycloak-js";
 import _ from "lodash";
-// import Buffer from "buffer";
-// var Buffer = require('buffer/').Buffer 
-// global.Buffer = Buffer;
-// window.Buffer = window.Buffer || require("buffer").Buffer;
 import { getUser, getUserInfo } from "./services/userServices";
 import { getSeries } from "./services/seriesServices";
 import NavBar from "./components/navbar";

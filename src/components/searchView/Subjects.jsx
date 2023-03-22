@@ -645,7 +645,7 @@ function Subjects(props) {
 
   return (
     <>
-      <label style={{ color: 'white' }}>
+      <label style={{ color: 'red' }}>
         Find patient:
         <input
           type="text"
