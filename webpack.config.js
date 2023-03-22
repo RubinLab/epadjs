@@ -1,8 +1,4 @@
 const webpack = require("webpack");
-const path = require("path");
-const Buffer = require("buffer/").Buffer;
-// const buffer = require("buffer");
-
 
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 
@@ -10,10 +6,6 @@ const htmlWebpackPlugin = new HtmlWebPackPlugin({
   template: "./src/index.html",
   filename: "./index.html"
 });
-
-// const processPlugin = new webpack.DefinePlugin({
-//   'process': 'process/browser'
-// });
 
 const config = {
   module: {
@@ -33,22 +25,9 @@ const config = {
       { test: /\.styl$/, loader: "style-loader!css-loader!stylus-loader" }
     ]
   },
-  // plugins: [htmlWebpackPlugin],
-  plugins: [htmlWebpackPlugin,
-    new webpack.ProvidePlugin({
-      Buffer: ['buffer', 'Buffer'],
-    }),
-    new webpack.ProvidePlugin({
-      process: 'process/browser',
-    })
-  ],
+  plugins: [htmlWebpackPlugin],
   resolve: {
     extensions: ['.ts', '.js'],
-    fallback: {
-      "stream": require.resolve("stream-browserify"),
-      // "buffer": require.resolve("buffer/").Buffer,
-      "Buffer": require.resolve("buffer/").Buffer,
-    }
   },
   devServer: {
     historyApiFallback: true
