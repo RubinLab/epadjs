@@ -59,6 +59,7 @@ import {
 import { getAllTemplates } from "../../services/templateServices";
 import { getImageIdAnnotations } from "aimapi";
 import { ConsoleWriter } from "istanbul-lib-report";
+import aimEntityData from "./annotationDock/aimEntityData";
 
 export const updateSearchTableIndex = searchTableIndex => {
   return { type: UPDATE_SEARCH_TABLE_INDEX, searchTableIndex }
@@ -444,10 +445,10 @@ export const changeActivePort = (portIndex) => {
 };
 
 // helpeer method
-export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann) => {
+export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann, otherSeriesAimsData) => {
   return {
     type: LOAD_SERIE_SUCCESS,
-    payload: { ref, aimsData, serID, imageData, ann },
+    payload: { ref, aimsData, serID, imageData, ann, otherSeriesAimsData },
   };
 };
 
@@ -696,12 +697,12 @@ export const getSingleSerie = (serie, annotation) => {
         numberOfAnnotations,
         aimID: annotation,
       };
-      const { aimsData, imageData } = await getSingleSerieData(
+      const { aimsData, imageData, otherSeriesAimsData } = await getSingleSerieData(
         serie,
         annotation
       );
       await dispatch(
-        singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation)
+        singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData)
       );
     } catch (err) {
       console.error(err);
@@ -719,9 +720,9 @@ export const updateSingleSerie = (serie, annotation) => {
       numberOfAnnotations,
       aimID: annotation,
     };
-    const { aimsData, imageData } = await getSingleSerieData(serie, annotation);
+    const { aimsData, imageData, otherSeriesAimsData } = await getSingleSerieData(serie, annotation);
     await dispatch(
-      singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation)
+      singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData)
     );
   };
 };
@@ -730,6 +731,7 @@ export const updateSingleSerie = (serie, annotation) => {
 const extractNonMarkupAims = (arr, seriesID) => {
   let studyAims = [];
   let serieAims = [];
+  let otherSeriesAims = [];
   // let imageAims = {};
   arr.forEach((aim) => {
     const series =
@@ -740,7 +742,7 @@ const extractNonMarkupAims = (arr, seriesID) => {
     if (!serieUID) {
       studyAims.push(aim);
     } else if (serieUID === seriesID) {
-      serieAims.push(aim);
+      serieAims.push(aim); 
       // if (
       //   (!aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
       //     .markupEntityCollection ||
@@ -755,9 +757,11 @@ const extractNonMarkupAims = (arr, seriesID) => {
       //   { aimUid: aim.ImageAnnotationCollection.uniqueIdentifier.root }
       // ];
       // }
+    } else {
+      otherSeriesAims.push(aim);
     }
   });
-  return { studyAims, serieAims };
+  return { studyAims, serieAims, otherSeriesAims };
 };
 
 // helper methods - calls backend and get data
@@ -770,7 +774,8 @@ const getSingleSerieData = (serie, annotation) => {
     patientID = patientID ? patientID : serie.subjectID;
     getStudyAims(patientID, studyUID, projectID)
       .then(async (result) => {
-        const { studyAims, serieAims } = extractNonMarkupAims(
+        
+        const { studyAims, serieAims, otherSeriesAims } = extractNonMarkupAims(
           result.data.rows,
           seriesUID
         );
@@ -779,7 +784,8 @@ const getSingleSerieData = (serie, annotation) => {
           ...getImageIdAnnotations(serieAims),
         };
         aimsData = getAimListFields(aimsData, annotation);
-        resolve({ aimsData, imageData });
+        const otherSeriesAimsData = getAimListFields(otherSeriesAims, annotation);
+        resolve({ aimsData, imageData, otherSeriesAimsData });
       })
       .catch((err) => reject("Error while getting annotation data", err));
   });

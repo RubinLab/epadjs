@@ -79,7 +79,8 @@ const initialState = {
   isSegUploaded: {},
   patientFilter: {},
   openStudies: {},
-  searchTableIndex: 0
+  searchTableIndex: 0,
+  otherSeriesAimsList: {}
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -165,12 +166,13 @@ const asyncReducer = (state = initialState, action) => {
 
         return { ...state, openSeries: openSeriesToUpdate };
       case CLOSE_SERIE:
-        console.log("In close");
         let delSeriesUID = state.openSeries[state.activePort].seriesUID;
         let delStudyUID = state.openSeries[state.activePort].studyUID;
         let delOpenStudies = { ...state.openStudies };
         const delAims = { ...state.aimsList };
+        const delOtherAims = {...state.otherSeriesAimsList};
         delete delAims[delSeriesUID];
+        delete delOtherAims[delSeriesUID];
         let delGrid = state.openSeries.slice(0, state.activePort);
         delGrid = delGrid.concat(state.openSeries.slice(state.activePort + 1));
         let shouldStudyExist = false;
@@ -196,6 +198,7 @@ const asyncReducer = (state = initialState, action) => {
             aimsList: delAims,
             openStudies: delOpenStudies,
             activePort: delActivePort,
+            otherSeriesAimsList: delOtherAims
           };
         }
         return {
@@ -262,6 +265,10 @@ const asyncReducer = (state = initialState, action) => {
           aimsList: {
             ...state.aimsList,
             [action.payload.ref.seriesUID]: colorAimsList,
+          },
+          otherSeriesAimsList: { 
+            ...state.otherSeriesAimsList, 
+            [action.payload.ref.seriesUID]: action.payload.otherSeriesAimsData
           },
           openSeries: imageAddedSeries,
         });
