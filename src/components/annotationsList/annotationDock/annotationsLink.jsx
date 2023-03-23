@@ -1,5 +1,16 @@
 import React from "react";
 import { connect } from "react-redux";
+import {
+  alertViewPortFull,
+  getSingleSerie,
+  clearSelection,
+  selectAnnotation,
+  changeActivePort,
+  addToGrid,
+  getWholeData,
+  updatePatient,
+  jumpToAim
+} from '../action';
 import "../annotationsList.css";
 
 const handleJumpToAim = aimId => {
@@ -14,6 +25,49 @@ const annotationsLink = (props) => {
   let list = [];
   let header = [];
   let studyAimsList = [];
+
+  const checkIfSerieOpen = selectedSerie => {
+    let isOpen = false;
+    let index;
+    props.openSeries.forEach((serie, i) => {
+      if (serie.seriesUID === selectedSerie) {
+        isOpen = true;
+        index = i;
+      }
+    });
+    return { isOpen, index };
+  };
+
+  const displayAnnotations = (e, selected) => {
+
+    const { patientID, projectID, studyUID, seriesUID, aimID } = selected;
+    const maxPort = parseInt(sessionStorage.getItem('maxPort'));
+
+
+    let isGridFull = openSeries.length === maxPort;
+    const { isOpen, index } = checkIfSerieOpen(seriesUID);
+    console.log(' ---> isOpen, index', seriesUID);
+    console.log(isOpen, index);
+
+    if (isOpen) {
+      props.dispatch(changeActivePort(index));
+      props.dispatch(jumpToAim(seriesUID, aimID, index));
+      props.dispatch(clearSelection());
+    } else {
+      // if (isGridFull) {
+      //   setShowSelectSerie(true);
+      // } else {
+      //   props.dispatch(addToGrid(selected, aimID));
+      //   props
+      //     .dispatch(getSingleSerie(selected, aimID))
+      //     .then(() => {})
+      //     .catch(err => console.error(err));
+      //   props.dispatch(clearSelection());
+      //   props.history.push('/display');
+      // }
+    }
+  };
+
 
   if (aimsList[seriesUID]) {
     const seriesAims = Object.values(aimsList[seriesUID]);
@@ -37,7 +91,7 @@ const annotationsLink = (props) => {
     seriesAims.forEach((aim, i) => {
       if (!props.imageAims[aim.id]) {
         list.push((
-          <tr key={aim.id} className="annsLink-table __tbody --row">
+          <tr key={`${aim.id}-${i}`} className="annsLink-table __tbody --row">
             <td
               data-id={aim.id}
               data-serie={seriesUID}
@@ -54,7 +108,7 @@ const annotationsLink = (props) => {
   }
 
 
-  if(otherSeriesAimsList[seriesUID]) {
+  if (otherSeriesAimsList[seriesUID]) {
     const otherSeriesAims = Object.values(otherSeriesAimsList[seriesUID]);
     header.push(
       <th
@@ -75,21 +129,21 @@ const annotationsLink = (props) => {
 
     otherSeriesAims.forEach((aim, i) => {
       studyAimsList.push((
-          <tr key={aim.id} className="annsLink-table __tbody --row">
-            <td
-              data-id={aim.id}
-              data-serie={seriesUID}
-              onClick={(e) => console.log(" here --->")}
-              className="annsLink-table __tbody --cell"
-            >
-              {aim.name}
-            </td>
-            {/* <td className="annsLink-table __tbody --cell2">{slideNo}</td> */}
-          </tr>
-        ));
-      
+        <tr key={aim.aimID} className="annsLink-table __tbody --row">
+          <td
+            data-id={aim.aimID}
+            data-serie={seriesUID}
+            onClick={(e) => displayAnnotations(e, aim)}
+            className="annsLink-table __tbody --cell"
+          >
+            {aim.name}
+          </td>
+          {/* <td className="annsLink-table __tbody --cell2">{slideNo}</td> */}
+        </tr>
+      ));
+
     });
-      
+
   }
 
   if (list.length === 0 && studyAimsList.length === 0) return ("");
@@ -105,12 +159,12 @@ const annotationsLink = (props) => {
         </table>
       )}
       {otherSeriesAimsList[seriesUID] && (
-               <table className="annsLink-table">
-               <thead className="annsLink-table __header">
-                 <tr className="annsLink-table __header --row" >{header[1]}</tr>
-               </thead>
-               <tbody className="annsLink-table __tbody" style={{ backgroundColor: '#333' }}>{studyAimsList}</tbody>
-             </table>
+        <table className="annsLink-table">
+          <thead className="annsLink-table __header">
+            <tr className="annsLink-table __header --row" >{header[1]}</tr>
+          </thead>
+          <tbody className="annsLink-table __tbody" style={{ backgroundColor: '#333' }}>{studyAimsList}</tbody>
+        </table>
       )}
     </React.Fragment>
   );

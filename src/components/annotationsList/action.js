@@ -472,7 +472,7 @@ const getAimListFields = (aims, ann) => {
 
       const markupColor =
         aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-          ?.markupEntityCollection ?.MarkupEntity[0] ?.lineColor ?.value; //if aim has markup colors make the first markup"s color aim"s color
+          ?.markupEntityCollection?.MarkupEntity[0]?.lineColor?.value; //if aim has markup colors make the first markup"s color aim"s color
       let color;
 
       if (imgAimUID) {
@@ -491,7 +491,7 @@ const getAimListFields = (aims, ann) => {
           : "study";
 
       let aimName =
-        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0] ?.name
+        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]?.name
           .value;
       let ind = aimName.indexOf("~");
       if (ind >= 0) {
@@ -526,7 +526,7 @@ const getAimListFields = (aims, ann) => {
         inferenceEntityCollection,
         segmentationEntityCollection,
         typeCode,
-        trackingUniqueIdentifier: trackingUniqueIdentifier ?.root,
+        trackingUniqueIdentifier: trackingUniqueIdentifier?.root,
         users,
       };
       const id = aim.ImageAnnotationCollection.uniqueIdentifier.root;
@@ -742,7 +742,7 @@ const extractNonMarkupAims = (arr, seriesID) => {
     if (!serieUID) {
       studyAims.push(aim);
     } else if (serieUID === seriesID) {
-      serieAims.push(aim); 
+      serieAims.push(aim);
       // if (
       //   (!aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
       //     .markupEntityCollection ||
@@ -764,27 +764,44 @@ const extractNonMarkupAims = (arr, seriesID) => {
   return { studyAims, serieAims, otherSeriesAims };
 };
 
+const getOtherSeriesAimData = (arr, projectID, patientID) => {
+  const aims = {};
+  arr.forEach(el => {
+    const aimID = el.ImageAnnotationCollection.uniqueIdentifier.root;
+    const name = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].name.value;
+    const study = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+      .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy;
+    const studyUID = study.instanceUid.root;
+    console.log(study)
+    const seriesUID = study.imageSeries.instanceUid.root;
+    aims[aimID] = { projectID, patientID, aimID, studyUID, seriesUID, name };
+  })
+  return aims;
+}
+
 // helper methods - calls backend and get data
 const getSingleSerieData = (serie, annotation) => {
   return new Promise((resolve, reject) => {
     let aimsData;
     let imageData;
-    let { studyUID, seriesUID, projectID, patientID } = serie;
+    let { studyUID, seriesUID, projectID, patientID, aimID } = serie;
     projectID = projectID ? projectID : "lite";
     patientID = patientID ? patientID : serie.subjectID;
+    aimID = aimID ? aimID : annotation;
     getStudyAims(patientID, studyUID, projectID)
       .then(async (result) => {
-        
+
         const { studyAims, serieAims, otherSeriesAims } = extractNonMarkupAims(
           result.data.rows,
           seriesUID
         );
+        console.log(otherSeriesAims);
         aimsData = serieAims.concat(studyAims);
         imageData = {
           ...getImageIdAnnotations(serieAims),
         };
         aimsData = getAimListFields(aimsData, annotation);
-        const otherSeriesAimsData = getAimListFields(otherSeriesAims, annotation);
+        const otherSeriesAimsData = getOtherSeriesAimData(otherSeriesAims, projectID, patientID);
         resolve({ aimsData, imageData, otherSeriesAimsData });
       })
       .catch((err) => reject("Error while getting annotation data", err));

@@ -207,6 +207,7 @@ const asyncReducer = (state = initialState, action) => {
           aimsList: delAims,
           // patients: delPatients,
           activePort: delActivePort,
+          otherSeriesAimsList: delOtherAims
         };
       case LOAD_ANNOTATIONS:
         return Object.assign({}, state, {
