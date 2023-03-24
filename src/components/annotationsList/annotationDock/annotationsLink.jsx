@@ -54,17 +54,16 @@ const annotationsLink = (props) => {
       props.dispatch(jumpToAim(seriesUID, aimID, index));
       props.dispatch(clearSelection());
     } else {
-      // if (isGridFull) {
-      //   setShowSelectSerie(true);
-      // } else {
-      //   props.dispatch(addToGrid(selected, aimID));
-      //   props
-      //     .dispatch(getSingleSerie(selected, aimID))
-      //     .then(() => {})
-      //     .catch(err => console.error(err));
-      //   props.dispatch(clearSelection());
-      //   props.history.push('/display');
-      // }
+      if (isGridFull) {
+        console.log(" -->will do!");
+      } else {
+        props.dispatch(addToGrid(selected, aimID));
+        props
+          .dispatch(getSingleSerie(selected, aimID))
+          .then(() => {})
+          .catch(err => console.error(err));
+        props.dispatch(clearSelection());
+      }
     }
   };
 
@@ -116,7 +115,7 @@ const annotationsLink = (props) => {
         key="anns-header"
         id="annsHeader"
       >
-        Other Image Annotations in the study
+        Other Image Annotations in study
       </th>,
       // <th
       //   className="annsLink-table __header --cell"
