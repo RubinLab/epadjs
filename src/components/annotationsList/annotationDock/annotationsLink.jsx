@@ -56,14 +56,15 @@ const annotationsLink = (props) => {
     } else {
       if (isGridFull) {
         console.log(" -->will do!");
+        props.dispatch(addToGrid(selected, aimID, props.activePort));
       } else {
         props.dispatch(addToGrid(selected, aimID));
-        props
-          .dispatch(getSingleSerie(selected, aimID))
-          .then(() => {})
-          .catch(err => console.error(err));
-        props.dispatch(clearSelection());
       }
+      props
+        .dispatch(getSingleSerie(selected, aimID))
+        .then(() => { })
+        .catch(err => console.error(err));
+      props.dispatch(clearSelection());
     }
   };
 

@@ -170,7 +170,7 @@ const asyncReducer = (state = initialState, action) => {
         let delStudyUID = state.openSeries[state.activePort].studyUID;
         let delOpenStudies = { ...state.openStudies };
         const delAims = { ...state.aimsList };
-        const delOtherAims = {...state.otherSeriesAimsList};
+        const delOtherAims = { ...state.otherSeriesAimsList };
         delete delAims[delSeriesUID];
         delete delOtherAims[delSeriesUID];
         let delGrid = state.openSeries.slice(0, state.activePort);
@@ -267,8 +267,8 @@ const asyncReducer = (state = initialState, action) => {
             ...state.aimsList,
             [action.payload.ref.seriesUID]: colorAimsList,
           },
-          otherSeriesAimsList: { 
-            ...state.otherSeriesAimsList, 
+          otherSeriesAimsList: {
+            ...state.otherSeriesAimsList,
             [action.payload.ref.seriesUID]: action.payload.otherSeriesAimsData
           },
           openSeries: imageAddedSeries,
@@ -478,12 +478,17 @@ const asyncReducer = (state = initialState, action) => {
           seriesInfo.projectName = "lite";
           seriesInfo.defaultTemplate = null;
         }
-        let newOpenSeries = state.openSeries.concat(seriesInfo);
+        const arePortsOccupied = action.port !== undefined && typeof action.port === 'number';
+        let newOpenSeries = [...state.openSeries];
+        
+        if (arePortsOccupied) newOpenSeries[action.port] = seriesInfo;
+        else newOpenSeries = newOpenSeries.concat([seriesInfo]); 
 
+        const newActivePort = arePortsOccupied ? state.activePort : newOpenSeries.length - 1;
         return {
           ...state,
           openSeries: newOpenSeries,
-          activePort: newOpenSeries.length - 1
+          activePort: newActivePort
         };
 
       case REPLACE_IN_GRID:

@@ -336,7 +336,7 @@ export const selectAnnotation = (
 
 // opens a new port to display series
 // adds series details to the array
-export const addToGrid = (serie, annotation) => {
+export const addToGrid = (serie, annotation, port) => {
   let { patientID, studyUID, seriesUID, projectID, patientName } = serie;
   projectID = projectID ? projectID : "lite";
   if (annotation)
@@ -350,7 +350,7 @@ export const addToGrid = (serie, annotation) => {
     aimID: annotation,
     // imageIndex: 0
   };
-  return { type: ADD_TO_GRID, reference };
+  return { type: ADD_TO_GRID, reference, port };
 };
 
 export const replaceInGrid = (serie) => {
@@ -772,7 +772,6 @@ const getOtherSeriesAimData = (arr, projectID, patientID) => {
     const study = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
       .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy;
     const studyUID = study.instanceUid.root;
-    console.log(study)
     const seriesUID = study.imageSeries.instanceUid.root;
     aims[aimID] = { projectID, patientID, aimID, studyUID, seriesUID, name };
   })
@@ -795,7 +794,6 @@ const getSingleSerieData = (serie, annotation) => {
           result.data.rows,
           seriesUID
         );
-        console.log(otherSeriesAims);
         aimsData = serieAims.concat(studyAims);
         imageData = {
           ...getImageIdAnnotations(serieAims),
