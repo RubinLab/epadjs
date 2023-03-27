@@ -1,5 +1,4 @@
 const webpack = require("webpack");
-const path = require("path");
 
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 
@@ -14,7 +13,8 @@ const config = {
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        use: "babel-loader"
+        use: "babel-loader",
+        options: { presets: ['stage-2'] }
       },
       {
         test: /\.css$/,
@@ -26,6 +26,9 @@ const config = {
     ]
   },
   plugins: [htmlWebpackPlugin],
+  resolve: {
+    extensions: ['.ts', '.js'],
+  },
   devServer: {
     historyApiFallback: true
   }
