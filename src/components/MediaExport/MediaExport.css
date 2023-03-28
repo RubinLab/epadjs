@@ -13,10 +13,11 @@
   margin-top: 30px;
   margin-left: 4px;
   /*left: 470px;*/
-  height: 600px;
+  height: 820px;
   overflow: auto;
   /*top: 91px;*/
   z-index: 1000;
+  font-size: 12px;
 }
 
 .close-media-export-menu {

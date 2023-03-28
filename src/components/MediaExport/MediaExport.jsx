@@ -8,8 +8,9 @@ import { pptWrapper } from "./pptWrapper";
 import { videoExport } from "./videoExport";
 import cornerstoneTools from "cornerstone-tools";
 import { getToolState } from "cornerstone-tools/stateManagement/toolState";
+//import "bootstrap/dist/css/bootstrap.min.css"
 
-import "./bootstrap.min.css";
+//import "./bootstrap.min.css";
 import "./bootstrap-icons.css";
 import "./MediaExport.css";
 import "./styles.css";
@@ -36,7 +37,9 @@ class MediaExport extends Component {
     // Any DICOM data whose tag is included in pptTags should have its data
     // included in the presentation.
     this.pptTags = ['(0008,0050)', '(0008,0020)', '(0010,0040)', '(0010,1010)',
-                    '(0008,103E)', '(0018,0080)', '(0018,0081)'];
+      '(0008,103E)', '(0018,0080)', '(0018,0081)'];
+    // Accession number and possibly other tags in the future.
+    this.sensitiveTags = ['(0008,0050)']
     // The following lines give this class a way to export and import the current
     // presentation and gif, so that you can close and re-open the class dialog
     // without losing progress.
@@ -63,6 +66,7 @@ class MediaExport extends Component {
       output: [],
       input: ""
     }
+    this.includeAccessionNumber = false;
     this.dumpDataSet = this.dumpDataSet.bind(this);
   }
   componentDidMount() {
@@ -117,13 +121,13 @@ class MediaExport extends Component {
    */
   setGifReady = (val) => {
     this.gifData.ready = val;
-    const x = document.getElementById('gifReadyButtons');
+    const x = document.getElementById('gifRecordingIndicator');
     const y = document.getElementById('gifLoadingIndicator');
     if (val) {
-      x.style.display = 'block';
+      x.innerHTML = 'Movie ready.';
       y.style.display = 'none';
     } else {
-      x.style.display = 'none';
+      // x.style.display = 'none';
     }
   }
 
@@ -159,7 +163,7 @@ class MediaExport extends Component {
     this.vid.recordGif(this.canv, duration, frameRate, this.gifData, 1, afterFrame);
     setTimeout(
       function Timer() {
-        x.innerHTML = 'Recording finished. ';
+        x.innerHTML = 'Recording finished.';
         y.style.display = 'block';
       }, duration * 1000)
   }
@@ -188,13 +192,14 @@ class MediaExport extends Component {
     const { element } = cornerstone.getEnabledElements()[activePort];
     this.canv = element.getElementsByClassName('cornerstone-canvas')[0];
     const image = cornerstone.getImage(element);
-    let stringArray = [''];
+    let stringArray = ['', ''];
     this.dumpDataSet(image.data, stringArray);
     this.pptw.addImageToSlide(
       this.canv.toDataURL(),
       this.canv.width,
       this.canv.height,
-      stringArray[0]
+      stringArray[0],
+      stringArray[1]
     );
     this.pptw.updateDisplayText('pptInfo');
     this.pptw.updateCanvasPreview('pptPreview');
@@ -241,7 +246,7 @@ class MediaExport extends Component {
    * Downloads the presentation. This occurs instantly, as the presentation is handled locally.
    */
   savePpt = () => {
-    this.pptw.exportPresentation();
+    this.pptw.exportPresentation('Stella images.pptx', this.includeAccessionNumber);
   }
 
   /**
@@ -320,6 +325,7 @@ class MediaExport extends Component {
         if (tag === undefined || !this.pptTags.includes(tag.tag)) {
           continue;
         }
+        const isSensitiveTag = this.sensitiveTags.includes(tag.tag);
 
         // The output string begins with the element name (or tag if not in data dictionary), length and VR (if present).  VR is undefined for
         // implicit transfer syntaxes
@@ -639,11 +645,12 @@ class MediaExport extends Component {
              text += " of length " + element.length + " for VR " + vr + " too long to show";
              text += this.sha1Text(dataSet.byteArray, element.dataOffset, element.length);
            }
-          // finally we add the string to our output array surrounded by li elements so it shows up in the
-          // DOM as a list
-          // output.push('<li style="color:' + color + ';" title="' + title + '">' + text + '</li>');
-          // this.slideNotes = this.slideNotes + text + '\n';
-          array[0] += '  ' + text + '\n';
+          // finally we add the string to our output array
+          if (!isSensitiveTag) {
+            array[0] += '  ' + text + '\n';
+          } else {
+            array[1] += '  ' + text + '\n';
+          }
           // console.log(text);
         }
       }
@@ -664,7 +671,7 @@ class MediaExport extends Component {
    * Updates the text that accompanies the framerate slider.
    */
   updateFramerateDisplay = () => {
-    document.getElementById("gifFramerateText").innerHTML = document.getElementById('gifFramerateSlider').value + ' frames per second';
+    document.getElementById("gifFramerateText").innerHTML = 'Frames per second: ' + document.getElementById('gifFramerateSlider').value;
   }
 
   /**
@@ -673,9 +680,9 @@ class MediaExport extends Component {
   updateDurationDisplay = () => {
     const duration = document.getElementById('gifDurationSlider').value;
     if (duration == 1) {
-      document.getElementById("gifDurationText").innerHTML = 'Duration: 1 second';
+      document.getElementById("gifDurationText").innerHTML = 'Duration: 1 Second';
     } else {
-      document.getElementById("gifDurationText").innerHTML = `Duration: ${duration} seconds`;
+      document.getElementById("gifDurationText").innerHTML = `Duration: ${duration} Seconds`;
     }
   }
 
@@ -683,14 +690,12 @@ class MediaExport extends Component {
    * Toggles display of the gif settings and the status of the toggle button.
    */
   toggleHideGifSettings = () => {
-    const x = document.getElementById("gifSettings");
-    const b = document.getElementById("gifSettingsButton");
-    if (x.style.display != "block") {
-      x.style.display = "block";
-      b.innerHTML = "Hide movie settings";
-    } else {
+    const x = document.getElementById("movie-settings");
+    // const b = document.getElementById("gifSettingsButton");
+    if (x.style.display == "block") {
       x.style.display = "none";
-      b.innerHTML = "Show movie settings";
+    } else {
+      x.style.display = "block";
     }
   }
 
@@ -698,13 +703,16 @@ class MediaExport extends Component {
    * Downloads the processed gif.
    */
   downloadGif = () => {
+    if (!this.gifData.ready) {
+      return;
+    }
     // It's a little hacky but it's the best way I could come up with, and
     // the people on stackoverflow said to do this.
     const a = document.createElement("a");
     document.body.appendChild(a);
     a.style = "display: none";
     a.href = this.gifData.url;
-    a.download = "STELLA gif.gif";
+    a.download = "STELLA movie.gif";
     a.click();
   }
 
@@ -714,13 +722,17 @@ class MediaExport extends Component {
    * presentation itself still contains an animated gif.
    */
   addGif = () => {
+    if (!this.gifData.ready) {
+      return;
+    }
     const f = new FileReader();
     f.onload = (dataURL) => {
       this.pptw.addImageToSlide(
         dataURL.target.result,
         this.gifData.width,
         this.gifData.height,
-        this.gifData.text
+        this.gifData.text,
+        this.gifData.sensitiveText
       );
       this.pptw.updateDisplayText('pptInfo');
       this.pptw.updateCanvasPreview('pptPreview');
@@ -792,9 +804,10 @@ class MediaExport extends Component {
       n++;
     }
     // Record the gif:
-    let stringArray = [''];
+    let stringArray = ['', ''];
     this.dumpDataSet(image.data, stringArray);
     this.gifData.text = stringArray[0];
+    this.gifData.sensitiveText = stringArray[1];
     this.canv = element.getElementsByClassName('cornerstone-canvas')[0];
     this.gifData.width = this.canv.width;
     this.gifData.height = this.canv.height;
@@ -822,6 +835,10 @@ class MediaExport extends Component {
       }, duration / k * 1000);
   }
 
+  toggleAccessionNumber = ({ target }) => {
+    this.includeAccessionNumber = target.checked;
+  }
+
   render() {
     const { output, input } = this.state;
     const lowerInput = input.toLowerCase();
@@ -836,7 +853,7 @@ class MediaExport extends Component {
         {/*<div id="media-export-handle" className="buttonLabel">*/}
         {/*  <span>Export Media</span>*/}
         {/*</div>*/}
-        <div className="annotation-header">Media Export</div>
+        <div className="annotation-header-new">Media Export</div>
         <div className="slide-preview-area">
           <div className="slide-preview-text">
             <i style={{ cursor: 'pointer' }} onClick={this.prevPptSlide} className="bi bi-caret-left-fill"></i>
@@ -846,39 +863,44 @@ class MediaExport extends Component {
           <div onClick={this.deletePptSlide} style={{ cursor: 'pointer' }}><i className="bi bi-trash3"></i> Delete this Slide</div>
         </div>
         <div className="media-icon-bar">
-          <div className="annotation-header">Image Controls</div>
+          <div className="annotation-header-new">Image Controls</div>
           <div onClick={this.addToPpt} className="icon-block">
-            <a href="#" ><i className="bi bi-plus-square"></i><p>Add</p></a>
+            <a><i className="bi bi-plus-square"></i><p>Add</p></a>
           </div>
           <div onClick={this.removeFromPpt} className="icon-block">
-            <a href="#" ><i className="bi bi-dash-square"></i><p>Remove</p></a>
+            <a><i className="bi bi-dash-square"></i><p>Remove</p></a>
           </div>
-          <div onClick={this.savePpt} className="icon-block">
-            <a href="#" ><i className="bi bi-image"></i><p>Save to Disk</p></a>
+          <div onClick={this.saveScreenshot} className="icon-block">
+            <a><i className="bi bi-image"></i><p>Save{'\u00A0'}to Disk</p></a>
           </div>
         </div>
-
-        <button onClick={this.clearPpt}>Clear presentation</button>
-        <button onClick={this.addToPpt}>Add image to slide</button>
-        <button onClick={this.saveScreenshot}>Save image of slide</button>
-        <button onClick={this.removeFromPpt}>Remove image from slide</button>
-        <button onClick={this.deletePptSlide}>Delete slide</button>
-        <button onClick={this.savePpt}>Save presentation</button>
-        <br />
-        <button onClick={this.nextPptSlide}>Next slide</button>
-        <button onClick={this.prevPptSlide}>Previous slide</button>
-        {/*<p id="pptInfo"></p>*/}
-        Slide preview:
-        <br />
-        {/*<canvas id="pptPreview" width="320" height="180"></canvas>*/}
-        <br />
-        <button onClick={this.recordStack}>Make quick movie</button>
-        <button onClick={this.recordGif}>Make custom movie</button>
-        <br />
-        <button id="gifSettingsButton" onClick={this.toggleHideGifSettings}>Show movie settings</button>
-        <div id="gifSettings">
-          <div id="gifFramerateText">10 frames per second</div>
-          <input type="range" id="gifFramerateSlider" min="5" max="30" step="5" list="gifFPSlist" defaultValue="10" onChange={this.updateFramerateDisplay} />
+        <div className="media-icon-bar">
+          <div className="annotation-header-new">Movie Controls</div>
+          <div onClick={this.recordStack} className="icon-block">
+            <a><i className="bi bi-images"></i><p>Record Stack{'\u00A0'}as Movie</p></a>
+          </div>
+          <div onClick={this.recordGif} className="icon-block">
+            <a><i className="bi bi-record-circle danger"></i><p>Record Screen{'\u00A0'}as Movie</p></a>
+          </div>
+          <div onClick={this.addGif} className="icon-block">
+            <a><i className="bi bi-plus-square"></i><p>Add{'\u00A0'}to Slide</p></a>
+          </div>
+          <div onClick={this.removeFromPpt} className="icon-block">
+            <a><i className="bi bi-dash-square"></i><p>Remove from Slide</p></a>
+          </div>
+          <div onClick={this.downloadGif} className="icon-block">
+            <a><i className="bi bi-download" alt="Save Movie to Disk"></i><p>Save{'\u00A0'}to Disk</p></a>
+          </div>
+          <div onClick={this.toggleHideGifSettings} className="icon-block">
+            <a><i className="bi bi-gear-fill"></i><p>Settings</p></a>
+          </div>
+        </div>
+        <div className="movie-settings" id="movie-settings">
+          <div className="annotation-header-new">Movie Settings
+            <i onClick={this.toggleHideGifSettings} className="bi bi-eye-slash-fill" style={{ cursor: 'pointer', float: 'right', marginRight: '7px' }}> Hide Settings</i></div>
+          <br />
+          <label htmlFor="gifFramerateSlider" id="gifFramerateText" className="form-label">Frames per Second: 10</label>
+          <input type="range" className="form-range" min="5" max="30" step="5" list="gifFPSlist" defaultValue="10" onChange={this.updateFramerateDisplay} id="gifFramerateSlider" />
           <datalist id="gifFPSlist">
             <option>5</option>
             <option>10</option>
@@ -887,8 +909,8 @@ class MediaExport extends Component {
             <option>25</option>
             <option>30</option>
           </datalist>
-          <div id="gifDurationText">Duration: 3 seconds</div>
-          <input type="range" id="gifDurationSlider" min="1" max="5" step="1" list="gifDurationList" defaultValue="3" onChange={this.updateDurationDisplay} />
+          <label htmlFor="gifDurationSlider" id="gifDurationText" className="form-label">Duration: 3 Seconds</label>
+          <input type="range" className="form-range" min="1" max="5" step="1" list="gifDurationList" defaultValue="3" onChange={this.updateDurationDisplay} id="gifDurationSlider" />
           <datalist id="gifDurationList">
             <option>1</option>
             <option>2</option>
@@ -897,13 +919,31 @@ class MediaExport extends Component {
             <option>5</option>
           </datalist>
         </div>
-        <div id="gifRecordingIndicator"></div>
-        <div id="gifLoadingIndicator">Loading</div>
-        <div id="gifReadyButtons">
-          <button id="gifDownloadButton" onClick={this.downloadGif}>Save movie</button>
-          <button onClick={this.addGif}>Add movie to presentation</button>
+        <div className="presentation">
+          <div className="annotation-header-new">Presentation Controls </div>
+          <label className="accession-check icon-block2 form-check-label" htmlFor="toggleAccessionNumber">
+            <div className="form-check form-switch form-check-inline">
+              <input className="form-check-input" type="checkbox" role="switch" id="toggleAccessionNumber" onChange={this.toggleAccessionNumber}/>
+              <p style={{color: '#fff'}}>Save Accession #</p>
+              </div>
+            </label>
+          <div className="icon-block2" onClick={this.savePpt}>
+            <a style={{ textAlign: 'center' }}><i  className="bi bi-download"></i><p>Save Presentation</p></a>
+          </div>
+
+          <div className="icon-block2" onClick={this.clearPpt}>
+            <a style={{ textAlign: 'center' }}><i className="bi bi-x-circle"></i><p>Clear Presentation</p></a>
+          </div>
         </div>
-        <button onClick={this.logElement}>Log</button>
+        {/*<br />*/}
+        <br />
+        <div className="status" id="gif-status-box">
+          <div className="annotation-header-new">Status</div>
+          <div className="status-box">
+            <div id="gifRecordingIndicator">Status Messages appear here...</div>
+            <div id="gifLoadingIndicator">Loading</div>
+          </div>
+        </div>
       </div>
     );
   }
