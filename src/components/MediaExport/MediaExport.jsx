@@ -7,9 +7,12 @@ import { uids } from "./uids";
 import { pptWrapper } from "./pptWrapper";
 import { videoExport } from "./videoExport";
 import cornerstoneTools from "cornerstone-tools";
-import { getToolState } from "cornerstone-tools/stateManagement/toolState"
+import { getToolState } from "cornerstone-tools/stateManagement/toolState";
 
+import "./bootstrap.min.css";
+import "./bootstrap-icons.css";
 import "./MediaExport.css";
+import "./styles.css";
 
 const mapStateToProps = state => {
   return {
@@ -826,13 +829,35 @@ class MediaExport extends Component {
 
     const listHtml = { __html: list.join('') };
     return (
-      <div className="media-export-pop-up">
+      <div className="media-export-pop-up" id="media-tab-pane">
         {/*<div className="close-media-export-menu" onClick={this.props.onClose}>*/}
         {/*  <a href="#">X</a>*/}
         {/*</div>*/}
         {/*<div id="media-export-handle" className="buttonLabel">*/}
         {/*  <span>Export Media</span>*/}
         {/*</div>*/}
+        <div className="annotation-header">Media Export</div>
+        <div className="slide-preview-area">
+          <div className="slide-preview-text">
+            <i style={{ cursor: 'pointer' }} onClick={this.prevPptSlide} className="bi bi-caret-left-fill"></i>
+            <div style={{ display: 'inline-block' }} id="pptInfo"></div>
+            <i style={{ cursor: 'pointer' }} onClick={this.nextPptSlide} className="bi bi-caret-right-fill"></i>
+            <canvas className="slide-preview" id="pptPreview">&nbsp;</canvas></div>
+          <div onClick={this.deletePptSlide} style={{ cursor: 'pointer' }}><i className="bi bi-trash3"></i> Delete this Slide</div>
+        </div>
+        <div className="media-icon-bar">
+          <div className="annotation-header">Image Controls</div>
+          <div onClick={this.addToPpt} className="icon-block">
+            <a href="#" ><i className="bi bi-plus-square"></i><p>Add</p></a>
+          </div>
+          <div onClick={this.removeFromPpt} className="icon-block">
+            <a href="#" ><i className="bi bi-dash-square"></i><p>Remove</p></a>
+          </div>
+          <div onClick={this.savePpt} className="icon-block">
+            <a href="#" ><i className="bi bi-image"></i><p>Save to Disk</p></a>
+          </div>
+        </div>
+
         <button onClick={this.clearPpt}>Clear presentation</button>
         <button onClick={this.addToPpt}>Add image to slide</button>
         <button onClick={this.saveScreenshot}>Save image of slide</button>
@@ -842,10 +867,10 @@ class MediaExport extends Component {
         <br />
         <button onClick={this.nextPptSlide}>Next slide</button>
         <button onClick={this.prevPptSlide}>Previous slide</button>
-        <p id="pptInfo"></p>
+        {/*<p id="pptInfo"></p>*/}
         Slide preview:
         <br />
-        <canvas id="pptPreview" width="320" height="180"></canvas>
+        {/*<canvas id="pptPreview" width="320" height="180"></canvas>*/}
         <br />
         <button onClick={this.recordStack}>Make quick movie</button>
         <button onClick={this.recordGif}>Make custom movie</button>

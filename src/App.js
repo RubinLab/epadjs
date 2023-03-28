@@ -1553,6 +1553,8 @@ class App extends Component {
                     keycloak={this.state.keycloak}
                     onSwitchView={this.switchView}
                     closeLeftMenu={this.closeLeftMenu}
+                    savedData={this.state.savedData}
+                    saveData={(data) => { this.state.savedData = data }}
                   />
                 )}
               />

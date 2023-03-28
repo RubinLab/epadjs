@@ -67,7 +67,7 @@ export function pptWrapper() {
    * Moves to the previous slide. Does nothing if the current slide is the first slide.
    */
   this.prevSlide = function () {
-    this.currentSlide = Math.min(this.currentSlide - 1, 0);
+    this.currentSlide = Math.max(this.currentSlide - 1, 0);
   }
 
   /**
@@ -127,12 +127,12 @@ export function pptWrapper() {
    */
   this.updateDisplayText = function (elementId) {
     let nSlides = this.currentSlide + 1;
-    let x = 'Currently on slide ' + nSlides + ' of ' + this.slides.length + '.<br>';
-    x += 'This slide has ' + this.slides[this.currentSlide].length + ' image';
-    if (this.slides[this.currentSlide].length != 1) {
-      x += 's';
-    }
-    x += '.';
+    let x = 'Slide ' + nSlides + ' of ' + this.slides.length;
+    //x += 'This slide has ' + this.slides[this.currentSlide].length + ' image';
+    //if (this.slides[this.currentSlide].length != 1) {
+    //  x += 's';
+    //}
+    //x += '.';
     document.getElementById(elementId).innerHTML = x;
   }
 
