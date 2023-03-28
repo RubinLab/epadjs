@@ -252,6 +252,12 @@ class DisplayView extends Component {
       });
       window.dispatchEvent(evnt);
     }
+      // i => info
+    if (event.target.nodeName !== 'INPUT' && event.target.nodeName !== 'TEXTAREA') {
+      if (event.keyCode == 73 && event.ctrlKey) {
+        this.toggleOverlay();
+      }
+    }
   }
 
   // Sets the activeTool state getting it from session storage
@@ -1670,6 +1676,15 @@ class DisplayView extends Component {
     this.jumpToImage(imageIndex, i);
   };
 
+  toggleOverlay = (e, i) => {
+    const showHide = { ... this.state.isOverlayVisible };
+    const index = i ? i : this.props.activePort;
+    if (showHide[index]) delete showHide[index];
+    else showHide[index] = true;
+    this.setState({ isOverlayVisible: showHide });
+    console.log(index, showHide);
+  }
+
   render() {
     const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
     const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
@@ -1726,12 +1741,7 @@ class DisplayView extends Component {
                     <span
                       className={"dot"}
                       style={{ background: "deepskyblue" }}
-                      onClick={() => {
-                        const showHide = {... this.state.isOverlayVisible};
-                        if (showHide[i]) delete showHide[i];
-                        else showHide[i] = true;
-                        this.setState({ isOverlayVisible: showHide });
-                      }}
+                      onClick={(e) => { this.toggleOverlay(e, i) }}
                     >
                       <FaTag />
                     </span>
