@@ -81,7 +81,7 @@ const SeriesDropDown = (props) => {
                 id="dropdownOtherSeries"
                 place="bottom"
                 type="info"
-                delayShow={1000}
+                delayShow={200}
             >
                 <span>Other Series</span>
             </ReactTooltip>
