@@ -35,7 +35,7 @@ import { circle } from "./Circle";
 import { bidirectional } from "./Bidirectional";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
-import { FaTimes, FaPen, FaExpandArrowsAlt } from "react-icons/fa";
+import { FaTimes, FaPen, FaExpandArrowsAlt, FaToggleOff, FaTag } from "react-icons/fa";
 import Form from "react-bootstrap/Form";
 import ToolMenu from "../ToolMenu/ToolMenu";
 import { getMarkups, setMarkupsOfAimActive } from "../aimEditor/Helpers";
@@ -162,7 +162,8 @@ class DisplayView extends Component {
       redirect: this.props.series.length < 1 ? true : false,
       containerHeight: 0,
       tokenRefresh: null,
-      activeTool: ''
+      activeTool: '',
+      isOverlayVisible: {}
     };
   }
 
@@ -1722,6 +1723,18 @@ class DisplayView extends Component {
                     >
                       <FaExpandArrowsAlt />
                     </span>
+                    <span
+                      className={"dot"}
+                      style={{ background: "deepskyblue" }}
+                      onClick={() => {
+                        const showHide = {... this.state.isOverlayVisible};
+                        if (showHide[i]) delete showHide[i];
+                        else showHide[i] = true;
+                        this.setState({ isOverlayVisible: showHide });
+                      }}
+                    >
+                      <FaTag />
+                    </span>
                   </div>
                   {/* <div className={"column middle"}>
                     <label>{series[i].seriesUID}</label>
@@ -1756,7 +1769,7 @@ class DisplayView extends Component {
                   <div className={"column right"}>
                     <span
                       className={"dot"}
-                      style={{ background: "#FDD800", float: "right" }}
+                      style={{ background: "#FDD800", float: 'right' }}
                       onClick={() => {
                         this.setState({ showAimEditor: true });
                       }}
@@ -1797,6 +1810,7 @@ class DisplayView extends Component {
                   isStackPrefetchEnabled={true}
                   style={{ height: "calc(100% - 26px)" }}
                   activeTool={activeTool}
+                  isOverlayVisible={this.state.isOverlayVisible[i] || false}
                 />
               </div>
             ))}
