@@ -8,6 +8,8 @@ import { TbStack2 } from "react-icons/tb";
 import { getStudyAims } from '../../services/studyServices';
 import { getSeries } from '../../services/seriesServices';
 import { addStudyToGrid, replaceInGrid, getSingleSerie, clearActivePortAimID } from 'components/annotationsList/action';
+import { isSupportedModality } from "../../Utils/aid.js";
+
 import "./SeriesDropDown.css";
 
 
@@ -23,7 +25,8 @@ const SeriesDropDown = (props) => {
             return seriesOfStudy;
         }
         if (openStudies && openStudies.hasOwnProperty(studyUID)) {
-            setSeriesList(openStudies[studyUID]);
+            const series = openStudies[studyUID].filter(isSupportedModality);
+            setSeriesList(series);
         }
         else {
             fetchData().then(result => {
