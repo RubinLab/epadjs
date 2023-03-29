@@ -46,8 +46,6 @@ const annotationsLink = (props) => {
 
     let isGridFull = openSeries.length === maxPort;
     const { isOpen, index } = checkIfSerieOpen(seriesUID);
-    console.log(' ---> isOpen, index', seriesUID);
-    console.log(isOpen, index);
 
     if (isOpen) {
       props.dispatch(changeActivePort(index));
@@ -55,7 +53,6 @@ const annotationsLink = (props) => {
       props.dispatch(clearSelection());
     } else {
       if (isGridFull) {
-        console.log(" -->will do!");
         props.dispatch(addToGrid(selected, aimID, props.activePort));
       } else {
         props.dispatch(addToGrid(selected, aimID));
