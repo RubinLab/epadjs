@@ -279,25 +279,29 @@ class ToolMenu extends Component {
 
   handleKeyPressed = (event) => {
     // ctrl + r => Reset
-    if (event.target.nodeName !== 'INPUT' && event.target.nodeName !== 'TEXTAREA' ) {
+    if (event.target.nodeName !== 'INPUT' && event.target.nodeName !== 'TEXTAREA') {
       if (event.keyCode == 82 && event.ctrlKey) {
         this.handleToolClicked(1, 'Reset');
       }
       // d => Length
       else if (event.keyCode == 68) {
-        this.handleToolClicked(12, 'Length');
+        const index = mode === 'teaching' ? 10 : 12;
+        this.handleToolClicked(index, 'Length');
       }
-      // o => Perpendicular/Bidirectional
+      // o => Perpendicular/Bidirectional 
       else if (event.keyCode == 79) {
-        this.handleToolClicked(15, 'Bidirectional');
+        const index = mode === 'teaching' ? 13 : 15;
+        this.handleToolClicked(index, 'Bidirectional');
       }
-      // f => Arrow
+      // f => Arrow 
       else if (event.keyCode == 70) {
-        this.handleToolClicked(13, 'ArrowAnnotate');
+        const index = mode === 'teaching' ? 11 : 13;
+        this.handleToolClicked(index, 'ArrowAnnotate');
       }
       // r => Circle
       else if (event.keyCode == 82) {
-        this.handleToolClicked(14, 'CircleRoi');
+        const index = mode === 'teaching' ? 12 : 14;
+        this.handleToolClicked(index, 'CircleRoi');
       }
       // z => zoom
       else if (event.keyCode == 90) {
