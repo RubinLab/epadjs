@@ -337,7 +337,6 @@ const AnnotationSearch = props => {
       setSort(sort);
   }
 
-  // This function is never executed and can probably be removed - James
   const insertIntoQueryOnSelection = el => {
     const field = document.getElementsByClassName(
       'form-control annotationSearch-text'
@@ -352,7 +351,6 @@ const AnnotationSearch = props => {
     }
   };
 
-  // This function is never executed and can probably be removed - James
   const renderOrganizeItem = name => {
     return (
       <div className="annotationSearch-cont__item">
@@ -379,7 +377,6 @@ const AnnotationSearch = props => {
     );
   };
 
-  // This function is never executed and can probably be removed - James
   const addPartialToQuery = () => {
     const { type, criteria, term } = partialQuery;
     const newQuery = `${query} ${type} ${criteria} ${term}`;
@@ -392,7 +389,6 @@ const AnnotationSearch = props => {
     props.dispatch(selectAnnotation(aimData));
   };
 
-  // This function is never executed and can probably be removed - James
   const renderContentItem = field => {
     return (
       <select
@@ -414,7 +410,6 @@ const AnnotationSearch = props => {
     );
   };
 
-  // This function is never executed and can probably be removed - James
   const renderQueryItem = () => {
     return (
       <div className="annotationSearch-cont__item">
@@ -609,7 +604,6 @@ const AnnotationSearch = props => {
     }
   };
 
-  // This function is never executed and can probably be removed - James
   const renderOptions = () => {
     const projectNames = Object.values(props.projectMap);
     const projectID = Object.keys(props.projectMap);
@@ -694,7 +688,6 @@ const AnnotationSearch = props => {
       .catch(err => console.error(err));
   };
 
-  // This function is never executed and can probably be removed - James
   const renderProjectSelect = () => {
     return (
       <div
@@ -929,7 +922,6 @@ const AnnotationSearch = props => {
     );
   };
 
-  // This function is never executed and can probably be removed - James
   const handleSubmitUpload = () => {
     setUploadClicked(false);
     getAnnotationsOfProjets();
@@ -1012,7 +1004,6 @@ const AnnotationSearch = props => {
     setShowPluginDropdown(true);
   };
 
-  // This function is never executed and can probably be removed - James
   const handleChangePlugin = e => {
     const tempSelectedPluign = parseInt(e.target.value);
     setSelectedPluginDbId(parseInt(e.target.value));
@@ -1023,7 +1014,6 @@ const AnnotationSearch = props => {
     }
   };
 
-  // This function is never executed and can probably be removed - James
   const runPlugin = async () => {
     console.log(
       `selected aims to pass to plugin : ${JSON.stringify(
