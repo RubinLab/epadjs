@@ -452,31 +452,32 @@ const AnnotationSearch = props => {
 
   // I replaced this function, and it can probably be removed - James
   const getSearchResult = (pageIndex, afterDelete, enterPressed) => {
-    props.dispatch(updateSearchTableIndex(0));
-    if (query.length === 0) {
-      getAnnotationsOfProjets(pageIndex, afterDelete);
-    }
-    else {
-      if (!syntaxVerify(query)) {
-        if (enterPressed) {
-          toast.info(explanation.invalidQuery, { position: 'top-right' });
-        }
-        return;
-      }
-      const queryToSave = {
-        [query]: {
-          query,
-          project: selectedProject
-        }
-      };
-      props.setQuery(queryToSave);
-      const bm = pageIndex ? bookmark : '';
-      searchAnnotations({ query: query }, bm)
-        .then(res => {
-          populateSearchResult(res, pageIndex, afterDelete);
-        })
-        .catch(err => console.error(err));
-    }
+    getFieldSearchResults(pageIndex, afterDelete, enterPressed);
+    //props.dispatch(updateSearchTableIndex(0));
+    //if (query.length === 0) {
+    //  getAnnotationsOfProjets(pageIndex, afterDelete);
+    //}
+    //else {
+    //  if (!syntaxVerify(query)) {
+    //    if (enterPressed) {
+    //      toast.info(explanation.invalidQuery, { position: 'top-right' });
+    //    }
+    //    return;
+    //  }
+    //  const queryToSave = {
+    //    [query]: {
+    //      query,
+    //      project: selectedProject
+    //    }
+    //  };
+    //  props.setQuery(queryToSave);
+    //  const bm = pageIndex ? bookmark : '';
+    //  searchAnnotations({ query: query }, bm)
+    //    .then(res => {
+    //      populateSearchResult(res, pageIndex, afterDelete);
+    //    })
+    //    .catch(err => console.error(err));
+    //}
   };
 
   // Returns true if the string is valid, false otherwise.
