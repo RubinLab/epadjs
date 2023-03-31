@@ -18,7 +18,7 @@ import {
   RiCloseCircleFill
 } from 'react-icons/ri';
 import { FcAbout, FcClearFilters } from 'react-icons/fc';
-import { BiSearch, BiX, BiTrash, BiDownload } from 'react-icons/bi';
+import { BiSearch, BiX, BiTrash, BiDownload, BiPlay } from 'react-icons/bi';
 import { BsEyeFill } from 'react-icons/bs';
 import { AiOutlineSortAscending, AiOutlineSortDescending } from 'react-icons/ai';
 import ReactTooltip from 'react-tooltip';
@@ -78,7 +78,8 @@ const explanation = {
   noResult: 'Can not find any result!',
   downloadProject:
     'Preparing project for download. The link to the files will be sent with a notification after completion!',
-  pluginAnnotations: 'you need to select an annotation'
+  pluginAnnotations: 'You need to select an annotation first.',
+  selectPlugin: 'You need to select a plugin first.'
 };
 
 const styles = {
@@ -100,6 +101,17 @@ const styles = {
     height: 'fit-content',
     fontSize: '1.2rem',
     margin: '0.3rem 2rem'
+  },
+  enabledRunButton: {
+    height: '41.98px',
+    'color': '#eaddb2',
+    cursor: 'pointer'
+  },
+  disabledRunButton:
+  {
+    height: '41.98px',
+    'color': '#eaddb2',
+    cursor: 'default'
   }
 };
 
@@ -174,7 +186,7 @@ const AnnotationSearch = props => {
     //     populateSearchResult(res, pageIndex, afterdelete);
     //   })
     //   .catch(err => console.error(err));
-    getFieldSearchResults();
+    getFieldSearchResults(pageIndex, afterdelete);
   };
 
   useEffect(() => {
@@ -185,7 +197,7 @@ const AnnotationSearch = props => {
     setBookmark('');
     setCheckboxSelected(false);
     props.dispatch(clearSelection());
-
+    persistSearch();
     if (props.searchQuery) {
       getFieldSearchResults(undefined, undefined, true);
       //const searchQueryFinal = Object.keys(props.searchQuery)[0];
@@ -206,7 +218,7 @@ const AnnotationSearch = props => {
     setSelectedPluginDbId(-1);
     getPluginProjects();
     // cavit
-  }, [props.pid]);
+  }, [props.pid, props.update]);
 
   const handleUserKeyPress = (e => {
     if (e.key === 'Enter') {
@@ -265,7 +277,7 @@ const AnnotationSearch = props => {
     getFieldSearchResults();
     props.dispatch(updateSearchTableIndex(0));
     return persistSearch;
-  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid, query, sort, filters], 500)
+  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid, query, sort, filters, props.update], 500)
 
   const handleSort = (column) => {
     if (!sort.length || (sort[0] !== column && sort[0] !== ("-" + column)))
@@ -594,7 +606,7 @@ const AnnotationSearch = props => {
 
   const getNewData = (pageIndex, afterDelete) => {
     if (mode === 'teaching') {
-      getFieldSearchResults(props.searchTableIndex);
+      getFieldSearchResults(props.searchTableIndex, afterDelete);
       return;
     }
 
@@ -1161,7 +1173,11 @@ const AnnotationSearch = props => {
 
   return (
     <>
-      <div className="container-fluid body-dk">
+      <div className="container-fluid body-dk" style={{
+        'zIndex': 6,
+        'position': 'sticky',
+        'top': 0
+      }}>
         {/* search / filters */}
         <div className="search_filter">
           <div className="row">
@@ -1220,18 +1236,91 @@ const AnnotationSearch = props => {
           }
         </div>
       </div >
-      <div className="icon_row">
-        <div className="icon_r">
-          {/* <button type="button" className="btn btn-sm" ><BsEyeFill /><br />View</button> */}
-          <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
-          {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
+      <div style={{
+        'width': 'auto',
+        'display': 'flex',
+        'flexDirection': 'row',
+        'alignItems': 'center',
+        'justifyContent': 'flex-start',
+        'position': 'sticky',
+        'top': '84px',
+        'width': '100%',
+        'zIndex': 5,
+        background: '#222222'
+      }}>
+        <div className="icon_row" style={{
+          // 'position': 'sticky',
+          // 'top': '84px',
+          // // 'width': '100%',
+          // 'zIndex': 5
+        }}>
+          <div className="icon_r">
+            {/* <button type="button" className="btn btn-sm" ><BsEyeFill /><br />View</button> */}
+            <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
+            {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
           {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
-          <AddToWorklist deselect={() => handleSelectDeselectAll(false)} />
-          <Projects deselect={() => handleSelectDeselectAll(false)} />
-          {/* <button type="button" className="btn btn-sm" onClick={() => { setShowProjects(!showProjects) }}><BiDownload /><br />Copy to Project</button>
+            <AddToWorklist deselect={() => handleSelectDeselectAll(false)} />
+            <Projects deselect={() => handleSelectDeselectAll(false)} />
+            {/* <button type="button" className="btn btn-sm" onClick={() => { setShowProjects(!showProjects) }}><BiDownload /><br />Copy to Project</button>
           {showProjects && (<Projects className='btn btn-sm worklist' onClose={() => { setShowProjects(false) }} />)} */}
-          <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
+            <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
+          </div>
         </div>
+        {(showPlugins && mode !== 'teaching') && (<div style={{
+          'textAlign': 'left',
+          'color': '#eaddb2',
+          'borderRight': '1px solid #ececec',
+          'backgroundColor': '#555',
+          'borderTop': '1px solid #ececec',
+          'marginRight': '3px',
+          'display': 'flex',
+          // 'height': "42.58px",
+          'alignItems': 'flex-end',
+        }}>
+          <div
+            style={{ padding: '5px 3px' }}
+          >
+            <div
+              style={{
+                color: '#eaddb2',
+                fontSize: '.8em'
+              }}
+              onClick={() => {
+                getPluginProjects();
+              }}
+            >
+
+              Select Plugin
+            </div>
+          </div>
+          <div
+            style={{
+              fontSize: '0.8rem',
+              margin: '5px 3px',
+            }}
+          >
+            <select
+              className="pluginaddqueueselect"
+              id="plugins"
+              onChange={handleChangePlugin}
+              value={selectedPluginDbId}
+              style={{ minWidth: '8rem' }}
+            >
+              <option key="-1" value="-1">
+                select
+              </option>
+              {prepareDropDownHtmlForPlugins()}
+            </select>
+          </div>
+          <button
+            style={showRunPluginButton ? styles.enabledRunButton : styles.disabledRunButton}
+            className="btn btn-sm"
+            onClick={() => showRunPluginButton ? runPlugin() : toast.info(explanation.selectPlugin, { position: 'top-right' })}
+          >
+            <BiPlay />
+            <br />Run
+          </button>
+        </div>)}
       </div>
       <table className="table table-dark table-striped table-hover title-case" style={{ "height": "100%" }}>
         <colgroup><col className="select_row" />

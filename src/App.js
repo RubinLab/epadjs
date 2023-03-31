@@ -90,7 +90,7 @@ class App extends Component {
       authenticated: false,
       openInfo: false,
       openUser: false,
-      viewType: "search",
+      viewType: "list",
       lastEventId: null,
       showLog: false,
       admin: false,
@@ -120,11 +120,13 @@ class App extends Component {
     };
   }
 
-  getWorklistPatient = (patient, project) => {
-    const pairsSelected = patient.reduce((all, item, index) => {
-      all.push({ subjectID: item, projectID: project[index] });
-      return all;
-    }, []);
+  getWorklistPatient = map => {
+    const keys = Object.keys(map);
+    const pairsSelected = [];
+    keys.forEach((item) => {
+      const idArr = item.split('-');
+      pairsSelected.push({subjectID: idArr[0], projectID: idArr[1]});
+    });
     const pairs = { ...this.state.pairs };
     const index = this.state.reportsCompArr.length;
     pairs[index] = pairsSelected;
@@ -560,7 +562,7 @@ class App extends Component {
     this.setState({ viewType });
     const { openSeries } = this.props;
     const portOpen = openSeries.length > 0;
-    if (viewType === "search") {
+    if (viewType === "list") {
       this.props.dispatch(clearSelection());
       if (!portOpen || force) {
         pid
@@ -580,8 +582,14 @@ class App extends Component {
           draggable: true,
         });
       }
-    } else if (viewType === "annotations") {
-      this.props.history.push(`/search`);
+    } else if (viewType === "search") {
+      pid
+        ? this.props.history.push(`/search/${pid}`)
+        : this.props.history.push(`/search`);
+    } else if (viewType === "flex") {
+      pid
+        ? this.props.history.push(`/flex/${pid}`)
+        : this.props.history.push(`/flex`);
     }
   };
 
@@ -654,6 +662,7 @@ class App extends Component {
           document.title = "Stella";
           document.getElementById("favicon");
           favicon.href = "/stella.png"
+          this.setState({ viewType: 'search' })
         }
 
         this.setState({ mode, apiUrl, wadoUrl, authMode });
@@ -705,6 +714,9 @@ class App extends Component {
       this.props.dispatch(getTemplates());
       localStorage.setItem("treeData", JSON.stringify({}));
       this.clearTreeExpand();
+      this.setState(state => ({
+        update: state.update + 1
+      }));
     }
     const oldPid = prevProps.location.pathname.split("/").pop();
     const newPid = this.props.location.pathname.split("/").pop();
@@ -1453,10 +1465,11 @@ class App extends Component {
                   )}
                 />
                 <ProtectedRoute
-                  path="/search"
+                  path="/search/:pid?"
                   render={(props) => (
                     <AnnotationSearch
                       {...props}
+                      update={this.state.update}
                       pid={this.state.pid}
                       searchQuery={this.state.searchQuery}
                       setQuery={(query) =>
@@ -1570,11 +1583,12 @@ class App extends Component {
                 render={(props) => <FlexView {...props} pid={this.state.pid} />}
               />
               <ProtectedRoute
-                path="/search"
+                path="/search/:pid?"
                 render={(props) => (
                   <AnnotationSearch
                     {...props}
                     pid={this.state.pid}
+                    update={this.state.update}
                     searchQuery={this.state.searchQuery}
                     setQuery={(query) => this.setState({ searchQuery: query })}
                   />
