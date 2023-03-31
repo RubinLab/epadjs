@@ -68,6 +68,7 @@ const lists = {
 const pageSize = 200;
 
 const explanation = {
+  invalidQuery: 'This search query is not valid.',
   deleteSelected: 'Delete selected annotations? This cannot be undone.',
   organize: 'Group and/or organize your query: ',
   type: 'Select a field from annotation',
@@ -77,8 +78,7 @@ const explanation = {
   noResult: 'Can not find any result!',
   downloadProject:
     'Preparing project for download. The link to the files will be sent with a notification after completion!',
-  pluginAnnotations: 'you need to select an annotation',
-  invalidQuery: 'This search query is not valid.'
+  pluginAnnotations: 'you need to select an annotation'
 };
 
 const styles = {
