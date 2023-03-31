@@ -174,7 +174,7 @@ const AnnotationSearch = props => {
     //     populateSearchResult(res, pageIndex, afterdelete);
     //   })
     //   .catch(err => console.error(err));
-    getFieldSearchResults();
+    getFieldSearchResults(pageIndex, afterdelete);
   };
 
   useEffect(() => {
@@ -187,16 +187,17 @@ const AnnotationSearch = props => {
     props.dispatch(clearSelection());
 
     if (props.searchQuery) {
-      const searchQueryFinal = Object.keys(props.searchQuery)[0];
-      const searchQueryText = Object.values(props.searchQuery)[0].query;
-      const searchQueryProject = Object.values(props.searchQuery)[0].project;
-      setQuery(searchQueryText);
-      setSelectedProject(searchQueryProject || '');
-      searchAnnotations({ query: escapeSlashesQuery(searchQueryFinal) })
-        .then(res => {
-          populateSearchResult(res);
-        })
-        .catch(err => console.error(err));
+      getFieldSearchResults(undefined, undefined, true);
+      //const searchQueryFinal = Object.keys(props.searchQuery)[0];
+      //const searchQueryText = Object.values(props.searchQuery)[0].query;
+      //const searchQueryProject = Object.values(props.searchQuery)[0].project;
+      //setQuery(searchQueryText);
+      //setSelectedProject(searchQueryProject || '');
+      //searchAnnotations({ query: escapeSlashesQuery(searchQueryFinal) })
+      //  .then(res => {
+      //    populateSearchResult(res);
+      //  })
+      //  .catch(err => console.error(err));
     } else {
       // getAnnotationsOfProjets();
     }
@@ -209,13 +210,15 @@ const AnnotationSearch = props => {
 
   const handleUserKeyPress = (e => {
     if (e.key === 'Enter') {
-      if (mode !== 'teaching') {
-        getSearchResult(undefined, undefined, true);
-        props.dispatch(updateSearchTableIndex(0));
-      } else {
-        getFieldSearchResults(undefined, undefined, true);
-        props.dispatch(updateSearchTableIndex(0));
-      }
+      getFieldSearchResults(undefined, undefined, true);
+      props.dispatch(updateSearchTableIndex(0));
+      //if (mode !== 'teaching') {
+      //  getSearchResult(undefined, undefined, true);
+      //  props.dispatch(updateSearchTableIndex(0));
+      //} else {
+      //  getFieldSearchResults(undefined, undefined, true);
+      //  props.dispatch(updateSearchTableIndex(0));
+      //}
     }
   });
 
@@ -334,6 +337,7 @@ const AnnotationSearch = props => {
       setSort(sort);
   }
 
+  // This function is never executed and can probably be removed - James
   const insertIntoQueryOnSelection = el => {
     const field = document.getElementsByClassName(
       'form-control annotationSearch-text'
@@ -348,6 +352,7 @@ const AnnotationSearch = props => {
     }
   };
 
+  // This function is never executed and can probably be removed - James
   const renderOrganizeItem = name => {
     return (
       <div className="annotationSearch-cont__item">
@@ -374,6 +379,7 @@ const AnnotationSearch = props => {
     );
   };
 
+  // This function is never executed and can probably be removed - James
   const addPartialToQuery = () => {
     const { type, criteria, term } = partialQuery;
     const newQuery = `${query} ${type} ${criteria} ${term}`;
@@ -386,6 +392,7 @@ const AnnotationSearch = props => {
     props.dispatch(selectAnnotation(aimData));
   };
 
+  // This function is never executed and can probably be removed - James
   const renderContentItem = field => {
     return (
       <select
@@ -407,26 +414,7 @@ const AnnotationSearch = props => {
     );
   };
 
-  const escapeSlashesString = str => {
-    const projectComponents = str.includes('project') ? str.split(':') : null;
-    const word = projectComponents ? str.split(':')[1] : str;
-    let result = word.split('').reduce((all, item, index) => {
-      if (item === '/') {
-        return (all += '\\' + item);
-      } else {
-        return (all += item);
-      }
-    }, '');
-    result = result.includes('/') ? `\"${result}\"` : result;
-    return projectComponents ? `project:${result}` : result;
-  };
-
-  const escapeSlashesQuery = q => {
-    return q.split(' ').reduce((all, item, index) => {
-      return (all += `${escapeSlashesString(item)} `);
-    }, '');
-  };
-
+  // This function is never executed and can probably be removed - James
   const renderQueryItem = () => {
     return (
       <div className="annotationSearch-cont__item">
@@ -467,6 +455,7 @@ const AnnotationSearch = props => {
     );
   };
 
+  // I replaced this function, and it can probably be removed - James
   const getSearchResult = (pageIndex, afterDelete, enterPressed) => {
     props.dispatch(updateSearchTableIndex(0));
     if (query.length === 0) {
@@ -492,33 +481,6 @@ const AnnotationSearch = props => {
           populateSearchResult(res, pageIndex, afterDelete);
         })
         .catch(err => console.error(err));
-      //let searchQuery = parseQuery();
-      //// setData([]);
-      //if (selectedProject) {
-      //  const multiSearch =
-      //    searchQuery.includes('AND') || searchQuery.includes('OR');
-      //  const notHaveParanthesis =
-      //    searchQuery[0] !== '(' || searchQuery[searchQuery.length - 1] !== ')';
-      //  if (multiSearch && notHaveParanthesis)
-      //    searchQuery = `(${searchQuery}) AND project:${selectedProject}`;
-      //  else searchQuery += ` AND project:${selectedProject}`;
-      //}
-      //if (searchQuery) {
-      //  // setError('');
-      //  const queryToSave = {
-      //    [searchQuery]: {
-      //      query,
-      //      project: selectedProject
-      //    }
-      //  };
-      //  props.setQuery(queryToSave);
-      //  const bm = pageIndex ? bookmark : '';
-      //  searchAnnotations({ query: escapeSlashesQuery(searchQuery) }, bm)
-      //    .then(res => {
-      //      populateSearchResult(res, pageIndex, afterDelete);
-      //    })
-      //    .catch(err => console.error(err));
-      //}
     }
   };
 
@@ -574,14 +536,7 @@ const AnnotationSearch = props => {
     return !operatorRegex.test(inputString);
   }
 
-  const escapeFilter = (input) => {
-    input.replaceAll('\\\\', '\\');
-    const charsToEscape = ['{', '(', '/', '.'];
-    for (const char of charsToEscape) {
-      input.replaceAll(char, `\\${char}`);
-    }
-  }
-
+  // This handles the search.
   const getFieldSearchResults = (pageIndex, afterDelete, enterPressed) => {
     if (query.length) {
       if (!syntaxVerify(query)) {
@@ -591,6 +546,8 @@ const AnnotationSearch = props => {
         return;
       }
     }
+    // We want to escape any special characters in the filters that are sent to
+    // the server, without changing what the user sees.
     const filterArray = Object.entries(filters);
     const newFilters = {};
     if (filterArray.length > 0) {
@@ -646,294 +603,13 @@ const AnnotationSearch = props => {
     }
 
     if (query) {
-      getSearchResult(pageIndex, afterDelete);
+      getFieldSearchResults(pageIndex, afterDelete);
     } else {
       getAnnotationsOfProjets(pageIndex, afterDelete);
     }
   };
 
-  const seperateParanthesis = arr => {
-    const result = [];
-    arr.forEach(el => {
-      if (el.startsWith('(') || el.endsWith(')')) {
-        if (el.length > 1) {
-          const letterArr = el.split('');
-          let closing = '';
-          if (letterArr[0] === '(') result.push(letterArr.shift());
-          if (letterArr[letterArr.length - 1] === ')') {
-            closing = letterArr.pop();
-          }
-          if (letterArr.length > 0) result.push(letterArr.join(''));
-          if (closing) result.push(closing);
-        } else {
-          result.push(el);
-        }
-      } else {
-        result.push(el);
-      }
-    });
-    return result;
-  };
-
-  const isNoOfParanthesisValid = arr => {
-    let open = 0;
-    let close = 0;
-    arr
-      .join()
-      .split('')
-      .forEach(el => {
-        if (el === '(') {
-          open += 1;
-        } else if (el === ')') {
-          close += 1;
-        }
-      });
-    return close === open;
-  };
-
-  const validateQueryContent = arr => {
-    let criteriaArr = [];
-    let typeArr = [];
-    arr.forEach((el, i) => {
-      if (lists.criteria.includes(el)) criteriaArr.push(i);
-      else if (lists.type.includes(el)) typeArr.push(i);
-    });
-    return { criteriaArr, typeArr };
-  };
-
-  const validateQueryOrder = arr => {
-    let validOrder = true;
-    const { criteriaArr, typeArr } = validateQueryContent(arr);
-    // there should be equal number of crieria and type
-    const sameLength = criteriaArr.length === typeArr.length;
-
-    // type should follow the criteria
-    criteriaArr.forEach((el, i) => {
-      if (el !== typeArr[i] + 1) validOrder = false;
-    });
-
-    return validOrder && sameLength;
-  };
-
-  const countCondition = arr => {
-    return arr.reduce((all, item) => {
-      if (lists.condition.includes(item)) all += 1;
-      return all;
-    }, 0);
-  };
-
-  const validateConditionExists = arr => {
-    const { criteriaArr, typeArr } = validateQueryContent(arr);
-    const isMultipleSearch = criteriaArr.length > 1 || typeArr.length > 1;
-    if (isMultipleSearch) {
-      let noOfQuery = 1;
-      if (criteriaArr.length === typeArr.length && criteriaArr.length > 1) {
-        noOfQuery = criteriaArr.length;
-      } else if (criteriaArr.length !== typeArr.length) {
-        noOfQuery =
-          criteriaArr.length > typeArr.length
-            ? criteriaArr.length
-            : typeArr.length;
-      }
-      const noOfCondition = countCondition(arr);
-      return noOfQuery === noOfCondition + 1;
-    } else return true;
-  };
-
-  const checkStartEndWithCondition = arr => {
-    // first and last three word can not be AND/OR
-    const uppercaseArr = arr.map(el => el.toUpperCase());
-    const beginning = uppercaseArr.slice(0, 3);
-    const end =
-      uppercaseArr.length > 2
-        ? uppercaseArr.slice(arr.length - 3)
-        : [...uppercaseArr];
-    const invalidBeginnig =
-      beginning.includes('AND') || beginning.includes('OR');
-    const invalidEnd = end.includes('AND') || end.includes('OR');
-    return invalidBeginnig || invalidEnd;
-  };
-
-  const validateQuery = arr => {
-    if (arr[0] === ')') {
-      setError('Query can not start with a closing paranthesis');
-      return false;
-    }
-
-    if (arr[arr.length - 1] === '(') {
-      setError('Query can not end with an openning paranthesis');
-      return false;
-    }
-
-    if (!isNoOfParanthesisValid(arr)) {
-      setError(
-        'Number of the opening and closing paranthesis should be equal!'
-      );
-      return false;
-    }
-
-    if (!validateQueryOrder(arr)) {
-      const fields = lists.type.join(', ');
-      const criterias = lists.criteria.join(', ');
-      setError(
-        `Search field (${fields}) must be followed by a criteria (${criterias})`
-      );
-      return false;
-    }
-
-    if (!validateConditionExists(arr)) {
-      setError(`Multiple queries must be connected with AND/OR conditions!`);
-      return false;
-    }
-
-    if (checkStartEndWithCondition(arr)) {
-      setError(
-        `AND/OR conditions should be used to connect two queries. Please use advanced search to build a query.`
-      );
-      return false;
-    }
-    return true;
-  };
-
-  const checkSingleTermQuery = arr => {
-    const includeParanthesis = query.includes('(') || query.includes(')');
-    const { criteriaArr, typeArr } = validateQueryContent(arr);
-    const includeCriteria = criteriaArr.length > 0;
-    const includeType = typeArr.length > 0;
-    return !(includeParanthesis || includeCriteria || includeType);
-  };
-
-  // const handleWhitespace = text => {
-  //   let result = text.trim().replace(/ {2,}/g, ' ');
-  //   if (result.includes(' ')) {
-  //     result = result.split(' ').reduce((all, item, i) => {
-  //       if (item === ' ') all += `\\${item}`;
-  //       return all;
-  //     }, '');
-  //   }
-  //   return result;
-  // };
-
-  // if quoted, handle space and do 2 search combined with OR
-  // if not quoted check if there is white space, if there is a white space check for a single letter if there is a single letter wrap with double quote
-  // if there is a single letter wrap with doublequote
-
-  const replaceWithCaret = text => {
-    return text
-      .trim()
-      .split('')
-      .reduce((all, item) => {
-        return item === ' ' ? all + '^' : all + item;
-      }, '');
-  };
-  const handleWhiteSpaceinQuote = text => {
-    const wrappedInQuote = text.startsWith('"') && text.endsWith('"');
-    const hasWhiteSpace = text.includes(' ');
-    let caretAddedQuery = '';
-    let handleSingleChar = text.includes(' ')
-      ? text
-        .split(' ')
-        .map(item => handleSingleLetter(item))
-        .join(' ')
-      : handleSingleLetter(text);
-    if (wrappedInQuote && hasWhiteSpace) {
-      caretAddedQuery = replaceWithCaret(handleSingleChar);
-    }
-    return [handleSingleChar, caretAddedQuery];
-  };
-
-  const handleSingleLetter = q => (q.length === 1 ? `"${q}"` : q);
-
-  // if text has double quotes should look for caret version too
-  const addCaretVersion = (parsedQueryArr, all) => {
-    if (parsedQueryArr[1]) {
-      const allArr = all.split(' ');
-      const len = allArr.length;
-      if (allArr[len - 1].length > 0 && allArr[len - 1].includes(':')) {
-        const str = `(${allArr[len - 1]}${parsedQueryArr[0]} OR ${allArr[len - 1]
-          }${parsedQueryArr[1]})`;
-        allArr.splice(len - 1, 1, str);
-        all = allArr.join(' ');
-      }
-    } else {
-      all += parsedQueryArr[0];
-    }
-    return all;
-  };
-
-  const parseQuery = () => {
-    // check if query contains any predefined words
-    const queryArray = seperateParanthesis(query.trim().split(' '));
-    let parsedQuery;
-    if (checkSingleTermQuery(queryArray)) {
-      // wrap single letter in double qute
-      // if caret added query combine with or
-      const parsedQueryArr = handleWhiteSpaceinQuote(query);
-      parsedQuery = parsedQueryArr[1]
-        ? `${parsedQueryArr[0]} OR ${parsedQueryArr[1]}`
-        : parsedQueryArr[0];
-    } else {
-      const isQueryInputValid = validateQuery(queryArray);
-      let criteria = '';
-      if (isQueryInputValid) {
-        // form a variable to collect
-        let parsedQueryString = '';
-        parsedQuery = queryArray.reduce((all, item, index) => {
-          if (lists.criteria.includes(item)) {
-            all += ':';
-            criteria = item;
-          } else if (
-            item.toLowerCase() === 'and' ||
-            item.toLowerCase() === 'or'
-          ) {
-            if (parsedQueryString.length > 0) {
-              const parsedQueryArr = handleWhiteSpaceinQuote(parsedQueryString);
-              all = addCaretVersion(parsedQueryArr, all);
-              parsedQueryString = '';
-            }
-            all = `${all} ${item.toUpperCase()} `;
-          } else if (lists.type.includes(item)) {
-            if (parsedQueryString.length > 0) {
-              const parsedQueryArr = handleWhiteSpaceinQuote(parsedQueryString);
-              all = addCaretVersion(parsedQueryArr, all);
-              parsedQueryString = '';
-            }
-            if (item === 'patient') {
-              all += 'patient_name';
-            } else if (item === 'template') {
-              all += 'template_code';
-            } else if (item === 'lesion_name') {
-              all += 'name';
-            } else all += `${item}`;
-            parsedQueryString = '';
-          } else if (lists.paranthesis.includes(item)) {
-            if (item === ')' && parsedQueryString.length > 0) {
-              const parsedQueryArr = handleWhiteSpaceinQuote(parsedQueryString);
-              all = addCaretVersion(parsedQueryArr, all);
-              parsedQueryString = '';
-            }
-            all += `${item}`;
-            parsedQueryString = '';
-          } else {
-            // check if it is the end of the query
-            // if it is end of the query do the same with above (add to all)
-            parsedQueryString =
-              parsedQueryString.length > 0
-                ? `${parsedQueryString} ${item}`
-                : item;
-            if (index === queryArray.length - 1) {
-              const parsedQueryArr = handleWhiteSpaceinQuote(parsedQueryString);
-              all = addCaretVersion(parsedQueryArr, all);
-              parsedQueryString = '';
-            }
-          }
-          return all;
-        }, '');
-      }
-    }
-    return parsedQuery;
-  };
-
+  // This function is never executed and can probably be removed - James
   const renderOptions = () => {
     const projectNames = Object.values(props.projectMap);
     const projectID = Object.keys(props.projectMap);
@@ -1018,6 +694,7 @@ const AnnotationSearch = props => {
       .catch(err => console.error(err));
   };
 
+  // This function is never executed and can probably be removed - James
   const renderProjectSelect = () => {
     return (
       <div
@@ -1252,6 +929,7 @@ const AnnotationSearch = props => {
     );
   };
 
+  // This function is never executed and can probably be removed - James
   const handleSubmitUpload = () => {
     setUploadClicked(false);
     getAnnotationsOfProjets();
@@ -1334,6 +1012,7 @@ const AnnotationSearch = props => {
     setShowPluginDropdown(true);
   };
 
+  // This function is never executed and can probably be removed - James
   const handleChangePlugin = e => {
     const tempSelectedPluign = parseInt(e.target.value);
     setSelectedPluginDbId(parseInt(e.target.value));
@@ -1344,6 +1023,7 @@ const AnnotationSearch = props => {
     }
   };
 
+  // This function is never executed and can probably be removed - James
   const runPlugin = async () => {
     console.log(
       `selected aims to pass to plugin : ${JSON.stringify(
@@ -1693,10 +1373,11 @@ const AnnotationSearch = props => {
       <AnnotationDownloadModal
         onSubmit={() => {
           setShowDownload(false);
-          if (mode === 'teaching')
-            getFieldSearchResults();
-          else
-            getSearchResult();
+          getFieldSearchResults();
+          //if (mode === 'teaching')
+          //  getFieldSearchResults();
+          //else
+          //  getFieldSearchResults();
         }}
         onCancel={() => setShowDownload(false)}
         // updateStatus={() => console.log('update status')}
