@@ -68,6 +68,7 @@ const lists = {
 const pageSize = 200;
 
 const explanation = {
+  invalidQuery: 'This search query is not valid.',
   deleteSelected: 'Delete selected annotations? This cannot be undone.',
   organize: 'Group and/or organize your query: ',
   type: 'Select a field from annotation',
@@ -198,16 +199,17 @@ const AnnotationSearch = props => {
     props.dispatch(clearSelection());
     persistSearch();
     if (props.searchQuery) {
-      const searchQueryFinal = Object.keys(props.searchQuery)[0];
-      const searchQueryText = Object.values(props.searchQuery)[0].query;
-      const searchQueryProject = Object.values(props.searchQuery)[0].project;
-      setQuery(searchQueryText);
-      setSelectedProject(searchQueryProject || '');
-      searchAnnotations({ query: escapeSlashesQuery(searchQueryFinal) })
-        .then(res => {
-          populateSearchResult(res);
-        })
-        .catch(err => console.error(err));
+      getFieldSearchResults(undefined, undefined, true);
+      //const searchQueryFinal = Object.keys(props.searchQuery)[0];
+      //const searchQueryText = Object.values(props.searchQuery)[0].query;
+      //const searchQueryProject = Object.values(props.searchQuery)[0].project;
+      //setQuery(searchQueryText);
+      //setSelectedProject(searchQueryProject || '');
+      //searchAnnotations({ query: escapeSlashesQuery(searchQueryFinal) })
+      //  .then(res => {
+      //    populateSearchResult(res);
+      //  })
+      //  .catch(err => console.error(err));
     } else {
       // getAnnotationsOfProjets();
     }
@@ -220,13 +222,15 @@ const AnnotationSearch = props => {
 
   const handleUserKeyPress = (e => {
     if (e.key === 'Enter') {
-      if (mode !== 'teaching') {
-        getSearchResult();
-        props.dispatch(updateSearchTableIndex(0));
-      } else {
-        getFieldSearchResults();
-        props.dispatch(updateSearchTableIndex(0));
-      }
+      getFieldSearchResults(undefined, undefined, true);
+      props.dispatch(updateSearchTableIndex(0));
+      //if (mode !== 'teaching') {
+      //  getSearchResult(undefined, undefined, true);
+      //  props.dispatch(updateSearchTableIndex(0));
+      //} else {
+      //  getFieldSearchResults(undefined, undefined, true);
+      //  props.dispatch(updateSearchTableIndex(0));
+      //}
     }
   });
 
@@ -418,26 +422,6 @@ const AnnotationSearch = props => {
     );
   };
 
-  const escapeSlashesString = str => {
-    const projectComponents = str.includes('project') ? str.split(':') : null;
-    const word = projectComponents ? str.split(':')[1] : str;
-    let result = word.split('').reduce((all, item, index) => {
-      if (item === '/') {
-        return (all += '\\' + item);
-      } else {
-        return (all += item);
-      }
-    }, '');
-    result = result.includes('/') ? `\"${result}\"` : result;
-    return projectComponents ? `project:${result}` : result;
-  };
-
-  const escapeSlashesQuery = q => {
-    return q.split(' ').reduce((all, item, index) => {
-      return (all += `${escapeSlashesString(item)} `);
-    }, '');
-  };
-
   const renderQueryItem = () => {
     return (
       <div className="annotationSearch-cont__item">
@@ -478,45 +462,114 @@ const AnnotationSearch = props => {
     );
   };
 
-  const getSearchResult = (pageIndex, afterDelete) => {
-    props.dispatch(updateSearchTableIndex(0));
-    if (query.length === 0) {
-      getAnnotationsOfProjets(pageIndex, afterDelete);
-    }
-    else {
-      let searchQuery = parseQuery();
-      // setData([]);
-      if (selectedProject) {
-        const multiSearch =
-          searchQuery.includes('AND') || searchQuery.includes('OR');
-        const notHaveParanthesis =
-          searchQuery[0] !== '(' || searchQuery[searchQuery.length - 1] !== ')';
-        if (multiSearch && notHaveParanthesis)
-          searchQuery = `(${searchQuery}) AND project:${selectedProject}`;
-        else searchQuery += ` AND project:${selectedProject}`;
-      }
-      if (searchQuery) {
-        // setError('');
-        const queryToSave = {
-          [searchQuery]: {
-            query,
-            project: selectedProject
-          }
-        };
-        props.setQuery(queryToSave);
-        const bm = pageIndex ? bookmark : '';
-        searchAnnotations({ query: escapeSlashesQuery(searchQuery) }, bm)
-          .then(res => {
-            populateSearchResult(res, pageIndex, afterDelete);
-            // setRows(res.data.total_rows);
-            // setShowSpinner(false);
-          })
-          .catch(err => console.error(err));
-      }
-    }
+  // I replaced this function, and it can probably be removed - James
+  const getSearchResult = (pageIndex, afterDelete, enterPressed) => {
+    getFieldSearchResults(pageIndex, afterDelete, enterPressed);
+    //props.dispatch(updateSearchTableIndex(0));
+    //if (query.length === 0) {
+    //  getAnnotationsOfProjets(pageIndex, afterDelete);
+    //}
+    //else {
+    //  if (!syntaxVerify(query)) {
+    //    if (enterPressed) {
+    //      toast.info(explanation.invalidQuery, { position: 'top-right' });
+    //    }
+    //    return;
+    //  }
+    //  const queryToSave = {
+    //    [query]: {
+    //      query,
+    //      project: selectedProject
+    //    }
+    //  };
+    //  props.setQuery(queryToSave);
+    //  const bm = pageIndex ? bookmark : '';
+    //  searchAnnotations({ query: query }, bm)
+    //    .then(res => {
+    //      populateSearchResult(res, pageIndex, afterDelete);
+    //    })
+    //    .catch(err => console.error(err));
+    //}
   };
 
-  const getFieldSearchResults = (pageIndex, afterDelete) => {
+  // Returns true if the string is valid, false otherwise.
+  const syntaxVerify = inputString => {
+    // Erase anything within quotes, because nothing in quotes can be invalid
+    // Replace fancy quotes with regular quotes
+    inputString = inputString.replace(/[\u201C\u201D]/g, '"').toLowerCase();
+    // Matches `""...""` where the `...` doesn't start or end with `"` and doesn't 
+    // contain any double quotes, ie `""a"a""`
+    inputString = inputString.replace(/""(?!"").+?""/g, '==');
+    // Matches anything in quotation marks.
+    inputString = inputString.replace(/"[^"]+?"/g, '##');
+    if (inputString.includes('"')) {
+      // Remaining quotes == quotation mark mismatch
+      return false;
+    }
+    return checkParens(inputString) && checkOperators(inputString);
+  }
+
+  // Returns false if it finds a problem with the string, true otherwise.
+  // This checks:
+  // 1. The number of '(' is the same as the number of ')'
+  // 2. The parentheses are a valid arrangement, so '(a)' is valid but ')a('
+  //    is not.
+  const checkParens = inputString => {
+    let netParens = 0;
+    for (const character of inputString) {
+      if (character == '(') {
+        netParens += 1;
+      } else if (character == ')') {
+        netParens -= 1;
+        if (netParens < 0) {
+          return false;
+        }
+      }
+    }
+    return netParens == 0;
+  }
+
+  // Returns false if it finds a problem with the string, true otherwise.
+  // Checks various things related to the search operators '(', ')', 'and', 'or', 'not'.
+  const checkOperators = inputString => {
+    const operatorRegex = new RegExp('\(' +
+      '\\( *\\)|' + // "()" and "( )" are invalid
+      '\\( *and|\\( *or|\\( *not|' + // ( then operator
+      'and *\\)|or *\\)|not *\\)|' + // ) then operator
+      '^ *and *$|^ *or *$|^ *not *$|' + // Whole query is an operator
+      '^ *and[ (]|^ *or[ (]|^ *not[ (]|' + // Unpaired operators at start of query
+      '[ )]and *$|[ )]or *$|[ )]not *$|' + // Unpaired operators at end of the query
+      'and +and|and +or|or +and|or +or|not +and|not +or|not +not' + // 2 operators other than "OR NOT", "AND NOT"
+      '\)')
+    return !operatorRegex.test(inputString);
+  }
+
+  // This handles the search.
+  const getFieldSearchResults = (pageIndex, afterDelete, enterPressed) => {
+    if (query.length) {
+      if (!syntaxVerify(query)) {
+        if (enterPressed) {
+          toast.info(explanation.invalidQuery, { position: 'top-right' });
+        }
+        return;
+      }
+    }
+    // We want to escape any special characters in the filters that are sent to
+    // the server, without changing what the user sees.
+    const filterArray = Object.entries(filters);
+    const newFilters = {};
+    if (filterArray.length > 0) {
+      for (const filt of filterArray) {
+        let filterText = filt[1];
+        filterText.replaceAll('\\\\', '\\');
+        const charsToEscape = ['+', '!', '{', '}', '[', ']', '^', '~',
+          '*', '?', ':', '/', '.', '$', '^', '(', ')'];
+        for (const char of charsToEscape) {
+          filterText = filterText.replaceAll(char, '\\' + char);
+        }
+        newFilters[filt[0]] = filterText;
+      }
+    }
     setShowSpinner(true);
     const bm = pageIndex ? bookmark : '';
     let body = {};
@@ -531,7 +584,7 @@ const AnnotationSearch = props => {
     if (selectedMods.length)
       fields['modality'] = selectedMods;
     if (selectedAnatomies.length)
-      fields['anatomy'] = selectedAnatomies
+      fields['anatomy'] = selectedAnatomies;
     if (selectedDiagnosis.length)
       fields['diagnosis'] = selectedDiagnosis;
     if (mode === 'teaching' && tfOnly)
@@ -541,7 +594,7 @@ const AnnotationSearch = props => {
     if (sort.length)
       body['sort'] = sort;
     if (Object.keys(filters).length)
-      body['filter'] = filters;
+      body['filter'] = newFilters;
     searchAnnotations(body, bm)
       .then(res => {
         populateSearchResult(res, pageIndex, afterDelete);
@@ -558,292 +611,10 @@ const AnnotationSearch = props => {
     }
 
     if (query) {
-      getSearchResult(pageIndex, afterDelete);
+      getFieldSearchResults(pageIndex, afterDelete);
     } else {
       getAnnotationsOfProjets(pageIndex, afterDelete);
     }
-  };
-
-  const seperateParanthesis = arr => {
-    const result = [];
-    arr.forEach(el => {
-      if (el.startsWith('(') || el.endsWith(')')) {
-        if (el.length > 1) {
-          const letterArr = el.split('');
-          let closing = '';
-          if (letterArr[0] === '(') result.push(letterArr.shift());
-          if (letterArr[letterArr.length - 1] === ')') {
-            closing = letterArr.pop();
-          }
-          if (letterArr.length > 0) result.push(letterArr.join(''));
-          if (closing) result.push(closing);
-        } else {
-          result.push(el);
-        }
-      } else {
-        result.push(el);
-      }
-    });
-    return result;
-  };
-
-  const isNoOfParanthesisValid = arr => {
-    let open = 0;
-    let close = 0;
-    arr
-      .join()
-      .split('')
-      .forEach(el => {
-        if (el === '(') {
-          open += 1;
-        } else if (el === ')') {
-          close += 1;
-        }
-      });
-    return close === open;
-  };
-
-  const validateQueryContent = arr => {
-    let criteriaArr = [];
-    let typeArr = [];
-    arr.forEach((el, i) => {
-      if (lists.criteria.includes(el)) criteriaArr.push(i);
-      else if (lists.type.includes(el)) typeArr.push(i);
-    });
-    return { criteriaArr, typeArr };
-  };
-
-  const validateQueryOrder = arr => {
-    let validOrder = true;
-    const { criteriaArr, typeArr } = validateQueryContent(arr);
-    // there should be equal number of crieria and type
-    const sameLength = criteriaArr.length === typeArr.length;
-
-    // type should follow the criteria
-    criteriaArr.forEach((el, i) => {
-      if (el !== typeArr[i] + 1) validOrder = false;
-    });
-
-    return validOrder && sameLength;
-  };
-
-  const countCondition = arr => {
-    return arr.reduce((all, item) => {
-      if (lists.condition.includes(item)) all += 1;
-      return all;
-    }, 0);
-  };
-
-  const validateConditionExists = arr => {
-    const { criteriaArr, typeArr } = validateQueryContent(arr);
-    const isMultipleSearch = criteriaArr.length > 1 || typeArr.length > 1;
-    if (isMultipleSearch) {
-      let noOfQuery = 1;
-      if (criteriaArr.length === typeArr.length && criteriaArr.length > 1) {
-        noOfQuery = criteriaArr.length;
-      } else if (criteriaArr.length !== typeArr.length) {
-        noOfQuery =
-          criteriaArr.length > typeArr.length
-            ? criteriaArr.length
-            : typeArr.length;
-      }
-      const noOfCondition = countCondition(arr);
-      return noOfQuery === noOfCondition + 1;
-    } else return true;
-  };
-
-  const checkStartEndWithCondition = arr => {
-    // first and last three word can not be AND/OR
-    const uppercaseArr = arr.map(el => el.toUpperCase());
-    const beginning = uppercaseArr.slice(0, 3);
-    const end =
-      uppercaseArr.length > 2
-        ? uppercaseArr.slice(arr.length - 3)
-        : [...uppercaseArr];
-    const invalidBeginnig =
-      beginning.includes('AND') || beginning.includes('OR');
-    const invalidEnd = end.includes('AND') || end.includes('OR');
-    return invalidBeginnig || invalidEnd;
-  };
-
-  const validateQuery = arr => {
-    if (arr[0] === ')') {
-      setError('Query can not start with a closing paranthesis');
-      return false;
-    }
-
-    if (arr[arr.length - 1] === '(') {
-      setError('Query can not end with an openning paranthesis');
-      return false;
-    }
-
-    if (!isNoOfParanthesisValid(arr)) {
-      setError(
-        'Number of the opening and closing paranthesis should be equal!'
-      );
-      return false;
-    }
-
-    if (!validateQueryOrder(arr)) {
-      const fields = lists.type.join(', ');
-      const criterias = lists.criteria.join(', ');
-      setError(
-        `Search field (${fields}) must be followed by a criteria (${criterias})`
-      );
-      return false;
-    }
-
-    if (!validateConditionExists(arr)) {
-      setError(`Multiple queries must be connected with AND/OR conditions!`);
-      return false;
-    }
-
-    if (checkStartEndWithCondition(arr)) {
-      setError(
-        `AND/OR conditions should be used to connect two queries. Please use advanced search to build a query.`
-      );
-      return false;
-    }
-    return true;
-  };
-
-  const checkSingleTermQuery = arr => {
-    const includeParanthesis = query.includes('(') || query.includes(')');
-    const { criteriaArr, typeArr } = validateQueryContent(arr);
-    const includeCriteria = criteriaArr.length > 0;
-    const includeType = typeArr.length > 0;
-    return !(includeParanthesis || includeCriteria || includeType);
-  };
-
-  // const handleWhitespace = text => {
-  //   let result = text.trim().replace(/ {2,}/g, ' ');
-  //   if (result.includes(' ')) {
-  //     result = result.split(' ').reduce((all, item, i) => {
-  //       if (item === ' ') all += `\\${item}`;
-  //       return all;
-  //     }, '');
-  //   }
-  //   return result;
-  // };
-
-  // if quoted, handle space and do 2 search combined with OR
-  // if not quoted check if there is white space, if there is a white space check for a single letter if there is a single letter wrap with double quote
-  // if there is a single letter wrap with doublequote
-
-  const replaceWithCaret = text => {
-    return text
-      .trim()
-      .split('')
-      .reduce((all, item) => {
-        return item === ' ' ? all + '^' : all + item;
-      }, '');
-  };
-  const handleWhiteSpaceinQuote = text => {
-    const wrappedInQuote = text.startsWith('"') && text.endsWith('"');
-    const hasWhiteSpace = text.includes(' ');
-    let caretAddedQuery = '';
-    let handleSingleChar = text.includes(' ')
-      ? text
-        .split(' ')
-        .map(item => handleSingleLetter(item))
-        .join(' ')
-      : handleSingleLetter(text);
-    if (wrappedInQuote && hasWhiteSpace) {
-      caretAddedQuery = replaceWithCaret(handleSingleChar);
-    }
-    return [handleSingleChar, caretAddedQuery];
-  };
-
-  const handleSingleLetter = q => (q.length === 1 ? `"${q}"` : q);
-
-  // if text has double quotes should look for caret version too
-  const addCaretVersion = (parsedQueryArr, all) => {
-    if (parsedQueryArr[1]) {
-      const allArr = all.split(' ');
-      const len = allArr.length;
-      if (allArr[len - 1].length > 0 && allArr[len - 1].includes(':')) {
-        const str = `(${allArr[len - 1]}${parsedQueryArr[0]} OR ${allArr[len - 1]
-          }${parsedQueryArr[1]})`;
-        allArr.splice(len - 1, 1, str);
-        all = allArr.join(' ');
-      }
-    } else {
-      all += parsedQueryArr[0];
-    }
-    return all;
-  };
-
-  const parseQuery = () => {
-    // check if query contains any predefined words
-    const queryArray = seperateParanthesis(query.trim().split(' '));
-    let parsedQuery;
-    if (checkSingleTermQuery(queryArray)) {
-      // wrap single letter in double qute
-      // if caret added query combine with or
-      const parsedQueryArr = handleWhiteSpaceinQuote(query);
-      parsedQuery = parsedQueryArr[1]
-        ? `${parsedQueryArr[0]} OR ${parsedQueryArr[1]}`
-        : parsedQueryArr[0];
-    } else {
-      const isQueryInputValid = validateQuery(queryArray);
-      let criteria = '';
-      if (isQueryInputValid) {
-        // form a variable to collect
-        let parsedQueryString = '';
-        parsedQuery = queryArray.reduce((all, item, index) => {
-          if (lists.criteria.includes(item)) {
-            all += ':';
-            criteria = item;
-          } else if (
-            item.toLowerCase() === 'and' ||
-            item.toLowerCase() === 'or'
-          ) {
-            if (parsedQueryString.length > 0) {
-              const parsedQueryArr = handleWhiteSpaceinQuote(parsedQueryString);
-              all = addCaretVersion(parsedQueryArr, all);
-              parsedQueryString = '';
-            }
-            all = `${all} ${item.toUpperCase()} `;
-          } else if (lists.type.includes(item)) {
-            if (parsedQueryString.length > 0) {
-              const parsedQueryArr = handleWhiteSpaceinQuote(parsedQueryString);
-              all = addCaretVersion(parsedQueryArr, all);
-              parsedQueryString = '';
-            }
-            if (item === 'patient') {
-              all += 'patient_name';
-            } else if (item === 'template') {
-              all += 'template_code';
-            } else if (item === 'lesion_name') {
-              all += 'name';
-            } else all += `${item}`;
-            parsedQueryString = '';
-          } else if (lists.paranthesis.includes(item)) {
-            if (item === ')' && parsedQueryString.length > 0) {
-              const parsedQueryArr = handleWhiteSpaceinQuote(parsedQueryString);
-              all = addCaretVersion(parsedQueryArr, all);
-              parsedQueryString = '';
-            }
-            all += `${item}`;
-            parsedQueryString = '';
-          } else {
-            // check if it is the end of the query
-            // if it is end of the query do the same with above (add to all)
-            parsedQueryString =
-              parsedQueryString.length > 0
-                ? `${parsedQueryString} ${item}`
-                : item;
-            if (index === queryArray.length - 1) {
-              const parsedQueryArr = handleWhiteSpaceinQuote(parsedQueryString);
-              all = addCaretVersion(parsedQueryArr, all);
-              parsedQueryString = '';
-            }
-          }
-          return all;
-        }, '');
-      }
-    }
-    return parsedQuery;
   };
 
   const renderOptions = () => {
@@ -1682,10 +1453,11 @@ const AnnotationSearch = props => {
       <AnnotationDownloadModal
         onSubmit={() => {
           setShowDownload(false);
-          if (mode === 'teaching')
-            getFieldSearchResults();
-          else
-            getSearchResult();
+          getFieldSearchResults();
+          //if (mode === 'teaching')
+          //  getFieldSearchResults();
+          //else
+          //  getFieldSearchResults();
         }}
         onCancel={() => setShowDownload(false)}
         // updateStatus={() => console.log('update status')}
