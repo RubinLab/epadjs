@@ -74,7 +74,7 @@ const annotationsLink = (props) => {
         key="anns-header"
         id="annsHeader"
       >
-        Other Image Annotations in Series
+        Other Image Annotations in <span style={{ fontWeight: 'bold', fontSize: '1.3rem' }}>Series</span>
       </th>,
       // <th
       //   className="annsLink-table __header --cell"
@@ -113,7 +113,7 @@ const annotationsLink = (props) => {
         key="anns-header"
         id="annsHeader"
       >
-        Other Image Annotations in study
+        Other Image Annotations in <span style={{ fontWeight: 'bold', fontSize: '1.3rem' }}>Study</span>
       </th>,
       // <th
       //   className="annsLink-table __header --cell"
