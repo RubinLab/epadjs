@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Modal, Button } from "react-bootstrap";
+import ReactTooltip from 'react-tooltip';
 import { toast } from "react-toastify";
 import FormButton from "../users/formButton";
 import UserList from "./userList";
@@ -227,6 +228,7 @@ class WorklistCreationForm extends React.Component {
     let button1Text = "Back";
     let button2Text = "Next";
     let button3Text = "Cancel";
+    let button2TextAlt = "Add Requirement";
     let button1Func = this.goPrevPage;
     let button2Func = this.goNextPage;
     let button3Func = onCancel;
@@ -351,11 +353,24 @@ class WorklistCreationForm extends React.Component {
             onClick={button1Func}
             disabled={page === 0}
           >{button1Text}</Button>
-          <Button variant="secondary"
-            onClick={button2Func}
-            disabled={page === 0 ? disableNext : disableSubmit}
-            id="next-btn"
-          >{button2Text}</Button>
+          <>
+            <Button variant="secondary"
+              data-tip
+              data-for="add-requirement-btn"
+              onClick={button2Func}
+              disabled={page === 0 ? disableNext : disableSubmit}
+              id="next-btn"
+            >{page === 1 && mode === 'teaching' ? button2TextAlt : button2Text}</Button>
+            {page === 1 && mode === 'teaching' && <ReactTooltip
+              id="add-requirement-btn"
+              place="bottom"
+              type="info"
+              delayShow={200}
+            >
+              <span className="filter-label">Add requirement for completing annotations for studies in the worklist</span>
+            </ReactTooltip>}
+          </>
+
           {mode === 'teaching' && this.state.page === 1 && (
             <Button variant="secondary"
               onClick={this.handleSaveWorklist}
