@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { connect } from "react-redux";
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
-import ReactTooltip from "react-tooltip";
 import { TbStack2 } from "react-icons/tb";
 import { getStudyAims } from '../../services/studyServices';
 import { getSeries } from '../../services/seriesServices';
@@ -69,8 +68,8 @@ const SeriesDropDown = (props) => {
                 id={`dropdown-button-drop-1`}
                 size="sm"
                 variant="secondary"
-                // title="Other Series"
-                title={<TbStack2 />}
+                title="Series"
+                // title={<TbStack2 />}
                 data-tip
                 data-for="dropdownOtherSeries"
             >
@@ -80,14 +79,6 @@ const SeriesDropDown = (props) => {
                     return (<Dropdown.Item key={seriesUID} eventKey={seriesUID} onSelect={handleSelect} style={{ textAlign: "left !important" }}>{seriesNo ? seriesNo : "#NA"} {counts} {seriesDescription?.length ? seriesDescription : "No Description"} {isCurrent ? "(Current)" : ""}</Dropdown.Item>);
                 })}
             </DropdownButton>
-            <ReactTooltip
-                id="dropdownOtherSeries"
-                place="bottom"
-                type="info"
-                delayShow={200}
-            >
-                <span>Other Series</span>
-            </ReactTooltip>
         </div >
     );
 }

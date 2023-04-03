@@ -1754,7 +1754,7 @@ class DisplayView extends Component {
                       <Form inline className="slice-form">
                         <Form.Group className="slice-number">
                           <Form.Label htmlFor="imageNum" className="slice-label" style={{ color: 'white' }}>
-                            {"Slice # "}
+                            {"Image # "}
                           </Form.Label>
                           <Form.Control
                             type="number"
