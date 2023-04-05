@@ -1750,7 +1750,13 @@ class DisplayView extends Component {
                       </Form>
                     </div>
                     <div className={"series-dd"}>
-                      <SeriesDropDown style={{ lineHeight: "1" }} serie={series[i]} isAimEditorShowing={this.state.showAimEditor} onCloseAimEditor={this.closeAimEditor} />
+                      <SeriesDropDown
+                        style={{ lineHeight: "1" }}
+                        serie={series[i]}
+                        isAimEditorShowing={this.state.showAimEditor}
+                        onCloseAimEditor={this.closeAimEditor}
+                        onSelect={this.jumpToImage}
+                      />
                     </div>
                   </div>
                   <div className={"column right"}>
