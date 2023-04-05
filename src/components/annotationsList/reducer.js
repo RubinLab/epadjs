@@ -79,7 +79,8 @@ const initialState = {
   isSegUploaded: {},
   patientFilter: {},
   openStudies: {},
-  searchTableIndex: 0
+  searchTableIndex: 0,
+  otherSeriesAimsList: {}
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -165,12 +166,13 @@ const asyncReducer = (state = initialState, action) => {
 
         return { ...state, openSeries: openSeriesToUpdate };
       case CLOSE_SERIE:
-        console.log("In close");
         let delSeriesUID = state.openSeries[state.activePort].seriesUID;
         let delStudyUID = state.openSeries[state.activePort].studyUID;
         let delOpenStudies = { ...state.openStudies };
         const delAims = { ...state.aimsList };
+        const delOtherAims = { ...state.otherSeriesAimsList };
         delete delAims[delSeriesUID];
+        delete delOtherAims[delSeriesUID];
         let delGrid = state.openSeries.slice(0, state.activePort);
         delGrid = delGrid.concat(state.openSeries.slice(state.activePort + 1));
         let shouldStudyExist = false;
@@ -196,6 +198,7 @@ const asyncReducer = (state = initialState, action) => {
             aimsList: delAims,
             openStudies: delOpenStudies,
             activePort: delActivePort,
+            otherSeriesAimsList: delOtherAims
           };
         }
         return {
@@ -204,6 +207,7 @@ const asyncReducer = (state = initialState, action) => {
           aimsList: delAims,
           // patients: delPatients,
           activePort: delActivePort,
+          otherSeriesAimsList: delOtherAims
         };
       case LOAD_ANNOTATIONS:
         return Object.assign({}, state, {
@@ -262,6 +266,10 @@ const asyncReducer = (state = initialState, action) => {
           aimsList: {
             ...state.aimsList,
             [action.payload.ref.seriesUID]: colorAimsList,
+          },
+          otherSeriesAimsList: {
+            ...state.otherSeriesAimsList,
+            [action.payload.ref.seriesUID]: action.payload.otherSeriesAimsData
           },
           openSeries: imageAddedSeries,
         });
@@ -470,12 +478,17 @@ const asyncReducer = (state = initialState, action) => {
           seriesInfo.projectName = "lite";
           seriesInfo.defaultTemplate = null;
         }
-        let newOpenSeries = state.openSeries.concat(seriesInfo);
+        const arePortsOccupied = action.port !== undefined && typeof action.port === 'number';
+        let newOpenSeries = [...state.openSeries];
+        
+        if (arePortsOccupied) newOpenSeries[action.port] = seriesInfo;
+        else newOpenSeries = newOpenSeries.concat([seriesInfo]); 
 
+        const newActivePort = arePortsOccupied ? state.activePort : newOpenSeries.length - 1;
         return {
           ...state,
           openSeries: newOpenSeries,
-          activePort: newOpenSeries.length - 1
+          activePort: newActivePort
         };
 
       case REPLACE_IN_GRID:
