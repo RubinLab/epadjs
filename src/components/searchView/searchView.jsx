@@ -787,6 +787,7 @@ class SearchView extends Component {
     this.setState(state => ({
       showUploadFileModal: !state.showUploadFileModal
     }));
+    this.props.dispatch(clearSelection());
   };
 
   handleClickDeleteIcon = () => {
