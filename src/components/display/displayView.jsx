@@ -162,15 +162,26 @@ class DisplayView extends Component {
       redirect: this.props.series.length < 1 ? true : false,
       containerHeight: 0,
       tokenRefresh: null,
-      activeTool: ''
+      activeTool: '',
+      invertMap: {}
     };
   }
 
+  invert = (index) => {
+    const activeElement = cornerstone.getEnabledElements()[
+      index
+    ].element;
+    const viewport = cornerstone.getViewport(activeElement);
+    viewport.invert = true;
+    cornerstone.setViewport(activeElement, viewport);
+  }
+
   componentDidMount() {
+
     const { series, onSwitchView } = this.props;
     // if (series.length < 1) {
     //   onSwitchView('search');
-    // }
+    // }    
     this.getViewports();
     this.getData();
     if (series.length > 0) {
@@ -189,6 +200,9 @@ class DisplayView extends Component {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
     };
+    series.forEach((el, i) => {
+      if (el.examType === 'NM') this.invert(i);
+    })
     // const element = document.getElementById("petViewport");
     // console.log("element is", cornerstone);
     // cornerstone.enable(element);
@@ -221,6 +235,9 @@ class DisplayView extends Component {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
+      series.forEach((el, i) => {
+        if (el.examType === 'NM') this.invert(i);
+      })
     }
     // This is to handle late loading of aimsList from store but it also calls getData
     // each time visibility of aims change

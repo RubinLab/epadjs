@@ -337,7 +337,7 @@ export const selectAnnotation = (
 // opens a new port to display series
 // adds series details to the array
 export const addToGrid = (serie, annotation, port) => {
-  let { patientID, studyUID, seriesUID, projectID, patientName } = serie;
+  let { patientID, studyUID, seriesUID, projectID, patientName, examType } = serie;
   projectID = projectID ? projectID : "lite";
   if (annotation)
     patientID = serie.originalSubjectID || serie.subjectID || serie.patientID;
@@ -348,6 +348,7 @@ export const addToGrid = (serie, annotation, port) => {
     seriesUID,
     patientName,
     aimID: annotation,
+    examType
     // imageIndex: 0
   };
   return { type: ADD_TO_GRID, reference, port };
