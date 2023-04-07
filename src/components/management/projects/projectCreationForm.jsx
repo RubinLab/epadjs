@@ -40,7 +40,7 @@ const projectCreationForm = ({
     // <Modal.Dialog dialogClassName="add-project__modal">
     <Modal.Dialog id="modal-fix" className="in-modal">
       <Modal.Header className="modal-header">
-        <Modal.Title>Create Project</Modal.Title>
+        <Modal.Title style={{ margin: "0.5rem 0rem 0.5rem 1rem" }} >Create Project</Modal.Title>
       </Modal.Header>
       <Modal.Body className="notification-modal">
         <form className="add-project__modal--form">
@@ -66,14 +66,16 @@ const projectCreationForm = ({
             One word only, no special characters, "_" is OK
           </span>
           <label className="add-project__modal--label">Description</label>
-          <textarea
-            onMouseDown={e => e.stopPropagation()}
-            className="add-project__modal--input"
-            name="description"
-            onChange={onType}
-            id="projectDescription"
+          <div style={{ marginLeft: "-1rem" }}>
+            <textarea
+              onMouseDown={e => e.stopPropagation()}
+              className="add-project__modal--input"
+              name="description"
+              onChange={onType}
+              id="projectDescription"
 
-          />
+            />
+          </div>
           <label className="add-project__modal--label">Default Template</label>
           <select
             name="defaulttemplate"
@@ -100,10 +102,10 @@ const projectCreationForm = ({
         </form>
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
-        <Button variant="secondary" onClick={onSubmit} id="submit-button">
+        <Button style={{ margin: "0rem 0.2rem 0.7rem 0rem" }} variant="secondary" onClick={onSubmit} id="submit-button">
           Submit
         </Button>
-        <Button variant="secondary" onClick={onCancel}>
+        <Button style={{ margin: "0rem 1rem 0.7rem 0.2rem" }} variant="secondary" onClick={onCancel}>
           Cancel
         </Button>
       </Modal.Footer>
