@@ -362,6 +362,8 @@
 .edit-userRole__table--row {
   padding: 1rem;
   margin-bottom: 0.5rem;
+  Background: #444;	
+  color: #d3d3d3;
 }
 
 .edit-userRole__modal--button {
@@ -706,6 +708,7 @@
 .edit-userRole__table--col {
   font-weight: 250;
   padding: 0.3rem;
+  font-size: 0.9rem;
 }
 
 .centeredCell {
@@ -973,6 +976,9 @@
 .project-table.__header {
   margin: 0.3rem;
   padding: 0.3rem;
+  Background: #444;	
+  color: #d3d3d3;
+  font-weight: 400;
 }
 
 .edit-userRole.project_user {
