@@ -327,8 +327,23 @@ const asyncReducer = (state = initialState, action) => {
       case TOGGLE_ALL_LABELS:
         const toggledLabelSerie = { ...state.aimsList };
         const anns = toggledLabelSerie[action.payload.serieID];
+        const studyAims = {};
         for (let ann in anns) {
           anns[ann].showLabel = action.payload.checked;
+          if (anns[ann].type === 'study') {
+            if (studyAims[ann]) delete studyAims[ann];
+            else studyAims[ann] = true;  
+          }
+        }
+        if (Object.keys(studyAims).length > 0) {
+          const ids= Object.keys(studyAims);
+          for (let series in toggledLabelSerie) {
+            if (series !== action.payload.serieID) {
+              for (let id of ids) {
+                toggledLabelSerie[series][id].showLabel = action.payload.checked;
+              }
+            }
+          }
         }
         return Object.assign({}, state, { aimsList: toggledLabelSerie });
 
