@@ -7,7 +7,6 @@ import UserTable from "./userTable";
 const style = { minWidth: "fit-content", left: "10%" };
 const userRoleEditingForm = ({ onCancel, onSubmit, onType, error, users }) => {
   // users = users || projects;
-  console.log(users);
   return (
     // <Modal.Dialog dialogClassName="edit-userRole__modal">
     <Modal.Dialog
