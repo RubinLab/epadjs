@@ -654,6 +654,7 @@ class App extends Component {
         sessionStorage.setItem("defaultAimName", defaultAimName);
         sessionStorage.setItem("feedback", feedback);
         sessionStorage.setItem("legacyReporting", legacyReporting);
+
         if (waterfallOptions) {
           sessionStorage.setItem("waterfallOptions", waterfallOptions);
         }
@@ -761,6 +762,7 @@ class App extends Component {
       sessionStorage.setItem("API_KEY", API_KEY);
       sessionStorage.setItem("username", user);
       sessionStorage.setItem("displayName", user);
+      sessionStorage.setItem("encrypted", "true");
     }
 
     await this.completeAutorization();
