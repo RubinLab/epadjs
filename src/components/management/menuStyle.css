@@ -185,7 +185,9 @@
 .edit-project__modal--form,
 .add-worklist__modal--form,
 .add-host__modal--form
-/* .edit-worklist__modal--form  */ {
+
+/* .edit-worklist__modal--form  */
+  {
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -210,9 +212,10 @@
 .add-connection__modal--input,
 .edit-project__modal--input,
 .add-worklist__modal--input,
-.edit-connection__modal--input
-.add-host__modal--input
-/* .edit-worklist__modal--input  */ {
+.edit-connection__modal--input .add-host__modal--input
+
+/* .edit-worklist__modal--input  */
+  {
   width: 100%;
 }
 
@@ -236,9 +239,10 @@
 .edit-project__modal--label,
 .add-worklist__modal--label,
 .edit-connection__modal--label,
-.add-connection__modal--label
-.add-host__modal--label
-/* .edit-worklist__modal--label  */ {
+.add-connection__modal--label .add-host__modal--label
+
+/* .edit-worklist__modal--label  */
+  {
   margin-top: 1rem;
   color: gray;
   text-align: left;
@@ -247,6 +251,7 @@
 .add-project__modal--label {
   margin-top: 0.5rem;
 }
+
 .edit-connection__modal--input,
 .edit-user__modal--input {
   color: black;
@@ -261,6 +266,7 @@
   color: gray;
   font-size: 1.2rem;
 }
+
 .required {
   margin-top: 1rem;
   text-align: left;
@@ -336,6 +342,7 @@
   border: 2px solid gray;
   box-shadow: 1rem 1rem 1rem grey;
 }
+
 .edit-userRole__modal .modal-content,
 .edit-project__modal .modal-content,
 .edit-connection__modal .modal-content {
@@ -346,6 +353,7 @@
   color: gray;
   width: 100%;
 }
+
 .user-table__header {
   padding: 0.5rem;
 }
@@ -362,7 +370,7 @@
 .edit-userRole__table--row {
   padding: 1rem;
   margin-bottom: 0.5rem;
-  Background: #444;	
+  Background: #444;
   color: #d3d3d3;
 }
 
@@ -402,6 +410,7 @@
 .select-wrap {
   color: rgb(85, 85, 85);
 }
+
 .pro-table .rt-table .rt-tbody .rt-tr-group {
   border: 0.005rem solid gray;
 }
@@ -426,9 +435,11 @@
 .edit-project__modal--form select,
 .add-worklist__modal--form input,
 .add-worklist__modal--form textarea
+
 /* .edit-worklist__modal--form input,
 .edit-worklist__modal--form textarea,
-.edit-worklist__modal--form select  */ {
+.edit-worklist__modal--form select  */
+  {
   color: black;
 }
 
@@ -496,6 +507,7 @@
   flex-wrap: nowrap;
   align-items: center;
 }
+
 .annotation-toolbar__icon {
   width: 3%;
   margin-left: 0.5rem;
@@ -518,6 +530,7 @@
   margin: 0em;
   padding: 0.3em;
 }
+
 .annotations-toolbar {
   height: 15%;
   align-items: center;
@@ -538,6 +551,7 @@
   /* border: 1px solid #ccc;
   background: white; */
 }
+
 .flexible-modal-mask {
   position: fixed;
   height: 100%;
@@ -547,6 +561,7 @@
   right: 0;
   bottom: 0;
 }
+
 .flexible-modal-resizer {
   position: absolute;
   right: 0;
@@ -556,6 +571,7 @@
   border-bottom: solid 2px #333;
   border-right: solid 2px #333;
 }
+
 .flexible-modal-drag-area {
   background: rgba(22, 22, 333, 0.2);
   height: 50px;
@@ -564,6 +580,7 @@
   top: 0;
   cursor: move;
 }
+
 .projectTable-row {
   border-spacing: 2rem;
 }
@@ -656,6 +673,7 @@
   max-height: 3rem;
   align-items: center;
 }
+
 .pagination-bottom .-pagination .-previous,
 .pagination-bottom .-pagination .-next {
   max-width: 15%;
@@ -775,6 +793,7 @@
   color: white;
   font-weight: bold;
 }
+
 .response-item__icon {
   margin-right: 1rem;
   font-size: 1.2rem;
@@ -787,6 +806,7 @@
 .response-item__time {
   font-size: 0.9rem;
 }
+
 .notification-warning {
   color: orangered;
   /* color: rgb(199, 3, 3); */
@@ -800,12 +820,14 @@
 .response__mbody.modal-body {
   font-size: 1.1rem;
 }
+
 .info-about__des,
 .response__des c,
 .info-team__desc {
   padding-left: 1rem;
   margin-bottom: 0.5rem;
 }
+
 .info-about__link,
 .response__link {
   color: #fff;
@@ -846,6 +868,7 @@
   border-radius: 8px;
   cursor: pointer;
 }
+
 .user-profile__button:hover {
   background: #70142e;
   color: #fff;
@@ -885,6 +908,7 @@
   width: -webkit-fill-available;
   text-align: center;
 }
+
 /* .user-profile__button:hover {
   font-size: 1.2rem;
   border-bottom: 2px solid #5bc0de;
@@ -946,6 +970,7 @@
   border-bottom-left-radius: 8px;
   background: #3a3f44;
 }
+
 .update-profile__modal--form button {
   width: 5rem;
 }
@@ -973,10 +998,13 @@
 .project-table {
   width: 100%;
 }
-.project-table.__header {
+
+.project-table.__header,
+.user-table__header,
+.user-table__header--user {
   margin: 0.3rem;
   padding: 0.3rem;
-  Background: #444;	
+  Background: #444;
   color: #d3d3d3;
   font-weight: 400;
 }
