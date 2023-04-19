@@ -167,13 +167,13 @@ class DisplayView extends Component {
     };
   }
 
-  invert = (index) => {
-    const activeElement = cornerstone.getEnabledElements()[
-      index
-    ].element;
-    const viewport = cornerstone.getViewport(activeElement);
-    viewport.invert = true;
-    cornerstone.setViewport(activeElement, viewport);
+  formInvertMap = () => {
+    const { series } = this.props;
+    const invertMap = { ...this.state.invertMap };
+    series.forEach((el, i) => {
+      if (el.examType === 'NM') invertMap[i] = true;
+    })
+    this.setState({ invertMap });
   }
 
   componentDidMount() {
@@ -184,6 +184,7 @@ class DisplayView extends Component {
     // }    
     this.getViewports();
     this.getData();
+    this.formInvertMap();
     if (series.length > 0) {
       this.setSubComponentHeights();
       window.addEventListener("resize", e => this.setSubComponentHeights(e));
@@ -200,9 +201,6 @@ class DisplayView extends Component {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
     };
-    series.forEach((el, i) => {
-      if (el.examType === 'NM') this.invert(i);
-    })
     // const element = document.getElementById("petViewport");
     // console.log("element is", cornerstone);
     // cornerstone.enable(element);
@@ -235,9 +233,7 @@ class DisplayView extends Component {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
-      series.forEach((el, i) => {
-        if (el.examType === 'NM') this.invert(i);
-      })
+      this.formInvertMap();
     }
     // This is to handle late loading of aimsList from store but it also calls getData
     // each time visibility of aims change
@@ -1794,6 +1790,7 @@ class DisplayView extends Component {
                   imageIdIndex={parseInt(data.stack.currentImageIdIndex)}
                   viewportIndex={i}
                   tools={tools}
+                  shouldInvert={this.state.invertMap[i]}
                   eventListeners={[
                     {
                       target: "element",
