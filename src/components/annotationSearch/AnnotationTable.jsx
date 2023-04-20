@@ -28,7 +28,7 @@ import { getSeries } from '../../services/seriesServices';
 import SelectSerieModal from '../annotationsList/selectSerieModal';
 import { isSupportedModality } from "../../Utils/aid.js";
 import { COMP_MODALITIES as compModality } from "../../constants.js";
-const defaultPageSize = 10;
+const defaultPageSize = 200;
 
 let maxPort;
 let mode;
