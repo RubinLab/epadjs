@@ -20,7 +20,7 @@ class Rightsidebar extends Component {
       width: '0px',
       marginRight: '0',
       buttonDisplay: "block",
-      showMediaExport: false
+      showMediaExport: false,
       open: false,
     };
   }

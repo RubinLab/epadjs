@@ -165,7 +165,7 @@ class DisplayView extends Component {
       activeTool: '',
       siblingCommunication: {
         mediaExportButton: null
-      }
+      },
       isOverlayVisible: {}
     };
   }
