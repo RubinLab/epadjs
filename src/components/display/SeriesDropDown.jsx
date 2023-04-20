@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { connect } from "react-redux";
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
-import { TbStack2 } from "react-icons/tb";
 import { getStudyAims } from '../../services/studyServices';
 import { getSeries } from '../../services/seriesServices';
 import { addStudyToGrid, replaceInGrid, getSingleSerie, clearActivePortAimID } from 'components/annotationsList/action';
@@ -69,7 +68,6 @@ const SeriesDropDown = (props) => {
                 size="sm"
                 variant="secondary"
                 title="Series"
-                // title={<TbStack2 />}
                 data-tip
                 data-for="dropdownOtherSeries"
             >

@@ -35,7 +35,7 @@ import { circle } from "./Circle";
 import { bidirectional } from "./Bidirectional";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
-import { FaTimes, FaPen, FaExpandArrowsAlt, FaToggleOff, FaTag } from "react-icons/fa";
+import { FaTimes, FaPen, FaExpandArrowsAlt, FaTag } from "react-icons/fa";
 import Form from "react-bootstrap/Form";
 import ToolMenu from "../ToolMenu/ToolMenu";
 import { getMarkups, setMarkupsOfAimActive } from "../aimEditor/Helpers";
@@ -1682,7 +1682,6 @@ class DisplayView extends Component {
     if (showHide[index]) delete showHide[index];
     else showHide[index] = true;
     this.setState({ isOverlayVisible: showHide });
-    console.log(index, showHide);
   }
 
   render() {
