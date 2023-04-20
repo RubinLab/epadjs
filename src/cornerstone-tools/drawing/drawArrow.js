@@ -14,9 +14,15 @@ import drawJoinedLines from './drawJoinedLines.js';
  * @param  {number} lineWidth The width of the arrow line.
  * @returns {undefined}
  */
+
 export default function(context, start, end, color, lineWidth) {
   // Variables to be used when creating the arrow
   const headLength = 10;
+
+  // changes the direction of the arrow
+  const temp = end;
+  end = start;
+  start = temp;
 
   const angle = Math.atan2(end.y - start.y, end.x - start.x);
 
