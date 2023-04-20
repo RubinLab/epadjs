@@ -191,6 +191,7 @@
   flex-direction: column;
   align-items: left;
   background: #444;
+  padding: 0rem 1rem;
 }
 
 .updateAssignee__modal.modal-dialog,
