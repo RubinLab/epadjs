@@ -329,8 +329,8 @@ class ToolMenu extends Component {
       if (activeTool === "FreehandRoiTool" || activeTool === "FreehandRoi3DTool") {
         this.deselectFreehand();
       }
+      this.setState({ activeToolIdx: 1 });
       this.setToolStateForAllElements(this.state.activeTool, "passive");
-      this.setState({ activeToolIdx: 0 });
       this.setCursor("default");
     }
 
