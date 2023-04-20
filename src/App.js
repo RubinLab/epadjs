@@ -125,7 +125,7 @@ class App extends Component {
     const pairsSelected = [];
     keys.forEach((item) => {
       const idArr = item.split('-');
-      pairsSelected.push({subjectID: idArr[0], projectID: idArr[1]});
+      pairsSelected.push({ subjectID: idArr[0], projectID: idArr[1] });
     });
     const pairs = { ...this.state.pairs };
     const index = this.state.reportsCompArr.length;
@@ -654,6 +654,7 @@ class App extends Component {
         sessionStorage.setItem("defaultAimName", defaultAimName);
         sessionStorage.setItem("feedback", feedback);
         sessionStorage.setItem("legacyReporting", legacyReporting);
+
         if (waterfallOptions) {
           sessionStorage.setItem("waterfallOptions", waterfallOptions);
         }
@@ -755,12 +756,15 @@ class App extends Component {
     const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
     const { openSeries } = this.props;
 
+    this.setState({ pid: projectID })
+
     if (API_KEY && user) {
       // THIS IS APIKEY
       sessionStorage.setItem("authMode", "apiKey");
       sessionStorage.setItem("API_KEY", API_KEY);
       sessionStorage.setItem("username", user);
       sessionStorage.setItem("displayName", user);
+      sessionStorage.setItem("encrypted", "true");
     }
 
     await this.completeAutorization();

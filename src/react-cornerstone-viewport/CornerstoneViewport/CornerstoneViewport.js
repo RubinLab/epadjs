@@ -93,7 +93,7 @@ class CornerstoneViewport extends Component {
 
   constructor(props) {
     super(props);
-
+    
     const imageIdIndex = props.imageIdIndex;
     const imageId = props.imageIds[imageIdIndex];
 

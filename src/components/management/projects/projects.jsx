@@ -88,7 +88,9 @@ class Projects extends React.Component {
       : lastname ? `${lastname}`
         : firstname ? `${firstname}`
           : null;
-    const name = fullName || displayname || username;
+    const nullDisplayName = displayname.toLowerCase().includes('null');
+    const escapedDisplayName = nullDisplayName && displayname.length > 0 ? username : displayname;      
+    const name = fullName || escapedDisplayName || username;
     return name;
   }
 

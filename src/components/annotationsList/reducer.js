@@ -327,19 +327,40 @@ const asyncReducer = (state = initialState, action) => {
       case TOGGLE_ALL_LABELS:
         const toggledLabelSerie = { ...state.aimsList };
         const anns = toggledLabelSerie[action.payload.serieID];
+        const studyAims = {};
         for (let ann in anns) {
           anns[ann].showLabel = action.payload.checked;
+          if (anns[ann].type === 'study') {
+            if (studyAims[ann]) delete studyAims[ann];
+            else studyAims[ann] = true;  
+          }
+        }
+        if (Object.keys(studyAims).length > 0) {
+          const ids= Object.keys(studyAims);
+          for (let series in toggledLabelSerie) {
+            if (series !== action.payload.serieID) {
+              for (let id of ids) {
+                toggledLabelSerie[series][id].showLabel = action.payload.checked;
+              }
+            }
+          }
         }
         return Object.assign({}, state, { aimsList: toggledLabelSerie });
 
       case TOGGLE_LABEL:
         const singleLabelToggled = { ...state.aimsList };
-        const allAnns = singleLabelToggled[action.payload.serieID];
-        for (let ann in allAnns) {
-          if (ann === action.payload.aimID) {
-            const currentStatus = allAnns[ann].showLabel;
-            allAnns[ann].showLabel = !currentStatus;
-          }
+        // if type is study
+        if (singleLabelToggled[action.payload.serieID][action.payload.aimID].type === 'study') {
+          const allSeries = Object.values(singleLabelToggled);
+          const allSeriesIDs = Object.keys(singleLabelToggled);
+          allSeries.forEach((series, i) => {
+            const currentStatus = series[action.payload.aimID].showLabel;
+            series[action.payload.aimID].showLabel = !currentStatus;
+            singleLabelToggled[allSeriesIDs[i]] = series;
+          })
+        } else {
+          const ann = singleLabelToggled[action.payload.serieID][action.payload.aimID];
+          ann.showLabel = !ann.showLabel
         }
         return Object.assign({}, state, { aimsList: singleLabelToggled });
       case CLEAR_GRID:
@@ -480,9 +501,9 @@ const asyncReducer = (state = initialState, action) => {
         }
         const arePortsOccupied = action.port !== undefined && typeof action.port === 'number';
         let newOpenSeries = [...state.openSeries];
-        
+
         if (arePortsOccupied) newOpenSeries[action.port] = seriesInfo;
-        else newOpenSeries = newOpenSeries.concat([seriesInfo]); 
+        else newOpenSeries = newOpenSeries.concat([seriesInfo]);
 
         const newActivePort = arePortsOccupied ? state.activePort : newOpenSeries.length - 1;
         return {

@@ -6,7 +6,10 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import { getStudyAims } from '../../services/studyServices';
 import { getSeries } from '../../services/seriesServices';
 import { addStudyToGrid, replaceInGrid, getSingleSerie, clearActivePortAimID } from 'components/annotationsList/action';
+import { isSupportedModality } from "../../Utils/aid.js";
+
 import "./SeriesDropDown.css";
+
 
 const SeriesDropDown = (props) => {
     const [seriesList, setSeriesList] = useState([]);
@@ -20,7 +23,8 @@ const SeriesDropDown = (props) => {
             return seriesOfStudy;
         }
         if (openStudies && openStudies.hasOwnProperty(studyUID)) {
-            setSeriesList(openStudies[studyUID]);
+            const series = openStudies[studyUID].filter(isSupportedModality);
+            setSeriesList(series);
         }
         else {
             fetchData().then(result => {
@@ -64,7 +68,9 @@ const SeriesDropDown = (props) => {
                 id={`dropdown-button-drop-1`}
                 size="sm"
                 variant="secondary"
-                title="Other Series"
+                title="Series"
+                data-tip
+                data-for="dropdownOtherSeries"
             >
                 {seriesList && seriesList.length && seriesList.map(({ seriesDescription, seriesUID, seriesNo, i }) => {
                     let isCurrent = props.openSeries[props.activePort].seriesUID === seriesUID;
