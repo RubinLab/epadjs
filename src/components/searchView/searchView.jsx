@@ -734,8 +734,6 @@ class SearchView extends Component {
           this.setState({ downloading: false });
           console.log(err);
         });
-      this.setState(state => ({ update: state.update + 1 }));
-      this.props.dispatch(clearSelection());
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
     } else {
@@ -789,6 +787,7 @@ class SearchView extends Component {
     this.setState(state => ({
       showUploadFileModal: !state.showUploadFileModal
     }));
+    this.props.dispatch(clearSelection());
   };
 
   handleClickDeleteIcon = () => {
@@ -887,8 +886,8 @@ class SearchView extends Component {
 
   handleSubmitDownload = () => {
     this.setState({ showAnnotationModal: false });
-    this.setState(state => ({ update: state.update + 1 }));
-    this.props.dispatch(clearSelection());
+    // this.setState(state => ({ update: state.update + 1 }));
+    // this.props.dispatch(clearSelection());
   };
 
   handleUploadWizardClick = () => {

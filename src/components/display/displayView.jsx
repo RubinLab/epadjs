@@ -35,12 +35,12 @@ import { circle } from "./Circle";
 import { bidirectional } from "./Bidirectional";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
-import { FaTimes, FaPen, FaExpandArrowsAlt } from "react-icons/fa";
+import { FaTimes, FaPen, FaExpandArrowsAlt, FaTag } from "react-icons/fa";
 import Form from "react-bootstrap/Form";
 import ToolMenu from "../ToolMenu/ToolMenu";
 import { getMarkups, setMarkupsOfAimActive } from "../aimEditor/Helpers";
 import { refreshToken } from "../../services/authService";
-import { isThisSecond } from "date-fns/esm";
+// import { isThisSecond } from "date-fns/esm";
 import { FiMessageSquare } from "react-icons/fi";
 import { errorMonitor } from "events";
 import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
@@ -166,6 +166,7 @@ class DisplayView extends Component {
       siblingCommunication: {
         mediaExportButton: null
       }
+      isOverlayVisible: {}
     };
   }
 
@@ -253,6 +254,12 @@ class DisplayView extends Component {
         cancelable: true,
       });
       window.dispatchEvent(evnt);
+    }
+      // i => info
+    if (event.target.nodeName !== 'INPUT' && event.target.nodeName !== 'TEXTAREA') {
+      if (event.keyCode == 73 && event.ctrlKey) {
+        this.toggleOverlay();
+      }
     }
   }
 
@@ -1672,6 +1679,14 @@ class DisplayView extends Component {
     this.jumpToImage(imageIndex, i);
   };
 
+  toggleOverlay = (e, i) => {
+    const showHide = { ... this.state.isOverlayVisible };
+    const index = i ? i : this.props.activePort;
+    if (showHide[index]) delete showHide[index];
+    else showHide[index] = true;
+    this.setState({ isOverlayVisible: showHide });
+  }
+
   render() {
     const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
     const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
@@ -1731,6 +1746,13 @@ class DisplayView extends Component {
                     >
                       <FaExpandArrowsAlt />
                     </span>
+                    <span
+                      className={"dot"}
+                      style={{ background: "deepskyblue" }}
+                      onClick={(e) => { this.toggleOverlay(e, i) }}
+                    >
+                      <FaTag />
+                    </span>
                   </div>
                   {/* <div className={"column middle"}>
                     <label>{series[i].seriesUID}</label>
@@ -1740,7 +1762,7 @@ class DisplayView extends Component {
                       <Form inline className="slice-form">
                         <Form.Group className="slice-number">
                           <Form.Label htmlFor="imageNum" className="slice-label" style={{ color: 'white' }}>
-                            {"Slice # "}
+                            {"Image # "}
                           </Form.Label>
                           <Form.Control
                             type="number"
@@ -1759,13 +1781,19 @@ class DisplayView extends Component {
                       </Form>
                     </div>
                     <div className={"series-dd"}>
-                      <SeriesDropDown style={{ lineHeight: "1" }} serie={series[i]} isAimEditorShowing={this.state.showAimEditor} onCloseAimEditor={this.closeAimEditor} />
+                      <SeriesDropDown
+                        style={{ lineHeight: "1" }}
+                        serie={series[i]}
+                        isAimEditorShowing={this.state.showAimEditor}
+                        onCloseAimEditor={this.closeAimEditor}
+                        onSelect={this.jumpToImage}
+                      />
                     </div>
                   </div>
                   <div className={"column right"}>
                     <span
                       className={"dot"}
-                      style={{ background: "#FDD800", float: "right" }}
+                      style={{ background: "#FDD800", float: 'right' }}
                       onClick={() => {
                         this.setState({ showAimEditor: true });
                       }}
@@ -1806,6 +1834,7 @@ class DisplayView extends Component {
                   isStackPrefetchEnabled={true}
                   style={{ height: "calc(100% - 26px)" }}
                   activeTool={activeTool}
+                  isOverlayVisible={this.state.isOverlayVisible[i] || false}
                 />
               </div>
             ))}

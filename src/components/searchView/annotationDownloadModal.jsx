@@ -46,7 +46,7 @@ class AnnnotationDownloadModal extends React.Component {
           toast.error("Select a download format!", { autoClose: false });
         }
       });
-    this.props.dispatch(clearSelection());
+    // this.props.dispatch(clearSelection());
     this.props.onCancel();
   };
 

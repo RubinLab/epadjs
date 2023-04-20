@@ -13,20 +13,37 @@ import "./RightsideBar.css";
 class Rightsidebar extends Component {
   constructor(props) {
     super(props);
-
     let x = window.matchMedia("(max-width: 1080px)");
     let rightDim = x.matches ? "320px" : "420px";
     this.state = {
       rightDim,
-      width: rightDim,
-      marginRight: rightDim,
+      width: '0px',
+      marginRight: '0',
       buttonDisplay: "block",
-      open: true,
       showMediaExport: false
+      open: false,
     };
   }
 
-  async componentDidMount() { }
+  componentDidMount() {
+    // if mode is thick 
+    const encrypted = sessionStorage.getItem("encrypted");
+    const mode = sessionStorage.getItem("mode");
+    if (mode === "thick" && encrypted) {
+      this.setState({
+        open: false, 
+        width: "0px",
+        marginRight: "0",
+      })
+    } else {
+      this.setState({
+        width: this.state.rightDim,
+        marginRight: this.state.rightDim,
+        open: true,
+      })
+    }
+
+  }
 
   handleToggle = () => {
     const { rightDim, open } = this.state;

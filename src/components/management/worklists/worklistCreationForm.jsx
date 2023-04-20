@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Modal, Button } from "react-bootstrap";
+import ReactTooltip from 'react-tooltip';
 import { toast } from "react-toastify";
 import FormButton from "../users/formButton";
 import UserList from "./userList";
@@ -227,6 +228,7 @@ class WorklistCreationForm extends React.Component {
     let button1Text = "Back";
     let button2Text = "Next";
     let button3Text = "Cancel";
+    let button2TextAlt = "Add Requirement";
     let button1Func = this.goPrevPage;
     let button2Func = this.goNextPage;
     let button3Func = onCancel;
@@ -267,8 +269,8 @@ class WorklistCreationForm extends React.Component {
     return (
       // <Modal.Dialog dialogClassName="add-worklist__modal">
       <Modal.Dialog id="modal-fix" className="in-modal">
-        <Modal.Header className="modal-header">
-          <Modal.Title>Create worklist</Modal.Title>
+        <Modal.Header className="modal-header" >
+          <Modal.Title style={{ margin: "0.5rem 0rem 0.5rem 1rem" }} >Create worklist</Modal.Title>
         </Modal.Header>
         <Modal.Body className="notification-modal">
           {!this.state.page && (
@@ -305,14 +307,16 @@ class WorklistCreationForm extends React.Component {
                 id="addWorklist-due"
               />
               <label className="add-worklist__modal--label">Description</label>
-              <textarea
-                onMouseDown={e => e.stopPropagation()}
-                className="add-worklist__modal--input"
-                name="description"
-                onChange={this.handleFormInput}
-                defaultValue={this.state.description}
-                id="addWorklist-desc"
-              />
+              <div style={{ marginLeft: "-1.3rem" }}>
+                <textarea
+                  onMouseDown={e => e.stopPropagation()}
+                  className="add-worklist__modal--input"
+                  name="description"
+                  onChange={this.handleFormInput}
+                  defaultValue={this.state.description}
+                  id="addWorklist-desc"
+                />
+              </div>
               <span className="form-exp required">*Required</span>
             </form>
           )}
@@ -348,20 +352,36 @@ class WorklistCreationForm extends React.Component {
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
           <Button variant="secondary"
+            style={{ margin: "0rem 0.2rem 0.7rem 0rem" }}
             onClick={button1Func}
             disabled={page === 0}
           >{button1Text}</Button>
-          <Button variant="secondary"
-            onClick={button2Func}
-            disabled={page === 0 ? disableNext : disableSubmit}
-            id="next-btn"
-          >{button2Text}</Button>
+          <>
+            <Button variant="secondary"
+              style={{ margin: "0rem 0.2rem 0.7rem 0.2rem" }}
+              data-tip
+              data-for="add-requirement-btn"
+              onClick={button2Func}
+              disabled={page === 0 ? disableNext : disableSubmit}
+              id="next-btn"
+            >{page === 1 && mode === 'teaching' ? button2TextAlt : button2Text}</Button>
+            {page === 1 && mode === 'teaching' && <ReactTooltip
+              id="add-requirement-btn"
+              place="bottom"
+              type="info"
+              delayShow={200}
+            >
+              <span className="filter-label">Add requirement for completing annotations for studies in the worklist</span>
+            </ReactTooltip>}
+          </>
+
           {mode === 'teaching' && this.state.page === 1 && (
             <Button variant="secondary"
+              style={{ margin: "0rem 0.2rem 0.7rem 0rem" }}
               onClick={this.handleSaveWorklist}
               id="next-btn"
             >Submit</Button>)}
-          <Button variant="secondary" onClick={button3Func}>{button3Text}</Button>
+          <Button style={{ margin: "0rem 1rem 0.7rem 0.2rem" }} variant="secondary" onClick={button3Func}>{button3Text}</Button>
         </Modal.Footer>
       </Modal.Dialog >
     );

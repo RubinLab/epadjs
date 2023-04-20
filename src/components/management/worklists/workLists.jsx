@@ -122,7 +122,7 @@ class WorkList extends React.Component {
     let newSelected = {};
     if (this.state.selectAll === 0) {
       this.state.worklists.forEach(project => {
-        newSelected[project.worklistID] = project.username;
+        newSelected[project.workListID] = true;
       });
     }
 

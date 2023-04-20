@@ -1,6 +1,7 @@
 /* eslint-env browser */
 
 import setup from './common.js';
+import process from 'process';
 
 /**
  * This is the web browser implementation of `debug()`.

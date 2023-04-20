@@ -43,11 +43,11 @@ class Sidebar extends Component {
       worklistsAssigned: [],
       worklistsCreated: [],
       pacs: [],
-      width: mode !== "lite" ? "205px" : "0",
-      tabMarginLeft: "170px",
-      marginLeft: mode !== "lite" ? "205px" : "0",
+      width: '30px',
+      tabMarginLeft: "0px",
+      marginLeft: '30px',
       buttonDisplay: mode !== "lite" ? "none" : "block",
-      open: mode !== "lite",
+      open: false,
       index: 0,
       pid: null,
       progressView: [false, false],
@@ -162,10 +162,12 @@ class Sidebar extends Component {
       const { data: templates } = await getTemplatesUniversal();
       for (let template of templates) {
         const tempCode = template.Template[0].templateCodeValue;
-        for (let project of template.projects) {
-          prTempMap[project]
-            ? prTempMap[project].push(tempCode)
-            : (prTempMap[project] = [tempCode]);
+        if (template.projects) {
+          for (let project of template.projects) {
+            prTempMap[project]
+              ? prTempMap[project].push(tempCode)
+              : (prTempMap[project] = [tempCode]);
+          }
         }
       }
       return prTempMap;
@@ -279,14 +281,19 @@ class Sidebar extends Component {
     if (type !== "progress") {
       this.collapseAll();
     }
-    if (type === "project" && this.props.type === "search") {
+    if (type === "project" && this.props.type === "search" && mode === 'teaching') {
+      this.setState({ index: 0 });
+      this.props.getPidUpdate(id);
+      this.props.history.push(`/search/${id}`);
+    } else if (type === "project" && this.props.type === "list" && mode !== 'teaching') {
       this.setState({ index: 0 });
       this.props.getPidUpdate(id);
       this.props.clearTreeExpand();
-      if (mode === 'teaching')
-        this.props.history.push(`/search`);
-      else
-        this.props.history.push(`/list/${id}`);
+      this.props.history.push(`/list/${id}`);
+    } else if (type === "project" && this.props.type === "search" && mode !== 'teaching') {  
+      this.setState({ index: 0 });
+      this.props.getPidUpdate(id);
+      this.props.history.push(`/search/${id}`);
     } else if (type === "project" && this.props.type === "flex") {
       this.props.history.push(`/flex/${id}`);
       this.setState({ index: 0 });

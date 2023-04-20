@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import Table from 'react-table-v6';
 import ReactTooltip from 'react-tooltip';
@@ -87,7 +88,9 @@ class Projects extends React.Component {
       : lastname ? `${lastname}`
         : firstname ? `${firstname}`
           : null;
-    const name = fullName || displayname || username;
+    const nullDisplayName = displayname.toLowerCase().includes('null');
+    const escapedDisplayName = nullDisplayName && displayname.length > 0 ? username : displayname;      
+    const name = fullName || escapedDisplayName || username;
     return name;
   }
 
@@ -409,6 +412,7 @@ class Projects extends React.Component {
       {
         Header: 'Name',
         accessor: 'name',
+        id: 'namePr',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
@@ -417,9 +421,8 @@ class Projects extends React.Component {
       {
         Header: 'Open',
         sortable: true,
-        resizable: true,
         minResizeWidth: 20,
-        width: 50,
+        width: 30,
         Cell: original => (
           <Link className="open-link" to={'/list/' + original.row.checkbox.id}>
             <div onClick={this.props.onClose} data-tip data-for="project-open">
@@ -439,6 +442,7 @@ class Projects extends React.Component {
       {
         Header: 'Description',
         accessor: 'description',
+        id: 'descriptionPr',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
@@ -447,14 +451,16 @@ class Projects extends React.Component {
       {
         Header: 'Type',
         accessor: 'type',
+        id: 'typePr',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 20
+        minWidth: 40
       },
       {
         Header: 'Users',
         accessor: 'loginNames',
+        id: 'loginNamesnPr',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
@@ -462,9 +468,9 @@ class Projects extends React.Component {
         Cell: original => {
           const { loginNames } = original.row;
           const className =
-            loginNames.length > 0 ? 'wrapped' : 'wrapped click-to-add';
+            loginNames?.length > 0 ? 'wrapped' : 'wrapped click-to-add';
           const text =
-            loginNames.length > 0 ? this.concatenateNames(loginNames) : 'Add user';
+            loginNames?.length > 0 ? this.concatenateNames(loginNames) : 'Add user';
           return (
             <>
               <p
@@ -494,21 +500,24 @@ class Projects extends React.Component {
       },
       {
         Header: 'Template',
-        width: 80,
+        id: 'TemplatePr',
+        minWidth: 80,
         minResizeWidth: 20,
         resizable: true,
         Cell: original => {
           const { defaultTemplate } = original.row.checkbox;
           const none =
             defaultTemplate === 'null' || defaultTemplate === 'undefined';
-          return <div>{none ? '' : defaultTemplate}</div>;
+          const temp = defaultTemplate && !none ? this.props.templates[defaultTemplate] : null;
+          const templateName  = temp ? temp.TemplateContainer.Template[0].name : '';
+          return <div>{templateName }</div>;
         }
       },
       {
         Header: '',
         width: 45,
         minResizeWidth: 20,
-        resizable: true,
+        // resizable: true,
         Cell: original => {
           return (
             <>
@@ -545,7 +554,7 @@ class Projects extends React.Component {
         Header: '',
         width: 45,
         minResizeWidth: 20,
-        resizable: true,
+        // resizable: true,
         Cell: original => (
           <>
             <div
@@ -647,4 +656,11 @@ Projects.propTypes = {
   selection: PropTypes.string,
   onClose: PropTypes.func
 };
-export default Projects;
+
+const mapsStateToProps = state => {
+  return {
+    templates: state.annotationsListReducer.templates,
+  };
+};
+
+export default connect(mapsStateToProps)(Projects);

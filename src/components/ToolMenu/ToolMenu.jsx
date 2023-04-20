@@ -284,40 +284,46 @@ class ToolMenu extends Component {
 
   handleKeyPressed = (event) => {
     // ctrl + r => Reset
-    if (event.keyCode == 82 && event.ctrlKey) {
-      this.handleToolClicked(1, 'Reset');
-    }
-    // d => Length
-    else if (event.keyCode == 68) {
-      this.handleToolClicked(12, 'Length');
-    }
-    // o => Perpendicular/Bidirectional
-    else if (event.keyCode == 79) {
-      this.handleToolClicked(15, 'Bidirectional');
-    }
-    // f => Arrow
-    else if (event.keyCode == 70) {
-      this.handleToolClicked(13, 'ArrowAnnotate');
-    }
-    // r => Circle
-    else if (event.keyCode == 82) {
-      this.handleToolClicked(14, 'CircleRoi');
-    }
-    // z => zoom
-    else if (event.keyCode == 90) {
-      this.handleToolClicked(4, 'Zoom');
-    }
-    // p => Pan
-    else if (event.keyCode == 80) {
-      this.handleToolClicked(6, 'Pan');
-    }
-    // w => Wwwc
-    else if (event.keyCode == 87) {
-      this.handleToolClicked(2, 'Wwwc');
-    }
-    // s => Select
-    else if (event.keyCode == 83) {
-      this.handleToolClicked(1, 'Noop');
+    if (event.target.nodeName !== 'INPUT' && event.target.nodeName !== 'TEXTAREA') {
+      if (event.keyCode == 82 && event.ctrlKey) {
+        this.handleToolClicked(1, 'Reset');
+      }
+      // d => Length
+      else if (event.keyCode == 68) {
+        const index = mode === 'teaching' ? 10 : 12;
+        this.handleToolClicked(index, 'Length');
+      }
+      // o => Perpendicular/Bidirectional 
+      else if (event.keyCode == 79) {
+        const index = mode === 'teaching' ? 13 : 15;
+        this.handleToolClicked(index, 'Bidirectional');
+      }
+      // f => Arrow 
+      else if (event.keyCode == 70) {
+        const index = mode === 'teaching' ? 11 : 13;
+        this.handleToolClicked(index, 'ArrowAnnotate');
+      }
+      // r => Circle
+      else if (event.keyCode == 82) {
+        const index = mode === 'teaching' ? 12 : 14;
+        this.handleToolClicked(index, 'CircleRoi');
+      }
+      // z => zoom
+      else if (event.keyCode == 90) {
+        this.handleToolClicked(4, 'Zoom');
+      }
+      // p => Pan
+      else if (event.keyCode == 80) {
+        this.handleToolClicked(6, 'Pan');
+      }
+      // w => Wwwc
+      else if (event.keyCode == 87) {
+        this.handleToolClicked(2, 'Wwwc');
+      }
+      // s => Select
+      else if (event.keyCode == 83) {
+        this.handleToolClicked(1, 'Noop');
+      }
     }
   }
 
@@ -328,8 +334,8 @@ class ToolMenu extends Component {
       if (activeTool === "FreehandRoiTool" || activeTool === "FreehandRoi3DTool") {
         this.deselectFreehand();
       }
+      this.setState({ activeToolIdx: 1 });
       this.setToolStateForAllElements(this.state.activeTool, "passive");
-      this.setState({ activeToolIdx: 0 });
       this.setCursor("default");
     }
 
