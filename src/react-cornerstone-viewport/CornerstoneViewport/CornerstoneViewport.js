@@ -601,7 +601,7 @@ class CornerstoneViewport extends Component {
   onNewImage = (event) => {
     const newImageId = event.detail.image.imageId;
     const newImageIdIndex = this.props.imageIds.indexOf(newImageId);
-
+    console.log(" --> onNewImage")
     // TODO: Should we grab and set some imageId specific metadata here?
     // Could prevent cornerstone dependencies in child components.
     this.setState({
@@ -625,7 +625,8 @@ class CornerstoneViewport extends Component {
 
   imageSliderOnInputCallback = (value) => {
     this.setViewportActive();
-
+    console.log(" ---> scroll value");
+    console.log(value);
     scrollToIndex(this.element, value);
   };
 

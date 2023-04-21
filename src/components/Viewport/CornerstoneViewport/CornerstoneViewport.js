@@ -713,6 +713,7 @@ class CornerstoneViewport extends Component {
   onStackScroll = event => {
     this.setViewportActive();
 
+    console.log(" -----> here onStackScrooll");
     const element = event.currentTarget;
     const stackData = cornerstoneTools.getToolState(element, "stack");
     const stack = stackData.data[0];

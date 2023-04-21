@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
+import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import cornerstoneTools from "cornerstone-tools";
 import {
   getImageIds,
@@ -614,6 +615,7 @@ class DisplayView extends Component {
     const { imageIds } = this.state;
     this.setState({ imageIds: { ...imageIds, ...newImageIds } });
 
+    cornerstoneWADOImageLoader.webWorkerManager.terminate();
     //to jump to the same image after aim save
     let imageIndex;
     if (

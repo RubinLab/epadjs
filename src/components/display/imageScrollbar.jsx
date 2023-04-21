@@ -40,6 +40,7 @@ class ImageScrollbar extends PureComponent {
 
   onChange = event => {
     const intValue = parseInt(event.target.value, 10);
+    console.log(" ---> booo")
     this.props.onInputCallback(intValue);
   };
 
