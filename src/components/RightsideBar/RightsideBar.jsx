@@ -9,6 +9,7 @@ import AimEditor from "../aimEditor/aimEditor";
 import MediaExport from "../MediaExport/MediaExport";
 
 import "./RightsideBar.css";
+import "../MediaExport/styles.css";
 
 class Rightsidebar extends Component {
   constructor(props) {
@@ -79,6 +80,19 @@ class Rightsidebar extends Component {
     }
   };
 
+  mediaExportTabClicked = () => {
+    if (!this.state.showMediaExport || this.props.showAimEditor) {
+      this.showMediaExport();
+    }
+  }
+
+  annotationsTabClicked = () => {
+    if (!this.state.open) {
+      this.handleToggle();
+    }
+    this.setState({ showMediaExport: false });
+  }
+
   //saveMediaData = (obj) => {
   //  this.state.mediaExportData = obj;
   //}
@@ -93,7 +107,17 @@ class Rightsidebar extends Component {
         <div>
           <div className="right-tab-menu" style={{ marginRight: marginRight }}>
             <div className="drawer-control" onClick={this.handleToggle}>{!open ? (<BsArrowBarLeft className="bi bi-arrow-bar-left" />) : (<BsArrowBarRight className="bi bi-arrow-bar-left" />)}</div>
-            <div className="right-tabs">Annotations</div>
+            {/*<div className="right-tabs">Annotations</div>*/}
+            <div className="right-tabs">
+              <ul className="nav nav-tabs" id="myTab1" role="tablist">
+                <li className="nav-item" role="presentation">
+                  <button className="nav-link active" id="media-tab" data-bs-toggle="tab" data-bs-target="#media-tab-pane" type="button" role="tab" aria-controls="media-tab-pane" aria-selected="false" onClick={this.mediaExportTabClicked}>Media Export</button>
+                </li>
+                <li className="nav-item" role="presentation">
+                  <button className="nav-link " id="annotations-tab" data-bs-toggle="tab" data-bs-target="#annotations-tab-pane" type="button" role="tab" aria-controls="annotations-tab-pane" aria-selected="true" onClick={this.annotationsTabClicked}>Annotations</button>
+                </li>
+              </ul>
+            </div> 
           </div>
         </div>
         {/* } */}
