@@ -179,7 +179,6 @@ export function pptWrapper() {
    * @param {string} nameOfFile
    */
   this.exportPresentation = function (nameOfFile = 'Stella images.pptx', includeSensitive = false) {
-    console.log(this.slides);
     for (let i = 0; i < this.slides.length; i++) {
       let slideNotes = '';
       let slideArray = this.slides[i];
