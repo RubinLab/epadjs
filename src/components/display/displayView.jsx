@@ -246,13 +246,16 @@ class DisplayView extends Component {
   }
 
   handleKeyPressed = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+    }
     if (event.key === "Escape") {
       const evnt = new CustomEvent("escPressed", {
         cancelable: true,
       });
       window.dispatchEvent(evnt);
     }
-      // i => info
+    // i => info
     if (event.target.nodeName !== 'INPUT' && event.target.nodeName !== 'TEXTAREA') {
       if (event.keyCode == 73 && event.ctrlKey) {
         this.toggleOverlay();
