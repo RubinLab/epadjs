@@ -163,9 +163,6 @@ class DisplayView extends Component {
       containerHeight: 0,
       tokenRefresh: null,
       activeTool: '',
-      siblingCommunication: {
-        mediaExportButton: null
-      },
       isOverlayVisible: {}
     };
   }
@@ -1705,13 +1702,11 @@ class DisplayView extends Component {
           updateProgress={updateProgress}
           updateTreeDataOnSave={updateTreeDataOnSave}
           setAimDirty={this.setDirtyFlag}
-          communicate={this.state.siblingCommunication}
           saveData={this.props.saveData}
           savedData={this.props.savedData}
         >
           <ToolMenu
             onSwitchView={this.props.onSwitchView}
-            communicate={this.state.siblingCommunication}
           />
           {!this.state.isLoading &&
             Object.entries(series).length &&

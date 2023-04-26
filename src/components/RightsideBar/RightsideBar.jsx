@@ -101,20 +101,44 @@ class Rightsidebar extends Component {
   render() {
     const { selectedAim, showAimEditor } = this.props;
     const { open, width, marginRight } = this.state;
-    this.props.communicate.mediaExportButton = this.showMediaExport;
     return (
       <React.Fragment>
         <div>
           <div className="right-tab-menu" style={{ marginRight: marginRight }}>
-            <div className="drawer-control" onClick={this.handleToggle}>{!open ? (<BsArrowBarLeft className="bi bi-arrow-bar-left" />) : (<BsArrowBarRight className="bi bi-arrow-bar-left" />)}</div>
+            <div className="drawer-control" onClick={this.handleToggle}>
+            {!open ? (<BsArrowBarLeft className="bi bi-arrow-bar-left" />) : (<BsArrowBarRight className="bi bi-arrow-bar-left" />)}
+          </div>
             {/*<div className="right-tabs">Annotations</div>*/}
             <div className="right-tabs">
               <ul className="nav nav-tabs" id="myTab1" role="tablist">
                 <li className="nav-item" role="presentation">
-                  <button className="nav-link active" id="media-tab" data-bs-toggle="tab" data-bs-target="#media-tab-pane" type="button" role="tab" aria-controls="media-tab-pane" aria-selected="false" onClick={this.mediaExportTabClicked}>Media Export</button>
+                  <button
+                    className={this.state.showMediaExport ? "nav-link active" : "nav-link"}
+                    id="media-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#media-tab-pane"
+                    type="button" role="tab"
+                    aria-controls="media-tab-pane"
+                    aria-selected={this.state.showMediaExport}
+                    onClick={this.mediaExportTabClicked}
+                  >
+                    Media Export
+                  </button>
                 </li>
                 <li className="nav-item" role="presentation">
-                  <button className="nav-link " id="annotations-tab" data-bs-toggle="tab" data-bs-target="#annotations-tab-pane" type="button" role="tab" aria-controls="annotations-tab-pane" aria-selected="true" onClick={this.annotationsTabClicked}>Annotations</button>
+                  <button
+                    className={this.state.showMediaExport ? "nav-link" : "nav-link active"}
+                    id="annotations-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#annotations-tab-pane"
+                    type="button"
+                    role="tab"
+                    aria-controls="annotations-tab-pane"
+                    aria-selected={!this.state.showMediaExport}
+                    onClick={this.annotationsTabClicked}
+                  >
+                    Annotations
+                  </button>
                 </li>
               </ul>
             </div> 
