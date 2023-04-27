@@ -14,20 +14,25 @@ const alertDeletionModal = ({ title, message, onCancel, onDelete, error }) => {
           >
             {title}
           </div>
-          <h4 className="-maxView__message--exp">{message}</h4>
+          <h4 className="-maxView__message--exp" style={{ margin: "0.4rem 1rem 0.8rem 1rem" }}>{message}</h4>
         </div>
         {error && <div className="err-message">{error}</div>}
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
         {!error && (
-          <Button variant="secondary" onClick={() => { 
-            onDelete(); 
-            // window.dispatchEvent("refreshProjects") 
+          <Button variant="secondary"
+            style={{ margin: "0rem 0.2rem 0.7rem 0rem" }}
+            onClick={() => {
+              onDelete();
+              // window.dispatchEvent("refreshProjects") 
             }}>
             Delete
           </Button>
         )}
-        <Button variant="secondary" onClick={onCancel}>
+        <Button variant="secondary"
+          onClick={onCancel}
+          style={{ margin: "0rem 1rem 0.7rem 0.2rem" }}
+        >
           Cancel
         </Button>
       </Modal.Footer>
