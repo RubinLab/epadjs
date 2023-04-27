@@ -364,8 +364,8 @@ class WorklistCreationForm extends React.Component {
               onClick={button2Func}
               disabled={page === 0 ? disableNext : disableSubmit}
               id="next-btn"
-            >{page === 1 && mode === 'teaching' ? button2TextAlt : button2Text}</Button>
-            {page === 1 && mode === 'teaching' && <ReactTooltip
+            >{page === 1 ? button2TextAlt : button2Text}</Button>
+            {page === 1 && <ReactTooltip
               id="add-requirement-btn"
               place="bottom"
               type="info"
@@ -375,7 +375,7 @@ class WorklistCreationForm extends React.Component {
             </ReactTooltip>}
           </>
 
-          {mode === 'teaching' && this.state.page === 1 && (
+          {this.state.page === 1 && (
             <Button variant="secondary"
               style={{ margin: "0rem 0.2rem 0.7rem 0rem" }}
               onClick={this.handleSaveWorklist}
