@@ -30,7 +30,7 @@ import {
   deleteAnnotationsList
 } from '../../services/annotationServices.js';
 import AnnotationTable from './AnnotationTable.jsx';
-import { clearSelection, selectAnnotation, updateSearchTableIndex } from '../annotationsList/action';
+import { clearSelection, selectAnnotation, updateSearchTableIndex, refreshPage } from '../annotationsList/action';
 import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
 import UploadModal from '../searchView/uploadModal';
 import DeleteAlert from '../management/common/alertDeletionModal';
@@ -219,6 +219,16 @@ const AnnotationSearch = props => {
     getPluginProjects();
     // cavit
   }, [props.pid, props.update]);
+
+  useEffect(() => {
+    if (props.refreshMap.plugins) {
+      setShowRunPluginButton(false);
+      setSelectedPluginDbId(-1);
+      getPluginProjects();
+      props.dispatch(refreshPage('plugins', false))
+    }
+
+  }, [props.refreshMap.plugins])
 
   const handleUserKeyPress = (e => {
     if (e.key === 'Enter') {
@@ -1473,7 +1483,8 @@ const mapsStateToProps = state => {
     projectMap: state.annotationsListReducer.projectMap,
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
     openSeries: state.annotationsListReducer.openSeries,
-    searchTableIndex: state.annotationsListReducer.searchTableIndex
+    searchTableIndex: state.annotationsListReducer.searchTableIndex,
+    refreshMap: state.annotationsListReducer.refreshMap
   };
 };
 
