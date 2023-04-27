@@ -45,6 +45,7 @@ import {
   ADD_STUDY_TO_GRID,
   REPLACE_IN_GRID,
   UPDATE_SEARCH_TABLE_INDEX,
+  REFRESH_MAP,
   colors,
   commonLabels,
 } from "./types";
@@ -80,7 +81,8 @@ const initialState = {
   patientFilter: {},
   openStudies: {},
   searchTableIndex: 0,
-  otherSeriesAimsList: {}
+  otherSeriesAimsList: {},
+  refreshMap: {}
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -98,6 +100,11 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case REFRESH_MAP:
+        const { feature, condition } = state.payload;
+        const updatedRefreshMap = { ...state[refreshMap] };
+        updatedRefreshMap[feature] = condition;
+        return { ...state, refreshMap: updatedRefreshMap };
       case UPDATE_SEARCH_TABLE_INDEX:
         return { ...state, searchTableIndex: action.searchTableIndex }
       case SAVE_PATIENT_FILTER:
@@ -332,11 +339,11 @@ const asyncReducer = (state = initialState, action) => {
           anns[ann].showLabel = action.payload.checked;
           if (anns[ann].type === 'study') {
             if (studyAims[ann]) delete studyAims[ann];
-            else studyAims[ann] = true;  
+            else studyAims[ann] = true;
           }
         }
         if (Object.keys(studyAims).length > 0) {
-          const ids= Object.keys(studyAims);
+          const ids = Object.keys(studyAims);
           for (let series in toggledLabelSerie) {
             if (series !== action.payload.serieID) {
               for (let id of ids) {

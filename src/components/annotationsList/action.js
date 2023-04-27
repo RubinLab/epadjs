@@ -444,6 +444,13 @@ export const changeActivePort = (portIndex) => {
   };
 };
 
+export const refreshPage = (feature, condition) => {
+  return {
+    type: REFRESH_MAP,
+    payload: { feature, condition }
+  }
+}
+
 // helpeer method
 export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann, otherSeriesAimsData) => {
   return {
