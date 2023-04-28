@@ -25,8 +25,11 @@ export const angleCursor = new MouseCursor(
 );
 
 export const arrowAnnotateCursor = new MouseCursor(
+  // `<g id="arrowAnnotate-group" fill="none" stroke-width="1" stroke="ACTIVE_COLOR" stroke-linecap="round" stroke-linejoin="round">
+  //   <path id="arrowAnnotate-arrow" d="M23,7 l-15,15 M7,17 l0,6 6,0" stroke-width="10" />
+  // </g>`,
   `<g id="arrowAnnotate-group" fill="none" stroke-width="1" stroke="ACTIVE_COLOR" stroke-linecap="round" stroke-linejoin="round">
-    <path id="arrowAnnotate-arrow" d="M23,7 l-15,15 M7,17 l0,6 6,0" stroke-width="2" />
+    <path id="arrowAnnotate-arrow" d="M2 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1H3.707l10.147 10.146a.5.5 0 0 1-.708.708L3 3.707V8.5a.5.5 0 0 1-1 0v-6z" stroke-width="2" />
   </g>`,
   {
     viewBox: {
