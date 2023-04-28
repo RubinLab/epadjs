@@ -45,6 +45,7 @@ import {
   ADD_STUDY_TO_GRID,
   REPLACE_IN_GRID,
   UPDATE_SEARCH_TABLE_INDEX,
+  REFRESH_MAP,
   colors,
   commonLabels,
 } from "./types";
@@ -444,6 +445,13 @@ export const changeActivePort = (portIndex) => {
     portIndex,
   };
 };
+
+export const refreshPage = (feature, condition) => {
+  return {
+    type: REFRESH_MAP,
+    payload: { feature, condition }
+  }
+}
 
 // helpeer method
 export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann, otherSeriesAimsData) => {
