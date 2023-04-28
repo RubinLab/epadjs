@@ -45,6 +45,7 @@ import {
   ADD_STUDY_TO_GRID,
   REPLACE_IN_GRID,
   UPDATE_SEARCH_TABLE_INDEX,
+  REFRESH_MAP,
   colors,
   commonLabels,
 } from "./types";

@@ -101,8 +101,8 @@ const asyncReducer = (state = initialState, action) => {
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
       case REFRESH_MAP:
-        const { feature, condition } = state.payload;
-        const updatedRefreshMap = { ...state[refreshMap] };
+        const { feature, condition } = action.payload;
+        const updatedRefreshMap = { ...state.refreshMap };
         updatedRefreshMap[feature] = condition;
         return { ...state, refreshMap: updatedRefreshMap };
       case UPDATE_SEARCH_TABLE_INDEX:

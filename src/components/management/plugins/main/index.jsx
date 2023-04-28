@@ -186,6 +186,7 @@ class Plugins extends React.Component {
       plugins: tempPlugins,
       tableSelectedData: {},
     });
+    this.props.dispatch(refreshPage('plugins', true));
   };
 
   addTemplate = (templateArray, tableSelectedData) => {
@@ -881,6 +882,6 @@ class Plugins extends React.Component {
   };
 }
 
-const mapStateToProps = (state) => {}
+const mapStateToProps = (state) => { return {}}
 
 export default connect(mapStateToProps)(Plugins);
