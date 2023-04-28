@@ -639,7 +639,7 @@ class App extends Component {
         apiUrl = process.env.REACT_APP_API_URL || apiUrl;
         wadoUrl = process.env.REACT_APP_WADO_URL || wadoUrl;
         authMode = process.env.REACT_APP_AUTH_MODE || authMode;
-        const waterfallOptions = process.env.REACT_APP_WATERFALL_OPTS;
+        let waterfallOptions = process.env.REACT_APP_WATERFALL_OPTS;
         maxPort = process.env.REACT_APP_MAX_PORT || maxPort || 6;
         defaultAimName =
           process.env.REACT_APP_DEFAULT_AIM_NAME || defaultAimName;
@@ -655,6 +655,9 @@ class App extends Component {
         sessionStorage.setItem("feedback", feedback);
         sessionStorage.setItem("legacyReporting", legacyReporting);
 
+        waterfallOptions = "test-here";
+
+        console.log("waterfall waterfallOptions", waterfallOptions);
         if (waterfallOptions) {
           sessionStorage.setItem("waterfallOptions", waterfallOptions);
         }
@@ -752,6 +755,11 @@ class App extends Component {
   };
 
   handleArgs = async (args) => {
+    console.log(" handle args");
+    const WaterfallOpts = sessionStorage.getItem("waterfallOptions");
+    console.log(" waterfallOpts", WaterfallOpts);
+
+
     const { data } = await decryptAndGrantAccess(args);
     const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
     const { openSeries } = this.props;
@@ -766,6 +774,7 @@ class App extends Component {
       sessionStorage.setItem("displayName", user);
       sessionStorage.setItem("encrypted", "true");
     }
+
 
     await this.completeAutorization();
 
