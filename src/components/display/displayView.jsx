@@ -163,17 +163,29 @@ class DisplayView extends Component {
       containerHeight: 0,
       tokenRefresh: null,
       activeTool: '',
+      invertMap: {}
       isOverlayVisible: {}
     };
   }
 
+  formInvertMap = () => {
+    const { series } = this.props;
+    const invertMap = { ...this.state.invertMap };
+    series.forEach((el, i) => {
+      if (el.examType === 'NM') invertMap[i] = true;
+    })
+    this.setState({ invertMap });
+  }
+
   componentDidMount() {
+
     const { series, onSwitchView } = this.props;
     // if (series.length < 1) {
     //   onSwitchView('search');
-    // }
+    // }    
     this.getViewports();
     this.getData();
+    this.formInvertMap();
     if (series.length > 0) {
       this.setSubComponentHeights();
       window.addEventListener("resize", e => this.setSubComponentHeights(e));
@@ -222,6 +234,7 @@ class DisplayView extends Component {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
+      this.formInvertMap();
     }
     // This is to handle late loading of aimsList from store but it also calls getData
     // each time visibility of aims change
@@ -1799,6 +1812,7 @@ class DisplayView extends Component {
                   imageIdIndex={parseInt(data.stack.currentImageIdIndex)}
                   viewportIndex={i}
                   tools={tools}
+                  shouldInvert={this.state.invertMap[i]}
                   eventListeners={[
                     {
                       target: "element",
