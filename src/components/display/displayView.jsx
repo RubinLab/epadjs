@@ -163,7 +163,7 @@ class DisplayView extends Component {
       containerHeight: 0,
       tokenRefresh: null,
       activeTool: '',
-      invertMap: {}
+      invertMap: {},
       isOverlayVisible: {}
     };
   }
