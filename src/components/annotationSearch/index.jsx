@@ -1450,6 +1450,7 @@ const AnnotationSearch = props => {
             encrUrlArgs={encArgs}
             decrArgs={decrArgs}
             onSave={getNewData}
+            completeLoading={props.completeLoading}
           />
         )}
       </table>

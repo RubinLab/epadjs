@@ -116,7 +116,9 @@ class App extends Component {
       searchQuery: "",
       pairs: {},
       leftMenuState: "open",
-      update: 0
+      update: 0,
+      loading: false,
+      freeze: "auto"
     };
   }
 
@@ -770,6 +772,7 @@ class App extends Component {
     await this.completeAutorization();
 
     if (seriesArray) {
+      this.setState({ loading: true, freeze: 'none' })
       const parsedSeriesArray = JSON.parse(seriesArray);
       parsedSeriesArray.forEach(
         (serie, i) => (parsedSeriesArray[i] = { ...serie, projectID })
@@ -789,11 +792,13 @@ class App extends Component {
       }
       Promise.all(promiseArr)
         .then(() => {
+          this.setState({ loading: false, freeze: 'auto' })
           this.props.history.push("/display");
         })
         .catch((err) => console.error(err));
     } else if (patientID && studyUID && projectID) {
       // This should be teaching files
+      this.setState({ loading: true, freeze: 'none' })
       const packedData = {
         projectID,
         patientID,
@@ -841,6 +846,7 @@ class App extends Component {
     }
     Promise.all(promiseArr)
       .then(() => {
+        this.setState({ loading: false, freeze: 'auto' })
         this.props.history.push("/display");
       })
       .catch((err) => console.error(err));
@@ -1479,6 +1485,7 @@ class App extends Component {
                       setQuery={(query) =>
                         this.setState({ searchQuery: query })
                       }
+                      completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
                     />
                   )}
                 />
@@ -1595,6 +1602,7 @@ class App extends Component {
                     update={this.state.update}
                     searchQuery={this.state.searchQuery}
                     setQuery={(query) => this.setState({ searchQuery: query })}
+                    completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
                   />
                 )}
               />
