@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Route, Switch, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
+import PropagateLoader from 'react-spinners/PropagateLoader';
 import { ToastContainer, toast } from "react-toastify";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import Keycloak from "keycloak-js";
@@ -1415,6 +1416,7 @@ class App extends Component {
               projectAdded={this.state.projectAdded}
               openClose={this.state.leftMenuState}
             >
+              <PropagateLoader color={'#7A8288'} loading={this.state.loading} margin={8} />
               <Switch className="splitted-mainview">
                 <Route path="/logout" render={(props) => (
                   <Logout logout={this.onLogout} />
@@ -1561,6 +1563,7 @@ class App extends Component {
             projectAdded={this.state.projectAdded}
             getWorklistPatient={this.getWorklistPatient}
           >
+            <PropagateLoader color={'#7A8288'} loading={this.state.loading} margin={8} />
             <Switch>
               <Route path="/logout" component={Logout} />
               <ProtectedRoute
