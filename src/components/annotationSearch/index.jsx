@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { toast } from 'react-toastify';
+import PropagateLoader from 'react-spinners/PropagateLoader';
 import _ from 'lodash';
 import Collapsible from 'react-collapsible';
 import { HiOutlineFolderDownload } from 'react-icons/hi';
@@ -1441,6 +1442,7 @@ const AnnotationSearch = props => {
               filters={filters}
             />
           )}
+          {props.loading && <PropagateLoader color={'#7A8288'} loading={this.state.loading} margin={8} />}
         </tbody>
         {showSelectSeries && (
           <SeriesModal

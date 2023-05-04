@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Route, Switch, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
-import PropagateLoader from 'react-spinners/PropagateLoader';
 import { ToastContainer, toast } from "react-toastify";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import Keycloak from "keycloak-js";
@@ -27,7 +26,6 @@ import UserMenu from "./components/userProfileMenu.jsx";
 import WarningModal from "./components/common/warningModal";
 import ConfirmationModal from "./components/common/confirmationModal";
 import SelectModalMenu from "./components/common/SelectModalMenu";
-
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
@@ -1416,7 +1414,6 @@ class App extends Component {
               projectAdded={this.state.projectAdded}
               openClose={this.state.leftMenuState}
             >
-              <PropagateLoader color={'#7A8288'} loading={this.state.loading} margin={8} />
               <Switch className="splitted-mainview">
                 <Route path="/logout" render={(props) => (
                   <Logout logout={this.onLogout} />
@@ -1488,6 +1485,7 @@ class App extends Component {
                         this.setState({ searchQuery: query })
                       }
                       completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
+                      loading={this.state.loading}
                     />
                   )}
                 />
@@ -1563,7 +1561,6 @@ class App extends Component {
             projectAdded={this.state.projectAdded}
             getWorklistPatient={this.getWorklistPatient}
           >
-            <PropagateLoader color={'#7A8288'} loading={this.state.loading} margin={8} />
             <Switch>
               <Route path="/logout" component={Logout} />
               <ProtectedRoute
@@ -1606,6 +1603,7 @@ class App extends Component {
                     searchQuery={this.state.searchQuery}
                     setQuery={(query) => this.setState({ searchQuery: query })}
                     completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
+                    loading={this.state.loading}
                   />
                 )}
               />
