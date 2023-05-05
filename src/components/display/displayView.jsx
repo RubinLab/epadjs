@@ -163,7 +163,7 @@ class DisplayView extends Component {
       containerHeight: 0,
       tokenRefresh: null,
       activeTool: '',
-      invertMap: {}
+      invertMap: {},
       isOverlayVisible: {}
     };
   }
@@ -178,7 +178,6 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
-
     const { series, onSwitchView } = this.props;
     // if (series.length < 1) {
     //   onSwitchView('search');
