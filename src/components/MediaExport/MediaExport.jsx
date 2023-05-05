@@ -8,9 +8,7 @@ import { pptWrapper } from "./pptWrapper";
 import { videoExport } from "./videoExport";
 import cornerstoneTools from "cornerstone-tools";
 import { getToolState } from "cornerstone-tools/stateManagement/toolState";
-//import "bootstrap/dist/css/bootstrap.min.css"
 
-//import "./bootstrap.min.css";
 import "./bootstrap-icons.css";
 import "./MediaExport.css";
 import "./styles.css";
@@ -71,13 +69,11 @@ class MediaExport extends Component {
   }
   componentDidMount() {
     const { activePort } = this.props;
-    // console.log(this.props);
     // In theory this.props has all of the information needed to export
     // high quality screenshots. In practice, you need cornerstone to 
     // handle that for you.
     const { element } = cornerstone.getEnabledElements()[activePort];
     this.canv = element.getElementsByClassName('cornerstone-canvas')[0];
-    // this.vid.initializeRecorder(this.canv);
     this.pptw.updateDisplayText('pptInfo');
     this.pptw.updateCanvasPreview('pptPreview');
     this.gifData.setReady(this.gifData.ready);
@@ -168,8 +164,6 @@ class MediaExport extends Component {
       }, duration * 1000)
   }
 
-  // TODO: Make a custom modal instead of using window.confirm
-  // Possible change: Only confirm if there are multiple slides (see deletePptSlide)
   /**
    * Clears the presentation.
    */
@@ -230,9 +224,6 @@ class MediaExport extends Component {
     this.pptw.updateCanvasPreview('pptPreview');
   }
 
-  // Possible change: ask the user to confirm if the slide is not empty
-  // (or if it contains 2 + images)
-  // (see clearPpt)
   /**
    * Deletes the current slide from the presentation.
    */
@@ -847,12 +838,6 @@ class MediaExport extends Component {
     const listHtml = { __html: list.join('') };
     return (
       <div className="media-export-pop-up" id="media-tab-pane">
-        {/*<div className="close-media-export-menu" onClick={this.props.onClose}>*/}
-        {/*  <a href="#">X</a>*/}
-        {/*</div>*/}
-        {/*<div id="media-export-handle" className="buttonLabel">*/}
-        {/*  <span>Export Media</span>*/}
-        {/*</div>*/}
         <div className="annotation-header-new">Media Export</div>
         <div className="slide-preview-area">
           <div className="slide-preview-text">
@@ -935,7 +920,6 @@ class MediaExport extends Component {
             <a style={{ textAlign: 'center' }}><i className="bi bi-x-circle"></i><p>Clear Presentation</p></a>
           </div>
         </div>
-        {/*<br />*/}
         <br />
         <div className="status" id="gif-status-box">
           <div className="annotation-header-new">Status</div>

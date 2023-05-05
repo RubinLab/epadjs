@@ -2,7 +2,6 @@ import pptxgen from "pptxgenjs";
 
 export function pptWrapper() {
   let defaultSlideNotes = '';
-  const maxImagesPerSlide = 999;
   const slideBackgroundColor = '2E2D29';
   // The next two values are in inches. Powerpoint seems to use 96 pixels per inch.
   const slideHeight = 15;
@@ -83,10 +82,6 @@ export function pptWrapper() {
    * @param {string} imageNotesSensitive Slide notes to be included that are more sensitive, eg PHI.
    */
   this.addImageToSlide = function (dataURL, width, height, imageNotes = '', imageNotesSensitive = '') {
-    //if (this.slides[this.currentSlide].length >= maxImagesPerSlide) {
-    //  window.alert("Limit of " + maxImagesPerSlide + " images per slide! This image was not added.");
-    //  throw "Limit of " + maxImagesPerSlide + " images per slide!";
-    //}
     this.slides[this.currentSlide].push({ b64: dataURL, w: width, h: height, notes: imageNotes, notesSensitive: imageNotesSensitive });
   }
 

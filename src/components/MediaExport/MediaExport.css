@@ -2,20 +2,12 @@
   position: absolute;
   background-color: #777;
   padding: 5px 5px;
-  /*outline: solid;
-  outline-width: 1px;*/
-  /*background-color: #3a3f44;
-  outline-color: black;*/
-  /*width: 455px;*/
   width: 420px;
-  /*Default: no right specified, left: 470px*/
   right: 0;
   margin-top: 30px;
   margin-left: 4px;
-  /*left: 470px;*/
   height: 820px;
   overflow: auto;
-  /*top: 91px;*/
   z-index: 1000;
   font-size: 12px;
 }
@@ -71,15 +63,3 @@ a {
 #gifSettings {
   display: none;
 }
-
-/*Somebody who's good with CSS should change the next two things to look better.
-  Changing the cursor is intended to make it clear that the menu is draggable,
-  as it otherwise isn't obvious. Changing the color is supposed to suggest that
-  it's like a title bar.
-#media-export-handle {
-  background-color: #222;
-}*/
-
-/*#media-export-handle:hover {
-  cursor: move;
-}*/
