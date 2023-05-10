@@ -195,6 +195,7 @@ export function getSingleSeries(projectId, subjectId, studyUID, seriesUID) {
 }
 
 export function setSignificantSeries(projectId, subjectId, studyUID, body) {
+  console.log(" not good if thick!!!")
   const url =
     http.apiUrl() +
     "/projects/" +
