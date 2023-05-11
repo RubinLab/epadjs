@@ -576,6 +576,7 @@ class DisplayView extends Component {
     let baseUrl;
     imageUrls.map((url) => {
       baseUrl = wadoUrl + url.lossyImage;
+      console.log(" ---> url.multiFrameImage", url.multiFrameImage);
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
           let multiFrameUrl = baseUrl + "&frame=" + i;
