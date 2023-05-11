@@ -116,7 +116,8 @@ class App extends Component {
       searchQuery: "",
       pairs: {},
       leftMenuState: "open",
-      update: 0
+      update: 0,
+      savedData: {}
     };
   }
 
@@ -1424,6 +1425,8 @@ class App extends Component {
                       keycloak={this.state.keycloak}
                       onSwitchView={this.switchView}
                       closeLeftMenu={this.closeLeftMenu}
+                      savedData={this.state.savedData}
+                      saveData={(data) => {this.state.savedData=data}}
                     />
                   )}
                 />
@@ -1567,6 +1570,8 @@ class App extends Component {
                     keycloak={this.state.keycloak}
                     onSwitchView={this.switchView}
                     closeLeftMenu={this.closeLeftMenu}
+                    savedData={this.state.savedData}
+                    saveData={(data) => { this.state.savedData = data }}
                   />
                 )}
               />

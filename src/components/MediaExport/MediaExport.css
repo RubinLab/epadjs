@@ -1,0 +1,65 @@
+.media-export-pop-up {
+  position: absolute;
+  background-color: #777;
+  padding: 5px 5px;
+  width: 420px;
+  right: 0;
+  margin-top: 30px;
+  margin-left: 4px;
+  height: 820px;
+  overflow: auto;
+  z-index: 1000;
+  font-size: 12px;
+}
+
+.close-media-export-menu {
+  position: absolute;
+  top: 2px;
+  right: 5px;
+  color: white;
+}
+
+label {
+  font-weight: 400;
+}
+
+hr {
+  margin-top: 1em;
+  margin-bottom: 0em;
+}
+
+h5 {
+  font-size: 2em;
+  margin-bottom: 0em;
+}
+
+a {
+  color: red;
+  text-align: right !important;
+}
+
+#gifLoadingIndicator {
+    display: none;
+}
+
+#gifLoadingIndicator::after {
+  display: inline-block;
+  animation: ellipsis steps(1,end) 1s infinite;
+  content: '';
+}
+
+@keyframes ellipsis {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+  100% { content: ''; }
+}
+
+#gifReadyButtons {
+  display: none;
+}
+
+#gifSettings {
+  display: none;
+}
