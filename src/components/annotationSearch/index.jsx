@@ -1426,6 +1426,7 @@ const AnnotationSearch = props => {
             </th>
           </tr>
         </thead>
+        <PropagateLoader color={'#7A8288'} loading={props.loading} margin-left={'8rem'} />
         <tbody>
           {data.length > 0 && !showSpinner && (
             <AnnotationTable
@@ -1442,7 +1443,6 @@ const AnnotationSearch = props => {
               filters={filters}
             />
           )}
-          <PropagateLoader color={'white'} loading={props.loading} margin={8} />
         </tbody>
         {showSelectSeries && (
           <SeriesModal
