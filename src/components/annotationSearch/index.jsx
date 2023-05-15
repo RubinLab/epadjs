@@ -1442,7 +1442,7 @@ const AnnotationSearch = props => {
               filters={filters}
             />
           )}
-          {props.loading && <PropagateLoader color={'#7A8288'} loading={props.loading} margin={8} />}
+          <PropagateLoader color={'white'} loading={props.loading} margin={8} />
         </tbody>
         {showSelectSeries && (
           <SeriesModal
