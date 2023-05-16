@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { toast } from 'react-toastify';
+import PropagateLoader from 'react-spinners/PropagateLoader';
 import _ from 'lodash';
 import Collapsible from 'react-collapsible';
 import { HiOutlineFolderDownload } from 'react-icons/hi';
@@ -1425,6 +1426,7 @@ const AnnotationSearch = props => {
             </th>
           </tr>
         </thead>
+        <PropagateLoader color={'#7A8288'} loading={props.loading} margin-left={'8rem'} />
         <tbody>
           {data.length > 0 && !showSpinner && (
             <AnnotationTable
@@ -1450,6 +1452,7 @@ const AnnotationSearch = props => {
             encrUrlArgs={encArgs}
             decrArgs={decrArgs}
             onSave={getNewData}
+            completeLoading={props.completeLoading}
           />
         )}
       </table>
