@@ -351,8 +351,3 @@ body {
   padding: 0px; 
   margin: 0px;
 }
-
-/*Maybe remove this once I implement tabs.*/
-label {
-    color: #fff;
-}
