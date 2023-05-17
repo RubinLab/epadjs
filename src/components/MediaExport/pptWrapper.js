@@ -145,7 +145,8 @@ export function pptWrapper() {
     }
     let canv = document.getElementById(canvasId);
     let ctx = canv.getContext('2d');
-    ctx.fillStyle = "white";
+    // ctx.fillStyle = "white";
+    ctx.fillStyle = "#2E2D29";
     ctx.fillRect(0, 0, canv.width, canv.height);
     //ctx.clearRect(0, 0, canv.width, canv.height);
     let n = this.slides[slideToDisplay].length;
@@ -157,13 +158,15 @@ export function pptWrapper() {
     let count = 0;
     for (let i = 0; i < this.slides[slideToDisplay].length; i++) {
       let img = new Image;
+      let picW = this.slides[slideToDisplay][i].w;
+      let picH = this.slides[slideToDisplay][i].h;
+      let imgW = Math.min(canv.width / nRows, canv.height / nCols * picW / picH);
+      let imgH = Math.min(canv.height / nCols, canv.width / nRows * picH / picW);
       img.onload = function () {
-        let xOffset = canv.width / nRows * (count % nRows);
-        let yOffset = canv.height / nCols * Math.floor(count / nRows);
+        let xOffset = canv.width / nRows * (count % nRows) + (canv.width / nRows - imgW) / 2;
+        let yOffset = canv.height / nCols * Math.floor(count / nRows) + (canv.height / nCols - imgH) / 2;
         count++;
-        let previewWidth = canv.width / nRows;
-        let previewHeight = canv.height / nCols;
-        ctx.drawImage(img, xOffset, yOffset, previewWidth, previewHeight);
+        ctx.drawImage(img, xOffset, yOffset, imgW, imgH)
       }
       img.src = this.slides[slideToDisplay][i].b64;
     }
