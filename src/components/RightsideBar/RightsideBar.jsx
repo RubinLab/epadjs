@@ -113,6 +113,20 @@ class Rightsidebar extends Component {
               <ul className="nav nav-tabs" id="myTab1" role="tablist">
                 <li className="nav-item" role="presentation">
                   <button
+                    className={this.state.showMediaExport ? "nav-link active" : "nav-link"}
+                    id="media-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#media-tab-pane"
+                    type="button" role="tab"
+                    aria-controls="media-tab-pane"
+                    aria-selected={this.state.showMediaExport}
+                    onClick={this.mediaExportTabClicked}
+                  >
+                    Media Export
+                  </button>
+                </li>
+                <li className="nav-item" role="presentation">
+                  <button
                     className={this.state.showMediaExport ? "nav-link" : "nav-link active"}
                     id="annotations-tab"
                     data-bs-toggle="tab"
@@ -124,20 +138,6 @@ class Rightsidebar extends Component {
                     onClick={this.annotationsTabClicked}
                   >
                     Annotations
-                  </button>
-                </li>
-                <li className="nav-item" role="presentation">
-                  <button
-                    className={this.state.showMediaExport ? "nav-link active" : "nav-link"}
-                    id="media-tab"
-                    data-bs-toggle="tab"
-                    data-bs-target="#media-tab-pane"
-                    type="button" role="tab"
-                    aria-controls="media-tab-pane"
-                    aria-selected={this.state.showMediaExport}
-                    onClick={this.mediaExportTabClicked}
-                  >
-                    Media Export
                   </button>
                 </li>
               </ul>
