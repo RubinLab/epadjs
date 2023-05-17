@@ -1,9 +1,9 @@
 {
-  "mode": "lite",
-  "apiUrl": "http://localhost:8080",
+  "mode": "thick",
+  "apiUrl": "http://host.docker.internal:8080/api",
   "testUrl": "http://localhost:3000",
-  "apiUrlV1": "http://localhost:8080/epad",
-  "wadoUrl": "wadouri:http://localhost:8080/wado",
+  "apiUrlV1": "http://host.docker.internal:8080/api",
+  "wadoUrl": "wadouri:http://host.docker.internal:8080/api/wado",
   "clientKey": "Swa9Ci6Hr7n8eb6JqlEZpaujC7ZQq1fM",
   "maxPort": "4",
   "defaultAimName": "Finding"
