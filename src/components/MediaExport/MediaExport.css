@@ -42,7 +42,7 @@ a {
     display: none;
 }
 
-#gifLoadingIndicator::after {
+/*#gifLoadingIndicator::after {
   display: inline-block;
   animation: ellipsis steps(1,end) 1s infinite;
   content: '';
@@ -54,7 +54,7 @@ a {
   50% { content: '..'; }
   75% { content: '...'; }
   100% { content: ''; }
-}
+}*/
 
 #gifReadyButtons {
   display: none;
