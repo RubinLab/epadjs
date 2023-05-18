@@ -26,7 +26,6 @@ import UserMenu from "./components/userProfileMenu.jsx";
 import WarningModal from "./components/common/warningModal";
 import ConfirmationModal from "./components/common/confirmationModal";
 import SelectModalMenu from "./components/common/SelectModalMenu";
-
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
@@ -117,7 +116,9 @@ class App extends Component {
       pairs: {},
       leftMenuState: "open",
       update: 0,
-      savedData: {}
+      savedData: {},
+      loading: false,
+      freeze: "auto",
     };
   }
 
@@ -771,6 +772,7 @@ class App extends Component {
     await this.completeAutorization();
 
     if (seriesArray) {
+      this.setState({ loading: true, freeze: 'none' })
       const parsedSeriesArray = JSON.parse(seriesArray);
       parsedSeriesArray.forEach(
         (serie, i) => (parsedSeriesArray[i] = { ...serie, projectID })
@@ -790,11 +792,13 @@ class App extends Component {
       }
       Promise.all(promiseArr)
         .then(() => {
+          this.setState({ loading: false, freeze: 'auto' })
           this.props.history.push("/display");
         })
         .catch((err) => console.error(err));
     } else if (patientID && studyUID && projectID) {
       // This should be teaching files
+      this.setState({ loading: true, freeze: 'none' })
       const packedData = {
         projectID,
         patientID,
@@ -842,6 +846,7 @@ class App extends Component {
     }
     Promise.all(promiseArr)
       .then(() => {
+        this.setState({ loading: false, freeze: 'auto' })
         this.props.history.push("/display");
       })
       .catch((err) => console.error(err));
@@ -1482,6 +1487,8 @@ class App extends Component {
                       setQuery={(query) =>
                         this.setState({ searchQuery: query })
                       }
+                      completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
+                      loading={this.state.loading}
                     />
                   )}
                 />
@@ -1600,6 +1607,8 @@ class App extends Component {
                     update={this.state.update}
                     searchQuery={this.state.searchQuery}
                     setQuery={(query) => this.setState({ searchQuery: query })}
+                    completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
+                    loading={this.state.loading}
                   />
                 )}
               />

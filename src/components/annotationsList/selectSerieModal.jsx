@@ -90,6 +90,7 @@ class selectSerieModal extends React.Component {
         all: [templates],
       });
       this.semanticAnswers.createViewerWindow();
+      this.props.completeLoading();
     };// end teaching file related part
   }
   componentWillUnmount = () => {
@@ -162,7 +163,7 @@ class selectSerieModal extends React.Component {
     const { projectID, patientID, studyUID, subjectID } = series[0];
     const subID = patientID ? patientID : subjectID;
 
-    if (!significanceSet) {
+    if (!significanceSet && this.mode === "teaching") {
       setSignificantSeries(projectID, subID, studyUID, significantSeries);
     }
   }
