@@ -28,7 +28,8 @@ import {
   FaPalette,
   FaObjectUngroup,
   FaDotCircle,
-  FaTimes
+  FaTimes,
+  FaCamera
 } from "react-icons/fa";
 import { BsArrowUpLeft } from "react-icons/bs";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
@@ -106,7 +107,7 @@ const tools = [
   { name: "Brush3DHUGated" },
   { name: "BrushSphericalHUGated" },
   { name: "Brush3DAutoGated" },
-  { name: "ArrowAnnotate" },
+  { name: "ArrowAnnotate" }
 ];
 
 class ToolMenu extends Component {

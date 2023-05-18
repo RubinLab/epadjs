@@ -1717,8 +1717,12 @@ class DisplayView extends Component {
           updateProgress={updateProgress}
           updateTreeDataOnSave={updateTreeDataOnSave}
           setAimDirty={this.setDirtyFlag}
+          saveData={this.props.saveData}
+          savedData={this.props.savedData}
         >
-          <ToolMenu onSwitchView={this.props.onSwitchView} />
+          <ToolMenu
+            onSwitchView={this.props.onSwitchView}
+          />
           {!this.state.isLoading &&
             Object.entries(series).length &&
             data.map((data, i) => (

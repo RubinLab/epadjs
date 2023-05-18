@@ -116,8 +116,9 @@ class App extends Component {
       pairs: {},
       leftMenuState: "open",
       update: 0,
+      savedData: {},
       loading: false,
-      freeze: "auto"
+      freeze: "auto",
     };
   }
 
@@ -1429,6 +1430,8 @@ class App extends Component {
                       keycloak={this.state.keycloak}
                       onSwitchView={this.switchView}
                       closeLeftMenu={this.closeLeftMenu}
+                      savedData={this.state.savedData}
+                      saveData={(data) => {this.state.savedData=data}}
                     />
                   )}
                 />
@@ -1574,6 +1577,8 @@ class App extends Component {
                     keycloak={this.state.keycloak}
                     onSwitchView={this.switchView}
                     closeLeftMenu={this.closeLeftMenu}
+                    savedData={this.state.savedData}
+                    saveData={(data) => { this.state.savedData = data }}
                   />
                 )}
               />
