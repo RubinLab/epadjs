@@ -77,6 +77,7 @@ class MediaExport extends Component {
     this.pptw.updateDisplayText('pptInfo');
     this.pptw.updateCanvasPreview('pptPreview');
     this.gifData.setReady(this.gifData.ready);
+    this.isRecording = false;
   }
 
   // helper function to see if a string only has ascii characters in it
@@ -132,36 +133,42 @@ class MediaExport extends Component {
    * the sliders in the UI.
    */
   recordGif = () => {
-    this.gifData.setReady(false);
-    const x = document.getElementById('gifRecordingIndicator');
-    x.innerHTML = 'Recording progress: 0%'
-    const y = document.getElementById('gifLoadingIndicator');
-    const { activePort } = this.props;
-    const { element } = cornerstone.getEnabledElements()[activePort];
-    const image = cornerstone.getImage(element);
-    let stringArray = [''];
-    this.dumpDataSet(image.data, stringArray);
-    this.gifData.text = stringArray[0];
-    this.canv = element.getElementsByClassName('cornerstone-canvas')[0];
-    this.gifData.width = this.canv.width;
-    this.gifData.height = this.canv.height;
-    const duration = parseInt(document.getElementById('gifDurationSlider').value);
-    const frameRate = parseInt(document.getElementById('gifFramerateSlider').value);
-    let progress = 0;
-    let i = 0;
-    const afterFrame = () => {
-      i = i + 1;
-      if (Math.floor(i / (duration * frameRate) * 10) > progress) {
-        progress = Math.floor(i / (duration * frameRate) * 10);
-        x.innerHTML = 'Recording progress: ' + progress*10 + '%'
+    if (!this.isRecording) {
+      this.isRecording = true;
+      this.gifData.setReady(false);
+      const x = document.getElementById('gifRecordingIndicator');
+      x.innerHTML = 'Recording progress: 0%'
+      const y = document.getElementById('gifLoadingIndicator');
+      const { activePort } = this.props;
+      const { element } = cornerstone.getEnabledElements()[activePort];
+      const image = cornerstone.getImage(element);
+      let stringArray = [''];
+      this.dumpDataSet(image.data, stringArray);
+      this.gifData.text = stringArray[0];
+      this.canv = element.getElementsByClassName('cornerstone-canvas')[0];
+      this.gifData.width = this.canv.width;
+      this.gifData.height = this.canv.height;
+      const duration = parseInt(document.getElementById('gifDurationSlider').value);
+      const frameRate = parseInt(document.getElementById('gifFramerateSlider').value);
+      let progress = 0;
+      let i = 0;
+      const afterFrame = () => {
+        i = i + 1;
+        if (Math.floor(i / (duration * frameRate) * 10) > progress) {
+          progress = Math.floor(i / (duration * frameRate) * 10);
+          x.innerHTML = 'Recording progress: ' + progress * 10 + '%'
+        }
       }
+      this.vid.recordGif(this.canv, duration, frameRate, this.gifData, 1, afterFrame);
+      const finished = () => { this.isRecording = false }
+      setTimeout(
+        function Timer() {
+          finished();
+          x.innerHTML = 'Recording finished. Preparing movie.';
+          y.style.display = 'block';
+        }, duration * 1000)
     }
-    this.vid.recordGif(this.canv, duration, frameRate, this.gifData, 1, afterFrame);
-    setTimeout(
-      function Timer() {
-        x.innerHTML = 'Recording finished.';
-        y.style.display = 'block';
-      }, duration * 1000)
+
   }
 
   /**
@@ -732,98 +739,92 @@ class MediaExport extends Component {
   }
 
   recordStack = () => {
-    // scrollToIndex(element, 0) scrolls to the first image,
-    // scrollToIndex(element, 1) to the second image,
-    // scrollToIndex(element, -1) to the last image,
-    // scrollToIndex(element, -2) to the second to last image, etc.
-    const x = document.getElementById('gifRecordingIndicator');
-    x.innerHTML = 'Recording progress: 0%'
-    const y = document.getElementById('gifLoadingIndicator');
-    const { activePort } = this.props;
-    const { element } = cornerstone.getEnabledElements()[activePort];
-    const image = cornerstone.getImage(element);
-    const duration = parseInt(document.getElementById('gifDurationSlider').value);
-    let frameRate = parseInt(document.getElementById('gifFramerateSlider').value);
-    let numImages = -1;
-    let n = 1;
-    // There isn't any simple way to figure out the number of images in a series from here.
-    // scrollToIndex method figures it out by calling getToolState, a method internal to
-    // cornerstone-tools. I have imported it and am using it here. I am not sure about the
-    // specifics of importing it that way, because I noticed that cornerstone-tools is
-    // included in /epadjs/src instead of being imported through npm. If that changes, my method
-    // of importing getToolState may break, but hopefully my code should be resilient enough to
-    // keep functioning if that happens.
-    try {
-      numImages = getToolState(element, 'stack').data[0].imageIds.length;
-    } catch (error) {
-      // Exponential search to find the maximum allowed index. This is hacky but it should 
-      // work as a backup.
-      console.warn('MediaExport could not figure out the number of images in this series. ' +
-        'This is because of the following error:\n', error);
-      let lowerBound = 0;
-      let upperBound = 1;
-      let loopDone = false;
-      while (!loopDone) {
-        try {
-          scrollToIndex(element, upperBound);
-          lowerBound = upperBound;
-          upperBound = upperBound * 2;
-        } catch (e) {
-          loopDone = true;
+    if (!this.isRecording) {
+      this.isRecording = true;
+      // scrollToIndex(element, 0) scrolls to the first image,
+      // scrollToIndex(element, 1) to the second image,
+      // scrollToIndex(element, -1) to the last image,
+      // scrollToIndex(element, -2) to the second to last image, etc.
+      const x = document.getElementById('gifRecordingIndicator');
+      x.innerHTML = 'Recording progress: 0%'
+      const y = document.getElementById('gifLoadingIndicator');
+      const { activePort } = this.props;
+      const { element } = cornerstone.getEnabledElements()[activePort];
+      const image = cornerstone.getImage(element);
+      let duration = parseInt(document.getElementById('gifDurationSlider').value);
+      let frameRate = parseInt(document.getElementById('gifFramerateSlider').value);
+      let numImages = -1;
+      // There isn't any simple way to figure out the number of images in a series from here.
+      // scrollToIndex method figures it out by calling getToolState, a method internal to
+      // cornerstone-tools. I have imported it and am using it here. I am not sure about the
+      // specifics of importing it that way, because I noticed that cornerstone-tools is
+      // included in /epadjs/src instead of being imported through npm. If that changes, my method
+      // of importing getToolState may break, but hopefully my code should be resilient enough to
+      // keep functioning if that happens.
+      try {
+        numImages = getToolState(element, 'stack').data[0].imageIds.length;
+      } catch (error) {
+        // Exponential search to find the maximum allowed index. This is hacky but it should 
+        // work as a backup.
+        console.warn('MediaExport could not figure out the number of images in this series. ' +
+          'Using a workaround. This is because of the following error:\n', error);
+        let lowerBound = 0;
+        let upperBound = 1;
+        let loopDone = false;
+        while (!loopDone) {
+          try {
+            scrollToIndex(element, upperBound);
+            lowerBound = upperBound;
+            upperBound = upperBound * 2;
+          } catch (e) {
+            loopDone = true;
+          }
+        }
+        while (lowerBound != upperBound) {
+          let middleIndex = Math.ceil(lowerBound / 2 + upperBound / 2);
+          try {
+            scrollToIndex(element, middleIndex);
+            lowerBound = middleIndex;
+          } catch (e) {
+            upperBound = Math.min(middleIndex, upperBound - 1);
+          }
+        }
+        numImages = lowerBound + 1;
+      }
+      // Record the gif:
+      duration = Math.max(duration, numImages / frameRate);
+      let stringArray = ['', ''];
+      this.dumpDataSet(image.data, stringArray);
+      this.gifData.text = stringArray[0];
+      this.gifData.sensitiveText = stringArray[1];
+      this.canv = element.getElementsByClassName('cornerstone-canvas')[0];
+      this.gifData.width = this.canv.width;
+      this.gifData.height = this.canv.height;
+      let i = 0;
+      scrollToIndex(element, 0);
+      let progress = 0;
+      const afterFrame = () => {
+        i += 1;
+        if (Math.floor(i / numImages * 10) > progress) {
+          progress = Math.floor(i / numImages * 10);
+          x.innerHTML = 'Recording progress: ' + progress * 10 + '%';
+        }
+        if (i < numImages) {
+          scrollToIndex(element, i);
         }
       }
-      while (lowerBound != upperBound) {
-        let middleIndex = Math.ceil(lowerBound / 2 + upperBound / 2);
-        try {
-          scrollToIndex(element, middleIndex);
-          lowerBound = middleIndex;
-        } catch (e) {
-          upperBound = Math.min(middleIndex, upperBound-1);
-        }
-      }
-      numImages = lowerBound + 1;
+      // We can record the frames quickly and play them back at the desired framerate.
+      const speedUp = Math.max(30 / numImages * duration, 1);
+      this.vid.recordGif(this.canv, duration / speedUp, numImages / duration * speedUp, this.gifData, speedUp, afterFrame);
+      const finished = () => {this.isRecording = false}
+      setTimeout(
+        function Timer() {
+          finished();
+          this.isRecording = false;
+          x.innerHTML = 'Recording finished. Preparing movie.';
+          y.style.display = 'block';
+        }, duration / speedUp * 1000 + 50);
     }
-    // We want the resulting gif to be the duration specified by the user, without
-    // exceeding the specified framerate, so we skip frames until we can fit the
-    // whole video in the desired duration, then we reduce the framerate to
-    // ensure that the video has the correct duration.
-    while (n <= 1000) {
-      if (frameRate * duration >= Math.floor(numImages / n)) {
-        frameRate = Math.floor(numImages / n) / duration;
-        break;
-      }
-      n++;
-    }
-    // Record the gif:
-    let stringArray = ['', ''];
-    this.dumpDataSet(image.data, stringArray);
-    this.gifData.text = stringArray[0];
-    this.gifData.sensitiveText = stringArray[1];
-    this.canv = element.getElementsByClassName('cornerstone-canvas')[0];
-    this.gifData.width = this.canv.width;
-    this.gifData.height = this.canv.height;
-    let i = 0;
-    scrollToIndex(element, 0);
-    let progress = 0;
-    const afterFrame = () => {
-      i = i + n;
-      if (Math.floor(i / numImages * 10) > progress) {
-        progress = Math.floor(i / numImages * 10);
-        x.innerHTML = 'Recording progress: ' + progress*10 + '%'
-      }
-      if (i < numImages) {
-        scrollToIndex(element, i);
-      }
-    }
-    // Arbitrarily chosen. I tested this on my computer and it struggles to keep up past
-    // about 20 frames per second.
-    const k = Math.max(20/frameRate, 1);
-    this.vid.recordGif(this.canv, duration / k, frameRate * k, this.gifData, k, afterFrame);
-    setTimeout(
-      function Timer() {
-        x.innerHTML = 'Recording finished. ';
-        y.style.display = 'block';
-      }, duration / k * 1000);
   }
 
   toggleAccessionNumber = ({ target }) => {
@@ -886,23 +887,10 @@ class MediaExport extends Component {
           <br />
           <label htmlFor="gifFramerateSlider" id="gifFramerateText" className="form-label">Frames per Second: 10</label>
           <input type="range" className="form-range" min="5" max="30" step="5" list="gifFPSlist" defaultValue="10" onChange={this.updateFramerateDisplay} id="gifFramerateSlider" />
-          <datalist id="gifFPSlist">
-            <option>5</option>
-            <option>10</option>
-            <option>15</option>
-            <option>20</option>
-            <option>25</option>
-            <option>30</option>
-          </datalist>
-          <label htmlFor="gifDurationSlider" id="gifDurationText" className="form-label">Duration: 3 Seconds</label>
-          <input type="range" className="form-range" min="1" max="5" step="1" list="gifDurationList" defaultValue="3" onChange={this.updateDurationDisplay} id="gifDurationSlider" />
-          <datalist id="gifDurationList">
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
-            <option>5</option>
-          </datalist>
+          <datalist id="gifFPSlist"></datalist>
+          <label htmlFor="gifDurationSlider" id="gifDurationText" className="form-label">Duration: 5 Seconds</label>
+          <input type="range" className="form-range" min="1" max="30" step="1" list="gifDurationList" defaultValue="5" onChange={this.updateDurationDisplay} id="gifDurationSlider" />
+          <datalist id="gifDurationList"></datalist>
         </div>
         <div className="presentation">
           <div className="annotation-header-new">Presentation Controls </div>
@@ -925,7 +913,9 @@ class MediaExport extends Component {
           <div className="annotation-header-new">Status</div>
           <div className="status-box">
             <div id="gifRecordingIndicator">Status Messages appear here...</div>
-            <div id="gifLoadingIndicator">Loading</div>
+            <div id="gifLoadingIndicator"><div className="spinner-border" role="status">
+              <span className="sr-only">Loading...</span>
+            </div>{/*Loading*/}</div>
           </div>
         </div>
       </div>
