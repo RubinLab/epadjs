@@ -2,6 +2,10 @@ import GIF from 'gif.js';
 
 
 export function videoExport() {
+  // This is an array to make it simpler for timers to change its value.
+  this._videoIsRecording = [false];
+  this._gif;
+
   /**
    * Records a gif of an HTML canvas.
    * @param {HTMLElement} element
@@ -36,15 +40,35 @@ export function videoExport() {
       outputObj.url = url;
       outputObj.setReady(true);
     });
+    this._gif = gif;
+    // Can't directly access this._videoIsRecording from within setTimeout
+    // but we can access const _videoIsRecording.
+    const _videoIsRecording = this._videoIsRecording;
+    _videoIsRecording[0] = true;
     for (var i = 0; i < seconds * frameRate; i++) {
       setTimeout(
         function Timer() {
-          gif.addFrame(element, { copy: true, delay: 1000 / frameRate * speedFactor });
-          afterEachFrame();
+          if (_videoIsRecording[0]) {
+            gif.addFrame(element, { copy: true, delay: 1000 / frameRate * speedFactor });
+            afterEachFrame();
+          }
+          
         }, 1000/frameRate * i);
     }
     setTimeout(function Timer() {
-      gif.render();
+      if (_videoIsRecording[0]) {
+        _videoIsRecording[0] = false;
+        gif.render();
+      }
     }, seconds * 1000 + 50);
+  }
+  /**
+   * Ends the screen capture that's in progress and immediately starts rendering.
+   */
+  this.endVideo = () => {
+    if (this._videoIsRecording[0]) {
+      this._videoIsRecording[0] = false;
+      this._gif.render();
+    }
   }
 }

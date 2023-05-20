@@ -21,6 +21,20 @@ const mapStateToProps = state => {
 
 const scrollToIndex = cornerstoneTools.importInternal("util/scrollToIndex");
 
+// These values control various things in the media export interface, and
+// are placed here for convenience.
+const defaultGifLength = 10;
+const maxGifLength = 30;
+const defaultFrameRate = 10;
+const maxFrameRate = 30;
+const debounceMilliseconds = 300;
+// Any DICOM data whose tag is included in this array should have its data included in the presentation.
+const tagsToInclude = ['(0008,0050)', '(0008,0020)', '(0010,0040)', '(0010,1010)', '(0008,103E)', '(0018,0080)', '(0018,0081)'];
+// The accessionTag array contains the tag for the accession numbers. It's an array in case we want
+// to add other PHI-related tags here in the future. If a tag is in this array, its data is only
+// included in the presentation if the 'Save Accession #' button is toggled on.
+const accessionTag = ['(0008,0050)'];
+
 /**
  * Handles media exporting. This class saves its data using the saveData parameter.
  * When you construct a new instance of this class, take the most recent input of
@@ -32,12 +46,8 @@ const scrollToIndex = cornerstoneTools.importInternal("util/scrollToIndex");
 class MediaExport extends Component {
   constructor(props) {
     super(props);
-    // Any DICOM data whose tag is included in pptTags should have its data
-    // included in the presentation.
-    this.pptTags = ['(0008,0050)', '(0008,0020)', '(0010,0040)', '(0010,1010)',
-      '(0008,103E)', '(0018,0080)', '(0018,0081)'];
-    // Accession number and possibly other tags in the future.
-    this.sensitiveTags = ['(0008,0050)']
+    this.pptTags = tagsToInclude;
+    this.sensitiveTags = accessionTag;
     // The following lines give this class a way to export and import the current
     // presentation and gif, so that you can close and re-open the class dialog
     // without losing progress.
@@ -62,8 +72,10 @@ class MediaExport extends Component {
     this.slideNotes = ''
     this.state = {
       output: [],
-      input: ""
+      input: "",
+      isRecording: false
     }
+    this.debounce = [false];
     this.includeAccessionNumber = false;
     this.dumpDataSet = this.dumpDataSet.bind(this);
   }
@@ -77,7 +89,6 @@ class MediaExport extends Component {
     this.pptw.updateDisplayText('pptInfo');
     this.pptw.updateCanvasPreview('pptPreview');
     this.gifData.setReady(this.gifData.ready);
-    this.isRecording = false;
   }
 
   // helper function to see if a string only has ascii characters in it
@@ -131,14 +142,24 @@ class MediaExport extends Component {
   /**
    * Records a gif of the active cornerstone canvas, using the settings taken from
    * the sliders in the UI.
+   * This function is debounced, so it does nothing if called twice within a short
+   * time frame, because otherwise you could lose a lot of progress by accidentally
+   * double-clicking. The debounce time can be configured at the top of this file.
    */
   recordGif = () => {
-    if (!this.isRecording) {
-      this.isRecording = true;
+    const x = document.getElementById('gifRecordingIndicator');
+    const y = document.getElementById('gifLoadingIndicator');
+    if (this.debounce[0]) {
+      return;
+    }
+    this.debounce[0] = true;
+    const debounce = this.debounce;
+    setTimeout(() => { debounce[0] = false }, debounceMilliseconds);
+    if (!this.state.isRecording) {
+      this.setState({ isRecording: true });
       this.gifData.setReady(false);
-      const x = document.getElementById('gifRecordingIndicator');
-      x.innerHTML = 'Recording progress: 0%'
-      const y = document.getElementById('gifLoadingIndicator');
+      y.style.display = 'none';
+      x.innerHTML = 'Recording progress: 0%';
       const { activePort } = this.props;
       const { element } = cornerstone.getEnabledElements()[activePort];
       const image = cornerstone.getImage(element);
@@ -160,13 +181,26 @@ class MediaExport extends Component {
         }
       }
       this.vid.recordGif(this.canv, duration, frameRate, this.gifData, 1, afterFrame);
-      const finished = () => { this.isRecording = false }
+      const finished = () => {
+        this.setState({ isRecording: false });
+        debounce[0] = true;
+        setTimeout(() => { debounce[0] = false }, debounceMilliseconds * 2 - 100);
+      }
       setTimeout(
         function Timer() {
-          finished();
-          x.innerHTML = 'Recording finished. Preparing movie.';
-          y.style.display = 'block';
-        }, duration * 1000)
+          // Asynchronous stuff is hard so instead of checking this.state.isRecording
+          // we check this.
+          if (x.innerHTML === 'Recording progress: 100%') {
+            finished();
+            x.innerHTML = 'Recording finished. Preparing movie.';
+            y.style.display = 'block';
+          }
+        }, duration * 1000 + 100)
+    } else {
+      x.innerHTML = 'Recording finished early. Preparing movie.';
+      y.style.display = 'block';
+      this.vid.endVideo();
+      this.setState({ isRecording: false });
     }
 
   }
@@ -739,8 +773,8 @@ class MediaExport extends Component {
   }
 
   recordStack = () => {
-    if (!this.isRecording) {
-      this.isRecording = true;
+    if (!this.state.isRecording) {
+      this.setState({ isRecording: true });
       // scrollToIndex(element, 0) scrolls to the first image,
       // scrollToIndex(element, 1) to the second image,
       // scrollToIndex(element, -1) to the last image,
@@ -816,11 +850,10 @@ class MediaExport extends Component {
       // We can record the frames quickly and play them back at the desired framerate.
       const speedUp = Math.max(30 / numImages * duration, 1);
       this.vid.recordGif(this.canv, duration / speedUp, numImages / duration * speedUp, this.gifData, speedUp, afterFrame);
-      const finished = () => {this.isRecording = false}
+      const finished = () => { this.setState({ isRecording: false }) }
       setTimeout(
         function Timer() {
           finished();
-          this.isRecording = false;
           x.innerHTML = 'Recording finished. Preparing movie.';
           y.style.display = 'block';
         }, duration / speedUp * 1000 + 50);
@@ -866,7 +899,10 @@ class MediaExport extends Component {
             <a><i className="bi bi-images"></i><p>Record Stack{'\u00A0'}as Movie</p></a>
           </div>
           <div onClick={this.recordGif} className="icon-block">
-            <a><i className="bi bi-record-circle danger"></i><p>Record Screen{'\u00A0'}as Movie</p></a>
+            <a>
+              <i className={this.state.isRecording ? "bi bi-stop-fill" : "bi bi-record-circle danger"}></i>
+              <p>{this.state.isRecording ? 'Stop Recording' : 'Record Screen\u00A0as Movie'}</p>
+            </a>
           </div>
           <div onClick={this.addGif} className="icon-block">
             <a><i className="bi bi-plus-square"></i><p>Add{'\u00A0'}to Slide</p></a>
@@ -885,11 +921,11 @@ class MediaExport extends Component {
           <div className="annotation-header-new">Movie Settings
             <i onClick={this.toggleHideGifSettings} className="bi bi-eye-slash-fill" style={{ cursor: 'pointer', float: 'right', marginRight: '7px' }}> Hide Settings</i></div>
           <br />
-          <label htmlFor="gifFramerateSlider" id="gifFramerateText" className="form-label">Frames per Second: 10</label>
-          <input type="range" className="form-range" min="5" max="30" step="5" list="gifFPSlist" defaultValue="10" onChange={this.updateFramerateDisplay} id="gifFramerateSlider" />
+          <label htmlFor="gifFramerateSlider" id="gifFramerateText" className="form-label">Frames per Second: {defaultFrameRate}</label>
+          <input type="range" className="form-range" min="5" max={maxFrameRate} step="5" list="gifFPSlist" defaultValue={defaultFrameRate} onChange={this.updateFramerateDisplay} id="gifFramerateSlider" />
           <datalist id="gifFPSlist"></datalist>
-          <label htmlFor="gifDurationSlider" id="gifDurationText" className="form-label">Duration: 5 Seconds</label>
-          <input type="range" className="form-range" min="1" max="30" step="1" list="gifDurationList" defaultValue="5" onChange={this.updateDurationDisplay} id="gifDurationSlider" />
+          <label htmlFor="gifDurationSlider" id="gifDurationText" className="form-label">Duration: {defaultGifLength} Seconds</label>
+          <input type="range" className="form-range" min="1" max={maxGifLength} step="1" list="gifDurationList" defaultValue={defaultGifLength} onChange={this.updateDurationDisplay} id="gifDurationSlider" />
           <datalist id="gifDurationList"></datalist>
         </div>
         <div className="presentation">
