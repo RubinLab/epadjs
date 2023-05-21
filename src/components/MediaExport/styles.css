@@ -299,7 +299,7 @@ body {
   margin-top: 15px;
   margin-bottom: 5px;
   color: #ccc;
-  display: none;
+  display: block;
 }
 
 .icon-block2{

@@ -890,28 +890,30 @@ class MediaExport extends Component {
             <a><i className="bi bi-dash-square"></i><p>Remove</p></a>
           </div>
           <div onClick={this.saveScreenshot} className="icon-block">
-            <a><i className="bi bi-image"></i><p>Save{'\u00A0'}to Disk</p></a>
+            <a><i className="bi bi-image"></i><p>Save to Disk</p></a>
           </div>
         </div>
         <div className="media-icon-bar">
           <div className="annotation-header-new">Movie Controls</div>
           <div onClick={this.recordStack} className="icon-block">
-            <a><i className="bi bi-images"></i><p>Record Stack{'\u00A0'}as Movie</p></a>
+            <a><i className="bi bi-images"></i><p>Record Stack as Movie</p></a>
           </div>
           <div onClick={this.recordGif} className="icon-block">
             <a>
               <i className={this.state.isRecording ? "bi bi-stop-fill" : "bi bi-record-circle danger"}></i>
-              <p>{this.state.isRecording ? 'Stop Recording' : 'Record Screen\u00A0as Movie'}</p>
+              <p style={this.state.isRecording ? { color: '#80FF00' } : {}}>
+                {this.state.isRecording ? 'Stop Recording' : 'Record Series Actions'}
+              </p>
             </a>
           </div>
           <div onClick={this.addGif} className="icon-block">
-            <a><i className="bi bi-plus-square"></i><p>Add{'\u00A0'}to Slide</p></a>
+            <a><i className="bi bi-plus-square"></i><p>Add to Slide</p></a>
           </div>
           <div onClick={this.removeFromPpt} className="icon-block">
             <a><i className="bi bi-dash-square"></i><p>Remove from Slide</p></a>
           </div>
           <div onClick={this.downloadGif} className="icon-block">
-            <a><i className="bi bi-download" alt="Save Movie to Disk"></i><p>Save{'\u00A0'}to Disk</p></a>
+            <a><i className="bi bi-download" alt="Save Movie to Disk"></i><p>Save to Disk</p></a>
           </div>
           <div onClick={this.toggleHideGifSettings} className="icon-block">
             <a><i className="bi bi-gear-fill"></i><p>Settings</p></a>
