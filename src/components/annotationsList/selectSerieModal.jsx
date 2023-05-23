@@ -421,6 +421,7 @@ class selectSerieModal extends React.Component {
           "Teaching file couldn't be saved! More information about the error can be found in the logs."
         );
         console.error(error);
+        this.setState({ isButtonDisabled: false });
       });
   }
 
