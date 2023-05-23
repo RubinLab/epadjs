@@ -213,7 +213,8 @@ class selectSerieModal extends React.Component {
       selectionArr: [],
       seriesList: [],
       selectedToDisplay: [],
-      limit: 0
+      limit: 0,
+      isButtonDisabled: false
     });
     // this.props.dispatch(clearSelection());
     this.props.onCancel();
