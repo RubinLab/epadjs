@@ -1049,7 +1049,11 @@ class DisplayView extends Component {
             serieIndex,
           });
         }
+        console.log(" ---> value", value);
+
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
+
+        console.log(" ----> color", color);
 
         let imageId = getWadoImagePath(studyUid, seriesUid, key);
 
@@ -1368,12 +1372,12 @@ class DisplayView extends Component {
 
   getColorOfMarkup = (aimUid, seriesUid) => {
     console.log("  +++++++++++++++++ ");
-    console.log('----> aimUid, seriesUid', aimUid, seriesUid);
-    console.log(' --> this.props.aimList', this.props.aimList);
-    console.log(' --> this.props.aimList[seriesUid]', this.props.aimList[seriesUid]);
-    console.log(' --> this.props.aimList[seriesUid][aimUid]', this.props.aimList[seriesUid][aimUid]);
-    console.log(' --> color', this.props.aimList[seriesUid][aimUid].color);
-    console.log(' --> button', this.props.aimList[seriesUid][aimUid].color.button);
+    // console.log('----> aimUid, seriesUid', aimUid, seriesUid);
+    // console.log(' --> this.props.aimList', this.props.aimList);
+    // console.log(' --> this.props.aimList[seriesUid]', this.props.aimList[seriesUid]);
+    // console.log(' --> this.props.aimList[seriesUid][aimUid]', this.props.aimList[seriesUid][aimUid]);
+    // console.log(' --> color', this.props.aimList[seriesUid][aimUid].color);
+    // console.log(' --> button', this.props.aimList[seriesUid][aimUid].color.button);
     console.log(' --> background', this.props.aimList[seriesUid][aimUid].color.button.background);
     console.log(" +++++++++++++++++ ");
     try {
@@ -1385,6 +1389,7 @@ class DisplayView extends Component {
 
   renderMarkup = (imageId, markup, color, seriesUid, studyUid) => {
     const type = markup.markupType;
+    console.log( '---> in render markup type', type )
     switch (type) {
       case "TwoDimensionPolyline":
         this.renderPolygon(imageId, markup, color, seriesUid, studyUid);
