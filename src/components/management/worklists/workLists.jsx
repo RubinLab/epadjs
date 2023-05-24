@@ -88,11 +88,14 @@ class WorkList extends React.Component {
   };
 
   handleRequirementFormInput = e => {
-    const { name, value } = e.target;
+    const { name, value, options, selectedIndex } = e.target;
+    const code = options && options[selectedIndex] ? options[selectedIndex].id : null;
     const newRequirement = { ...this.state.newRequirement };
-    name === 'template' && value === 'Any'
-      ? (newRequirement[name] = value.toLowerCase())
-      : (newRequirement[name] = value);
+    if (name === 'template') {
+      if (value === 'Any')
+        newRequirement[name] = value.toLowerCase()
+      else newRequirement[name] = code;
+    } else newRequirement[name] = value;
     if (name === 'numOfAims' && !isNaN(parseInt(value))) {
       this.setState({ error: null });
     }
@@ -567,7 +570,8 @@ class WorkList extends React.Component {
           const { requirements, workListID } = original.row.checkbox;
           const displayReq = requirements.reduce((all, item, index) => {
             const { level, numOfAims, template } = item;
-            all.push(`${numOfAims}:${template}:${level}`);
+            const templateName = this.props.templateMap[template];
+            all.push(`${numOfAims}:${templateName}:${level}`);
             return all;
           }, []);
           const className = requirements.length
@@ -759,6 +763,7 @@ class WorkList extends React.Component {
             onDelete={this.deleteRequirement}
             onNewReqInfo={this.handleRequirementFormInput}
             error={this.state.error}
+            templateMap={this.props.templateMap}
           />
         )}
       </div>
@@ -768,6 +773,7 @@ class WorkList extends React.Component {
 
 WorkList.propTypes = {
   selection: PropTypes.string,
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
+  templateMap: PropTypes.object,
 };
 export default WorkList;
