@@ -164,7 +164,8 @@ class DisplayView extends Component {
       tokenRefresh: null,
       activeTool: '',
       invertMap: {},
-      isOverlayVisible: {}
+      isOverlayVisible: {},
+      subpath: []
     };
   }
 
@@ -565,6 +566,12 @@ class DisplayView extends Component {
 
   async getImages(serie) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
+    if (urls.length > 0) {
+      const arr = urls[0].lossyImage.split('/');
+      const subpath = [...this.state.subpath];
+      subpath[this.props.activePort] = arr[1];
+      this.setState({ subpath });
+    }
     return urls;
   }
 
@@ -722,7 +729,8 @@ class DisplayView extends Component {
             const cornerstoneImageId = getWadoImagePath(
               studyUID,
               seriesUID,
-              key
+              key,
+              this.state.subpath[this.props.activePort] 
             );
             const ret = this.getImageIndexFromImageId(
               cornerstoneImageIds,
@@ -1049,17 +1057,13 @@ class DisplayView extends Component {
             serieIndex,
           });
         }
-        console.log(" ---> value", value);
-
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
+        let imageId = getWadoImagePath(studyUid, seriesUid, key, this.state.subpath[this.props.activePort]);
 
-        console.log(" ----> color", color);
-
-        let imageId = getWadoImagePath(studyUid, seriesUid, key);
-
-        if (this.state.imageIds && !this.state.imageIds[imageId])
+        if (this.state.imageIds && !this.state.imageIds[imageId]) {
           //image is not multiframe so strip the frame number from the imageId
           imageId = imageId.split("&frame=")[0];
+        }
 
         this.renderMarkup(imageId, value, color);
       });
@@ -1371,15 +1375,6 @@ class DisplayView extends Component {
   };
 
   getColorOfMarkup = (aimUid, seriesUid) => {
-    console.log("  +++++++++++++++++ ");
-    // console.log('----> aimUid, seriesUid', aimUid, seriesUid);
-    // console.log(' --> this.props.aimList', this.props.aimList);
-    // console.log(' --> this.props.aimList[seriesUid]', this.props.aimList[seriesUid]);
-    // console.log(' --> this.props.aimList[seriesUid][aimUid]', this.props.aimList[seriesUid][aimUid]);
-    // console.log(' --> color', this.props.aimList[seriesUid][aimUid].color);
-    // console.log(' --> button', this.props.aimList[seriesUid][aimUid].color.button);
-    console.log(' --> background', this.props.aimList[seriesUid][aimUid].color.button.background);
-    console.log(" +++++++++++++++++ ");
     try {
       return this.props.aimList[seriesUid][aimUid].color.button.background;
     } catch (error) {
@@ -1389,7 +1384,6 @@ class DisplayView extends Component {
 
   renderMarkup = (imageId, markup, color, seriesUid, studyUid) => {
     const type = markup.markupType;
-    console.log( '---> in render markup type', type )
     switch (type) {
       case "TwoDimensionPolyline":
         this.renderPolygon(imageId, markup, color, seriesUid, studyUid);
