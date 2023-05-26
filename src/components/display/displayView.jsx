@@ -164,7 +164,8 @@ class DisplayView extends Component {
       tokenRefresh: null,
       activeTool: '',
       invertMap: {},
-      isOverlayVisible: {}
+      isOverlayVisible: {},
+      subpath: []
     };
   }
 
@@ -565,6 +566,12 @@ class DisplayView extends Component {
 
   async getImages(serie) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
+    if (urls.length > 0) {
+      const arr = urls[0].lossyImage.split('/');
+      const subpath = [...this.state.subpath];
+      subpath[this.props.activePort] = arr[1];
+      this.setState({ subpath });
+    }
     return urls;
   }
 
@@ -722,7 +729,8 @@ class DisplayView extends Component {
             const cornerstoneImageId = getWadoImagePath(
               studyUID,
               seriesUID,
-              key
+              key,
+              this.state.subpath[this.props.activePort] 
             );
             const ret = this.getImageIndexFromImageId(
               cornerstoneImageIds,
@@ -1050,12 +1058,12 @@ class DisplayView extends Component {
           });
         }
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
+        let imageId = getWadoImagePath(studyUid, seriesUid, key, this.state.subpath[this.props.activePort]);
 
-        let imageId = getWadoImagePath(studyUid, seriesUid, key);
-
-        if (this.state.imageIds && !this.state.imageIds[imageId])
+        if (this.state.imageIds && !this.state.imageIds[imageId]) {
           //image is not multiframe so strip the frame number from the imageId
           imageId = imageId.split("&frame=")[0];
+        }
 
         this.renderMarkup(imageId, value, color);
       });
