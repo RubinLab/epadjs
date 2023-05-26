@@ -40,7 +40,8 @@ class selectSerieModal extends React.Component {
       // seriesList: [],
       selectedToDisplay: {},
       limit: 0,
-      list: []
+      list: [],
+      isButtonDisabled: false
     };
     this.maxPort = parseInt(sessionStorage.getItem("maxPort"));
     this.mode = sessionStorage.getItem("mode");
@@ -212,7 +213,8 @@ class selectSerieModal extends React.Component {
       selectionArr: [],
       seriesList: [],
       selectedToDisplay: [],
-      limit: 0
+      limit: 0,
+      isButtonDisabled: false
     });
     // this.props.dispatch(clearSelection());
     this.props.onCancel();
@@ -353,6 +355,7 @@ class selectSerieModal extends React.Component {
   };
 
   saveTeachingFile = async () => {
+    this.setState({ isButtonDisabled: true });
     if (this.semanticAnswers.checkFormSaveReady({ isTeachingModal: true })) {
       window.alert(
         "Please fill all required fields!"
@@ -409,6 +412,7 @@ class selectSerieModal extends React.Component {
         });
         await this.setSignificantSeries(series);
         window.dispatchEvent(new Event("refreshProjects"));
+        this.setState({ isButtonDisabled: false });
         return result;
       })
       .catch((error) => {
@@ -417,6 +421,7 @@ class selectSerieModal extends React.Component {
           "Teaching file couldn't be saved! More information about the error can be found in the logs."
         );
         console.error(error);
+        this.setState({ isButtonDisabled: false });
       });
   }
 
@@ -493,8 +498,8 @@ class selectSerieModal extends React.Component {
         <Modal.Footer className="select-serie-footer">
           {isTeachingFile && (
             <div>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) { this.handleCancel(); this.props.onSave() } }}>Save Teaching File</Button>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()}>Save Teaching File & Display</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) { this.handleCancel(); this.props.onSave() } }} disabled={this.state.isButtonDisabled}>Save Teaching File</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()} disabled={this.state.isButtonDisabled}>Save Teaching File & Display</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Discard</Button>
             </div>
           )}
