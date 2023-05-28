@@ -4,9 +4,9 @@ import Row from "./tableRow";
 
 const userTable = ({ onSelect, users }) => {
   const rows = [];
-  users.forEach(el => {
+  users.forEach(el => { 
     rows.push(
-      <Row name={el.name} key={el.name} role={el.role} onSelect={onSelect} />
+      <Row name={el.name} username={el.username} key={el.name} role={el.role} onSelect={onSelect} />
     );
   });
   return (

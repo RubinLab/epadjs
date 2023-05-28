@@ -89,7 +89,7 @@ class Projects extends React.Component {
         : firstname ? `${firstname}`
           : null;
     const nullDisplayName = displayname.toLowerCase().includes('null');
-    const escapedDisplayName = nullDisplayName && displayname.length > 0 ? username : displayname;      
+    const escapedDisplayName = nullDisplayName && displayname.length > 0 ? username : displayname;
     const name = fullName || escapedDisplayName || username;
     return name;
   }
@@ -103,12 +103,12 @@ class Projects extends React.Component {
         for (let k = 0; k < roles.length; k++) {
           if (users[i].username === roles[k].username) {
             const name = this.createName(users[i]);
-            userRoles.push({ name, role: roles[k].role });
+            userRoles.push({ name, username: users[i].username, role: roles[k].role });
             break;
           }
         }
         if (userRoles.length < i + 1 && i < users.length) {
-          userRoles.push({ name: users[i].username, role: 'None' });
+          userRoles.push({ name: users[i].username, username: users[i].username, role: 'None' });
         }
       }
       await this.setState({ userRoles });
@@ -509,8 +509,8 @@ class Projects extends React.Component {
           const none =
             defaultTemplate === 'null' || defaultTemplate === 'undefined';
           const temp = defaultTemplate && !none ? this.props.templates[defaultTemplate] : null;
-          const templateName  = temp ? temp.TemplateContainer.Template[0].name : '';
-          return <div>{templateName }</div>;
+          const templateName = temp ? temp.TemplateContainer.Template[0].name : '';
+          return <div>{templateName}</div>;
         }
       },
       {
