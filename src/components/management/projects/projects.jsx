@@ -98,6 +98,8 @@ class Projects extends React.Component {
     const userRoles = [];
     try {
       const { data: users } = await getUsers();
+      console.log("users ---> ");
+      console.log(users);
       const { data: roles } = await getProjectUsers(id);
       for (let i = 0; i < users.length; i++) {
         for (let k = 0; k < roles.length; k++) {
@@ -111,6 +113,8 @@ class Projects extends React.Component {
           userRoles.push({ name: users[i].username, username: users[i].username, role: 'None' });
         }
       }
+      console.log(" ----> user roles");
+      console.log(userRoles);
       await this.setState({ userRoles });
       this.setState({ hasUserRolesClicked: true });
     } catch (err) {
