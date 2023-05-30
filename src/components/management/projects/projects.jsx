@@ -95,26 +95,22 @@ class Projects extends React.Component {
   }
 
   handleClickUSerRoles = async id => {
-    const userRoles = [];
     try {
       const { data: users } = await getUsers();
-      console.log("users ---> ");
-      console.log(users);
       const { data: roles } = await getProjectUsers(id);
-      for (let i = 0; i < users.length; i++) {
-        for (let k = 0; k < roles.length; k++) {
-          if (users[i].username === roles[k].username) {
-            const name = this.createName(users[i]);
-            userRoles.push({ name, username: users[i].username, role: roles[k].role });
-            break;
-          }
-        }
-        if (userRoles.length < i + 1 && i < users.length) {
-          userRoles.push({ name: users[i].username, username: users[i].username, role: 'None' });
+      let userRoles = users.reduce((all, item, index) => {
+        const name = this.createName(item);
+        all[item.username] = { name, username: item.username, role: "None" }
+        return all;
+      }, {})
+
+      for (let k = 0; k < roles.length; k++) {
+        const { username } = roles[k];
+        if (userRoles[username]) {
+          userRoles[username].role = roles[k].role;
         }
       }
-      console.log(" ----> user roles");
-      console.log(userRoles);
+      userRoles = Object.values(userRoles);
       await this.setState({ userRoles });
       this.setState({ hasUserRolesClicked: true });
     } catch (err) {
