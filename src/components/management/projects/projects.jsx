@@ -89,7 +89,7 @@ class Projects extends React.Component {
         : firstname ? `${firstname}`
           : null;
     const nullDisplayName = displayname.toLowerCase().includes('null');
-    const escapedDisplayName = nullDisplayName && displayname.length > 0 ? username : displayname;      
+    const escapedDisplayName = nullDisplayName && displayname.length > 0 ? username : displayname;
     const name = fullName || escapedDisplayName || username;
     return name;
   }
@@ -292,9 +292,11 @@ class Projects extends React.Component {
     for (let project in newSelected) {
       promises.push(deleteProject(project));
     }
+
+    this.setState({ selected: {}, hasDeleteAllClicked: false });
+
     Promise.all(promises)
       .then(() => {
-        this.setState({ selected: {}, hasDeleteAllClicked: false });
         this.props.getProjectAdded();
       })
       .catch(err => {
@@ -308,9 +310,10 @@ class Projects extends React.Component {
   };
 
   deleteSingleProject = async () => {
-    deleteProject(this.state.singleDeleteId)
+    const id = this.state.singleDeleteId;
+    this.setState({ singleDeleteId: '', hasDeleteSingleClicked: false });
+    deleteProject(id)
       .then(() => {
-        this.setState({ singleDeleteId: '', hasDeleteSingleClicked: false });
         this.getProjectData();
         this.props.getProjectAdded();
       })
@@ -509,8 +512,8 @@ class Projects extends React.Component {
           const none =
             defaultTemplate === 'null' || defaultTemplate === 'undefined';
           const temp = defaultTemplate && !none ? this.props.templates[defaultTemplate] : null;
-          const templateName  = temp ? temp.TemplateContainer.Template[0].name : '';
-          return <div>{templateName }</div>;
+          const templateName = temp ? temp.TemplateContainer.Template[0].name : '';
+          return <div>{templateName}</div>;
         }
       },
       {
