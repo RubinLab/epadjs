@@ -87,7 +87,7 @@ const DiagnosisFilter = (props) => {
                 <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
                     Diagnosis
                 </Dropdown.Toggle>
-                {props.templates[teachingFileTempCode] && <Dropdown.Menu as={DiagnosisMenu} className='dropdown-menu p-2 dropdown-menu-dark modality'>
+                {props.templates[teachingFileTempCode] && <Dropdown.Menu as={DiagnosisMenu} className='dropdown-menu p-2 dropdown-menu-dark modality' style={{maxHeight: '30rem', overflow: 'overlay'}}>
                     {diagnosis?.map((diagnose, i) => {
                         return (
                             <Dropdown.Item key={i} eventKey={diagnose} onSelect={eventKey => handleSelect(eventKey)}>{diagnose}</Dropdown.Item>
