@@ -730,7 +730,7 @@ class DisplayView extends Component {
               studyUID,
               seriesUID,
               key,
-              this.state.subpath[this.props.activePort] 
+              this.state.subpath[this.props.activePort]
             );
             const ret = this.getImageIndexFromImageId(
               cornerstoneImageIds,
@@ -1635,7 +1635,8 @@ class DisplayView extends Component {
     if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
     return imageId.split("/").pop();
   };
-  newImage = (event) => {
+
+  newImage = (event, index) => {
     let { imageId } = event.detail.image;
     imageId = this.parseImgeId(imageId); //strip from cs imagePath to imageId
     const { activePort } = this.props;
@@ -1650,7 +1651,8 @@ class DisplayView extends Component {
     // set the state to preserve the imageId
     // this.setState({ data: tempData });
     // // dispatch to write the newImageId to store
-    this.props.dispatch(updateImageId(imageId));
+    event.detail.viewportIndex = index;
+    this.props.dispatch(updateImageId(imageId, event.detail.viewportIndex));
     const yaw = event.detail;
     window.dispatchEvent(
       new CustomEvent("newImage", { detail: yaw })
@@ -1846,7 +1848,7 @@ class DisplayView extends Component {
                     {
                       target: "element",
                       eventName: "cornerstonenewimage",
-                      handler: this.newImage,
+                      handler: (e) => this.newImage(e, i),
                     },
                   ]}
                   setViewportActive={() => this.setActive(i)}
