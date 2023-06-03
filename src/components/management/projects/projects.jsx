@@ -62,7 +62,8 @@ class Projects extends React.Component {
     newRoles: {},
     templates: [],
     projectIndex: null,
-    userNameMap: {}
+    userNameMap: {},
+    isDeleting: false
   };
 
   componentDidMount = () => {
@@ -277,7 +278,8 @@ class Projects extends React.Component {
       hasUserRolesClicked: false,
       errorMessage: null,
       projectIndex: null,
-      defaulttemplate: null
+      defaulttemplate: null,
+      isDeleting: false
     });
   };
 
@@ -289,14 +291,16 @@ class Projects extends React.Component {
     //Call Promise.all to array
     //then => refresh the page
     //catch => push
+
+    this.setState({ isDeleting: true });
     for (let project in newSelected) {
       promises.push(deleteProject(project));
     }
 
-    this.setState({ selected: {}, hasDeleteAllClicked: false });
 
     Promise.all(promises)
       .then(() => {
+        this.setState({ selected: {}, hasDeleteAllClicked: false, isDeleting: false });
         this.props.getProjectAdded();
       })
       .catch(err => {
@@ -311,9 +315,11 @@ class Projects extends React.Component {
 
   deleteSingleProject = async () => {
     const id = this.state.singleDeleteId;
-    this.setState({ singleDeleteId: '', hasDeleteSingleClicked: false });
+    this.setState({ isDeleting: true });
+
     deleteProject(id)
       .then(() => {
+        this.setState({ singleDeleteId: '', hasDeleteSingleClicked: false, isDeleting: false });
         this.getProjectData();
         this.props.getProjectAdded();
       })
@@ -606,6 +612,7 @@ class Projects extends React.Component {
           onCancel={this.handleCancel}
           onDelete={this.deleteAllSelected}
           error={this.state.errorMessage}
+          isDeleting={this.state.isDeleting}
         />
         <DeleteAlert
           show={this.state.hasDeleteSingleClicked}
@@ -613,6 +620,7 @@ class Projects extends React.Component {
           onCancel={this.handleCancel}
           onDelete={this.deleteSingleProject}
           error={this.state.errorMessage}
+          isDeleting={this.state.isDeleting}
         />
         {this.state.hasAddClicked && (
           <ProjectCreationForm
