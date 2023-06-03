@@ -11,7 +11,6 @@ class RequirementForm extends React.Component {
   };
 
   componentDidMount = async () => {
-    console.log(this.props);
     try {
       const { data } = await getTemplatesUniversal();
       const templates = {};
@@ -22,10 +21,9 @@ class RequirementForm extends React.Component {
         };
         templates[el.Template[0].templateUID] = data;
       });
-      console.log(templates);
       this.setState({ templates });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
