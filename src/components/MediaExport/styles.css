@@ -243,8 +243,8 @@ body {
 }
 .icon-block a, icon-block a:active, icon-block a:hover, .presentation .icon-block a, .presentation .icon-block a:active, .presentation .icon-block a:hover{
   max-width: 50px;
-  margin-right: 7px;
-  margin-left: 7px;
+  margin-right: auto;
+  margin-left: auto;
   text-align: center !important;
 
   color: #fff !important;
@@ -299,7 +299,7 @@ body {
   margin-top: 15px;
   margin-bottom: 5px;
   color: #ccc;
-  display: none;
+  display: block;
 }
 
 .icon-block2{
