@@ -89,28 +89,28 @@ class Projects extends React.Component {
         : firstname ? `${firstname}`
           : null;
     const nullDisplayName = displayname.toLowerCase().includes('null');
-    const escapedDisplayName = nullDisplayName && displayname.length > 0 ? username : displayname;      
+    const escapedDisplayName = nullDisplayName && displayname.length > 0 ? username : displayname;
     const name = fullName || escapedDisplayName || username;
     return name;
   }
 
   handleClickUSerRoles = async id => {
-    const userRoles = [];
     try {
       const { data: users } = await getUsers();
       const { data: roles } = await getProjectUsers(id);
-      for (let i = 0; i < users.length; i++) {
-        for (let k = 0; k < roles.length; k++) {
-          if (users[i].username === roles[k].username) {
-            const name = this.createName(users[i]);
-            userRoles.push({ name, role: roles[k].role });
-            break;
-          }
-        }
-        if (userRoles.length < i + 1 && i < users.length) {
-          userRoles.push({ name: users[i].username, role: 'None' });
+      let userRoles = users.reduce((all, item, index) => {
+        const name = this.createName(item);
+        all[item.username] = { name, username: item.username, role: "None" }
+        return all;
+      }, {})
+
+      for (let k = 0; k < roles.length; k++) {
+        const { username } = roles[k];
+        if (userRoles[username]) {
+          userRoles[username].role = roles[k].role;
         }
       }
+      userRoles = Object.values(userRoles);
       await this.setState({ userRoles });
       this.setState({ hasUserRolesClicked: true });
     } catch (err) {
@@ -509,8 +509,8 @@ class Projects extends React.Component {
           const none =
             defaultTemplate === 'null' || defaultTemplate === 'undefined';
           const temp = defaultTemplate && !none ? this.props.templates[defaultTemplate] : null;
-          const templateName  = temp ? temp.TemplateContainer.Template[0].name : '';
-          return <div>{templateName }</div>;
+          const templateName = temp ? temp.TemplateContainer.Template[0].name : '';
+          return <div>{templateName}</div>;
         }
       },
       {
