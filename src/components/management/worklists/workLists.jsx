@@ -83,7 +83,16 @@ class WorkList extends React.Component {
   };
 
   getWorkListData = async () => {
-    const { data: worklists } = await getWorklistsOfCreator();
+    let { data: worklists } = await getWorklistsOfCreator();
+    for (let wl of worklists) {
+      let display = wl.requirements.reduce((all, item, i) => {
+        const { level, numOfAims, template } = item;
+        const templateName = this.props.templateMap[template];
+        all.push(`${numOfAims}:${templateName}:${level}`);
+        return all;
+      }, []);
+      wl.requirementDisplay = display.join(', ');
+    }
     this.setState({ worklists });
   };
 
@@ -567,13 +576,7 @@ class WorkList extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
-          const { requirements, workListID } = original.row.checkbox;
-          const displayReq = requirements.reduce((all, item, index) => {
-            const { level, numOfAims, template } = item;
-            const templateName = this.props.templateMap[template];
-            all.push(`${numOfAims}:${templateName}:${level}`);
-            return all;
-          }, []);
+          const { requirements, workListID, requirementDisplay } = original.row.checkbox;
           const className = requirements.length
             ? 'wrapped menu-clickable'
             : 'wrapped click-to-add menu-clickable';
@@ -590,10 +593,10 @@ class WorkList extends React.Component {
                     updateRequirement: true
                   });
                 }}
-                id={`req-${original.row.checkbox.workListID}`}
+                id={`req-${workListID}`}
 
               >
-                {displayReq.join(', ') || 'Define requirement'}
+                {requirementDisplay || 'Define requirement'}
               </div>
               <ReactTooltip
                 id="worklist-requirement"
