@@ -15,8 +15,12 @@ class UpdateRequirement extends React.Component {
   state = { requirements: [], page: 0 };
 
   componentDidMount = () => {
-    const requirements = _.cloneDeep(this.props.requirements);
-    this.setState({ requirements }); 
+    const requirements = this.props.requirements.reduce((all, item, i) => {
+      item.template = this.props.templateMap[item.template];
+      all.push(item);
+      return all;
+    }, []);
+    this.setState({ requirements });
   }
 
   addRequirement = newReq => {
@@ -89,6 +93,7 @@ class UpdateRequirement extends React.Component {
               <RequirementForm
                 requirements={requirements}
                 onNewReqInfo={this.props.onNewReqInfo}
+                templateMap={this.props.templateMap}
               />
               {error && <div className="err-message __field">{error}</div>}
             </>

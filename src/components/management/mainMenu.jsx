@@ -13,6 +13,12 @@ import Header from "./common/managementHeader";
 import { scanDataFolder } from "./dataFolderScan";
 let mode;
 
+const mapStateToProps = (state) => {
+  return {
+    templates: state.annotationsListReducer.templates,
+  };
+};
+
 class MainMenu extends React.Component {
   constructor(props) {
     super(props);
@@ -20,13 +26,25 @@ class MainMenu extends React.Component {
       selection: "",
       isModalOpen: false,
       coordinate: "50%",
+      templateMap: {}
     };
+  }
+
+  formTemplateMap = () => {
+    const codes = Object.keys(this.props.templates)
+    const obj = Object.values(this.props.templates)
+    const templateMap = codes.reduce((all, item, index) => {
+      all[item] = obj[index].TemplateContainer.Template[0].name;
+      return all;
+    }, {})
+    this.setState({ templateMap })
   }
 
   componentDidMount = () => {
     mode = sessionStorage.getItem("mode");
     this.updateDimensions();
     window.addEventListener("resize", this.updateDimensions);
+    this.formTemplateMap();
   };
 
   updateDimensions = () => {
@@ -78,6 +96,7 @@ class MainMenu extends React.Component {
             selection={this.state.selection}
             onClose={this.handleCloseModal}
             updateProgress={this.props.updateProgress}
+            templateMap={this.state.templateMap}
           />
         );
       // case "Annotations":
@@ -214,4 +233,4 @@ class MainMenu extends React.Component {
   }
 }
 
-export default connect()(MainMenu);
+export default connect(mapStateToProps)(MainMenu);
