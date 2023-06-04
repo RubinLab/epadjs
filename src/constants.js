@@ -7,7 +7,6 @@ export const DISP_MODALITIES = [
   "CR",
   "US",
   "DX",
-  "OT",
   "XA",
   "OCT",
   "NM"
