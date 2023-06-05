@@ -181,7 +181,7 @@ const toolBar = props => {
       </div>
       {/* </div>
       )} */}
-      <Worklists parent="patientList" showAddTo={props.showAddTo} project={props.project} />
+      <Worklists parent="patientList" showAddTo={props.showAddTo} project={props.project} refresh={props.refresh} />
       {mode !== 'lite' && <Projects parent="patientList" showAddTo={props.showAddTo} onSave={props.onSaveToProject} />}
       {/* <div
         className={
