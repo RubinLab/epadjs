@@ -1036,15 +1036,19 @@ class AimEditor extends Component {
   getAxisOfBidirectional = (bidirectional) => {
     // takes two lines of b.directional and distincs the short and long axis
     const { element } = cornerstone.getEnabledElements()[this.props.activePort];
-    const { rowPixelSpacing, columnPixelSpacing } = cornerstone.getViewport(
-      element
-    ).displayedArea;
+    const { displayedArea } = cornerstone.getViewport(element);
+    let { rowPixelSpacing, columnPixelSpacing } = this.image;
+
+    rowPixelSpacing = rowPixelSpacing ? rowPixelSpacing : displayedArea ? displayedArea.rowPixelSpacing : 1;
+    columnPixelSpacing = columnPixelSpacing ? columnPixelSpacing : displayedArea ? displayedArea.columnPixelSpacing : 1;
+
     const {
       start,
       end,
       perpendicularStart,
       perpendicularEnd,
     } = bidirectional.handles;
+
     const length = Math.hypot(
       (start.x - end.x) * (columnPixelSpacing || 1),
       (start.y - end.y) * (rowPixelSpacing || 1)
