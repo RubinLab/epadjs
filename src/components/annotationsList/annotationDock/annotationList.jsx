@@ -193,6 +193,7 @@ class AnnotationsList extends React.Component {
         openSeries[activePort].imageAnnotations[imageID + "&frame=1"];
       const noMarkupAnnotations =
         openSeries[activePort].imageAnnotations[imageID + "-img"];
+       
       if (singleFrameAnnotations && multiFrameAnnotations)
         imageAnnotations = [
           ...singleFrameAnnotations,
@@ -207,6 +208,7 @@ class AnnotationsList extends React.Component {
           ? [...imageAnnotations, ...noMarkupAnnotations]
           : noMarkupAnnotations;
       }
+
       if (imageAnnotations) {
         try {
           for (let aim of imageAnnotations) {

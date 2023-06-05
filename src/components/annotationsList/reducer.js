@@ -169,7 +169,8 @@ const asyncReducer = (state = initialState, action) => {
           }
           return newSerie;
         });
-        openSeriesToUpdate[state.activePort].imageID = action.imageID;
+        const port = action.port || state.activePort;
+        openSeriesToUpdate[port].imageID = action.imageID;
 
         return { ...state, openSeries: openSeriesToUpdate };
       case CLOSE_SERIE:

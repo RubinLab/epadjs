@@ -119,10 +119,11 @@ export const clearAimId = () => {
 
 // imageId is used to display annotation details
 // at right side bar
-export const updateImageId = (imageID) => {
+export const updateImageId = (imageID, port) => {
   return {
     type: UPDATE_IMAGEID,
     imageID,
+    port
   };
 };
 
