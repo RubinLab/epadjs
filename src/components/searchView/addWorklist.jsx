@@ -75,7 +75,7 @@ const AddToWorklist = (props) => {
       });
       // props.deselect();
       props.dispatch(clearSelection());
-      if (mode !== 'teaching') props.refresh();
+      if (mode !== 'teaching' && props.refresh) props.refresh();
     } catch (e) {
       toast.error("Error adding annotation(s) to worklist.", {
         position: "top-right",
@@ -102,7 +102,7 @@ const AddToWorklist = (props) => {
       });
       // props.deselect();
       props.dispatch(clearSelection());
-      if (mode !== 'teaching') props.refresh();
+      if (mode !== 'teaching' && props.refresh) props.refresh();
     } catch (e) {
       toast.error("Error adding studies to worklist.", {
         position: "top-right",
@@ -129,7 +129,7 @@ const AddToWorklist = (props) => {
       });
       // props.deselect();
       props.dispatch(clearSelection());
-      if (mode !== 'teaching') props.refresh();
+      if (mode !== 'teaching' && props.refresh) props.refresh();
     } catch (e) {
       toast.error("Error adding subjects to worklist.", {
         position: "top-right",
