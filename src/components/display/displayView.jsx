@@ -1703,7 +1703,7 @@ class DisplayView extends Component {
 
   toggleOverlay = (e, i) => {
     const showHide = { ... this.state.isOverlayVisible };
-    const index = i ? i : this.props.activePort;
+    const index = i || i === 0 ? i : this.props.activePort;
     if (showHide[index]) delete showHide[index];
     else showHide[index] = true;
     this.setState({ isOverlayVisible: showHide });
