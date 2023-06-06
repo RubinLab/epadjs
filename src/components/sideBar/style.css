@@ -46,6 +46,20 @@ body {
   writing-mode: vertical-lr !important;
 }
 
+#projects-tab__cont,
+#worklists-tab__cont,
+#progress-tab__cont {
+  transform: rotate(270deg);
+  margin-right: 4rem;
+}
+
+#projects-tab,
+#worklists-tab,
+#progress-tab { 
+  padding: 1rem 0.3rem;
+  height: 6rem;
+}
+
 .left-editor-display {
   width: 172px;
   background-color: #777;
