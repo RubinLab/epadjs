@@ -1,10 +1,12 @@
 import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
+import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import {
   getImageIds,
   getWadoImagePath,
   getSegmentation,
+  getMetadata
 } from "../../services/seriesServices";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
@@ -48,6 +50,7 @@ import getVPDimensions from "./ViewportCalculations";
 import SeriesDropDown from './SeriesDropDown';
 
 let mode;
+console.log(" ---> cornerstoneWADOImageLoader", cornerstoneWADOImageLoader);
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 } },
@@ -182,9 +185,12 @@ class DisplayView extends Component {
     const { series, onSwitchView } = this.props;
     // if (series.length < 1) {
     //   onSwitchView('search');
-    // }    
+    // }
+    console.log(" step 1");
     this.getViewports();
+    console.log(" step 2");
     this.getData();
+    console.log(" step 3");
     this.formInvertMap();
     if (series.length > 0) {
       this.setSubComponentHeights();
@@ -486,8 +492,10 @@ class DisplayView extends Component {
       for (let i = 0; i < series.length; i++) {
         const promise = this.getImageStack(series[i], i);
         promises.push(promise);
+
       }
       Promise.all(promises).then((res) => {
+        console.log('----------res ', res);
         this.setState(
           {
             data: res,
@@ -581,15 +589,116 @@ class DisplayView extends Component {
 
   getImageFrameURI = (metadataURI, metadata) => {
     // Use the BulkDataURI if present int the metadata
-    // if (metadata["7FE00010"] && metadata["7FE00010"].BulkDataURI) {
-    //   console.log("donuyom", metadata["7FE00010"].BulkDataURI);
-    //   return metadata["7FE00010"].BulkDataURI;
-    // }
+    if (metadata["7FE00010"] && metadata["7FE00010"].BulkDataURI) {
+      console.log("donuyom", metadata["7FE00010"].BulkDataURI);
+      return metadata["7FE00010"].BulkDataURI;
+    }
 
     // fall back to using frame #1
     return metadataURI + "/frames/1";
   };
+
   getImageStack = async (serie, index) => {
+    const wadoUrl = sessionStorage.getItem("wadoUrl");
+    console.log(" -----> wadoUrl", wadoUrl);
+    if (wadoUrl.includes('wadors')) {
+      console.log(" in wadors check")
+      // call new method
+      return this.getImageStackWithWadors(serie, index);
+    } else {
+      return this.getImageStackWithWadouri(serie, index);
+
+    }
+
+  }
+
+  getImageStackWithWadors = async (serie, index) => {
+    let stack = {};
+    let newImageIds = {};
+    let cornerstoneImageIds = [];
+    const imageUrls = await this.getImages(serie);
+    let baseUrl;
+    console.log(' ----> imageUrls');
+    console.log(imageUrls);
+    let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
+    console.log(' ----> wadoUrlNoWadors after split', wadoUrlNoWadors);
+    for (let url of imageUrls) {
+      console.log(" ----> url", url);
+      baseUrl = wadoUrlNoWadors + url.lossyImage;
+      let singleFrameUrl = baseUrl;
+
+      if (url.multiFrameImage === true) {
+        console.log('%%%%%%%%%%%%%%%%%%%%%%%% multiframe true');
+        for (var i = 0; i < url.numberOfFrames; i++) {
+          let multiFrameUrl = baseUrl + "/frames/" + i;
+          // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
+          const { data } = await getMetadata(singleFrameUrl);
+          console.log(" +++++++++>>>>  Metadata", data);
+          cornerstoneImageIds.push(`wadors:${multiFrameUrl}`);
+          console.log("  +++++>> multiframe url array", multiFrameUrl);
+          // cornerstone.loadAndCacheImage(multiFrameUrl);
+          newImageIds[multiFrameUrl] = true;
+          // cornerstoneWADOImageLoader.wadors.metaDataManager.add(
+          //   multiFrameUrl,
+          //   data[0]
+          // );
+          // cornerstone.loadAndCacheImage(imageId);
+        }
+      } else {
+        let singleFrameUrl = baseUrl;
+        cornerstoneImageIds.push(`wadors:${singleFrameUrl}`);
+        // cornerstone.loadAndCacheImage(singleFrameUrl);
+        newImageIds[singleFrameUrl] = false;
+      }
+
+
+      // console.log(" -----> Single frame url", singleFrameUrl);
+      // const { data } = await getMetadata(singleFrameUrl);
+      // console.log(" +++++++++>>>>  Metadata", data);
+      // cornerstoneImageIds.push(singleFrameUrl);
+      // const { data } = await getMetadata(singleFrameUrl);
+      // console.log("Metadata", data);
+      // const metadata = data[0];
+
+    }
+    console.log(cornerstoneImageIds);
+    const { imageIds } = this.state;
+    this.setState({ imageIds: { ...imageIds, ...newImageIds } });
+
+    //to jump to the same image after aim save
+    let imageIndex;
+    if (
+      this.state.data[index] &&
+      this.state.data[index].stack.currentImageIdIndex
+    )
+      imageIndex = this.state.data[index].stack.currentImageIdIndex;
+    else imageIndex = 0;
+
+    // if serie is being open from the annotation jump to that image and load the aim editor
+    if (serie.aimID) {
+      imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+    }
+
+    stack.currentImageIdIndex = parseInt(imageIndex, 10);
+    stack.imageIds = [...cornerstoneImageIds];
+
+    console.log("stack", stack);
+
+    return { stack };
+    // const imageFrameURI = this.getImageFrameURI(
+    //   singleFrameUrl + "/metadata",
+    //   metadata
+    // );
+    // const imageId = "wadors:" + imageFrameURI;
+
+    // cornerstoneWADOImageLoader.wadors.metaDataManager.add(
+    //   imageId,
+    //   metadata
+    // );
+    // cornerstone.loadAndCacheImage(imageId);
+  }
+
+  getImageStackWithWadouri = async (serie, index) => {
     let stack = {};
     let newImageIds = {};
     let cornerstoneImageIds = [];
@@ -1787,7 +1896,7 @@ class DisplayView extends Component {
                           <Form.Control
                             type="number"
                             min="1"
-                            value={parseInt(data.stack.currentImageIdIndex) + 1}
+                            value={parseInt(data?.stack?.currentImageIdIndex) + 1}
                             className={"slice-field"}
                             onChange={(event) => this.handleJumpChange(i, event)}
                             style={{
