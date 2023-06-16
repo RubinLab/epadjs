@@ -625,7 +625,7 @@ class DisplayView extends Component {
       let singleFrameUrl = baseUrl;
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
-          let multiFrameUrl = baseUrl + "/frames/" + i + 1;
+          let multiFrameUrl = `${baseUrl} + "/frames/" + ${i + 1}`;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           const { data } = await getMetadata(singleFrameUrl);
           cornerstoneImageIds.push(`wadors:${multiFrameUrl}`);
