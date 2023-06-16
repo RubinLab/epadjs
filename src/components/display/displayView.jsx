@@ -622,24 +622,23 @@ class DisplayView extends Component {
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
     for (let url of imageUrls) {
       baseUrl = wadoUrlNoWadors + url.lossyImage;
-      let singleFrameUrl = baseUrl;
       if (url.multiFrameImage === true) {
-        const { data } = await getMetadata(singleFrameUrl);
+        const { data } = await getMetadata(baseUrl);
         for (var i = 0; i < url.numberOfFrames; i++) {
-          let multiFrameUrl = `${baseUrl}/frames/${i + 1}`;
+          let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
-          cornerstoneImageIds.push(`wadors:${multiFrameUrl}`);
+          cornerstoneImageIds.push(multiFrameUrl);
           // cornerstone.loadAndCacheImage(multiFrameUrl);
           newImageIds[multiFrameUrl] = true;
           cornerstoneWADOImageLoader.wadors.metaDataManager.add(
             multiFrameUrl,
             data[0]
           );
-          cornerstone.loadAndCacheImage(`wadors:${multiFrameUrl}`);
+          cornerstone.loadAndCacheImage(multiFrameUrl);
         }
       } else {
-        let singleFrameUrl = `wadors:${baseUrl}/frames/1`;
         const { data } = await getMetadata(baseUrl);
+        let singleFrameUrl = `wadors:${baseUrl}/frames/1`;
         cornerstoneImageIds.push(singleFrameUrl);
         // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
