@@ -605,6 +605,7 @@ class DisplayView extends Component {
       console.log(" in wadors check")
       // call new method
       return this.getImageStackWithWadors(serie, index);
+      // return this.getImageStackWithWadouri(serie, index);
     } else {
       return this.getImageStackWithWadouri(serie, index);
 
@@ -632,8 +633,8 @@ class DisplayView extends Component {
         for (var i = 0; i < url.numberOfFrames; i++) {
           let multiFrameUrl = baseUrl + "/frames/" + i;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
-          const { data } = await getMetadata(singleFrameUrl);
-          console.log(" +++++++++>>>>  Metadata", data);
+          // const { data } = await getMetadata(singleFrameUrl);
+          // console.log(" +++++++++>>>>  Metadata", data);
           cornerstoneImageIds.push(`wadors:${multiFrameUrl}`);
           console.log("  +++++>> multiframe url array", multiFrameUrl);
           // cornerstone.loadAndCacheImage(multiFrameUrl);
