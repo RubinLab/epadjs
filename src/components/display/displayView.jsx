@@ -619,50 +619,37 @@ class DisplayView extends Component {
     let cornerstoneImageIds = [];
     const imageUrls = await this.getImages(serie);
     let baseUrl;
-    console.log(' ----> imageUrls');
-    console.log(imageUrls);
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
-    console.log(' ----> wadoUrlNoWadors after split', wadoUrlNoWadors);
     for (let url of imageUrls) {
-      console.log(" ----> url", url);
       baseUrl = wadoUrlNoWadors + url.lossyImage;
       let singleFrameUrl = baseUrl;
-
       if (url.multiFrameImage === true) {
-        console.log('%%%%%%%%%%%%%%%%%%%%%%%% multiframe true');
         for (var i = 0; i < url.numberOfFrames; i++) {
           let multiFrameUrl = baseUrl + "/frames/" + i;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
-          // const { data } = await getMetadata(singleFrameUrl);
-          // console.log(" +++++++++>>>>  Metadata", data);
+          const { data } = await getMetadata(singleFrameUrl);
           cornerstoneImageIds.push(`wadors:${multiFrameUrl}`);
-          console.log("  +++++>> multiframe url array", multiFrameUrl);
           // cornerstone.loadAndCacheImage(multiFrameUrl);
           newImageIds[multiFrameUrl] = true;
-          // cornerstoneWADOImageLoader.wadors.metaDataManager.add(
-          //   multiFrameUrl,
-          //   data[0]
-          // );
-          // cornerstone.loadAndCacheImage(imageId);
+          cornerstoneWADOImageLoader.wadors.metaDataManager.add(
+            multiFrameUrl,
+            data[0]
+          );
+          cornerstone.loadAndCacheImage(`wadors:${multiFrameUrl}`);
         }
       } else {
-        let singleFrameUrl = baseUrl;
-        cornerstoneImageIds.push(`wadors:${singleFrameUrl}`);
+        let singleFrameUrl = `wadors:${baseUrl}`;
+        const { data } = await getMetadata(baseUrl);
+        cornerstoneImageIds.push(singleFrameUrl);
         // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
+        cornerstoneWADOImageLoader.wadors.metaDataManager.add(
+          singleFrameUrl,
+          data[0]
+        );
+        cornerstone.loadAndCacheImage(singleFrameUrl);
       }
-
-
-      // console.log(" -----> Single frame url", singleFrameUrl);
-      // const { data } = await getMetadata(singleFrameUrl);
-      // console.log(" +++++++++>>>>  Metadata", data);
-      // cornerstoneImageIds.push(singleFrameUrl);
-      // const { data } = await getMetadata(singleFrameUrl);
-      // console.log("Metadata", data);
-      // const metadata = data[0];
-
     }
-    console.log(cornerstoneImageIds);
     const { imageIds } = this.state;
     this.setState({ imageIds: { ...imageIds, ...newImageIds } });
 
@@ -683,20 +670,7 @@ class DisplayView extends Component {
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
 
-    console.log("stack", stack);
-
     return { stack };
-    // const imageFrameURI = this.getImageFrameURI(
-    //   singleFrameUrl + "/metadata",
-    //   metadata
-    // );
-    // const imageId = "wadors:" + imageFrameURI;
-
-    // cornerstoneWADOImageLoader.wadors.metaDataManager.add(
-    //   imageId,
-    //   metadata
-    // );
-    // cornerstone.loadAndCacheImage(imageId);
   }
 
   getImageStackWithWadouri = async (serie, index) => {
@@ -722,26 +696,6 @@ class DisplayView extends Component {
         // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
       }
-      // } else {
-      //   let singleFrameUrl = baseUrl;
-      //   console.log("Single frame url", singleFrameUrl);
-      //   cornerstoneImageIds.push(singleFrameUrl);
-      //   imageIds[singleFrameUrl] = false;
-      //   const { data } = await getMetadata(singleFrameUrl);
-      //   console.log("Metadata", data);
-      //   const metadata = data[0];
-      //   const imageFrameURI = this.getImageFrameURI(
-      //     singleFrameUrl + "/metadata",
-      //     metadata
-      //   );
-      //   const imageId = "wadors:" + imageFrameURI;
-
-      //   cornerstoneWADOImageLoader.wadors.metaDataManager.add(
-      //     imageId,
-      //     metadata
-      //   );
-      //   cornerstone.loadAndCacheImage(imageId);
-      // }
     });
     const { imageIds } = this.state;
     this.setState({ imageIds: { ...imageIds, ...newImageIds } });
