@@ -638,7 +638,7 @@ class DisplayView extends Component {
           cornerstone.loadAndCacheImage(`wadors:${multiFrameUrl}`);
         }
       } else {
-        let singleFrameUrl = `wadors:${baseUrl}`;
+        let singleFrameUrl = `wadors:${baseUrl}/frames/1`;
         const { data } = await getMetadata(baseUrl);
         cornerstoneImageIds.push(singleFrameUrl);
         // cornerstone.loadAndCacheImage(singleFrameUrl);
