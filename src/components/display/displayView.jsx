@@ -624,10 +624,10 @@ class DisplayView extends Component {
       baseUrl = wadoUrlNoWadors + url.lossyImage;
       let singleFrameUrl = baseUrl;
       if (url.multiFrameImage === true) {
+        const { data } = await getMetadata(singleFrameUrl);
         for (var i = 0; i < url.numberOfFrames; i++) {
           let multiFrameUrl = `${baseUrl}/frames/${i + 1}`;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
-          const { data } = await getMetadata(singleFrameUrl);
           cornerstoneImageIds.push(`wadors:${multiFrameUrl}`);
           // cornerstone.loadAndCacheImage(multiFrameUrl);
           newImageIds[multiFrameUrl] = true;
