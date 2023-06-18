@@ -551,39 +551,29 @@ function AnnotationTable(props) {
         },
         {
           Header: 'Narrative',
-          accessor: 'userComment',
+          // accessor: 'userComment',
           Cell: ({ row }) => {
             const text = row.original.userComment;
             const subText = text || text?.length >= 100 ? text.substring(0, 100) + '...' : '';
-            const button = (
+            return (
               <>
                 <div
                   data-tip
                   data-for="narrative"
                 >
                   {subText}
-                  <ReactTooltip
-                    id="narrative"
-                    place="left"
-                    type="info"
-                    delayShow={500}
-                  >
-                    <span className="filter-label">Please open aim to see the narrative!</span>
-                  </ReactTooltip>
                 </div>
-              </>)
-            const content = !text || text?.length < 100 ? text : button;
-            // const text = row.original.userComment?.substring(0, 50);
-
-            return (
-              <>
-                <div>{content}</div>
-                {/* <Modal show={showNarrative} fullscreen={true} onHide={() => { setShow(false); setNarrative('') }}>
-                  {console.log(" tttttt")}
-                  <Modal.Body>{narrative}</Modal.Body>
-                </Modal> */}
+                <ReactTooltip
+                  id="narrative"
+                  place="left"
+                  type="info"
+                  delayShow={500}
+                >
+                  <span className="filter-label">Please open aim to see the narrative!</span>
+                </ReactTooltip>
               </>
             )
+
           }
         }],
       [props.selectedAnnotations, data]
