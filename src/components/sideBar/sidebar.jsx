@@ -95,7 +95,6 @@ class Sidebar extends Component {
   getProjectsData = async () => {
     try {
       let { data: projects } = await getProjects();
-      console.log()
       if (projects.length > 0) {
         // get the project all and unassigned
         // push them to the end of the projects
@@ -233,11 +232,7 @@ class Sidebar extends Component {
         this.setState({ pid });
       }
 
-      if (
-        lastEventId !== prevProps.lastEventId &&
-        refresh &&
-        !notSideBarUpdate
-      ) {
+      if (lastEventId !== prevProps.lastEventId && refresh && !notSideBarUpdate) {
         projects = await this.getProjectsData();
         this.setStateProjectData(projects);
       }
@@ -290,7 +285,7 @@ class Sidebar extends Component {
       this.props.getPidUpdate(id);
       this.props.clearTreeExpand();
       this.props.history.push(`/list/${id}`);
-    } else if (type === "project" && this.props.type === "search" && mode !== 'teaching') {  
+    } else if (type === "project" && this.props.type === "search" && mode !== 'teaching') {
       this.setState({ index: 0 });
       this.props.getPidUpdate(id);
       this.props.history.push(`/search/${id}`);
