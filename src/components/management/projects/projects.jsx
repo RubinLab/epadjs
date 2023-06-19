@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import Table from 'react-table-v6';
 import ReactTooltip from 'react-tooltip';
 import { FaRegTrashAlt, FaEdit, FaRegEye } from 'react-icons/fa';
+import { BsList } from "react-icons/bs";
 import { Link } from 'react-router-dom';
 import '../menuStyle.css';
 import {
@@ -475,17 +476,13 @@ class Projects extends React.Component {
         minResizeWidth: 20,
         minWidth: 30,
         Cell: original => {
-          const { loginNames } = original.row;
-          const className =
-            loginNames?.length > 0 ? 'wrapped' : 'wrapped click-to-add';
-          const text =
-            loginNames?.length > 0 ? this.concatenateNames(loginNames) : 'Add user';
           return (
             <>
-              <p
-                className={className}
+              <button
                 data-tip
                 data-for="project-user-assign"
+                variant="primary"
+                className="btn btn-sm btn-outline-light"
                 onClick={() => {
                   this.handleClickUSerRoles(original.row.checkbox.id);
                   this.setState({
@@ -493,15 +490,19 @@ class Projects extends React.Component {
                   });
                 }}
               >
-                {text}
-              </p>
+                <BsList
+                  className="menu-clickable"
+                  data-tip
+                  data-for="showAims-icon"
+                />
+              </button>
               <ReactTooltip
                 id="project-user-assign"
                 place="right"
                 type="info"
-                delayShow={1000}
+                delayShow={500}
               >
-                <span className="filter-label">Add users to project</span>
+                <span className="filter-label">See users - assign roles</span>
               </ReactTooltip>
             </>
           );

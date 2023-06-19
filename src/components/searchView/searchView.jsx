@@ -724,14 +724,16 @@ class SearchView extends Component {
         fileName = 'Downloaded_series';
       }
 
+      const update = this.state.update + 1;
+
       promise
         .then(result => {
           let blob = new Blob([result.data], { type: 'application/zip' });
           this.triggerBrowserDownload(blob, fileName);
-          this.setState({ error: null, downloading: false });
+          this.setState({ error: null, downloading: false, update });
         })
         .catch(err => {
-          this.setState({ downloading: false });
+          this.setState({ downloading: false, update });
           console.log(err);
         });
     } else if (selectedAnnotations.length > 0) {
@@ -924,6 +926,7 @@ class SearchView extends Component {
       this.setState({ showOldProjects: false });
       this.props.clearTreeExpand();
       this.props.dispatch(clearSelection());
+      window.dispatchEvent(new Event('refreshProjects'));
       this.props.history.push(`/list/${projectId}`);
     } catch (err) {
       console.log(err);
@@ -1006,6 +1009,7 @@ class SearchView extends Component {
           expandLevel={this.props.expandLevel}
           updateProgress={this.props.updateProgress}
           className="searchView-toolbar__icon worklist-icon"
+          refresh={() => this.setState(state => ({ update: state.update + 1 }))}
         // expanding={expanding}
         />
         {(this.props.showSeriesModal ||

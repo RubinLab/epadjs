@@ -95,7 +95,6 @@ class Sidebar extends Component {
   getProjectsData = async () => {
     try {
       let { data: projects } = await getProjects();
-      console.log()
       if (projects.length > 0) {
         // get the project all and unassigned
         // push them to the end of the projects
@@ -233,11 +232,7 @@ class Sidebar extends Component {
         this.setState({ pid });
       }
 
-      if (
-        lastEventId !== prevProps.lastEventId &&
-        refresh &&
-        !notSideBarUpdate
-      ) {
+      if (lastEventId !== prevProps.lastEventId && refresh && !notSideBarUpdate) {
         projects = await this.getProjectsData();
         this.setStateProjectData(projects);
       }
@@ -290,7 +285,7 @@ class Sidebar extends Component {
       this.props.getPidUpdate(id);
       this.props.clearTreeExpand();
       this.props.history.push(`/list/${id}`);
-    } else if (type === "project" && this.props.type === "search" && mode !== 'teaching') {  
+    } else if (type === "project" && this.props.type === "search" && mode !== 'teaching') {
       this.setState({ index: 0 });
       this.props.getPidUpdate(id);
       this.props.history.push(`/search/${id}`);
@@ -523,13 +518,13 @@ class Sidebar extends Component {
           <div className="drawer-control-left" onClick={this.handleOpenClose}>{open ? <BsArrowBarLeft className="bi bi-arrow-bar-left" /> : <BsArrowBarRight className="bi bi-arrow-bar-left" />}</div>
           <div className={open ? "left-tabs" : "left-tabs-closed"} style={{ marginLeft: tabMarginLeft }}>
             <ul className="nav nav-tabs flex-column" style={{ borderLeft: 'none', padding: '0px' }} id="myTab" role="tablist">
-              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation">
+              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation" id="projects-tab__cont">
                 <button className={tab === 'projects' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'projects' })} id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects-tab-pane" type="button" role="tab" aria-controls="projects-tab-pane" aria-selected="false">Projects</button>
               </li>
-              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation">
+              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation" id="worklists-tab__cont">
                 <button className={tab === 'worklist' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'worklist' })} id="worklists-tab" data-bs-toggle="tab" data-bs-target="#worklists-tab-pane" type="button" role="tab" aria-controls="worklists-tab-pane" aria-selected="true">Worklists</button>
               </li>
-              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation">
+              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation" id="progress-tab__cont">
                 <button className={tab === 'progress' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'progress' })} id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress-tab-pane" type="button" role="tab" aria-controls="progress-tab-pane" aria-selected="false">Progress</button>
               </li>
             </ul>
