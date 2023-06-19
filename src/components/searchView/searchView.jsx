@@ -924,6 +924,7 @@ class SearchView extends Component {
       this.setState({ showOldProjects: false });
       this.props.clearTreeExpand();
       this.props.dispatch(clearSelection());
+      window.dispatchEvent(new Event('refreshProjects'));
       this.props.history.push(`/list/${projectId}`);
     } catch (err) {
       console.log(err);
