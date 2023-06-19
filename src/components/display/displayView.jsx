@@ -634,7 +634,7 @@ class DisplayView extends Component {
             multiFrameUrl,
             data[0]
           );
-          cornerstone.loadAndCacheImage(multiFrameUrl);
+          // cornerstone.loadAndCacheImage(multiFrameUrl);
         }
       } else {
         const { data } = await getMetadata(baseUrl);
@@ -646,7 +646,7 @@ class DisplayView extends Component {
           singleFrameUrl,
           data[0]
         );
-        cornerstone.loadAndCacheImage(singleFrameUrl);
+        // cornerstone.loadAndCacheImage(singleFrameUrl);
       }
     }
     const { imageIds } = this.state;
