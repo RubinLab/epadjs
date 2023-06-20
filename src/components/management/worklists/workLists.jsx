@@ -577,7 +577,6 @@ class WorkList extends React.Component {
         minWidth: 50,
         Cell: original => {
           const { requirements, workListID, requirementDisplay } = original.row.checkbox;
-
           const className = requirements.length
             ? 'wrapped menu-clickable'
             : 'wrapped click-to-add menu-clickable';
