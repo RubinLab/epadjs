@@ -87,7 +87,7 @@ class WorkList extends React.Component {
     for (let wl of worklists) {
       let display = wl.requirements.reduce((all, item, i) => {
         const { level, numOfAims, template } = item;
-        const templateName = this.props.templateMap[template];
+        const templateName = template === 'any'? 'Any' : this.props.templateMap[template];
         all.push(`${numOfAims}:${templateName}:${level}`);
         return all;
       }, []);
@@ -577,6 +577,7 @@ class WorkList extends React.Component {
         minWidth: 50,
         Cell: original => {
           const { requirements, workListID, requirementDisplay } = original.row.checkbox;
+
           const className = requirements.length
             ? 'wrapped menu-clickable'
             : 'wrapped click-to-add menu-clickable';
