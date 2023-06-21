@@ -155,11 +155,19 @@ class FlexView extends React.Component {
   };
 
   componentDidUpdate = async (prevProps) => {
+    const {lastEventId, refresh} = this.props;
+
     try {
       if (prevProps.pid !== this.props.pid) {
         await this.getData(this.props.pid);
         await this.defineColumns();
       }
+
+      if (prevProps.lastEventId !== lastEventId && refresh) {
+        await this.getData(this.props.pid);
+        await this.defineColumns();
+      }
+
     } catch (err) {
       console.log(err);
     }
@@ -243,8 +251,9 @@ class FlexView extends React.Component {
 const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
+    lastEventId: state.annotationsListReducer.lastEventId,
+    refresh: state.annotationsListReducer.refresh
   };
 };
 
 export default (connect(mapStateToProps)(FlexView));
-
