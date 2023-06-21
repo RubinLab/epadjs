@@ -297,6 +297,7 @@ class Users extends React.Component {
   createUser = () => {
     let roleEdit = [];
     let body = {};
+    const mode = sessionStorage.getItem('mode');
     const { userToEdit } = this.state;
     if (userToEdit) {
       let permissions = '';
