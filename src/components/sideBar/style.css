@@ -1,13 +1,12 @@
-
 body {
   margin: 0px;
-  background-color: #222222 !important; 
+  background-color: #222222 !important;
   font-family: "Open-Sans", sans-serif;
   color: #ececec;
 }
 
 .left-open {
-  width: 200px; 
+  width: 200px;
   height: 100vh;
   left: 0;
   position: fixed;
@@ -18,10 +17,10 @@ body {
 }
 
 .left-closed {
-  max-width: 40px; 
+  max-width: 40px;
   height: 100vh;
   background-color: #555;
-  position: fixed; 
+  position: fixed;
   left: 0;
   margin-left: 0px;
   font-size: 12px;
@@ -35,7 +34,8 @@ body {
   /* text-shadow: 1px 2px 0px rgba(0, 0, 0, 0.25); */
 
 }
-.left-tabs{
+
+.left-tabs {
   transform: rotate(90deg) !important;
   padding-bottom: 0px;
   color: #fff;
@@ -44,6 +44,13 @@ body {
   /* height: 10px; */
   width: 10px;
   writing-mode: vertical-lr !important;
+}
+
+#myTab {
+  padding-top: 0rem;
+  height: 24px;
+  position: relative;
+  bottom: 5px;
 }
 
 #projects-tab__cont,
@@ -55,9 +62,12 @@ body {
 
 #projects-tab,
 #worklists-tab,
-#progress-tab { 
+#progress-tab {
   padding: 1rem 0.3rem;
   height: 6rem;
+  position: relative;
+  left: 25px;
+  top: 30px;
 }
 
 .left-editor-display {
@@ -72,17 +82,21 @@ body {
   /* overflow-y: scroll; */
   /* border-right: solid 1px #222; */
 }
-.nav-tabs-border-color{
+
+.nav-tabs-border-color {
   border: #222;
 }
 
-.far-right {float:right;}
+.far-right {
+  float: right;
+}
 
-.tab-content{
+.tab-content {
   padding-top: 1em;
   margin-right: 34px;
   height: 100vh;
 }
+
 .nav-tabs {
   --bs-nav-tabs-border-width: 1px;
   --bs-nav-tabs-border-color: #222 !important;
@@ -112,24 +126,27 @@ body {
 
 
 
-.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+.nav-tabs .nav-item.show .nav-link,
+.nav-tabs .nav-link.active {
   color: var(--bs-nav-tabs-link-active-color);
   background-color: var(--bs-nav-tabs-link-active-bg);
   border-color: #222222;
   /* text-shadow: 1px 2px 0px rgb(0 0 0 / 25%) !important; */
 
 }
+
 .nav-tabs .nav-link {
   margin-bottom: calc(var(--bs-nav-tabs-border-width) * -1);
   background: 0 0;
   border: var(--bs-nav-tabs-border-width) solid #222 !important;
   border-top-left-radius: var(--bs-nav-tabs-border-radius);
   border-top-right-radius: var(--bs-nav-tabs-border-radius);
-  color:var(--bs-nav-link-color);
+  color: var(--bs-nav-link-color);
   margin-right: 0px;
   /* text-shadow: 1px 2px 0px rgb(0 0 0 / 25%) !important;
    */
 }
+
 .nav-link {
   display: block;
   padding: var(--bs-nav-link-padding-y) var(--bs-nav-link-padding-x);
@@ -137,7 +154,7 @@ body {
   font-weight: var(--bs-nav-link-font-weight);
   color: var(--bs-nav-link-color);
   text-decoration: none;
-  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out;
+  transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out;
   /* text-shadow: 1px 2px 0px rgb(0 0 0 / 25%) !important; */
   margin-right: .5em;
 }
@@ -189,25 +206,28 @@ body {
   /* text-shadow: 1px 0px 1px rgba(0, 0, 0, 0.25); */
   margin: 7px;
 }
+
 .progress-text ul {
-  padding-left:0rem !important;
+  padding-left: 0rem !important;
   list-style-type: none !important;
-  margin:2px;
+  margin: 2px;
 }
-.progress-text ul li{
+
+.progress-text ul li {
   list-style-type: none !important;
   text-transform: capitalize;
 }
 
-.progress-text:hover{
+.progress-text:hover {
   background-color: #3a3f44;
 }
 
-.progress-text ul li b{
+.progress-text ul li b {
   color: #fff47e;
   font-weight: 400;
   list-style-type: none !important;
 }
+
 .progress-expanded {
   background-color: #cccccc;
   left: 0;
@@ -216,23 +236,25 @@ body {
 }
 
 .left-closed {
-  max-width: 40px; 
+  max-width: 40px;
   height: 100vh;
   background-color: #555;
-  position: fixed; 
+  position: fixed;
   left: 0;
   margin-left: 0px;
   /* margin-right: 7px; */
   font-size: 12px;
   padding: 7px 12px 7px 10px;
 }
+
 .drawer-control {
   color: #ffffff;
   text-align: right;
   text-shadow: 1px 2px 0px rgba(0, 0, 0, 0.25);
 
 }
-.left-tabs-closed{
+
+.left-tabs-closed {
   padding-bottom: 0px;
   color: #fff;
   text-shadow: 1px 2px 0px rgb(0 0 0 / 25%);
@@ -263,13 +285,13 @@ body {
 }
 
 .Collapsible__contentOuter {
-  width:172px; 
-  background:  #cccccc;
+  width: 172px;
+  background: #cccccc;
 }
 
 .Collapsible__contentInner {
-  background:  #cccccc;
-  width:172px; 
+  background: #cccccc;
+  width: 172px;
 }
 
 .Collapsible__contentInner p {
@@ -291,13 +313,13 @@ body {
   padding: 5px;
   padding-left: 1em;
   margin-top: 1.5em;
-  background:  #cccccc;
+  background: #cccccc;
   width: 172px;
 }
 
 .Collapsible__trigger.is-open {
   display: block;
-  position: relative;  
+  position: relative;
 }
 
 .Collapsible__trigger:after {
