@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
+import PropagateLoader from 'react-spinners/PropagateLoader';
 import {
   getImageIds,
   getWadoImagePath,
@@ -495,7 +496,6 @@ class DisplayView extends Component {
 
       }
       Promise.all(promises).then((res) => {
-        console.log('----------res ', res);
         this.setState(
           {
             data: res,
@@ -1796,6 +1796,9 @@ class DisplayView extends Component {
           <ToolMenu
             onSwitchView={this.props.onSwitchView}
           />
+          {this.state.isLoading && <div style={{ marginTop: '30%', marginLeft: '50%' }}>
+            <PropagateLoader color={'#7A8288'} loading={this.state.isLoading} margin={8} />
+          </div>}
           {!this.state.isLoading &&
             Object.entries(series).length &&
             data.map((data, i) => (
