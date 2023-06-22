@@ -51,7 +51,7 @@ export function getImageIds(series) {
 }
 
 export function getMetadata(url) {
-    return http.get(url + "/metadata");
+  return http.get(url + "/metadata");
 }
 
 //  seems like this doesn"t belong to here but olny services know details about paths&server side
