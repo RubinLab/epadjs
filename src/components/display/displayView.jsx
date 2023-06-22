@@ -51,6 +51,7 @@ import getVPDimensions from "./ViewportCalculations";
 import SeriesDropDown from './SeriesDropDown';
 
 let mode;
+const wadoUrl = sessionStorage.getItem('wadoUrl');
 console.log(" ---> cornerstoneWADOImageLoader", cornerstoneWADOImageLoader);
 
 const tools = [
@@ -1696,6 +1697,7 @@ class DisplayView extends Component {
   // this is in aimEditor. should be somewhare common so both can use (the new aimapi library)
   parseImgeId = (imageId) => {
     if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
+    if (imageId.includes('wadors')) return imageId.split('/instances/').pop();
     return imageId.split("/").pop();
   };
 
