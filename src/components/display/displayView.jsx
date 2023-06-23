@@ -9,6 +9,7 @@ import {
   getSegmentation,
   getMetadata
 } from "../../services/seriesServices";
+import { getImageMetadata } from "../../services/imageServices";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
@@ -621,11 +622,14 @@ class DisplayView extends Component {
     const imageUrls = await this.getImages(serie);
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
-    for (let url of imageUrls) {
-      baseUrl = wadoUrlNoWadors + url.lossyImage;
-      if (url.multiFrameImage === true) {
-        const { data } = await getMetadata(baseUrl);
-        for (var i = 0; i < url.numberOfFrames; i++) {
+    const seriesURL = wadoUrlNoWadors + imageUrls[0].lossyImage.split('/instances/')[0];
+    const { data: seriesMetadata } = await getMetadata(seriesURL);
+    const useSeriesData = seriesMetadata.length > 0 && seriesMetadata.length === imageUrls.length;
+    for (let k = 0; k < imageUrls.length; k++) {
+      baseUrl = wadoUrlNoWadors + imageUrls[k].lossyImage;
+      if (imageUrls[k].multiFrameImage === true) {
+        const { data } = await getImageMetadata(baseUrl);
+        for (var i = 0; i < imageUrls[k].numberOfFrames; i++) {
           let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           cornerstoneImageIds.push(multiFrameUrl);
@@ -638,14 +642,19 @@ class DisplayView extends Component {
           cornerstone.loadAndCacheImage(multiFrameUrl);
         }
       } else {
-        const { data } = await getMetadata(baseUrl);
+        let data;
+        if (!useSeriesData)  {
+          const result  = await getImageMetadata(baseUrl);
+          data = result.data;
+        }
         let singleFrameUrl = `wadors:${baseUrl}/frames/1`;
         cornerstoneImageIds.push(singleFrameUrl);
         // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
+        const imgData = useSeriesData ? seriesMetadata[k] : data[0];
         cornerstoneWADOImageLoader.wadors.metaDataManager.add(
           singleFrameUrl,
-          data[0]
+          imgData
         );
         cornerstone.loadAndCacheImage(singleFrameUrl);
       }
