@@ -53,7 +53,6 @@ import SeriesDropDown from './SeriesDropDown';
 
 let mode;
 const wadoUrl = sessionStorage.getItem('wadoUrl');
-console.log(" ---> cornerstoneWADOImageLoader", cornerstoneWADOImageLoader);
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 } },
@@ -189,11 +188,8 @@ class DisplayView extends Component {
     // if (series.length < 1) {
     //   onSwitchView('search');
     // }
-    console.log(" step 1");
     this.getViewports();
-    console.log(" step 2");
     this.getData();
-    console.log(" step 3");
     this.formInvertMap();
     if (series.length > 0) {
       this.setSubComponentHeights();
@@ -602,17 +598,10 @@ class DisplayView extends Component {
 
   getImageStack = async (serie, index) => {
     const wadoUrl = sessionStorage.getItem("wadoUrl");
-    console.log(" -----> wadoUrl", wadoUrl);
-    if (wadoUrl.includes('wadors')) {
-      console.log(" in wadors check")
-      // call new method
+    if (wadoUrl.includes('wadors')) 
       return this.getImageStackWithWadors(serie, index);
-      // return this.getImageStackWithWadouri(serie, index);
-    } else {
+     else 
       return this.getImageStackWithWadouri(serie, index);
-
-    }
-
   }
 
   getImageStackWithWadors = async (serie, index) => {
@@ -639,7 +628,7 @@ class DisplayView extends Component {
             multiFrameUrl,
             data[0]
           );
-          cornerstone.loadAndCacheImage(multiFrameUrl);
+          // cornerstone.loadAndCacheImage(multiFrameUrl);
         }
       } else {
         let data;
@@ -656,7 +645,7 @@ class DisplayView extends Component {
           singleFrameUrl,
           imgData
         );
-        cornerstone.loadAndCacheImage(singleFrameUrl);
+        // cornerstone.loadAndCacheImage(singleFrameUrl);
       }
     }
     const { imageIds } = this.state;
