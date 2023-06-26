@@ -4,6 +4,7 @@ import ReactTable from "react-table-v6";
 import treeTableHOC from "react-table-v6/lib/hoc/treeTable";
 import _ from "lodash";
 import { Button } from "react-bootstrap";
+import WarningModal from '../common/warningModal';
 import { getSeries } from "../../services/seriesServices";
 import { getStudies } from "../../services/projectServices";
 import ColumnSelect from "./ColumnSelect.jsx";
@@ -29,6 +30,7 @@ class FlexView extends React.Component {
     expanded: {},
     seriesTableOpen: false,
     series: [],
+    showWarning: false
   };
 
   studyColumns = [
@@ -98,23 +100,27 @@ class FlexView extends React.Component {
     if (series.length > 0) series = this.excludeOpenSeries(series);
     // filter series that have displayable modality
     series = series.filter(isSupportedModality);
-    //check if there is enough room
-    if (series.length + this.props.openSeries.length > this.maxPort) {
-      //if there is not bring the modal
-      this.setState({ showSeriesTable: true, series });
-      // TODO show toast
+    if (series.length === 0) {
+      this.setState({ showWarning: true });
     } else {
-      //if there is enough room
-      //add serie to the grid
-      const promiseArr = [];
-      for (let i = 0; i < series.length; i++) {
-        this.props.dispatch(addToGrid(series[i]));
-        promiseArr.push(this.props.dispatch(getSingleSerie(series[i])));
+      //check if there is enough room
+      if (series.length + this.props.openSeries.length > this.maxPort) {
+        //if there is not bring the modal
+        this.setState({ showSeriesTable: true, series });
+        // TODO show toast
+      } else {
+        //if there is enough room
+        //add serie to the grid
+        const promiseArr = [];
+        for (let i = 0; i < series.length; i++) {
+          this.props.dispatch(addToGrid(series[i]));
+          promiseArr.push(this.props.dispatch(getSingleSerie(series[i])));
+        }
+        //getsingleSerie
+        Promise.all(promiseArr)
+          .then(() => { this.props.history.push('/display') })
+          .catch(err => console.error(err));
       }
-      //getsingleSerie
-      Promise.all(promiseArr)
-        .then(() => { this.props.history.push('/display') })
-        .catch(err => console.error(err));
     }
   };
 
@@ -225,25 +231,34 @@ class FlexView extends React.Component {
       showSeriesTable,
     } = this.state;
     return (
-      <div className="flexView" style={{ fontSize: '12px' }}>
-        {showSeriesTable && (
-          // <SeriesTable series={series} onClose={this.closeSeriesTable} />
-          <SelectSerieModal seriesPassed={[series]} onCancel={this.closeSeriesTable} />
-        )}
-        <ColumnSelect
-          order={order}
-          onChecked={this.toggleColumn}
-          studyColumns={this.studyColumns}
-          onClose={this.selectDropdown}
-        />
-        {this.state.data && (
-          <StudyTable
-            data={data}
+      <>
+        <div className="flexView" style={{ fontSize: '12px' }}>
+          {showSeriesTable && (
+            // <SeriesTable series={series} onClose={this.closeSeriesTable} />
+            <SelectSerieModal seriesPassed={[series]} onCancel={this.closeSeriesTable} />
+          )}
+          <ColumnSelect
             order={order}
-            displaySeries={this.displaySeries}
+            onChecked={this.toggleColumn}
+            studyColumns={this.studyColumns}
+            onClose={this.selectDropdown}
+          />
+          {this.state.data && (
+            <StudyTable
+              data={data}
+              order={order}
+              displaySeries={this.displaySeries}
+            />
+          )}
+        </div>
+        {this.state.showWarning && (
+          <WarningModal
+            onOK={() => this.setState({ showWarning: false })}
+            title={'No series to display'}
+            message={'There is no Series to display in the Study'}
           />
         )}
-      </div>
+      </>
     );
   };
 }

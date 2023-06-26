@@ -29,6 +29,7 @@ import { Aim, enumAimType } from "aimapi";
 import { teachingFileTempUid, teachingFileTempCode } from '../../constants';
 import { isSupportedModality } from '../../Utils/aid';
 import { DISP_MODALITIES } from '../../constants';
+import WarningModal from "components/common/warningModal";
 
 class selectSerieModal extends React.Component {
   // _isMounted = false;
@@ -41,7 +42,8 @@ class selectSerieModal extends React.Component {
       selectedToDisplay: {},
       limit: 0,
       list: [],
-      isButtonDisabled: false
+      isButtonDisabled: false,
+      showWarning: false
     };
     this.maxPort = parseInt(sessionStorage.getItem("maxPort"));
     this.mode = sessionStorage.getItem("mode");
@@ -351,6 +353,10 @@ class selectSerieModal extends React.Component {
     }
     if (significantExplanation)
       selectionList.push(<div key={"explanation"} className={"significant-series"}><br />(S): Significant series</div>);
+
+    if (selectionList.length === 0) {
+      this.setState({ showWarning: true });
+    }
     return selectionList;
   };
 
@@ -380,6 +386,7 @@ class selectSerieModal extends React.Component {
       examTypes = examTypes[0].split("\\");
     }
     study.examTypes = examTypes.filter(type => DISP_MODALITIES.includes(type));
+
     study.birthdate = study.birthdate.split('-').join('');
     study.insertDate = study.insertDate.split('-').join('');
     study.studyDate = study.studyDate.split('-').join('');
@@ -395,34 +402,40 @@ class selectSerieModal extends React.Component {
     let aimSaved = JSON.parse(aimJson);
     const isUpdate = false;
 
-    return uploadAim(aimSaved, projectID, isUpdate)
-      .then(async () => {
-        toast.success("Teaching File succesfully saved.", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
+    if (study.examTypes.length === 0) {
+      this.setState({ showWarning: true });
+      deleteStudy({ projectID, patientID, studyUID }, '?all=true').then().catch(err => console.error(err));
+      return;
+    } else {
+      return uploadAim(aimSaved, projectID, isUpdate)
+        .then(async () => {
+          toast.success("Teaching File succesfully saved.", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+          let studies = Object.values(this.props.seriesPassed);
+          let series = [];
+          studies.forEach(arr => {
+            series = series.concat(arr);
+          });
+          await this.setSignificantSeries(series);
+          window.dispatchEvent(new Event("refreshProjects"));
+          this.setState({ isButtonDisabled: false });
+          return result;
+        })
+        .catch((error) => {
+          deleteStudy({ projectID, patientID, studyUID }, '?all=true').then().catch(err => console.error(err));
+          alert(
+            "Teaching file couldn't be saved! More information about the error can be found in the logs."
+          );
+          console.error(error);
+          this.setState({ isButtonDisabled: false });
         });
-        let studies = Object.values(this.props.seriesPassed);
-        let series = [];
-        studies.forEach(arr => {
-          series = series.concat(arr);
-        });
-        await this.setSignificantSeries(series);
-        window.dispatchEvent(new Event("refreshProjects"));
-        this.setState({ isButtonDisabled: false });
-        return result;
-      })
-      .catch((error) => {
-        deleteStudy({ projectID, patientID, studyUID }, '?all=true');
-        alert(
-          "Teaching file couldn't be saved! More information about the error can be found in the logs."
-        );
-        console.error(error);
-        this.setState({ isButtonDisabled: false });
-      });
+    }
   }
 
   saveTeachingFileAndDisplay = async () => {
@@ -433,84 +446,98 @@ class selectSerieModal extends React.Component {
     this.displaySelection(result);
   }
 
+  closeWarning = () => {
+    const currentState = this.state.showWarning;
+    this.setState({ showWarning: !currentState });
+  }
+
   render = () => {
     const { openSeries, isTeachingFile } = this.props;
     const title = isTeachingFile ? "Create STELLA Teaching File" : "Series Selection Window"
     const selections = Object.keys(this.state.selectedToDisplay);
     const list = this.renderSelection();
     return (
-      <Modal.Dialog id="series-modal" className="series-modal">
-        < Modal.Header className="select-serie-header">
-          <Modal.Title className="select-serie-title">
-            {title}
-          </Modal.Title>
-        </Modal.Header >
-        <Modal.Body className="select-serie-body">
-          {isTeachingFile &&
-            (
-              <>
-                <div id="stella-beta-warning">Warning! Beta Software, Not For Routine Use During Preclinical Testing</div>
-                <div id="questionaire" className={"field-grid"}>
-                  <row>
-                    <div id="anatomy"></div>
-                    <div id="diagnosis"></div>
-                  </row>
-                  <row>
-                    <div id="speciality"></div>
-                    <div id="comment">
-                      {/* <i class="dropdown icon"></i>
+      <>
+        <Modal.Dialog id="series-modal" className="series-modal">
+          < Modal.Header className="select-serie-header">
+            <Modal.Title className="select-serie-title">
+              {title}
+            </Modal.Title>
+          </Modal.Header >
+          <Modal.Body className="select-serie-body">
+            {isTeachingFile &&
+              (
+                <>
+                  <div id="stella-beta-warning">Warning! Beta Software, Not For Routine Use During Preclinical Testing</div>
+                  <div id="questionaire" className={"field-grid"}>
+                    <row>
+                      <div id="anatomy"></div>
+                      <div id="diagnosis"></div>
+                    </row>
+                    <row>
+                      <div id="speciality"></div>
+                      <div id="comment">
+                        {/* <i class="dropdown icon"></i>
                   <div className="title active" style={{ color: "rgb(204, 204, 204)", fontSize: "13px" }}>Narrative</div>
                   <div>
                   <input className="comment ui input"></input>
                 </div> */}
-                    </div>
-                  </row>
-                </div>
-              </>
+                      </div>
+                    </row>
+                  </div>
+                </>
+              )}
+            <br />
+            <div className={"max-series"}>Please select up to {this.maxPort} series to display:</div>
+            {openSeries.length > 0 && (
+              <div>
+                Four viewports in use - close some or all to open new series.
+                <br />
+                <button
+                  size="lg"
+                  className="selectSerie-clearButton"
+                  onClick={() => this.props.dispatch(clearGrid())}
+                >
+                  X  - Close all series
+                </button>
+              </div>
             )}
-          <br />
-          <div className={"max-series"}>Please select up to {this.maxPort} series to display:</div>
-          {openSeries.length > 0 && (
-            <div>
-              Four viewports in use - close some or all to open new series.
-              <br />
-              <button
-                size="lg"
-                className="selectSerie-clearButton"
-                onClick={() => this.props.dispatch(clearGrid())}
-              >
-                X  - Close all series
-              </button>
-            </div>
-          )}
-          {/* <button
+            {/* <button
             size="lg"
             className="selectSerie-clearButton"
             onClick={() => this.props.dispatch(clearGrid())}
           >
             X  - Close all series
           </button> */}
-          {this.state.limit > this.maxPort && !openSeries.length && (
-            <div>Please select only {this.maxPort} series to open!</div>
-          )}
-          <div style={{ paddingLeft: "0.5em", maxHeight: "500px", overflowY: "auto" }}>{list}</div>
-        </Modal.Body>
-        <Modal.Footer className="select-serie-footer">
-          {isTeachingFile && (
-            <div>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) { this.handleCancel(); this.props.onSave() } }} disabled={this.state.isButtonDisabled}>Save Teaching File</Button>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()} disabled={this.state.isButtonDisabled}>Save Teaching File & Display</Button>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Discard</Button>
-            </div>
-          )}
-          {!isTeachingFile && (
-            <div>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.displaySelection()} disabled={!selections.length}>Display selection</Button>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Cancel</Button>
-            </div>
-          )}
-        </Modal.Footer>
-      </Modal.Dialog >
+            {this.state.limit > this.maxPort && !openSeries.length && (
+              <div>Please select only {this.maxPort} series to open!</div>
+            )}
+            <div style={{ paddingLeft: "0.5em", maxHeight: "500px", overflowY: "auto" }}>{list}</div>
+          </Modal.Body>
+          <Modal.Footer className="select-serie-footer">
+            {isTeachingFile && (
+              <div>
+                <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) { this.handleCancel(); this.props.onSave() } }} disabled={this.state.isButtonDisabled}>Save Teaching File</Button>
+                <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()} disabled={this.state.isButtonDisabled}>Save Teaching File & Display</Button>
+                <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Discard</Button>
+              </div>
+            )}
+            {!isTeachingFile && (
+              <div>
+                <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.displaySelection()} disabled={!selections.length}>Display selection</Button>
+                <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Cancel</Button>
+              </div>
+            )}
+          </Modal.Footer>
+        </Modal.Dialog >
+        {this.state.showWarning && (
+          <WarningModal
+            onOK={this.closeWarning}
+            title={'No series to display'}
+            message={`There is no Series to display in the Study. ${isTeachingFile ? 'The teaching file can not be created!' : ''}`}
+          />
+        )}
+      </>
     );
   };
 }
