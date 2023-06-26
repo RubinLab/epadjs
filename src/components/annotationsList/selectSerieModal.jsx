@@ -353,6 +353,10 @@ class selectSerieModal extends React.Component {
     }
     if (significantExplanation)
       selectionList.push(<div key={"explanation"} className={"significant-series"}><br />(S): Significant series</div>);
+
+    if (selectionList.length === 0) {
+      this.setState({ showWarning: true });
+    }
     return selectionList;
   };
 
