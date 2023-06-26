@@ -209,7 +209,7 @@ class selectSerieModal extends React.Component {
     return groupedObj;
   };
 
-  handleCancel = () => {
+  handleCancel = async () => {
     this.setState({
       selectionType: "",
       selectionArr: [],
@@ -220,6 +220,16 @@ class selectSerieModal extends React.Component {
     });
     // this.props.dispatch(clearSelection());
     this.props.onCancel();
+    try {
+      if (this.mode === 'teaching' && this.props.decrArgs) {
+        const { projectID, patientID, studyUID } = this.props.decrArgs;
+        await deleteStudy({ projectID, patientID, studyUID }, '?all=true');
+        console.error(error);
+        this.setState({ isButtonDisabled: false });
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   setPreSelecteds = () => {
