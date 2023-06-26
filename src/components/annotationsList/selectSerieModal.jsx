@@ -534,7 +534,7 @@ class selectSerieModal extends React.Component {
           <WarningModal
             onOK={this.closeWarning}
             title={'No series to display'}
-            message={'There is no Series to display in the Study'}
+            message={`There is no Series to display in the Study. ${isTeachingFile ? 'The teaching file can not be created!' : ''}`}
           />
         )}
       </>
