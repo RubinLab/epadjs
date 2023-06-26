@@ -48,7 +48,7 @@ const annotation = (props) => {
   const narrativeExists = narrative && narrative !== "";
   const isShortNarrative = narrativeExists && narrative.length < 200;
 
-  const content = isShortNarrative || showMore ? narrative : `${narrative.substring(0, 180)}...`;
+  const content = isShortNarrative || showMore ? narrative : `${narrative?.substring(0, 180)}...`;
   const linkElement = (<Button style={{'padding': '0px', 'marginLeft': '2rem'}} variant="link" onClick={() => setShowMore(!showMore)}>{showMore ? 'show less' : 'show more'}</Button>);
   const narrativeElement = (<li key={"narrative"}>
     <b>Narrative:</b> {content} {isShortNarrative ? '' : linkElement}
