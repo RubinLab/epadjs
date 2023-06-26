@@ -623,6 +623,14 @@ class DisplayView extends Component {
     const useSeriesData = seriesMetadata.length > 0 && seriesMetadata.length === imageUrls.length;
     for (let k = 0; k < imageUrls.length; k++) {
       baseUrl = wadoUrlNoWadors + imageUrls[k].lossyImage;
+      let data;
+      let imgData;
+      if (!useSeriesData) {
+        const result  = await getImageMetadata(baseUrl);
+        data = result.data;
+        imgData = data[0];
+      } else imgData = seriesMetadata[k];
+
       if (imageUrls[k].multiFrameImage === true) {
         const { data } = await getImageMetadata(baseUrl); // if series metadata no need 
         for (var i = 0; i < imageUrls[k].numberOfFrames; i++) {
@@ -633,21 +641,15 @@ class DisplayView extends Component {
           newImageIds[multiFrameUrl] = true;
           cornerstoneWADOImageLoader.wadors.metaDataManager.add(
             multiFrameUrl,
-            data[0]
+            imgData
           );
           // cornerstone.loadAndCacheImage(multiFrameUrl);
         }
       } else {
-        let data;
-        if (!useSeriesData)  {
-          const result  = await getImageMetadata(baseUrl);
-          data = result.data;
-        }
         let singleFrameUrl = `wadors:${baseUrl}/frames/1`;
         cornerstoneImageIds.push(singleFrameUrl);
         // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
-        const imgData = useSeriesData ? seriesMetadata[k] : data[0];
         cornerstoneWADOImageLoader.wadors.metaDataManager.add(
           singleFrameUrl,
           imgData
