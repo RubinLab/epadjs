@@ -632,7 +632,6 @@ class DisplayView extends Component {
       } else imgData = seriesMetadata[k];
 
       if (imageUrls[k].multiFrameImage === true) {
-        const { data } = await getImageMetadata(baseUrl); // if series metadata no need 
         for (var i = 0; i < imageUrls[k].numberOfFrames; i++) {
           let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
