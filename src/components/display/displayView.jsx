@@ -608,16 +608,23 @@ class DisplayView extends Component {
     let stack = {};
     let newImageIds = {};
     let cornerstoneImageIds = [];
+    let seriesMetadata = [];
     const imageUrls = await this.getImages(serie);
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
     const seriesURL = wadoUrlNoWadors + imageUrls[0].lossyImage.split('/instances/')[0];
-    const { data: seriesMetadata } = await getMetadata(seriesURL);
+    try {
+      seriesMetadata = await getMetadata(seriesURL);
+      seriesMetadata = seriesMetadata.data;
+    } catch (err) {
+      console.log("Can not get series metadata");
+      console.error(err);
+    }
     const useSeriesData = seriesMetadata.length > 0 && seriesMetadata.length === imageUrls.length;
     for (let k = 0; k < imageUrls.length; k++) {
       baseUrl = wadoUrlNoWadors + imageUrls[k].lossyImage;
       if (imageUrls[k].multiFrameImage === true) {
-        const { data } = await getImageMetadata(baseUrl);
+        const { data } = await getImageMetadata(baseUrl); // if series metadata no need 
         for (var i = 0; i < imageUrls[k].numberOfFrames; i++) {
           let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
