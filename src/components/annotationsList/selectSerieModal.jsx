@@ -222,9 +222,6 @@ class selectSerieModal extends React.Component {
       if (this.mode === 'teaching' && this.props.decrArgs) {
         const { projectID, patientID, studyUID } = this.props.decrArgs;
         await deleteStudy({ projectID, patientID, studyUID }, '?all=true');
-        alert(
-          "Teaching file couldn't be saved! More information about the error can be found in the logs."
-        );
         console.error(error);
         this.setState({ isButtonDisabled: false });
       }
