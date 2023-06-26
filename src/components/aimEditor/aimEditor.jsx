@@ -452,7 +452,6 @@ class AimEditor extends Component {
         if (examTypes?.length === 1 && examTypes[0].includes("\\")) {
           examTypes = examTypes[0].split("\\");
         }
-        // TODO: should I add warning here?
         study.examTypes = examTypes.filter(type => DISP_MODALITIES.includes(type));
         aimData = { study, answers, user };
         aim = new Aim(
