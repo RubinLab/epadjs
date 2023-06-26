@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
+import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import { getTemplates } from "../../services/templateServices";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
@@ -28,6 +29,7 @@ import "./aimEditor.css";
 
 let mode;
 let defaultAimName;
+const wadoUrl = sessionStorage.getItem('wadoUrl');
 
 class AimEditor extends Component {
   constructor(props) {
@@ -587,6 +589,9 @@ class AimEditor extends Component {
   getAimSeedDataFromMarkup = (markupsToSave) => {
     const cornerStoneImageId = Object.keys(markupsToSave)[0];
     const image = this.getCornerstoneImagebyId(cornerStoneImageId);
+    if (wadoUrl.includes('wadors')) {
+      image.metadata = this.createImageDataFromMetadata(cornerStoneImageId);
+    }
     return image;
     // const seedData = getAimImageData(image);
     // addSemanticAnswersToSeedData(seedData, answers);
@@ -822,6 +827,23 @@ class AimEditor extends Component {
     const imageId = Object.keys(imageCache)[imageIdx];
     return imageCache[imageId].image;
   };
+
+  createImageDataFromMetadata = (id) => {
+    const data = {};
+    const requiredTags =
+      ['x00080016', 'x00080018', "x0020000d", "x00080030", "x0020000d", "x00080020", "x00080050", "x0020000e", "x00080060", "x00200011", "x0008103e", "x00200013", "x00080070", "x00081090", "x00181020", "x00100040", "x00100010", "x00100020", "x00100030"];
+
+    const metadata = cornerstoneWADOImageLoader.wadors.metaDataManager.get(id);
+
+    for (let i = 0; i < requiredTags.length; i++) {
+      const key = requiredTags[i].substring(1).toUpperCase();
+      data[requiredTags[i]] = metadata[key]?.Value ? metadata[key].Value[0] : '';
+    }
+    if (typeof data['x00100010'] === 'object' && data['x00100010'].hasOwnProperty('Alphabetic')) {
+      data['x00100010'] = data['x00100010']['Alphabetic']
+    }
+    return data;
+  }
 
   getCornerstoneImagebyId = (imageId) => {
     return cornerstone.imageCache.imageCache[imageId].image;
@@ -1289,8 +1311,9 @@ class AimEditor extends Component {
   };
 
   getstripCsImageId = (imageId) => {
-    if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
-    return imageId.split("/").pop();
+    if (imageId.includes("objectUID=")) return imageId.split("&frame=")[0].split("objectUID=")[1];
+    const idArray = imageId.split("/");
+    return idArray[idArray.length - 3];
   };
 }
 

@@ -147,7 +147,7 @@ class ToolMenu extends Component {
       // { name: "Invert", icon: <FaAdjust />, tool: "Invert" },
       { name: "Reset", icon: <MdLoop />, tool: "Reset", teaching: true },
       { name: "Pan", icon: <MdPanTool />, tool: "Pan", teaching: true },
-      { name: "MetaData", icon: <FaListAlt />, tool: "MetaData", teaching: true },
+      // { name: "MetaData", icon: <FaListAlt />, tool: "MetaData", teaching: true },
       { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate", teaching: true },
       // { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
       { name: "Color", icon: <FaPalette />, tool: "colorLut" },
@@ -286,22 +286,22 @@ class ToolMenu extends Component {
       }
       // d => Length
       else if (event.keyCode == 68) {
-        const index = mode === 'teaching' ? 10 : 12;
+        const index = mode === 'teaching' ? 9 : 11;
         this.handleToolClicked(index, 'Length');
       }
       // o => Perpendicular/Bidirectional 
       else if (event.keyCode == 79) {
-        const index = mode === 'teaching' ? 13 : 15;
+        const index = mode === 'teaching' ? 12 : 14;
         this.handleToolClicked(index, 'Bidirectional');
       }
       // f => Arrow 
       else if (event.keyCode == 70) {
-        const index = mode === 'teaching' ? 11 : 13;
+        const index = mode === 'teaching' ? 10 : 12;
         this.handleToolClicked(index, 'ArrowAnnotate');
       }
       // r => Circle
       else if (event.keyCode == 82) {
-        const index = mode === 'teaching' ? 12 : 14;
+        const index = mode === 'teaching' ? 11 : 13;
         this.handleToolClicked(index, 'CircleRoi');
       }
       // z => zoom
@@ -572,7 +572,7 @@ class ToolMenu extends Component {
           );
         })}
 
-        {this.state.showMetaData && (<MetaData onClose={this.showMetaData} />)}
+        {/* {this.state.showMetaData && (<MetaData onClose={this.showMetaData} />)} */}
         {/*<div
           id="angle"
           tabIndex="7"

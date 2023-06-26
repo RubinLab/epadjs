@@ -1,11 +1,15 @@
 import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
+import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
+import PropagateLoader from 'react-spinners/PropagateLoader';
 import {
   getImageIds,
   getWadoImagePath,
   getSegmentation,
+  getMetadata
 } from "../../services/seriesServices";
+import { getImageMetadata } from "../../services/imageServices";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
@@ -48,6 +52,7 @@ import getVPDimensions from "./ViewportCalculations";
 import SeriesDropDown from './SeriesDropDown';
 
 let mode;
+const wadoUrl = sessionStorage.getItem('wadoUrl');
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 } },
@@ -182,7 +187,7 @@ class DisplayView extends Component {
     const { series, onSwitchView } = this.props;
     // if (series.length < 1) {
     //   onSwitchView('search');
-    // }    
+    // }
     this.getViewports();
     this.getData();
     this.formInvertMap();
@@ -486,6 +491,7 @@ class DisplayView extends Component {
       for (let i = 0; i < series.length; i++) {
         const promise = this.getImageStack(series[i], i);
         promises.push(promise);
+
       }
       Promise.all(promises).then((res) => {
         this.setState(
@@ -581,15 +587,99 @@ class DisplayView extends Component {
 
   getImageFrameURI = (metadataURI, metadata) => {
     // Use the BulkDataURI if present int the metadata
-    // if (metadata["7FE00010"] && metadata["7FE00010"].BulkDataURI) {
-    //   console.log("donuyom", metadata["7FE00010"].BulkDataURI);
-    //   return metadata["7FE00010"].BulkDataURI;
-    // }
+    if (metadata["7FE00010"] && metadata["7FE00010"].BulkDataURI) {
+      console.log("donuyom", metadata["7FE00010"].BulkDataURI);
+      return metadata["7FE00010"].BulkDataURI;
+    }
 
     // fall back to using frame #1
     return metadataURI + "/frames/1";
   };
+
   getImageStack = async (serie, index) => {
+    const wadoUrl = sessionStorage.getItem("wadoUrl");
+    if (wadoUrl.includes('wadors')) 
+      return this.getImageStackWithWadors(serie, index);
+     else 
+      return this.getImageStackWithWadouri(serie, index);
+  }
+
+  getImageStackWithWadors = async (serie, index) => {
+    let stack = {};
+    let newImageIds = {};
+    let cornerstoneImageIds = [];
+    let seriesMetadata = [];
+    const imageUrls = await this.getImages(serie);
+    let baseUrl;
+    let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
+    const seriesURL = wadoUrlNoWadors + imageUrls[0].lossyImage.split('/instances/')[0];
+    try {
+      seriesMetadata = await getMetadata(seriesURL);
+      seriesMetadata = seriesMetadata.data;
+    } catch (err) {
+      console.log("Can not get series metadata");
+      console.error(err);
+    }
+    const useSeriesData = seriesMetadata.length > 0 && seriesMetadata.length === imageUrls.length;
+    for (let k = 0; k < imageUrls.length; k++) {
+      baseUrl = wadoUrlNoWadors + imageUrls[k].lossyImage;
+      let data;
+      let imgData;
+      if (!useSeriesData) {
+        const result  = await getImageMetadata(baseUrl);
+        data = result.data;
+        imgData = data[0];
+      } else imgData = seriesMetadata[k];
+
+      if (imageUrls[k].multiFrameImage === true) {
+        for (var i = 0; i < imageUrls[k].numberOfFrames; i++) {
+          let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
+          // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
+          cornerstoneImageIds.push(multiFrameUrl);
+          // cornerstone.loadAndCacheImage(multiFrameUrl);
+          newImageIds[multiFrameUrl] = true;
+          cornerstoneWADOImageLoader.wadors.metaDataManager.add(
+            multiFrameUrl,
+            imgData
+          );
+          // cornerstone.loadAndCacheImage(multiFrameUrl);
+        }
+      } else {
+        let singleFrameUrl = `wadors:${baseUrl}/frames/1`;
+        cornerstoneImageIds.push(singleFrameUrl);
+        // cornerstone.loadAndCacheImage(singleFrameUrl);
+        newImageIds[singleFrameUrl] = false;
+        cornerstoneWADOImageLoader.wadors.metaDataManager.add(
+          singleFrameUrl,
+          imgData
+        );
+        // cornerstone.loadAndCacheImage(singleFrameUrl);
+      }
+    }
+    const { imageIds } = this.state;
+    this.setState({ imageIds: { ...imageIds, ...newImageIds } });
+
+    //to jump to the same image after aim save
+    let imageIndex;
+    if (
+      this.state.data[index] &&
+      this.state.data[index].stack.currentImageIdIndex
+    )
+      imageIndex = this.state.data[index].stack.currentImageIdIndex;
+    else imageIndex = 0;
+
+    // if serie is being open from the annotation jump to that image and load the aim editor
+    if (serie.aimID) {
+      imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+    }
+
+    stack.currentImageIdIndex = parseInt(imageIndex, 10);
+    stack.imageIds = [...cornerstoneImageIds];
+
+    return { stack };
+  }
+
+  getImageStackWithWadouri = async (serie, index) => {
     let stack = {};
     let newImageIds = {};
     let cornerstoneImageIds = [];
@@ -612,26 +702,6 @@ class DisplayView extends Component {
         // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
       }
-      // } else {
-      //   let singleFrameUrl = baseUrl;
-      //   console.log("Single frame url", singleFrameUrl);
-      //   cornerstoneImageIds.push(singleFrameUrl);
-      //   imageIds[singleFrameUrl] = false;
-      //   const { data } = await getMetadata(singleFrameUrl);
-      //   console.log("Metadata", data);
-      //   const metadata = data[0];
-      //   const imageFrameURI = this.getImageFrameURI(
-      //     singleFrameUrl + "/metadata",
-      //     metadata
-      //   );
-      //   const imageId = "wadors:" + imageFrameURI;
-
-      //   cornerstoneWADOImageLoader.wadors.metaDataManager.add(
-      //     imageId,
-      //     metadata
-      //   );
-      //   cornerstone.loadAndCacheImage(imageId);
-      // }
     });
     const { imageIds } = this.state;
     this.setState({ imageIds: { ...imageIds, ...newImageIds } });
@@ -1633,6 +1703,7 @@ class DisplayView extends Component {
   // this is in aimEditor. should be somewhare common so both can use (the new aimapi library)
   parseImgeId = (imageId) => {
     if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
+    if (imageId.includes('wadors')) return imageId.split('/instances/').pop();
     return imageId.split("/").pop();
   };
 
@@ -1733,6 +1804,9 @@ class DisplayView extends Component {
           <ToolMenu
             onSwitchView={this.props.onSwitchView}
           />
+          {this.state.isLoading && <div style={{ marginTop: '30%', marginLeft: '50%' }}>
+            <PropagateLoader color={'#7A8288'} loading={this.state.isLoading} margin={8} />
+          </div>}
           {!this.state.isLoading &&
             Object.entries(series).length &&
             data.map((data, i) => (
@@ -1787,7 +1861,7 @@ class DisplayView extends Component {
                           <Form.Control
                             type="number"
                             min="1"
-                            value={parseInt(data.stack.currentImageIdIndex) + 1}
+                            value={parseInt(data?.stack?.currentImageIdIndex) + 1}
                             className={"slice-field"}
                             onChange={(event) => this.handleJumpChange(i, event)}
                             style={{

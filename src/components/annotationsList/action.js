@@ -62,6 +62,8 @@ import { getImageIdAnnotations } from "aimapi";
 import { ConsoleWriter } from "istanbul-lib-report";
 import aimEntityData from "./annotationDock/aimEntityData";
 
+const wadoUrl = sessionStorage.getItem('wadoUrl');
+
 export const updateSearchTableIndex = searchTableIndex => {
   return { type: UPDATE_SEARCH_TABLE_INDEX, searchTableIndex }
 }
@@ -805,9 +807,23 @@ const getSingleSerieData = (serie, annotation) => {
           seriesUID
         );
         aimsData = serieAims.concat(studyAims);
+        let imageAimMap = getImageIdAnnotations(serieAims);
+        if (wadoUrl.includes('wadors')) {
+          const imgIds = Object.keys(imageAimMap);
+          const aims = Object.values(imageAimMap);
+          imageAimMap = aims.reduce((all, item, i) => {
+            let img = imgIds[i].split('&');
+            img = `${img[0]}/frames/1`
+            all[img] = item;
+            return all;
+          }, {})
+
+        }
+        
         imageData = {
-          ...getImageIdAnnotations(serieAims),
+          ...imageAimMap,
         };
+
         aimsData = getAimListFields(aimsData, annotation);
         const otherSeriesAimsData = getOtherSeriesAimData(otherSeriesAims, projectID, patientID);
         resolve({ aimsData, imageData, otherSeriesAimsData });
