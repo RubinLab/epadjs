@@ -315,6 +315,7 @@ export var AimEditor = function (
         self.extractTemplate(self.jsonTemplateCopy);
       }
     };
+
     if (self.preOpen !== null) {
       self.templateSelect.selectedIndex = self.preOpen;
       self.templateSelect.onchange();
@@ -351,6 +352,8 @@ export var AimEditor = function (
       arrayLength = 1;
     }
 
+    console.log(" ----> extracttemplate 1")
+
     var component = null;
     //adding comment textarea for the template
     var commentDiv = document.createElement("div");
@@ -368,6 +371,8 @@ export var AimEditor = function (
     headerCheckIcon.setAttribute("id", "annotationNameIcon");
     headerCheckIcon.className = "green check circle outline icon";
 
+    console.log(" ----> extracttemplate 2")
+
     if (mode === "teaching" && templateCode === teachingFileTempCode) {
       labelAnnotationName.textContent = "Case Title:";
       labelAnnotationNameInput.placeholder = "Ex: 39 year old with knee pain";
@@ -375,6 +380,8 @@ export var AimEditor = function (
       labelAnnotationName.textContent = "Annotation Name";
       labelAnnotationNameInput.value = this.aimName;
     }
+
+    console.log(" ----> extracttemplate 3")
 
     labelAnnotationNameInput.style.fontFamily = self.fontfamily;
     labelAnnotationNameInput.style.fontSize = "0.9rem";
@@ -399,6 +406,8 @@ export var AimEditor = function (
     labelAnnotationNameInput.setAttribute("type", "text");
     labelAnnotationNameInput.id = "annotationName";
 
+    console.log(" ----> extracttemplate 4 - annotationNameDiv", annotationNameDiv);
+
     annotationNameDiv.appendChild(labelAnnotationName);
     annotationNameDiv.appendChild(labelAnnotationNameInput);
     annotationNameLabelDiv.appendChild(labelAnnotationName);
@@ -422,7 +431,10 @@ export var AimEditor = function (
     textareaDomObject.style.color = "black";
     textareaDomObject.style.width = "100%";
 
+    console.log(" ----> extracttemplate 5 - commentDiv", commentDiv);
+    
     commentDiv.appendChild(textareaDomObject);
+    
 
     textareaDomObject.onkeyup = function () {
       if (self.activateDirtyCheck) {
@@ -579,6 +591,7 @@ export var AimEditor = function (
     $(".ui.accordion").accordion();
     self.checkShapes(self.runtimeUserShapes);
     // self.formCheckHandler(self.checkFormSaveReady());
+    console.log(" ----> extracttemplate ends")
   };
 
   this.QuestionType = function (

@@ -22,6 +22,7 @@ const handleJumpToAim = aimId => {
 const annotationsLink = (props) => {
   const { openSeries, activePort, aimsList, otherSeriesAimsList } = props;
   const { seriesUID } = openSeries[activePort];
+  console.log(" ---> top annotationslink")
   let list = [];
   let header = [];
   let studyAimsList = [];
@@ -39,6 +40,7 @@ const annotationsLink = (props) => {
   };
 
   const displayAnnotations = (e, selected) => {
+    console.log(" ----> displayAnnotations begin ")
 
     const { patientID, projectID, studyUID, seriesUID, aimID } = selected;
     const maxPort = parseInt(sessionStorage.getItem('maxPort'));
@@ -63,6 +65,8 @@ const annotationsLink = (props) => {
         .catch(err => console.error(err));
       props.dispatch(clearSelection());
     }
+    console.log(" ----> displayAnnotations end ")
+
   };
 
 
@@ -144,6 +148,8 @@ const annotationsLink = (props) => {
   }
 
   if (list.length === 0 && studyAimsList.length === 0) return ("");
+
+  console.log(" ---> before return annotationslink")
 
   return (
     <React.Fragment>
