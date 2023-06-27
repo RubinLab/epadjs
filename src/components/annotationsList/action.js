@@ -507,7 +507,7 @@ const getAimListFields = (aims, ann) => {
           .value;
       let ind = aimName.indexOf("~");
       if (ind >= 0) {
-        aimName = aimName.substring(0, ind);
+        aimName = aimName && typeof aimName === 'string' ? aimName.substring(0, ind) : aimName;
       }
 
       // let displayStatus = ann
