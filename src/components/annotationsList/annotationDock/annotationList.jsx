@@ -299,7 +299,8 @@ class AnnotationsList extends React.Component {
           </div>
         </div>
         <div>{annList}</div>
-        <AnnotationsLink imageAims={imageAims} />
+        <div>wohooo!!</div>
+        {/* <AnnotationsLink imageAims={imageAims} /> */}
       </React.Fragment >
     );
   };

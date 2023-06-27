@@ -432,7 +432,10 @@ export var AimEditor = function (
     textareaDomObject.style.width = "100%";
 
     console.log(" ----> extracttemplate 5 - commentDiv", commentDiv);
-    
+
+    console.log(' ====> commentDiv', commentDiv);
+    console.log();
+    console.log();
     commentDiv.appendChild(textareaDomObject);
     
 
@@ -448,13 +451,15 @@ export var AimEditor = function (
         code: json.TemplateContainer.Template[0].codeValue,
         codeSystemName:
           json.TemplateContainer.Template[0].codingSchemeDesignator,
-        "iso:displayName": {
+          "iso:displayName": {
           "xmlns:iso": "uri:iso.org:21090",
           value: json.TemplateContainer.Template[0].codeMeaning,
         },
       },
     ];
-
+    
+    console.log(' ----> document.getElementById("accordion1")', document.getElementById("accordion1"));
+    
     document.getElementById("accordion1").appendChild(annotationNameLabelDiv);
     document.getElementById("accordion1").appendChild(annotationNameDiv);
     //end adding comment textarea for the template
