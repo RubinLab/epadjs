@@ -406,7 +406,7 @@ export var AimEditor = function (
     labelAnnotationNameInput.setAttribute("type", "text");
     labelAnnotationNameInput.id = "annotationName";
 
-    console.log(" ----> extracttemplate 4 - annotationNameDiv", annotationNameDiv);
+    console.log(" ----> 44444111112222extracttemplate 4 - annotationNameDiv", annotationNameDiv);
 
     annotationNameDiv.appendChild(labelAnnotationName);
     annotationNameDiv.appendChild(labelAnnotationNameInput);
