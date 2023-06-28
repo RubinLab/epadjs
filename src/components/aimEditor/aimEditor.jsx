@@ -29,12 +29,13 @@ import "./aimEditor.css";
 
 let mode;
 let defaultAimName;
-const wadoUrl = sessionStorage.getItem('wadoUrl');
+let wadoUrl;
 
 class AimEditor extends Component {
   constructor(props) {
     super(props);
     mode = sessionStorage.getItem('mode');
+    wadoUrl = sessionStorage.getItem('wadoUrl');
     defaultAimName = sessionStorage.getItem('defaultAimName');
     this.image = this.getImage();
     this.semanticAnswers = {};
