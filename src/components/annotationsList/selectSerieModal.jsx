@@ -45,6 +45,7 @@ class selectSerieModal extends React.Component {
     };
     this.maxPort = parseInt(sessionStorage.getItem("maxPort"));
     this.mode = sessionStorage.getItem("mode");
+    this.wadoUrl = sessionStorage.getItem("wadoUrl");
   }
 
   //get the serie list
@@ -187,12 +188,12 @@ class selectSerieModal extends React.Component {
       else
         this.props.dispatch(addToGrid(serie, serie.aimID));
       if (this.state.selectionType === "aim") {
-        this.props.dispatch(getSingleSerie(serie, serie.aimID));
+        this.props.dispatch(getSingleSerie(serie, serie.aimID, this.wadoUrl));
       } else {
         if (aimID)
-          this.props.dispatch(getSingleSerie(serie, aimID));
+          this.props.dispatch(getSingleSerie(serie, aimID, this.wadoUrl));
         else
-          this.props.dispatch(getSingleSerie(serie));
+          this.props.dispatch(getSingleSerie(serie, null, this.wadoUrl));
       }
     }
     this.props.history.push("/display");
