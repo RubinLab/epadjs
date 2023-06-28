@@ -808,7 +808,9 @@ const getSingleSerieData = (serie, annotation) => {
         );
         aimsData = serieAims.concat(studyAims);
         let imageAimMap = getImageIdAnnotations(serieAims);
-        if (wadoUrl.includes('wadors')) {
+        // TODO fix the env var retrieval
+        // if (wadoUrl.includes('wadors')) {
+        {
           const imgIds = Object.keys(imageAimMap);
           const aims = Object.values(imageAimMap);
           imageAimMap = aims.reduce((all, item, i) => {
