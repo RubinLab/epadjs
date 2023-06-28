@@ -187,7 +187,9 @@ class AnnotationsList extends React.Component {
       }
     }
 
-    const wadors = wadoUrl.includes('wadors');
+    // const wadors = wadoUrl.includes('wadors');
+    const wadors = true;
+    console.log(' ---> wadourl', wadoUrl);
 
     const aimList = openSeries[activePort].imageAnnotations;
     if (aimList) {
