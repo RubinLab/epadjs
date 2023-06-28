@@ -16,6 +16,7 @@ import cornerstone from "cornerstone-core";
 import { state } from "cornerstone-tools/store/index.js";
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
+console.log(' =====> wadoUrl at top', wadoUrl);
 
 class AnnotationsList extends React.Component {
   state = {
@@ -188,6 +189,7 @@ class AnnotationsList extends React.Component {
     }
 
     // const wadors = wadoUrl.includes('wadors');
+    console.log(' ---> wadourl', wadoUrl);
     const wadors = true;
     console.log(' ---> wadourl', wadoUrl);
 
