@@ -196,7 +196,7 @@ class selectSerieModal extends React.Component {
       }
     }
     this.props.history.push("/display");
-    this.handleCancel();
+    this.handleCancel(true);
   };
 
   groupUnderPatient = objArr => {
@@ -207,7 +207,7 @@ class selectSerieModal extends React.Component {
     return groupedObj;
   };
 
-  handleCancel = async () => {
+  handleCancel = async (resetState) => {
     this.setState({
       selectionType: "",
       selectionArr: [],
@@ -219,7 +219,7 @@ class selectSerieModal extends React.Component {
     // this.props.dispatch(clearSelection());
     this.props.onCancel();
     try {
-      if (this.mode === 'teaching' && this.props.decrArgs) {
+      if (this.mode === 'teaching' && this.props.decrArgs && !resetState) {
         const { projectID, patientID, studyUID } = this.props.decrArgs;
         await deleteStudy({ projectID, patientID, studyUID }, '?all=true');
         console.error(error);
@@ -508,7 +508,7 @@ class selectSerieModal extends React.Component {
         <Modal.Footer className="select-serie-footer">
           {isTeachingFile && (
             <div>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) { this.handleCancel(); this.props.onSave() } }} disabled={this.state.isButtonDisabled}>Save Teaching File</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) { this.handleCancel(true); this.props.onSave() } }} disabled={this.state.isButtonDisabled}>Save Teaching File</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()} disabled={this.state.isButtonDisabled}>Save Teaching File & Display</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Discard</Button>
             </div>
