@@ -16,6 +16,7 @@ import {
 import SelectionItem from "./containers/selectionItem";
 import { FaRegCheckSquare } from "react-icons/fa";
 import { getSeries, setSignificantSeries } from "../../services/seriesServices";
+import WarningModal from "../common/warningModal";
 import { getTemplate } from "../../services/templateServices";
 import { uploadAim } from "services/annotationServices";
 import "./annotationsList.css";
@@ -41,7 +42,8 @@ class selectSerieModal extends React.Component {
       selectedToDisplay: {},
       limit: 0,
       list: [],
-      isButtonDisabled: false
+      isButtonDisabled: false,
+      showWarning: false
     };
     this.maxPort = parseInt(sessionStorage.getItem("maxPort"));
     this.mode = sessionStorage.getItem("mode");
@@ -93,7 +95,12 @@ class selectSerieModal extends React.Component {
       });
       this.semanticAnswers.createViewerWindow();
       this.props.completeLoading();
+      // const list = this.renderSelection();
+      const list = [];
+      const emptyList = list.length === 0;
+      this.setState({ list, showWarning: emptyList });
     };// end teaching file related part
+
   }
   componentWillUnmount = () => {
     this._isMounted = false;
@@ -220,7 +227,7 @@ class selectSerieModal extends React.Component {
     // this.props.dispatch(clearSelection());
     this.props.onCancel();
     try {
-      if (this.mode === 'teaching' && this.props.decrArgs && !resetState) {
+      if (this.mode === 'teaching' && this.props.decrArgs && !resetState && !showWarning ) {
         const { projectID, patientID, studyUID } = this.props.decrArgs;
         await deleteStudy({ projectID, patientID, studyUID }, '?all=true');
         console.error(error);
@@ -446,10 +453,11 @@ class selectSerieModal extends React.Component {
 
   render = () => {
     const { openSeries, isTeachingFile } = this.props;
+    const { isButtonDisabled, showWarning } = this.state;
     const title = isTeachingFile ? "Create STELLA Teaching File" : "Series Selection Window"
     const selections = Object.keys(this.state.selectedToDisplay);
-    const list = this.renderSelection();
     return (
+      // <>
       <Modal.Dialog id="series-modal" className="series-modal">
         < Modal.Header className="select-serie-header">
           <Modal.Title className="select-serie-title">
@@ -457,7 +465,7 @@ class selectSerieModal extends React.Component {
           </Modal.Title>
         </Modal.Header >
         <Modal.Body className="select-serie-body">
-          {isTeachingFile &&
+          {isTeachingFile && !showWarning &&
             (
               <>
                 <div id="stella-beta-warning">Warning! Beta Software, Not For Routine Use During Preclinical Testing</div>
@@ -480,7 +488,7 @@ class selectSerieModal extends React.Component {
               </>
             )}
           <br />
-          <div className={"max-series"}>Please select up to {this.maxPort} series to display:</div>
+          {!showWarning && <div className={"max-series"}>Please select up to {this.maxPort} series to display:</div>}
           {openSeries.length > 0 && (
             <div>
               Four viewports in use - close some or all to open new series.
@@ -504,13 +512,16 @@ class selectSerieModal extends React.Component {
           {this.state.limit > this.maxPort && !openSeries.length && (
             <div>Please select only {this.maxPort} series to open!</div>
           )}
-          <div style={{ paddingLeft: "0.5em", maxHeight: "500px", overflowY: "auto" }}>{list}</div>
+          <div style={{ paddingLeft: "0.5em", maxHeight: "500px", overflowY: "auto" }}>{this.state.list}</div>
+          {showWarning && (<div id="stella-beta-warning">
+            {`There is no Series to display in the Study. ${isTeachingFile ? 'The teaching file can not be created!' : ''}`}
+          </div>)}
         </Modal.Body>
         <Modal.Footer className="select-serie-footer">
           {isTeachingFile && (
             <div>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) { this.handleCancel(true); this.props.onSave() } }} disabled={this.state.isButtonDisabled}>Save Teaching File</Button>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()} disabled={this.state.isButtonDisabled}>Save Teaching File & Display</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) { this.handleCancel(true); this.props.onSave() } }} disabled={isButtonDisabled || showWarning}>Save Teaching File</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()} disabled={isButtonDisabled || showWarning}>Save Teaching File & Display</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Discard</Button>
             </div>
           )}
