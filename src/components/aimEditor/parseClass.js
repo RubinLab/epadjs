@@ -201,7 +201,6 @@ export var AimEditor = function (
   };
 
   this.createViewerWindow = function () {
-    console.log(" ---> createViewerWindow begin");
     self.renderButtonhandler(true);
     self.mainWindowDiv = document.createElement("div");
 
@@ -328,12 +327,9 @@ export var AimEditor = function (
     document.getElementById("tlist").children[0].style.width = "100%";
     self.templateSelect.style.width = "100%";
     templateDiv.style.width = "100%";
-
-    console.log(" ---> createViewerWindow end");
   };
 
   this.extractTemplate = function (json) {
-    console.log(' --->  json extractTemplate', json);
     const templateCode = json["TemplateContainer"]["Template"][0]["codeValue"];
     var a = 0;
     // to hide main aim editor components other than teaching components
@@ -351,9 +347,6 @@ export var AimEditor = function (
       isArray = 0;
       arrayLength = 1;
     }
-
-    console.log(" ----> extracttemplate 1")
-
     var component = null;
     //adding comment textarea for the template
     var commentDiv = document.createElement("div");
@@ -371,8 +364,6 @@ export var AimEditor = function (
     headerCheckIcon.setAttribute("id", "annotationNameIcon");
     headerCheckIcon.className = "green check circle outline icon";
 
-    console.log(" ----> extracttemplate 2")
-
     if (mode === "teaching" && templateCode === teachingFileTempCode) {
       labelAnnotationName.textContent = "Case Title:";
       labelAnnotationNameInput.placeholder = "Ex: 39 year old with knee pain";
@@ -380,8 +371,6 @@ export var AimEditor = function (
       labelAnnotationName.textContent = "Annotation Name";
       labelAnnotationNameInput.value = this.aimName;
     }
-
-    console.log(" ----> extracttemplate 3")
 
     labelAnnotationNameInput.style.fontFamily = self.fontfamily;
     labelAnnotationNameInput.style.fontSize = "0.9rem";
@@ -406,8 +395,6 @@ export var AimEditor = function (
     labelAnnotationNameInput.setAttribute("type", "text");
     labelAnnotationNameInput.id = "annotationName";
 
-    console.log(" ----> 44444111112222extracttemplate 4 - annotationNameDiv", annotationNameDiv);
-
     annotationNameDiv.appendChild(labelAnnotationName);
     annotationNameDiv.appendChild(labelAnnotationNameInput);
     annotationNameLabelDiv.appendChild(labelAnnotationName);
@@ -431,14 +418,8 @@ export var AimEditor = function (
     textareaDomObject.style.color = "black";
     textareaDomObject.style.width = "100%";
 
-    console.log(" ----> extracttemplate 5 - commentDiv", commentDiv);
-
-    console.log(' ====> commentDiv', commentDiv);
-    console.log();
-    console.log();
     commentDiv.appendChild(textareaDomObject);
     
-
     textareaDomObject.onkeyup = function () {
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
@@ -457,9 +438,7 @@ export var AimEditor = function (
         },
       },
     ];
-    
-    console.log(' ----> document.getElementById("accordion1")', document.getElementById("accordion1"));
-    
+        
     document.getElementById("accordion1").appendChild(annotationNameLabelDiv);
     document.getElementById("accordion1").appendChild(annotationNameDiv);
     //end adding comment textarea for the template
@@ -503,7 +482,6 @@ export var AimEditor = function (
 
         // below line adds all components to the div passed from caller. Rectifiying for teaching file
         //  document.getElementById("accordion1").appendChild(componentDiv);
-        console.log(' <--------- out of ifs  ---> ')
         if (component.label === "Anatomy Core" && isTeachingFlag) {
           teachingDivParent.anatomy.appendChild(componentDiv);
           teachingDivParent.anatomy.appendChild(labelDiv);
@@ -596,7 +574,6 @@ export var AimEditor = function (
     $(".ui.accordion").accordion();
     self.checkShapes(self.runtimeUserShapes);
     // self.formCheckHandler(self.checkFormSaveReady());
-    console.log(" ----> extracttemplate ends")
   };
 
   this.QuestionType = function (
