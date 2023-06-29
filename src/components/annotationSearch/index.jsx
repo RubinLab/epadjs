@@ -45,6 +45,7 @@ import AddToWorklist from '../searchView/addWorklist';
 import Projects from '../searchView/addToProject';
 import Spinner from 'react-bootstrap/Spinner';
 import SeriesModal from '../annotationsList/selectSerieModal';
+import WarningModal from '../common/warningModal';
 import { COMP_MODALITIES as compModality } from "../../constants.js";
 
 import './annotationSearch.css';
@@ -157,6 +158,7 @@ const AnnotationSearch = props => {
   const [showProjects, setShowProjects] = useState(false);
   const [showDownload, setShowDownload] = useState(false);
   const [showSelectSeries, setShowSelectSeries] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
   const [seriesList, setSeriesList] = useState([]);
   const [encArgs, setEncArgs] = useState('');
   const [decrArgs, setDecrArgs] = useState('');
@@ -262,7 +264,8 @@ const AnnotationSearch = props => {
   const handleTeachingFilesModal = event => {
     const { seriesArray, args, packedData } = event.detail;
     const seriesList = [seriesArray];
-    setShowSelectSeries(true);
+    setShowSelectSeries(seriesList.length > 0);
+    setShowWarning(seriesList.length === 0);
     setSeriesList(seriesList);
     setEncArgs(args);
     setDecrArgs(packedData);
@@ -1477,6 +1480,11 @@ const AnnotationSearch = props => {
         projectID={selectedProject}
         show={showDownload}
       />
+      {showWarning && (<WarningModal
+        onOK={() => { setShowWarning(false); props.completeLoading() }}
+        title={'No series to display'}
+        message={`There is no Series to display in the Study. ${mode === 'teaching' ? 'The teaching file can not be created!' : ''}`}
+      />)}
     </>
   );
 };
