@@ -814,8 +814,10 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
           const imgIds = Object.keys(imageAimMap);
           const aims = Object.values(imageAimMap);
           imageAimMap = aims.reduce((all, item, i) => {
-            let img = imgIds[i].split('&');
-            img = `${img[0]}/frames/1`
+            // Aimapi sends wadouri format including &frame= wadors format is handled here
+            let img = imgIds[i].split('&frame=');
+            let frameNo = img.length > 1 ? img[1] : 1;
+            img = `${img[0]}/frames/${frameNo}`
             all[img] = item;
             return all;
           }, {})
