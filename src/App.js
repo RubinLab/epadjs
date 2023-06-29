@@ -1431,7 +1431,7 @@ class App extends Component {
                       onSwitchView={this.switchView}
                       closeLeftMenu={this.closeLeftMenu}
                       savedData={this.state.savedData}
-                      saveData={(data) => {this.state.savedData=data}}
+                      saveData={(data) => { this.state.savedData = data }}
                     />
                   )}
                 />
@@ -1489,6 +1489,7 @@ class App extends Component {
                       }
                       completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
                       loading={this.state.loading}
+                      forceUpdatePage={() => this.setState(state => ({ update: state.update + 1 }))}
                     />
                   )}
                 />
@@ -1609,6 +1610,7 @@ class App extends Component {
                     setQuery={(query) => this.setState({ searchQuery: query })}
                     completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
                     loading={this.state.loading}
+                    forceUpdatePage={() => this.setState(state => ({ update: state.update + 1 }))}
                   />
                 )}
               />

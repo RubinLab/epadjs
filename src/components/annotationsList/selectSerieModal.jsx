@@ -224,6 +224,7 @@ class selectSerieModal extends React.Component {
         const { projectID, patientID, studyUID } = this.props.decrArgs;
         await deleteStudy({ projectID, patientID, studyUID }, '?all=true');
         this.setState({ isButtonDisabled: false });
+        if (this.props.forceUpdatePage) this.props.forceUpdatePage();
       }
     } catch (err) {
       console.error(err);
@@ -432,6 +433,7 @@ class selectSerieModal extends React.Component {
         );
         console.error(error);
         this.setState({ isButtonDisabled: false });
+        if (this.props.forceUpdatePage) this.props.forceUpdatePage();
       });
   }
 

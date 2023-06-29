@@ -1462,6 +1462,7 @@ const AnnotationSearch = props => {
             decrArgs={decrArgs}
             onSave={getNewData}
             completeLoading={props.completeLoading}
+            forceUpdatePage={props.forceUpdatePage}
           />
         )}
       </table>
