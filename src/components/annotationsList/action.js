@@ -792,7 +792,7 @@ const getOtherSeriesAimData = (arr, projectID, patientID) => {
 }
 
 // helper methods - calls backend and get data
-const getSingleSerieData = (serie, annotation, wadourl) => {
+const getSingleSerieData = (serie, annotation, wadoUrl) => {
   return new Promise((resolve, reject) => {
     let aimsData;
     let imageData;
