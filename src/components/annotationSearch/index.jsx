@@ -47,6 +47,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import SeriesModal from '../annotationsList/selectSerieModal';
 import WarningModal from '../common/warningModal';
 import { COMP_MODALITIES as compModality } from "../../constants.js";
+import { isSupportedModality } from 'Utils/aid.js';
 
 import './annotationSearch.css';
 
@@ -262,10 +263,15 @@ const AnnotationSearch = props => {
   }, [handleTeachingFilesModal]);
 
   const handleTeachingFilesModal = event => {
-    const { seriesArray, args, packedData } = event.detail;
-    const seriesList = [seriesArray];
-    setShowSelectSeries(seriesList.length > 0);
-    setShowWarning(seriesList.length === 0);
+    let { seriesArray, args, packedData } = event.detail;
+
+    for (let i = 0; i < seriesArray.length; i++) {
+      seriesArray = seriesArray.filter(isSupportedModality);
+    }
+    
+    let seriesList = [seriesArray];
+    setShowSelectSeries(seriesArray.length > 0);
+    setShowWarning(seriesArray.length === 0);
     setSeriesList(seriesList);
     setEncArgs(args);
     setDecrArgs(packedData);
