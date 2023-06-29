@@ -15,9 +15,10 @@ import { deleteAnnotation } from "../../../services/annotationServices";
 import cornerstone from "cornerstone-core";
 import { state } from "cornerstone-tools/store/index.js";
 
-const wadoUrl = sessionStorage.getItem('wadoUrl');
+let wadoUrl;
 
 class AnnotationsList extends React.Component {
+  wadoUrl = sessionStorage.getItem("wadoUrl");
   state = {
     labelDisplayAll: false,
     annsDisplayAll: true,
@@ -187,7 +188,7 @@ class AnnotationsList extends React.Component {
       }
     }
 
-    const wadors = wadoUrl.includes('wadors');
+    const wadors = this.wadoUrl.includes('wadors');
 
     const aimList = openSeries[activePort].imageAnnotations;
     if (aimList) {
@@ -196,10 +197,6 @@ class AnnotationsList extends React.Component {
       const singleFrameAnnotations = aimList[imageID];
       const multiFrameAnnotations = wadors ? aimList[imageID] : aimList[imageID + "&frame=1"];
       const noMarkupAnnotations = aimList[imageID + "-img"];
-
-      console.log(' -----> noMarkupAnnotations');
-      console.log(noMarkupAnnotations);
-
 
       if (singleFrameAnnotations && multiFrameAnnotations)
         imageAnnotations = [

@@ -697,7 +697,7 @@ const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
 // };
 
 // action to open series
-export const getSingleSerie = (serie, annotation) => {
+export const getSingleSerie = (serie, annotation, wadoUrl) => {
   return async (dispatch, getState) => {
     try {
       await dispatch(loadAnnotations());
@@ -711,7 +711,8 @@ export const getSingleSerie = (serie, annotation) => {
       };
       const { aimsData, imageData, otherSeriesAimsData } = await getSingleSerieData(
         serie,
-        annotation
+        annotation,
+        wadoUrl
       );
       await dispatch(
         singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData)
@@ -791,7 +792,7 @@ const getOtherSeriesAimData = (arr, projectID, patientID) => {
 }
 
 // helper methods - calls backend and get data
-const getSingleSerieData = (serie, annotation) => {
+const getSingleSerieData = (serie, annotation, wadoUrl) => {
   return new Promise((resolve, reject) => {
     let aimsData;
     let imageData;
@@ -808,7 +809,8 @@ const getSingleSerieData = (serie, annotation) => {
         );
         aimsData = serieAims.concat(studyAims);
         let imageAimMap = getImageIdAnnotations(serieAims);
-        if (wadoUrl.includes('wadors')) {
+        // TODO fix the env var retrieval
+        if (wadoUrl.includes('wadors')) {     
           const imgIds = Object.keys(imageAimMap);
           const aims = Object.values(imageAimMap);
           imageAimMap = aims.reduce((all, item, i) => {

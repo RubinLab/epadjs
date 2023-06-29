@@ -39,10 +39,8 @@ const annotationsLink = (props) => {
   };
 
   const displayAnnotations = (e, selected) => {
-
     const { patientID, projectID, studyUID, seriesUID, aimID } = selected;
     const maxPort = parseInt(sessionStorage.getItem('maxPort'));
-
 
     let isGridFull = openSeries.length === maxPort;
     const { isOpen, index } = checkIfSerieOpen(seriesUID);

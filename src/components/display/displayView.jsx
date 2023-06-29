@@ -52,7 +52,7 @@ import getVPDimensions from "./ViewportCalculations";
 import SeriesDropDown from './SeriesDropDown';
 
 let mode;
-const wadoUrl = sessionStorage.getItem('wadoUrl');
+let wadoUrl;
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 } },
@@ -150,6 +150,7 @@ class DisplayView extends Component {
   constructor(props) {
     super(props);
     mode = sessionStorage.getItem('mode');
+    wadoUrl = sessionStorage.getItem('wadoUrl');
     this.state = {
       width: "100%",
       height: "100%",
