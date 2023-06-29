@@ -45,13 +45,13 @@ const annotation = (props) => {
 
   let comment = props.aim.comment.value;
   let narrative = comment.split("~~")[1];
-  const narrativeExists = narrative && narrative !== "";
+  const narrativeExists = typeof narrative === 'string' && narrative !== "";
   const isShortNarrative = narrativeExists && narrative.length < 200;
 
-  const content = isShortNarrative || showMore ? narrative : `${narrative?.substring(0, 180)}...`;
-  const linkElement = (<Button style={{'padding': '0px', 'marginLeft': '2rem'}} variant="link" onClick={() => setShowMore(!showMore)}>{showMore ? 'show less' : 'show more'}</Button>);
+  const content = !narrativeExists ? '' : isShortNarrative ? narrative : showMore ? narrative : `${narrative?.substring(0, 180)}...`;
+  const linkElement = (<Button style={{ 'padding': '0px', 'marginLeft': '2rem' }} variant="link" onClick={() => setShowMore(!showMore)}>{showMore ? 'show less' : 'show more'}</Button>);
   const narrativeElement = (<li key={"narrative"}>
-    <b>Narrative:</b> {content} {isShortNarrative ? '' : linkElement}
+    <b>Narrative:</b> {content} {!isShortNarrative && narrativeExists ? linkElement : ''}
   </li>)
 
   return (
