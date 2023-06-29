@@ -812,8 +812,9 @@ const getSingleSerieData = (serie, annotation) => {
           const imgIds = Object.keys(imageAimMap);
           const aims = Object.values(imageAimMap);
           imageAimMap = aims.reduce((all, item, i) => {
-            let img = imgIds[i].split('&');
-            img = `${img[0]}/frames/1`
+            let img = imgIds[i].split('&frame=');
+            let frameNo = img.length > 1 ? img[1] : 1;
+            img = `${img[0]}/frames/${frameNo}`
             all[img] = item;
             return all;
           }, {})

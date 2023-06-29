@@ -663,8 +663,8 @@ class AimEditor extends Component {
     var markupsToSave = {};
     markedCSImageIds.map((CSImageId) => {
       const markUps = toolState[CSImageId];
-      const imageUid = this.getstripCsImageId(CSImageId);
-      const { imageId, frameNum } = this.parseImageUid(imageUid);
+      const { imageId, frameNum } = this.parseImageUidAndFrame(CSImageId);
+
       Object.keys(markUps).map((tool) => {
         switch (tool) {
           case "FreehandRoi3DTool":
@@ -887,15 +887,6 @@ class AimEditor extends Component {
       aim.createImageAnnotationStatement(2, segId, volumeId);
     }
     return segEntityData.sopInstanceUid;
-  };
-
-  parseImageUid = (imageUid) => {
-    if (imageUid.includes("frame=")) {
-      const obj = {};
-      [obj.imageId, obj.frameNum] = imageUid.split("&frame=");
-      return obj;
-    }
-    return { imageId: imageUid, frameNum: 1 }; //default frame number is always 1
   };
 
   addPolygonToAim = (aim, polygon, shapeIndex, imageId, frameNum) => {
@@ -1310,10 +1301,22 @@ class AimEditor extends Component {
     this.props.onCancel(false); //close the aim editor
   };
 
-  getstripCsImageId = (imageId) => {
-    if (imageId.includes("objectUID=")) return imageId.split("&frame=")[0].split("objectUID=")[1];
-    const idArray = imageId.split("/");
-    return idArray[idArray.length - 3];
+  parseImageUidAndFrame = (imageId) => {
+    const obj = {};
+    if (imageId.includes("objectUID=")) {
+      // wadouri:http://url/pacs/?requestType=WADO*studyUID=3453535&seriesUID=57457&objectUID=65865&frame=2
+      const frameSplit = imageId.split("&frame=");
+      if (frameSplit.length === 1) obj.frameNum = 1;
+      obj.frameNum = frameSplit[1];
+      obj.imageId = frameSplit[0].split("objectUID=")[1];
+      return obj;
+    }
+    // wadors:http://url/pacs/studies/46363/series/547754/instances/56475/frames/2
+    const idArray = imageId.split("/instances/")[1].split('/frames/');
+    if (idArray.length === 1) obj.frameNum = 1;
+    obj.frameNum = idArray[1];
+    obj.imageId = idArray[0];
+    return obj;
   };
 }
 
