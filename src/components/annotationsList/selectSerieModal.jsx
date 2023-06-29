@@ -427,13 +427,13 @@ class selectSerieModal extends React.Component {
         return result;
       })
       .catch((error) => {
-        deleteStudy({ projectID, patientID, studyUID }, '?all=true').then().catch(err => console.error(err));
+        deleteStudy({ projectID, patientID, studyUID }, '?all=true').then(() => { if (this.props.forceUpdatePage) this.props.forceUpdatePage(); }
+        ).catch(err => console.error(err));
         alert(
           "Teaching file couldn't be saved! More information about the error can be found in the logs."
         );
         console.error(error);
         this.setState({ isButtonDisabled: false });
-        if (this.props.forceUpdatePage) this.props.forceUpdatePage();
       });
   }
 
