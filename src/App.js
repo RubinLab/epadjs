@@ -786,7 +786,7 @@ class App extends Component {
       }
       const promiseArr = [];
       for (let serie of parsedSeriesArray) {
-        serie = { ...serie, projectID: "lite" };
+        serie.projectID = serie.projectID || 'lite';
         this.props.dispatch(addToGrid(serie));
         promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
       }
