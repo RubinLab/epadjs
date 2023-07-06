@@ -93,7 +93,7 @@ class CornerstoneViewport extends Component {
 
   constructor(props) {
     super(props);
-
+    
     const imageIdIndex = props.imageIdIndex;
     const imageId = props.imageIds[imageIdIndex];
 
@@ -133,6 +133,7 @@ class CornerstoneViewport extends Component {
       cornerstoneOptions,
       imageIds,
       resizeThrottleMs,
+      shouldInvert
     } = this.props;
     const { imageIdIndex } = this.state;
     const imageId = imageIds[imageIdIndex];
@@ -586,8 +587,11 @@ class CornerstoneViewport extends Component {
 
   // TODO: May need to throttle?
   onImageRendered = (event) => {
-    const viewport = event.detail.viewport;
-
+    const { viewport, element } = event.detail;
+    if (this.props.shouldInvert) {
+      event.detail.viewport.invert = true;
+      cornerstone.setViewport(element, viewport);
+    }
     this.setState({
       scale: viewport.scale,
       windowCenter: viewport.voi.windowCenter,

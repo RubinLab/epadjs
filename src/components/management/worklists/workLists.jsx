@@ -83,16 +83,28 @@ class WorkList extends React.Component {
   };
 
   getWorkListData = async () => {
-    const { data: worklists } = await getWorklistsOfCreator();
+    let { data: worklists } = await getWorklistsOfCreator();
+    for (let wl of worklists) {
+      let display = wl.requirements.reduce((all, item, i) => {
+        const { level, numOfAims, template } = item;
+        const templateName = template === 'any'? 'Any' : this.props.templateMap[template];
+        all.push(`${numOfAims}:${templateName}:${level}`);
+        return all;
+      }, []);
+      wl.requirementDisplay = display.join(', ');
+    }
     this.setState({ worklists });
   };
 
   handleRequirementFormInput = e => {
-    const { name, value } = e.target;
+    const { name, value, options, selectedIndex } = e.target;
+    const code = options && options[selectedIndex] ? options[selectedIndex].id : null;
     const newRequirement = { ...this.state.newRequirement };
-    name === 'template' && value === 'Any'
-      ? (newRequirement[name] = value.toLowerCase())
-      : (newRequirement[name] = value);
+    if (name === 'template') {
+      if (value === 'Any')
+        newRequirement[name] = value.toLowerCase()
+      else newRequirement[name] = code;
+    } else newRequirement[name] = value;
     if (name === 'numOfAims' && !isNaN(parseInt(value))) {
       this.setState({ error: null });
     }
@@ -122,7 +134,7 @@ class WorkList extends React.Component {
     let newSelected = {};
     if (this.state.selectAll === 0) {
       this.state.worklists.forEach(project => {
-        newSelected[project.worklistID] = project.username;
+        newSelected[project.workListID] = true;
       });
     }
 
@@ -564,12 +576,7 @@ class WorkList extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
-          const { requirements, workListID } = original.row.checkbox;
-          const displayReq = requirements.reduce((all, item, index) => {
-            const { level, numOfAims, template } = item;
-            all.push(`${numOfAims}:${template}:${level}`);
-            return all;
-          }, []);
+          const { requirements, workListID, requirementDisplay } = original.row.checkbox;
           const className = requirements.length
             ? 'wrapped menu-clickable'
             : 'wrapped click-to-add menu-clickable';
@@ -586,10 +593,10 @@ class WorkList extends React.Component {
                     updateRequirement: true
                   });
                 }}
-                id={`req-${original.row.checkbox.workListID}`}
+                id={`req-${workListID}`}
 
               >
-                {displayReq.join(', ') || 'Define requirement'}
+                {requirementDisplay || 'Define requirement'}
               </div>
               <ReactTooltip
                 id="worklist-requirement"
@@ -759,6 +766,7 @@ class WorkList extends React.Component {
             onDelete={this.deleteRequirement}
             onNewReqInfo={this.handleRequirementFormInput}
             error={this.state.error}
+            templateMap={this.props.templateMap}
           />
         )}
       </div>
@@ -768,6 +776,7 @@ class WorkList extends React.Component {
 
 WorkList.propTypes = {
   selection: PropTypes.string,
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
+  templateMap: PropTypes.object,
 };
 export default WorkList;

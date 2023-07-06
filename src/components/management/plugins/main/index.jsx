@@ -1,4 +1,5 @@
 import React from "react";
+import { connect } from "react-redux";
 import { toast } from "react-toastify";
 import { getProjectsWithPkAsId } from "../../../../services/projectServices";
 import {
@@ -21,6 +22,7 @@ import {
   getDefaultParameter,
   getOnePlugin,
 } from "../../../../services/pluginServices";
+import { refreshPage } from "../../../annotationsList/action";
 import DeleteAlert from "../../common/alertDeletionModal";
 import UploadModal from "../../../searchView/uploadModal";
 import EditTools from "../../templates/projectTable";
@@ -184,6 +186,7 @@ class Plugins extends React.Component {
       plugins: tempPlugins,
       tableSelectedData: {},
     });
+    this.props.dispatch(refreshPage('plugins', true));
   };
 
   addTemplate = (templateArray, tableSelectedData) => {
@@ -434,6 +437,10 @@ class Plugins extends React.Component {
       templateList = templateList.data;
 
       this.setState({ plugins, projectList, templateList });
+
+      this.props.dispatch(refreshPage('plugins', true))
+
+
     } else {
       toast.error("error happened while saving plugin", {
         position: "top-right",
@@ -552,6 +559,7 @@ class Plugins extends React.Component {
         editPluginClicked: false,
         errorMessage: null,
       });
+      this.props.dispatch(refreshPage('plugins', true))
     } else {
       toast.error("error happened while editing plugi", {
         position: "top-right",
@@ -874,4 +882,6 @@ class Plugins extends React.Component {
   };
 }
 
-export default Plugins;
+const mapStateToProps = (state) => { return {}}
+
+export default connect(mapStateToProps)(Plugins);

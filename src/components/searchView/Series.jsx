@@ -238,6 +238,9 @@ function Series(props) {
             paddingLeft: '20px'
           };
 
+          const treeExpPatient = props.treeExpand[props.patientIndex];
+          const treeStudies = treeExpPatient && props.treeExpand[props.patientIndex][props.studyIndex];
+
           return (
             <div style={style}>
               <div>
@@ -280,14 +283,14 @@ function Series(props) {
                   }
                 }}
               >
-                {row.isExpanded ||
-                  props.treeExpand[props.patientIndex][props.studyIndex][
+                {row.isExpanded || (treeStudies && treeStudies[
                   row.index
-                  ] ? (
-                  <span>&#x25BC;</span>
-                ) : (
-                  <span>&#x25B6;</span>
-                )}
+                ])
+                  ? (
+                    <span>&#x25BC;</span>
+                  ) : (
+                    <span>&#x25B6;</span>
+                  )}
               </span>
             </div>
           );
@@ -339,7 +342,7 @@ function Series(props) {
             {row.original.numberOfAnnotations === 0 ? (
               ''
             ) : (
-              <span 
+              <span
                 // className="badge badge-secondary"
                 className="searchView-table__cell"
               >

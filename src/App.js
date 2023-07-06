@@ -26,7 +26,6 @@ import UserMenu from "./components/userProfileMenu.jsx";
 import WarningModal from "./components/common/warningModal";
 import ConfirmationModal from "./components/common/confirmationModal";
 import SelectModalMenu from "./components/common/SelectModalMenu";
-
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
@@ -90,7 +89,7 @@ class App extends Component {
       authenticated: false,
       openInfo: false,
       openUser: false,
-      viewType: "search",
+      viewType: "list",
       lastEventId: null,
       showLog: false,
       admin: false,
@@ -116,15 +115,20 @@ class App extends Component {
       searchQuery: "",
       pairs: {},
       leftMenuState: "open",
-      update: 0
+      update: 0,
+      savedData: {},
+      loading: false,
+      freeze: "auto",
     };
   }
 
-  getWorklistPatient = (patient, project) => {
-    const pairsSelected = patient.reduce((all, item, index) => {
-      all.push({ subjectID: item, projectID: project[index] });
-      return all;
-    }, []);
+  getWorklistPatient = map => {
+    const keys = Object.keys(map);
+    const pairsSelected = [];
+    keys.forEach((item) => {
+      const idArr = item.split('-');
+      pairsSelected.push({ subjectID: idArr[0], projectID: idArr[1] });
+    });
     const pairs = { ...this.state.pairs };
     const index = this.state.reportsCompArr.length;
     pairs[index] = pairsSelected;
@@ -560,7 +564,7 @@ class App extends Component {
     this.setState({ viewType });
     const { openSeries } = this.props;
     const portOpen = openSeries.length > 0;
-    if (viewType === "search") {
+    if (viewType === "list") {
       this.props.dispatch(clearSelection());
       if (!portOpen || force) {
         pid
@@ -580,8 +584,14 @@ class App extends Component {
           draggable: true,
         });
       }
-    } else if (viewType === "annotations") {
-      this.props.history.push(`/search`);
+    } else if (viewType === "search") {
+      pid
+        ? this.props.history.push(`/search/${pid}`)
+        : this.props.history.push(`/search`);
+    } else if (viewType === "flex") {
+      pid
+        ? this.props.history.push(`/flex/${pid}`)
+        : this.props.history.push(`/flex`);
     }
   };
 
@@ -646,6 +656,7 @@ class App extends Component {
         sessionStorage.setItem("defaultAimName", defaultAimName);
         sessionStorage.setItem("feedback", feedback);
         sessionStorage.setItem("legacyReporting", legacyReporting);
+
         if (waterfallOptions) {
           sessionStorage.setItem("waterfallOptions", waterfallOptions);
         }
@@ -654,6 +665,7 @@ class App extends Component {
           document.title = "Stella";
           document.getElementById("favicon");
           favicon.href = "/stella.png"
+          this.setState({ viewType: 'search' })
         }
 
         this.setState({ mode, apiUrl, wadoUrl, authMode });
@@ -705,6 +717,9 @@ class App extends Component {
       this.props.dispatch(getTemplates());
       localStorage.setItem("treeData", JSON.stringify({}));
       this.clearTreeExpand();
+      this.setState(state => ({
+        update: state.update + 1
+      }));
     }
     const oldPid = prevProps.location.pathname.split("/").pop();
     const newPid = this.props.location.pathname.split("/").pop();
@@ -743,17 +758,21 @@ class App extends Component {
     const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
     const { openSeries } = this.props;
 
+    this.setState({ pid: projectID })
+
     if (API_KEY && user) {
       // THIS IS APIKEY
       sessionStorage.setItem("authMode", "apiKey");
       sessionStorage.setItem("API_KEY", API_KEY);
       sessionStorage.setItem("username", user);
       sessionStorage.setItem("displayName", user);
+      sessionStorage.setItem("encrypted", "true");
     }
 
     await this.completeAutorization();
 
     if (seriesArray) {
+      this.setState({ loading: true, freeze: 'none' })
       const parsedSeriesArray = JSON.parse(seriesArray);
       parsedSeriesArray.forEach(
         (serie, i) => (parsedSeriesArray[i] = { ...serie, projectID })
@@ -773,11 +792,13 @@ class App extends Component {
       }
       Promise.all(promiseArr)
         .then(() => {
+          this.setState({ loading: false, freeze: 'auto' })
           this.props.history.push("/display");
         })
         .catch((err) => console.error(err));
     } else if (patientID && studyUID && projectID) {
       // This should be teaching files
+      this.setState({ loading: true, freeze: 'none' })
       const packedData = {
         projectID,
         patientID,
@@ -825,6 +846,7 @@ class App extends Component {
     }
     Promise.all(promiseArr)
       .then(() => {
+        this.setState({ loading: false, freeze: 'auto' })
         this.props.history.push("/display");
       })
       .catch((err) => console.error(err));
@@ -1408,6 +1430,8 @@ class App extends Component {
                       keycloak={this.state.keycloak}
                       onSwitchView={this.switchView}
                       closeLeftMenu={this.closeLeftMenu}
+                      savedData={this.state.savedData}
+                      saveData={(data) => { this.state.savedData = data }}
                     />
                   )}
                 />
@@ -1453,15 +1477,19 @@ class App extends Component {
                   )}
                 />
                 <ProtectedRoute
-                  path="/search"
+                  path="/search/:pid?"
                   render={(props) => (
                     <AnnotationSearch
                       {...props}
+                      update={this.state.update}
                       pid={this.state.pid}
                       searchQuery={this.state.searchQuery}
                       setQuery={(query) =>
                         this.setState({ searchQuery: query })
                       }
+                      completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
+                      loading={this.state.loading}
+                      forceUpdatePage={() => this.setState(state => ({ update: state.update + 1 }))}
                     />
                   )}
                 />
@@ -1550,6 +1578,8 @@ class App extends Component {
                     keycloak={this.state.keycloak}
                     onSwitchView={this.switchView}
                     closeLeftMenu={this.closeLeftMenu}
+                    savedData={this.state.savedData}
+                    saveData={(data) => { this.state.savedData = data }}
                   />
                 )}
               />
@@ -1570,13 +1600,17 @@ class App extends Component {
                 render={(props) => <FlexView {...props} pid={this.state.pid} />}
               />
               <ProtectedRoute
-                path="/search"
+                path="/search/:pid?"
                 render={(props) => (
                   <AnnotationSearch
                     {...props}
                     pid={this.state.pid}
+                    update={this.state.update}
                     searchQuery={this.state.searchQuery}
                     setQuery={(query) => this.setState({ searchQuery: query })}
+                    completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
+                    loading={this.state.loading}
+                    forceUpdatePage={() => this.setState(state => ({ update: state.update + 1 }))}
                   />
                 )}
               />

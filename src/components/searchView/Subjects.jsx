@@ -541,6 +541,8 @@ function Subjects(props) {
     const searchTerm = searchKey.current.value.trim().toLowerCase();
     props.dispatch(savePatientFilter(searchTerm, pageSize, pageIndex));
     setFilteredData(searchTerm, pageSize, pageIndex);
+    props.dispatch(clearSelection());
+
   };
 
   const setFilteredData = (searchTerm, pageSize, pageIndex) => {

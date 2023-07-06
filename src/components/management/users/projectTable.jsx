@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import Row from "./tableRow";
+import '../menuStyle.css'
 
 const projectTable = ({ onSelect, projectToRole, projectMap }) => {
   const mode = sessionStorage.getItem("mode");

@@ -20,7 +20,7 @@ export var AimEditor = function (
 ) {
   //this.mapObjCodeValueParent = new Map();
   const mode = sessionStorage.getItem("mode");
-  
+
   var self = this;
   var selectid = 0;
   this.loadingAimFlag = false;
@@ -175,7 +175,7 @@ export var AimEditor = function (
         var object = {};
         object.codeValue =
           self.arrayTemplatesJsonObjects[i].TemplateContainer.Template[0][
-            "codeValue"
+          "codeValue"
           ];
         object.arrayIndex = i;
         self.mapTemplateCodeValueByIndex.set(object.codeValue, i);
@@ -314,6 +314,7 @@ export var AimEditor = function (
         self.extractTemplate(self.jsonTemplateCopy);
       }
     };
+
     if (self.preOpen !== null) {
       self.templateSelect.selectedIndex = self.preOpen;
       self.templateSelect.onchange();
@@ -346,7 +347,6 @@ export var AimEditor = function (
       isArray = 0;
       arrayLength = 1;
     }
-
     var component = null;
     //adding comment textarea for the template
     var commentDiv = document.createElement("div");
@@ -360,7 +360,7 @@ export var AimEditor = function (
     labelAnnotationNameInput.setAttribute("id", "annotationName");
 
     // To put red circle for name
-    var headerCheckIcon = document.createElement("i");  
+    var headerCheckIcon = document.createElement("i");
     headerCheckIcon.setAttribute("id", "annotationNameIcon");
     headerCheckIcon.className = "green check circle outline icon";
 
@@ -380,9 +380,9 @@ export var AimEditor = function (
 
     labelAnnotationNameInput.onkeyup = function () {
       // make sure aim has name 
-      if(!isTeachingFlag){
-        let iconToChange =  document.getElementById("annotationNameIcon");
-        if(labelAnnotationNameInput.value.length)
+      if (!isTeachingFlag) {
+        let iconToChange = document.getElementById("annotationNameIcon");
+        if (labelAnnotationNameInput.value.length)
           iconToChange.className = "green check circle outline icon"
         else iconToChange.className = "red check circle outline icon";
       }
@@ -398,7 +398,7 @@ export var AimEditor = function (
     annotationNameDiv.appendChild(labelAnnotationName);
     annotationNameDiv.appendChild(labelAnnotationNameInput);
     annotationNameLabelDiv.appendChild(labelAnnotationName);
-    if(!isTeachingFlag) annotationNameLabelDiv.appendChild(headerCheckIcon);
+    if (!isTeachingFlag) annotationNameLabelDiv.appendChild(headerCheckIcon);
     annotationNameDiv.className = "comment ui input";
     annotationNameDiv.style.width = "100%";
 
@@ -419,7 +419,7 @@ export var AimEditor = function (
     textareaDomObject.style.width = "100%";
 
     commentDiv.appendChild(textareaDomObject);
-
+    
     textareaDomObject.onkeyup = function () {
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
@@ -432,13 +432,13 @@ export var AimEditor = function (
         code: json.TemplateContainer.Template[0].codeValue,
         codeSystemName:
           json.TemplateContainer.Template[0].codingSchemeDesignator,
-        "iso:displayName": {
+          "iso:displayName": {
           "xmlns:iso": "uri:iso.org:21090",
           value: json.TemplateContainer.Template[0].codeMeaning,
         },
       },
     ];
-
+        
     document.getElementById("accordion1").appendChild(annotationNameLabelDiv);
     document.getElementById("accordion1").appendChild(annotationNameDiv);
     //end adding comment textarea for the template
@@ -459,7 +459,7 @@ export var AimEditor = function (
           ""
         );
 
-        var componentDivLabel = document.createTextNode(cmplabel+": ");
+        var componentDivLabel = document.createTextNode(cmplabel + ": ");
         var componentDiv = document.createElement("div");
         componentDiv.className = " accordion mylbl";
         componentDiv.disabled = "true";
@@ -482,21 +482,21 @@ export var AimEditor = function (
 
         // below line adds all components to the div passed from caller. Rectifiying for teaching file
         //  document.getElementById("accordion1").appendChild(componentDiv);
-        if (component.label === "Anatomy Core" && isTeachingFlag ) {
+        if (component.label === "Anatomy Core" && isTeachingFlag) {
           teachingDivParent.anatomy.appendChild(componentDiv);
           teachingDivParent.anatomy.appendChild(labelDiv);
           teachingDivParent.anatomy.appendChild(commentDiv);
-        } 
-        else if (component.label === "Radiology Specialty" && isTeachingFlag ) {
+        }
+        else if (component.label === "Radiology Specialty" && isTeachingFlag) {
           teachingDivParent.speciality.appendChild(componentDiv);
           teachingDivParent.speciality.appendChild(labelDiv);
           teachingDivParent.speciality.appendChild(commentDiv);
-        } 
-         else if (component.label === "Findings and Diagnosis" && isTeachingFlag ) {
+        }
+        else if (component.label === "Findings and Diagnosis" && isTeachingFlag) {
           teachingDivParent.diagnosis.appendChild(componentDiv);
           teachingDivParent.diagnosis.appendChild(labelDiv);
           teachingDivParent.diagnosis.appendChild(commentDiv);
-        } 
+        }
         else {
           document.getElementById("accordion1").appendChild(componentDiv);
         }
@@ -600,14 +600,14 @@ export var AimEditor = function (
     parentDiv,
     mapTagArray,
     parentTagTypeFromJson
-  ) {};
+  ) { };
   this.CalculationType = function (
     parent,
     object,
     parentDiv,
     mapTagArray,
     parentTagTypeFromJson
-  ) {};
+  ) { };
 
   this.Inference = function (
     parent,
@@ -615,7 +615,7 @@ export var AimEditor = function (
     parentDiv,
     mapTagArray,
     parentTagTypeFromJson
-  ) {};
+  ) { };
 
   this.textFreeInput = function (
     parent,
@@ -623,7 +623,7 @@ export var AimEditor = function (
     parentDiv,
     mapTagArray,
     parentTagTypeFromJson
-  ) {};
+  ) { };
 
   this.ValidTerm = function (
     parent,
@@ -1973,7 +1973,7 @@ export var AimEditor = function (
         );
       } else if (
         typeof self.mapStatusAllowedTermBlocks.get(checkmarkObj.id) !==
-          "undefined" &&
+        "undefined" &&
         allowedTermObj.nextId != "0" &&
         this.selected == false
       ) {
@@ -2152,7 +2152,7 @@ export var AimEditor = function (
         );
       } else if (
         typeof self.mapStatusAllowedTermBlocks.get(checkmarkObj.id) !==
-          "undefined" &&
+        "undefined" &&
         allowedTermObj.nextId != "0" &&
         checkbox.checked == false
       ) {
@@ -2397,9 +2397,9 @@ export var AimEditor = function (
     }
   };
 
-  this.solveAimCompnent = function (object) {};
+  this.solveAimCompnent = function (object) { };
 
-  this.AfterClick = function (obj) {};
+  this.AfterClick = function (obj) { };
 
   this.printXmlAim = function (data, xmlArray) {
     var oSerializer = new XMLSerializer();
@@ -2416,7 +2416,7 @@ export var AimEditor = function (
     itself,
     Entitytype,
     jsonInner
-  ) {};
+  ) { };
 
   this.saveQuestionType = function (
     parentObject,
@@ -2481,7 +2481,7 @@ export var AimEditor = function (
     itself,
     Entitytype,
     jsonInner
-  ) {};
+  ) { };
 
   this.saveCalculationType = function (
     parentArray,
@@ -2489,7 +2489,7 @@ export var AimEditor = function (
     itself,
     Entitytype,
     jsonInner
-  ) {};
+  ) { };
 
   this.saveCalculation = function (
     parentArray,
@@ -2497,7 +2497,7 @@ export var AimEditor = function (
     itself,
     Entitytype,
     jsonInner
-  ) {};
+  ) { };
 
   this.saveInference = function (
     parentArray,
@@ -2505,7 +2505,7 @@ export var AimEditor = function (
     itself,
     Entitytype,
     jsonInner
-  ) {};
+  ) { };
 
   this.saveComponent = function (
     parentArray,
@@ -2513,7 +2513,7 @@ export var AimEditor = function (
     itself,
     Entitytype,
     jsonInner
-  ) {};
+  ) { };
 
   //****************** used components ***********************************
 
@@ -3101,7 +3101,7 @@ export var AimEditor = function (
       if (commentvalue !== "") {
         let lastImObCharColl =
           tempjson.imagingObservationCharacteristicCollection[
-            tempjson.imagingObservationCharacteristicCollection.length - 1
+          tempjson.imagingObservationCharacteristicCollection.length - 1
           ];
         lastImObCharColl["comment"] = { value: commentvalue };
         commentvalue = "";
@@ -3192,7 +3192,7 @@ export var AimEditor = function (
       if (commentvalue !== "") {
         var lastImPhyCharColl =
           tempjson.imagingPhysicalEntityCharacteristicCollection[
-            tempjson.imagingPhysicalEntityCharacteristicCollection.length - 1
+          tempjson.imagingPhysicalEntityCharacteristicCollection.length - 1
           ];
         lastImPhyCharColl["comment"] = { value: commentvalue };
         commentvalue = "";
@@ -3528,7 +3528,7 @@ export var AimEditor = function (
                   } else {
                     if (
                       innerkeys[0] ==
-                        "ImagingPhysicalEntityCharacteristicCollection" ||
+                      "ImagingPhysicalEntityCharacteristicCollection" ||
                       "imagingObservationCharacteristicCollection"
                     ) {
                       var tempMergeJsons = {};
@@ -3595,7 +3595,7 @@ export var AimEditor = function (
                   } else {
                     if (
                       innerkeys[0] ==
-                        "ImagingPhysicalEntityCharacteristicCollection" ||
+                      "ImagingPhysicalEntityCharacteristicCollection" ||
                       "imagingObservationCharacteristicCollection"
                     ) {
                       var tempMergeJsons = {};
@@ -3695,7 +3695,7 @@ export var AimEditor = function (
     let loadButton = document.createElement("Button");
     let loadButtonText = document.createTextNode("load");
     loadButton.appendChild(loadButtonText);
-    loadButton.onclick = function () {};
+    loadButton.onclick = function () { };
 
     parentDiv.appendChild(saveButton);
     parentDiv.appendChild(loadButton);
@@ -3711,7 +3711,7 @@ export var AimEditor = function (
         objs[i].className = "green check circle outline icon";
     }
   };
-  this.checkFormSaveReady = function ({isTeachingModal}={}) {
+  this.checkFormSaveReady = function ({ isTeachingModal } = {}) {
     var countRedCircle = 0;
     var objs = document.getElementsByTagName("i");
 
@@ -3893,10 +3893,10 @@ export var AimEditor = function (
                   "set selected",
                   [
                     self.mathOperators.get(eachCharactQuantfObj.operator) +
-                      " " +
-                      eachCharactQuantfObj.valueLabel.value +
-                      " " +
-                      eachCharactQuantfObj.ucumString.value,
+                    " " +
+                    eachCharactQuantfObj.valueLabel.value +
+                    " " +
+                    eachCharactQuantfObj.ucumString.value,
                   ]
                 );
                 break;
@@ -4051,20 +4051,20 @@ export var AimEditor = function (
       // use the the model above not the model in the below line
       // shapes needs to be in format shapes = {Circle : "" , Line : "ok"} , value : {"" , "ok"} will be used to make sure that each option is checked
       /* schema chape list 
-    	<xs:enumeration value="Point"/>
-			<xs:enumeration value="Circle"/>
-			<xs:enumeration value="Polyline"/>
-			<xs:enumeration value="Ellipse"/>
-			<xs:enumeration value="MultiPoint"/>
-			<xs:enumeration value="3DPolygon"/>
-			<xs:enumeration value="3DPolyline"/>
-			<xs:enumeration value="3DMultiPoint"/>
-			<xs:enumeration value="3DPoint"/>
-			<xs:enumeration value="3DEllipse"/>
-			<xs:enumeration value="3DEllipsoid"/>
-			<xs:enumeration value="Line"/>
-			<xs:enumeration value="AnyShape"/>
-			<xs:enumeration value="AnyClosedShape"/>
+      <xs:enumeration value="Point"/>
+      <xs:enumeration value="Circle"/>
+      <xs:enumeration value="Polyline"/>
+      <xs:enumeration value="Ellipse"/>
+      <xs:enumeration value="MultiPoint"/>
+      <xs:enumeration value="3DPolygon"/>
+      <xs:enumeration value="3DPolyline"/>
+      <xs:enumeration value="3DMultiPoint"/>
+      <xs:enumeration value="3DPoint"/>
+      <xs:enumeration value="3DEllipse"/>
+      <xs:enumeration value="3DEllipsoid"/>
+      <xs:enumeration value="Line"/>
+      <xs:enumeration value="AnyShape"/>
+      <xs:enumeration value="AnyClosedShape"/>
       
     const newShapes = {Circle, Polyline, Line, Perpendicular};
     */
@@ -4226,7 +4226,7 @@ export var AimEditor = function (
           self.aimName = "";
           document.getElementById("annotationName").value = "";
         }
-        if(self.aimName === ""){
+        if (self.aimName === "") {
           document.getElementById("annotationNameIcon").className = "red check circle outline icon"
         }
       }

@@ -15,12 +15,15 @@ class RequirementForm extends React.Component {
       const { data } = await getTemplatesUniversal();
       const templates = {};
       data.forEach((el, i) => {
-        templates[el.Template[0].templateUID] =
-          el.Template[0].templateCodeValue;
+        const data = {
+          name: el.Template[0].templateName,
+          code: el.Template[0].templateCodeValue
+        };
+        templates[el.Template[0].templateUID] = data;
       });
       this.setState({ templates });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -28,11 +31,12 @@ class RequirementForm extends React.Component {
     const firstItem = <option key="first">{`--- Select ${field} ---`}</option>;
     const options = [firstItem];
     const templateIDs = Object.keys(this.state.templates);
+    const templateData = Object.values(this.state.templates);
     if (field === 'Template') {
       options.push(<option key="any" id='Any'>{'Any'}</option>);
     }
     arr.forEach((el, i) => {
-      options.push(<option key={`${el}-${i}`} id={field === 'Level' ? el : templateIDs[i]}>{el}</option>);
+      options.push(<option key={`${el}-${i}`} id={field === 'Template' ? templateData[i].code : templateIDs[i]}>{field === 'Template' ? el.name : el}</option>);
     });
     return options;
   };

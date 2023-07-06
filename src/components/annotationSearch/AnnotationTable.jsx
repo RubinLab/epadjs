@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { connect } from 'react-redux';
+import ReactTooltip from 'react-tooltip';
+import Modal from 'react-bootstrap/Modal';
 import {
   useTable,
   usePagination,
@@ -7,17 +9,12 @@ import {
   useSortBy,
   useControlledState
 } from 'react-table';
-import { Link } from 'react-router-dom';
-import { FaRegEye } from 'react-icons/fa';
 import { clearCarets, convertDateFormat } from '../../Utils/aid.js';
 import {
   changeActivePort,
   jumpToAim,
-  alertViewPortFull,
   addToGrid,
   getSingleSerie,
-  getWholeData,
-  updatePatient,
   startLoading,
   loadCompleted,
   annotationsLoadingError,
@@ -254,6 +251,8 @@ function AnnotationTable(props) {
   const [showSelectSeriesModal, setShowSelectSeriesModal] = useState(false);
   const [selected, setSelected] = useState({});
   const [listOfSelecteds, setListOfSelecteds] = useState([]);
+  const [showNarrative, setShowNarrative] = useState(false);
+  const [narrative, setNarrative] = useState('');
 
   const handlePageIndex = act => {
     let newIndex = act === 'prev' ? props.searchTableIndex - 1 : props.searchTableIndex + 1;
@@ -552,9 +551,31 @@ function AnnotationTable(props) {
         },
         {
           Header: 'Narrative',
-          accessor: 'userComment'
-        }
-      ],
+          // accessor: 'userComment',
+          Cell: ({ row }) => {
+            const text = row.original.userComment;
+            const subText = text || text?.length >= 100 ? text.substring(0, 100) + '...' : '';
+            return (
+              <>
+                <div
+                  data-tip
+                  data-for="narrative"
+                >
+                  {subText}
+                </div>
+                <ReactTooltip
+                  id="narrative"
+                  place="left"
+                  type="info"
+                  delayShow={500}
+                >
+                  <span className="filter-label">Please open aim to see the narrative!</span>
+                </ReactTooltip>
+              </>
+            )
+
+          }
+        }],
       [props.selectedAnnotations, data]
     );
   }

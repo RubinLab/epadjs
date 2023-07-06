@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
+import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import { getTemplates } from "../../services/templateServices";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
@@ -28,11 +29,13 @@ import "./aimEditor.css";
 
 let mode;
 let defaultAimName;
+let wadoUrl;
 
 class AimEditor extends Component {
   constructor(props) {
     super(props);
     mode = sessionStorage.getItem('mode');
+    wadoUrl = sessionStorage.getItem('wadoUrl');
     defaultAimName = sessionStorage.getItem('defaultAimName');
     this.image = this.getImage();
     this.semanticAnswers = {};
@@ -587,6 +590,9 @@ class AimEditor extends Component {
   getAimSeedDataFromMarkup = (markupsToSave) => {
     const cornerStoneImageId = Object.keys(markupsToSave)[0];
     const image = this.getCornerstoneImagebyId(cornerStoneImageId);
+    if (wadoUrl.includes('wadors')) {
+      image.metadata = this.createImageDataFromMetadata(cornerStoneImageId);
+    }
     return image;
     // const seedData = getAimImageData(image);
     // addSemanticAnswersToSeedData(seedData, answers);
@@ -658,8 +664,8 @@ class AimEditor extends Component {
     var markupsToSave = {};
     markedCSImageIds.map((CSImageId) => {
       const markUps = toolState[CSImageId];
-      const imageUid = this.getstripCsImageId(CSImageId);
-      const { imageId, frameNum } = this.parseImageUid(imageUid);
+      const { imageId, frameNum } = this.parseImageUidAndFrame(CSImageId);
+
       Object.keys(markUps).map((tool) => {
         switch (tool) {
           case "FreehandRoi3DTool":
@@ -823,6 +829,23 @@ class AimEditor extends Component {
     return imageCache[imageId].image;
   };
 
+  createImageDataFromMetadata = (id) => {
+    const data = {};
+    const requiredTags =
+      ['x00080016', 'x00080018', "x0020000d", "x00080030", "x0020000d", "x00080020", "x00080050", "x0020000e", "x00080060", "x00200011", "x0008103e", "x00200013", "x00080070", "x00081090", "x00181020", "x00100040", "x00100010", "x00100020", "x00100030"];
+
+    const metadata = cornerstoneWADOImageLoader.wadors.metaDataManager.get(id);
+
+    for (let i = 0; i < requiredTags.length; i++) {
+      const key = requiredTags[i].substring(1).toUpperCase();
+      data[requiredTags[i]] = metadata[key]?.Value ? metadata[key].Value[0] : '';
+    }
+    if (typeof data['x00100010'] === 'object' && data['x00100010'].hasOwnProperty('Alphabetic')) {
+      data['x00100010'] = data['x00100010']['Alphabetic']
+    }
+    return data;
+  }
+
   getCornerstoneImagebyId = (imageId) => {
     return cornerstone.imageCache.imageCache[imageId].image;
   };
@@ -865,15 +888,6 @@ class AimEditor extends Component {
       aim.createImageAnnotationStatement(2, segId, volumeId);
     }
     return segEntityData.sopInstanceUid;
-  };
-
-  parseImageUid = (imageUid) => {
-    if (imageUid.includes("frame=")) {
-      const obj = {};
-      [obj.imageId, obj.frameNum] = imageUid.split("&frame=");
-      return obj;
-    }
-    return { imageId: imageUid, frameNum: 1 }; //default frame number is always 1
   };
 
   addPolygonToAim = (aim, polygon, shapeIndex, imageId, frameNum) => {
@@ -1036,15 +1050,19 @@ class AimEditor extends Component {
   getAxisOfBidirectional = (bidirectional) => {
     // takes two lines of b.directional and distincs the short and long axis
     const { element } = cornerstone.getEnabledElements()[this.props.activePort];
-    const { rowPixelSpacing, columnPixelSpacing } = cornerstone.getViewport(
-      element
-    ).displayedArea;
+    const { displayedArea } = cornerstone.getViewport(element);
+    let { rowPixelSpacing, columnPixelSpacing } = this.image;
+
+    rowPixelSpacing = rowPixelSpacing ? rowPixelSpacing : displayedArea ? displayedArea.rowPixelSpacing : 1;
+    columnPixelSpacing = columnPixelSpacing ? columnPixelSpacing : displayedArea ? displayedArea.columnPixelSpacing : 1;
+
     const {
       start,
       end,
       perpendicularStart,
       perpendicularEnd,
     } = bidirectional.handles;
+
     const length = Math.hypot(
       (start.x - end.x) * (columnPixelSpacing || 1),
       (start.y - end.y) * (rowPixelSpacing || 1)
@@ -1284,9 +1302,22 @@ class AimEditor extends Component {
     this.props.onCancel(false); //close the aim editor
   };
 
-  getstripCsImageId = (imageId) => {
-    if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
-    return imageId.split("/").pop();
+  parseImageUidAndFrame = (imageId) => {
+    const obj = {};
+    if (imageId.includes("objectUID=")) {
+      // wadouri:http://url/pacs/?requestType=WADO*studyUID=3453535&seriesUID=57457&objectUID=65865&frame=2
+      const frameSplit = imageId.split("&frame=");
+      if (frameSplit.length === 1) obj.frameNum = 1;
+      obj.frameNum = frameSplit[1];
+      obj.imageId = frameSplit[0].split("objectUID=")[1];
+      return obj;
+    }
+    // wadors:http://url/pacs/studies/46363/series/547754/instances/56475/frames/2
+    const idArray = imageId.split("/instances/")[1].split('/frames/');
+    if (idArray.length === 1) obj.frameNum = 1;
+    obj.frameNum = idArray[1];
+    obj.imageId = idArray[0];
+    return obj;
   };
 }
 

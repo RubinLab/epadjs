@@ -40,10 +40,12 @@ class selectSerieModal extends React.Component {
       // seriesList: [],
       selectedToDisplay: {},
       limit: 0,
-      list: []
+      list: [],
+      isButtonDisabled: false
     };
     this.maxPort = parseInt(sessionStorage.getItem("maxPort"));
     this.mode = sessionStorage.getItem("mode");
+    this.wadoUrl = sessionStorage.getItem("wadoUrl");
   }
 
   //get the serie list
@@ -90,6 +92,7 @@ class selectSerieModal extends React.Component {
         all: [templates],
       });
       this.semanticAnswers.createViewerWindow();
+      this.props.completeLoading();
     };// end teaching file related part
   }
   componentWillUnmount = () => {
@@ -162,7 +165,7 @@ class selectSerieModal extends React.Component {
     const { projectID, patientID, studyUID, subjectID } = series[0];
     const subID = patientID ? patientID : subjectID;
 
-    if (!significanceSet) {
+    if (!significanceSet && this.mode === "teaching") {
       setSignificantSeries(projectID, subID, studyUID, significantSeries);
     }
   }
@@ -185,16 +188,16 @@ class selectSerieModal extends React.Component {
       else
         this.props.dispatch(addToGrid(serie, serie.aimID));
       if (this.state.selectionType === "aim") {
-        this.props.dispatch(getSingleSerie(serie, serie.aimID));
+        this.props.dispatch(getSingleSerie(serie, serie.aimID, this.wadoUrl));
       } else {
         if (aimID)
-          this.props.dispatch(getSingleSerie(serie, aimID));
+          this.props.dispatch(getSingleSerie(serie, aimID, this.wadoUrl));
         else
-          this.props.dispatch(getSingleSerie(serie));
+          this.props.dispatch(getSingleSerie(serie, null, this.wadoUrl));
       }
     }
     this.props.history.push("/display");
-    this.handleCancel();
+    this.handleCancel(true);
   };
 
   groupUnderPatient = objArr => {
@@ -205,16 +208,27 @@ class selectSerieModal extends React.Component {
     return groupedObj;
   };
 
-  handleCancel = () => {
+  handleCancel = async (resetState) => {
     this.setState({
       selectionType: "",
       selectionArr: [],
       seriesList: [],
       selectedToDisplay: [],
-      limit: 0
+      limit: 0,
+      isButtonDisabled: false
     });
     // this.props.dispatch(clearSelection());
     this.props.onCancel();
+    try {
+      if (this.mode === 'teaching' && this.props.decrArgs && !resetState) {
+        const { projectID, patientID, studyUID } = this.props.decrArgs;
+        await deleteStudy({ projectID, patientID, studyUID }, '?all=true');
+        this.setState({ isButtonDisabled: false });
+        if (this.props.forceUpdatePage) this.props.forceUpdatePage();
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   setPreSelecteds = () => {
@@ -352,6 +366,7 @@ class selectSerieModal extends React.Component {
   };
 
   saveTeachingFile = async () => {
+    this.setState({ isButtonDisabled: true });
     if (this.semanticAnswers.checkFormSaveReady({ isTeachingModal: true })) {
       window.alert(
         "Please fill all required fields!"
@@ -408,14 +423,17 @@ class selectSerieModal extends React.Component {
         });
         await this.setSignificantSeries(series);
         window.dispatchEvent(new Event("refreshProjects"));
+        this.setState({ isButtonDisabled: false });
         return result;
       })
       .catch((error) => {
-        deleteStudy({ projectID, patientID, studyUID }, '?all=true');
+        deleteStudy({ projectID, patientID, studyUID }, '?all=true').then(() => { if (this.props.forceUpdatePage) this.props.forceUpdatePage(); }
+        ).catch(err => console.error(err));
         alert(
           "Teaching file couldn't be saved! More information about the error can be found in the logs."
         );
         console.error(error);
+        this.setState({ isButtonDisabled: false });
       });
   }
 
@@ -492,8 +510,8 @@ class selectSerieModal extends React.Component {
         <Modal.Footer className="select-serie-footer">
           {isTeachingFile && (
             <div>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) { this.handleCancel(); this.props.onSave() } }}>Save Teaching File</Button>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()}>Save Teaching File & Display</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) { this.handleCancel(true); this.props.onSave() } }} disabled={this.state.isButtonDisabled}>Save Teaching File</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()} disabled={this.state.isButtonDisabled}>Save Teaching File & Display</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Discard</Button>
             </div>
           )}

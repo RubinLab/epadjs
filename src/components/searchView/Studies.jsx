@@ -238,7 +238,7 @@ function Studies(props) {
       }
       //getsingleSerie
       Promise.all(promiseArr)
-        .then(() => {})
+        .then(() => { })
         .catch(err => console.error(err));
 
       //if patient doesnot exist get patient
@@ -308,7 +308,7 @@ function Studies(props) {
                 }}
               >
                 {row.isExpanded ||
-                props.treeExpand[props.patientIndex][row.index] ? (
+                  (props.treeExpand && props.treeExpand[props.patientIndex] && props.treeExpand[props.patientIndex][row.index]) ? (
                   <span>&#x25BC;</span>
                 ) : (
                   <span>&#x25B6;</span>
@@ -358,9 +358,9 @@ function Studies(props) {
             {row.original.numberOfAnnotations === 0 ? (
               ''
             ) : (
-              <span 
-              // className="badge badge-secondary"
-              className="searchView-table__cell"
+              <span
+                // className="badge badge-secondary"
+                className="searchView-table__cell"
               >
                 {row.original.numberOfAnnotations}
               </span>
@@ -377,9 +377,9 @@ function Studies(props) {
             {row.original.numberOfSeries === 0 ? (
               ''
             ) : (
-              <span 
-              // className="badge badge-secondary"
-              className="searchView-table__cell"
+              <span
+                // className="badge badge-secondary"
+                className="searchView-table__cell"
               >
                 {row.original.numberOfSeries}
               </span>
@@ -477,8 +477,8 @@ function Studies(props) {
     const studiesArray =
       treeData[projectID] && treeData[projectID][subjectID]
         ? Object.values(treeData[projectID][subjectID].studies).map(
-            el => el.data
-          )
+          el => el.data
+        )
         : [];
 
     return studiesArray;

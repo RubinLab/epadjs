@@ -4,59 +4,63 @@ export function getSeries(projectId, subjectId, studyId) {
   if (http.mode() === "lite")
     return http.get(
       http.apiUrl() +
-        "/projects/lite/subjects/" +
-        encodeURIComponent(subjectId) +
-        "/studies/" +
-        encodeURIComponent(studyId) +
-        "/series?&filterDSO=true"
+      "/projects/lite/subjects/" +
+      encodeURIComponent(subjectId) +
+      "/studies/" +
+      encodeURIComponent(studyId) +
+      "/series?&filterDSO=true"
     );
   else
     return http.get(
       http.apiUrl() +
-        "/projects/" +
-        encodeURIComponent(projectId) +
-        "/subjects/" +
-        encodeURIComponent(subjectId) +
-        "/studies/" +
-        encodeURIComponent(studyId) +
-        "/series?filterDSO=true"
+      "/projects/" +
+      encodeURIComponent(projectId) +
+      "/subjects/" +
+      encodeURIComponent(subjectId) +
+      "/studies/" +
+      encodeURIComponent(studyId) +
+      "/series?filterDSO=true"
     );
 }
 export function getImageIds(series) {
   if (http.mode() === "lite") {
     return http.get(
       http.apiUrl() +
-        "/projects/lite/subjects/" +
-        encodeURIComponent(series.patientID) +
-        "/studies/" +
-        encodeURIComponent(series.studyUID) +
-        "/series/" +
-        encodeURIComponent(series.seriesUID) +
-        "/images"
+      "/projects/lite/subjects/" +
+      encodeURIComponent(series.patientID) +
+      "/studies/" +
+      encodeURIComponent(series.studyUID) +
+      "/series/" +
+      encodeURIComponent(series.seriesUID) +
+      "/images"
     );
   } else {
     return http.get(
       http.apiUrl() +
-        "/projects/" +
-        encodeURIComponent(series.projectID) +
-        "/subjects/" +
-        encodeURIComponent(series.patientID) +
-        "/studies/" +
-        encodeURIComponent(series.studyUID) +
-        "/series/" +
-        encodeURIComponent(series.seriesUID) +
-        "/images"
+      "/projects/" +
+      encodeURIComponent(series.projectID) +
+      "/subjects/" +
+      encodeURIComponent(series.patientID) +
+      "/studies/" +
+      encodeURIComponent(series.studyUID) +
+      "/series/" +
+      encodeURIComponent(series.seriesUID) +
+      "/images"
     );
   }
 }
 
+export function getMetadata(url) {
+  return http.get(url + "/metadata");
+}
+
 //  seems like this doesn"t belong to here but olny services know details about paths&server side
-export function getWadoImagePath(studyUid, seriesUid, imageId) {
+export function getWadoImagePath(studyUid, seriesUid, imageId, subpath) {
   const wadoUrl = http.wadoUrl();
   if (wadoUrl.includes("wadors"))
     return (
       wadoUrl +
-      "/studies/" +
+      "/" + subpath + "/studies/" +
       encodeURIComponent(studyUid) +
       "/series/" +
       encodeURIComponent(seriesUid) +
@@ -65,7 +69,7 @@ export function getWadoImagePath(studyUid, seriesUid, imageId) {
     );
   else
     return (
-      wadoUrl +
+      wadoUrl + "/" + subpath +
       "/?requestType=WADO&studyUID=" +
       encodeURIComponent(studyUid) +
       "&seriesUID=" +
@@ -183,14 +187,14 @@ export function updateTagsOfSeries(
 export function getSingleSeries(projectId, subjectId, studyUID, seriesUID) {
   return http.get(
     http.apiUrl() +
-      "/projects/" +
-      encodeURIComponent(projectId) +
-      "/subjects/" +
-      encodeURIComponent(subjectId) +
-      "/studies/" +
-      encodeURIComponent(studyUID) +
-      "/series/" +
-      encodeURIComponent(seriesUID)
+    "/projects/" +
+    encodeURIComponent(projectId) +
+    "/subjects/" +
+    encodeURIComponent(subjectId) +
+    "/studies/" +
+    encodeURIComponent(studyUID) +
+    "/series/" +
+    encodeURIComponent(seriesUID)
   );
 }
 

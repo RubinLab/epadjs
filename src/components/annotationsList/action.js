@@ -45,6 +45,7 @@ import {
   ADD_STUDY_TO_GRID,
   REPLACE_IN_GRID,
   UPDATE_SEARCH_TABLE_INDEX,
+  REFRESH_MAP,
   colors,
   commonLabels,
 } from "./types";
@@ -59,6 +60,9 @@ import {
 import { getAllTemplates } from "../../services/templateServices";
 import { getImageIdAnnotations } from "aimapi";
 import { ConsoleWriter } from "istanbul-lib-report";
+import aimEntityData from "./annotationDock/aimEntityData";
+
+const wadoUrl = sessionStorage.getItem('wadoUrl');
 
 export const updateSearchTableIndex = searchTableIndex => {
   return { type: UPDATE_SEARCH_TABLE_INDEX, searchTableIndex }
@@ -117,10 +121,11 @@ export const clearAimId = () => {
 
 // imageId is used to display annotation details
 // at right side bar
-export const updateImageId = (imageID) => {
+export const updateImageId = (imageID, port) => {
   return {
     type: UPDATE_IMAGEID,
     imageID,
+    port
   };
 };
 
@@ -335,8 +340,8 @@ export const selectAnnotation = (
 
 // opens a new port to display series
 // adds series details to the array
-export const addToGrid = (serie, annotation) => {
-  let { patientID, studyUID, seriesUID, projectID, patientName } = serie;
+export const addToGrid = (serie, annotation, port) => {
+  let { patientID, studyUID, seriesUID, projectID, patientName, examType } = serie;
   projectID = projectID ? projectID : "lite";
   if (annotation)
     patientID = serie.originalSubjectID || serie.subjectID || serie.patientID;
@@ -347,9 +352,10 @@ export const addToGrid = (serie, annotation) => {
     seriesUID,
     patientName,
     aimID: annotation,
+    examType
     // imageIndex: 0
   };
-  return { type: ADD_TO_GRID, reference };
+  return { type: ADD_TO_GRID, reference, port };
 };
 
 export const replaceInGrid = (serie) => {
@@ -443,11 +449,18 @@ export const changeActivePort = (portIndex) => {
   };
 };
 
+export const refreshPage = (feature, condition) => {
+  return {
+    type: REFRESH_MAP,
+    payload: { feature, condition }
+  }
+}
+
 // helpeer method
-export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann) => {
+export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann, otherSeriesAimsData) => {
   return {
     type: LOAD_SERIE_SUCCESS,
-    payload: { ref, aimsData, serID, imageData, ann },
+    payload: { ref, aimsData, serID, imageData, ann, otherSeriesAimsData },
   };
 };
 
@@ -471,7 +484,7 @@ const getAimListFields = (aims, ann) => {
 
       const markupColor =
         aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-          ?.markupEntityCollection ?.MarkupEntity[0] ?.lineColor ?.value; //if aim has markup colors make the first markup"s color aim"s color
+          ?.markupEntityCollection?.MarkupEntity[0]?.lineColor?.value; //if aim has markup colors make the first markup"s color aim"s color
       let color;
 
       if (imgAimUID) {
@@ -490,11 +503,11 @@ const getAimListFields = (aims, ann) => {
           : "study";
 
       let aimName =
-        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0] ?.name
+        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]?.name
           .value;
       let ind = aimName.indexOf("~");
       if (ind >= 0) {
-        aimName = aimName.substring(0, ind);
+        aimName = aimName && typeof aimName === 'string' ? aimName.substring(0, ind) : aimName;
       }
 
       // let displayStatus = ann
@@ -525,7 +538,7 @@ const getAimListFields = (aims, ann) => {
         inferenceEntityCollection,
         segmentationEntityCollection,
         typeCode,
-        trackingUniqueIdentifier: trackingUniqueIdentifier ?.root,
+        trackingUniqueIdentifier: trackingUniqueIdentifier?.root,
         users,
       };
       const id = aim.ImageAnnotationCollection.uniqueIdentifier.root;
@@ -684,7 +697,7 @@ const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
 // };
 
 // action to open series
-export const getSingleSerie = (serie, annotation) => {
+export const getSingleSerie = (serie, annotation, wadoUrl) => {
   return async (dispatch, getState) => {
     try {
       await dispatch(loadAnnotations());
@@ -696,12 +709,13 @@ export const getSingleSerie = (serie, annotation) => {
         numberOfAnnotations,
         aimID: annotation,
       };
-      const { aimsData, imageData } = await getSingleSerieData(
+      const { aimsData, imageData, otherSeriesAimsData } = await getSingleSerieData(
         serie,
-        annotation
+        annotation,
+        wadoUrl
       );
       await dispatch(
-        singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation)
+        singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData)
       );
     } catch (err) {
       console.error(err);
@@ -719,9 +733,9 @@ export const updateSingleSerie = (serie, annotation) => {
       numberOfAnnotations,
       aimID: annotation,
     };
-    const { aimsData, imageData } = await getSingleSerieData(serie, annotation);
+    const { aimsData, imageData, otherSeriesAimsData } = await getSingleSerieData(serie, annotation);
     await dispatch(
-      singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation)
+      singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData)
     );
   };
 };
@@ -730,6 +744,7 @@ export const updateSingleSerie = (serie, annotation) => {
 const extractNonMarkupAims = (arr, seriesID) => {
   let studyAims = [];
   let serieAims = [];
+  let otherSeriesAims = [];
   // let imageAims = {};
   arr.forEach((aim) => {
     const series =
@@ -755,31 +770,68 @@ const extractNonMarkupAims = (arr, seriesID) => {
       //   { aimUid: aim.ImageAnnotationCollection.uniqueIdentifier.root }
       // ];
       // }
+    } else {
+      otherSeriesAims.push(aim);
     }
   });
-  return { studyAims, serieAims };
+  return { studyAims, serieAims, otherSeriesAims };
 };
 
+const getOtherSeriesAimData = (arr, projectID, patientID) => {
+  const aims = {};
+  arr.forEach(el => {
+    const aimID = el.ImageAnnotationCollection.uniqueIdentifier.root;
+    const name = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].name.value;
+    const study = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+      .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy;
+    const studyUID = study.instanceUid.root;
+    const seriesUID = study.imageSeries.instanceUid.root;
+    aims[aimID] = { projectID, patientID, aimID, studyUID, seriesUID, name };
+  })
+  return aims;
+}
+
 // helper methods - calls backend and get data
-const getSingleSerieData = (serie, annotation) => {
+const getSingleSerieData = (serie, annotation, wadoUrl) => {
   return new Promise((resolve, reject) => {
     let aimsData;
     let imageData;
-    let { studyUID, seriesUID, projectID, patientID } = serie;
+    let { studyUID, seriesUID, projectID, patientID, aimID } = serie;
     projectID = projectID ? projectID : "lite";
     patientID = patientID ? patientID : serie.subjectID;
+    aimID = aimID ? aimID : annotation;
     getStudyAims(patientID, studyUID, projectID)
       .then(async (result) => {
-        const { studyAims, serieAims } = extractNonMarkupAims(
+
+        const { studyAims, serieAims, otherSeriesAims } = extractNonMarkupAims(
           result.data.rows,
           seriesUID
         );
         aimsData = serieAims.concat(studyAims);
+        let imageAimMap = getImageIdAnnotations(serieAims);
+        // TODO fix the env var retrieval
+        const url = wadoUrl ? wadoUrl : sessionStorage.getItem('wadoUrl');
+        if (url.includes('wadors')) {    
+          const imgIds = Object.keys(imageAimMap);
+          const aims = Object.values(imageAimMap);
+          imageAimMap = aims.reduce((all, item, i) => {
+            // Aimapi sends wadouri format including &frame= wadors format is handled here
+            let img = imgIds[i].split('&frame=');
+            let frameNo = img.length > 1 ? img[1] : 1;
+            img = `${img[0]}/frames/${frameNo}`
+            all[img] = item;
+            return all;
+          }, {})
+
+        }
+        
         imageData = {
-          ...getImageIdAnnotations(serieAims),
+          ...imageAimMap,
         };
+
         aimsData = getAimListFields(aimsData, annotation);
-        resolve({ aimsData, imageData });
+        const otherSeriesAimsData = getOtherSeriesAimData(otherSeriesAims, projectID, patientID);
+        resolve({ aimsData, imageData, otherSeriesAimsData });
       })
       .catch((err) => reject("Error while getting annotation data", err));
   });

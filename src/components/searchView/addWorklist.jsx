@@ -10,9 +10,10 @@ import {
   addSubjectsToWorklist,
   addAimsToWorklist
 } from "../../services/worklistServices";
+import { clearSelection } from "../annotationsList/action";
 
 const AddToWorklist = (props) => {
-
+  const mode = sessionStorage.getItem('mode');
   const [worklists, setWorklist] = useState([]);
   const [firstRun, setFirstRun] = useState(true);
   const [selectedData, setSelectedData] = useState([]);
@@ -73,6 +74,8 @@ const AddToWorklist = (props) => {
         draggable: false,
       });
       // props.deselect();
+      props.dispatch(clearSelection());
+      if (mode !== 'teaching' && props.refresh) props.refresh();
     } catch (e) {
       toast.error("Error adding annotation(s) to worklist.", {
         position: "top-right",
@@ -98,6 +101,8 @@ const AddToWorklist = (props) => {
         draggable: false,
       });
       // props.deselect();
+      props.dispatch(clearSelection());
+      if (mode !== 'teaching' && props.refresh) props.refresh();
     } catch (e) {
       toast.error("Error adding studies to worklist.", {
         position: "top-right",
@@ -123,6 +128,8 @@ const AddToWorklist = (props) => {
         draggable: false,
       });
       // props.deselect();
+      props.dispatch(clearSelection());
+      if (mode !== 'teaching' && props.refresh) props.refresh();
     } catch (e) {
       toast.error("Error adding subjects to worklist.", {
         position: "top-right",
@@ -215,7 +222,7 @@ const AddToWorklist = (props) => {
         Add To Worklist
       </Dropdown.Toggle>
 
-      <Dropdown.Menu as={WorklistMenu} className="dropdown-menu p-2 dropdown-menu-dark" style={{ backgroundColor: '#333', borderColor: 'white', minWidth: '15rem', fontSize: '11px' }} >
+      <Dropdown.Menu as={WorklistMenu} className="dropdown-menu p-2 dropdown-menu-dark" style={{ maxHeight: '20rem', overflow: 'overlay', backgroundColor: '#333', borderColor: 'white', minWidth: '15rem', fontSize: '11px' }} >
         {worklists?.map(({ name, workListID }, y) => {
           return (
             <Dropdown.Item key={y} id={workListID} onSelect={() => onSelect(workListID)}>{name}</Dropdown.Item>

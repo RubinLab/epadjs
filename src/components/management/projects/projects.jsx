@@ -1,8 +1,10 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import Table from 'react-table-v6';
 import ReactTooltip from 'react-tooltip';
 import { FaRegTrashAlt, FaEdit, FaRegEye } from 'react-icons/fa';
+import { BsList } from "react-icons/bs";
 import { Link } from 'react-router-dom';
 import '../menuStyle.css';
 import {
@@ -61,7 +63,8 @@ class Projects extends React.Component {
     newRoles: {},
     templates: [],
     projectIndex: null,
-    userNameMap: {}
+    userNameMap: {},
+    isDeleting: false
   };
 
   componentDidMount = () => {
@@ -87,27 +90,29 @@ class Projects extends React.Component {
       : lastname ? `${lastname}`
         : firstname ? `${firstname}`
           : null;
-    const name = fullName || displayname || username;
+    const nullDisplayName = displayname.toLowerCase().includes('null');
+    const escapedDisplayName = nullDisplayName && displayname.length > 0 ? username : displayname;
+    const name = fullName || escapedDisplayName || username;
     return name;
   }
 
   handleClickUSerRoles = async id => {
-    const userRoles = [];
     try {
       const { data: users } = await getUsers();
       const { data: roles } = await getProjectUsers(id);
-      for (let i = 0; i < users.length; i++) {
-        for (let k = 0; k < roles.length; k++) {
-          if (users[i].username === roles[k].username) {
-            const name = this.createName(users[i]);
-            userRoles.push({ name, role: roles[k].role });
-            break;
-          }
-        }
-        if (userRoles.length < i + 1 && i < users.length) {
-          userRoles.push({ name: users[i].username, role: 'None' });
+      let userRoles = users.reduce((all, item, index) => {
+        const name = this.createName(item);
+        all[item.username] = { name, username: item.username, role: "None" }
+        return all;
+      }, {})
+
+      for (let k = 0; k < roles.length; k++) {
+        const { username } = roles[k];
+        if (userRoles[username]) {
+          userRoles[username].role = roles[k].role;
         }
       }
+      userRoles = Object.values(userRoles);
       await this.setState({ userRoles });
       this.setState({ hasUserRolesClicked: true });
     } catch (err) {
@@ -274,7 +279,8 @@ class Projects extends React.Component {
       hasUserRolesClicked: false,
       errorMessage: null,
       projectIndex: null,
-      defaulttemplate: null
+      defaulttemplate: null,
+      isDeleting: false
     });
   };
 
@@ -286,12 +292,16 @@ class Projects extends React.Component {
     //Call Promise.all to array
     //then => refresh the page
     //catch => push
+
+    this.setState({ isDeleting: true });
     for (let project in newSelected) {
       promises.push(deleteProject(project));
     }
+
+
     Promise.all(promises)
       .then(() => {
-        this.setState({ selected: {}, hasDeleteAllClicked: false });
+        this.setState({ selected: {}, hasDeleteAllClicked: false, isDeleting: false });
         this.props.getProjectAdded();
       })
       .catch(err => {
@@ -305,9 +315,12 @@ class Projects extends React.Component {
   };
 
   deleteSingleProject = async () => {
-    deleteProject(this.state.singleDeleteId)
+    const id = this.state.singleDeleteId;
+    this.setState({ isDeleting: true });
+
+    deleteProject(id)
       .then(() => {
-        this.setState({ singleDeleteId: '', hasDeleteSingleClicked: false });
+        this.setState({ singleDeleteId: '', hasDeleteSingleClicked: false, isDeleting: false });
         this.getProjectData();
         this.props.getProjectAdded();
       })
@@ -409,6 +422,7 @@ class Projects extends React.Component {
       {
         Header: 'Name',
         accessor: 'name',
+        id: 'namePr',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
@@ -417,9 +431,8 @@ class Projects extends React.Component {
       {
         Header: 'Open',
         sortable: true,
-        resizable: true,
         minResizeWidth: 20,
-        width: 50,
+        width: 30,
         Cell: original => (
           <Link className="open-link" to={'/list/' + original.row.checkbox.id}>
             <div onClick={this.props.onClose} data-tip data-for="project-open">
@@ -439,6 +452,7 @@ class Projects extends React.Component {
       {
         Header: 'Description',
         accessor: 'description',
+        id: 'descriptionPr',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
@@ -447,30 +461,28 @@ class Projects extends React.Component {
       {
         Header: 'Type',
         accessor: 'type',
+        id: 'typePr',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 20
+        minWidth: 40
       },
       {
         Header: 'Users',
         accessor: 'loginNames',
+        id: 'loginNamesnPr',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 30,
         Cell: original => {
-          const { loginNames } = original.row;
-          const className =
-            loginNames.length > 0 ? 'wrapped' : 'wrapped click-to-add';
-          const text =
-            loginNames.length > 0 ? this.concatenateNames(loginNames) : 'Add user';
           return (
             <>
-              <p
-                className={className}
+              <button
                 data-tip
                 data-for="project-user-assign"
+                variant="primary"
+                className="btn btn-sm btn-outline-light"
                 onClick={() => {
                   this.handleClickUSerRoles(original.row.checkbox.id);
                   this.setState({
@@ -478,15 +490,19 @@ class Projects extends React.Component {
                   });
                 }}
               >
-                {text}
-              </p>
+                <BsList
+                  className="menu-clickable"
+                  data-tip
+                  data-for="showAims-icon"
+                />
+              </button>
               <ReactTooltip
                 id="project-user-assign"
                 place="right"
                 type="info"
-                delayShow={1000}
+                delayShow={500}
               >
-                <span className="filter-label">Add users to project</span>
+                <span className="filter-label">See users - assign roles</span>
               </ReactTooltip>
             </>
           );
@@ -494,21 +510,24 @@ class Projects extends React.Component {
       },
       {
         Header: 'Template',
-        width: 80,
+        id: 'TemplatePr',
+        minWidth: 80,
         minResizeWidth: 20,
         resizable: true,
         Cell: original => {
           const { defaultTemplate } = original.row.checkbox;
           const none =
             defaultTemplate === 'null' || defaultTemplate === 'undefined';
-          return <div>{none ? '' : defaultTemplate}</div>;
+          const temp = defaultTemplate && !none ? this.props.templates[defaultTemplate] : null;
+          const templateName = temp ? temp.TemplateContainer.Template[0].name : '';
+          return <div>{templateName}</div>;
         }
       },
       {
         Header: '',
         width: 45,
         minResizeWidth: 20,
-        resizable: true,
+        // resizable: true,
         Cell: original => {
           return (
             <>
@@ -545,7 +564,7 @@ class Projects extends React.Component {
         Header: '',
         width: 45,
         minResizeWidth: 20,
-        resizable: true,
+        // resizable: true,
         Cell: original => (
           <>
             <div
@@ -594,6 +613,7 @@ class Projects extends React.Component {
           onCancel={this.handleCancel}
           onDelete={this.deleteAllSelected}
           error={this.state.errorMessage}
+          isDeleting={this.state.isDeleting}
         />
         <DeleteAlert
           show={this.state.hasDeleteSingleClicked}
@@ -601,6 +621,7 @@ class Projects extends React.Component {
           onCancel={this.handleCancel}
           onDelete={this.deleteSingleProject}
           error={this.state.errorMessage}
+          isDeleting={this.state.isDeleting}
         />
         {this.state.hasAddClicked && (
           <ProjectCreationForm
@@ -647,4 +668,11 @@ Projects.propTypes = {
   selection: PropTypes.string,
   onClose: PropTypes.func
 };
-export default Projects;
+
+const mapsStateToProps = state => {
+  return {
+    templates: state.annotationsListReducer.templates,
+  };
+};
+
+export default connect(mapsStateToProps)(Projects);

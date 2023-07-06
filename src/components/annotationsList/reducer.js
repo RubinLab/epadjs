@@ -45,6 +45,7 @@ import {
   ADD_STUDY_TO_GRID,
   REPLACE_IN_GRID,
   UPDATE_SEARCH_TABLE_INDEX,
+  REFRESH_MAP,
   colors,
   commonLabels,
 } from "./types";
@@ -79,7 +80,9 @@ const initialState = {
   isSegUploaded: {},
   patientFilter: {},
   openStudies: {},
-  searchTableIndex: 0
+  searchTableIndex: 0,
+  otherSeriesAimsList: {},
+  refreshMap: {}
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -97,6 +100,11 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case REFRESH_MAP:
+        const { feature, condition } = action.payload;
+        const updatedRefreshMap = { ...state.refreshMap };
+        updatedRefreshMap[feature] = condition;
+        return { ...state, refreshMap: updatedRefreshMap };
       case UPDATE_SEARCH_TABLE_INDEX:
         return { ...state, searchTableIndex: action.searchTableIndex }
       case SAVE_PATIENT_FILTER:
@@ -161,16 +169,18 @@ const asyncReducer = (state = initialState, action) => {
           }
           return newSerie;
         });
-        openSeriesToUpdate[state.activePort].imageID = action.imageID;
+        const port = action.port || state.activePort;
+        openSeriesToUpdate[port].imageID = action.imageID;
 
         return { ...state, openSeries: openSeriesToUpdate };
       case CLOSE_SERIE:
-        console.log("In close");
         let delSeriesUID = state.openSeries[state.activePort].seriesUID;
         let delStudyUID = state.openSeries[state.activePort].studyUID;
         let delOpenStudies = { ...state.openStudies };
         const delAims = { ...state.aimsList };
+        const delOtherAims = { ...state.otherSeriesAimsList };
         delete delAims[delSeriesUID];
+        delete delOtherAims[delSeriesUID];
         let delGrid = state.openSeries.slice(0, state.activePort);
         delGrid = delGrid.concat(state.openSeries.slice(state.activePort + 1));
         let shouldStudyExist = false;
@@ -196,6 +206,7 @@ const asyncReducer = (state = initialState, action) => {
             aimsList: delAims,
             openStudies: delOpenStudies,
             activePort: delActivePort,
+            otherSeriesAimsList: delOtherAims
           };
         }
         return {
@@ -204,6 +215,7 @@ const asyncReducer = (state = initialState, action) => {
           aimsList: delAims,
           // patients: delPatients,
           activePort: delActivePort,
+          otherSeriesAimsList: delOtherAims
         };
       case LOAD_ANNOTATIONS:
         return Object.assign({}, state, {
@@ -263,6 +275,10 @@ const asyncReducer = (state = initialState, action) => {
             ...state.aimsList,
             [action.payload.ref.seriesUID]: colorAimsList,
           },
+          otherSeriesAimsList: {
+            ...state.otherSeriesAimsList,
+            [action.payload.ref.seriesUID]: action.payload.otherSeriesAimsData
+          },
           openSeries: imageAddedSeries,
         });
         return result;
@@ -319,19 +335,40 @@ const asyncReducer = (state = initialState, action) => {
       case TOGGLE_ALL_LABELS:
         const toggledLabelSerie = { ...state.aimsList };
         const anns = toggledLabelSerie[action.payload.serieID];
+        const studyAims = {};
         for (let ann in anns) {
           anns[ann].showLabel = action.payload.checked;
+          if (anns[ann].type === 'study') {
+            if (studyAims[ann]) delete studyAims[ann];
+            else studyAims[ann] = true;
+          }
+        }
+        if (Object.keys(studyAims).length > 0) {
+          const ids = Object.keys(studyAims);
+          for (let series in toggledLabelSerie) {
+            if (series !== action.payload.serieID) {
+              for (let id of ids) {
+                toggledLabelSerie[series][id].showLabel = action.payload.checked;
+              }
+            }
+          }
         }
         return Object.assign({}, state, { aimsList: toggledLabelSerie });
 
       case TOGGLE_LABEL:
         const singleLabelToggled = { ...state.aimsList };
-        const allAnns = singleLabelToggled[action.payload.serieID];
-        for (let ann in allAnns) {
-          if (ann === action.payload.aimID) {
-            const currentStatus = allAnns[ann].showLabel;
-            allAnns[ann].showLabel = !currentStatus;
-          }
+        // if type is study
+        if (singleLabelToggled[action.payload.serieID][action.payload.aimID].type === 'study') {
+          const allSeries = Object.values(singleLabelToggled);
+          const allSeriesIDs = Object.keys(singleLabelToggled);
+          allSeries.forEach((series, i) => {
+            const currentStatus = series[action.payload.aimID].showLabel;
+            series[action.payload.aimID].showLabel = !currentStatus;
+            singleLabelToggled[allSeriesIDs[i]] = series;
+          })
+        } else {
+          const ann = singleLabelToggled[action.payload.serieID][action.payload.aimID];
+          ann.showLabel = !ann.showLabel
         }
         return Object.assign({}, state, { aimsList: singleLabelToggled });
       case CLEAR_GRID:
@@ -470,12 +507,17 @@ const asyncReducer = (state = initialState, action) => {
           seriesInfo.projectName = "lite";
           seriesInfo.defaultTemplate = null;
         }
-        let newOpenSeries = state.openSeries.concat(seriesInfo);
+        const arePortsOccupied = action.port !== undefined && typeof action.port === 'number';
+        let newOpenSeries = [...state.openSeries];
 
+        if (arePortsOccupied) newOpenSeries[action.port] = seriesInfo;
+        else newOpenSeries = newOpenSeries.concat([seriesInfo]);
+
+        const newActivePort = arePortsOccupied ? state.activePort : newOpenSeries.length - 1;
         return {
           ...state,
           openSeries: newOpenSeries,
-          activePort: newOpenSeries.length - 1
+          activePort: newActivePort
         };
 
       case REPLACE_IN_GRID:

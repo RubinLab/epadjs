@@ -52,14 +52,21 @@ const NavBar = ({
                 }
                   style={{ cursor: 'pointer' }}
                   onClick={() => {
-                    onSwitchView('annotations');
+                    onSwitchView('search');
                   }} aria-current="page">Search</a>
               </li>
               <li className="nav-item" >
-                <NavLink className={
+                {/* <NavLink className={
                   path.includes('flex') ? 'nav-link active' : 'nav-link'
                 }
-                  to={pid ? `/flex/${pid}` : `/flex`} aria-current="page">Study List</NavLink>
+                  to={pid ? `/flex/${pid}` : `/flex`} aria-current="page">Study List</NavLink> */}
+                <a className={
+                  path.includes('flex') ? 'nav-link active' : 'nav-link'
+                }
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    onSwitchView('flex');
+                  }} aria-current="page">Study List</a>
               </li>
               <li className="nav-item" >
                 <a className={
@@ -80,14 +87,21 @@ const NavBar = ({
                 } style={{ cursor: 'pointer' }}
                   onClick={() => {
                     onSearchViewClick();
-                    onSwitchView('search', true);
+                    onSwitchView('list', true);
                   }} aria-current="page">Patient List</a>
               </li>
               <li className="nav-item" >
-                <NavLink className={
+                {/* <NavLink className={
                   path.includes('flex') ? 'nav-link active' : 'nav-link'
                 }
-                  to={pid ? `/flex/${pid}` : `/flex`} aria-current="page">Study List</NavLink>
+                  to={pid ? `/flex/${pid}` : `/flex`} aria-current="page">Study List</NavLink> */}
+                <a className={
+                  path.includes('flex') ? 'nav-link active' : 'nav-link'
+                }
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    onSwitchView('flex');
+                  }} aria-current="page">Study List</a>
               </li>
               <li className="nav-item" >
                 <a className={
@@ -95,7 +109,7 @@ const NavBar = ({
                 }
                   style={{ cursor: 'pointer' }}
                   onClick={() => {
-                    onSwitchView('annotations');
+                    onSwitchView('search');
                   }} aria-current="page">Annotations</a>
               </li>
               <li className="nav-item" id="navbarReports">

@@ -1,11 +1,15 @@
 import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
+import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
+import PropagateLoader from 'react-spinners/PropagateLoader';
 import {
   getImageIds,
   getWadoImagePath,
   getSegmentation,
+  getMetadata
 } from "../../services/seriesServices";
+import { getImageMetadata } from "../../services/imageServices";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
@@ -35,12 +39,12 @@ import { circle } from "./Circle";
 import { bidirectional } from "./Bidirectional";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
-import { FaTimes, FaPen, FaExpandArrowsAlt } from "react-icons/fa";
+import { FaTimes, FaPen, FaExpandArrowsAlt, FaTag } from "react-icons/fa";
 import Form from "react-bootstrap/Form";
 import ToolMenu from "../ToolMenu/ToolMenu";
 import { getMarkups, setMarkupsOfAimActive } from "../aimEditor/Helpers";
 import { refreshToken } from "../../services/authService";
-import { isThisSecond } from "date-fns/esm";
+// import { isThisSecond } from "date-fns/esm";
 import { FiMessageSquare } from "react-icons/fi";
 import { errorMonitor } from "events";
 import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
@@ -48,6 +52,7 @@ import getVPDimensions from "./ViewportCalculations";
 import SeriesDropDown from './SeriesDropDown';
 
 let mode;
+let wadoUrl;
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 } },
@@ -145,6 +150,7 @@ class DisplayView extends Component {
   constructor(props) {
     super(props);
     mode = sessionStorage.getItem('mode');
+    wadoUrl = sessionStorage.getItem('wadoUrl');
     this.state = {
       width: "100%",
       height: "100%",
@@ -162,8 +168,20 @@ class DisplayView extends Component {
       redirect: this.props.series.length < 1 ? true : false,
       containerHeight: 0,
       tokenRefresh: null,
-      activeTool: ''
+      activeTool: '',
+      invertMap: {},
+      isOverlayVisible: {},
+      subpath: []
     };
+  }
+
+  formInvertMap = () => {
+    const { series } = this.props;
+    const invertMap = { ...this.state.invertMap };
+    series.forEach((el, i) => {
+      if (el.examType === 'NM') invertMap[i] = true;
+    })
+    this.setState({ invertMap });
   }
 
   componentDidMount() {
@@ -173,6 +191,7 @@ class DisplayView extends Component {
     // }
     this.getViewports();
     this.getData();
+    this.formInvertMap();
     if (series.length > 0) {
       this.setSubComponentHeights();
       window.addEventListener("resize", e => this.setSubComponentHeights(e));
@@ -221,6 +240,7 @@ class DisplayView extends Component {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
+      this.formInvertMap();
     }
     // This is to handle late loading of aimsList from store but it also calls getData
     // each time visibility of aims change
@@ -245,11 +265,20 @@ class DisplayView extends Component {
   }
 
   handleKeyPressed = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+    }
     if (event.key === "Escape") {
       const evnt = new CustomEvent("escPressed", {
         cancelable: true,
       });
       window.dispatchEvent(evnt);
+    }
+    // i => info
+    if (event.target.nodeName !== 'INPUT' && event.target.nodeName !== 'TEXTAREA') {
+      if (event.keyCode == 73 && event.ctrlKey) {
+        this.toggleOverlay();
+      }
     }
   }
 
@@ -463,6 +492,7 @@ class DisplayView extends Component {
       for (let i = 0; i < series.length; i++) {
         const promise = this.getImageStack(series[i], i);
         promises.push(promise);
+
       }
       Promise.all(promises).then((res) => {
         this.setState(
@@ -543,6 +573,12 @@ class DisplayView extends Component {
 
   async getImages(serie) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
+    if (urls.length > 0) {
+      const arr = urls[0].lossyImage.split('/');
+      const subpath = [...this.state.subpath];
+      subpath[this.props.activePort] = arr[1];
+      this.setState({ subpath });
+    }
     return urls;
   }
 
@@ -552,15 +588,99 @@ class DisplayView extends Component {
 
   getImageFrameURI = (metadataURI, metadata) => {
     // Use the BulkDataURI if present int the metadata
-    // if (metadata["7FE00010"] && metadata["7FE00010"].BulkDataURI) {
-    //   console.log("donuyom", metadata["7FE00010"].BulkDataURI);
-    //   return metadata["7FE00010"].BulkDataURI;
-    // }
+    if (metadata["7FE00010"] && metadata["7FE00010"].BulkDataURI) {
+      console.log("donuyom", metadata["7FE00010"].BulkDataURI);
+      return metadata["7FE00010"].BulkDataURI;
+    }
 
     // fall back to using frame #1
     return metadataURI + "/frames/1";
   };
+
   getImageStack = async (serie, index) => {
+    const wadoUrl = sessionStorage.getItem("wadoUrl");
+    if (wadoUrl.includes('wadors')) 
+      return this.getImageStackWithWadors(serie, index);
+     else 
+      return this.getImageStackWithWadouri(serie, index);
+  }
+
+  getImageStackWithWadors = async (serie, index) => {
+    let stack = {};
+    let newImageIds = {};
+    let cornerstoneImageIds = [];
+    let seriesMetadata = [];
+    const imageUrls = await this.getImages(serie);
+    let baseUrl;
+    let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
+    const seriesURL = wadoUrlNoWadors + imageUrls[0].lossyImage.split('/instances/')[0];
+    try {
+      seriesMetadata = await getMetadata(seriesURL);
+      seriesMetadata = seriesMetadata.data;
+    } catch (err) {
+      console.log("Can not get series metadata");
+      console.error(err);
+    }
+    const useSeriesData = seriesMetadata.length > 0 && seriesMetadata.length === imageUrls.length;
+    for (let k = 0; k < imageUrls.length; k++) {
+      baseUrl = wadoUrlNoWadors + imageUrls[k].lossyImage;
+      let data;
+      let imgData;
+      if (!useSeriesData) {
+        const result  = await getImageMetadata(baseUrl);
+        data = result.data;
+        imgData = data[0];
+      } else imgData = seriesMetadata[k];
+
+      if (imageUrls[k].multiFrameImage === true) {
+        for (var i = 0; i < imageUrls[k].numberOfFrames; i++) {
+          let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
+          // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
+          cornerstoneImageIds.push(multiFrameUrl);
+          // cornerstone.loadAndCacheImage(multiFrameUrl);
+          newImageIds[multiFrameUrl] = true;
+          cornerstoneWADOImageLoader.wadors.metaDataManager.add(
+            multiFrameUrl,
+            imgData
+          );
+          // cornerstone.loadAndCacheImage(multiFrameUrl);
+        }
+      } else {
+        let singleFrameUrl = `wadors:${baseUrl}/frames/1`;
+        cornerstoneImageIds.push(singleFrameUrl);
+        // cornerstone.loadAndCacheImage(singleFrameUrl);
+        newImageIds[singleFrameUrl] = false;
+        cornerstoneWADOImageLoader.wadors.metaDataManager.add(
+          singleFrameUrl,
+          imgData
+        );
+        // cornerstone.loadAndCacheImage(singleFrameUrl);
+      }
+    }
+    const { imageIds } = this.state;
+    this.setState({ imageIds: { ...imageIds, ...newImageIds } });
+
+    //to jump to the same image after aim save
+    let imageIndex;
+    if (
+      this.state.data[index] &&
+      this.state.data[index].stack.currentImageIdIndex
+    )
+      imageIndex = this.state.data[index].stack.currentImageIdIndex;
+    else imageIndex = 0;
+
+    // if serie is being open from the annotation jump to that image and load the aim editor
+    if (serie.aimID) {
+      imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+    }
+
+    stack.currentImageIdIndex = parseInt(imageIndex, 10);
+    stack.imageIds = [...cornerstoneImageIds];
+
+    return { stack };
+  }
+
+  getImageStackWithWadouri = async (serie, index) => {
     let stack = {};
     let newImageIds = {};
     let cornerstoneImageIds = [];
@@ -583,26 +703,6 @@ class DisplayView extends Component {
         // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
       }
-      // } else {
-      //   let singleFrameUrl = baseUrl;
-      //   console.log("Single frame url", singleFrameUrl);
-      //   cornerstoneImageIds.push(singleFrameUrl);
-      //   imageIds[singleFrameUrl] = false;
-      //   const { data } = await getMetadata(singleFrameUrl);
-      //   console.log("Metadata", data);
-      //   const metadata = data[0];
-      //   const imageFrameURI = this.getImageFrameURI(
-      //     singleFrameUrl + "/metadata",
-      //     metadata
-      //   );
-      //   const imageId = "wadors:" + imageFrameURI;
-
-      //   cornerstoneWADOImageLoader.wadors.metaDataManager.add(
-      //     imageId,
-      //     metadata
-      //   );
-      //   cornerstone.loadAndCacheImage(imageId);
-      // }
     });
     const { imageIds } = this.state;
     this.setState({ imageIds: { ...imageIds, ...newImageIds } });
@@ -700,7 +800,8 @@ class DisplayView extends Component {
             const cornerstoneImageId = getWadoImagePath(
               studyUID,
               seriesUID,
-              key
+              key,
+              this.state.subpath[this.props.activePort]
             );
             const ret = this.getImageIndexFromImageId(
               cornerstoneImageIds,
@@ -1028,12 +1129,12 @@ class DisplayView extends Component {
           });
         }
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
+        let imageId = getWadoImagePath(studyUid, seriesUid, key, this.state.subpath[this.props.activePort]);
 
-        let imageId = getWadoImagePath(studyUid, seriesUid, key);
-
-        if (this.state.imageIds && !this.state.imageIds[imageId])
+        if (this.state.imageIds && !this.state.imageIds[imageId]) {
           //image is not multiframe so strip the frame number from the imageId
           imageId = imageId.split("&frame=")[0];
+        }
 
         this.renderMarkup(imageId, value, color);
       });
@@ -1603,9 +1704,11 @@ class DisplayView extends Component {
   // this is in aimEditor. should be somewhare common so both can use (the new aimapi library)
   parseImgeId = (imageId) => {
     if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
+    if (imageId.includes('wadors')) return imageId.split('/instances/').pop();
     return imageId.split("/").pop();
   };
-  newImage = (event) => {
+
+  newImage = (event, index) => {
     let { imageId } = event.detail.image;
     imageId = this.parseImgeId(imageId); //strip from cs imagePath to imageId
     const { activePort } = this.props;
@@ -1620,7 +1723,8 @@ class DisplayView extends Component {
     // set the state to preserve the imageId
     // this.setState({ data: tempData });
     // // dispatch to write the newImageId to store
-    this.props.dispatch(updateImageId(imageId));
+    event.detail.viewportIndex = index;
+    this.props.dispatch(updateImageId(imageId, event.detail.viewportIndex));
     const yaw = event.detail;
     window.dispatchEvent(
       new CustomEvent("newImage", { detail: yaw })
@@ -1669,6 +1773,14 @@ class DisplayView extends Component {
     this.jumpToImage(imageIndex, i);
   };
 
+  toggleOverlay = (e, i) => {
+    const showHide = { ... this.state.isOverlayVisible };
+    const index = i || i === 0 ? i : this.props.activePort;
+    if (showHide[index]) delete showHide[index];
+    else showHide[index] = true;
+    this.setState({ isOverlayVisible: showHide });
+  }
+
   render() {
     const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
     const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
@@ -1687,8 +1799,15 @@ class DisplayView extends Component {
           updateProgress={updateProgress}
           updateTreeDataOnSave={updateTreeDataOnSave}
           setAimDirty={this.setDirtyFlag}
+          saveData={this.props.saveData}
+          savedData={this.props.savedData}
         >
-          <ToolMenu onSwitchView={this.props.onSwitchView} />
+          <ToolMenu
+            onSwitchView={this.props.onSwitchView}
+          />
+          {this.state.isLoading && <div style={{ marginTop: '30%', marginLeft: '50%' }}>
+            <PropagateLoader color={'#7A8288'} loading={this.state.isLoading} margin={8} />
+          </div>}
           {!this.state.isLoading &&
             Object.entries(series).length &&
             data.map((data, i) => (
@@ -1722,6 +1841,13 @@ class DisplayView extends Component {
                     >
                       <FaExpandArrowsAlt />
                     </span>
+                    <span
+                      className={"dot"}
+                      style={{ background: "deepskyblue" }}
+                      onClick={(e) => { this.toggleOverlay(e, i) }}
+                    >
+                      <FaTag />
+                    </span>
                   </div>
                   {/* <div className={"column middle"}>
                     <label>{series[i].seriesUID}</label>
@@ -1731,12 +1857,12 @@ class DisplayView extends Component {
                       <Form inline className="slice-form">
                         <Form.Group className="slice-number">
                           <Form.Label htmlFor="imageNum" className="slice-label" style={{ color: 'white' }}>
-                            {"Slice # "}
+                            {"Image # "}
                           </Form.Label>
                           <Form.Control
                             type="number"
                             min="1"
-                            value={parseInt(data.stack.currentImageIdIndex) + 1}
+                            value={parseInt(data?.stack?.currentImageIdIndex) + 1}
                             className={"slice-field"}
                             onChange={(event) => this.handleJumpChange(i, event)}
                             style={{
@@ -1750,13 +1876,19 @@ class DisplayView extends Component {
                       </Form>
                     </div>
                     <div className={"series-dd"}>
-                      <SeriesDropDown style={{ lineHeight: "1" }} serie={series[i]} isAimEditorShowing={this.state.showAimEditor} onCloseAimEditor={this.closeAimEditor} />
+                      <SeriesDropDown
+                        style={{ lineHeight: "1" }}
+                        serie={series[i]}
+                        isAimEditorShowing={this.state.showAimEditor}
+                        onCloseAimEditor={this.closeAimEditor}
+                        onSelect={this.jumpToImage}
+                      />
                     </div>
                   </div>
                   <div className={"column right"}>
                     <span
                       className={"dot"}
-                      style={{ background: "#FDD800", float: "right" }}
+                      style={{ background: "#FDD800", float: 'right' }}
                       onClick={() => {
                         this.setState({ showAimEditor: true });
                       }}
@@ -1771,6 +1903,7 @@ class DisplayView extends Component {
                   imageIdIndex={parseInt(data.stack.currentImageIdIndex)}
                   viewportIndex={i}
                   tools={tools}
+                  shouldInvert={this.state.invertMap[i]}
                   eventListeners={[
                     {
                       target: "element",
@@ -1790,13 +1923,14 @@ class DisplayView extends Component {
                     {
                       target: "element",
                       eventName: "cornerstonenewimage",
-                      handler: this.newImage,
+                      handler: (e) => this.newImage(e, i),
                     },
                   ]}
                   setViewportActive={() => this.setActive(i)}
                   isStackPrefetchEnabled={true}
                   style={{ height: "calc(100% - 26px)" }}
                   activeTool={activeTool}
+                  isOverlayVisible={this.state.isOverlayVisible[i] || false}
                 />
               </div>
             ))}

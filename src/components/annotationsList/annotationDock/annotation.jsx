@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   FaCaretDown,
   FaCaretUp,
 } from "react-icons/fa";
+import Button from 'react-bootstrap/Button';
 import { FiEdit } from "react-icons/fi";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { AiOutlineEyeInvisible, AiOutlineEye } from "react-icons/ai";
@@ -11,6 +12,7 @@ import CalculationLabel from "./calculationLabel";
 
 const annotation = (props) => {
   const mode = sessionStorage.getItem("mode");
+  const [showMore, setShowMore] = useState(false);
   //conditional borderstyling
   let buttonStyle = { ...props.style.button };
   let labelStyle = { ...props.style.label };
@@ -43,6 +45,15 @@ const annotation = (props) => {
 
   let comment = props.aim.comment.value;
   let narrative = comment.split("~~")[1];
+  const narrativeExists = typeof narrative === 'string' && narrative !== "";
+  const isShortNarrative = narrativeExists && narrative.length < 200;
+
+  const content = !narrativeExists ? '' : isShortNarrative ? narrative : showMore ? narrative : `${narrative?.substring(0, 180)}...`;
+  const linkElement = (<Button style={{ 'padding': '0px', 'marginLeft': '2rem' }} variant="link" onClick={() => setShowMore(!showMore)}>{showMore ? 'show less' : 'show more'}</Button>);
+  const narrativeElement = (<li key={"narrative"}>
+    <b>Narrative:</b> {content} {!isShortNarrative && narrativeExists ? linkElement : ''}
+  </li>)
+
   return (
     <>
       {/* <div className={className} style={finalButtonStyle}> */}
@@ -88,13 +99,7 @@ const annotation = (props) => {
               />
               {/* )} */}
 
-              {mode === "teaching" && narrative && narrative !== "" && (
-
-                <li key={"narrative"}>
-                  <b>Narrative:</b> {narrative}
-                </li>
-
-              )}
+              {mode === "teaching" && narrativeElement}
             </ul>
 
 

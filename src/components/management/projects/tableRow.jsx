@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-const tableRow = ({ name, role, onSelect }) => {
+const tableRow = ({ name, username, role, onSelect }) => {
   return (
     <tr className="edit-userRole__table--row">
       <th className="edit-userRole__table--col">{name}</th>
@@ -9,7 +9,7 @@ const tableRow = ({ name, role, onSelect }) => {
         <input
           type="radio"
           value="Owner"
-          name={name}
+          name={username}
           onChange={onSelect}
           defaultChecked={"Owner" === role}
         />
@@ -18,7 +18,7 @@ const tableRow = ({ name, role, onSelect }) => {
         <input
           type="radio"
           value="Member"
-          name={name}
+          name={username}
           onChange={onSelect}
           defaultChecked={"Member" === role}
         />
@@ -27,7 +27,7 @@ const tableRow = ({ name, role, onSelect }) => {
         <input
           type="radio"
           value="Collaborator"
-          name={name}
+          name={username}
           onChange={onSelect}
           defaultChecked={"Collaborator" === role}
         />
@@ -36,7 +36,7 @@ const tableRow = ({ name, role, onSelect }) => {
         <input
           type="radio"
           value="StudyOnly"
-          name={name}
+          name={username}
           onChange={onSelect}
           defaultChecked={"StudyOnly" === role}
         />
@@ -46,7 +46,7 @@ const tableRow = ({ name, role, onSelect }) => {
           type="radio"
           value=""
           onChange={onSelect}
-          name={name}
+          name={username}
           defaultChecked={"None" === role}
         />
       </td>
