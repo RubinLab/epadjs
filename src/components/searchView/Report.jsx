@@ -19,8 +19,8 @@ import {
 } from '../annotationsList/action';
 
 const maxPort = parseInt(sessionStorage.getItem('maxPort'));
-let waterfallOptions = sessionStorage.getItem('waterfallOptions');
-if (waterfallOptions) waterfallOptions = waterfallOptions.split('-');
+// let waterfallOptions = sessionStorage.getItem('waterfallOptions');
+// if (waterfallOptions) waterfallOptions = waterfallOptions.split('-');
 const metricDefaultOptions = ['RECIST', 'ADLA', 'intensitystddev', 'Export (beta)'];
 const messages = {
   title: 'Can not open all series',
@@ -46,6 +46,7 @@ const Report = props => {
   const [filteredPatients, setFilteredPatients] = useState({});
   const [selectedSeries, setSelectedSeries] = useState([]);
   const [sizes, setSizes] = useState({});
+  const [waterfallOptions, setWaterfallOptions] = useState([]);
 
   const constructPairs = object => {
     const result = [];
@@ -80,7 +81,7 @@ const Report = props => {
       loadFilter = 'shapes=line&metric=standard deviation';
       numofHeaderCols = 2;
       hideCols = [];
-    } else if (report === 'Longitudinal' || (report !=='Waterfall')) {
+    } else if (report === 'Longitudinal' || (report !== 'Waterfall')) {
       filter = 'report=Longitudinal';
       if (report != 'Longitudinal') loadFilter = 'metric=' + report;
       if (template != null) filter += '&templatecode=' + template;
@@ -229,6 +230,13 @@ const Report = props => {
       filter,
       selectedProject
     } = getTableArguments();
+
+    let waterfallOpts = sessionStorage.getItem('waterfallOptions');
+    if (waterfallOpts) { 
+      waterfallOpts = waterfallOpts.split('-'); 
+      setWaterfallOptions(waterfallOpts);
+    }
+
     let result;
     async function fetchData() {
       try {
@@ -477,7 +485,7 @@ const Report = props => {
             height: ref.style.height,
           });
         }}
-        >
+      >
         <div
           id="report"
           style={props.report === 'Waterfall' ? style : {}}
