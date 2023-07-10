@@ -19,7 +19,7 @@ import {
   RiCloseCircleFill
 } from 'react-icons/ri';
 import { FcAbout, FcClearFilters } from 'react-icons/fc';
-import { BiSearch, BiX, BiTrash, BiDownload, BiPlay } from 'react-icons/bi';
+import { BiSearch, BiX, BiTrash, BiDownload, BiPlay, BiUpload } from 'react-icons/bi';
 import { BsEyeFill } from 'react-icons/bs';
 import { AiOutlineSortAscending, AiOutlineSortDescending } from 'react-icons/ai';
 import ReactTooltip from 'react-tooltip';
@@ -1284,6 +1284,7 @@ const AnnotationSearch = props => {
             {/* <button type="button" className="btn btn-sm" onClick={() => { setShowProjects(!showProjects) }}><BiDownload /><br />Copy to Project</button>
           {showProjects && (<Projects className='btn btn-sm worklist' onClose={() => { setShowProjects(false) }} />)} */}
             <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
+            <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiUpload /><br />Convert CSV to AIM files</button>
           </div>
         </div>
         {(showPlugins && mode !== 'teaching') && (<div style={{
