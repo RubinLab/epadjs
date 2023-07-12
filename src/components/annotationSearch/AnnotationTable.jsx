@@ -435,10 +435,7 @@ function AnnotationTable(props) {
               <input
                 type="checkbox"
                 className='form-check-input'
-                checked={
-                  props.selectedAnnotations[row.original.aimID] ? true : false
-                }
-                onChange={() => props.updateSelectedAims(row.original)}
+                onClick={() => { props.updateSelectedAims(row.original) }}
               />
             );
           }
@@ -576,7 +573,7 @@ function AnnotationTable(props) {
 
           }
         }],
-      [props.selectedAnnotations, data]
+      [data]
     );
   }
   else {
@@ -591,10 +588,7 @@ function AnnotationTable(props) {
               <input
                 type="checkbox"
                 className='form-check-input'
-                checked={
-                  props.selectedAnnotations[row.original.aimID] ? true : false
-                }
-                onChange={() => props.updateSelectedAims(row.original)}
+                onClick={() => props.updateSelectedAims(row.original)}
               />
             );
           }
@@ -684,7 +678,7 @@ function AnnotationTable(props) {
           accessor: 'userComment'
         }
       ],
-      [props.selectedAnnotations, data]
+      [data]
     );
   }
 
