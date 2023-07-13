@@ -1166,6 +1166,8 @@ class AimEditor extends Component {
     });
 
     const images = await Promise.all(imagePromises);
+    console.log('----> images');
+    console.log(images);
 
     const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
       images,
@@ -1187,6 +1189,8 @@ class AimEditor extends Component {
       var fileReader = new FileReader();
       fileReader.onload = (event) => {
         segArrayBuffer = event.target.result;
+        console.log(' ====> segArrayBuffer');
+        console.log(segArrayBuffer);
         const dicomData = dcmjs.data.DicomMessage.readFile(segArrayBuffer);
         const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(
           dicomData.dict
