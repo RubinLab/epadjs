@@ -1169,6 +1169,19 @@ class AimEditor extends Component {
     console.log('----> images');
     console.log(images);
 
+    // let instance = cornerstone.metaData.get('instance', images[0].imageId)
+    // console.log(cornerstone.metaData);
+    let instance = cornerstoneWADOImageLoader.wadors.metaDataManager.get(images[0].imageId)
+
+    instance._meta = [] //array needs to be present
+
+    console.log("  =====>  instance");
+    console.log(instance);
+
+    // console.log(dcmjs);
+    const dataset = dcmjs.normalizers.Normalizer.normalizeToDataset([instance]);
+    console.log(" ===> dataset normalized", dataset)
+
     const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
       images,
       labelmap3D,
