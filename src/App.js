@@ -1490,6 +1490,7 @@ class App extends Component {
                       completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
                       loading={this.state.loading}
                       forceUpdatePage={() => this.setState(state => ({ update: state.update + 1 }))}
+                      getPidUpdate={this.getPidUpdate}
                     />
                   )}
                 />
@@ -1611,6 +1612,7 @@ class App extends Component {
                     completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
                     loading={this.state.loading}
                     forceUpdatePage={() => this.setState(state => ({ update: state.update + 1 }))}
+                    getPidUpdate={this.getPidUpdate}
                   />
                 )}
               />
