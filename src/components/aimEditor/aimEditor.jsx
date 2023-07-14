@@ -468,6 +468,9 @@ class AimEditor extends Component {
         const { activePort } = this.props;
         const { element } = cornerstone.getEnabledElements()[activePort];
         const image = cornerstone.getImage(element);
+        if (wadoUrl.includes('wadors')) {
+          image.metadata = this.createImageDataFromMetadata(image.imageId);
+        }
         aimData = { image, answers, user };
         aim = new Aim(
           aimData,
