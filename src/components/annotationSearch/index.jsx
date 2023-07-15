@@ -235,7 +235,8 @@ const AnnotationSearch = props => {
   }, [props.refreshMap.plugins])
 
   const handleUserKeyPress = (e => {
-    if (e.key === 'Enter') {
+    const teachingFields = document.getElementById("questionaire"); 
+    if (e.key === 'Enter' && !teachingFields) {
       getFieldSearchResults(undefined, undefined, true);
       props.dispatch(updateSearchTableIndex(0));
       //if (mode !== 'teaching') {
