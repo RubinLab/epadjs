@@ -55,7 +55,7 @@ export function getMetadata(url) {
 }
 
 //  seems like this doesn"t belong to here but olny services know details about paths&server side
-export function getWadoImagePath(studyUid, seriesUid, imageId, subpath, format = "RS") {
+export function getWadoImagePath(studyUid, seriesUid, imageId, subpath = "pacs", format = "RS") {
   const wadoUrl = http.wadoUrl();
   if (format === "RS" && wadoUrl.includes("wadors"))
     return (
@@ -69,7 +69,7 @@ export function getWadoImagePath(studyUid, seriesUid, imageId, subpath, format =
     );
   else
     return (
-      wadoUrl + "/" + subpath +
+      wadoUrl.replace('wadors','wado') + "/" + subpath +
       "/?requestType=WADO&studyUID=" +
       encodeURIComponent(studyUid) +
       "&seriesUID=" +
