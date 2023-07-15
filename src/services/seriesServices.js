@@ -110,7 +110,7 @@ export function downloadSeries(projectID, body) {
 
 export function getSegmentation(series, imageId) {
   const { studyUID, seriesUID } = series;
-  const url = getWadoImagePath(studyUID, seriesUID, imageId, "URI")
+  const url = getWadoImagePath(studyUID, seriesUID, imageId, undefined, "URI")
     .replace("wadouri:", "")
     .replace("wadors:", "");
   return http.get(url, { responseType: "arraybuffer" });
