@@ -69,7 +69,7 @@ export function getWadoImagePath(studyUid, seriesUid, imageId, subpath = "pacs",
     );
   else
     return (
-      wadoUrl.replace('wadors','wado') + "/" + subpath +
+      wadoUrl.replace('/wadors','/wado') + "/" + subpath +
       "/?requestType=WADO&studyUID=" +
       encodeURIComponent(studyUid) +
       "&seriesUID=" +
