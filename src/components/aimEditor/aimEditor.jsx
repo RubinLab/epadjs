@@ -1121,6 +1121,7 @@ class AimEditor extends Component {
     const { element } = cornerstone.getEnabledElements()[this.props.activePort];
     const imageIds = this.getElementsActiveLayerImageIds(element);
     let imagePromises = [];
+    let metadataArray = [];
     for (let i = 0; i < imageIds.length; i++) {
       imagePromises.push(cornerstone.loadImage(imageIds[i]));
     }
@@ -1169,33 +1170,46 @@ class AimEditor extends Component {
     });
 
     const images = await Promise.all(imagePromises);
+    for (let i = 0; i < images.length; i++) {
+      metadataArray.push(cornerstoneWADOImageLoader.wadors.metaDataManager.get(images[i].imageId))
+    }
+
     console.log('----> images');
     console.log(images);
-
+    
     // let instance = cornerstone.metaData.get('instance', images[0].imageId)
     // console.log(cornerstone.metaData);
+    console.log(cornerstoneWADOImageLoader.wadors.metaDataManager);
     let instance = cornerstoneWADOImageLoader.wadors.metaDataManager.get(images[0].imageId)
 
-    instance._meta = [] //array needs to be present
+    // instance._meta = [] //array needs to be present
 
     console.log("  =====>  instance");
     console.log(instance);
+    delete instance.isMultiframe;
+
 
     // console.log(dcmjs);
-    const dataset = dcmjs.normalizers.Normalizer.normalizeToDataset([instance]);
+    // const dataset = dcmjs.normalizers.Normalizer.normalizeToDataset([instance]);
+    const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(instance);
     console.log(" ===> dataset normalized", dataset)
 
     const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
-      images,
+      metadataArray,
       labelmap3D,
       { rleEncode: false }
     );
+
+    const imageToPass = images[firstSegImageIndex];
+    const data = this.createImageDataFromMetadata(images[firstSegImageIndex].imageId)
+    console.log(" =====> data");
+    imageToPass.metadata = data;
 
     return {
       segBlob,
       segStats,
       imageIdx: firstSegImageIndex,
-      image: images[firstSegImageIndex],
+      image: imageToPass,
     };
   };
 
