@@ -599,9 +599,9 @@ class DisplayView extends Component {
 
   getImageStack = async (serie, index) => {
     const wadoUrl = sessionStorage.getItem("wadoUrl");
-    if (wadoUrl.includes('wadors')) 
+    if (wadoUrl.includes('wadors'))
       return this.getImageStackWithWadors(serie, index);
-     else 
+    else
       return this.getImageStackWithWadouri(serie, index);
   }
 
@@ -627,7 +627,7 @@ class DisplayView extends Component {
       let data;
       let imgData;
       if (!useSeriesData) {
-        const result  = await getImageMetadata(baseUrl);
+        const result = await getImageMetadata(baseUrl);
         data = result.data;
         imgData = data[0];
       } else imgData = seriesMetadata[k];
@@ -1140,8 +1140,13 @@ class DisplayView extends Component {
       });
     });
     // this.refreshAllViewports();
-    if (seriesSegmentations.length)
-      this.handleSegmentations(seriesSegmentations);
+
+    console.log(" ---> seriesSegmentations", seriesSegmentations);
+
+    if (seriesSegmentations.length) { 
+      console.log(" in if");
+      this.handleSegmentations(seriesSegmentations); 
+    }
   };
 
   linesToPerpendicular = (values) => {
@@ -1238,12 +1243,14 @@ class DisplayView extends Component {
   };
 
   handleSegmentations = seriesSegmentations => {
+    console.log(" in habdle", seriesSegmentations);
     let segLabelMaps = {};
     let activeLabelMapIndex;
     const { serieIndex } = seriesSegmentations[0];
 
     try {
       const { imageIds } = this.state.data[serieIndex].stack;
+      console.log(" imageids", imageIds);
 
       var imagePromises = imageIds.map((imageId) => {
         return cornerstone.loadAndCacheImage(imageId);
@@ -1252,6 +1259,8 @@ class DisplayView extends Component {
       Promise.all(imagePromises).then(async () => {
         seriesSegmentations.forEach(
           ({ seriesUid, studyUid, aimUid, serieIndex }, i) => {
+            console.log(" ---> seriesUid, studyUid, aimUid, serieIndex ");
+            console.log(seriesUid, studyUid, aimUid, serieIndex);
             this.getSegmentationData(
               seriesUid,
               studyUid,
@@ -1333,6 +1342,7 @@ class DisplayView extends Component {
     serieIndex,
     labelMapIndex
   ) => {
+    console.log(" ---> in get segmentation data");
     const { aimList } = this.props;
 
     const segmentationEntity =
