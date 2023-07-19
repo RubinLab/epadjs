@@ -1386,21 +1386,40 @@ class DisplayView extends Component {
       // Promise.all(imagePromises).then(() => {
       // const stackToolState = cornerstoneTools.getToolState(element, "stack");
       // const imageIds = stackToolState.data[0].imageIds;
+      console.log(cornerstone.metaData);
+      console.log(" image plane module");
+      console.log(cornerstoneWADOImageLoader.wadors.metaDataManager.get("imagePlaneModule", imageIds[0]));
+      const provider = wadoUrl.includes('wadors') ? cornerstoneWADOImageLoader.wadors.metaDataManager : cornerstone.metaData;
       const {
-        labelmapBuffer,
+        labelmapBufferArray,
         segMetadata,
         segmentsOnFrame,
+        segmentsOnFrameArray
       } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
         imageIds,
         arrayBuffer,
-        cornerstone.metaData
+        // cornerstone.metaData
+        provider
       );
+
+      // const obj = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
+      //   imageIds,
+      //   arrayBuffer,
+      //   // cornerstone.metaData
+      //   provider
+      // );
+
+      // console.log(' ---> obj');
+      // console.log(obj);
 
       const { setters, getters } = cornerstoneTools.getModule("segmentation");
 
+      console.log(" ---> segmentsOnFrame", segmentsOnFrame);
+      console.log(" ---> segmentsOnFrameArray", segmentsOnFrameArray);
+
       setters.labelmap3DByFirstImageId(
         imageIds[0],
-        labelmapBuffer,
+        labelmapBufferArray,
         labelMapIndex,
         segMetadata.data,
         imageIds.length,

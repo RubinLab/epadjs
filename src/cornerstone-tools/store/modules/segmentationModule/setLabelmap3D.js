@@ -96,6 +96,10 @@ function setLabelmap3DByFirstImageId(
     redo: [],
   };
 
+  console.log("buffer --->");
+  console.log(buffer);
+  buffer = buffer[0];
+  console.log(buffer);
   const labelmaps2D = brushStackState.labelmaps3D[labelmapIndex].labelmaps2D;
   const slicelengthInBytes = buffer.byteLength / numberOfFrames;
   const sliceLengthInUint16 = slicelengthInBytes / 2; // SliceLength in Uint16.
