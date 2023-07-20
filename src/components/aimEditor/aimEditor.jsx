@@ -1173,27 +1173,9 @@ class AimEditor extends Component {
     for (let i = 0; i < images.length; i++) {
       metadataArray.push(cornerstoneWADOImageLoader.wadors.metaDataManager.get(images[i].imageId))
     }
-
-    console.log('----> images');
-    console.log(images);
-    
-    // let instance = cornerstone.metaData.get('instance', images[0].imageId)
-    // console.log(cornerstone.metaData);
-    console.log(cornerstoneWADOImageLoader.wadors.metaDataManager);
     let instance = cornerstoneWADOImageLoader.wadors.metaDataManager.get(images[0].imageId)
-
-    // instance._meta = [] //array needs to be present
-
-    console.log("  =====>  instance");
-    console.log(instance);
     delete instance.isMultiframe;
-
-
-    // console.log(dcmjs);
-    // const dataset = dcmjs.normalizers.Normalizer.normalizeToDataset([instance]);
-    const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(instance);
-    console.log(" ===> dataset normalized", dataset)
-
+    // const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(instance);
     const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
       metadataArray,
       labelmap3D,
@@ -1202,7 +1184,6 @@ class AimEditor extends Component {
 
     const imageToPass = images[firstSegImageIndex];
     const data = this.createImageDataFromMetadata(images[firstSegImageIndex].imageId)
-    console.log(" =====> data");
     imageToPass.metadata = data;
 
     return {
@@ -1219,8 +1200,6 @@ class AimEditor extends Component {
       var fileReader = new FileReader();
       fileReader.onload = (event) => {
         segArrayBuffer = event.target.result;
-        console.log(' ====> segArrayBuffer');
-        console.log(segArrayBuffer);
         const dicomData = dcmjs.data.DicomMessage.readFile(segArrayBuffer);
         const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(
           dicomData.dict
