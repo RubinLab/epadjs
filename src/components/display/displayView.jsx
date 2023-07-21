@@ -484,8 +484,7 @@ class DisplayView extends Component {
     return segAims;
   };
 
-  getData(con) {
-    console.log(con);
+  getData() {
     this.clearAllMarkups();//we are already clearing in it renderAims do we need to here? 
     try {
       const { series } = this.props;
@@ -496,8 +495,6 @@ class DisplayView extends Component {
 
       }
       Promise.all(promises).then((res) => {
-        console.log(" ---> res", con, res[0].stack.currentImageIdIndex);
-        console.log(res);
         this.setState(
           {
             data: res,
@@ -669,26 +666,17 @@ class DisplayView extends Component {
     if (
       this.state.data[index] &&
       this.state.data[index].stack.currentImageIdIndex
-    ) {
+    )
       imageIndex = this.state.data[index].stack.currentImageIdIndex;
-      console.log(" #### 1")
-    }
-    else { 
-      imageIndex = 0; 
-      console.log(" #### 2")
-    }
+
+    else imageIndex = 0;
 
     // if serie is being open from the annotation jump to that image and load the aim editor
-    if (serie.aimID) {
-      imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
-      console.log(" #### 3")
-    }
+    if (serie.aimID) imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
 
-    console.log(" #### ")
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
-    console.log(" --> stacks first index", stack.currentImageIdIndex);
     return { stack };
   }
 
@@ -809,7 +797,6 @@ class DisplayView extends Component {
 
   // Returns the image index of the aim of the serie or the passed aim if aimID is passed 
   getImageIndex = (serie, cornerstoneImageIds, aimID = "") => {
-    console.log(" --> in getImageIndex");
     if (aimID === "")
       aimID = serie.aimID;
     const { imageAnnotations, studyUID, seriesUID } = serie;
@@ -827,7 +814,6 @@ class DisplayView extends Component {
               cornerstoneImageIds,
               cornerstoneImageId
             );
-            console.log(' $$$$$$$$$$$$$$', ret)
             return ret;
           }
         }

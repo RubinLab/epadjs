@@ -94,7 +94,6 @@ class CornerstoneViewport extends Component {
   constructor(props) {
     super(props);
 
-    console.log(' ---> props.imageIdIndex', props.imageIdIndex);
     // const imageIdIndex = props.imageIdIndex;
     const imageIdIndex = Math.ceil(props.imageIds.length / 2);
     const imageId = props.imageIds[imageIdIndex];
@@ -241,10 +240,6 @@ class CornerstoneViewport extends Component {
         // What if user kills component before `displayImage`?
       }
     } else if (!hasStackChanged && hasImageIndexChanged) {
-      console.log(' ---> this.element');
-      console.log(this.element);
-      console.log(' ---> imageIndex');
-      console.log(imageIndex);
       scrollToIndex(this.element, imageIndex);
     }
 
@@ -607,7 +602,6 @@ class CornerstoneViewport extends Component {
       event.detail.viewport.invert = true;
       cornerstone.setViewport(element, viewport);
     }
-    console.log(" ---> viewport voi", viewport.voi);
     this.setState({
       scale: viewport.scale,
       windowCenter: viewport.voi.windowCenter,
