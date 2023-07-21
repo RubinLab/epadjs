@@ -93,8 +93,9 @@ class CornerstoneViewport extends Component {
 
   constructor(props) {
     super(props);
-    
-    const imageIdIndex = props.imageIdIndex;
+
+    // const imageIdIndex = props.imageIdIndex;
+    const imageIdIndex = Math.ceil(props.imageIds.length / 2);
     const imageId = props.imageIds[imageIdIndex];
 
     this.state = {
@@ -177,7 +178,16 @@ class CornerstoneViewport extends Component {
 
       _addAndConfigureInitialToolsForElement(tools, this.element);
       _trySetActiveTool(this.element, this.props.activeTool);
-      this.setState({ isLoading: false });
+
+
+      // Load first image in stack
+      const image0 = await cornerstone.loadAndCacheImage(imageIds[0]);
+
+      // Display
+      cornerstone.displayImage(this.element, image0);
+      this.props.jumpToImage();
+
+      this.setState({ isLoading: false, imageIdIndex: 0 });
     } catch (error) {
       this.setState({ error, isLoading: false });
     }

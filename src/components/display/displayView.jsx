@@ -599,9 +599,9 @@ class DisplayView extends Component {
 
   getImageStack = async (serie, index) => {
     const wadoUrl = sessionStorage.getItem("wadoUrl");
-    if (wadoUrl.includes('wadors')) 
+    if (wadoUrl.includes('wadors'))
       return this.getImageStackWithWadors(serie, index);
-     else 
+    else
       return this.getImageStackWithWadouri(serie, index);
   }
 
@@ -627,7 +627,7 @@ class DisplayView extends Component {
       let data;
       let imgData;
       if (!useSeriesData) {
-        const result  = await getImageMetadata(baseUrl);
+        const result = await getImageMetadata(baseUrl);
         data = result.data;
         imgData = data[0];
       } else imgData = seriesMetadata[k];
@@ -667,16 +667,15 @@ class DisplayView extends Component {
       this.state.data[index].stack.currentImageIdIndex
     )
       imageIndex = this.state.data[index].stack.currentImageIdIndex;
+
     else imageIndex = 0;
 
     // if serie is being open from the annotation jump to that image and load the aim editor
-    if (serie.aimID) {
-      imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
-    }
+    if (serie.aimID) imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
-
     return { stack };
   }
 
@@ -786,6 +785,7 @@ class DisplayView extends Component {
   isDicomSegEntity = (markupType) => {
     return markupType === "DicomSegmentationEntity";
   };
+
 
 
   // Returns the image index of the aim of the serie or the passed aim if aimID is passed 
@@ -1931,6 +1931,7 @@ class DisplayView extends Component {
                   style={{ height: "calc(100% - 26px)" }}
                   activeTool={activeTool}
                   isOverlayVisible={this.state.isOverlayVisible[i] || false}
+                  jumpToImage={() => this.jumpToImage(0, i)}
                 />
               </div>
             ))}
