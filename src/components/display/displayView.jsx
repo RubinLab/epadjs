@@ -508,6 +508,7 @@ class DisplayView extends Component {
             this.renderAims();
             this.refreshAllViewports();
             this.shouldOpenAimEditor();
+            // this.jumpToImage(0, this.props.activePort);
           }
         );
       });
@@ -1954,6 +1955,7 @@ class DisplayView extends Component {
                   style={{ height: "calc(100% - 26px)" }}
                   activeTool={activeTool}
                   isOverlayVisible={this.state.isOverlayVisible[i] || false}
+                  jumpToImage={() => this.jumpToImage(0, i)}
                 />
               </div>
             ))}

@@ -186,7 +186,7 @@ class CornerstoneViewport extends Component {
 
       // Display
       cornerstone.displayImage(this.element, image0);
-
+      this.props.jumpToImage();
 
       this.setState({ isLoading: false, imageIdIndex: 0 });
     } catch (error) {
