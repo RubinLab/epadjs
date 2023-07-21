@@ -95,7 +95,7 @@ class CornerstoneViewport extends Component {
     super(props);
 
     // const imageIdIndex = props.imageIdIndex;
-    const imageIdIndex = Math.ceil(props.imageIds.length / 2);
+    const imageIdIndex = Math.floor(props.imageIds.length / 2);
     const imageId = props.imageIds[imageIdIndex];
 
     this.state = {
