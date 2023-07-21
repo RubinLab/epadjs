@@ -1142,7 +1142,6 @@ class DisplayView extends Component {
     // this.refreshAllViewports();
 
     if (seriesSegmentations.length) { 
-      console.log(" in if");
       this.handleSegmentations(seriesSegmentations); 
     }
   };

@@ -1173,8 +1173,6 @@ class AimEditor extends Component {
     for (let i = 0; i < images.length; i++) {
       metadataArray.push(cornerstoneWADOImageLoader.wadors.metaDataManager.get(images[i].imageId))
     }
-    let instance = cornerstoneWADOImageLoader.wadors.metaDataManager.get(images[0].imageId)
-    delete instance.isMultiframe;
     // const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(instance);
     const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
       metadataArray,
