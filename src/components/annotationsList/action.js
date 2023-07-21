@@ -819,7 +819,7 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
             let img = imgIds[i].split('&frame=');
             let frameNo = img.length > 1 ? img[1] : 1;
             img = `${img[0]}/frames/${frameNo}`
-            all[img] = item;
+            all[img] = all[img] ? [...all[img], ...item] : item;
             return all;
           }, {})
 

@@ -1121,6 +1121,7 @@ class AimEditor extends Component {
     const { element } = cornerstone.getEnabledElements()[this.props.activePort];
     const imageIds = this.getElementsActiveLayerImageIds(element);
     let imagePromises = [];
+    let metadataArray = [];
     for (let i = 0; i < imageIds.length; i++) {
       imagePromises.push(cornerstone.loadImage(imageIds[i]));
     }
@@ -1169,18 +1170,25 @@ class AimEditor extends Component {
     });
 
     const images = await Promise.all(imagePromises);
-
+    for (let i = 0; i < images.length; i++) {
+      metadataArray.push(cornerstoneWADOImageLoader.wadors.metaDataManager.get(images[i].imageId))
+    }
+    // const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(instance);
     const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
-      images,
+      metadataArray,
       labelmap3D,
       { rleEncode: false }
     );
+
+    const imageToPass = images[firstSegImageIndex];
+    const data = this.createImageDataFromMetadata(images[firstSegImageIndex].imageId)
+    imageToPass.metadata = data;
 
     return {
       segBlob,
       segStats,
       imageIdx: firstSegImageIndex,
-      image: images[firstSegImageIndex],
+      image: imageToPass,
     };
   };
 

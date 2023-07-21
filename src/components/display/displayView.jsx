@@ -1140,8 +1140,10 @@ class DisplayView extends Component {
       });
     });
     // this.refreshAllViewports();
-    if (seriesSegmentations.length)
-      this.handleSegmentations(seriesSegmentations);
+
+    if (seriesSegmentations.length) { 
+      this.handleSegmentations(seriesSegmentations); 
+    }
   };
 
   linesToPerpendicular = (values) => {
@@ -1376,21 +1378,23 @@ class DisplayView extends Component {
       // Promise.all(imagePromises).then(() => {
       // const stackToolState = cornerstoneTools.getToolState(element, "stack");
       // const imageIds = stackToolState.data[0].imageIds;
+      const provider = wadoUrl.includes('wadors') ? cornerstoneWADOImageLoader.wadors.metaDataManager : cornerstone.metaData;
       const {
-        labelmapBuffer,
+        labelmapBufferArray,
         segMetadata,
         segmentsOnFrame,
+        segmentsOnFrameArray
       } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
         imageIds,
         arrayBuffer,
-        cornerstone.metaData
+        provider
       );
 
       const { setters, getters } = cornerstoneTools.getModule("segmentation");
 
       setters.labelmap3DByFirstImageId(
         imageIds[0],
-        labelmapBuffer,
+        labelmapBufferArray,
         labelMapIndex,
         segMetadata.data,
         imageIds.length,
