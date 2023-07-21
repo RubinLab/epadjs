@@ -239,7 +239,7 @@ class DisplayView extends Component {
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData();
+      this.getData('------> in update');
       this.formInvertMap();
     }
     // This is to handle late loading of aimsList from store but it also calls getData
@@ -484,7 +484,8 @@ class DisplayView extends Component {
     return segAims;
   };
 
-  getData() {
+  getData(con) {
+    console.log(con);
     this.clearAllMarkups();//we are already clearing in it renderAims do we need to here? 
     try {
       const { series } = this.props;
@@ -495,6 +496,8 @@ class DisplayView extends Component {
 
       }
       Promise.all(promises).then((res) => {
+        console.log(" ---> res", con, res[0].stack.currentImageIdIndex);
+        console.log(res);
         this.setState(
           {
             data: res,
@@ -599,9 +602,9 @@ class DisplayView extends Component {
 
   getImageStack = async (serie, index) => {
     const wadoUrl = sessionStorage.getItem("wadoUrl");
-    if (wadoUrl.includes('wadors')) 
+    if (wadoUrl.includes('wadors'))
       return this.getImageStackWithWadors(serie, index);
-     else 
+    else
       return this.getImageStackWithWadouri(serie, index);
   }
 
@@ -627,7 +630,7 @@ class DisplayView extends Component {
       let data;
       let imgData;
       if (!useSeriesData) {
-        const result  = await getImageMetadata(baseUrl);
+        const result = await getImageMetadata(baseUrl);
         data = result.data;
         imgData = data[0];
       } else imgData = seriesMetadata[k];
@@ -665,20 +668,34 @@ class DisplayView extends Component {
     if (
       this.state.data[index] &&
       this.state.data[index].stack.currentImageIdIndex
-    )
+    ) {
       imageIndex = this.state.data[index].stack.currentImageIdIndex;
-    else imageIndex = 0;
+      console.log(" #### 1")
+    }
+    else { 
+      imageIndex = 0; 
+      console.log(" #### 2")
+    }
 
     // if serie is being open from the annotation jump to that image and load the aim editor
     if (serie.aimID) {
       imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+      console.log(" #### 3")
     }
+
+    console.log(" #### ")
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
-
+    console.log(" --> stacks first index", stack.currentImageIdIndex);
     return { stack };
   }
+
+  // resetImgIndexAfterLoad = () => {
+  //   const data = { ...this.state.data };
+  //   data.currentImageIdIndex = 0;
+  //   this.setState()
+  // }
 
   getImageStackWithWadouri = async (serie, index) => {
     let stack = {};
@@ -788,8 +805,10 @@ class DisplayView extends Component {
   };
 
 
+
   // Returns the image index of the aim of the serie or the passed aim if aimID is passed 
   getImageIndex = (serie, cornerstoneImageIds, aimID = "") => {
+    console.log(" --> in getImageIndex");
     if (aimID === "")
       aimID = serie.aimID;
     const { imageAnnotations, studyUID, seriesUID } = serie;
@@ -807,6 +826,7 @@ class DisplayView extends Component {
               cornerstoneImageIds,
               cornerstoneImageId
             );
+            console.log(' $$$$$$$$$$$$$$', ret)
             return ret;
           }
         }
@@ -1784,6 +1804,8 @@ class DisplayView extends Component {
   render() {
     const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
     const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
+    // const loadingImgIndex = Math.ceil(data?.stack?.imageIds.length / 2);
+    // console.log(data);
     // if (this.state.redirect) return <Redirect to="/list" />;
     const redirect = (mode === 'teaching' ? 'search' : 'list');
     return !Object.entries(series).length ? (
@@ -1900,7 +1922,8 @@ class DisplayView extends Component {
                 <CornerstoneViewport
                   key={i}
                   imageIds={data.stack.imageIds}
-                  imageIdIndex={parseInt(data.stack.currentImageIdIndex)}
+                  // imageIdIndex={Math.ceil(data.stack.imageIds.length / 2)}
+                  imageIdIndex={data.stack.currentImageIdIndex}
                   viewportIndex={i}
                   tools={tools}
                   shouldInvert={this.state.invertMap[i]}

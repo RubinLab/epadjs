@@ -93,8 +93,10 @@ class CornerstoneViewport extends Component {
 
   constructor(props) {
     super(props);
-    
-    const imageIdIndex = props.imageIdIndex;
+
+    console.log(' ---> props.imageIdIndex', props.imageIdIndex);
+    // const imageIdIndex = props.imageIdIndex;
+    const imageIdIndex = Math.ceil(props.imageIds.length / 2);
     const imageId = props.imageIds[imageIdIndex];
 
     this.state = {
@@ -177,7 +179,16 @@ class CornerstoneViewport extends Component {
 
       _addAndConfigureInitialToolsForElement(tools, this.element);
       _trySetActiveTool(this.element, this.props.activeTool);
-      this.setState({ isLoading: false });
+
+
+      // Load first image in stack
+      const image0 = await cornerstone.loadAndCacheImage(imageIds[0]);
+
+      // Display
+      cornerstone.displayImage(this.element, image0);
+
+
+      this.setState({ isLoading: false, imageIdIndex: 0 });
     } catch (error) {
       this.setState({ error, isLoading: false });
     }
@@ -230,6 +241,10 @@ class CornerstoneViewport extends Component {
         // What if user kills component before `displayImage`?
       }
     } else if (!hasStackChanged && hasImageIndexChanged) {
+      console.log(' ---> this.element');
+      console.log(this.element);
+      console.log(' ---> imageIndex');
+      console.log(imageIndex);
       scrollToIndex(this.element, imageIndex);
     }
 
@@ -592,6 +607,7 @@ class CornerstoneViewport extends Component {
       event.detail.viewport.invert = true;
       cornerstone.setViewport(element, viewport);
     }
+    console.log(" ---> viewport voi", viewport.voi);
     this.setState({
       scale: viewport.scale,
       windowCenter: viewport.voi.windowCenter,
