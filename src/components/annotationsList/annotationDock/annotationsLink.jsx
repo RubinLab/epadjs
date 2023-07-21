@@ -9,7 +9,8 @@ import {
   addToGrid,
   getWholeData,
   updatePatient,
-  jumpToAim
+  jumpToAim,
+  updateImageId,
 } from '../action';
 import "../annotationsList.css";
 
@@ -39,15 +40,21 @@ const annotationsLink = (props) => {
   };
 
   const displayAnnotations = (e, selected) => {
+    console.log(" ----> displayAnnotations");
     const { patientID, projectID, studyUID, seriesUID, aimID } = selected;
     const maxPort = parseInt(sessionStorage.getItem('maxPort'));
 
     let isGridFull = openSeries.length === maxPort;
     const { isOpen, index } = checkIfSerieOpen(seriesUID);
 
+    console.log(" ---> seriesUID, aimID, index");
+    console.log(seriesUID, aimID, index);
+
     if (isOpen) {
+      console.log(" ----> is open");
       props.dispatch(changeActivePort(index));
       props.dispatch(jumpToAim(seriesUID, aimID, index));
+      handleJumpToAim(aimID);
       props.dispatch(clearSelection());
     } else {
       if (isGridFull) {

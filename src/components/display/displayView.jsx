@@ -599,9 +599,9 @@ class DisplayView extends Component {
 
   getImageStack = async (serie, index) => {
     const wadoUrl = sessionStorage.getItem("wadoUrl");
-    if (wadoUrl.includes('wadors')) 
+    if (wadoUrl.includes('wadors'))
       return this.getImageStackWithWadors(serie, index);
-     else 
+    else
       return this.getImageStackWithWadouri(serie, index);
   }
 
@@ -627,7 +627,7 @@ class DisplayView extends Component {
       let data;
       let imgData;
       if (!useSeriesData) {
-        const result  = await getImageMetadata(baseUrl);
+        const result = await getImageMetadata(baseUrl);
         data = result.data;
         imgData = data[0];
       } else imgData = seriesMetadata[k];
@@ -816,14 +816,34 @@ class DisplayView extends Component {
   };
 
   getImageIndexFromImageId = (cornerstoneImageIds, cornerstoneImageId) => {
+
+    console.log(" ---> cornerstoneImageIds", wadoUrl);
+    console.log(cornerstoneImageIds);
+    console.log(" --> cornerstoneImageId");
+    console.log(cornerstoneImageId);
+
+
+
     const { imageIds } = this.state;
+<<<<<<< Updated upstream
     const wadors = this.wadoUrl.includes('wadors');
     console.log(' ---> cornerstoneImageIds', cornerstoneImageIds);
     console.log(" **** cornerstoneImageId", cornerstoneImageId);
     if (!imageIds[cornerstoneImageId] && !wadors )
+=======
+    console.log(" --> imageIds state");
+    console.log(imageIds);
+
+    if (!imageIds[cornerstoneImageId]) {
+      console.log(" ---> imageIds[cornerstoneImageId]", imageIds[cornerstoneImageId])
+>>>>>>> Stashed changes
       cornerstoneImageId = cornerstoneImageId.split("&frame")[0];
+    }
     for (let [key, value] of Object.entries(cornerstoneImageIds)) {
-      if (value == cornerstoneImageId) return key;
+      console.log( " ----> value == cornerstoneImageId", value == cornerstoneImageId);
+      if (value == cornerstoneImageId) { 
+        return key; 
+      }
     }
     return 0;
   };
@@ -1750,7 +1770,9 @@ class DisplayView extends Component {
   jumpToAimImage = event => {
     const { series, activePort } = this.props;
     const aimId = event.detail;
+    console.log(" ---> aimID", aimId);
     const imageIndex = this.getImageIndex(series[activePort], this.state.data[activePort].stack.imageIds, aimId);
+    console.log("imageIndex;", imageIndex);
     this.jumpToImage(imageIndex, activePort);
   };
 
