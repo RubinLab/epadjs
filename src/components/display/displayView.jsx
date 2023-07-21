@@ -817,7 +817,10 @@ class DisplayView extends Component {
 
   getImageIndexFromImageId = (cornerstoneImageIds, cornerstoneImageId) => {
     const { imageIds } = this.state;
-    if (!imageIds[cornerstoneImageId])
+    const wadors = this.wadoUrl.includes('wadors');
+    console.log(' ---> cornerstoneImageIds', cornerstoneImageIds);
+    console.log(" **** cornerstoneImageId", cornerstoneImageId);
+    if (!imageIds[cornerstoneImageId] && !wadors )
       cornerstoneImageId = cornerstoneImageId.split("&frame")[0];
     for (let [key, value] of Object.entries(cornerstoneImageIds)) {
       if (value == cornerstoneImageId) return key;
@@ -1116,6 +1119,7 @@ class DisplayView extends Component {
 
   parseAims = (aimList, seriesUid, studyUid, serieIndex) => {
     const seriesSegmentations = [];
+    const wadors = this.wadoUrl.includes('wadors');
     Object.entries(aimList).forEach(([key, values]) => {
       this.linesToPerpendicular(values); //change the perendicular lines to bidirectional to render by CS
       values.forEach((value) => {
@@ -1131,7 +1135,7 @@ class DisplayView extends Component {
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
         let imageId = getWadoImagePath(studyUid, seriesUid, key, this.state.subpath[this.props.activePort]);
 
-        if (this.state.imageIds && !this.state.imageIds[imageId]) {
+        if (this.state.imageIds && !this.state.imageIds[imageId] && !wadors) {
           //image is not multiframe so strip the frame number from the imageId
           imageId = imageId.split("&frame=")[0];
         }
