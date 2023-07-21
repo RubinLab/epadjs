@@ -239,7 +239,7 @@ class DisplayView extends Component {
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData('------> in update');
+      this.getData();
       this.formInvertMap();
     }
     // This is to handle late loading of aimsList from store but it also calls getData
@@ -505,7 +505,6 @@ class DisplayView extends Component {
             this.renderAims();
             this.refreshAllViewports();
             this.shouldOpenAimEditor();
-            // this.jumpToImage(0, this.props.activePort);
           }
         );
       });
@@ -679,12 +678,6 @@ class DisplayView extends Component {
     stack.imageIds = [...cornerstoneImageIds];
     return { stack };
   }
-
-  // resetImgIndexAfterLoad = () => {
-  //   const data = { ...this.state.data };
-  //   data.currentImageIdIndex = 0;
-  //   this.setState()
-  // }
 
   getImageStackWithWadouri = async (serie, index) => {
     let stack = {};
@@ -1791,8 +1784,6 @@ class DisplayView extends Component {
   render() {
     const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
     const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
-    // const loadingImgIndex = Math.ceil(data?.stack?.imageIds.length / 2);
-    // console.log(data);
     // if (this.state.redirect) return <Redirect to="/list" />;
     const redirect = (mode === 'teaching' ? 'search' : 'list');
     return !Object.entries(series).length ? (
@@ -1909,8 +1900,7 @@ class DisplayView extends Component {
                 <CornerstoneViewport
                   key={i}
                   imageIds={data.stack.imageIds}
-                  // imageIdIndex={Math.ceil(data.stack.imageIds.length / 2)}
-                  imageIdIndex={data.stack.currentImageIdIndex}
+                  imageIdIndex={parseInt(data.stack.currentImageIdIndex)}
                   viewportIndex={i}
                   tools={tools}
                   shouldInvert={this.state.invertMap[i]}
