@@ -794,15 +794,23 @@ class DisplayView extends Component {
       aimID = serie.aimID;
     const { imageAnnotations, studyUID, seriesUID } = serie;
     if (imageAnnotations) {
+      console.log(" %%%%%%%%%%%%%%% >  in image annotations")
       for (let [key, values] of Object.entries(imageAnnotations)) {
         for (let value of values) {
+          console.log('   +++++???? value.aimUid');
+          console.log(value.aimUid);
+          console.log('   +++++???? aimID');
+          console.log(aimID);
           if (value.aimUid === aimID) {
+            console.log(" in if ")
             const cornerstoneImageId = getWadoImagePath(
               studyUID,
               seriesUID,
               key,
               this.state.subpath[this.props.activePort]
             );
+            console.log("cornerstoneImageIds", cornerstoneImageIds);
+            console.log(cornerstoneImageId)
             const ret = this.getImageIndexFromImageId(
               cornerstoneImageIds,
               cornerstoneImageId
@@ -812,37 +820,24 @@ class DisplayView extends Component {
         }
       }
     }
+    console.log(" ++++++++++++++> returns 0 <+++++++++++++++")
     return 0;
   };
 
   getImageIndexFromImageId = (cornerstoneImageIds, cornerstoneImageId) => {
-
-    console.log(" ---> cornerstoneImageIds", wadoUrl);
-    console.log(cornerstoneImageIds);
-    console.log(" --> cornerstoneImageId");
-    console.log(cornerstoneImageId);
-
-
-
+    
     const { imageIds } = this.state;
-<<<<<<< Updated upstream
-    const wadors = this.wadoUrl.includes('wadors');
-    console.log(' ---> cornerstoneImageIds', cornerstoneImageIds);
-    console.log(" **** cornerstoneImageId", cornerstoneImageId);
-    if (!imageIds[cornerstoneImageId] && !wadors )
-=======
-    console.log(" --> imageIds state");
-    console.log(imageIds);
+    const wadors = wadoUrl.includes('wadors');
 
-    if (!imageIds[cornerstoneImageId]) {
-      console.log(" ---> imageIds[cornerstoneImageId]", imageIds[cornerstoneImageId])
->>>>>>> Stashed changes
+    if (!imageIds[cornerstoneImageId] && !wadors) {
       cornerstoneImageId = cornerstoneImageId.split("&frame")[0];
     }
     for (let [key, value] of Object.entries(cornerstoneImageIds)) {
-      console.log( " ----> value == cornerstoneImageId", value == cornerstoneImageId);
-      if (value == cornerstoneImageId) { 
-        return key; 
+      // console.log(' **** value', value);
+      // console.log(' **** cornerstoneImageId', cornerstoneImageId)
+      console.log(" ----> value == cornerstoneImageId", value === cornerstoneImageId);
+      if (value === cornerstoneImageId) {
+        return key;
       }
     }
     return 0;
@@ -1139,7 +1134,7 @@ class DisplayView extends Component {
 
   parseAims = (aimList, seriesUid, studyUid, serieIndex) => {
     const seriesSegmentations = [];
-    const wadors = this.wadoUrl.includes('wadors');
+    const wadors = wadoUrl.includes('wadors');
     Object.entries(aimList).forEach(([key, values]) => {
       this.linesToPerpendicular(values); //change the perendicular lines to bidirectional to render by CS
       values.forEach((value) => {
