@@ -575,8 +575,6 @@ class DisplayView extends Component {
 
   async getImages(serie, i) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
-    // console.log(' ---> urls');
-    // console.log(urls);
     if (urls.length > 0) {
       const arr = urls[0].lossyImage.split('/');
       this.props.dispatch(updateSubpath(arr[1], i));
@@ -796,23 +794,15 @@ class DisplayView extends Component {
       aimID = serie.aimID;
     const { imageAnnotations, studyUID, seriesUID } = serie;
     if (imageAnnotations) {
-      // console.log(" %%%%%%%%%%%%%%% >  in image annotations")
       for (let [key, values] of Object.entries(imageAnnotations)) {
         for (let value of values) {
-          // console.log('   +++++???? value.aimUid');
-          // console.log(value.aimUid);
-          // console.log('   +++++???? aimID');
-          // console.log(aimID);
           if (value.aimUid === aimID) {
-            // console.log(" in if ")
             const cornerstoneImageId = getWadoImagePath(
               studyUID,
               seriesUID,
               key,
               this.props.subpath[this.props.activePort]
             );
-            // console.log("cornerstoneImageIds", cornerstoneImageIds);
-            // console.log(cornerstoneImageId)
             const ret = this.getImageIndexFromImageId(
               cornerstoneImageIds,
               cornerstoneImageId
@@ -822,7 +812,6 @@ class DisplayView extends Component {
         }
       }
     }
-    // console.log(" ++++++++++++++> returns 0 <+++++++++++++++")
     return 0;
   };
 
@@ -835,12 +824,7 @@ class DisplayView extends Component {
       cornerstoneImageId = cornerstoneImageId.split("&frame")[0];
     }
     for (let [key, value] of Object.entries(cornerstoneImageIds)) {
-      // console.log(' **** value', value);
-      // console.log(' **** key', key);
-      // console.log(' **** cornerstoneImageId', cornerstoneImageId)
-      console.log(" ----> value == cornerstoneImageId", value === cornerstoneImageId);
       if (value === cornerstoneImageId) {
-        console.log(' **** key', key);
         return key;
       }
     }
@@ -1313,7 +1297,6 @@ class DisplayView extends Component {
   };
 
   setSerieActiveLabelMap = aimId => {
-    console.log(" ---->imdaaaatttt");
     const { series, activePort } = this.props;
     const { seriesLabelMaps } = this.state;
     if (!seriesLabelMaps[activePort]) {
@@ -1770,11 +1753,7 @@ class DisplayView extends Component {
   jumpToAimImage = event => {
     const { series, activePort } = this.props;
     const { aimId, index } = event.detail;
-    console.log(" aimid & index", aimId, index);
-    // console.log(" ---> aimID", aimId);
     const imageIndex = this.getImageIndex(series[index], this.state.data[index].stack.imageIds, aimId);
-    console.log(' ----> imageIndex', imageIndex);
-    // console.log("imageIndex;", imageIndex);
     this.jumpToImage(imageIndex, index);
   };
 
