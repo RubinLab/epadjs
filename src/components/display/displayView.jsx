@@ -173,7 +173,6 @@ class DisplayView extends Component {
       activeTool: '',
       invertMap: {},
       isOverlayVisible: {},
-      // subpath: []
     };
   }
 
