@@ -575,8 +575,8 @@ class DisplayView extends Component {
 
   async getImages(serie, i) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
-    console.log(' ---> urls');
-    console.log(urls);
+    // console.log(' ---> urls');
+    // console.log(urls);
     if (urls.length > 0) {
       const arr = urls[0].lossyImage.split('/');
       this.props.dispatch(updateSubpath(arr[1], i));
@@ -835,11 +835,12 @@ class DisplayView extends Component {
       cornerstoneImageId = cornerstoneImageId.split("&frame")[0];
     }
     for (let [key, value] of Object.entries(cornerstoneImageIds)) {
-      console.log(' **** value', value);
-      console.log(' **** key', key);
-      console.log(' **** cornerstoneImageId', cornerstoneImageId)
+      // console.log(' **** value', value);
+      // console.log(' **** key', key);
+      // console.log(' **** cornerstoneImageId', cornerstoneImageId)
       console.log(" ----> value == cornerstoneImageId", value === cornerstoneImageId);
       if (value === cornerstoneImageId) {
+        console.log(' **** key', key);
         return key;
       }
     }
@@ -1768,15 +1769,13 @@ class DisplayView extends Component {
   // Triggered by event from right bar to jump to the image of aim
   jumpToAimImage = event => {
     const { series, activePort } = this.props;
-    console.log(' ---> activePort in jum to aim event', activePort);
-    console.log(event.detail);
     const { aimId, index } = event.detail;
     console.log(" aimid & index", aimId, index);
     // console.log(" ---> aimID", aimId);
     const imageIndex = this.getImageIndex(series[index], this.state.data[index].stack.imageIds, aimId);
     console.log(' ----> imageIndex', imageIndex);
     // console.log("imageIndex;", imageIndex);
-    this.jumpToImage(imageIndex, activePort);
+    this.jumpToImage(imageIndex, index);
   };
 
   // Don't take the activePort Index from props because store updates late so
