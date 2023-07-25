@@ -14,9 +14,9 @@ import {
 } from '../action';
 import "../annotationsList.css";
 
-const handleJumpToAim = aimId => {
+const handleJumpToAim = (aimId, index) => {
   window.dispatchEvent(
-    new CustomEvent("jumpToAimImage", { detail: aimId })
+    new CustomEvent("jumpToAimImage", { detail: { aimId, index } })
   );
 };
 
@@ -47,14 +47,14 @@ const annotationsLink = (props) => {
     let isGridFull = openSeries.length === maxPort;
     const { isOpen, index } = checkIfSerieOpen(seriesUID);
 
-    console.log(" ---> seriesUID, aimID, index");
-    console.log(seriesUID, aimID, index);
+    // console.log(" ---> seriesUID, aimID, index");
+    // console.log(seriesUID, aimID, index);
 
     if (isOpen) {
       console.log(" ----> is open");
       props.dispatch(changeActivePort(index));
       props.dispatch(jumpToAim(seriesUID, aimID, index));
-      handleJumpToAim(aimID);
+      handleJumpToAim(aimID, index);
       props.dispatch(clearSelection());
     } else {
       if (isGridFull) {
@@ -97,7 +97,7 @@ const annotationsLink = (props) => {
             <td
               data-id={aim.id}
               data-serie={seriesUID}
-              onClick={(e) => handleJumpToAim(aim.id)}
+              onClick={(e) => handleJumpToAim(aim.id, props.activePort)}
               className="annsLink-table __tbody --cell"
             >
               {aim.name}

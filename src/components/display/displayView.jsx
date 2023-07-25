@@ -26,6 +26,7 @@ import {
   getSingleSerie,
   aimDelete,
   clearAimId,
+  updateSubpath
 } from "../annotationsList/action";
 import { deleteAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
@@ -143,6 +144,7 @@ const mapStateToProps = (state) => {
     activePort: state.annotationsListReducer.activePort,
     aimList: state.annotationsListReducer.aimsList,
     aimSegLabelMaps: state.annotationsListReducer.aimSegLabelMaps,
+    subpath: state.annotationsListReducer.subpath
   };
 };
 
@@ -171,7 +173,7 @@ class DisplayView extends Component {
       activeTool: '',
       invertMap: {},
       isOverlayVisible: {},
-      subpath: []
+      // subpath: []
     };
   }
 
@@ -571,13 +573,13 @@ class DisplayView extends Component {
     this.refreshAllViewports();
   };
 
-  async getImages(serie) {
+  async getImages(serie, i) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
+    console.log(' ---> urls');
+    console.log(urls);
     if (urls.length > 0) {
       const arr = urls[0].lossyImage.split('/');
-      const subpath = [...this.state.subpath];
-      subpath[this.props.activePort] = arr[1];
-      this.setState({ subpath });
+      this.props.dispatch(updateSubpath(arr[1], i));
     }
     return urls;
   }
@@ -610,7 +612,7 @@ class DisplayView extends Component {
     let newImageIds = {};
     let cornerstoneImageIds = [];
     let seriesMetadata = [];
-    const imageUrls = await this.getImages(serie);
+    const imageUrls = await this.getImages(serie, index);
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
     const seriesURL = wadoUrlNoWadors + imageUrls[0].lossyImage.split('/instances/')[0];
@@ -684,7 +686,7 @@ class DisplayView extends Component {
     let stack = {};
     let newImageIds = {};
     let cornerstoneImageIds = [];
-    const imageUrls = await this.getImages(serie);
+    const imageUrls = await this.getImages(serie, index);
     const wadoUrl = sessionStorage.getItem("wadoUrl");
     let baseUrl;
     imageUrls.map((url) => {
@@ -794,23 +796,23 @@ class DisplayView extends Component {
       aimID = serie.aimID;
     const { imageAnnotations, studyUID, seriesUID } = serie;
     if (imageAnnotations) {
-      console.log(" %%%%%%%%%%%%%%% >  in image annotations")
+      // console.log(" %%%%%%%%%%%%%%% >  in image annotations")
       for (let [key, values] of Object.entries(imageAnnotations)) {
         for (let value of values) {
-          console.log('   +++++???? value.aimUid');
-          console.log(value.aimUid);
-          console.log('   +++++???? aimID');
-          console.log(aimID);
+          // console.log('   +++++???? value.aimUid');
+          // console.log(value.aimUid);
+          // console.log('   +++++???? aimID');
+          // console.log(aimID);
           if (value.aimUid === aimID) {
-            console.log(" in if ")
+            // console.log(" in if ")
             const cornerstoneImageId = getWadoImagePath(
               studyUID,
               seriesUID,
               key,
-              this.state.subpath[this.props.activePort]
+              this.props.subpath[this.props.activePort]
             );
-            console.log("cornerstoneImageIds", cornerstoneImageIds);
-            console.log(cornerstoneImageId)
+            // console.log("cornerstoneImageIds", cornerstoneImageIds);
+            // console.log(cornerstoneImageId)
             const ret = this.getImageIndexFromImageId(
               cornerstoneImageIds,
               cornerstoneImageId
@@ -820,12 +822,12 @@ class DisplayView extends Component {
         }
       }
     }
-    console.log(" ++++++++++++++> returns 0 <+++++++++++++++")
+    // console.log(" ++++++++++++++> returns 0 <+++++++++++++++")
     return 0;
   };
 
   getImageIndexFromImageId = (cornerstoneImageIds, cornerstoneImageId) => {
-    
+
     const { imageIds } = this.state;
     const wadors = wadoUrl.includes('wadors');
 
@@ -833,8 +835,9 @@ class DisplayView extends Component {
       cornerstoneImageId = cornerstoneImageId.split("&frame")[0];
     }
     for (let [key, value] of Object.entries(cornerstoneImageIds)) {
-      // console.log(' **** value', value);
-      // console.log(' **** cornerstoneImageId', cornerstoneImageId)
+      console.log(' **** value', value);
+      console.log(' **** key', key);
+      console.log(' **** cornerstoneImageId', cornerstoneImageId)
       console.log(" ----> value == cornerstoneImageId", value === cornerstoneImageId);
       if (value === cornerstoneImageId) {
         return key;
@@ -1148,7 +1151,7 @@ class DisplayView extends Component {
           });
         }
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
-        let imageId = getWadoImagePath(studyUid, seriesUid, key, this.state.subpath[this.props.activePort]);
+        let imageId = getWadoImagePath(studyUid, seriesUid, key, this.props.subpath[this.props.activePort]);
 
         if (this.state.imageIds && !this.state.imageIds[imageId] && !wadors) {
           //image is not multiframe so strip the frame number from the imageId
@@ -1309,6 +1312,7 @@ class DisplayView extends Component {
   };
 
   setSerieActiveLabelMap = aimId => {
+    console.log(" ---->imdaaaatttt");
     const { series, activePort } = this.props;
     const { seriesLabelMaps } = this.state;
     if (!seriesLabelMaps[activePort]) {
@@ -1764,10 +1768,14 @@ class DisplayView extends Component {
   // Triggered by event from right bar to jump to the image of aim
   jumpToAimImage = event => {
     const { series, activePort } = this.props;
-    const aimId = event.detail;
-    console.log(" ---> aimID", aimId);
-    const imageIndex = this.getImageIndex(series[activePort], this.state.data[activePort].stack.imageIds, aimId);
-    console.log("imageIndex;", imageIndex);
+    console.log(' ---> activePort in jum to aim event', activePort);
+    console.log(event.detail);
+    const { aimId, index } = event.detail;
+    console.log(" aimid & index", aimId, index);
+    // console.log(" ---> aimID", aimId);
+    const imageIndex = this.getImageIndex(series[index], this.state.data[index].stack.imageIds, aimId);
+    console.log(' ----> imageIndex', imageIndex);
+    // console.log("imageIndex;", imageIndex);
     this.jumpToImage(imageIndex, activePort);
   };
 
