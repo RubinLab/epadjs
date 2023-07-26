@@ -46,6 +46,7 @@ import {
   REPLACE_IN_GRID,
   UPDATE_SEARCH_TABLE_INDEX,
   REFRESH_MAP,
+  SUBPATH,
   colors,
   commonLabels,
 } from "./types";
@@ -63,6 +64,10 @@ import { ConsoleWriter } from "istanbul-lib-report";
 import aimEntityData from "./annotationDock/aimEntityData";
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
+
+export const updateSubpath = (subpath, portIndex) => {
+  return { type: SUBPATH, payload: { subpath, portIndex } }
+}
 
 export const updateSearchTableIndex = searchTableIndex => {
   return { type: UPDATE_SEARCH_TABLE_INDEX, searchTableIndex }
@@ -811,7 +816,7 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
         let imageAimMap = getImageIdAnnotations(serieAims);
         // TODO fix the env var retrieval
         const url = wadoUrl ? wadoUrl : sessionStorage.getItem('wadoUrl');
-        if (url.includes('wadors')) {    
+        if (url.includes('wadors')) {
           const imgIds = Object.keys(imageAimMap);
           const aims = Object.values(imageAimMap);
           imageAimMap = aims.reduce((all, item, i) => {
@@ -824,7 +829,7 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
           }, {})
 
         }
-        
+
         imageData = {
           ...imageAimMap,
         };

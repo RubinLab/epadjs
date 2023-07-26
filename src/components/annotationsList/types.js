@@ -60,6 +60,7 @@ export const ADD_STUDY_TO_GRID = "epadjs/annotationList/ADD_STUDY_TO_GRID";
 export const REPLACE_IN_GRID = "epadjs/annotationList/REPLACE_IN_GRID";
 export const UPDATE_SEARCH_TABLE_INDEX = "epadjs/annotationList/UPDATE_SEARCH_TABLE_INDEX ";
 export const REFRESH_MAP = "epadjs/annotationList/REFRESH_MAP";
+export const SUBPATH = "epadjs/annotationList/SUBPATH";
 
 
 
