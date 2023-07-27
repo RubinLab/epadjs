@@ -2,13 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Modal, Button } from 'react-bootstrap';
-import {
-  getProjects,
-  uploadFileToProject
-} from '../../services/projectServices';
-import { uploadFileToSubject } from '../../services/subjectServices';
-import { uploadFileToStudy } from '../../services/studyServices';
-import { uploadFileToSeries } from '../../services/seriesServices';
+import { uploadCsv }from './csvServices';
 import { getTemplates } from '../annotationsList/action';
 
 let mode;
@@ -28,37 +22,37 @@ class UploadCSV extends React.Component {
     this.setState({ [name]: checked });
   };
 
-  componentDidMount = async () => {
-    try {
-      const { pid } = this.props;
-      if (mode !== 'lite') {
-        let { data: projects } = await getProjects();
-        for (let i = 0; i < projects.length; i++) {
-          if (projects[i].id === 'all') {
-            projects.splice(i, 1);
-            i = i - 1;
-            continue;
-          }
-          if (projects[i].id === 'nonassigned') {
-            projects.splice(i, 1);
-            i = i - 1;
-            continue;
-          }
-        }
+  // componentDidMount = async () => {
+  //   try {
+  //     const { pid } = this.props;
+  //     if (mode !== 'lite') {
+  //       let { data: projects } = await getProjects();
+  //       for (let i = 0; i < projects.length; i++) {
+  //         if (projects[i].id === 'all') {
+  //           projects.splice(i, 1);
+  //           i = i - 1;
+  //           continue;
+  //         }
+  //         if (projects[i].id === 'nonassigned') {
+  //           projects.splice(i, 1);
+  //           i = i - 1;
+  //           continue;
+  //         }
+  //       }
 
-        const nonSelectablePid = pid === 'nonassigned' || pid === 'all';
-        const projectID =
-          nonSelectablePid && projects.length > 0
-            ? projects[0].id
-            : !nonSelectablePid
-              ? pid
-              : '';
-        this.setState({ projects, projectID });
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  //       const nonSelectablePid = pid === 'nonassigned' || pid === 'all';
+  //       const projectID =
+  //         nonSelectablePid && projects.length > 0
+  //           ? projects[0].id
+  //           : !nonSelectablePid
+  //             ? pid
+  //             : '';
+  //       this.setState({ projects, projectID });
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
 
   onSelectFile = e => {
     this.setState({ files: Array.from(e.target.files) });
@@ -80,9 +74,9 @@ class UploadCSV extends React.Component {
     selectedSeries = Object.values(selectedSeries);
 
     const promises = [];
-    const projectID = this.props.projectID
-      ? this.props.projectID
-      : this.state.projectID;
+    // const projectID = this.props.projectID
+    //   ? this.props.projectID
+    //   : this.state.projectID;
     const formData = new FormData();
     this.state.files.forEach((file, index) => {
       formData.append(`file${index + 1}`, file);
@@ -94,21 +88,7 @@ class UploadCSV extends React.Component {
     };
 
     if (onSubmit) onSubmit();
-    if (selectedPatients.length > 0) {
-      selectedPatients.forEach(el =>
-        promises.push(uploadFileToSubject(formData, config, el))
-      );
-    } else if (selectedStudies.length > 0) {
-      selectedStudies.forEach(el =>
-        promises.push(uploadFileToStudy(formData, config, el))
-      );
-    } else if (selectedSeries.length > 0) {
-      selectedSeries.forEach(el =>
-        promises.push(uploadFileToSeries(formData, config, el))
-      );
-    } else {
-      promises.push(uploadFileToProject(formData, config, projectID));
-    }
+    promises.push(uploadCsv(formData, config))
 
     Promise.all(promises)
       .then(() => {
