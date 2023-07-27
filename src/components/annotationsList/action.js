@@ -47,6 +47,7 @@ import {
   UPDATE_SEARCH_TABLE_INDEX,
   REFRESH_MAP,
   AIM_SAVE,
+  SUBPATH,
   colors,
   commonLabels,
 } from "./types";
@@ -64,6 +65,10 @@ import { ConsoleWriter } from "istanbul-lib-report";
 import aimEntityData from "./annotationDock/aimEntityData";
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
+
+export const updateSubpath = (subpath, portIndex) => {
+  return { type: SUBPATH, payload: { subpath, portIndex } }
+}
 
 export const updateSearchTableIndex = searchTableIndex => {
   return { type: UPDATE_SEARCH_TABLE_INDEX, searchTableIndex }

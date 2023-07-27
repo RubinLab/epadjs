@@ -9,13 +9,14 @@ import {
   addToGrid,
   getWholeData,
   updatePatient,
-  jumpToAim
+  jumpToAim,
+  updateImageId,
 } from '../action';
 import "../annotationsList.css";
 
-const handleJumpToAim = aimId => {
+const handleJumpToAim = (aimId, index) => {
   window.dispatchEvent(
-    new CustomEvent("jumpToAimImage", { detail: aimId })
+    new CustomEvent("jumpToAimImage", { detail: { aimId, index } })
   );
 };
 
@@ -48,6 +49,7 @@ const annotationsLink = (props) => {
     if (isOpen) {
       props.dispatch(changeActivePort(index));
       props.dispatch(jumpToAim(seriesUID, aimID, index));
+      handleJumpToAim(aimID, index);
       props.dispatch(clearSelection());
     } else {
       if (isGridFull) {
@@ -90,7 +92,7 @@ const annotationsLink = (props) => {
             <td
               data-id={aim.id}
               data-serie={seriesUID}
-              onClick={(e) => handleJumpToAim(aim.id)}
+              onClick={(e) => handleJumpToAim(aim.id, props.activePort)}
               className="annsLink-table __tbody --cell"
             >
               {aim.name}
