@@ -47,6 +47,7 @@ import {
   REPLACE_IN_GRID,
   UPDATE_SEARCH_TABLE_INDEX,
   REFRESH_MAP,
+  AIM_SAVE,
   colors,
   commonLabels,
 } from "./types";
@@ -101,6 +102,24 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case AIM_SAVE:
+        console.log(" ----> reducer");
+        console.log(action.payload);
+        const { seriesList, aimRefs } = action.payload;
+        const clonedOtherAims = _.cloneDeep(state.otherSeriesAimsList);
+
+        seriesList.forEach((el, i) => {
+          console.log(" ====> clonedOtherAims[el.seriesUID]");
+          console.log(el.seriesUID);
+          console.log(clonedOtherAims[el.seriesUID]);
+          if (clonedOtherAims[el.seriesUID]) {
+            console.log(" in if")
+            clonedOtherAims[el.seriesUID][aimRefs.aimID] = aimRefs;
+          }
+          console.log(" ---> buuu")
+          console.log(clonedOtherAims[el.seriesUID]);
+        })
+        return {...state, otherSeriesAimsData: clonedOtherAims };
       case REFRESH_MAP:
         const { feature, condition } = action.payload;
         const updatedRefreshMap = { ...state.refreshMap };
@@ -658,7 +677,7 @@ const asyncReducer = (state = initialState, action) => {
         }, {});
 
         newOpenSeries[serieToUpdateIndex] = updatedSerie;
-        return { ...state, openSeries: [...newOpenSeries], otherSeriesAimsList: reformedOtherSeries};
+        return { ...state, openSeries: [...newOpenSeries], otherSeriesAimsList: reformedOtherSeries };
       }
       default:
         return state;

@@ -46,6 +46,7 @@ import {
   REPLACE_IN_GRID,
   UPDATE_SEARCH_TABLE_INDEX,
   REFRESH_MAP,
+  AIM_SAVE,
   colors,
   commonLabels,
 } from "./types";
@@ -723,6 +724,28 @@ export const getSingleSerie = (serie, annotation, wadoUrl) => {
   };
 };
 
+
+export const updateOtherAims = (aimrefs) => {
+  return async (dispatch) => {
+    try {
+      // aimID,
+      // patientID,
+      // projectID,
+      // seriesUID,
+      // studyUID,
+      // name,
+      const { projectID, patientID, studyUID } = aimrefs;
+      // projectId, subjectId, studyId
+      const { data: seriesList } = await getSeries(projectID, patientID, studyUID);
+      console.log(' ---> seriesList', seriesList);
+      await dispatch(otherAimsUpdated(seriesList, aimrefs));
+    }
+    catch (err) {
+      console.error(err);
+    }
+  }
+}
+
 export const updateSingleSerie = (serie, annotation) => {
   return async (dispatch, getState) => {
     let { patientID, studyUID, seriesUID, numberOfAnnotations } = serie;
@@ -811,7 +834,7 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
         let imageAimMap = getImageIdAnnotations(serieAims);
         // TODO fix the env var retrieval
         const url = wadoUrl ? wadoUrl : sessionStorage.getItem('wadoUrl');
-        if (url.includes('wadors')) {    
+        if (url.includes('wadors')) {
           const imgIds = Object.keys(imageAimMap);
           const aims = Object.values(imageAimMap);
           imageAimMap = aims.reduce((all, item, i) => {
@@ -824,7 +847,7 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
           }, {})
 
         }
-        
+
         imageData = {
           ...imageAimMap,
         };
@@ -935,3 +958,9 @@ export const segUploadRemove = (segUid) => {
 export const aimDelete = (aimRefs) => {
   return { type: AIM_DELETE, payload: aimRefs };
 };
+
+
+export const otherAimsUpdated = (seriesList, aimRefs) => {
+  console.log(" -----> otherAimsUpdated");
+  return { type: AIM_SAVE, payload: { seriesList, aimRefs } };
+}
