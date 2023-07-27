@@ -103,23 +103,14 @@ const asyncReducer = (state = initialState, action) => {
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
       case AIM_SAVE:
-        console.log(" ----> reducer");
-        console.log(action.payload);
         const { seriesList, aimRefs } = action.payload;
         const clonedOtherAims = _.cloneDeep(state.otherSeriesAimsList);
-
         seriesList.forEach((el, i) => {
-          console.log(" ====> clonedOtherAims[el.seriesUID]");
-          console.log(el.seriesUID);
-          console.log(clonedOtherAims[el.seriesUID]);
-          if (clonedOtherAims[el.seriesUID]) {
-            console.log(" in if")
+          if (clonedOtherAims[el.seriesUID] && el.seriesUID !== aimRefs.seriesUID) {
             clonedOtherAims[el.seriesUID][aimRefs.aimID] = aimRefs;
           }
-          console.log(" ---> buuu")
-          console.log(clonedOtherAims[el.seriesUID]);
         })
-        return {...state, otherSeriesAimsData: clonedOtherAims };
+        return {...state, otherSeriesAimsList: clonedOtherAims };
       case REFRESH_MAP:
         const { feature, condition } = action.payload;
         const updatedRefreshMap = { ...state.refreshMap };
