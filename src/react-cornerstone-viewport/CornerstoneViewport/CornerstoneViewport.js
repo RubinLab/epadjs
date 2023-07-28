@@ -94,8 +94,7 @@ class CornerstoneViewport extends Component {
   constructor(props) {
     super(props);
 
-    // const imageIdIndex = props.imageIdIndex;
-    const imageIdIndex = Math.floor(props.imageIds.length / 2);
+    const imageIdIndex = props.imageIdIndex;
     const imageId = props.imageIds[imageIdIndex];
 
     this.state = {
@@ -111,6 +110,8 @@ class CornerstoneViewport extends Component {
       scale: undefined,
       windowWidth: undefined,
       windowCenter: undefined,
+      // windowWidthSet: undefined,
+      // windowCenterSet: undefined,
       isOverlayVisible: true,
       // Orientation Markers
       rotationDegrees: undefined,
@@ -178,16 +179,7 @@ class CornerstoneViewport extends Component {
 
       _addAndConfigureInitialToolsForElement(tools, this.element);
       _trySetActiveTool(this.element, this.props.activeTool);
-
-
-      // Load first image in stack
-      const image0 = await cornerstone.loadAndCacheImage(imageIds[0]);
-
-      // Display
-      cornerstone.displayImage(this.element, image0);
-      this.props.jumpToImage();
-
-      this.setState({ isLoading: false, imageIdIndex: 0 });
+      this.setState({ isLoading: false });
     } catch (error) {
       this.setState({ error, isLoading: false });
     }
@@ -597,15 +589,29 @@ class CornerstoneViewport extends Component {
 
   // TODO: May need to throttle?
   onImageRendered = (event) => {
-    const { viewport, element } = event.detail;
+    // console.log(event.detail);
+    const { viewport, element, image } = event.detail;
     if (this.props.shouldInvert) {
       event.detail.viewport.invert = true;
       cornerstone.setViewport(element, viewport);
     }
+
+    let wwwc = sessionStorage.getItem('wwwc');
+    console.log(' ----> wwwc', wwwc);
+    wwwc = wwwc ? JSON.parse(wwwc) : {};
+
+    viewport.voi.windowCenter = wwwc[this.props.viewportIndex]?.wc || image.windowCenter;
+    viewport.voi.windowWidth = wwwc[this.props.viewportIndex]?.ww || image.windowWidth;
+
+    cornerstone.setViewport(element, viewport);
+
+    // console.log(viewport);
     this.setState({
       scale: viewport.scale,
-      windowCenter: viewport.voi.windowCenter,
-      windowWidth: viewport.voi.windowWidth,
+      // windowCenter: viewport.voi.windowCenter,
+      // windowWidth: viewport.voi.windowWidth,
+      windowCenter: image.windowCenter,
+      windowWidth: image.windowWidth,
       rotationDegrees: viewport.rotation,
       isFlippedVertically: viewport.vflip,
       isFlippedHorizontally: viewport.hflip,

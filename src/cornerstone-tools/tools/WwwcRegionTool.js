@@ -180,7 +180,7 @@ const _isEmptyObject = obj =>
  * @param {Object} config The tool's configuration object
  * @returns {void}
  */
-const _applyWWWCRegion = function(evt, config) {
+const _applyWWWCRegion = function (evt, config) {
   const eventData = evt.detail;
   const { image, element } = eventData;
   const { start: startPoint, end: endPoint } = evt.detail.handles;
@@ -218,7 +218,14 @@ const _applyWWWCRegion = function(evt, config) {
     Math.abs(minMaxMean.max - minMaxMean.min),
     config.minWindowWidth
   );
+  image.windowWidth = Math.max(
+    Math.abs(minMaxMean.max - minMaxMean.min),
+    config.minWindowWidth
+  );
+
   viewport.voi.windowCenter = minMaxMean.mean;
+  image.windowCenter = minMaxMean.mean;
+
 
   external.cornerstone.setViewport(element, viewport);
   external.cornerstone.updateImage(element);
@@ -234,7 +241,7 @@ const _applyWWWCRegion = function(evt, config) {
  * @param {bumber} globalMax starting "max" value
  * @returns {Object} {min: number, max: number, mean: number }
  */
-const _calculateMinMaxMean = function(pixelLuminance, globalMin, globalMax) {
+const _calculateMinMaxMean = function (pixelLuminance, globalMin, globalMax) {
   const numPixels = pixelLuminance.length;
   let min = globalMax;
   let max = globalMin;

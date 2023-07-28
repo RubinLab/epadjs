@@ -27,7 +27,9 @@ export default class WwwcTool extends BaseTool {
 
   mouseDragCallback(evt) {
     this.applyActiveStrategy(evt);
+    console.log(evt.detail);
     evt.detail.viewport.voiLUT = undefined;
+    // cornerstone.setViewport(element, viewport);
     external.cornerstone.setViewport(evt.detail.element, evt.detail.viewport);
   }
 
@@ -68,8 +70,25 @@ function basicLevelingStrategy(evt) {
   if (orientation === 0) {
     eventData.viewport.voi.windowWidth += deltaX;
     eventData.viewport.voi.windowCenter += deltaY;
+    eventData.image.windowWidth += deltaX;
+    eventData.image.windowCenter += deltaY;
   } else {
     eventData.viewport.voi.windowWidth += deltaY;
     eventData.viewport.voi.windowCenter += deltaX;
+    eventData.image.windowWidth += deltaY;
+    eventData.image.windowCenter += deltaX;
   }
+
+  // let wwwc = sessionStorage.getItem("wwwc");
+
+  // console.log(wwwc);
+  // wwwc = wwwc ? JSON.parse(wwwc) : {};
+
+  // wwwc[activePort] = { ww: preset.window, wc: preset.level };
+
+  // console.log(wwwc)  
+  // console.log(JSON.stringify(wwwc));
+
+  // sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
+
 }

@@ -5,21 +5,23 @@ import "./WindowLevel.css";
 
 export class WindowLevel extends Component {
   constructor(props) {
-    super(props);    
+    super(props);
     this.state = {
-      name: props.selectedPreset      
+      name: props.selectedPreset
     };
   }
 
-  componentDidMount(){
+  componentDidMount() {
     const voi = this.getCurrentWL()?.voi;
-    this.setState({level: voi.windowCenter,
-      window: voi.windowWidth});
+    this.setState({
+      level: voi.windowCenter,
+      window: voi.windowWidth
+    });
   }
 
   getCurrentWL = () => {
     const { activePort } = this.props;
-    if (cornerstone.getEnabledElements()){
+    if (cornerstone.getEnabledElements()) {
       const { element } = cornerstone.getEnabledElements()[activePort];
       return cornerstone.getViewport(element);
     }
@@ -32,8 +34,28 @@ export class WindowLevel extends Component {
     const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
     const vp = this.getCurrentWL(element);
+    const image = cornerstone.getImage(
+      cornerstone.getEnabledElements()[activePort]["element"]
+    );
+
     vp.voi.windowCenter = preset.level;
     vp.voi.windowWidth = preset.window;
+
+    image.windowCenter = preset.level;
+    image.windowWidth = preset.window;
+
+    let wwwc = sessionStorage.getItem("wwwc");
+
+    console.log(wwwc);
+    wwwc = wwwc ? JSON.parse(wwwc) : {};
+
+    wwwc[activePort] = { ww: preset.window, wc: preset.level };
+
+    console.log(wwwc)  
+    console.log(JSON.stringify(wwwc));
+
+    sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
+
     vp.voiLUT = undefined;
     cornerstone.setViewport(element, vp);
     this.setState({ name, level, window });
@@ -50,9 +72,9 @@ export class WindowLevel extends Component {
     this.setState({ level: e.target.value });
   };
 
-  checkPreset = (preset) =>{
+  checkPreset = (preset) => {
     const voi = this.getCurrentWL()?.voi;
-    if(voi?.windowCenter === preset.level && voi?.windowWidth === preset.window) return true;
+    if (voi?.windowCenter === preset.level && voi?.windowWidth === preset.window) return true;
     return false;
   }
 

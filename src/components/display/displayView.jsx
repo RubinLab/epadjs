@@ -173,6 +173,7 @@ class DisplayView extends Component {
       activeTool: '',
       invertMap: {},
       isOverlayVisible: {},
+      wwwc: {}
     };
   }
 
@@ -183,6 +184,10 @@ class DisplayView extends Component {
       if (el.examType === 'NM') invertMap[i] = true;
     })
     this.setState({ invertMap });
+  }
+
+  setWwwc = (ww, wc) => {
+    this.setState({ wwwc: { ww, wc } })
   }
 
   componentDidMount() {
@@ -1147,8 +1152,8 @@ class DisplayView extends Component {
     });
     // this.refreshAllViewports();
 
-    if (seriesSegmentations.length) { 
-      this.handleSegmentations(seriesSegmentations); 
+    if (seriesSegmentations.length) {
+      this.handleSegmentations(seriesSegmentations);
     }
   };
 
@@ -1942,6 +1947,7 @@ class DisplayView extends Component {
                   activeTool={activeTool}
                   isOverlayVisible={this.state.isOverlayVisible[i] || false}
                   jumpToImage={() => this.jumpToImage(0, i)}
+                  // wwwc={this.state.wwwc}
                 />
               </div>
             ))}
