@@ -15,7 +15,8 @@ import {
   updatePatientOnAimSave,
   getSingleSerie,
   segUploadStarted,
-  segUploadRemove
+  segUploadRemove,
+  updateOtherAims
 } from "../annotationsList/action";
 import RecistTable from "./RecistTable";
 import { Aim, enumAimType } from "aimapi";
@@ -1298,6 +1299,12 @@ class AimEditor extends Component {
     this.props.dispatch(
       getSingleSerie({ patientID, projectID, seriesUID, studyUID })
     );
+    const aimObj = { ...aimRefs };
+    delete aimObj.comment;
+    delete aimObj.isStudyAim;
+
+    this.props.dispatch(updateOtherAims(aimObj))
+
     // Delete after tests Sept 2021
     // this.props.dispatch(
     //   updateSingleSerie({

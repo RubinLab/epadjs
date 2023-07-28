@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import {
   LOAD_ANNOTATIONS,
   LOAD_ANNOTATIONS_SUCCESS,
@@ -46,6 +47,7 @@ import {
   REPLACE_IN_GRID,
   UPDATE_SEARCH_TABLE_INDEX,
   REFRESH_MAP,
+  AIM_SAVE,
   SUBPATH,
   colors,
   commonLabels,
@@ -102,6 +104,15 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case AIM_SAVE:
+        const { seriesList, aimRefs } = action.payload;
+        const clonedOtherAims = _.cloneDeep(state.otherSeriesAimsList);
+        seriesList.forEach((el, i) => {
+          if (clonedOtherAims[el.seriesUID] && el.seriesUID !== aimRefs.seriesUID) {
+            clonedOtherAims[el.seriesUID][aimRefs.aimID] = aimRefs;
+          }
+        })
+        return {...state, otherSeriesAimsList: clonedOtherAims };
       case SUBPATH:
         const {subpath, portIndex} = action.payload;
         const newSubpath = [...state.subpath];
@@ -637,6 +648,9 @@ const asyncReducer = (state = initialState, action) => {
       case AIM_DELETE: {
         const { aimRefs } = action.payload;
         const { seriesUID } = aimRefs;
+        const deepOther = _.cloneDeep(state.otherSeriesAimsList);
+        const deepOtherArrKeys = Object.keys(deepOther);
+        const deepOtherArrValues = Object.values(deepOther);
         let serieToUpdateIndex;
         const newOpenSeries = [...state.openSeries];
         const serieToUpdate = newOpenSeries.find((serie, index) => {
@@ -655,8 +669,18 @@ const asyncReducer = (state = initialState, action) => {
             if (ann.aimUid === aimRefs.aimID) value.splice(i, 1);
           }
         });
+
+        deepOtherArrValues.forEach((el => {
+          if (el[aimRefs.aimID]) delete el[aimRefs.aimID];
+        }))
+
+        const reformedOtherSeries = deepOtherArrKeys.reduce((all, item, index) => {
+          all[item] = deepOtherArrValues[index];
+          return all;
+        }, {});
+
         newOpenSeries[serieToUpdateIndex] = updatedSerie;
-        return { ...state, openSeries: [...newOpenSeries] };
+        return { ...state, openSeries: [...newOpenSeries], otherSeriesAimsList: reformedOtherSeries };
       }
       default:
         return state;
