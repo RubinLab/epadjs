@@ -820,6 +820,7 @@ class App extends Component {
     }
   };
 
+
   hasTeachingFiles = (studyUID) => {
     return searchAnnotations({
       query: `(template_code:${teachingFileTempCode} AND study_uid:${studyUID}) AND project:lite`,

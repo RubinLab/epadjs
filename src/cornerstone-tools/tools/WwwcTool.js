@@ -79,16 +79,8 @@ function basicLevelingStrategy(evt) {
     eventData.image.windowCenter += deltaX;
   }
 
-  // let wwwc = sessionStorage.getItem("wwwc");
-
-  // console.log(wwwc);
-  // wwwc = wwwc ? JSON.parse(wwwc) : {};
-
-  // wwwc[activePort] = { ww: preset.window, wc: preset.level };
-
-  // console.log(wwwc)  
-  // console.log(JSON.stringify(wwwc));
-
-  // sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
+  window.dispatchEvent(
+    new CustomEvent("updateWL", { detail: { wc: eventData.image.windowCenter, ww: eventData.image.windowWidth } })
+  );
 
 }
