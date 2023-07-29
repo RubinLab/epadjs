@@ -425,13 +425,8 @@ class DisplayView extends Component {
     const { ww, wc } = event.detail;
     let wwwc = sessionStorage.getItem("wwwc");
 
-    console.log(wwwc);
-
     wwwc = wwwc ? JSON.parse(wwwc) : {};
     wwwc[this.props.activePort] = { ww, wc };
-
-    console.log(wwwc)
-    console.log(JSON.stringify(wwwc));
 
     sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
   }
@@ -1703,7 +1698,6 @@ class DisplayView extends Component {
 
   deleteViewportWL = () => {
     let wwwc = sessionStorage.getItem("wwwc");
-    console.log(wwwc);
     wwwc = wwwc ? JSON.parse(wwwc) : {};
     if (wwwc[this.props.activePort]) delete wwwc[this.props.activePort];
     const viewportArray = Object.values(wwwc);
