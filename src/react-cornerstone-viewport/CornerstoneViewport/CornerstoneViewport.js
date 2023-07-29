@@ -599,9 +599,11 @@ class CornerstoneViewport extends Component {
     let wwwc = sessionStorage.getItem('wwwc');
     console.log(' ----> wwwc', wwwc);
     wwwc = wwwc ? JSON.parse(wwwc) : {};
+    const wc = wwwc[this.props.viewportIndex]?.wc || image.windowCenter;
+    const ww = wwwc[this.props.viewportIndex]?.ww || image.windowWidth;
 
-    viewport.voi.windowCenter = wwwc[this.props.viewportIndex]?.wc || image.windowCenter;
-    viewport.voi.windowWidth = wwwc[this.props.viewportIndex]?.ww || image.windowWidth;
+    viewport.voi.windowCenter = wc;
+    viewport.voi.windowWidth = ww;
 
     cornerstone.setViewport(element, viewport);
 
@@ -610,8 +612,8 @@ class CornerstoneViewport extends Component {
       scale: viewport.scale,
       // windowCenter: viewport.voi.windowCenter,
       // windowWidth: viewport.voi.windowWidth,
-      windowCenter: image.windowCenter,
-      windowWidth: image.windowWidth,
+      windowCenter: wc,
+      windowWidth: ww,
       rotationDegrees: viewport.rotation,
       isFlippedVertically: viewport.vflip,
       isFlippedHorizontally: viewport.hflip,
