@@ -107,8 +107,10 @@ const asyncReducer = (state = initialState, action) => {
       case AIM_SAVE:
         const { seriesList, aimRefs } = action.payload;
         const clonedOtherAims = _.cloneDeep(state.otherSeriesAimsList);
+        // to cover falsy isStudyAim value
+        const isStudyAim = aimRefs.isStudyAim === true;
         seriesList.forEach((el, i) => {
-          if (clonedOtherAims[el.seriesUID] && el.seriesUID !== aimRefs.seriesUID) {
+          if (clonedOtherAims[el.seriesUID] && el.seriesUID !== aimRefs.seriesUID && !isStudyAim) {
             clonedOtherAims[el.seriesUID][aimRefs.aimID] = aimRefs;
           }
         })

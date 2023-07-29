@@ -742,7 +742,6 @@ export const updateOtherAims = (aimrefs) => {
       const { projectID, patientID, studyUID } = aimrefs;
       // projectId, subjectId, studyId
       const { data: seriesList } = await getSeries(projectID, patientID, studyUID);
-      console.log(' ---> seriesList', seriesList);
       await dispatch(otherAimsUpdated(seriesList, aimrefs));
     }
     catch (err) {
@@ -966,6 +965,5 @@ export const aimDelete = (aimRefs) => {
 
 
 export const otherAimsUpdated = (seriesList, aimRefs) => {
-  console.log(" -----> otherAimsUpdated");
   return { type: AIM_SAVE, payload: { seriesList, aimRefs } };
 }
