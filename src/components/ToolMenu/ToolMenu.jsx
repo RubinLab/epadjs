@@ -378,7 +378,7 @@ class ToolMenu extends Component {
       return;
     } else if (tool === "ClearGrid") {
       this.props.dispatch(clearGrid());
-      window.dispatchEvent(new CustomEvent('deleteViewportWL'));
+      sessionStorage.removeItem('wwwc');
       if (mode !== 'teaching')
         this.props.onSwitchView("search");
       else
