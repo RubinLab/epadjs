@@ -110,8 +110,6 @@ class CornerstoneViewport extends Component {
       scale: undefined,
       windowWidth: undefined,
       windowCenter: undefined,
-      // windowWidthSet: undefined,
-      // windowCenterSet: undefined,
       isOverlayVisible: true,
       // Orientation Markers
       rotationDegrees: undefined,
@@ -607,8 +605,6 @@ class CornerstoneViewport extends Component {
 
     this.setState({
       scale: viewport.scale,
-      // windowCenter: viewport.voi.windowCenter,
-      // windowWidth: viewport.voi.windowWidth,
       windowCenter: wc,
       windowWidth: ww,
       rotationDegrees: viewport.rotation,

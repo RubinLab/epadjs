@@ -28,7 +28,6 @@ export default class WwwcTool extends BaseTool {
   mouseDragCallback(evt) {
     this.applyActiveStrategy(evt);
     evt.detail.viewport.voiLUT = undefined;
-    // cornerstone.setViewport(element, viewport);
     external.cornerstone.setViewport(evt.detail.element, evt.detail.viewport);
   }
 
