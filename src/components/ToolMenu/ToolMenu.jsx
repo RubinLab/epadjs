@@ -378,6 +378,7 @@ class ToolMenu extends Component {
       return;
     } else if (tool === "ClearGrid") {
       this.props.dispatch(clearGrid());
+      sessionStorage.removeItem('wwwc');
       if (mode !== 'teaching')
         this.props.onSwitchView("search");
       else
@@ -494,6 +495,8 @@ class ToolMenu extends Component {
     if (layers.length || (colormap && colormap !== "gray"))
       this.resetRenderCanvas(element);
     cornerstone.reset(element);
+    window.dispatchEvent(new CustomEvent('deleteViewportWL'));
+
   };
 
   resetRenderCanvas = (element) => {
