@@ -1301,6 +1301,7 @@ class AimEditor extends Component {
     );
     const aimObj = { ...aimRefs };
     delete aimObj.comment;
+    delete aimObj.isStudyAim;
 
     this.props.dispatch(updateOtherAims(aimObj))
 
