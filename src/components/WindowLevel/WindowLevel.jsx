@@ -34,15 +34,9 @@ export class WindowLevel extends Component {
     const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
     const vp = this.getCurrentWL(element);
-    const image = cornerstone.getImage(
-      cornerstone.getEnabledElements()[activePort]["element"]
-    );
 
     vp.voi.windowCenter = preset.level;
     vp.voi.windowWidth = preset.window;
-
-    image.windowCenter = preset.level;
-    image.windowWidth = preset.window;
     
     window.dispatchEvent(
       new CustomEvent("updateWL", { detail: { wc: preset.level, ww: preset.window } })
@@ -50,7 +44,7 @@ export class WindowLevel extends Component {
 
     vp.voiLUT = undefined;
     cornerstone.setViewport(element, vp);
-    this.setState({ name, level, window: preset.window });
+    this.setState({ name, level, windowWidth: preset.window });
     this.props.onClose(name);
   };
 
