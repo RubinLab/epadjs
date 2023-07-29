@@ -69,17 +69,14 @@ function basicLevelingStrategy(evt) {
   if (orientation === 0) {
     eventData.viewport.voi.windowWidth += deltaX;
     eventData.viewport.voi.windowCenter += deltaY;
-    eventData.image.windowWidth += deltaX;
-    eventData.image.windowCenter += deltaY;
   } else {
     eventData.viewport.voi.windowWidth += deltaY;
     eventData.viewport.voi.windowCenter += deltaX;
-    eventData.image.windowWidth += deltaY;
-    eventData.image.windowCenter += deltaX;
   }
 
   window.dispatchEvent(
-    new CustomEvent("updateWL", { detail: { wc: eventData.image.windowCenter, ww: eventData.image.windowWidth } })
+    new CustomEvent("updateWL", { detail: { wc: eventData.viewport.voi.windowCenter, ww: eventData.viewport.voi.windowWidth } })
+
   );
 
 }
