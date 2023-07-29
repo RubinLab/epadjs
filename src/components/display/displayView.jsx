@@ -54,6 +54,7 @@ import SeriesDropDown from './SeriesDropDown';
 
 let mode;
 let wadoUrl;
+let maxPort;
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 } },
@@ -153,6 +154,7 @@ class DisplayView extends Component {
     super(props);
     mode = sessionStorage.getItem('mode');
     wadoUrl = sessionStorage.getItem('wadoUrl');
+    maxPort = sessionStorage.getItem('maxPort');
     this.state = {
       width: "100%",
       height: "100%",
@@ -173,6 +175,7 @@ class DisplayView extends Component {
       activeTool: '',
       invertMap: {},
       isOverlayVisible: {},
+      wwwc: {}
     };
   }
 
@@ -183,6 +186,10 @@ class DisplayView extends Component {
       if (el.examType === 'NM') invertMap[i] = true;
     })
     this.setState({ invertMap });
+  }
+
+  setWwwc = (ww, wc) => {
+    this.setState({ wwwc: { ww, wc } })
   }
 
   componentDidMount() {
@@ -200,6 +207,8 @@ class DisplayView extends Component {
     window.addEventListener("markupSelected", this.handleMarkupSelected);
     window.addEventListener("markupCreated", this.handleMarkupCreated);
     window.addEventListener("toggleAnnotations", this.toggleAnnotations);
+    window.addEventListener("updateWL", this.updateWL);
+    window.addEventListener('deleteViewportWL', this.deleteViewportWL);
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
@@ -214,6 +223,7 @@ class DisplayView extends Component {
     // cornerstone.enable(element);
     // this.props.closeLeftMenu();
   }
+
 
   async componentDidUpdate(prevProps, prevState) {
     const { pid, series, activePort, aimList } = this.props;
@@ -254,6 +264,8 @@ class DisplayView extends Component {
     window.removeEventListener("markupSelected", this.handleMarkupSelected);
     window.removeEventListener("markupCreated", this.handleMarkupCreated);
     window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
+    window.removeEventListener("updateWL", this.updateWL);
+    window.removeEventListener('deleteViewportWL', this.deleteViewportWL);
     window.removeEventListener("jumpToAimImage", this.jumpToAimImage);
     window.removeEventListener("editAim", this.editAimHandler);
     window.removeEventListener("deleteAim", this.deleteAimHandler);
@@ -410,6 +422,17 @@ class DisplayView extends Component {
 
     cornerstone.updateImage(element);
   };
+
+  updateWL = (event) => {
+    const { ww, wc } = event.detail;
+    let wwwc = sessionStorage.getItem("wwwc");
+
+    const max = parseInt(maxPort);
+    wwwc = wwwc ? JSON.parse(wwwc) : new Array(max);
+    wwwc[this.props.activePort] = { ww, wc };
+
+    sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
+  }
 
   // Traverse all shapes and set visibility, if aimID is passed only sets aim's shapes
   setVisibilityOfShapes = (visibility, aimID) => {
@@ -1147,8 +1170,8 @@ class DisplayView extends Component {
     });
     // this.refreshAllViewports();
 
-    if (seriesSegmentations.length) { 
-      this.handleSegmentations(seriesSegmentations); 
+    if (seriesSegmentations.length) {
+      this.handleSegmentations(seriesSegmentations);
     }
   };
 
@@ -1676,6 +1699,18 @@ class DisplayView extends Component {
     delete brushModule.configuration.minInterval;
   }
 
+  deleteViewportWL = () => {
+    let wwwc = sessionStorage.getItem("wwwc");
+
+    const max = parseInt(maxPort);
+    wwwc = wwwc ? JSON.parse(wwwc) : new Array(max);
+
+    wwwc.splice(this.props.activePort, 1);
+    wwwc.push(null);
+
+    sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
+  }
+
   closeViewport = () => {
     const { showAimEditor, dirty } = this.state;
     // closes the active viewport
@@ -1686,6 +1721,7 @@ class DisplayView extends Component {
       return;
     }
     this.props.dispatch(closeSerie());
+    this.deleteViewportWL();
     // this.props.onSwitchView("search");
   };
 
