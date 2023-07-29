@@ -965,6 +965,5 @@ export const aimDelete = (aimRefs) => {
 
 
 export const otherAimsUpdated = (seriesList, aimRefs) => {
-  console.log(" -----> otherAimsUpdated");
   return { type: AIM_SAVE, payload: { seriesList, aimRefs } };
 }
