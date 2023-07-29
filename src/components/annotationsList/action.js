@@ -742,7 +742,6 @@ export const updateOtherAims = (aimrefs) => {
       const { projectID, patientID, studyUID } = aimrefs;
       // projectId, subjectId, studyId
       const { data: seriesList } = await getSeries(projectID, patientID, studyUID);
-      console.log(' ---> seriesList', seriesList);
       await dispatch(otherAimsUpdated(seriesList, aimrefs));
     }
     catch (err) {
