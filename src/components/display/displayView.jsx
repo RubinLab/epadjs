@@ -54,6 +54,7 @@ import SeriesDropDown from './SeriesDropDown';
 
 let mode;
 let wadoUrl;
+let maxPort;
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 } },
@@ -153,6 +154,7 @@ class DisplayView extends Component {
     super(props);
     mode = sessionStorage.getItem('mode');
     wadoUrl = sessionStorage.getItem('wadoUrl');
+    maxPort = sessionStorage.getItem('maxPort');
     this.state = {
       width: "100%",
       height: "100%",
@@ -425,7 +427,8 @@ class DisplayView extends Component {
     const { ww, wc } = event.detail;
     let wwwc = sessionStorage.getItem("wwwc");
 
-    wwwc = wwwc ? JSON.parse(wwwc) : {};
+    const max = parseInt(maxPort);
+    wwwc = wwwc ? JSON.parse(wwwc) : new Array(max);
     wwwc[this.props.activePort] = { ww, wc };
 
     sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
@@ -1698,14 +1701,14 @@ class DisplayView extends Component {
 
   deleteViewportWL = () => {
     let wwwc = sessionStorage.getItem("wwwc");
-    wwwc = wwwc ? JSON.parse(wwwc) : {};
-    if (wwwc[this.props.activePort]) delete wwwc[this.props.activePort];
-    const viewportArray = Object.values(wwwc);
-    const newWWWC = viewportArray.reduce((all, item, index) => {
-      all[index] = item;
-      return all
-    }, {});
-    sessionStorage.setItem('wwwc', JSON.stringify(newWWWC));
+
+    const max = parseInt(maxPort);
+    wwwc = wwwc ? JSON.parse(wwwc) : new Array(max);
+
+    wwwc.splice(this.props.activePort, 1);
+    wwwc.push(null);
+
+    sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
   }
 
   closeViewport = () => {
@@ -1975,7 +1978,6 @@ class DisplayView extends Component {
                   activeTool={activeTool}
                   isOverlayVisible={this.state.isOverlayVisible[i] || false}
                   jumpToImage={() => this.jumpToImage(0, i)}
-                // wwwc={this.state.wwwc}
                 />
               </div>
             ))}
