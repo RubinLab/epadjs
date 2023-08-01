@@ -209,6 +209,7 @@ class DisplayView extends Component {
     window.addEventListener("toggleAnnotations", this.toggleAnnotations);
     window.addEventListener("updateWL", this.updateWL);
     window.addEventListener('deleteViewportWL', this.deleteViewportWL);
+    window.addEventListener('resetViewportWL', this.resetViewportWL);
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
@@ -265,6 +266,7 @@ class DisplayView extends Component {
     window.removeEventListener("markupCreated", this.handleMarkupCreated);
     window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
     window.removeEventListener("updateWL", this.updateWL);
+    window.removeEventListener('resetViewportWL', this.resetViewportWL);
     window.removeEventListener('deleteViewportWL', this.deleteViewportWL);
     window.removeEventListener("jumpToAimImage", this.jumpToAimImage);
     window.removeEventListener("editAim", this.editAimHandler);
@@ -1699,15 +1701,20 @@ class DisplayView extends Component {
     delete brushModule.configuration.minInterval;
   }
 
-  deleteViewportWL = () => {
+  resetViewportWL = () => {
     let wwwc = sessionStorage.getItem("wwwc");
-
     const max = parseInt(maxPort);
     wwwc = wwwc ? JSON.parse(wwwc) : new Array(max);
+    wwwc[this.props.activePort] = null;
+    sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
+  }
 
+  deleteViewportWL = () => {
+    let wwwc = sessionStorage.getItem("wwwc");
+    const max = parseInt(maxPort);
+    wwwc = wwwc ? JSON.parse(wwwc) : new Array(max);
     wwwc.splice(this.props.activePort, 1);
     wwwc.push(null);
-
     sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
   }
 
