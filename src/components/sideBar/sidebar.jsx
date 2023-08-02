@@ -84,12 +84,13 @@ class Sidebar extends Component {
 
   componentWillUnmount = () => {
     // window.removeEventListener("resize", this.setTabHeight);
-    window.removeEventListener("refreshProjects", this.getProjectsData);
+    window.removeEventListener("refreshProjects", this.refreshProjects);
   };
 
-  refreshProjects = async () => {
+  refreshProjects = async (event) => {
     const projects = await this.getProjectsData();
-    this.setStateProjectData(projects, true);
+    const pid = event ? event.detail : null;
+    this.setStateProjectData(projects, true, pid);
   }
 
   getProjectsData = async () => {
@@ -144,13 +145,17 @@ class Sidebar extends Component {
     }
   };
 
-  setStateProjectData = (projects, setPid) => {
+  setStateProjectData = (projects, setPid, pidTojump) => {
+    let { pathname } = this.props.location;
+    pathname = pathname.split('/').pop();
     this.setState({ projects });
     if (this.props.openSeries.length === 0 && setPid) {
-      const pid = projects[0].id;
+      // check if url has a valid pid
+      pathname = this.props.projectMap[pathname] ? pathname : null;
+      let pid = pidTojump || pathname || projects[0].id
       this.setState({ pid, selected: pid });
-      if (mode !== 'teaching')
-        this.props.history.push(`/list/${pid}`);
+      if (mode !== 'teaching') this.props.history.push(`/list/${pid}`);
+      if (mode === 'teaching') this.props.history.push(`/search/${pid}`);
       this.props.getPidUpdate(pid);
     }
   };
@@ -551,14 +556,16 @@ const mapStateToProps = state => {
     lastEventId,
     openSeries,
     notificationAction,
-    refresh
+    refresh,
+    projectMap
   } = state.annotationsListReducer;
   return {
     activePort,
     lastEventId,
     openSeries,
     notificationAction,
-    refresh
+    refresh,
+    projectMap
   };
 };
 export default withRouter(connect(mapStateToProps)(Sidebar));
