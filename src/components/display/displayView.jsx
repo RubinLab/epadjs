@@ -682,7 +682,8 @@ class DisplayView extends Component {
         for (var i = 0; i < imageUrls[k].numberOfFrames; i++) {
           let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
-          cornerstoneImageIds.push(multiFrameUrl);
+          // using distanceDatasetPairs to sort instead of just adding to the array
+          // cornerstoneImageIds.push(multiFrameUrl);
           distanceDatasetPairs.push([distance, multiFrameUrl]);
           // cornerstone.loadAndCacheImage(multiFrameUrl);
           newImageIds[multiFrameUrl] = true;
@@ -694,7 +695,8 @@ class DisplayView extends Component {
         }
       } else {
         let singleFrameUrl = `wadors:${baseUrl}/frames/1`;
-        cornerstoneImageIds.push(singleFrameUrl);
+        // using distanceDatasetPairs to sort instead of just adding to the array
+        // cornerstoneImageIds.push(singleFrameUrl);
         distanceDatasetPairs.push([distance, singleFrameUrl]);
         // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
@@ -717,17 +719,11 @@ class DisplayView extends Component {
       imageIndex = this.state.data[index].stack.currentImageIdIndex;
 
     else imageIndex = 0;
-     
-    console.log('original cornerstone ids');
-    console.log(cornerstoneImageIds);
-    cornerstoneImageIds = [];
 
     distanceDatasetPairs.sort((a, b) => b[0] - a[0]);
     distanceDatasetPairs.forEach((pair) => {
       cornerstoneImageIds.push(pair[1]);
     });
-    console.log('ordered cornesrstone ids');
-    console.log(cornerstoneImageIds);
     // if serie is being open from the annotation jump to that image and load the aim editor
     if (serie.aimID) imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
 
