@@ -495,8 +495,7 @@ class ToolMenu extends Component {
     if (layers.length || (colormap && colormap !== "gray"))
       this.resetRenderCanvas(element);
     cornerstone.reset(element);
-    window.dispatchEvent(new CustomEvent('deleteViewportWL'));
-
+    window.dispatchEvent(new CustomEvent('resetViewportWL'));
   };
 
   resetRenderCanvas = (element) => {
