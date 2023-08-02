@@ -20,7 +20,7 @@ const ProjectAdd = (props) => {
       const aimIDs = Object.keys(annotations);
       try {
         await addAimsToProject(projectId, aimIDs);
-        window.dispatchEvent(new Event('refreshProjects'));
+        window.dispatchEvent(new CustomEvent('refreshProjects', { detail: projectId }));
         toast.success("Annotation(s) succesfully copied.", {
           position: "top-right",
           autoClose: 3000,
