@@ -669,7 +669,6 @@ class DisplayView extends Component {
         data = result.data;
         imgData = data[0];
       } else imgData = seriesMetadata[k];
-      // imgData k imaji icin metadata
       const position = imgData['00200032'].Value.slice();
       const positionVector = dcmjs.normalizers.ImageNormalizer.vec3Subtract(
         position,
