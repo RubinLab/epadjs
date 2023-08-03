@@ -634,6 +634,7 @@ class DisplayView extends Component {
     let newImageIds = {};
     let cornerstoneImageIds = [];
     let seriesMetadata = [];
+    let seriesMetadataMap = {};
     const imageUrls = await this.getImages(serie, index);
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
@@ -641,12 +642,13 @@ class DisplayView extends Component {
     try {
       seriesMetadata = await getMetadata(seriesURL);
       seriesMetadata = seriesMetadata.data;
+      seriesMetadata.forEach(item => seriesMetadataMap[item['00080018'].Value[0]] = item);
     } catch (err) {
       console.log("Can not get series metadata");
       console.error(err);
     }
     const useSeriesData = seriesMetadata.length > 0 && seriesMetadata.length === imageUrls.length;
-    
+    console.log('series', seriesMetadata, seriesMetadataMap);
     // get first image
     let firstImage = null;
     if (!useSeriesData) {
@@ -662,6 +664,7 @@ class DisplayView extends Component {
     const distanceDatasetPairs = [];
     const distanceDatasetPairsDataset = [];
 
+    console.log('imageUrls', imageUrls);
     for (let k = 0; k < imageUrls.length; k++) {
       baseUrl = wadoUrlNoWadors + imageUrls[k].lossyImage;
       let data;
@@ -670,7 +673,7 @@ class DisplayView extends Component {
         const result = await getImageMetadata(baseUrl);
         data = result.data;
         imgData = data[0];
-      } else imgData = seriesMetadata[k];
+      } else imgData = seriesMetadataMap[imageUrls[k].imageUID];
       
       const position = imgData['00200032'].Value.slice();
       const positionVector = dcmjs.normalizers.ImageNormalizer.vec3Subtract(
@@ -863,6 +866,7 @@ class DisplayView extends Component {
     const { imageAnnotations, studyUID, seriesUID } = serie;
     if (imageAnnotations) {
       for (let [key, values] of Object.entries(imageAnnotations)) {
+        console.log(' values', values, aimID);
         for (let value of values) {
           if (value.aimUid === aimID) {
             const cornerstoneImageId = getWadoImagePath(
@@ -1843,7 +1847,9 @@ class DisplayView extends Component {
   jumpToAimImage = event => {
     const { series, activePort } = this.props;
     const { aimId, index } = event.detail;
+    console.log('jump ', event.detail);
     const imageIndex = this.getImageIndex(series[index], this.state.data[index].stack.imageIds, aimId);
+    console.log('imagein', imageIndex);
     this.jumpToImage(imageIndex, index);
   };
 
