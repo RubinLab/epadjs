@@ -661,7 +661,6 @@ class DisplayView extends Component {
     const columnVector = firstImage['00200037'].Value.slice(3, 6);
     const scanAxis = dcmjs.normalizers.ImageNormalizer.vec3CrossProduct(rowVector, columnVector);
     const distanceDatasetPairs = [];
-    const distanceDatasetPairsDataset = [];
 
     for (let k = 0; k < imageUrls.length; k++) {
       baseUrl = wadoUrlNoWadors + imageUrls[k].lossyImage;
@@ -679,7 +678,6 @@ class DisplayView extends Component {
         referencePosition
       );
       const distance = dcmjs.normalizers.ImageNormalizer.vec3Dot(positionVector, scanAxis);
-      distanceDatasetPairsDataset.push([distance, imgData]);
 
       if (imageUrls[k].multiFrameImage === true) {
         for (var i = 0; i < imageUrls[k].numberOfFrames; i++) {
