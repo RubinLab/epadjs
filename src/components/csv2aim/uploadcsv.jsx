@@ -1,5 +1,4 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Modal, Button } from 'react-bootstrap';
 import { uploadCsv }from '../../services/annotationServices';
@@ -26,18 +25,12 @@ class UploadCSV extends React.Component {
 
   onUpload = () => {
     let {
-      selectedPatients,
-      selectedStudies,
-      selectedSeries,
       clearTreeData,
       onResolve,
       onCancel,
       onSubmit,
       clearTreeExpand
     } = this.props;
-    selectedPatients = Object.values(selectedPatients);
-    selectedStudies = Object.values(selectedStudies);
-    selectedSeries = Object.values(selectedSeries);
 
     const promises = [];
     const formData = new FormData();
@@ -121,19 +114,8 @@ UploadCSV.propTypes = {
   onResolve: PropTypes.func,
   onSubmit: PropTypes.func,
   pid: PropTypes.string,
-  selectedPatients: PropTypes.object,
-  selectedSeries: PropTypes.object,
-  selectedStudies: PropTypes.object,
   clearTreeExpand: PropTypes.func
 
 };
 
-const mapStateToProps = state => {
-  return {
-    selectedPatients: state.annotationsListReducer.selectedPatients,
-    selectedStudies: state.annotationsListReducer.selectedStudies,
-    selectedSeries: state.annotationsListReducer.selectedSeries
-  };
-};
-
-export default connect(mapStateToProps)(UploadCSV);
+export default UploadCSV;
