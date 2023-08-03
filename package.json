@@ -87,5 +87,8 @@
   },
   "resolutions": {
     "webpack": "^5.75.0"
+  },
+  "overrides": {
+    "istanbul-lib-report@>3.0.0":  "3.0.0"
   }
 }
