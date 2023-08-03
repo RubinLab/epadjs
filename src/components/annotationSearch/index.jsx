@@ -686,10 +686,11 @@ const AnnotationSearch = props => {
           props.dispatch(selectAnnotation(el));
       });
     } else if (action === 'unselectPageAll') {
-      arrayToSelect.forEach(el => {
-        if (props.selectedAnnotations[el.aimID])
-          props.dispatch(selectAnnotation(el));
-      });
+      // arrayToSelect.forEach(el => {
+      //   if (props.selectedAnnotations[el.aimID])
+      //     props.dispatch(selectAnnotation(el));
+      // });
+      props.dispatch(clearSelection());
     } else if (action === 'unselectAll') {
       props.dispatch(clearSelection());
     }
@@ -1441,6 +1442,7 @@ const AnnotationSearch = props => {
           {data.length > 0 && !showSpinner && (
             <AnnotationTable
               data={data}
+              allSelected={allSelected}
               selected={props.selectedAnnotations}
               updateSelectedAims={updateSelectedAims}
               noOfRows={rows}

@@ -26,7 +26,8 @@ import {
   getSingleSerie,
   aimDelete,
   clearAimId,
-  updateSubpath
+  updateSubpath,
+  clearSelection
 } from "../annotationsList/action";
 import { deleteAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
@@ -197,6 +198,7 @@ class DisplayView extends Component {
     // if (series.length < 1) {
     //   onSwitchView('search');
     // }
+    this.props.dispatch(clearSelection());
     this.getViewports();
     this.getData();
     this.formInvertMap();
