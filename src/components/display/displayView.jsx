@@ -654,7 +654,8 @@ class DisplayView extends Component {
     let firstImage = null;
     if (!useSeriesData) {
       const result = await getImageMetadata(wadoUrlNoWadors + imageUrls[0].lossyImage);
-      data = result.data;
+      const data = result.data;
+      console.log(data) 
       firstImage = data[0];
     } else firstImage = seriesMetadata[0];
 
@@ -675,12 +676,13 @@ class DisplayView extends Component {
 
     for (let k = 0; k < imageUrls.length; k++) {
       baseUrl = wadoUrlNoWadors + imageUrls[k].lossyImage;
-      let data;
       let imgData;
       let distance = null;
       if (!useSeriesData) {
         const result = await getImageMetadata(baseUrl);
-        data = result.data;
+        const data = result.data;
+        console.log(" data 2");
+        console.log(data);
         imgData = data[0];
       } else imgData = seriesMetadataMap[imageUrls[k].imageUID];
 
