@@ -636,6 +636,7 @@ class DisplayView extends Component {
     let newImageIds = {};
     let cornerstoneImageIds = [];
     let seriesMetadata = [];
+    let seriesMetadataMap = {};
     const imageUrls = await this.getImages(serie, index);
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
@@ -643,11 +644,26 @@ class DisplayView extends Component {
     try {
       seriesMetadata = await getMetadata(seriesURL);
       seriesMetadata = seriesMetadata.data;
+      seriesMetadata.forEach(item => seriesMetadataMap[item['00080018'].Value[0]] = item);
     } catch (err) {
       console.log("Can not get series metadata");
       console.error(err);
     }
     const useSeriesData = seriesMetadata.length > 0 && seriesMetadata.length === imageUrls.length;
+    // get first image
+    let firstImage = null;
+    if (!useSeriesData) {
+      const result = await getImageMetadata(wadoUrlNoWadors + imageUrls[0].lossyImage);
+      data = result.data;
+      firstImage = data[0];
+    } else firstImage = seriesMetadata[0];
+
+    const referencePosition = firstImage['00200032'].Value;
+    const rowVector = firstImage['00200037'].Value.slice(0, 3);
+    const columnVector = firstImage['00200037'].Value.slice(3, 6);
+    const scanAxis = dcmjs.normalizers.ImageNormalizer.vec3CrossProduct(rowVector, columnVector);
+    const distanceDatasetPairs = [];
+
     for (let k = 0; k < imageUrls.length; k++) {
       baseUrl = wadoUrlNoWadors + imageUrls[k].lossyImage;
       let data;
@@ -656,13 +672,22 @@ class DisplayView extends Component {
         const result = await getImageMetadata(baseUrl);
         data = result.data;
         imgData = data[0];
-      } else imgData = seriesMetadata[k];
+      } else imgData = seriesMetadataMap[imageUrls[k].imageUID];
+      
+      const position = imgData['00200032'].Value.slice();
+      const positionVector = dcmjs.normalizers.ImageNormalizer.vec3Subtract(
+        position,
+        referencePosition
+      );
+      const distance = dcmjs.normalizers.ImageNormalizer.vec3Dot(positionVector, scanAxis);
 
       if (imageUrls[k].multiFrameImage === true) {
         for (var i = 0; i < imageUrls[k].numberOfFrames; i++) {
           let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
-          cornerstoneImageIds.push(multiFrameUrl);
+          // using distanceDatasetPairs to sort instead of just adding to the array
+          // cornerstoneImageIds.push(multiFrameUrl);
+          distanceDatasetPairs.push([distance, multiFrameUrl]);
           // cornerstone.loadAndCacheImage(multiFrameUrl);
           newImageIds[multiFrameUrl] = true;
           cornerstoneWADOImageLoader.wadors.metaDataManager.add(
@@ -673,7 +698,9 @@ class DisplayView extends Component {
         }
       } else {
         let singleFrameUrl = `wadors:${baseUrl}/frames/1`;
-        cornerstoneImageIds.push(singleFrameUrl);
+        // using distanceDatasetPairs to sort instead of just adding to the array
+        // cornerstoneImageIds.push(singleFrameUrl);
+        distanceDatasetPairs.push([distance, singleFrameUrl]);
         // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
         cornerstoneWADOImageLoader.wadors.metaDataManager.add(
@@ -696,9 +723,13 @@ class DisplayView extends Component {
 
     else imageIndex = 0;
 
+    distanceDatasetPairs.sort((a, b) => b[0] - a[0]);
+    distanceDatasetPairs.forEach((pair) => {
+      cornerstoneImageIds.push(pair[1]);
+    });
+
     // if serie is being open from the annotation jump to that image and load the aim editor
     if (serie.aimID) imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
-
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
