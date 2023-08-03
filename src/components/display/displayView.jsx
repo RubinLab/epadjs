@@ -658,36 +658,49 @@ class DisplayView extends Component {
       firstImage = data[0];
     } else firstImage = seriesMetadata[0];
 
-    const referencePosition = firstImage['00200032'].Value;
-    const rowVector = firstImage['00200037'].Value.slice(0, 3);
-    const columnVector = firstImage['00200037'].Value.slice(3, 6);
-    const scanAxis = dcmjs.normalizers.ImageNormalizer.vec3CrossProduct(rowVector, columnVector);
+    let referencePosition = null;
+    let rowVector = null;
+    let columnVector = null;
+    let scanAxis = null;
+
     const distanceDatasetPairs = [];
+
+    const sortByGeo = !!firstImage['00200032'] && !!firstImage['00200037'];
+    if (sortByGeo) {
+      referencePosition = firstImage['00200032'].Value;
+      rowVector = firstImage['00200037'].Value.slice(0, 3);
+      columnVector = firstImage['00200037'].Value.slice(3, 6);
+      scanAxis = dcmjs.normalizers.ImageNormalizer.vec3CrossProduct(rowVector, columnVector);
+    }
 
     for (let k = 0; k < imageUrls.length; k++) {
       baseUrl = wadoUrlNoWadors + imageUrls[k].lossyImage;
       let data;
       let imgData;
+      let distance = null;
       if (!useSeriesData) {
         const result = await getImageMetadata(baseUrl);
         data = result.data;
         imgData = data[0];
       } else imgData = seriesMetadataMap[imageUrls[k].imageUID];
-      
-      const position = imgData['00200032'].Value.slice();
-      const positionVector = dcmjs.normalizers.ImageNormalizer.vec3Subtract(
-        position,
-        referencePosition
-      );
-      const distance = dcmjs.normalizers.ImageNormalizer.vec3Dot(positionVector, scanAxis);
+
+
+      if (sortByGeo) {
+        const position = imgData['00200032'].Value.slice();
+        const positionVector = dcmjs.normalizers.ImageNormalizer.vec3Subtract(
+          position,
+          referencePosition
+        );
+        distance = dcmjs.normalizers.ImageNormalizer.vec3Dot(positionVector, scanAxis);
+      }
 
       if (imageUrls[k].multiFrameImage === true) {
         for (var i = 0; i < imageUrls[k].numberOfFrames; i++) {
           let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           // using distanceDatasetPairs to sort instead of just adding to the array
-          // cornerstoneImageIds.push(multiFrameUrl);
-          distanceDatasetPairs.push([distance, multiFrameUrl]);
+          if (!sortByGeo) cornerstoneImageIds.push(multiFrameUrl);
+          else distanceDatasetPairs.push([distance, multiFrameUrl]);
           // cornerstone.loadAndCacheImage(multiFrameUrl);
           newImageIds[multiFrameUrl] = true;
           cornerstoneWADOImageLoader.wadors.metaDataManager.add(
@@ -699,8 +712,8 @@ class DisplayView extends Component {
       } else {
         let singleFrameUrl = `wadors:${baseUrl}/frames/1`;
         // using distanceDatasetPairs to sort instead of just adding to the array
-        // cornerstoneImageIds.push(singleFrameUrl);
-        distanceDatasetPairs.push([distance, singleFrameUrl]);
+        if (!sortByGeo) cornerstoneImageIds.push(singleFrameUrl);
+        else distanceDatasetPairs.push([distance, singleFrameUrl]);
         // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
         cornerstoneWADOImageLoader.wadors.metaDataManager.add(
@@ -723,10 +736,12 @@ class DisplayView extends Component {
 
     else imageIndex = 0;
 
-    distanceDatasetPairs.sort((a, b) => b[0] - a[0]);
-    distanceDatasetPairs.forEach((pair) => {
-      cornerstoneImageIds.push(pair[1]);
-    });
+    if (sortByGeo) {
+      distanceDatasetPairs.sort((a, b) => b[0] - a[0]);
+      distanceDatasetPairs.forEach((pair) => {
+        cornerstoneImageIds.push(pair[1]);
+      });
+    }
 
     // if serie is being open from the annotation jump to that image and load the aim editor
     if (serie.aimID) imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
