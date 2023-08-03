@@ -654,11 +654,13 @@ class DisplayView extends Component {
       data = result.data;
       firstImage = data[0];
     } else firstImage = seriesMetadata[0];
+
     const referencePosition = firstImage['00200032'].Value;
     const rowVector = firstImage['00200037'].Value.slice(0, 3);
     const columnVector = firstImage['00200037'].Value.slice(3, 6);
     const scanAxis = dcmjs.normalizers.ImageNormalizer.vec3CrossProduct(rowVector, columnVector);
     const distanceDatasetPairs = [];
+    const distanceDatasetPairsDataset = [];
 
     for (let k = 0; k < imageUrls.length; k++) {
       baseUrl = wadoUrlNoWadors + imageUrls[k].lossyImage;
@@ -669,13 +671,14 @@ class DisplayView extends Component {
         data = result.data;
         imgData = data[0];
       } else imgData = seriesMetadata[k];
+      
       const position = imgData['00200032'].Value.slice();
       const positionVector = dcmjs.normalizers.ImageNormalizer.vec3Subtract(
         position,
         referencePosition
       );
       const distance = dcmjs.normalizers.ImageNormalizer.vec3Dot(positionVector, scanAxis);
-      
+      distanceDatasetPairsDataset.push([distance, imgData]);
 
       if (imageUrls[k].multiFrameImage === true) {
         for (var i = 0; i < imageUrls[k].numberOfFrames; i++) {
@@ -723,6 +726,18 @@ class DisplayView extends Component {
     distanceDatasetPairs.forEach((pair) => {
       cornerstoneImageIds.push(pair[1]);
     });
+    console.log('ordered dataset ids only', distanceDatasetPairs.map(i=>[i[0],i[1].split('instances/')[1]]));
+    
+    console.log('cornesrstoneImageIds foreach', cornerstoneImageIds);
+    cornerstoneImageIds = [];
+    for (let i = 0; i<distanceDatasetPairs.length; i+=1) {
+      cornerstoneImageIds.push(distanceDatasetPairs[i][1]);
+    };
+    console.log('cornerstoneImageIds for', cornerstoneImageIds);
+
+    const ordered = [];
+    distanceDatasetPairsDataset.sort((a, b) => b[0] - a[0]);
+    console.log('ordered dataset', distanceDatasetPairsDataset.map(i=>[i[0],i[1]['00080018'].Value[0]]));
     // if serie is being open from the annotation jump to that image and load the aim editor
     if (serie.aimID) imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
 
