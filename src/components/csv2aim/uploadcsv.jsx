@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Modal, Button } from 'react-bootstrap';
-import { uploadCsv }from './csvServices';
+import { uploadCsv }from '../../services/annotationServices';
 import { getTemplates } from '../annotationsList/action';
 
 let mode;
