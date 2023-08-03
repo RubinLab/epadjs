@@ -12,7 +12,7 @@ import StudyTable from "./StudyTable";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
 import SeriesTable from "./SeriesTable";
 import { isSupportedModality } from "../../Utils/aid.js";
-import { addToGrid, getSingleSerie } from '../annotationsList/action';
+import { addToGrid, getSingleSerie, clearSelection } from '../annotationsList/action';
 import 'react-table-v6/react-table.css';
 // import "../annotationSearch/annotationSearch.css";
 // import "./flexView.css";
@@ -147,6 +147,7 @@ class FlexView extends React.Component {
 
   componentDidMount = async () => {
     const order = JSON.parse(sessionStorage.getItem('studyListColumns'));
+    this.props.dispatch(clearSelection());
     if (order && order.length)
       this.setState({ order });
     try {
@@ -161,7 +162,7 @@ class FlexView extends React.Component {
   };
 
   componentDidUpdate = async (prevProps) => {
-    const {lastEventId, refresh} = this.props;
+    const { lastEventId, refresh } = this.props;
 
     try {
       if (prevProps.pid !== this.props.pid) {
