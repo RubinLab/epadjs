@@ -31,7 +31,8 @@ class Rightsidebar extends Component {
     console.log('Rightsidebar - didmount - props.show', this.props.showAimEditor);
     const encrypted = sessionStorage.getItem("encrypted");
     const mode = sessionStorage.getItem("mode");
-    if (mode === "thick" && encrypted) {
+    const teachingSaved = sessionStorage.getItem("teachingSaved");
+    if ((mode === "thick" && encrypted )|| teachingSaved === "true") {
       this.setState({
         open: false, 
         width: "0px",

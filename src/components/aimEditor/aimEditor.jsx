@@ -1284,6 +1284,7 @@ class AimEditor extends Component {
       pauseOnHover: true,
       draggable: true,
     });
+
     const isStudyAim = aimRefs ? aimRefs.isStudyAim : false; //If upload has segmentation it can't be study aim
     if (isStudyAim) {
       openSeries.forEach(({ seriesUID, studyUID }) => {
@@ -1318,6 +1319,8 @@ class AimEditor extends Component {
     // this.props.dispatch(updatePatientOnAimSave(aimRefs));
     this.props.updateTreeDataOnSave(aimRefs);
     this.props.onCancel(false); //close the aim editor
+    const encrypted = sessionStorage.getItem("encrypted");
+    if (encrypted) sessionStorage.setItem("teachingSaved", true);
   };
 
   parseImageUidAndFrame = (imageId) => {
