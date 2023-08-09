@@ -326,6 +326,7 @@ class AimEditor extends Component {
     const answers = this.semanticAnswers.saveAim();
     try {
       this.createAim(answers);
+      console.log(" pass create aim in save");
     } catch (error) {
       console.warn("Error:", error);
       window.alert("Error saving Aim: ", error);

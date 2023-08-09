@@ -28,6 +28,7 @@ class Rightsidebar extends Component {
 
   componentDidMount() {
     // if mode is thick 
+    console.log('Rightsidebar - didmount - props.show', this.props.showAimEditor);
     const encrypted = sessionStorage.getItem("encrypted");
     const mode = sessionStorage.getItem("mode");
     if (mode === "thick" && encrypted) {

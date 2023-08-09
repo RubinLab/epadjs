@@ -811,9 +811,8 @@ class DisplayView extends Component {
           this.setState({ hasSegmentation: true });
           // this.setSerieActiveLabelMap(aimID);
         }
-        if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
-          this.setState({ showAimEditor: false });
-        this.setState({ showAimEditor: true, selectedAim: aimJson });
+        if (this.state.showAimEditor && this.state.selectedAim !== aimJson) { this.setState({ showAimEditor: false }); }
+        else { console.log(" in else"); this.setState({ showAimEditor: true, selectedAim: aimJson }) };
         if (markupTypes)
           setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
         this.refreshAllViewports();

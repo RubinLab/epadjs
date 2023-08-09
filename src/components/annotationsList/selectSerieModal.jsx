@@ -375,6 +375,7 @@ class selectSerieModal extends React.Component {
     }
     const { encrUrlArgs, decrArgs } = this.props;
     const { projectID, patientID, studyUID } = decrArgs;
+    console.log(projectID, patientID, studyUID);
     let updatedAimId, trackingUId; //should be undefined for creating new aim
     if (!encrUrlArgs) {
       console.error("Error saving teaching file. No encrypted argument present");
