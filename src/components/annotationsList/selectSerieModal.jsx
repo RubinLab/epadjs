@@ -69,6 +69,7 @@ class selectSerieModal extends React.Component {
 
     // teaching file save related
     const { isTeachingFile } = this.props;
+    sessionStorage.setItem("teachingSaved", false);
     if (isTeachingFile) {
       const element = document.getElementById("questionaire");
       const speciality = document.getElementById("speciality");
