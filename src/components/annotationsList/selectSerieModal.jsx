@@ -221,10 +221,14 @@ class selectSerieModal extends React.Component {
     this.props.onCancel();
     try {
       if (this.mode === 'teaching' && this.props.decrArgs && !resetState) {
+        console.log(" in if");
         const { projectID, patientID, studyUID } = this.props.decrArgs;
+        console.log(' ---> projectID, patientID, studyUID')
+        console.log(projectID, patientID, studyUID)
         await deleteStudy({ projectID, patientID, studyUID }, '?all=true');
         this.setState({ isButtonDisabled: false });
         if (this.props.forceUpdatePage) this.props.forceUpdatePage();
+        if (this.mode === 'teaching')  this.props.history.push("/search/" + projectID);
       }
     } catch (err) {
       console.error(err);
