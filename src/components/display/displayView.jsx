@@ -802,8 +802,10 @@ class DisplayView extends Component {
       const { aimList } = this.props;
       const encrypted = sessionStorage.getItem("encrypted");
       const teachingSaved = sessionStorage.getItem("teachingSaved");
-      console.log(encrypted, typeof encrypted);
-      console.log(teachingSaved, typeof teachingSaved);
+      console.log(encrypted);
+      console.log(typeof encrypted);
+      console.log(teachingSaved );
+      console.log(typeof teachingSaved);
 
       if (Object.entries(aimList).length !== 0) {
         const aimJson = aimList[seriesUID][aimID].json;
