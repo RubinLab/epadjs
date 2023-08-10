@@ -819,7 +819,7 @@ class DisplayView extends Component {
           // this.setSerieActiveLabelMap(aimID);
         }
         if (this.state.showAimEditor && this.state.selectedAim !== aimJson) { this.setState({ showAimEditor: false }); }
-        else if (encrypted === 'true' && teachingSaved === 'true') { console.log("in new control"); this.setState({ showAimEditor: false }) }
+        // else if (encrypted === 'true' && teachingSaved === 'true') { console.log("in new control"); this.setState({ showAimEditor: false }) }
         else { console.log(" in else"); this.setState({ showAimEditor: true, selectedAim: aimJson }) };
         if (markupTypes)
           setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
