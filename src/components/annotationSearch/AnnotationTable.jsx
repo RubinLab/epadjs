@@ -253,6 +253,7 @@ function AnnotationTable(props) {
   const [listOfSelecteds, setListOfSelecteds] = useState({});
   const [showNarrative, setShowNarrative] = useState(false);
   const [narrative, setNarrative] = useState('');
+  const [aimMap, setAimMap] = useState({})
 
   const handlePageIndex = act => {
     let newIndex = act === 'prev' ? props.searchTableIndex - 1 : props.searchTableIndex + 1;
@@ -269,13 +270,19 @@ function AnnotationTable(props) {
     setPageCount(Math.ceil(props.noOfRows / pageSize));
     const startIndex = pageSize * pageIndex;
     const endIndex = pageSize * (pageIndex + 1);
+    const map = {};
     rawData.forEach((el, i) => {
       if (i >= startIndex && i < endIndex) {
-        el.data ? pageData.push(el.data) : pageData.push(el);
+        const aim = el.data ? el.data : el;
+        pageData.push(aim);
+        const { aimID, seriesUID, studyUID, subjectID, projectID, patientName, name } = aim;
+        map[aimID] = { aimID, seriesUID, studyUID, subjectID, projectID, patientName, name }   
       }
     });
+    setAimMap(map);
     setData(pageData);
   };
+
 
   useEffect(() => {
     const selectedList = Object.keys(props.selectedAnnotations);
@@ -453,7 +460,8 @@ function AnnotationTable(props) {
             return (
               <input
                 type="checkbox"
-                className='form-check-input'
+                className='form-check-input __search-checkbox'
+                id={row.original.aimID}
                 onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
                 checked={listOfSelecteds[row.original.aimID]}
               // checked={props.allSelected}
