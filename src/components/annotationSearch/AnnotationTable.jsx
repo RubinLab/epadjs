@@ -62,7 +62,7 @@ function Table({
   fetchData,
   controlledPageIndex,
   handlePageIndex,
-  listOfSelecteds,
+  // listOfSelecteds,
   handleSort,
   handleFilter,
 }) {
@@ -250,7 +250,7 @@ function AnnotationTable(props) {
   const [data, setData] = useState([]);
   const [showSelectSeriesModal, setShowSelectSeriesModal] = useState(false);
   const [selected, setSelected] = useState({});
-  const [listOfSelecteds, setListOfSelecteds] = useState({});
+  // const [listOfSelecteds, setListOfSelecteds] = useState({});
   const [showNarrative, setShowNarrative] = useState(false);
   const [narrative, setNarrative] = useState('');
   // const [aimMap, setAimMap] = useState({})
@@ -285,29 +285,29 @@ function AnnotationTable(props) {
     setData(pageData);
   };
 
-  useEffect(() => {
-    const selectedList = Object.keys(props.selectedAnnotations);
+  // useEffect(() => {
+  //   const selectedList = Object.keys(props.selectedAnnotations);
 
-    if (props.allSelected === false && selectedList.length === 0) {
-      setListOfSelecteds({});
-    }
+  //   if (props.allSelected === false && selectedList.length === 0) {
+  //     setListOfSelecteds({});
+  //   }
 
-    const newList = {};
-    if (props.allSelected) {
-      data.forEach(el => {
-        newList[el.aimID] = true;
-      });
-      setListOfSelecteds(newList);
-    }
+  //   const newList = {};
+  //   if (props.allSelected) {
+  //     data.forEach(el => {
+  //       newList[el.aimID] = true;
+  //     });
+  //     setListOfSelecteds(newList);
+  //   }
 
-  }, [props.allSelected]);
+  // }, [props.allSelected]);
 
-  const updateListOfSelected = (item) => {
-    const newList = { ...listOfSelecteds }
-    if (newList[item.aimID]) delete newList[item.aimID];
-    else newList[item.aimID] = true;
-    setListOfSelecteds(newList);
-  }
+  // const updateListOfSelected = (item) => {
+  //   const newList = { ...listOfSelecteds }
+  //   if (newList[item.aimID]) delete newList[item.aimID];
+  //   else newList[item.aimID] = true;
+  //   setListOfSelecteds(newList);
+  // }
 
   useEffect(() => {
     preparePageData(props.data, defaultPageSize, props.searchTableIndex);
@@ -463,8 +463,8 @@ function AnnotationTable(props) {
                 type="checkbox"
                 className='form-check-input __search-checkbox'
                 id={row.original.aimID}
-                onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
-                checked={listOfSelecteds[row.original.aimID]}
+                // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
+                // checked={listOfSelecteds[row.original.aimID]}
               // checked={props.allSelected}
               />
             );
@@ -603,7 +603,9 @@ function AnnotationTable(props) {
 
           }
         }],
-      [data, listOfSelecteds, props.selectedAnnotations]
+      // [data, listOfSelecteds, props.selectedAnnotations]
+      [data]
+
     );
   }
   else {
@@ -618,8 +620,8 @@ function AnnotationTable(props) {
               <input
                 type="checkbox"
                 className='form-check-input'
-                onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
-                checked={props.allSelected || listOfSelecteds[row.original.aimID]}
+                // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
+                // checked={props.allSelected || listOfSelecteds[row.original.aimID]}
               />
             );
           }
@@ -709,7 +711,9 @@ function AnnotationTable(props) {
           accessor: 'userComment'
         }
       ],
-      [data, listOfSelecteds, props.selectedAnnotations]
+      // [data, listOfSelecteds, props.selectedAnnotations]
+      [data]
+
     );
   }
 
@@ -736,7 +740,7 @@ function AnnotationTable(props) {
         updateSelectedAims={props.updateSelectedAims}
         controlledPageIndex={props.searchTableIndex}
         handlePageIndex={handlePageIndex}
-        listOfSelecteds={listOfSelecteds}
+        // listOfSelecteds={listOfSelecteds}
         handleSort={props.handleSort}
         handleFilter={props.handleFilter}
       />
