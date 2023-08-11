@@ -283,7 +283,6 @@ function AnnotationTable(props) {
     setData(pageData);
   };
 
-
   useEffect(() => {
     const selectedList = Object.keys(props.selectedAnnotations);
 

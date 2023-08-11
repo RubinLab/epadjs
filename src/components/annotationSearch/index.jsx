@@ -975,6 +975,13 @@ const AnnotationSearch = props => {
     return { isOpen, index };
   };
 
+  const findSelectedCheckboxes = () => {
+    let checkboxes = document.getElementsByClassName('__search-checkbox');
+    checkboxes = Array.from(checkboxes);
+    const selected = checkboxes.filter(el => el.checked).map(el => el.id);
+    return selected;
+  }
+
   const deleteAllSelected = () => {
     const notDeleted = {};
     let newSelected = Object.assign({}, props.selectedAnnotations);
@@ -1014,6 +1021,7 @@ const AnnotationSearch = props => {
     setShowDeleteModal(false);
     props.dispatch(clearSelection());
   };
+
   // cavit
   const prepareDropDownHtmlForPlugins = () => {
     const list = pluginListArray;
