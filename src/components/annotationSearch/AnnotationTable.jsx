@@ -253,7 +253,7 @@ function AnnotationTable(props) {
   const [listOfSelecteds, setListOfSelecteds] = useState({});
   const [showNarrative, setShowNarrative] = useState(false);
   const [narrative, setNarrative] = useState('');
-  const [aimMap, setAimMap] = useState({})
+  // const [aimMap, setAimMap] = useState({})
 
   const handlePageIndex = act => {
     let newIndex = act === 'prev' ? props.searchTableIndex - 1 : props.searchTableIndex + 1;
@@ -279,7 +279,9 @@ function AnnotationTable(props) {
         map[aimID] = { aimID, seriesUID, studyUID, subjectID, projectID, patientName, name }   
       }
     });
-    setAimMap(map);
+    // instead of writing 200 aims to storage, i can write a function
+    // for each click if false remove data, if true add the data
+    sessionStorage.aimMap = JSON.stringify(map);
     setData(pageData);
   };
 

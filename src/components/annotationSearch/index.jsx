@@ -235,7 +235,7 @@ const AnnotationSearch = props => {
   }, [props.refreshMap.plugins])
 
   const handleUserKeyPress = (e => {
-    const teachingFields = document.getElementById("questionaire"); 
+    const teachingFields = document.getElementById("questionaire");
     if (e.key === 'Enter' && !teachingFields) {
       getFieldSearchResults(undefined, undefined, true);
       props.dispatch(updateSearchTableIndex(0));
@@ -982,9 +982,22 @@ const AnnotationSearch = props => {
     return selected;
   }
 
+  const formSelectedAnnotationsData = () => {
+    const aimArray = findSelectedCheckboxes();
+    const aimMap = JSON.parse(sessionStorage.getItem('aimMap'));
+    console.log(aimMap);
+    const aimObj = aimArray.reduce((all, item, index) => {
+      all[item] = { ...aimMap[item] };
+      return all;
+    }, {})
+    return aimObj;
+  }
+
+
   const deleteAllSelected = () => {
     const notDeleted = {};
-    let newSelected = Object.assign({}, props.selectedAnnotations);
+    // let newSelected = Object.assign({}, props.selectedAnnotations);
+    let newSelected = formSelectedAnnotationsData();
     const toBeDeleted = {};
     const promiseArr = [];
     for (let annotation in newSelected) {
@@ -1020,6 +1033,7 @@ const AnnotationSearch = props => {
       });
     setShowDeleteModal(false);
     props.dispatch(clearSelection());
+
   };
 
   // cavit
@@ -1290,7 +1304,7 @@ const AnnotationSearch = props => {
             {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
           {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
             <AddToWorklist deselect={() => handleSelectDeselectAll(false)} forceUpdatePage={props.forceUpdatePage} />
-            <Projects deselect={() => handleSelectDeselectAll(false)} updateUrl={props.history.push}/>
+            <Projects deselect={() => handleSelectDeselectAll(false)} updateUrl={props.history.push} />
             {/* <button type="button" className="btn btn-sm" onClick={() => { setShowProjects(!showProjects) }}><BiDownload /><br />Copy to Project</button>
           {showProjects && (<Projects className='btn btn-sm worklist' onClose={() => { setShowProjects(false) }} />)} */}
             <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
