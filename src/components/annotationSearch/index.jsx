@@ -664,14 +664,9 @@ const AnnotationSearch = props => {
   };
 
   const handleSelectDeselectAll = (checked) => {
-    if (checked) {
-      handleMultipleSelect('selectPageAll');
-      setAllSelected(checked);
-    }
-    else {
-      handleMultipleSelect('unselectPageAll');
-      setAllSelected(checked);
-    }
+    let checkboxes = document.getElementsByClassName('__search-checkbox');
+    checkboxes = Array.from(checkboxes);
+    checkboxes.forEach(el => el.checked = checked);
   }
 
   const handleMultipleSelect = action => {
@@ -1374,7 +1369,7 @@ const AnnotationSearch = props => {
           <tr>
             <th className="select_row">
               <div className="form-check">
-                <input className="form-check-input" type="checkbox" checked={allSelected} onChange={({ target: { checked } }) => handleSelectDeselectAll(checked)} />
+                <input className="form-check-input" type="checkbox" onChange={({ target: { checked } }) => handleSelectDeselectAll(checked)} />
               </div>
             </th>
             <th>
