@@ -47,7 +47,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import SeriesModal from '../annotationsList/selectSerieModal';
 import WarningModal from '../common/warningModal';
 import { COMP_MODALITIES as compModality } from "../../constants.js";
-import { isSupportedModality } from 'Utils/aid.js';
+import { isSupportedModality, findSelectedCheckboxes, handleSelectDeselectAll } from 'Utils/aid.js';
 
 import './annotationSearch.css';
 
@@ -663,12 +663,6 @@ const AnnotationSearch = props => {
     return options;
   };
 
-  const handleSelectDeselectAll = (checked) => {
-    let checkboxes = document.getElementsByClassName('__search-checkbox');
-    checkboxes = Array.from(checkboxes);
-    checkboxes.forEach(el => el.checked = checked);
-  }
-
   const handleMultipleSelect = action => {
     const pages = Math.ceil(props.rows / pageSize);
     const indexStart = props.searchTableIndex * pageSize;
@@ -970,17 +964,10 @@ const AnnotationSearch = props => {
     return { isOpen, index };
   };
 
-  const findSelectedCheckboxes = () => {
-    let checkboxes = document.getElementsByClassName('__search-checkbox');
-    checkboxes = Array.from(checkboxes);
-    const selected = checkboxes.filter(el => el.checked).map(el => el.id);
-    return selected;
-  }
 
   const formSelectedAnnotationsData = () => {
     const aimArray = findSelectedCheckboxes();
     const aimMap = JSON.parse(sessionStorage.getItem('aimMap'));
-    console.log(aimMap);
     const aimObj = aimArray.reduce((all, item, index) => {
       all[item] = { ...aimMap[item] };
       return all;

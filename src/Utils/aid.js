@@ -6,6 +6,19 @@ import { DISP_MODALITIES } from "../constants";
  * https://github.com/dcmjs-org/dcmjs/blob/master/src/DicomMetaDictionary.js#L5
  */
 
+export const findSelectedCheckboxes = () => {
+  let checkboxes = document.getElementsByClassName('__search-checkbox');
+  checkboxes = Array.from(checkboxes);
+  const selected = checkboxes.filter(el => el.checked).map(el => el.id);
+  return selected;
+}
+
+const handleSelectDeselectAll = (checked) => {
+  let checkboxes = document.getElementsByClassName('__search-checkbox');
+  checkboxes = Array.from(checkboxes);
+  checkboxes.forEach(el => el.checked = checked);
+}
+
 export function styleEightDigitDate(rawDate) {
   if (rawDate.length !== 8) {
     return rawDate;
