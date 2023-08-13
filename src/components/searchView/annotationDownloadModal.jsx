@@ -8,6 +8,7 @@ import {
 } from "../../services/annotationServices";
 import { ToastContainer, toast } from "react-toastify";
 import { clearSelection } from "../annotationsList/action";
+import { findSelectedCheckboxes } from '../../Utils/aid.js';
 import "../infoMenu/infoMenu.css";
 
 const support = false;
@@ -25,9 +26,9 @@ class AnnnotationDownloadModal extends React.Component {
     const { pid, projectID } = this.props;
     const annsToDownload =
       Object.keys(this.props.selectedAnnotations).length > 0
-        ? this.props.selectedAnnotations
-        : this.props.selected;
-    const aimList = Object.keys(annsToDownload);
+        ? this.props.selectedAnnotations : this.props.selected ?
+       this.props.selected : findSelectedCheckboxes();
+    const aimList = Array.isArray(annsToDownload) ? annsToDownload : Object.keys(annsToDownload);
     // this.props.updateStatus();
     const promise =
       projectID || pid

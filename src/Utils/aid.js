@@ -13,7 +13,7 @@ export const findSelectedCheckboxes = () => {
   return selected;
 }
 
-const handleSelectDeselectAll = (checked) => {
+export const handleSelectDeselectAll = (checked) => {
   let checkboxes = document.getElementsByClassName('__search-checkbox');
   checkboxes = Array.from(checkboxes);
   checkboxes.forEach(el => el.checked = checked);
