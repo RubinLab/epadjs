@@ -47,7 +47,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import SeriesModal from '../annotationsList/selectSerieModal';
 import WarningModal from '../common/warningModal';
 import { COMP_MODALITIES as compModality } from "../../constants.js";
-import { isSupportedModality, findSelectedCheckboxes, handleSelectDeselectAll } from 'Utils/aid.js';
+import { isSupportedModality, findSelectedCheckboxes, handleSelectDeselectAll, resetSelectAllCheckbox } from 'Utils/aid.js';
 
 import './annotationSearch.css';
 
@@ -1003,6 +1003,7 @@ const AnnotationSearch = props => {
     Promise.all(promiseArr)
       .then(() => {
         getNewData(props.searchTableIndex, true);
+        resetSelectAllCheckbox(false);
       })
       .catch(error => {
         if (
@@ -1012,10 +1013,10 @@ const AnnotationSearch = props => {
         )
           toast.error(error.response.data.message, { autoClose: false });
         getNewData(props.searchTableIndex, true);
+        resetSelectAllCheckbox(false);
       });
     setShowDeleteModal(false);
     props.dispatch(clearSelection());
-
   };
 
   // cavit
@@ -1356,7 +1357,7 @@ const AnnotationSearch = props => {
           <tr>
             <th className="select_row">
               <div className="form-check">
-                <input className="form-check-input" type="checkbox" onChange={({ target: { checked } }) => handleSelectDeselectAll(checked)} />
+                <input className="form-check-input __select-all" type="checkbox" onChange={({ target: { checked } }) => handleSelectDeselectAll(checked)} />
               </div>
             </th>
             <th>

@@ -19,6 +19,12 @@ export const handleSelectDeselectAll = (checked) => {
   checkboxes.forEach(el => el.checked = checked);
 }
 
+export const resetSelectAllCheckbox = state => {
+  let selectAllCheckbox = document.getElementsByClassName('__select-all');
+  selectAllCheckbox = Array.from(selectAllCheckbox);
+  selectAllCheckbox[0].checked = state;
+}
+
 export function styleEightDigitDate(rawDate) {
   if (rawDate.length !== 8) {
     return rawDate;
