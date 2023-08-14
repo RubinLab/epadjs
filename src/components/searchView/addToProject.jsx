@@ -5,6 +5,8 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import { FaProjectDiagram } from 'react-icons/fa';
 import ReactTooltip from 'react-tooltip';
 import { addAimsToProject } from "../../services/projectServices";
+import { findSelectedCheckboxes } from '../../Utils/aid.js';
+
 
 // const ProjectAdd = ({ projectMap, onSave, className, annotations, deselect, parent, showAddTo, history }) => {
 const ProjectAdd = (props) => {
@@ -14,10 +16,13 @@ const ProjectAdd = (props) => {
 
   const addSelectionToProject = async (projectId) => {
     // If selected are not annotations, search is view is handling it (by props on Save)
-    if (!annotations.length && onSave)
+    const aimsPassed = annotations && annotations.length > 0;
+    if (!aimsPassed && onSave) {
       onSave(projectId);
-    else {
-      const aimIDs = Object.keys(annotations);
+    } else {
+      const storeIds = Object.keys(annotations);
+      const selectedIds = findSelectedCheckboxes();
+      const aimIDs = storeIds.length > 0 ? storeIds : selectedIds;
       try {
         await addAimsToProject(projectId, aimIDs);
         window.dispatchEvent(new CustomEvent('refreshProjects', { detail: projectId }));
