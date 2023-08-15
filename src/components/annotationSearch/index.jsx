@@ -1286,8 +1286,8 @@ const AnnotationSearch = props => {
             <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
             {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
           {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
-            <AddToWorklist deselect={() => handleSelectDeselectAll(false)} forceUpdatePage={props.forceUpdatePage} />
-            <Projects deselect={() => handleSelectDeselectAll(false)} updateUrl={props.history.push} />
+            <AddToWorklist deselect={() => { handleSelectDeselectAll(false); resetSelectAllCheckbox(false) }} forceUpdatePage={props.forceUpdatePage} />
+            <Projects deselect={() => { handleSelectDeselectAll(false); resetSelectAllCheckbox(false) }} updateUrl={props.history.push} />
             {/* <button type="button" className="btn btn-sm" onClick={() => { setShowProjects(!showProjects) }}><BiDownload /><br />Copy to Project</button>
           {showProjects && (<Projects className='btn btn-sm worklist' onClose={() => { setShowProjects(false) }} />)} */}
             <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>

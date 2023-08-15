@@ -5,7 +5,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import { FaProjectDiagram } from 'react-icons/fa';
 import ReactTooltip from 'react-tooltip';
 import { addAimsToProject } from "../../services/projectServices";
-import { findSelectedCheckboxes } from '../../Utils/aid.js';
+import { findSelectedCheckboxes, resetSelectAllCheckbox } from '../../Utils/aid.js';
 
 
 // const ProjectAdd = ({ projectMap, onSave, className, annotations, deselect, parent, showAddTo, history }) => {
