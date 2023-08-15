@@ -11,7 +11,7 @@ import {
   addAimsToWorklist
 } from "../../services/worklistServices";
 import { clearSelection } from "../annotationsList/action";
-import { findSelectedCheckboxes } from '../../Utils/aid.js';
+import { findSelectedCheckboxes, resetSelectAllCheckbox } from '../../Utils/aid.js';
 
 
 const AddToWorklist = (props) => {
@@ -75,6 +75,7 @@ const AddToWorklist = (props) => {
         pauseOnHover: true,
         draggable: false,
       });
+      resetSelectAllCheckbox(false);
       // props.deselect();
       props.dispatch(clearSelection());
       if (mode !== 'teaching' && props.refresh) props.refresh();
@@ -89,6 +90,7 @@ const AddToWorklist = (props) => {
         draggable: false,
       });
       console.error(e);
+      resetSelectAllCheckbox(false);
     }
   }
 
