@@ -1525,7 +1525,13 @@ class DisplayView extends Component {
         }
       });
     }
-  };
+    
+    if (this.state.hiding) {
+      const vpElements = document.getElementsByClassName("viewportContainer");
+      for (var i = 0; i < vpElements.length; i++)
+        if (i !== this.props.activePort) vpElements[i].style.display = "none";
+    };
+  }
 
   getColorOfMarkup = (aimUid, seriesUid) => {
     try {
