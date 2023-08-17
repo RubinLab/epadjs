@@ -209,7 +209,8 @@ class DisplayView extends Component {
     window.addEventListener("markupSelected", this.handleMarkupSelected);
     window.addEventListener("markupCreated", this.handleMarkupCreated);
     window.addEventListener("toggleAnnotations", this.toggleAnnotations);
-    window.addEventListener("updateWL", this.updateWL);
+    // window.addEventListener("updateWL", this.updateWL);
+    window.addEventListener("updateImageStatus", this.updateImageStatus);
     window.addEventListener('deleteViewportWL', this.deleteViewportWL);
     window.addEventListener('resetViewportWL', this.resetViewportWL);
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
@@ -267,7 +268,8 @@ class DisplayView extends Component {
     window.removeEventListener("markupSelected", this.handleMarkupSelected);
     window.removeEventListener("markupCreated", this.handleMarkupCreated);
     window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
-    window.removeEventListener("updateWL", this.updateWL);
+    // window.removeEventListener("updateWL", this.updateWL);
+    window.removeEventListener("updateImageStatus", this.updateImageStatus);
     window.removeEventListener('resetViewportWL', this.resetViewportWL);
     window.removeEventListener('deleteViewportWL', this.deleteViewportWL);
     window.removeEventListener("jumpToAimImage", this.jumpToAimImage);
@@ -436,6 +438,19 @@ class DisplayView extends Component {
     wwwc[this.props.activePort] = { ww, wc };
 
     sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
+  }
+
+  updateImageStatus = (event) => {
+    const { type, value } = event.detail;
+    // const { ww, wc } = event.detail;
+    let imgStatus = sessionStorage.getItem("imgStatus");
+    const max = parseInt(maxPort);
+    imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
+    let obj = imgStatus[this.props.activePort];
+    obj = obj && typeof obj === 'object' ? obj : {};
+    obj[type] = value;
+    imgStatus[this.props.activePort]= obj;
+    sessionStorage.setItem('imgStatus', JSON.stringify(imgStatus));
   }
 
   // Traverse all shapes and set visibility, if aimID is passed only sets aim's shapes
@@ -1516,6 +1531,7 @@ class DisplayView extends Component {
 
   refreshAllViewports = () => {
     const elements = cornerstone.getEnabledElements();
+    console.log(elements);
     if (elements) {
       elements.map(({ element }) => {
         try {
@@ -1756,6 +1772,14 @@ class DisplayView extends Component {
     sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
   }
 
+  resetViewportImageStatus = () => {
+    let imgStatus = sessionStorage.getItem("imgStatus");
+    const max = parseInt(maxPort);
+    imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
+    imgStatus[this.props.activePort] = null;
+    sessionStorage.setItem('imgStatus', JSON.stringify(imgStatus));
+  }
+
   deleteViewportWL = () => {
     let wwwc = sessionStorage.getItem("wwwc");
     const max = parseInt(maxPort);
@@ -1763,6 +1787,15 @@ class DisplayView extends Component {
     wwwc.splice(this.props.activePort, 1);
     wwwc.push(null);
     sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
+  }
+
+  deleteViewportImageStatus = () => {
+    let imgStatus = sessionStorage.getItem("imgStatus");
+    const max = parseInt(maxPort);
+    imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
+    imgStatus.splice(this.props.activePort, 1);
+    imgStatus.push(null);
+    sessionStorage.setItem('imgStatus', JSON.stringify(imgStatus));
   }
 
   closeViewport = () => {
