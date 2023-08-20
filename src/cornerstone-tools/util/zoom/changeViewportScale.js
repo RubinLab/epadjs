@@ -16,13 +16,18 @@ export default function(viewport, ticks, scaleLimits) {
   const factor = oldFactor + ticks;
   const scale = Math.pow(pow, factor);
 
+  let finalScale = scale;
   if (maxScale && scale > maxScale) {
     viewport.scale = maxScale;
+    finalScale = maxScale;
   } else if (minScale && scale < minScale) {
     viewport.scale = minScale;
+    finalScale = minScale;
   } else {
     viewport.scale = scale;
   }
+
+   window.dispatchEvent( new CustomEvent("updateImageStatus", { detail: { type: 'zoom', value: finalScale } }));
 
   return viewport;
 }
