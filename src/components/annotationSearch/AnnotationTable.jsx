@@ -21,7 +21,7 @@ import {
   updateSearchTableIndex
 } from '../annotationsList/action';
 import { formatDate } from '../flexView/helperMethods';
-import { getSeries } from '../../services/seriesServices';
+import { getSeries, getSingleSeries } from '../../services/seriesServices';
 import SelectSerieModal from '../annotationsList/selectSerieModal';
 import { isSupportedModality } from "../../Utils/aid.js";
 import { COMP_MODALITIES as compModality } from "../../constants.js";
@@ -375,6 +375,12 @@ function AnnotationTable(props) {
         if (isGridFull) {
           setShowSelectSeriesModal(true);
         } else {
+          if (!selected.examType) {
+            let { data: res } = await getSingleSeries(projectID, patientID, studyUID, seriesUID);
+            const series = res.filter(el => el.seriesUID === seriesUID);
+            selected.examType = series[0].examType;
+          }
+
           props.dispatch(addToGrid(selected, aimID));
           props.dispatch(getSingleSerie(selected, aimID));
           //if grid is NOT full check if patient data exists

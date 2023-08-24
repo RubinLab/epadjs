@@ -12,6 +12,7 @@ import {
   jumpToAim,
   updateImageId,
 } from '../action';
+import { getSingleSeries } from "../../../services/seriesServices";
 import "../annotationsList.css";
 
 const handleJumpToAim = (aimId, index) => {
@@ -39,7 +40,17 @@ const annotationsLink = (props) => {
     return { isOpen, index };
   };
 
-  const displayAnnotations = (e, selected) => {
+  const getExamtype = async (patientID, projectID, studyUID, seriesUID) => {
+    try {
+      let { data: res } = await getSingleSeries(projectID, patientID, studyUID, seriesUID);
+      const series = res.filter(el => el.seriesUID === seriesUID);
+      return series[0].examType;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const displayAnnotations = async (e, selected) => {
     const { patientID, projectID, studyUID, seriesUID, aimID } = selected;
     const maxPort = parseInt(sessionStorage.getItem('maxPort'));
 
@@ -52,6 +63,10 @@ const annotationsLink = (props) => {
       handleJumpToAim(aimID, index);
       props.dispatch(clearSelection());
     } else {
+      if (!selected.examType) {
+        const examType = await getExamtype(patientID, projectID, studyUID, seriesUID, aimID );
+        selected.examType = examType;
+      }
       if (isGridFull) {
         props.dispatch(addToGrid(selected, aimID, props.activePort));
       } else {

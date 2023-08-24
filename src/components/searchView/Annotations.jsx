@@ -5,6 +5,7 @@ import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import { getAnnotations } from '../../services/annotationServices';
+import { getSingleSeries } from '../../services/seriesServices';
 import { formatDate } from '../flexView/helperMethods';
 import SelectSerieModal from '../annotationsList/selectSerieModal';
 import {
@@ -99,7 +100,17 @@ function Annotations(props) {
     return { isOpen, index };
   };
 
-  const displayAnnotations = selected => {
+  const getExamtype = async (patientID, projectID, studyUID, seriesUID) => {
+    try {
+      let { data: res } = await getSingleSeries(projectID, patientID, studyUID, seriesUID);
+      const series = res.filter(el => el.seriesUID === seriesUID);
+      return series[0].examType;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const displayAnnotations = async (selected) => {
     const { projectID, studyUID, seriesUID, aimID } = selected;
     setSelected(selected);
     const patientID = selected.subjectID;
@@ -119,10 +130,14 @@ function Annotations(props) {
       if (isGridFull) {
         setShowSelectSerie(true);
       } else {
+        if (!selected.examType) {
+          const examType = await getExamtype(patientID, projectID, studyUID, seriesUID, aimID);
+          selected.examType = examType;
+        }
         props.dispatch(addToGrid(selected, aimID));
         props
           .dispatch(getSingleSerie(selected, aimID))
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.error(err));
         //if grid is NOT full check if patient data exists
         // -----> Delete after v1.0 <-----

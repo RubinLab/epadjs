@@ -52,7 +52,7 @@ import {
   commonLabels,
 } from "./types";
 
-import { getSeries } from "../../services/seriesServices";
+import { getSeries, getSingleSeries } from "../../services/seriesServices";
 import { getStudies, getStudyAims } from "../../services/studyServices";
 import {
   getAnnotations,
@@ -313,17 +313,11 @@ export const selectAnnotation = (
 ) => {
   const {
     aimID,
-
     seriesUID,
-
     studyUID,
-
     subjectID,
-
     projectID,
-
     patientName,
-
     name,
   } = selectedAnnotationObj;
 
@@ -349,8 +343,7 @@ export const selectAnnotation = (
 export const addToGrid = (serie, annotation, port) => {
   let { patientID, studyUID, seriesUID, projectID, patientName, examType } = serie;
   projectID = projectID ? projectID : "lite";
-  if (annotation)
-    patientID = serie.originalSubjectID || serie.subjectID || serie.patientID;
+
   let reference = {
     projectID,
     patientID,
@@ -365,10 +358,10 @@ export const addToGrid = (serie, annotation, port) => {
 };
 
 export const replaceInGrid = (serie) => {
-  let { seriesUID } = serie;
+  let { seriesUID, examType } = serie;
   // return async(dispatch)=>{
   //   await dispatch(getSingleSerie(serie));
-  return { type: REPLACE_IN_GRID, seriesUID };
+  return { type: REPLACE_IN_GRID, payload: { seriesUID, examType } };
   // } 
 }
 
@@ -715,11 +708,13 @@ export const getSingleSerie = (serie, annotation, wadoUrl) => {
         numberOfAnnotations,
         aimID: annotation,
       };
+
       const { aimsData, imageData, otherSeriesAimsData } = await getSingleSerieData(
         serie,
         annotation,
         wadoUrl
       );
+
       await dispatch(
         singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData)
       );
@@ -829,7 +824,6 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
     aimID = aimID ? aimID : annotation;
     getStudyAims(patientID, studyUID, projectID)
       .then(async (result) => {
-
         const { studyAims, serieAims, otherSeriesAims } = extractNonMarkupAims(
           result.data.rows,
           seriesUID
