@@ -137,7 +137,6 @@ class CornerstoneViewport extends Component {
     } = this.props;
     const { imageIdIndex } = this.state;
     const imageId = imageIds[imageIdIndex];
-
     // EVENTS
     this._bindInternalEventListeners();
     this._bindExternalEventListeners();
@@ -588,10 +587,8 @@ class CornerstoneViewport extends Component {
   // TODO: May need to throttle?
   onImageRendered = (event) => {
     const { viewport, element, image } = event.detail;
-    if (this.props.shouldInvert) {
-      event.detail.viewport.invert = true;
-      cornerstone.setViewport(element, viewport);
-    }
+    event.detail.viewport.invert = this.props.shouldInvert;
+    cornerstone.setViewport(element, viewport);
 
     let wwwc = sessionStorage.getItem('wwwc');
     wwwc = wwwc ? JSON.parse(wwwc) : {};

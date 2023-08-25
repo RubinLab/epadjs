@@ -114,9 +114,9 @@ const asyncReducer = (state = initialState, action) => {
             clonedOtherAims[el.seriesUID][aimRefs.aimID] = aimRefs;
           }
         })
-        return {...state, otherSeriesAimsList: clonedOtherAims };
+        return { ...state, otherSeriesAimsList: clonedOtherAims };
       case SUBPATH:
-        const {subpath, portIndex} = action.payload;
+        const { subpath, portIndex } = action.payload;
         const newSubpath = [...state.subpath];
         newSubpath[portIndex] = subpath;
         return { ...state, subpath: newSubpath };
@@ -204,7 +204,7 @@ const asyncReducer = (state = initialState, action) => {
         let delGrid = state.openSeries.slice(0, state.activePort);
         let delSubpath = state.openSeries.slice(0, state.activePort);
         delGrid = delGrid.concat(state.openSeries.slice(state.activePort + 1));
-        delSubpath= delSubpath.concat(state.subpath.slice(state.activePort + 1));
+        delSubpath = delSubpath.concat(state.subpath.slice(state.activePort + 1));
         let shouldStudyExist = false;
         for (let item of delGrid) {
           if (item.studyUID === delStudyUID) {
@@ -548,8 +548,8 @@ const asyncReducer = (state = initialState, action) => {
         const replacedOpenSeries = [...state.openSeries];
         const newAimsList = { ...state.aimsList };
         delete newAimsList[replacedOpenSeries[state.activePort].seriesUID];
-        replacedOpenSeries[state.activePort].seriesUID = action.seriesUID;
-
+        replacedOpenSeries[state.activePort].seriesUID = action.payload.seriesUID;
+        replacedOpenSeries[state.activePort].examType = action.payload.examType;
         return {
           ...state,
           openSeries: replacedOpenSeries,
