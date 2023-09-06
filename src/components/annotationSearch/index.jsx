@@ -1185,6 +1185,7 @@ const AnnotationSearch = props => {
     setSelectedMods([]);
     setSelectedDiagnosis([]);
     setSelectedAnatomies([]);
+  
   }
 
   const clearAllFilters = () => {
@@ -1253,7 +1254,7 @@ const AnnotationSearch = props => {
                 return (<button key={diagnose} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearDiagnosis(diagnose)} > {diagnose
                 } < BiX /></button>);
               })}
-              {(selectedSubs.length + selectedMods.length + selectedAnatomies.length + selectedDiagnosis) > 1 && (<button type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={clearAllTeachingFilers}>Clear All Filters <BiX /></button>)}
+              {(selectedSubs.length + selectedMods.length + selectedAnatomies.length + selectedDiagnosis) > 1 && (<button type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={clearAllFilters}>Clear All Filters <BiX /></button>)}
             </div>)
           }
         </div>
