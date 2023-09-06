@@ -49,6 +49,7 @@ const SeriesDropDown = (props) => {
                 detail: props.activePort
             })
         );
+        window.dispatchEvent(new CustomEvent('deleteViewportWL'));
     }
 
     const handleToggle = async (show) => {

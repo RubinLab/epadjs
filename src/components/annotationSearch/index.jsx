@@ -235,7 +235,8 @@ const AnnotationSearch = props => {
   }, [props.refreshMap.plugins])
 
   const handleUserKeyPress = (e => {
-    if (e.key === 'Enter') {
+    const teachingFields = document.getElementById("questionaire"); 
+    if (e.key === 'Enter' && !teachingFields) {
       getFieldSearchResults(undefined, undefined, true);
       props.dispatch(updateSearchTableIndex(0));
       //if (mode !== 'teaching') {
@@ -268,7 +269,7 @@ const AnnotationSearch = props => {
     for (let i = 0; i < seriesArray.length; i++) {
       seriesArray = seriesArray.filter(isSupportedModality);
     }
-    
+
     let seriesList = [seriesArray];
     setShowSelectSeries(seriesArray.length > 0);
     setShowWarning(seriesArray.length === 0);
@@ -685,10 +686,11 @@ const AnnotationSearch = props => {
           props.dispatch(selectAnnotation(el));
       });
     } else if (action === 'unselectPageAll') {
-      arrayToSelect.forEach(el => {
-        if (props.selectedAnnotations[el.aimID])
-          props.dispatch(selectAnnotation(el));
-      });
+      // arrayToSelect.forEach(el => {
+      //   if (props.selectedAnnotations[el.aimID])
+      //     props.dispatch(selectAnnotation(el));
+      // });
+      props.dispatch(clearSelection());
     } else if (action === 'unselectAll') {
       props.dispatch(clearSelection());
     }
@@ -1279,8 +1281,8 @@ const AnnotationSearch = props => {
             <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
             {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
           {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
-            <AddToWorklist deselect={() => handleSelectDeselectAll(false)} />
-            <Projects deselect={() => handleSelectDeselectAll(false)} />
+            <AddToWorklist deselect={() => handleSelectDeselectAll(false)} forceUpdatePage={props.forceUpdatePage} />
+            <Projects deselect={() => handleSelectDeselectAll(false)} updateUrl={props.history.push}/>
             {/* <button type="button" className="btn btn-sm" onClick={() => { setShowProjects(!showProjects) }}><BiDownload /><br />Copy to Project</button>
           {showProjects && (<Projects className='btn btn-sm worklist' onClose={() => { setShowProjects(false) }} />)} */}
             <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
@@ -1440,6 +1442,7 @@ const AnnotationSearch = props => {
           {data.length > 0 && !showSpinner && (
             <AnnotationTable
               data={data}
+              allSelected={allSelected}
               selected={props.selectedAnnotations}
               updateSelectedAims={updateSelectedAims}
               noOfRows={rows}

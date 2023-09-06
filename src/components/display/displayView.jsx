@@ -26,6 +26,8 @@ import {
   getSingleSerie,
   aimDelete,
   clearAimId,
+  updateSubpath,
+  clearSelection
 } from "../annotationsList/action";
 import { deleteAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
@@ -53,6 +55,7 @@ import SeriesDropDown from './SeriesDropDown';
 
 let mode;
 let wadoUrl;
+let maxPort;
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 } },
@@ -143,6 +146,7 @@ const mapStateToProps = (state) => {
     activePort: state.annotationsListReducer.activePort,
     aimList: state.annotationsListReducer.aimsList,
     aimSegLabelMaps: state.annotationsListReducer.aimSegLabelMaps,
+    subpath: state.annotationsListReducer.subpath
   };
 };
 
@@ -151,6 +155,7 @@ class DisplayView extends Component {
     super(props);
     mode = sessionStorage.getItem('mode');
     wadoUrl = sessionStorage.getItem('wadoUrl');
+    maxPort = sessionStorage.getItem('maxPort');
     this.state = {
       width: "100%",
       height: "100%",
@@ -171,7 +176,7 @@ class DisplayView extends Component {
       activeTool: '',
       invertMap: {},
       isOverlayVisible: {},
-      subpath: []
+      wwwc: {}
     };
   }
 
@@ -184,11 +189,16 @@ class DisplayView extends Component {
     this.setState({ invertMap });
   }
 
+  setWwwc = (ww, wc) => {
+    this.setState({ wwwc: { ww, wc } })
+  }
+
   componentDidMount() {
     const { series, onSwitchView } = this.props;
     // if (series.length < 1) {
     //   onSwitchView('search');
     // }
+    this.props.dispatch(clearSelection());
     this.getViewports();
     this.getData();
     this.formInvertMap();
@@ -199,6 +209,9 @@ class DisplayView extends Component {
     window.addEventListener("markupSelected", this.handleMarkupSelected);
     window.addEventListener("markupCreated", this.handleMarkupCreated);
     window.addEventListener("toggleAnnotations", this.toggleAnnotations);
+    window.addEventListener("updateWL", this.updateWL);
+    window.addEventListener('deleteViewportWL', this.deleteViewportWL);
+    window.addEventListener('resetViewportWL', this.resetViewportWL);
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
@@ -213,6 +226,7 @@ class DisplayView extends Component {
     // cornerstone.enable(element);
     // this.props.closeLeftMenu();
   }
+
 
   async componentDidUpdate(prevProps, prevState) {
     const { pid, series, activePort, aimList } = this.props;
@@ -253,6 +267,9 @@ class DisplayView extends Component {
     window.removeEventListener("markupSelected", this.handleMarkupSelected);
     window.removeEventListener("markupCreated", this.handleMarkupCreated);
     window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
+    window.removeEventListener("updateWL", this.updateWL);
+    window.removeEventListener('resetViewportWL', this.resetViewportWL);
+    window.removeEventListener('deleteViewportWL', this.deleteViewportWL);
     window.removeEventListener("jumpToAimImage", this.jumpToAimImage);
     window.removeEventListener("editAim", this.editAimHandler);
     window.removeEventListener("deleteAim", this.deleteAimHandler);
@@ -409,6 +426,17 @@ class DisplayView extends Component {
 
     cornerstone.updateImage(element);
   };
+
+  updateWL = (event) => {
+    const { ww, wc } = event.detail;
+    let wwwc = sessionStorage.getItem("wwwc");
+
+    const max = parseInt(maxPort);
+    wwwc = wwwc ? JSON.parse(wwwc) : new Array(max);
+    wwwc[this.props.activePort] = { ww, wc };
+
+    sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
+  }
 
   // Traverse all shapes and set visibility, if aimID is passed only sets aim's shapes
   setVisibilityOfShapes = (visibility, aimID) => {
@@ -571,13 +599,11 @@ class DisplayView extends Component {
     this.refreshAllViewports();
   };
 
-  async getImages(serie) {
+  async getImages(serie, i) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
     if (urls.length > 0) {
       const arr = urls[0].lossyImage.split('/');
-      const subpath = [...this.state.subpath];
-      subpath[this.props.activePort] = arr[1];
-      this.setState({ subpath });
+      this.props.dispatch(updateSubpath(arr[1], i));
     }
     return urls;
   }
@@ -599,9 +625,9 @@ class DisplayView extends Component {
 
   getImageStack = async (serie, index) => {
     const wadoUrl = sessionStorage.getItem("wadoUrl");
-    if (wadoUrl.includes('wadors')) 
+    if (wadoUrl.includes('wadors'))
       return this.getImageStackWithWadors(serie, index);
-     else 
+    else
       return this.getImageStackWithWadouri(serie, index);
   }
 
@@ -610,33 +636,70 @@ class DisplayView extends Component {
     let newImageIds = {};
     let cornerstoneImageIds = [];
     let seriesMetadata = [];
-    const imageUrls = await this.getImages(serie);
+    let seriesMetadataMap = {};
+    const imageUrls = await this.getImages(serie, index);
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
     const seriesURL = wadoUrlNoWadors + imageUrls[0].lossyImage.split('/instances/')[0];
     try {
       seriesMetadata = await getMetadata(seriesURL);
       seriesMetadata = seriesMetadata.data;
+      seriesMetadata.forEach(item => seriesMetadataMap[item['00080018'].Value[0]] = item);
     } catch (err) {
       console.log("Can not get series metadata");
       console.error(err);
     }
     const useSeriesData = seriesMetadata.length > 0 && seriesMetadata.length === imageUrls.length;
+    // get first image
+    let firstImage = null;
+    if (!useSeriesData) {
+      const result = await getImageMetadata(wadoUrlNoWadors + imageUrls[0].lossyImage);
+      const data = result.data;
+      firstImage = data[0];
+    } else firstImage = seriesMetadata[0];
+
+    let referencePosition = null;
+    let rowVector = null;
+    let columnVector = null;
+    let scanAxis = null;
+
+    const distanceDatasetPairs = [];
+
+    const sortByGeo = !!firstImage['00200032'] && !!firstImage['00200037'];
+    if (sortByGeo) {
+      referencePosition = firstImage['00200032'].Value;
+      rowVector = firstImage['00200037'].Value.slice(0, 3);
+      columnVector = firstImage['00200037'].Value.slice(3, 6);
+      scanAxis = dcmjs.normalizers.ImageNormalizer.vec3CrossProduct(rowVector, columnVector);
+    }
+
     for (let k = 0; k < imageUrls.length; k++) {
       baseUrl = wadoUrlNoWadors + imageUrls[k].lossyImage;
-      let data;
       let imgData;
+      let distance = null;
       if (!useSeriesData) {
-        const result  = await getImageMetadata(baseUrl);
-        data = result.data;
+        const result = await getImageMetadata(baseUrl);
+        const data = result.data;
         imgData = data[0];
-      } else imgData = seriesMetadata[k];
+      } else imgData = seriesMetadataMap[imageUrls[k].imageUID];
+
+
+      if (sortByGeo) {
+        const position = imgData['00200032'].Value.slice();
+        const positionVector = dcmjs.normalizers.ImageNormalizer.vec3Subtract(
+          position,
+          referencePosition
+        );
+        distance = dcmjs.normalizers.ImageNormalizer.vec3Dot(positionVector, scanAxis);
+      }
 
       if (imageUrls[k].multiFrameImage === true) {
         for (var i = 0; i < imageUrls[k].numberOfFrames; i++) {
           let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
-          cornerstoneImageIds.push(multiFrameUrl);
+          // using distanceDatasetPairs to sort instead of just adding to the array
+          if (!sortByGeo) cornerstoneImageIds.push(multiFrameUrl);
+          else distanceDatasetPairs.push([distance, multiFrameUrl]);
           // cornerstone.loadAndCacheImage(multiFrameUrl);
           newImageIds[multiFrameUrl] = true;
           cornerstoneWADOImageLoader.wadors.metaDataManager.add(
@@ -647,7 +710,9 @@ class DisplayView extends Component {
         }
       } else {
         let singleFrameUrl = `wadors:${baseUrl}/frames/1`;
-        cornerstoneImageIds.push(singleFrameUrl);
+        // using distanceDatasetPairs to sort instead of just adding to the array
+        if (!sortByGeo) cornerstoneImageIds.push(singleFrameUrl);
+        else distanceDatasetPairs.push([distance, singleFrameUrl]);
         // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
         cornerstoneWADOImageLoader.wadors.metaDataManager.add(
@@ -667,16 +732,21 @@ class DisplayView extends Component {
       this.state.data[index].stack.currentImageIdIndex
     )
       imageIndex = this.state.data[index].stack.currentImageIdIndex;
+
     else imageIndex = 0;
 
-    // if serie is being open from the annotation jump to that image and load the aim editor
-    if (serie.aimID) {
-      imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+    if (sortByGeo) {
+      distanceDatasetPairs.sort((a, b) => b[0] - a[0]);
+      distanceDatasetPairs.forEach((pair) => {
+        cornerstoneImageIds.push(pair[1]);
+      });
     }
+
+    // if serie is being open from the annotation jump to that image and load the aim editor
+    if (serie.aimID) imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
-
     return { stack };
   }
 
@@ -684,7 +754,7 @@ class DisplayView extends Component {
     let stack = {};
     let newImageIds = {};
     let cornerstoneImageIds = [];
-    const imageUrls = await this.getImages(serie);
+    const imageUrls = await this.getImages(serie, index);
     const wadoUrl = sessionStorage.getItem("wadoUrl");
     let baseUrl;
     imageUrls.map((url) => {
@@ -788,6 +858,7 @@ class DisplayView extends Component {
   };
 
 
+
   // Returns the image index of the aim of the serie or the passed aim if aimID is passed 
   getImageIndex = (serie, cornerstoneImageIds, aimID = "") => {
     if (aimID === "")
@@ -801,7 +872,7 @@ class DisplayView extends Component {
               studyUID,
               seriesUID,
               key,
-              this.state.subpath[this.props.activePort]
+              this.props.subpath[this.props.activePort]
             );
             const ret = this.getImageIndexFromImageId(
               cornerstoneImageIds,
@@ -816,11 +887,17 @@ class DisplayView extends Component {
   };
 
   getImageIndexFromImageId = (cornerstoneImageIds, cornerstoneImageId) => {
+
     const { imageIds } = this.state;
-    if (!imageIds[cornerstoneImageId])
+    const wadors = wadoUrl.includes('wadors');
+
+    if (!imageIds[cornerstoneImageId] && !wadors) {
       cornerstoneImageId = cornerstoneImageId.split("&frame")[0];
+    }
     for (let [key, value] of Object.entries(cornerstoneImageIds)) {
-      if (value == cornerstoneImageId) return key;
+      if (value === cornerstoneImageId) {
+        return key;
+      }
     }
     return 0;
   };
@@ -1116,6 +1193,7 @@ class DisplayView extends Component {
 
   parseAims = (aimList, seriesUid, studyUid, serieIndex) => {
     const seriesSegmentations = [];
+    const wadors = wadoUrl.includes('wadors');
     Object.entries(aimList).forEach(([key, values]) => {
       this.linesToPerpendicular(values); //change the perendicular lines to bidirectional to render by CS
       values.forEach((value) => {
@@ -1129,9 +1207,9 @@ class DisplayView extends Component {
           });
         }
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
-        let imageId = getWadoImagePath(studyUid, seriesUid, key, this.state.subpath[this.props.activePort]);
+        let imageId = getWadoImagePath(studyUid, seriesUid, key, this.props.subpath[this.props.activePort]);
 
-        if (this.state.imageIds && !this.state.imageIds[imageId]) {
+        if (this.state.imageIds && !this.state.imageIds[imageId] && !wadors) {
           //image is not multiframe so strip the frame number from the imageId
           imageId = imageId.split("&frame=")[0];
         }
@@ -1140,8 +1218,10 @@ class DisplayView extends Component {
       });
     });
     // this.refreshAllViewports();
-    if (seriesSegmentations.length)
+
+    if (seriesSegmentations.length) {
       this.handleSegmentations(seriesSegmentations);
+    }
   };
 
   linesToPerpendicular = (values) => {
@@ -1376,21 +1456,23 @@ class DisplayView extends Component {
       // Promise.all(imagePromises).then(() => {
       // const stackToolState = cornerstoneTools.getToolState(element, "stack");
       // const imageIds = stackToolState.data[0].imageIds;
+      const provider = wadoUrl.includes('wadors') ? cornerstoneWADOImageLoader.wadors.metaDataManager : cornerstone.metaData;
       const {
-        labelmapBuffer,
+        labelmapBufferArray,
         segMetadata,
         segmentsOnFrame,
+        segmentsOnFrameArray
       } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
         imageIds,
         arrayBuffer,
-        cornerstone.metaData
+        provider
       );
 
       const { setters, getters } = cornerstoneTools.getModule("segmentation");
 
       setters.labelmap3DByFirstImageId(
         imageIds[0],
-        labelmapBuffer,
+        labelmapBufferArray,
         labelMapIndex,
         segMetadata.data,
         imageIds.length,
@@ -1666,6 +1748,23 @@ class DisplayView extends Component {
     delete brushModule.configuration.minInterval;
   }
 
+  resetViewportWL = () => {
+    let wwwc = sessionStorage.getItem("wwwc");
+    const max = parseInt(maxPort);
+    wwwc = wwwc ? JSON.parse(wwwc) : new Array(max);
+    wwwc[this.props.activePort] = null;
+    sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
+  }
+
+  deleteViewportWL = () => {
+    let wwwc = sessionStorage.getItem("wwwc");
+    const max = parseInt(maxPort);
+    wwwc = wwwc ? JSON.parse(wwwc) : new Array(max);
+    wwwc.splice(this.props.activePort, 1);
+    wwwc.push(null);
+    sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
+  }
+
   closeViewport = () => {
     const { showAimEditor, dirty } = this.state;
     // closes the active viewport
@@ -1676,6 +1775,7 @@ class DisplayView extends Component {
       return;
     }
     this.props.dispatch(closeSerie());
+    this.deleteViewportWL();
     // this.props.onSwitchView("search");
   };
 
@@ -1745,9 +1845,9 @@ class DisplayView extends Component {
   // Triggered by event from right bar to jump to the image of aim
   jumpToAimImage = event => {
     const { series, activePort } = this.props;
-    const aimId = event.detail;
-    const imageIndex = this.getImageIndex(series[activePort], this.state.data[activePort].stack.imageIds, aimId);
-    this.jumpToImage(imageIndex, activePort);
+    const { aimId, index } = event.detail;
+    const imageIndex = this.getImageIndex(series[index], this.state.data[index].stack.imageIds, aimId);
+    this.jumpToImage(imageIndex, index);
   };
 
   // Don't take the activePort Index from props because store updates late so
@@ -1931,6 +2031,7 @@ class DisplayView extends Component {
                   style={{ height: "calc(100% - 26px)" }}
                   activeTool={activeTool}
                   isOverlayVisible={this.state.isOverlayVisible[i] || false}
+                  jumpToImage={() => this.jumpToImage(0, i)}
                 />
               </div>
             ))}

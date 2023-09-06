@@ -250,7 +250,7 @@ function AnnotationTable(props) {
   const [data, setData] = useState([]);
   const [showSelectSeriesModal, setShowSelectSeriesModal] = useState(false);
   const [selected, setSelected] = useState({});
-  const [listOfSelecteds, setListOfSelecteds] = useState([]);
+  const [listOfSelecteds, setListOfSelecteds] = useState({});
   const [showNarrative, setShowNarrative] = useState(false);
   const [narrative, setNarrative] = useState('');
 
@@ -279,8 +279,27 @@ function AnnotationTable(props) {
 
   useEffect(() => {
     const selectedList = Object.keys(props.selectedAnnotations);
-    setListOfSelecteds(selectedList);
-  }, [props.selectedAnnotations]);
+
+    if (props.allSelected === false && selectedList.length === 0) {
+      setListOfSelecteds({});
+    }
+
+    const newList = {};
+    if (props.allSelected) {
+      data.forEach(el => {
+        newList[el.aimID] = true;
+      });
+      setListOfSelecteds(newList);
+    }
+
+  }, [props.allSelected]);
+
+  const updateListOfSelected = (item) => {
+    const newList = { ...listOfSelecteds }
+    if (newList[item.aimID]) delete newList[item.aimID];
+    else newList[item.aimID] = true;
+    setListOfSelecteds(newList);
+  }
 
   useEffect(() => {
     preparePageData(props.data, defaultPageSize, props.searchTableIndex);
@@ -435,10 +454,9 @@ function AnnotationTable(props) {
               <input
                 type="checkbox"
                 className='form-check-input'
-                checked={
-                  props.selectedAnnotations[row.original.aimID] ? true : false
-                }
-                onChange={() => props.updateSelectedAims(row.original)}
+                onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
+                checked={listOfSelecteds[row.original.aimID]}
+              // checked={props.allSelected}
               />
             );
           }
@@ -576,7 +594,7 @@ function AnnotationTable(props) {
 
           }
         }],
-      [props.selectedAnnotations, data]
+      [data, listOfSelecteds, props.selectedAnnotations]
     );
   }
   else {
@@ -591,10 +609,8 @@ function AnnotationTable(props) {
               <input
                 type="checkbox"
                 className='form-check-input'
-                checked={
-                  props.selectedAnnotations[row.original.aimID] ? true : false
-                }
-                onChange={() => props.updateSelectedAims(row.original)}
+                onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
+                checked={props.allSelected || listOfSelecteds[row.original.aimID]}
               />
             );
           }
@@ -684,7 +700,7 @@ function AnnotationTable(props) {
           accessor: 'userComment'
         }
       ],
-      [props.selectedAnnotations, data]
+      [data, listOfSelecteds, props.selectedAnnotations]
     );
   }
 

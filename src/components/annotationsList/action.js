@@ -46,6 +46,8 @@ import {
   REPLACE_IN_GRID,
   UPDATE_SEARCH_TABLE_INDEX,
   REFRESH_MAP,
+  AIM_SAVE,
+  SUBPATH,
   colors,
   commonLabels,
 } from "./types";
@@ -63,6 +65,10 @@ import { ConsoleWriter } from "istanbul-lib-report";
 import aimEntityData from "./annotationDock/aimEntityData";
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
+
+export const updateSubpath = (subpath, portIndex) => {
+  return { type: SUBPATH, payload: { subpath, portIndex } }
+}
 
 export const updateSearchTableIndex = searchTableIndex => {
   return { type: UPDATE_SEARCH_TABLE_INDEX, searchTableIndex }
@@ -723,6 +729,27 @@ export const getSingleSerie = (serie, annotation, wadoUrl) => {
   };
 };
 
+
+export const updateOtherAims = (aimrefs) => {
+  return async (dispatch) => {
+    try {
+      // aimID,
+      // patientID,
+      // projectID,
+      // seriesUID,
+      // studyUID,
+      // name,
+      const { projectID, patientID, studyUID } = aimrefs;
+      // projectId, subjectId, studyId
+      const { data: seriesList } = await getSeries(projectID, patientID, studyUID);
+      await dispatch(otherAimsUpdated(seriesList, aimrefs));
+    }
+    catch (err) {
+      console.error(err);
+    }
+  }
+}
+
 export const updateSingleSerie = (serie, annotation) => {
   return async (dispatch, getState) => {
     let { patientID, studyUID, seriesUID, numberOfAnnotations } = serie;
@@ -811,7 +838,7 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
         let imageAimMap = getImageIdAnnotations(serieAims);
         // TODO fix the env var retrieval
         const url = wadoUrl ? wadoUrl : sessionStorage.getItem('wadoUrl');
-        if (url.includes('wadors')) {    
+        if (url.includes('wadors')) {
           const imgIds = Object.keys(imageAimMap);
           const aims = Object.values(imageAimMap);
           imageAimMap = aims.reduce((all, item, i) => {
@@ -819,12 +846,12 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
             let img = imgIds[i].split('&frame=');
             let frameNo = img.length > 1 ? img[1] : 1;
             img = `${img[0]}/frames/${frameNo}`
-            all[img] = item;
+            all[img] = all[img] ? [...all[img], ...item] : item;
             return all;
           }, {})
 
         }
-        
+
         imageData = {
           ...imageAimMap,
         };
@@ -935,3 +962,8 @@ export const segUploadRemove = (segUid) => {
 export const aimDelete = (aimRefs) => {
   return { type: AIM_DELETE, payload: aimRefs };
 };
+
+
+export const otherAimsUpdated = (seriesList, aimRefs) => {
+  return { type: AIM_SAVE, payload: { seriesList, aimRefs } };
+}

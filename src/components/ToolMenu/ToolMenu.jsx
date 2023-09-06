@@ -1,12 +1,13 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import cornerstone from "cornerstone-core";
+import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import MetaData from "../MetaData/MetaData";
 import SmartBrushMenu from "../SmartBrushMenu/SmartBrushMenu";
 import BrushSizeSelector from "./BrushSizeSelector";
 import { WindowLevel } from "../WindowLevel/WindowLevel";
 import ColormapSelector from "./ColormapSelector";
 import FuseSelector from "./FuseSelector";
-import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import {
   FaLocationArrow,
@@ -57,6 +58,7 @@ import ToolMenuItem from "../ToolMenu/ToolMenuItem";
 import Interpolation from "./Interpolation";
 
 let mode;
+let wadoUrl;
 
 const mapStateToProps = (state) => {
   return {
@@ -116,6 +118,7 @@ class ToolMenu extends Component {
   constructor(props) {
     super(props);
     mode = sessionStorage.getItem('mode');
+    wadoUrl = sessionStorage.getItem('wadoUrl');
     this.tools = tools;
     this.invert = this.invert.bind(this);
 
@@ -375,6 +378,7 @@ class ToolMenu extends Component {
       return;
     } else if (tool === "ClearGrid") {
       this.props.dispatch(clearGrid());
+      sessionStorage.removeItem('wwwc');
       if (mode !== 'teaching')
         this.props.onSwitchView("search");
       else
@@ -466,8 +470,12 @@ class ToolMenu extends Component {
 
   checkIfMultiframe = () => {
     const image = this.getActiveImage();
-    if (image.data.string("x00280008")) return true;
-    return false;
+    const wadors = wadoUrl.includes('wadors');
+    if (wadors) {
+      const imgMetadata = cornerstoneWADOImageLoader.wadors.metaDataManager.get(image.imageId);
+      return imgMetadata.isMultiframe;
+    } else if (!wadors && image.data.string("x00280008")) return true;
+     else return false;
   };
 
   invert() {
@@ -487,6 +495,7 @@ class ToolMenu extends Component {
     if (layers.length || (colormap && colormap !== "gray"))
       this.resetRenderCanvas(element);
     cornerstone.reset(element);
+    window.dispatchEvent(new CustomEvent('resetViewportWL'));
   };
 
   resetRenderCanvas = (element) => {

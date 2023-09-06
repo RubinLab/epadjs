@@ -5,21 +5,23 @@ import "./WindowLevel.css";
 
 export class WindowLevel extends Component {
   constructor(props) {
-    super(props);    
+    super(props);
     this.state = {
-      name: props.selectedPreset      
+      name: props.selectedPreset
     };
   }
 
-  componentDidMount(){
+  componentDidMount() {
     const voi = this.getCurrentWL()?.voi;
-    this.setState({level: voi.windowCenter,
-      window: voi.windowWidth});
+    this.setState({
+      level: voi.windowCenter,
+      windowWidth: voi.windowWidth
+    });
   }
 
   getCurrentWL = () => {
     const { activePort } = this.props;
-    if (cornerstone.getEnabledElements()){
+    if (cornerstone.getEnabledElements()) {
       const { element } = cornerstone.getEnabledElements()[activePort];
       return cornerstone.getViewport(element);
     }
@@ -27,16 +29,22 @@ export class WindowLevel extends Component {
   }
 
   applyWL = (preset) => {
-    const { name, level, window } = preset;
+    const { name, level } = preset;
     if (this.state.name === name) return;
     const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
     const vp = this.getCurrentWL(element);
+
     vp.voi.windowCenter = preset.level;
     vp.voi.windowWidth = preset.window;
+    
+    window.dispatchEvent(
+      new CustomEvent("updateWL", { detail: { wc: preset.level, ww: preset.window } })
+    );
+
     vp.voiLUT = undefined;
     cornerstone.setViewport(element, vp);
-    this.setState({ name, level, window });
+    this.setState({ name, level, windowWidth: preset.window });
     this.props.onClose(name);
   };
 
@@ -50,9 +58,9 @@ export class WindowLevel extends Component {
     this.setState({ level: e.target.value });
   };
 
-  checkPreset = (preset) =>{
+  checkPreset = (preset) => {
     const voi = this.getCurrentWL()?.voi;
-    if(voi?.windowCenter === preset.level && voi?.windowWidth === preset.window) return true;
+    if (voi?.windowCenter === preset.level && voi?.windowWidth === preset.window) return true;
     return false;
   }
 
