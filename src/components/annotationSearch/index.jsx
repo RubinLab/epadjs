@@ -47,7 +47,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import SeriesModal from '../annotationsList/selectSerieModal';
 import WarningModal from '../common/warningModal';
 import { COMP_MODALITIES as compModality } from "../../constants.js";
-import { isSupportedModality } from 'Utils/aid.js';
+import { isSupportedModality, findSelectedCheckboxes, handleSelectDeselectAll, resetSelectAllCheckbox } from 'Utils/aid.js';
 
 import './annotationSearch.css';
 
@@ -235,7 +235,7 @@ const AnnotationSearch = props => {
   }, [props.refreshMap.plugins])
 
   const handleUserKeyPress = (e => {
-    const teachingFields = document.getElementById("questionaire"); 
+    const teachingFields = document.getElementById("questionaire");
     if (e.key === 'Enter' && !teachingFields) {
       getFieldSearchResults(undefined, undefined, true);
       props.dispatch(updateSearchTableIndex(0));
@@ -663,17 +663,6 @@ const AnnotationSearch = props => {
     return options;
   };
 
-  const handleSelectDeselectAll = (checked) => {
-    if (checked) {
-      handleMultipleSelect('selectPageAll');
-      setAllSelected(checked);
-    }
-    else {
-      handleMultipleSelect('unselectPageAll');
-      setAllSelected(checked);
-    }
-  }
-
   const handleMultipleSelect = action => {
     const pages = Math.ceil(props.rows / pageSize);
     const indexStart = props.searchTableIndex * pageSize;
@@ -975,9 +964,22 @@ const AnnotationSearch = props => {
     return { isOpen, index };
   };
 
+
+  const formSelectedAnnotationsData = () => {
+    const aimArray = findSelectedCheckboxes();
+    const aimMap = JSON.parse(sessionStorage.getItem('aimMap'));
+    const aimObj = aimArray.reduce((all, item, index) => {
+      all[item] = { ...aimMap[item] };
+      return all;
+    }, {})
+    return aimObj;
+  }
+
+
   const deleteAllSelected = () => {
     const notDeleted = {};
-    let newSelected = Object.assign({}, props.selectedAnnotations);
+    // let newSelected = Object.assign({}, props.selectedAnnotations);
+    let newSelected = formSelectedAnnotationsData();
     const toBeDeleted = {};
     const promiseArr = [];
     for (let annotation in newSelected) {
@@ -1001,6 +1003,7 @@ const AnnotationSearch = props => {
     Promise.all(promiseArr)
       .then(() => {
         getNewData(props.searchTableIndex, true);
+        resetSelectAllCheckbox(false);
       })
       .catch(error => {
         if (
@@ -1010,10 +1013,12 @@ const AnnotationSearch = props => {
         )
           toast.error(error.response.data.message, { autoClose: false });
         getNewData(props.searchTableIndex, true);
+        resetSelectAllCheckbox(false);
       });
     setShowDeleteModal(false);
     props.dispatch(clearSelection());
   };
+
   // cavit
   const prepareDropDownHtmlForPlugins = () => {
     const list = pluginListArray;
@@ -1282,8 +1287,8 @@ const AnnotationSearch = props => {
             <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
             {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
           {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
-            <AddToWorklist deselect={() => handleSelectDeselectAll(false)} forceUpdatePage={props.forceUpdatePage} />
-            <Projects deselect={() => handleSelectDeselectAll(false)} updateUrl={props.history.push}/>
+            <AddToWorklist deselect={() => { handleSelectDeselectAll(false); resetSelectAllCheckbox(false) }} forceUpdatePage={props.forceUpdatePage} />
+            <Projects deselect={() => { handleSelectDeselectAll(false); resetSelectAllCheckbox(false) }} updateUrl={props.history.push} />
             {/* <button type="button" className="btn btn-sm" onClick={() => { setShowProjects(!showProjects) }}><BiDownload /><br />Copy to Project</button>
           {showProjects && (<Projects className='btn btn-sm worklist' onClose={() => { setShowProjects(false) }} />)} */}
             <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
@@ -1353,7 +1358,7 @@ const AnnotationSearch = props => {
           <tr>
             <th className="select_row">
               <div className="form-check">
-                <input className="form-check-input" type="checkbox" checked={allSelected} onChange={({ target: { checked } }) => handleSelectDeselectAll(checked)} />
+                <input className="form-check-input __select-all" type="checkbox" onChange={({ target: { checked } }) => handleSelectDeselectAll(checked)} />
               </div>
             </th>
             <th>

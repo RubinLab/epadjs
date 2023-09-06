@@ -29,6 +29,7 @@ import SidebarContent from "./sidebarContent";
 import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
 import './style.css';
+import { resetSelectAllCheckbox } from '../../Utils/aid.js';
 
 let mode;
 
@@ -363,6 +364,7 @@ class Sidebar extends Component {
               this.handleRoute("project", id);
               this.props.getPidUpdate(id);
               this.setState({ selected: id });
+              resetSelectAllCheckbox(false);
             }} style={{ padding: "0.2rem" }}>
               {name}
               <div className={'element_number'}>
