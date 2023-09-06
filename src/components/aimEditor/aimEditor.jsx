@@ -45,6 +45,7 @@ class AimEditor extends Component {
       saveButtonIsActive: false,
       isUpdate: false,
       autoFill: false,
+      buttonsDisabled: false
     };
     //if aim is being updated set the aimId and isUpdate flag
     if (this.props.aimId) {
@@ -275,12 +276,14 @@ class AimEditor extends Component {
             <button
               className="btn btn-sm btn-outline-light aim-editor-button"
               onClick={() => this.props.onCancel(true)}
+              disabled={this.state.buttonsDisabled}
             >
               Cancel
             </button>
             <button
               className="btn btn-sm btn-outline-light aim-editor-button"
               onClick={this.save}
+              disabled={this.state.buttonsDisabled}
             >
               Save
             </button>
@@ -315,6 +318,7 @@ class AimEditor extends Component {
 
   save = () => {
     // Check if the template selected and if the selected template type is compatible to have markups
+    this.setState({ buttonsDisabled: true });
     if (!this.checkAimTemplate() || !this.checkMarkupsForTemplate()) return;
 
     if (this.semanticAnswers.checkFormSaveReady()) {
@@ -657,6 +661,7 @@ class AimEditor extends Component {
           "Annotation could not be saved! More information about the error can be found in the logs."
         );
         console.error(error);
+        this.setState({ buttonsDisabled: false });
       });
   };
 
@@ -1232,12 +1237,13 @@ class AimEditor extends Component {
       uploadSegmentation(segmentation, segId, projectID)
         .then(() => {
           this.props.dispatch(segUploadStarted(segId));
-          this.setState({ uploadingSegId: segId, showModal: true });
+          this.setState({ uploadingSegId: segId, showModal: true, buttonsDisabled: false });
           resolve("success");
         })
         .catch((error) => {
           console.error(error);
           reject("error");
+          this.setState({ buttonsDisabled: false });
         });
     });
     return promise;
@@ -1317,6 +1323,7 @@ class AimEditor extends Component {
     // this.props.dispatch(updatePatientOnAimSave(aimRefs));
     this.props.updateTreeDataOnSave(aimRefs);
     this.props.onCancel(false); //close the aim editor
+    this.setState({ buttonsDisabled: false })
   };
 
   parseImageUidAndFrame = (imageId) => {
