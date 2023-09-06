@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
+import { BarLoader } from "react-spinners";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import { getTemplates } from "../../services/templateServices";
 import cornerstone from "cornerstone-core";
@@ -273,6 +274,7 @@ class AimEditor extends Component {
         <div id="questionaire" />
         {this.state.buttonGroupShow && (
           <div className="aim-editor-button-group">
+            <BarLoader loading={this.state.buttonsDisabled} height={10} width={120} />
             <button
               className="btn btn-sm btn-outline-light aim-editor-button"
               onClick={() => this.props.onCancel(true)}
