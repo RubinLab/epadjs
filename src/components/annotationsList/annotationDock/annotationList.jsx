@@ -136,15 +136,19 @@ class AnnotationsList extends React.Component {
 
   getLabelArray = () => {
     const calculations = {};
+    const wadors = this.wadoUrl.includes('wadors');
     try {
       const { openSeries, activePort } = this.props;
       const { imageID } = openSeries[activePort];
       let imageAnnotations;
       if (openSeries[activePort].imageAnnotations) {
-        imageAnnotations = openSeries[activePort].imageAnnotations[imageID];
-        if (!imageAnnotations)
-          imageAnnotations =
-            openSeries[activePort].imageAnnotations[imageID + "&frame=1"];
+        const annotations = openSeries[activePort].imageAnnotations;
+        imageAnnotations = annotations[imageID];
+        // TODO: check frame number ??
+        if (!imageAnnotations) {
+          imageAnnotations = wadors ? annotations[imageID] :
+            annotations[imageID + "&frame=1"];
+        }
       }
       if (imageAnnotations) {
         for (let aim of imageAnnotations) {

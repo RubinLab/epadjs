@@ -72,4 +72,10 @@ function basicLevelingStrategy(evt) {
     eventData.viewport.voi.windowWidth += deltaY;
     eventData.viewport.voi.windowCenter += deltaX;
   }
+
+  window.dispatchEvent(
+    new CustomEvent("updateWL", { detail: { wc: eventData.viewport.voi.windowCenter, ww: eventData.viewport.voi.windowWidth } })
+
+  );
+
 }

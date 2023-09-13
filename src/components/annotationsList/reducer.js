@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import {
   LOAD_ANNOTATIONS,
   LOAD_ANNOTATIONS_SUCCESS,
@@ -46,6 +47,8 @@ import {
   REPLACE_IN_GRID,
   UPDATE_SEARCH_TABLE_INDEX,
   REFRESH_MAP,
+  AIM_SAVE,
+  SUBPATH,
   colors,
   commonLabels,
 } from "./types";
@@ -82,7 +85,8 @@ const initialState = {
   openStudies: {},
   searchTableIndex: 0,
   otherSeriesAimsList: {},
-  refreshMap: {}
+  refreshMap: {},
+  subpath: []
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -100,6 +104,22 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case AIM_SAVE:
+        const { seriesList, aimRefs } = action.payload;
+        const clonedOtherAims = _.cloneDeep(state.otherSeriesAimsList);
+        // to cover falsy isStudyAim value
+        const isStudyAim = aimRefs.isStudyAim === true;
+        seriesList.forEach((el, i) => {
+          if (clonedOtherAims[el.seriesUID] && el.seriesUID !== aimRefs.seriesUID && !isStudyAim) {
+            clonedOtherAims[el.seriesUID][aimRefs.aimID] = aimRefs;
+          }
+        })
+        return {...state, otherSeriesAimsList: clonedOtherAims };
+      case SUBPATH:
+        const {subpath, portIndex} = action.payload;
+        const newSubpath = [...state.subpath];
+        newSubpath[portIndex] = subpath;
+        return { ...state, subpath: newSubpath };
       case REFRESH_MAP:
         const { feature, condition } = action.payload;
         const updatedRefreshMap = { ...state.refreshMap };
@@ -182,7 +202,9 @@ const asyncReducer = (state = initialState, action) => {
         delete delAims[delSeriesUID];
         delete delOtherAims[delSeriesUID];
         let delGrid = state.openSeries.slice(0, state.activePort);
+        let delSubpath = state.openSeries.slice(0, state.activePort);
         delGrid = delGrid.concat(state.openSeries.slice(state.activePort + 1));
+        delSubpath= delSubpath.concat(state.subpath.slice(state.activePort + 1));
         let shouldStudyExist = false;
         for (let item of delGrid) {
           if (item.studyUID === delStudyUID) {
@@ -209,13 +231,15 @@ const asyncReducer = (state = initialState, action) => {
             otherSeriesAimsList: delOtherAims
           };
         }
+
         return {
           ...state,
           openSeries: delGrid,
           aimsList: delAims,
           // patients: delPatients,
           activePort: delActivePort,
-          otherSeriesAimsList: delOtherAims
+          otherSeriesAimsList: delOtherAims,
+          subpath: delSubpath
         };
       case LOAD_ANNOTATIONS:
         return Object.assign({}, state, {
@@ -577,6 +601,7 @@ const asyncReducer = (state = initialState, action) => {
 
         // return { ...state, openSeries: updatedGrid, aimsList: {...state.aimsList} };
         return Object.assign({}, state, {
+          activePort: index,
           openSeries: updatedGrid,
           aimsList: {
             ...state.aimsList,
@@ -625,6 +650,9 @@ const asyncReducer = (state = initialState, action) => {
       case AIM_DELETE: {
         const { aimRefs } = action.payload;
         const { seriesUID } = aimRefs;
+        const deepOther = _.cloneDeep(state.otherSeriesAimsList);
+        const deepOtherArrKeys = Object.keys(deepOther);
+        const deepOtherArrValues = Object.values(deepOther);
         let serieToUpdateIndex;
         const newOpenSeries = [...state.openSeries];
         const serieToUpdate = newOpenSeries.find((serie, index) => {
@@ -643,8 +671,18 @@ const asyncReducer = (state = initialState, action) => {
             if (ann.aimUid === aimRefs.aimID) value.splice(i, 1);
           }
         });
+
+        deepOtherArrValues.forEach((el => {
+          if (el[aimRefs.aimID]) delete el[aimRefs.aimID];
+        }))
+
+        const reformedOtherSeries = deepOtherArrKeys.reduce((all, item, index) => {
+          all[item] = deepOtherArrValues[index];
+          return all;
+        }, {});
+
         newOpenSeries[serieToUpdateIndex] = updatedSerie;
-        return { ...state, openSeries: [...newOpenSeries] };
+        return { ...state, openSeries: [...newOpenSeries], otherSeriesAimsList: reformedOtherSeries };
       }
       default:
         return state;

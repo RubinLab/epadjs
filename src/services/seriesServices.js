@@ -55,9 +55,14 @@ export function getMetadata(url) {
 }
 
 //  seems like this doesn"t belong to here but olny services know details about paths&server side
-export function getWadoImagePath(studyUid, seriesUid, imageId, subpath) {
+export function getWadoImagePath(studyUid, seriesUid, imageId, subpath = "pacs", format = "RS") {
+  /* We assume that the PACS/DICOMweb server will respond to both WADO-RS (wadors) and 
+  WADO-URI (wadouri)requests. The main distinction between the two paths should be in the 
+  inclusion of loader names in the endpoints: wadors uses a loader name in the path, such as 
+  http://mydicomweb.com/wadors, while wadouri uses wado in the path, such as http://mydicomweb.com/wado. */
+
   const wadoUrl = http.wadoUrl();
-  if (wadoUrl.includes("wadors"))
+  if (format === "RS" && wadoUrl.includes("wadors"))
     return (
       wadoUrl +
       "/" + subpath + "/studies/" +
@@ -69,7 +74,7 @@ export function getWadoImagePath(studyUid, seriesUid, imageId, subpath) {
     );
   else
     return (
-      wadoUrl + "/" + subpath +
+      wadoUrl.replace('/wadors', '/wado') + "/" + subpath +
       "/?requestType=WADO&studyUID=" +
       encodeURIComponent(studyUid) +
       "&seriesUID=" +
@@ -110,7 +115,7 @@ export function downloadSeries(projectID, body) {
 
 export function getSegmentation(series, imageId) {
   const { studyUID, seriesUID } = series;
-  const url = getWadoImagePath(studyUID, seriesUID, imageId)
+  const url = getWadoImagePath(studyUID, seriesUID, imageId, undefined, "URI")
     .replace("wadouri:", "")
     .replace("wadors:", "");
   return http.get(url, { responseType: "arraybuffer" });

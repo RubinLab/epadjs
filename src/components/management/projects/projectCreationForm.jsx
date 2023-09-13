@@ -86,17 +86,21 @@ const projectCreationForm = ({
           >
             {options}
           </select>
-          <label className="add-project__modal--label">Type</label>
-          <select
-            name="type"
-            className="add-project__modal--select"
-            onChange={onType}
-            defaultValue="Private"
-            id="projectType"
-          >
-            <option value="Private" id="private">Private</option>
-            <option value="Public" id="public">Public</option>
-          </select>
+
+          {mode !== 'teaching' && (
+            <>
+              <label className="add-project__modal--label">Type</label>
+              <select
+                name="type"
+                className="add-project__modal--select"
+                onChange={onType}
+                defaultValue="Private"
+                id="projectType"
+              >
+                <option value="Private" id="private">Private</option>
+                <option value="Public" id="public">Public</option>
+              </select>
+            </>)}
           <label className="form-exp required">*Required</label>
           {error && <div className="err-message">{error}</div>}
         </form>

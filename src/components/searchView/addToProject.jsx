@@ -5,20 +5,27 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import { FaProjectDiagram } from 'react-icons/fa';
 import ReactTooltip from 'react-tooltip';
 import { addAimsToProject } from "../../services/projectServices";
+import { findSelectedCheckboxes, resetSelectAllCheckbox } from '../../Utils/aid.js';
 
-const ProjectAdd = ({ projectMap, onSave, className, annotations, deselect, parent, showAddTo }) => {
+
+// const ProjectAdd = ({ projectMap, onSave, className, annotations, deselect, parent, showAddTo, history }) => {
+const ProjectAdd = (props) => {
+  const { projectMap, onSave, className, annotations, deselect, parent, showAddTo, updateUrl } = props;
   const projectNames = Object.values(projectMap);
   const projectIDs = Object.keys(projectMap);
 
   const addSelectionToProject = async (projectId) => {
     // If selected are not annotations, search is view is handling it (by props on Save)
-    if (!annotations.length && onSave)
+    const aimsPassed = annotations && annotations.length > 0;
+    if (!aimsPassed && onSave) {
       onSave(projectId);
-    else {
-      const aimIDs = Object.keys(annotations);
+    } else {
+      const storeIds = Object.keys(annotations);
+      const selectedIds = findSelectedCheckboxes();
+      const aimIDs = storeIds.length > 0 ? storeIds : selectedIds;
       try {
         await addAimsToProject(projectId, aimIDs);
-        window.dispatchEvent(new Event('refreshProjects'));
+        window.dispatchEvent(new CustomEvent('refreshProjects', { detail: projectId }));
         toast.success("Annotation(s) succesfully copied.", {
           position: "top-right",
           autoClose: 3000,
@@ -105,7 +112,7 @@ const ProjectAdd = ({ projectMap, onSave, className, annotations, deselect, pare
       <Dropdown.Menu as={ProjectMenu} className="dropdown-menu p-2 dropdown-menu-dark" style={{ maxHeight: '20rem', overflow: 'overlay', backgroundColor: '#333', borderColor: 'white', minWidth: '15rem', fontSize: '11px' }} >
         {projectNames?.map(({ projectName }, y) => {
           return (
-            <Dropdown.Item key={y} eventKey={projectIDs[y]} onSelect={eventKey => addSelectionToProject(eventKey)}>{projectName}</Dropdown.Item>
+            <Dropdown.Item key={y} eventKey={projectIDs[y]} onSelect={eventKey => { addSelectionToProject(eventKey); updateUrl(`/search/${eventKey}`) }}>{projectName}</Dropdown.Item>
           )
         })
         }

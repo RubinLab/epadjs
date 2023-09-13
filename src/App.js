@@ -786,7 +786,7 @@ class App extends Component {
       }
       const promiseArr = [];
       for (let serie of parsedSeriesArray) {
-        serie = { ...serie, projectID: "lite" };
+        serie.projectID = serie.projectID || 'lite';
         this.props.dispatch(addToGrid(serie));
         promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
       }
@@ -819,6 +819,7 @@ class App extends Component {
       }
     }
   };
+
 
   hasTeachingFiles = (studyUID) => {
     return searchAnnotations({
@@ -1490,6 +1491,7 @@ class App extends Component {
                       completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
                       loading={this.state.loading}
                       forceUpdatePage={() => this.setState(state => ({ update: state.update + 1 }))}
+                      getPidUpdate={this.getPidUpdate}
                     />
                   )}
                 />
@@ -1611,6 +1613,7 @@ class App extends Component {
                     completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
                     loading={this.state.loading}
                     forceUpdatePage={() => this.setState(state => ({ update: state.update + 1 }))}
+                    getPidUpdate={this.getPidUpdate}
                   />
                 )}
               />

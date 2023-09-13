@@ -82,7 +82,7 @@ class UpdateRequirement extends React.Component {
                 name="edit"
                 style={buttonStyle}
                 onClick={this.changePage}
-                disabled={requirements.length < 2}
+                disabled={requirements.length === 0}
               >
                 Delete Requirement
               </Button>

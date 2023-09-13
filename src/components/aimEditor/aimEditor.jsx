@@ -15,7 +15,8 @@ import {
   updatePatientOnAimSave,
   getSingleSerie,
   segUploadStarted,
-  segUploadRemove
+  segUploadRemove,
+  updateOtherAims
 } from "../annotationsList/action";
 import RecistTable from "./RecistTable";
 import { Aim, enumAimType } from "aimapi";
@@ -468,6 +469,9 @@ class AimEditor extends Component {
         const { activePort } = this.props;
         const { element } = cornerstone.getEnabledElements()[activePort];
         const image = cornerstone.getImage(element);
+        if (wadoUrl.includes('wadors')) {
+          image.metadata = this.createImageDataFromMetadata(image.imageId);
+        }
         aimData = { image, answers, user };
         aim = new Aim(
           aimData,
@@ -1118,6 +1122,7 @@ class AimEditor extends Component {
     const { element } = cornerstone.getEnabledElements()[this.props.activePort];
     const imageIds = this.getElementsActiveLayerImageIds(element);
     let imagePromises = [];
+    let metadataArray = [];
     for (let i = 0; i < imageIds.length; i++) {
       imagePromises.push(cornerstone.loadImage(imageIds[i]));
     }
@@ -1166,18 +1171,25 @@ class AimEditor extends Component {
     });
 
     const images = await Promise.all(imagePromises);
-
+    for (let i = 0; i < images.length; i++) {
+      metadataArray.push(cornerstoneWADOImageLoader.wadors.metaDataManager.get(images[i].imageId))
+    }
+    // const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(instance);
     const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
-      images,
+      metadataArray,
       labelmap3D,
       { rleEncode: false }
     );
+
+    const imageToPass = images[firstSegImageIndex];
+    const data = this.createImageDataFromMetadata(images[firstSegImageIndex].imageId)
+    imageToPass.metadata = data;
 
     return {
       segBlob,
       segStats,
       imageIdx: firstSegImageIndex,
-      image: images[firstSegImageIndex],
+      image: imageToPass,
     };
   };
 
@@ -1287,6 +1299,11 @@ class AimEditor extends Component {
     this.props.dispatch(
       getSingleSerie({ patientID, projectID, seriesUID, studyUID })
     );
+    const aimObj = { ...aimRefs };
+    delete aimObj.comment;
+
+    this.props.dispatch(updateOtherAims(aimObj))
+
     // Delete after tests Sept 2021
     // this.props.dispatch(
     //   updateSingleSerie({

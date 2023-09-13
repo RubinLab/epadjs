@@ -93,7 +93,7 @@ class CornerstoneViewport extends Component {
 
   constructor(props) {
     super(props);
-    
+
     const imageIdIndex = props.imageIdIndex;
     const imageId = props.imageIds[imageIdIndex];
 
@@ -587,15 +587,26 @@ class CornerstoneViewport extends Component {
 
   // TODO: May need to throttle?
   onImageRendered = (event) => {
-    const { viewport, element } = event.detail;
+    const { viewport, element, image } = event.detail;
     if (this.props.shouldInvert) {
       event.detail.viewport.invert = true;
       cornerstone.setViewport(element, viewport);
     }
+
+    let wwwc = sessionStorage.getItem('wwwc');
+    wwwc = wwwc ? JSON.parse(wwwc) : {};
+    const wc = wwwc[this.props.viewportIndex]?.wc || image.windowCenter;
+    const ww = wwwc[this.props.viewportIndex]?.ww || image.windowWidth;
+
+    viewport.voi.windowCenter = wc;
+    viewport.voi.windowWidth = ww;
+
+    cornerstone.setViewport(element, viewport);
+
     this.setState({
       scale: viewport.scale,
-      windowCenter: viewport.voi.windowCenter,
-      windowWidth: viewport.voi.windowWidth,
+      windowCenter: wc,
+      windowWidth: ww,
       rotationDegrees: viewport.rotation,
       isFlippedVertically: viewport.vflip,
       isFlippedHorizontally: viewport.hflip,
