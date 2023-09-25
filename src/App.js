@@ -815,6 +815,11 @@ class App extends Component {
       } else {
         console.log(" --->  in else not rows <---")
         const seriesArray = await this.getSeriesData(packedData);
+        console.log(" ----> ");
+        console.log(packedData);
+        console.log(seriesArray);
+        console.log(args);
+        console.log(" ----> ");
         window.dispatchEvent(
           new CustomEvent("openTeachingFilesModal", {
             detail: { seriesArray, args, packedData },
