@@ -34,6 +34,9 @@ class selectSerieModal extends React.Component {
   // _isMounted = false;
   constructor(props) {
     super(props);
+    console.log(" ---> props");
+    console.log(props);
+    console.log(" ---> props");
     this.state = {
       selectionType: "",
       selectionArr: [],
@@ -95,6 +98,7 @@ class selectSerieModal extends React.Component {
       this.props.completeLoading();
     };// end teaching file related part
   }
+  
   componentWillUnmount = () => {
     this._isMounted = false;
   };
