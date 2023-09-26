@@ -283,6 +283,14 @@ const AnnotationSearch = props => {
   }
 
   const useDebouncedEffect = (effect, deps, delay) => {
+    console.log(" ---> our own");
+    console.log(' ---> effect');
+    console.log(effect);
+    console.log(' ---> deps');
+    console.log(deps);
+    console.log(' ---> delay');
+    console.log(delay);
+    console.log(" ---> <--- ")
     useEffect(() => {
       const handler = setTimeout(() => effect(), delay);
       return () => { persistSearch(); clearTimeout(handler) };
@@ -290,6 +298,7 @@ const AnnotationSearch = props => {
   }
 
   useDebouncedEffect(() => {
+    console.log(" --->react native");
     if (selectedProject !== props.pid)
       setSelectedProject(props.pid);
     if (firstRun) {
@@ -625,7 +634,7 @@ const AnnotationSearch = props => {
     if (Object.keys(filters).length)
       body['filter'] = newFilters;
     searchAnnotations(body, bm)
-    .then(res => {
+      .then(res => {
         console.log("  ---> here in getFieldSearchResults");
         populateSearchResult(res, pageIndex, afterDelete);
         setRows(res.data.total_rows);
@@ -1201,7 +1210,7 @@ const AnnotationSearch = props => {
     setSelectedMods([]);
     setSelectedDiagnosis([]);
     setSelectedAnatomies([]);
-  
+
   }
 
   const clearAllFilters = () => {
