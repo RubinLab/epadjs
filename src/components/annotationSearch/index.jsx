@@ -283,14 +283,14 @@ const AnnotationSearch = props => {
   }
 
   const useDebouncedEffect = (effect, deps, delay) => {
-    console.log(" ---> our own");
-    console.log(' ---> effect');
-    console.log(effect);
-    console.log(' ---> deps');
-    console.log(deps);
-    console.log(' ---> delay');
-    console.log(delay);
-    console.log(" ---> <--- ")
+    // console.log(" ---> our own");
+    // console.log(' ---> effect');
+    // console.log(effect);
+    // console.log(' ---> deps');
+    // console.log(deps);
+    // console.log(' ---> delay');
+    // console.log(delay);
+    // console.log(" ---> <--- ")
     useEffect(() => {
       const handler = setTimeout(() => effect(), delay);
       return () => { persistSearch(); clearTimeout(handler) };
@@ -299,13 +299,20 @@ const AnnotationSearch = props => {
 
   useDebouncedEffect(() => {
     console.log(" --->react native");
-    if (selectedProject !== props.pid)
-      setSelectedProject(props.pid);
+    if (selectedProject !== props.pid) { 
+      console.log('selectedProject', selectedProject);
+      console.log('props.pid', props.pid);
+      setSelectedProject(props.pid); 
+    }
     if (firstRun) {
+      console.log(' ---> firstRun', firstRun);
       if (sessionStorage.searchState) {
+        console.log(' ++++> sessionStorage.searchState');
+        console.log(sessionStorage.searchState);
         loadSearchState();
       }
       setFirstRun(false);
+      console.log(" ===> after first run set to false");
       return;
     }
     console.log(" ---> 7")
@@ -360,6 +367,7 @@ const AnnotationSearch = props => {
   }
 
   const loadSearchState = () => {
+    console.log(" ++++++> in loadSearchState")
     const searchState = JSON.parse(sessionStorage.searchState);
     const { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject, filters, sort } = searchState;
     if (filters)
@@ -391,10 +399,12 @@ const AnnotationSearch = props => {
     const start = field.selectionStart;
     if (start === query.length) {
       setQuery(`${query} ${el}`);
+      console.log(" in if query")
     } else {
       const firstPart = query.substring(0, start);
       const secondPart = query.substring(start);
       setQuery(`${firstPart} ${el} ${secondPart}`);
+      console.log(" in else query")
     }
   };
 
