@@ -306,10 +306,12 @@ const AnnotationSearch = props => {
         console.log(' ++++> sessionStorage.searchState');
         console.log(sessionStorage.searchState);
         loadSearchState();
+        setFirstRun(false);
+        return;
       }
       setFirstRun(false);
       console.log(" ===> after first run set to false");
-      return;
+      // return;
     }
     console.log(" ---> 7")
     getFieldSearchResults();
