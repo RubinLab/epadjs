@@ -92,7 +92,7 @@ class selectSerieModal extends React.Component {
         all: [templates],
       });
       this.semanticAnswers.createViewerWindow();
-      // this.props.completeLoading();
+      this.props.completeLoading();
     };// end teaching file related part
   }
 

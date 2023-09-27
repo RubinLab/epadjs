@@ -202,6 +202,7 @@ const AnnotationSearch = props => {
     setBookmark('');
     setCheckboxSelected(false);
     props.dispatch(clearSelection());
+    console.log(" %%%%%%%%%%%% right before the initial persist searh");
     persistSearch();
     if (props.searchQuery) {
       console.log(" ---> 5")
@@ -283,17 +284,12 @@ const AnnotationSearch = props => {
   }
 
   const useDebouncedEffect = (effect, deps, delay) => {
-    // console.log(" ---> our own");
-    // console.log(' ---> effect');
-    // console.log(effect);
-    // console.log(' ---> deps');
-    // console.log(deps);
-    // console.log(' ---> delay');
-    // console.log(delay);
-    // console.log(" ---> <--- ")
     useEffect(() => {
       const handler = setTimeout(() => effect(), delay);
-      return () => { persistSearch(); clearTimeout(handler) };
+      return () => { 
+        console.log(" >>>>>>>> usedebounce persist")
+        persistSearch(); 
+        clearTimeout(handler) };
     }, [...deps || [], delay]);
   }
 
@@ -362,6 +358,7 @@ const AnnotationSearch = props => {
   }
 
   const persistSearch = () => {
+    console.log(" +++++++++++++++++++ persist search");
     const searchState = { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject, filters, sort };
     sessionStorage.searchState = JSON.stringify(searchState);
   }

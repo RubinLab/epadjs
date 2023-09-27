@@ -772,7 +772,6 @@ class App extends Component {
     await this.completeAutorization();
 
     if (seriesArray) {
-      console.log(" in if series arr -->");
       this.setState({ loading: true, freeze: 'none' })
       const parsedSeriesArray = JSON.parse(seriesArray);
       parsedSeriesArray.forEach(
@@ -799,7 +798,6 @@ class App extends Component {
         .catch((err) => console.error(err));
     } else if (patientID && studyUID && projectID) {
       // This should be teaching files
-      console.log(" ----> in here patientID && studyUID && projectID");
       this.setState({ loading: true, freeze: 'none' })
       const packedData = {
         projectID,
@@ -810,23 +808,15 @@ class App extends Component {
       // If study has teaching file it's already added so no need to add
       const { data: TF } = await this.hasTeachingFiles(studyUID);
       if (TF.total_rows) {
-        console.log(" --> rows <---")
         this.displaySeries(packedData);
       } else {
-        console.log(" --->  in else not rows <---")
         const seriesArray = await this.getSeriesData(packedData);
-        console.log(" ----> ");
-        console.log(packedData);
-        console.log(seriesArray);
-        console.log(args);
-        console.log(" ----> ");
         window.dispatchEvent(
           new CustomEvent("openTeachingFilesModal", {
             detail: { seriesArray, args, packedData },
           })
         );
       }
-      console.log(" ---> here end of function")
     }
     // console.log(" none of above");
   };
