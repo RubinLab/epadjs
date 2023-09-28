@@ -95,6 +95,7 @@ class selectSerieModal extends React.Component {
       this.props.completeLoading();
     };// end teaching file related part
   }
+
   componentWillUnmount = () => {
     this._isMounted = false;
   };

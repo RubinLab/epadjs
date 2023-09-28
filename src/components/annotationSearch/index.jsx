@@ -286,14 +286,16 @@ const AnnotationSearch = props => {
   }
 
   useDebouncedEffect(() => {
-    if (selectedProject !== props.pid)
+    if (selectedProject !== props.pid) {
       setSelectedProject(props.pid);
+    }
     if (firstRun) {
       if (sessionStorage.searchState) {
         loadSearchState();
+        setFirstRun(false);
+        return;
       }
       setFirstRun(false);
-      return;
     }
     getFieldSearchResults();
     props.dispatch(updateSearchTableIndex(0));
@@ -1190,7 +1192,6 @@ const AnnotationSearch = props => {
     setSelectedMods([]);
     setSelectedDiagnosis([]);
     setSelectedAnatomies([]);
-  
   }
 
   const clearAllFilters = () => {

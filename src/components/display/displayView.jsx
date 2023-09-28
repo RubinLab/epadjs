@@ -560,7 +560,8 @@ class DisplayView extends Component {
   shouldOpenAimEditor = (notShowAimEditor = false) => {
     const { series } = this.props;
     series.forEach(({ aimID, seriesUID }) => {
-      if (aimID && !notShowAimEditor) this.openAimEditor(aimID, seriesUID);
+      if (aimID && !notShowAimEditor) {
+        this.openAimEditor(aimID, seriesUID);}
     });
   };
 
@@ -811,8 +812,9 @@ class DisplayView extends Component {
           this.setState({ hasSegmentation: true });
           // this.setSerieActiveLabelMap(aimID);
         }
-        if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
+        if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
           this.setState({ showAimEditor: false });
+        }
         this.setState({ showAimEditor: true, selectedAim: aimJson });
         if (markupTypes)
           setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
