@@ -190,7 +190,6 @@ const AnnotationSearch = props => {
     //     populateSearchResult(res, pageIndex, afterdelete);
     //   })
     //   .catch(err => console.error(err));
-    console.log(" ---> 4")
     getFieldSearchResults(pageIndex, afterdelete);
   };
 
@@ -202,10 +201,9 @@ const AnnotationSearch = props => {
     setBookmark('');
     setCheckboxSelected(false);
     props.dispatch(clearSelection());
-    console.log(" %%%%%%%%%%%% right before the initial persist searh");
     persistSearch();
     if (props.searchQuery) {
-      console.log(" ---> 5")
+
       getFieldSearchResults(undefined, undefined, true);
       //const searchQueryFinal = Object.keys(props.searchQuery)[0];
       //const searchQueryText = Object.values(props.searchQuery)[0].query;
@@ -240,7 +238,7 @@ const AnnotationSearch = props => {
   const handleUserKeyPress = (e => {
     const teachingFields = document.getElementById("questionaire");
     if (e.key === 'Enter' && !teachingFields) {
-      console.log(" ---> 6")
+
       getFieldSearchResults(undefined, undefined, true);
       props.dispatch(updateSearchTableIndex(0));
       //if (mode !== 'teaching') {
@@ -286,34 +284,27 @@ const AnnotationSearch = props => {
   const useDebouncedEffect = (effect, deps, delay) => {
     useEffect(() => {
       const handler = setTimeout(() => effect(), delay);
-      return () => { 
-        console.log(" >>>>>>>> usedebounce persist")
-        persistSearch(); 
-        clearTimeout(handler) };
+      return () => {
+        persistSearch();
+        clearTimeout(handler)
+      };
     }, [...deps || [], delay]);
   }
 
   useDebouncedEffect(() => {
-    console.log(" --->react native");
-    if (selectedProject !== props.pid) { 
+    if (selectedProject !== props.pid) {
       console.log('selectedProject', selectedProject);
       console.log('props.pid', props.pid);
-      setSelectedProject(props.pid); 
+      setSelectedProject(props.pid);
     }
     if (firstRun) {
-      console.log(' ---> firstRun', firstRun);
       if (sessionStorage.searchState) {
-        console.log(' ++++> sessionStorage.searchState');
-        console.log(sessionStorage.searchState);
         loadSearchState();
         setFirstRun(false);
         return;
       }
       setFirstRun(false);
-      console.log(" ===> after first run set to false");
-      // return;
     }
-    console.log(" ---> 7")
     getFieldSearchResults();
     props.dispatch(updateSearchTableIndex(0));
     return persistSearch;
@@ -360,13 +351,11 @@ const AnnotationSearch = props => {
   }
 
   const persistSearch = () => {
-    console.log(" +++++++++++++++++++ persist search");
     const searchState = { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject, filters, sort };
     sessionStorage.searchState = JSON.stringify(searchState);
   }
 
   const loadSearchState = () => {
-    console.log(" ++++++> in loadSearchState")
     const searchState = JSON.parse(sessionStorage.searchState);
     const { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject, filters, sort } = searchState;
     if (filters)
@@ -398,12 +387,10 @@ const AnnotationSearch = props => {
     const start = field.selectionStart;
     if (start === query.length) {
       setQuery(`${query} ${el}`);
-      console.log(" in if query")
     } else {
       const firstPart = query.substring(0, start);
       const secondPart = query.substring(start);
       setQuery(`${firstPart} ${el} ${secondPart}`);
-      console.log(" in else query")
     }
   };
 
@@ -508,7 +495,6 @@ const AnnotationSearch = props => {
 
   // I replaced this function, and it can probably be removed - James
   const getSearchResult = (pageIndex, afterDelete, enterPressed) => {
-    console.log(" ---> 8")
     getFieldSearchResults(pageIndex, afterDelete, enterPressed);
     //props.dispatch(updateSearchTableIndex(0));
     //if (query.length === 0) {
@@ -592,7 +578,6 @@ const AnnotationSearch = props => {
   // This handles the search.
   const getFieldSearchResults = (pageIndex, afterDelete, enterPressed) => {
     if (query.length) {
-      console.log(" ----> query.length ");
       if (!syntaxVerify(query)) {
         if (enterPressed) {
           toast.info(explanation.invalidQuery, { position: 'top-right' });
@@ -605,7 +590,6 @@ const AnnotationSearch = props => {
     const filterArray = Object.entries(filters);
     const newFilters = {};
     if (filterArray.length > 0) {
-      console.log(" ----> filterArray.length ");
       for (const filt of filterArray) {
         let filterText = filt[1];
         filterText.replaceAll('\\\\', '\\');
@@ -644,7 +628,6 @@ const AnnotationSearch = props => {
       body['filter'] = newFilters;
     searchAnnotations(body, bm)
       .then(res => {
-        console.log("  ---> here in getFieldSearchResults");
         populateSearchResult(res, pageIndex, afterDelete);
         setRows(res.data.total_rows);
         setShowSpinner(false);
@@ -654,13 +637,13 @@ const AnnotationSearch = props => {
 
   const getNewData = (pageIndex, afterDelete) => {
     if (mode === 'teaching') {
-      console.log(" ---> 1")
+
       getFieldSearchResults(props.searchTableIndex, afterDelete);
       return;
     }
 
     if (query) {
-      console.log(" ---> 2")
+
       getFieldSearchResults(pageIndex, afterDelete);
     } else {
       getAnnotationsOfProjets(pageIndex, afterDelete);
@@ -1514,7 +1497,7 @@ const AnnotationSearch = props => {
       <AnnotationDownloadModal
         onSubmit={() => {
           setShowDownload(false);
-          console.log(" ---> 3")
+
           getFieldSearchResults();
           //if (mode === 'teaching')
           //  getFieldSearchResults();
