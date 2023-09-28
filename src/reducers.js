@@ -4,7 +4,7 @@ import annotationsListReducer from "./components/annotationsList/reducer";
 import managementReducer from "./components/management/reducer";
 
 export default combineReducers({
-  // searchViewReducer,
+  searchViewReducer,
   annotationsListReducer,
   managementReducer
 });

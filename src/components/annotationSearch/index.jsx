@@ -203,7 +203,6 @@ const AnnotationSearch = props => {
     props.dispatch(clearSelection());
     persistSearch();
     if (props.searchQuery) {
-
       getFieldSearchResults(undefined, undefined, true);
       //const searchQueryFinal = Object.keys(props.searchQuery)[0];
       //const searchQueryText = Object.values(props.searchQuery)[0].query;
@@ -238,7 +237,6 @@ const AnnotationSearch = props => {
   const handleUserKeyPress = (e => {
     const teachingFields = document.getElementById("questionaire");
     if (e.key === 'Enter' && !teachingFields) {
-
       getFieldSearchResults(undefined, undefined, true);
       props.dispatch(updateSearchTableIndex(0));
       //if (mode !== 'teaching') {
@@ -273,7 +271,6 @@ const AnnotationSearch = props => {
     }
 
     let seriesList = [seriesArray];
-    console.log(seriesList);
     setShowSelectSeries(seriesArray.length > 0);
     setShowWarning(seriesArray.length === 0);
     setSeriesList(seriesList);
@@ -284,17 +281,12 @@ const AnnotationSearch = props => {
   const useDebouncedEffect = (effect, deps, delay) => {
     useEffect(() => {
       const handler = setTimeout(() => effect(), delay);
-      return () => {
-        persistSearch();
-        clearTimeout(handler)
-      };
+      return () => { persistSearch(); clearTimeout(handler) };
     }, [...deps || [], delay]);
   }
 
   useDebouncedEffect(() => {
     if (selectedProject !== props.pid) {
-      console.log('selectedProject', selectedProject);
-      console.log('props.pid', props.pid);
       setSelectedProject(props.pid);
     }
     if (firstRun) {
@@ -637,13 +629,11 @@ const AnnotationSearch = props => {
 
   const getNewData = (pageIndex, afterDelete) => {
     if (mode === 'teaching') {
-
       getFieldSearchResults(props.searchTableIndex, afterDelete);
       return;
     }
 
     if (query) {
-
       getFieldSearchResults(pageIndex, afterDelete);
     } else {
       getAnnotationsOfProjets(pageIndex, afterDelete);
@@ -1202,7 +1192,6 @@ const AnnotationSearch = props => {
     setSelectedMods([]);
     setSelectedDiagnosis([]);
     setSelectedAnatomies([]);
-
   }
 
   const clearAllFilters = () => {
@@ -1497,7 +1486,6 @@ const AnnotationSearch = props => {
       <AnnotationDownloadModal
         onSubmit={() => {
           setShowDownload(false);
-
           getFieldSearchResults();
           //if (mode === 'teaching')
           //  getFieldSearchResults();

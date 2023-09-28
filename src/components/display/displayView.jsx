@@ -513,7 +513,6 @@ class DisplayView extends Component {
   };
 
   getData() {
-    console.log( ' --> getData');
     this.clearAllMarkups();//we are already clearing in it renderAims do we need to here? 
     try {
       const { series } = this.props;
@@ -559,11 +558,9 @@ class DisplayView extends Component {
   }
 
   shouldOpenAimEditor = (notShowAimEditor = false) => {
-    console.log(' --> shouldOpenAimEditor')
     const { series } = this.props;
     series.forEach(({ aimID, seriesUID }) => {
       if (aimID && !notShowAimEditor) {
-        console.log(" in if")
         this.openAimEditor(aimID, seriesUID);}
     });
   };
@@ -802,7 +799,6 @@ class DisplayView extends Component {
   };
 
   openAimEditor = (aimID, seriesUID) => {
-    console.log(' ---> openAimEditor aimID, seriesUID', aimID, seriesUID)
     try {
       const { aimList } = this.props;
       if (Object.entries(aimList).length !== 0) {
@@ -817,7 +813,6 @@ class DisplayView extends Component {
           // this.setSerieActiveLabelMap(aimID);
         }
         if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
-          console.log(" this may cause it");
           this.setState({ showAimEditor: false });
         }
         this.setState({ showAimEditor: true, selectedAim: aimJson });

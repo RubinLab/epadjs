@@ -37,7 +37,6 @@ class Rightsidebar extends Component {
         marginRight: "0",
       })
     } else {
-      console.log("in else")
       this.setState({
         width: this.state.rightDim,
         marginRight: this.state.rightDim,

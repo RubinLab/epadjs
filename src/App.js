@@ -818,7 +818,6 @@ class App extends Component {
         );
       }
     }
-    // console.log(" none of above");
   };
 
 
