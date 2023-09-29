@@ -1286,7 +1286,9 @@ class AimEditor extends Component {
     });
     const isStudyAim = aimRefs ? aimRefs.isStudyAim : false; //If upload has segmentation it can't be study aim
     if (isStudyAim) {
-      this.props.dispatch(clearAimId());
+      let encrypted = sessionStorage.getItem('encrypted');
+      encrypted = JSON.parse(encrypted);
+      if (encrypted === true && mode === 'teaching') this.props.dispatch(clearAimId());
       openSeries.forEach(({ seriesUID, studyUID }) => {
         if (openSeries[
           activePort
