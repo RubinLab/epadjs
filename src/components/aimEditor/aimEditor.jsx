@@ -16,7 +16,8 @@ import {
   getSingleSerie,
   segUploadStarted,
   segUploadRemove,
-  updateOtherAims
+  updateOtherAims,
+  clearAimId
 } from "../annotationsList/action";
 import RecistTable from "./RecistTable";
 import { Aim, enumAimType } from "aimapi";
@@ -1285,6 +1286,7 @@ class AimEditor extends Component {
     });
     const isStudyAim = aimRefs ? aimRefs.isStudyAim : false; //If upload has segmentation it can't be study aim
     if (isStudyAim) {
+      this.props.dispatch(clearAimId());
       openSeries.forEach(({ seriesUID, studyUID }) => {
         if (openSeries[
           activePort
