@@ -513,7 +513,7 @@ class selectSerieModal extends React.Component {
             <div>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) { this.handleCancel(true); this.props.onSave() } }} disabled={this.state.isButtonDisabled}>Save Teaching File</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()} disabled={this.state.isButtonDisabled}>Save Teaching File & Display</Button>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Discard</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>No New TF - Just Open Stella</Button>
             </div>
           )}
           {!isTeachingFile && (
