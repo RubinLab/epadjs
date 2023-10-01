@@ -588,15 +588,36 @@ class CornerstoneViewport extends Component {
   // TODO: May need to throttle?
   onImageRendered = (event) => {
     const { viewport, element, image } = event.detail;
+    const { viewportIndex } = this.props;
     if (this.props.shouldInvert) {
       event.detail.viewport.invert = true;
       cornerstone.setViewport(element, viewport);
     }
 
-    let wwwc = sessionStorage.getItem('wwwc');
-    wwwc = wwwc ? JSON.parse(wwwc) : {};
-    const wc = wwwc[this.props.viewportIndex]?.wc || image.windowCenter;
-    const ww = wwwc[this.props.viewportIndex]?.ww || image.windowWidth;
+    // let wwwc = sessionStorage.getItem('wwwc');
+    let imgStatus = sessionStorage.getItem('imgStatus');
+    imgStatus = JSON.parse(imgStatus);
+    imgStatus = imgStatus ? imgStatus : [];
+    let wwwc = imgStatus[viewportIndex] && imgStatus[viewportIndex].wwwc ? imgStatus[viewportIndex].wwwc : {};
+    // let pan = imgStatus[viewportIndex] && imgStatus[viewportIndex].pan ? imgStatus[viewportIndex].pan : {};
+    let zoom = imgStatus[viewportIndex] && imgStatus[viewportIndex].zoom ? imgStatus[viewportIndex].zoom : null;
+
+    let wc = image.windowCenter;
+    let ww = image.windowWidth;
+
+    if (Object.keys(wwwc).length > 0) {
+      wc = wwwc.wc;
+      ww = wwwc.ww;
+    }
+
+    // if (Object.keys(pan).length > 0) {
+    //   viewport.translation.x += pan.x;
+    //   viewport.translation.y += pan.y;
+    // }
+
+    if (zoom) {
+      viewport.scale = zoom;
+    }
 
     viewport.voi.windowCenter = wc;
     viewport.voi.windowWidth = ww;
