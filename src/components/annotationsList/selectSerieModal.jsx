@@ -379,7 +379,7 @@ class selectSerieModal extends React.Component {
       // window.alert(
       //     "Please fill all required fields!"
       //   );
-      // return -1;
+      return -1;
     }
     const { encrUrlArgs, decrArgs } = this.props;
     const { projectID, patientID, studyUID } = decrArgs;
