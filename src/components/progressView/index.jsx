@@ -8,7 +8,7 @@ import { getWorklistProgress } from "../../services/worklistServices";
 import "./proView.css";
 
 class ProgressView extends React.Component {
-  state = { data: [], view: "User" };
+  state = { data: [], view: "Patient" };
   componentDidMount = async () => {
     this.getWorkListData();
   };
@@ -77,12 +77,13 @@ class ProgressView extends React.Component {
     let columns = [
       {
         Header: userHeader,
-        accessor: "assignee",
-        aggregate: vals => _.join(Array.from(new Set(vals)), ", "),
+        accessor: "assignee_name",
+        aggregate: vals =>  _.join(Array.from(new Set(vals)), ", "),
         Aggregated: row => {
           return (
             <div className="--aggregated">
               <span>{row.value}</span>
+              {/* <span>{'here'}</span> */}
             </div>
           );
         }
@@ -211,7 +212,7 @@ class ProgressView extends React.Component {
           data={this.state.data}
           columns={this.defineColumns()}
           // pageSize={this.defineColumns().length}
-          pivotBy={view === "User" ? ["assignee"] : ["subject_name"]}
+          pivotBy={view === "User" ? ["assignee_name"] : ["subject_name"]}
           showPagination={false}
         />
       </>
