@@ -376,9 +376,6 @@ class selectSerieModal extends React.Component {
       if (result || !result) 
         this.setState({ isButtonDisabled: false });
       
-      // window.alert(
-      //     "Please fill all required fields!"
-      //   );
       return -1;
     }
     const { encrUrlArgs, decrArgs } = this.props;
