@@ -69,14 +69,14 @@ const annotationsLink = (props) => {
 
   if (aimsList[seriesUID]) {
     const seriesAims = Object.values(aimsList[seriesUID]);
-    header.push(
-      <th
-        className="annsLink-table __header --cell"
-        key="anns-header"
-        id="annsHeader"
-      >
-        Other Image Annotations in <span style={{ fontWeight: 'bold', fontSize: '1.3rem' }}>Series</span>
-      </th>,
+    // header.push(
+    //   <th
+    //     className="annsLink-table __header --cell"
+    //     key="anns-header"
+    //     id="annsHeader"
+    //   >
+    //     Other Image Annotations in <span style={{ fontWeight: 'bold', fontSize: '1.3rem' }}>Series</span>
+    //   </th>,
       // <th
       //   className="annsLink-table __header --cell"
       //   key="slide-header"
@@ -84,7 +84,7 @@ const annotationsLink = (props) => {
       // >
       //   Slice#
       // </th>,
-    );
+    // );
 
     seriesAims.forEach((aim, i) => {
       if (!props.imageAims[aim.id]) {
@@ -114,7 +114,7 @@ const annotationsLink = (props) => {
         key="anns-header"
         id="annsHeader"
       >
-        Other Image Annotations in <span style={{ fontWeight: 'bold', fontSize: '1.3rem' }}>Study</span>
+        Other  Annotations
       </th>,
       // <th
       //   className="annsLink-table __header --cell"
@@ -150,16 +150,16 @@ const annotationsLink = (props) => {
     <React.Fragment>
       {aimsList[seriesUID] && (
         <table className="annsLink-table">
-          <thead className="annsLink-table __header">
+          {/* <thead className="annsLink-table __header">
             <tr className="annsLink-table __header --row" >{header[0]}</tr>
-          </thead>
-          <tbody className="annsLink-table __tbody" style={{ backgroundColor: '#333' }}>{list}</tbody>
+          </thead> */}
+          {/* <tbody className="annsLink-table __tbody" style={{ backgroundColor: '#333' }}>{list}</tbody> */}
         </table>
       )}
       {otherSeriesAimsList[seriesUID] && (
         <table className="annsLink-table">
           <thead className="annsLink-table __header">
-            <tr className="annsLink-table __header --row" >{header[1]}</tr>
+            <tr className="annsLink-table __header --row" >{header[0]}</tr>
           </thead>
           <tbody className="annsLink-table __tbody" style={{ backgroundColor: '#333' }}>{studyAimsList}</tbody>
         </table>

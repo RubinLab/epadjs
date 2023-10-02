@@ -805,6 +805,8 @@ const extractNonMarkupAims = (arr, seriesID) => {
 };
 
 const getOtherSeriesAimData = (arr, projectID, patientID) => {
+  // console.log(" ====> getOtherSeriesAimData");
+  // console.log(arr)
   const aims = {};
   arr.forEach(el => {
     const aimID = el.ImageAnnotationCollection.uniqueIdentifier.root;
@@ -813,6 +815,8 @@ const getOtherSeriesAimData = (arr, projectID, patientID) => {
       .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy;
     const studyUID = study.instanceUid.root;
     const seriesUID = study.imageSeries.instanceUid.root;
+    console.log(" ====> seriesUID");
+    console.log(seriesUID, name);
     aims[aimID] = { projectID, patientID, aimID, studyUID, seriesUID, name };
   })
   return aims;
@@ -857,7 +861,7 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
         };
 
         aimsData = getAimListFields(aimsData, annotation);
-        const otherSeriesAimsData = getOtherSeriesAimData(otherSeriesAims, projectID, patientID);
+        const otherSeriesAimsData = getOtherSeriesAimData([...serieAims, ...otherSeriesAims], projectID, patientID);
         resolve({ aimsData, imageData, otherSeriesAimsData });
       })
       .catch((err) => reject("Error while getting annotation data", err));
