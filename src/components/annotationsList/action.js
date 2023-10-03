@@ -804,20 +804,43 @@ const extractNonMarkupAims = (arr, seriesID) => {
   return { studyAims, serieAims, otherSeriesAims };
 };
 
+// const getOtherSeriesAimData = (arr, projectID, patientID) => {
+//   const aims = {};
+//   arr.forEach(el => {
+//     const aimID = el.ImageAnnotationCollection.uniqueIdentifier.root;
+//     const name = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].name.value;
+//     const comment = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].comment.value;
+//     const study = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+//       .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy;
+//     const studyUID = study.instanceUid.root;
+//     const seriesUID = study.imageSeries.instanceUid.root;
+//     aims[aimID] = { projectID, patientID, aimID, studyUID, seriesUID, name, comment };
+//   })
+//   return aims;
+// }
+
 const getOtherSeriesAimData = (arr, projectID, patientID) => {
   const aims = {};
   arr.forEach(el => {
+    const imgAnnItem = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
+    const imgRefEntity = imgAnnItem.imageReferenceEntityCollection.ImageReferenceEntity[0]
+    const imgs = imgRefEntity.imageStudy.imageSeries?.imageCollection?.Image;
     const aimID = el.ImageAnnotationCollection.uniqueIdentifier.root;
-    const name = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].name.value;
-    const comment = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].comment.value;
-    const study = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+    const name = imgAnnItem.name.value;
+    const comment = imgAnnItem.comment.value;
+    const imgIDs = imgs.reduce((all, item) => {
+      all[item.sopInstanceUid.root] = true;
+      return all;
+    }, {})
+    const study = imgAnnItem
       .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy;
     const studyUID = study.instanceUid.root;
     const seriesUID = study.imageSeries.instanceUid.root;
-    aims[aimID] = { projectID, patientID, aimID, studyUID, seriesUID, name, comment };
+    aims[aimID] = { projectID, patientID, aimID, studyUID, seriesUID, name, comment, imgIDs };
   })
   return aims;
 }
+
 
 // helper methods - calls backend and get data
 const getSingleSerieData = (serie, annotation, wadoUrl) => {
