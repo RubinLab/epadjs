@@ -805,19 +805,16 @@ const extractNonMarkupAims = (arr, seriesID) => {
 };
 
 const getOtherSeriesAimData = (arr, projectID, patientID) => {
-  // console.log(" ====> getOtherSeriesAimData");
-  // console.log(arr)
   const aims = {};
   arr.forEach(el => {
     const aimID = el.ImageAnnotationCollection.uniqueIdentifier.root;
     const name = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].name.value;
+    const comment = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].comment.value;
     const study = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
       .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy;
     const studyUID = study.instanceUid.root;
     const seriesUID = study.imageSeries.instanceUid.root;
-    console.log(" ====> seriesUID");
-    console.log(seriesUID, name);
-    aims[aimID] = { projectID, patientID, aimID, studyUID, seriesUID, name };
+    aims[aimID] = { projectID, patientID, aimID, studyUID, seriesUID, name, comment };
   })
   return aims;
 }

@@ -21,7 +21,6 @@ const handleJumpToAim = (aimId, index) => {
 };
 
 const annotationsLink = (props) => {
-  console.log(props);  
   const { openSeries, activePort, aimsList, otherSeriesAimsList } = props;
   const { seriesUID } = openSeries[activePort];
   let list = [];
@@ -77,16 +76,19 @@ const annotationsLink = (props) => {
     //   >
     //     Other Image Annotations in <span style={{ fontWeight: 'bold', fontSize: '1.3rem' }}>Series</span>
     //   </th>,
-      // <th
-      //   className="annsLink-table __header --cell"
-      //   key="slide-header"
-      //   id="annsImgSlide"
-      // >
-      //   Slice#
-      // </th>,
+    // <th
+    //   className="annsLink-table __header --cell"
+    //   key="slide-header"
+    //   id="annsImgSlide"
+    // >
+    //   Slice#
+    // </th>,
     // );
 
     seriesAims.forEach((aim, i) => {
+      const commentArr = aim.json.comment.value.split('/');
+      const slideNo = commentArr[2];
+      const seriesIndex = commentArr[3];
       if (!props.imageAims[aim.id]) {
         list.push((
           <tr key={`${aim.id}-${i}`} className="annsLink-table __tbody --row">
@@ -98,7 +100,7 @@ const annotationsLink = (props) => {
             >
               {aim.name}
             </td>
-            {/* <td className="annsLink-table __tbody --cell2">{slideNo}</td> */}
+            <td className="annsLink-table __tbody --cell">{`${slideNo} / ${seriesIndex}`}</td>
           </tr>
         ));
       }
@@ -126,6 +128,10 @@ const annotationsLink = (props) => {
     );
 
     otherSeriesAims.forEach((aim, i) => {
+      const commentArr = aim.comment.split('/');
+      const slideNo = commentArr[2] || "";
+      const seriesIndex = commentArr[3] || "";
+
       studyAimsList.push((
         <tr key={aim.aimID} className="annsLink-table __tbody --row">
           <td
@@ -136,7 +142,7 @@ const annotationsLink = (props) => {
           >
             {aim.name}
           </td>
-          {/* <td className="annsLink-table __tbody --cell2">{slideNo}</td> */}
+          <td className="annsLink-table __tbody --cell">{slideNo || seriesIndex ? `${slideNo} / ${seriesIndex}` : null}</td>
         </tr>
       ));
 
