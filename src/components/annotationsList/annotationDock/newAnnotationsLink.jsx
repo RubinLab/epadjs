@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import {
   alertViewPortFull,
@@ -21,11 +21,17 @@ const handleJumpToAim = (aimId, index) => {
 };
 
 const annotationsLink = (props) => {
+  const [presentImgID, setPresentImgID] = useState("");
   const { openSeries, activePort, aimsList, otherSeriesAimsList } = props;
   const { seriesUID } = openSeries[activePort];
   let list = [];
   let header = [];
   let studyAimsList = [];
+
+  useEffect(() => {
+    const { openSeries, activePort } = props;
+    setPresentImgID(openSeries[activePort].imageID);
+  }, [props.openSeries])
 
   const checkIfSerieOpen = selectedSerie => {
     let isOpen = false;
@@ -131,9 +137,16 @@ const annotationsLink = (props) => {
       const commentArr = aim.comment.split('/');
       const slideNo = commentArr[2] || "";
       const seriesIndex = commentArr[3] || "";
-
+      const { openSeries, activePort } = props;
+      const { imageID } = openSeries[activePort];
+      const imgIDs = Object.keys(aim.imgIDs);
+      let imgMatches = false;
+      imgIDs.forEach(el => {
+        if (presentImgID && presentImgID.includes(el)) { imgMatches = true; }
+      })
+      const color = imgMatches ? aim.color.button.background : null
       studyAimsList.push((
-        <tr key={aim.aimID} className="annsLink-table __tbody --row">
+        <tr key={aim.aimID} className="annsLink-table __tbody --row" style={{ background: color }}>
           <td
             data-id={aim.aimID}
             data-serie={seriesUID}
@@ -144,8 +157,7 @@ const annotationsLink = (props) => {
           </td>
           <td className="annsLink-table __tbody --cell">{slideNo || seriesIndex ? `${slideNo} / ${seriesIndex}` : null}</td>
         </tr>
-      ));
-
+      ))
     });
 
   }

@@ -1533,7 +1533,6 @@ class DisplayView extends Component {
 
   refreshAllViewports = () => {
     const elements = cornerstone.getEnabledElements();
-    console.log(elements);
     if (elements) {
       elements.map(({ element }) => {
         try {

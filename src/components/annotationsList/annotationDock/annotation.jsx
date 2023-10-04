@@ -58,7 +58,8 @@ const annotation = (props) => {
     <>
       {/* <div className={className} style={finalButtonStyle}> */}
       <div
-        className="annotation-header" style={finalButtonStyle}
+        className="annotation-header" 
+        style={finalButtonStyle}
         data-id={props.id}
       >
         {props.name}

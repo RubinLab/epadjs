@@ -114,9 +114,9 @@ const asyncReducer = (state = initialState, action) => {
             clonedOtherAims[el.seriesUID][aimRefs.aimID] = aimRefs;
           }
         })
-        return {...state, otherSeriesAimsList: clonedOtherAims };
+        return { ...state, otherSeriesAimsList: clonedOtherAims };
       case SUBPATH:
-        const {subpath, portIndex} = action.payload;
+        const { subpath, portIndex } = action.payload;
         const newSubpath = [...state.subpath];
         newSubpath[portIndex] = subpath;
         return { ...state, subpath: newSubpath };
@@ -204,7 +204,7 @@ const asyncReducer = (state = initialState, action) => {
         let delGrid = state.openSeries.slice(0, state.activePort);
         let delSubpath = state.openSeries.slice(0, state.activePort);
         delGrid = delGrid.concat(state.openSeries.slice(state.activePort + 1));
-        delSubpath= delSubpath.concat(state.subpath.slice(state.activePort + 1));
+        delSubpath = delSubpath.concat(state.subpath.slice(state.activePort + 1));
         let shouldStudyExist = false;
         for (let item of delGrid) {
           if (item.studyUID === delStudyUID) {
@@ -292,6 +292,12 @@ const asyncReducer = (state = initialState, action) => {
               colors
             );
 
+        const coloredOtherSeries = action.payload.otherSeriesAimsData;
+        const coloredAimIds = Object.keys(colorAimsList);
+        coloredAimIds.forEach(el => {
+          if (coloredOtherSeries[el])
+            coloredOtherSeries[el].color = colorAimsList[el].color;
+        })
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
@@ -301,7 +307,7 @@ const asyncReducer = (state = initialState, action) => {
           },
           otherSeriesAimsList: {
             ...state.otherSeriesAimsList,
-            [action.payload.ref.seriesUID]: action.payload.otherSeriesAimsData
+            [action.payload.ref.seriesUID]: coloredOtherSeries
           },
           openSeries: imageAddedSeries,
         });
