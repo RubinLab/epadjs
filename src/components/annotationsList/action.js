@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import {
   LOAD_ANNOTATIONS,
   LOAD_ANNOTATIONS_SUCCESS,
@@ -841,6 +842,125 @@ const getOtherSeriesAimData = (arr, projectID, patientID) => {
   return aims;
 }
 
+const formAimData = (aim, projectID, patientID) => {
+  const imgAnnItem = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
+  const imgRefEntity = imgAnnItem.imageReferenceEntityCollection.ImageReferenceEntity[0]
+  const imgs = imgRefEntity.imageStudy.imageSeries?.imageCollection?.Image;
+  const aimID = aim.ImageAnnotationCollection.uniqueIdentifier.root;
+  const name = imgAnnItem.name.value;
+  const comment = imgAnnItem.comment.value;
+  const imgIDs = imgs.reduce((all, item) => {
+    all[item.sopInstanceUid.root] = true;
+    return all;
+  }, {})
+  const study = imgAnnItem
+    .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy;
+  const studyUID = study.instanceUid.root;
+  const seriesUID = study.imageSeries.instanceUid.root;
+  return { projectID, patientID, aimID, studyUID, seriesUID, name, comment, imgIDs };
+}
+
+const newGetOtherSeriesAimData = (arr, projectID, patientID) => {
+  // StudyUID: [{seriesUID: 1.324234, seriesNo: 12, aimIDs: {id: {color: name: slice: }}]
+  const seriesNovsUIDmap = {};
+  const aims = arr.reduce((all, item, index) => {
+    const aimData = formAimData(item, projectID, patientID);
+    const { studyUID, seriesUID, comment, aimID } = aimData;
+    const commentArr = comment.split('/');
+    const seriesNo = commentArr[3] ? parseInt(commentArr[3]) : null;
+    const imageNo = commentArr[2] ? parseInt(commentArr[2]) : null;
+    // if (seriesNo && !seriesNovsUIDmap[`${seriesUID}-${studyUID}`]) seriesNovsUIDmap[`${seriesUID}-${studyUID}`] = seriesNo;
+    if (seriesNo && !seriesNovsUIDmap[`${seriesUID}`]) seriesNovsUIDmap[`${seriesUID}`] = seriesNo;
+    aimData.seriesNo = seriesNo;
+    aimData.imageNo = imageNo;
+
+    if (all[studyUID])
+      if (all[studyUID][seriesUID]) all[studyUID][seriesUID][2][aimID] = aimData;
+      else all[studyUID][seriesUID] = [seriesUID, seriesNo, { [aimID]: aimData }];
+    else
+      all[studyUID] = { [seriesUID]: [seriesUID, seriesNo, { [aimID]: aimData }] }
+    return all;
+  }, {});
+  return { aims, seriesNovsUIDmap };
+}
+
+const sortAimsBasedOnName = (series) => {
+  const result = [];
+
+  for (let item of series) {
+    //create a map
+    const map = {};
+    // iterate over the image array
+    for (let aim of item[2]) {
+      if (map[aim.imageNo]) map[aim.imageNo].push(aim);
+      else map[aim.imageNo] = [aim];
+    }
+    // turn values to an array of array 
+    console.log(map);
+    const images = Object.values(map);
+    console.log(" ---> images")
+    console.log(images)
+    for (let image of images) {
+      image.sort(function (a, b) {
+        return a.name - b.name;
+      })
+      console.log(image);
+    }
+    // iterate over the values array and sort by name
+    // merge array 
+    // assign it to the initial position
+  }
+  return series;
+}
+
+const sortAimsBasedOnImageNo = (series) => {
+  console.log(series);
+  for (let item of series) {
+    item[2].sort(function (a, b) {
+      return a.imageNo - b.imageNo;
+    });
+  }
+  return series;
+}
+
+const sortAims = (series) => {
+  console.log('passed', series);
+  // let series = Object.values(data)[0]
+  // series = Object.values(series);
+  // console.log(" before sort series");
+  // console.log(series);
+  series = sortAimsBasedOnImageNo(series);
+  // series = sortAimsBasedOnName(series)
+  return series;
+}
+
+const getStudyAimsDataSorted = (arr, projectID, patientID) => {
+  console.log(1);
+  const { aims, seriesNovsUIDmap } = newGetOtherSeriesAimData(arr, projectID, patientID);
+  const studyUID = Object.keys(aims);
+  const seriesMap = Object.values(aims);
+  // get series' values
+  console.log(2);
+  let series = Object.values(seriesMap[0]);
+  // sort them seriesNo
+  series.sort(function (a, b) {
+    return a[1] - b[1];
+  });
+  // remove map with new sorted array
+  console.log(3);
+  series.forEach(el => {
+    const aimArr = Object.values(el[2]);
+    el[2] = aimArr;
+  });
+  console.log(4);
+  aims[studyUID] = sortAims(series);
+  console.log(' after aims soertd based on imageno', aims);
+
+  // write a sorting function for slice numbers
+  // and remove aimID map with sorted Array
+  return aims;
+}
+
 
 // helper methods - calls backend and get data
 const getSingleSerieData = (serie, annotation, wadoUrl) => {
@@ -882,9 +1002,14 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
 
         aimsData = getAimListFields(aimsData, annotation);
         const otherSeriesAimsData = getOtherSeriesAimData([...serieAims, ...otherSeriesAims], projectID, patientID);
+        // const otherSeriesAimsData = getStudyAimsDataSorted([...serieAims, ...otherSeriesAims], projectID, patientID);
+        // console.log(getStudyAimsDataSorted([...serieAims, ...otherSeriesAims], projectID, patientID));
         resolve({ aimsData, imageData, otherSeriesAimsData });
       })
-      .catch((err) => reject("Error while getting annotation data", err));
+      .catch((err) => {
+        console.log(err);
+        reject("Error while getting annotation data", err)
+      });
   });
 };
 
