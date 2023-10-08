@@ -829,6 +829,7 @@ const getOtherSeriesAimData = (arr, projectID, patientID) => {
     const aimID = el.ImageAnnotationCollection.uniqueIdentifier.root;
     const name = imgAnnItem.name.value;
     const comment = imgAnnItem.comment.value;
+    console.log("name", name, imgs);
     const imgIDs = imgs.reduce((all, item) => {
       all[item.sopInstanceUid.root] = true;
       return all;
@@ -850,6 +851,7 @@ const formAimData = (aim, projectID, patientID) => {
   const name = imgAnnItem.name.value;
   const comment = imgAnnItem.comment.value;
   const imgIDs = imgs.reduce((all, item) => {
+    console.log("name", name, imgs);
     all[item.sopInstanceUid.root] = true;
     return all;
   }, {})
@@ -935,27 +937,21 @@ const sortAims = (series) => {
 }
 
 const getStudyAimsDataSorted = (arr, projectID, patientID) => {
-  console.log(1);
   const { aims, seriesNovsUIDmap } = newGetOtherSeriesAimData(arr, projectID, patientID);
   const studyUID = Object.keys(aims);
   const seriesMap = Object.values(aims);
   // get series' values
-  console.log(2);
   let series = Object.values(seriesMap[0]);
   // sort them seriesNo
   series.sort(function (a, b) {
     return a[1] - b[1];
   });
   // remove map with new sorted array
-  console.log(3);
   series.forEach(el => {
     const aimArr = Object.values(el[2]);
     el[2] = aimArr;
   });
-  console.log(4);
   aims[studyUID] = sortAims(series);
-  console.log(' after aims soertd based on imageno', aims);
-
   // write a sorting function for slice numbers
   // and remove aimID map with sorted Array
   return aims;

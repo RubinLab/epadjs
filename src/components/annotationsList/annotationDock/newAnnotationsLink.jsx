@@ -84,27 +84,27 @@ const annotationsLink = (props) => {
     );
 
     // aim => series
-    console.log(" ====>     console.log(otherSeriesAims");
-    console.log(otherSeriesAims);
+    // console.log(" ====>     console.log(otherSeriesAims");
+    // console.log(otherSeriesAims);
 
     otherSeriesAims.forEach((series, i) => {
-      console.log(' ----> series');
-      console.log(series);
+      // console.log(' ----> series');
+      // console.log(series);
       series[2].forEach((aim, index) => {
         const commentArr = aim.comment.split('/');
         const slideNo = commentArr[2] || "";
         const seriesIndex = commentArr[3] || "";
 
-        // const imgIDs = Object.keys(aim.imgIDs);
-        // let imgMatches = false;
-        // imgIDs.forEach(el => {
-        //   if (presentImgID && presentImgID.includes(el)) { imgMatches = true; }
-        // })
-        // const color = imgMatches && aim.color ? aim.color.button.background : null
+        const imgIDs = Object.keys(aim.imgIDs);
+        let imgMatches = false;
+        imgIDs.forEach(el => {
+          if (presentImgID && presentImgID.includes(el)) imgMatches = true;
+          
+        })
+        const color = imgMatches ? aimsList[seriesUID][aim.aimID].color.button.background : null;
 
         studyAimsList.push((
-          // <tr key={aim.aimID} className="annsLink-table __tbody --row" style={{ background: color }}>
-          <tr key={aim.aimID} className="annsLink-table __tbody --row">
+          <tr key={aim.aimID} className="annsLink-table __tbody --row" style={{ background: color }}>
             <td
               data-id={aim.aimID}
               data-serie={seriesUID}
