@@ -23,7 +23,7 @@ const handleJumpToAim = (aimId, index) => {
 const annotationsLink = (props) => {
   const [presentImgID, setPresentImgID] = useState("");
   const { openSeries, activePort, aimsList, otherSeriesAimsList } = props;
-  const { seriesUID } = openSeries[activePort];
+  const { seriesUID, studyUID } = openSeries[activePort];
   let list = [];
   let header = [];
   let studyAimsList = [];
@@ -71,51 +71,8 @@ const annotationsLink = (props) => {
     }
   };
 
-
-  if (aimsList[seriesUID]) {
-    const seriesAims = Object.values(aimsList[seriesUID]);
-    // header.push(
-    //   <th
-    //     className="annsLink-table __header --cell"
-    //     key="anns-header"
-    //     id="annsHeader"
-    //   >
-    //     Other Image Annotations in <span style={{ fontWeight: 'bold', fontSize: '1.3rem' }}>Series</span>
-    //   </th>,
-    // <th
-    //   className="annsLink-table __header --cell"
-    //   key="slide-header"
-    //   id="annsImgSlide"
-    // >
-    //   Slice#
-    // </th>,
-    // );
-
-    seriesAims.forEach((aim, i) => {
-      const commentArr = aim.json.comment.value.split('/');
-      const slideNo = commentArr[2];
-      const seriesIndex = commentArr[3];
-      if (!props.imageAims[aim.id]) {
-        list.push((
-          <tr key={`${aim.id}-${i}`} className="annsLink-table __tbody --row">
-            <td
-              data-id={aim.id}
-              data-serie={seriesUID}
-              onClick={(e) => handleJumpToAim(aim.id, props.activePort)}
-              className="annsLink-table __tbody --cell"
-            >
-              {aim.name}
-            </td>
-            <td className="annsLink-table __tbody --cell">{`${slideNo} / ${seriesIndex}`}</td>
-          </tr>
-        ));
-      }
-    });
-  }
-
-
-  if (otherSeriesAimsList[seriesUID]) {
-    const otherSeriesAims = Object.values(otherSeriesAimsList[seriesUID]);
+  if (otherSeriesAimsList[studyUID]) {
+    const otherSeriesAims = Object.values(otherSeriesAimsList[studyUID]);
     header.push(
       <th
         className="annsLink-table __header --cell"
@@ -124,40 +81,43 @@ const annotationsLink = (props) => {
       >
         Other  Annotations
       </th>,
-      // <th
-      //   className="annsLink-table __header --cell"
-      //   key="slide-header"
-      //   id="annsImgSlide"
-      // >
-      //   Slice#
-      // </th>,
     );
 
-    otherSeriesAims.forEach((aim, i) => {
-      const commentArr = aim.comment.split('/');
-      const slideNo = commentArr[2] || "";
-      const seriesIndex = commentArr[3] || "";
-      const { openSeries, activePort } = props;
-      const { imageID } = openSeries[activePort];
-      const imgIDs = Object.keys(aim.imgIDs);
-      let imgMatches = false;
-      imgIDs.forEach(el => {
-        if (presentImgID && presentImgID.includes(el)) { imgMatches = true; }
+    // aim => series
+    console.log(" ====>     console.log(otherSeriesAims");
+    console.log(otherSeriesAims);
+
+    otherSeriesAims.forEach((series, i) => {
+      console.log(' ----> series');
+      console.log(series);
+      series[2].forEach((aim, index) => {
+        const commentArr = aim.comment.split('/');
+        const slideNo = commentArr[2] || "";
+        const seriesIndex = commentArr[3] || "";
+
+        // const imgIDs = Object.keys(aim.imgIDs);
+        // let imgMatches = false;
+        // imgIDs.forEach(el => {
+        //   if (presentImgID && presentImgID.includes(el)) { imgMatches = true; }
+        // })
+        // const color = imgMatches && aim.color ? aim.color.button.background : null
+
+        studyAimsList.push((
+          // <tr key={aim.aimID} className="annsLink-table __tbody --row" style={{ background: color }}>
+          <tr key={aim.aimID} className="annsLink-table __tbody --row">
+            <td
+              data-id={aim.aimID}
+              data-serie={seriesUID}
+              onClick={(e) => displayAnnotations(e, aim)}
+              className="annsLink-table __tbody --cell"
+            >
+              {aim.name}
+            </td>
+            <td className="annsLink-table __tbody --cell">{slideNo || seriesIndex ? `${slideNo} / ${seriesIndex}` : null}</td>
+          </tr>
+        ))
+
       })
-      const color = imgMatches ? aim.color.button.background : null
-      studyAimsList.push((
-        <tr key={aim.aimID} className="annsLink-table __tbody --row" style={{ background: color }}>
-          <td
-            data-id={aim.aimID}
-            data-serie={seriesUID}
-            onClick={(e) => displayAnnotations(e, aim)}
-            className="annsLink-table __tbody --cell"
-          >
-            {aim.name}
-          </td>
-          <td className="annsLink-table __tbody --cell">{slideNo || seriesIndex ? `${slideNo} / ${seriesIndex}` : null}</td>
-        </tr>
-      ))
     });
 
   }
@@ -174,7 +134,7 @@ const annotationsLink = (props) => {
           {/* <tbody className="annsLink-table __tbody" style={{ backgroundColor: '#333' }}>{list}</tbody> */}
         </table>
       )}
-      {otherSeriesAimsList[seriesUID] && (
+      {otherSeriesAimsList[studyUID] && (
         <table className="annsLink-table">
           <thead className="annsLink-table __header">
             <tr className="annsLink-table __header --row" >{header[0]}</tr>

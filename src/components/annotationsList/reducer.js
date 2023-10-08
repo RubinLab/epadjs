@@ -105,6 +105,7 @@ const asyncReducer = (state = initialState, action) => {
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
       case AIM_SAVE:
+        // TODO feat/annotations-list
         const { seriesList, aimRefs } = action.payload;
         const clonedOtherAims = _.cloneDeep(state.otherSeriesAimsList);
         // to cover falsy isStudyAim value
@@ -194,6 +195,7 @@ const asyncReducer = (state = initialState, action) => {
 
         return { ...state, openSeries: openSeriesToUpdate };
       case CLOSE_SERIE:
+        // TODO feat/annotaions-list
         let delSeriesUID = state.openSeries[state.activePort].seriesUID;
         let delStudyUID = state.openSeries[state.activePort].studyUID;
         let delOpenStudies = { ...state.openStudies };
@@ -292,12 +294,13 @@ const asyncReducer = (state = initialState, action) => {
               colors
             );
 
-        const coloredOtherSeries = action.payload.otherSeriesAimsData;
-        const coloredAimIds = Object.keys(colorAimsList);
-        coloredAimIds.forEach(el => {
-          if (coloredOtherSeries[el])
-            coloredOtherSeries[el].color = colorAimsList[el].color;
-        })
+        console.log(action.payload.otherSeriesAimsData);
+        // const coloredOtherSeries = action.payload.otherSeriesAimsData;
+        // const coloredAimIds = Object.keys(colorAimsList);
+        // coloredAimIds.forEach(el => {
+        //   if (coloredOtherSeries[el])
+        //     coloredOtherSeries[el].color = colorAimsList[el].color;
+        // })
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
@@ -305,10 +308,7 @@ const asyncReducer = (state = initialState, action) => {
             ...state.aimsList,
             [action.payload.ref.seriesUID]: colorAimsList,
           },
-          otherSeriesAimsList: {
-            ...state.otherSeriesAimsList,
-            [action.payload.ref.seriesUID]: coloredOtherSeries
-          },
+          otherSeriesAimsList: { ...state.otherSeriesAimsList, ...action.payload.otherSeriesAimsData },
           openSeries: imageAddedSeries,
         });
         return result;
@@ -654,6 +654,7 @@ const asyncReducer = (state = initialState, action) => {
         });
       }
       case AIM_DELETE: {
+        // TODO feat/annotations-list
         const { aimRefs } = action.payload;
         const { seriesUID } = aimRefs;
         const deepOther = _.cloneDeep(state.otherSeriesAimsList);

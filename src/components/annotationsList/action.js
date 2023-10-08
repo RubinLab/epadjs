@@ -1001,8 +1001,8 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
         };
 
         aimsData = getAimListFields(aimsData, annotation);
-        const otherSeriesAimsData = getOtherSeriesAimData([...serieAims, ...otherSeriesAims], projectID, patientID);
-        // const otherSeriesAimsData = getStudyAimsDataSorted([...serieAims, ...otherSeriesAims], projectID, patientID);
+        // const otherSeriesAimsData = getOtherSeriesAimData([...serieAims, ...otherSeriesAims], projectID, patientID);
+        const otherSeriesAimsData = getStudyAimsDataSorted([...serieAims, ...otherSeriesAims], projectID, patientID);
         // console.log(getStudyAimsDataSorted([...serieAims, ...otherSeriesAims], projectID, patientID));
         resolve({ aimsData, imageData, otherSeriesAimsData });
       })
