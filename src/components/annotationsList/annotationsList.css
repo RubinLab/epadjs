@@ -19,6 +19,7 @@
   padding: 0.3rem;
   overflow-x: hidden;
 }
+
 .annList {
   background: #861737;
   /* background: #3a3f44; */
@@ -42,6 +43,7 @@
 .annList-dropdown {
   color: #3a3f44;
 }
+
 .annList-header {
   display: flex;
   justify-content: space-between;
@@ -54,6 +56,7 @@
   cursor: pointer;
   font: 5rem;
 }
+
 .-serieButton__container {
   display: flex;
   justify-content: space-evenly;
@@ -61,7 +64,9 @@
 }
 
 .annList-serieButton
-/*.selectSerie-clearButton */ {
+
+/*.selectSerie-clearButton */
+  {
   background-color: #333;
   width: 90%;
   max-width: 100%;
@@ -75,10 +80,14 @@
   justify-content: space-around;
 }
 
-.annList-serieButton:hover /*,
-.selectSerie-clearButton:hover */ {
+.annList-serieButton:hover
+
+/*,
+.selectSerie-clearButton:hover */
+  {
   transform: scale(1.1);
 }
+
 .-serieButton__icon {
   /* margin-right: 0.5rem; */
   cursor: pointer;
@@ -121,6 +130,7 @@
   justify-content: flex-start;
   flex-direction: column;
 }
+
 .-serieButton__checkbox-container {
   width: 10%;
   margin: 0.5rem;
@@ -174,12 +184,13 @@
   text-overflow: ellipsis;
   text-align: center;
 }
+
 .annotation-name__container {
   display: flex;
   padding-left: 0.5rem;
   width: 84%;
   font-size: 1rem;
-  text-transform: capitalize;  
+  text-transform: capitalize;
   /* align-items: center; */
 }
 
@@ -222,6 +233,7 @@
 .annotation-name__container {
   cursor: pointer;
 }
+
 svg {
   pointer-events: auto;
 }
@@ -231,9 +243,11 @@ svg {
   display: flex;
   justify-content: center;
 }
+
 .clickable-icon {
   pointer-events: none;
 }
+
 .annotation-label__container {
   /* border-bottom-left-radius: 1em;
   border-bottom-right-radius: 1em; */
@@ -249,7 +263,7 @@ svg {
 
 .annotation__userName {
   margin-right: 0.5rem;
-  text-transform: capitalize;  
+  text-transform: capitalize;
 }
 
 .annotation__type {
@@ -264,6 +278,7 @@ svg {
 .Volume-label {
   display: flex;
 }
+
 .aimEntity-item {
   list-style-type: circle;
   padding-left: 0.2rem;
@@ -292,10 +307,12 @@ svg {
   flex-wrap: wrap;
   justify-content: flex-start;
 }
+
 .-calculation__label--el {
   display: flex;
   margin-right: 0.5rem;
 }
+
 .-calculation__labelIn--max {
   margin-left: 1rem;
 }
@@ -326,6 +343,7 @@ svg {
   display: flex;
   justify-content: space-evenly;
 }
+
 .-maxView__message--exp {
   color: grey;
   margin: 0 auto;
@@ -407,6 +425,8 @@ svg {
   margin: 1rem auto;
   table-layout: auto;
   width: 95%;
+  background-color: none;
+  background-color: #777;
   /* table-layout: fixed; */
 }
 
@@ -414,6 +434,7 @@ svg {
 .annsLink-table.__tbody.--cell,
 .annsLink-table.__header.--cell {
   border-collapse: collapse;
+  background-color: #555;
 }
 
 .annsLink-table.__header.--cell {
@@ -458,7 +479,7 @@ svg {
 }
 
 .annsLink-table.__tbody.--row,
-.annsLink-table.__header{
+.annsLink-table.__header {
   border-bottom: 1px solid #272b30;
   color: #ccc !important;
   font-size: small;
@@ -468,14 +489,7 @@ svg {
   border-bottom: none;
 }
 
-table{
-  background-color: #333 !important;
-  border: none;
-  text-transform: capitalize;
-  font-size: 1.1rem;
-}
-
-th{
+th {
   border: none !important;
 }
 
@@ -483,7 +497,7 @@ th{
 
 #series-modal {
   background-color: #555555;
-  width:40% !important;
+  width: 40% !important;
   max-width: none !important;
   position: absolute;
   top: 20%;
@@ -492,39 +506,40 @@ th{
   z-index: 100;
 }
 
-.select-serie-header{
+.select-serie-header {
   background-color: #666 !important;
   border: none !important;
   height: 2.5rem;
 }
 
-.select-serie-title{
-  color:#d3d3d3 !important;
+.select-serie-title {
+  color: #d3d3d3 !important;
   font-size: 1.2rem !important;
 }
 
-.select-serie-body{
+.select-serie-body {
   background-color: #444 !important;
-  color:#ccc !important
+  color: #ccc !important
 }
 
-.select-serie-footer{
+.select-serie-footer {
   background-color: #444 !important;
   border: none !important;
-  color:#ccc !important
+  color: #ccc !important
 }
 
-.modal-button{
+.modal-button {
   margin: 0.2rem;
 }
 
-.field-grid {  display: grid;
+.field-grid {
+  display: grid;
   grid-template-columns: 49% 49%;
   gap: 1em 1em;
   grid-auto-flow: row;
 }
 
-.max-series{
+.max-series {
   width: 100%;
   background-color: #666 !important;
   line-height: 2rem;
@@ -532,7 +547,7 @@ th{
 }
 
 .significant-series {
-  color:#EADDB2;
+  color: #EADDB2;
 }
 
 .modal-content {
@@ -544,4 +559,24 @@ th{
   font-size: 1rem;
   font-weight: bold;
   margin: 0.3rem;
+}
+
+.other-annotations {
+  background-color: #222 !important;
+  padding: 7px;
+  color: #ccc;
+  text-shadow: 1px 0px 1px rgba(0, 0, 0, 0.25);
+  margin: 0.5rem 0.5rem 0rem 0.5rem;
+}
+
+.annotation-back {
+  background-color: #555;
+  display: block;
+  padding: 7px;
+  margin: 0px 7px;
+}
+
+.img-label {
+  display: block;
+  text-align: right;
 }

@@ -75,21 +75,14 @@ const annotationsLink = (props) => {
     const otherSeriesAims = Object.values(otherSeriesAimsList[studyUID]);
     header.push(
       <th
-        className="annsLink-table __header --cell"
+        className="other-annotations"
         key="anns-header"
-        id="annsHeader"
       >
         Other  Annotations
       </th>,
     );
 
-    // aim => series
-    // console.log(" ====>     console.log(otherSeriesAims");
-    // console.log(otherSeriesAims);
-
     otherSeriesAims.forEach((series, i) => {
-      // console.log(' ----> series');
-      // console.log(series);
       series[2].forEach((aim, index) => {
         const commentArr = aim.comment.split('/');
         const slideNo = commentArr[2] || "";
@@ -99,22 +92,19 @@ const annotationsLink = (props) => {
         let imgMatches = false;
         imgIDs.forEach(el => {
           if (presentImgID && presentImgID.includes(el)) imgMatches = true;
-          
+
         })
         const color = imgMatches ? aimsList[seriesUID][aim.aimID].color.button.background : null;
 
         studyAimsList.push((
-          <tr key={aim.aimID} className="annsLink-table __tbody --row" style={{ background: color }}>
-            <td
-              data-id={aim.aimID}
-              data-serie={seriesUID}
-              onClick={(e) => displayAnnotations(e, aim)}
-              className="annsLink-table __tbody --cell"
-            >
-              {aim.name}
-            </td>
-            <td className="annsLink-table __tbody --cell">{slideNo || seriesIndex ? `${slideNo} / ${seriesIndex}` : null}</td>
-          </tr>
+          <li style={{ background: color, listStyleType: 'none' }}
+            data-id={aim.aimID}
+            data-serie={seriesUID}
+            onClick={(e) => displayAnnotations(e, aim)}
+          >
+            <span>{aim.name}</span>
+            <span >{slideNo || seriesIndex ? `${slideNo} / ${seriesIndex}` : null}</span>
+          </li>
         ))
 
       })
@@ -126,23 +116,17 @@ const annotationsLink = (props) => {
 
   return (
     <React.Fragment>
-      {aimsList[seriesUID] && (
-        <table className="annsLink-table">
-          {/* <thead className="annsLink-table __header">
-            <tr className="annsLink-table __header --row" >{header[0]}</tr>
-          </thead> */}
-          {/* <tbody className="annsLink-table __tbody" style={{ backgroundColor: '#333' }}>{list}</tbody> */}
-        </table>
-      )}
       {otherSeriesAimsList[studyUID] && (
-        <table className="annsLink-table">
-          <thead className="annsLink-table __header">
-            <tr className="annsLink-table __header --row" >{header[0]}</tr>
-          </thead>
-          <tbody className="annsLink-table __tbody" style={{ backgroundColor: '#333' }}>{studyAimsList}</tbody>
-        </table>
-      )}
-    </React.Fragment>
+        <div>
+          <div className="other-annotations"> Other Annotations</div>
+          <div className="annotation-back" >
+            <p className="img-label">Image / Series</p>
+            <ul>{studyAimsList}</ul>
+          </div>
+        </div>
+      )
+      }
+    </React.Fragment >
   );
 };
 
