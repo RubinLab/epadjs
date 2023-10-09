@@ -83,6 +83,7 @@ const annotationsLink = (props) => {
     );
 
     otherSeriesAims.forEach((series, i) => {
+      const seriesList = [];
       series[2].forEach((aim, index) => {
         const commentArr = aim.comment.split('/');
         const slideNo = commentArr[2] || "";
@@ -95,19 +96,24 @@ const annotationsLink = (props) => {
 
         })
         const color = imgMatches ? aimsList[seriesUID][aim.aimID].color.button.background : null;
-
-        studyAimsList.push((
+        // studyAimsList.push((
+        seriesList.push((
           <li style={{ background: color, listStyleType: 'none' }}
             data-id={aim.aimID}
             data-serie={seriesUID}
             onClick={(e) => displayAnnotations(e, aim)}
           >
-            <span>{aim.name}</span>
-            <span >{slideNo || seriesIndex ? `${slideNo} / ${seriesIndex}` : null}</span>
+            {aim.name}
+            {/* <span>{aim.name}</span> */}
+            <span className="img-labels">
+              <span className="img-num">  {slideNo ? `${slideNo}` : null}</span>
+              <span className="img-ser">{seriesIndex ? `${seriesIndex}` : null}</span>
+            </span>
           </li>
         ))
 
       })
+      studyAimsList.push((<ul className='series'>{seriesList}</ul>))
     });
 
   }
@@ -121,7 +127,8 @@ const annotationsLink = (props) => {
           <div className="other-annotations"> Other Annotations</div>
           <div className="annotation-back" >
             <p className="img-label">Image / Series</p>
-            <ul>{studyAimsList}</ul>
+            {studyAimsList}
+            {/* <ul>{studyAimsList}</ul> */}
           </div>
         </div>
       )

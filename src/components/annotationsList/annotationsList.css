@@ -580,3 +580,33 @@ th {
   display: block;
   text-align: right;
 }
+
+.series {
+  border: #777 solid 1px;
+  padding: 3px;
+  color: #ececec;
+  list-style: none;
+}
+
+.img-labels {
+  float: right;
+}
+
+.img-num {
+  padding: 0 5px;
+  margin-right: 7px;
+  background-color: #ccc;
+  border: 1px solid #777;
+  border-radius: 21px;
+  font-size: 10px;
+  color: #222;
+}
+
+.img-ser {
+  padding: 0 5px;
+  margin-right: 7px;
+  background-color: #222;
+  border: 1px solid #777;
+  color: #ccc;
+  font-size: 10px;
+}
