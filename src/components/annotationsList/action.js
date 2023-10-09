@@ -885,32 +885,15 @@ const newGetOtherSeriesAimData = (arr, projectID, patientID) => {
 }
 
 const sortAimsBasedOnName = (series) => {
-  const result = [];
-
-  for (let item of series) {
-    //create a map
-    const map = {};
-    // iterate over the image array
-    for (let aim of item[2]) {
-      if (map[aim.imageNo]) map[aim.imageNo].push(aim);
-      else map[aim.imageNo] = [aim];
-    }
-    // turn values to an array of array 
-    console.log(map);
-    const images = Object.values(map);
-    console.log(" ---> images")
-    console.log(images)
-    for (let image of images) {
-      image.sort(function (a, b) {
-        return a.name - b.name;
-      })
-      console.log(image);
-    }
-    // iterate over the values array and sort by name
-    // merge array 
-    // assign it to the initial position
-  }
-  return series;
+  series.forEach(item => {
+    item[2].sort((a, b) => {
+      if (a.imageNo === b.imageNo) {
+        if (a.name > b.name) return 1;
+        else if ( a.name < b.name) return -1;
+        else return 0;
+      }
+    })
+  })
 }
 
 const sortAimsBasedOnImageNo = (series) => {
@@ -923,12 +906,8 @@ const sortAimsBasedOnImageNo = (series) => {
 }
 
 const sortAims = (series) => {
-  // let series = Object.values(data)[0]
-  // series = Object.values(series);
-  // console.log(" before sort series");
-  // console.log(series);
   series = sortAimsBasedOnImageNo(series);
-  // series = sortAimsBasedOnName(series)
+  sortAimsBasedOnName(series);
   return series;
 }
 
