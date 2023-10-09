@@ -182,6 +182,13 @@
   margin-left: 0;
 }
 
+.form-check {
+  display: block;
+  min-height: 1.5rem;
+  padding-left: 0.5em !important;
+  margin-bottom: 0.125rem;
+}
+
 /* .form-switch.form-check-input { */
 #showAnnotations {
   /* border: #777 1px solid !important; */
