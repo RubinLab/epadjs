@@ -829,7 +829,6 @@ const getOtherSeriesAimData = (arr, projectID, patientID) => {
     const aimID = el.ImageAnnotationCollection.uniqueIdentifier.root;
     const name = imgAnnItem.name.value;
     const comment = imgAnnItem.comment.value;
-    console.log("name", name, imgs);
     const imgIDs = imgs.reduce((all, item) => {
       all[item.sopInstanceUid.root] = true;
       return all;
@@ -851,7 +850,6 @@ const formAimData = (aim, projectID, patientID) => {
   const name = imgAnnItem.name.value;
   const comment = imgAnnItem.comment.value;
   const imgIDs = imgs.reduce((all, item) => {
-    console.log("name", name, imgs);
     all[item.sopInstanceUid.root] = true;
     return all;
   }, {})
@@ -916,7 +914,6 @@ const sortAimsBasedOnName = (series) => {
 }
 
 const sortAimsBasedOnImageNo = (series) => {
-  console.log(series);
   for (let item of series) {
     item[2].sort(function (a, b) {
       return a.imageNo - b.imageNo;
@@ -926,7 +923,6 @@ const sortAimsBasedOnImageNo = (series) => {
 }
 
 const sortAims = (series) => {
-  console.log('passed', series);
   // let series = Object.values(data)[0]
   // series = Object.values(series);
   // console.log(" before sort series");

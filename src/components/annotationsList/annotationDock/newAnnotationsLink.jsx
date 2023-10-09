@@ -24,14 +24,12 @@ const annotationsLink = (props) => {
   const [presentImgID, setPresentImgID] = useState("");
   const { openSeries, activePort, aimsList, otherSeriesAimsList } = props;
   const { seriesUID, studyUID } = openSeries[activePort];
-  let list = [];
-  let header = [];
   let studyAimsList = [];
 
   useEffect(() => {
     const { openSeries, activePort } = props;
     setPresentImgID(openSeries[activePort].imageID);
-  }, [props.openSeries])
+  }, [props.openSeries, props.aimsList])
 
   const checkIfSerieOpen = selectedSerie => {
     let isOpen = false;
@@ -46,79 +44,74 @@ const annotationsLink = (props) => {
   };
 
   const displayAnnotations = (e, selected) => {
-    const { patientID, projectID, studyUID, seriesUID, aimID } = selected;
+    console.log(' ---> selected');
+    console.log(selected);
     const maxPort = parseInt(sessionStorage.getItem('maxPort'));
 
     let isGridFull = openSeries.length === maxPort;
-    const { isOpen, index } = checkIfSerieOpen(seriesUID);
+    const { isOpen, index } = checkIfSerieOpen(selected.seriesUID);
 
     if (isOpen) {
       props.dispatch(changeActivePort(index));
-      props.dispatch(jumpToAim(seriesUID, aimID, index));
-      handleJumpToAim(aimID, index);
+      props.dispatch(jumpToAim(selected.seriesUID, selected.aimID, index));
+      handleJumpToAim(selected.aimID, index);
       props.dispatch(clearSelection());
     } else {
       if (isGridFull) {
-        props.dispatch(addToGrid(selected, aimID, props.activePort));
+        props.dispatch(addToGrid(selected, selected.aimID, props.activePort));
       } else {
-        props.dispatch(addToGrid(selected, aimID));
+        props.dispatch(addToGrid(selected, selected.aimID));
       }
       props
-        .dispatch(getSingleSerie(selected, aimID))
+        .dispatch(getSingleSerie(selected, selected.aimID))
         .then(() => { })
         .catch(err => console.error(err));
       props.dispatch(clearSelection());
     }
   };
 
-  if (otherSeriesAimsList[studyUID]) {
-    const otherSeriesAims = Object.values(otherSeriesAimsList[studyUID]);
-    header.push(
-      <th
-        className="other-annotations"
-        key="anns-header"
-      >
-        Other  Annotations
-      </th>,
-    );
+  const renderUI = () => {
+    if (otherSeriesAimsList[studyUID]) {
+      const otherSeriesAims = Object.values(otherSeriesAimsList[studyUID]);
+      if (otherSeriesAims) {
+        otherSeriesAims.forEach((series, i) => {
+          const seriesList = [];
+          // console.log(" ======= aimsList")
+          // console.log(aimsList);
+          // console.log(" =======")
+          series[2].forEach((aim, index) => {
+            const commentArr = aim?.comment.split('/');
+            const slideNo = commentArr[2] || "";
+            const seriesIndex = commentArr[3] || "";
 
-    otherSeriesAims.forEach((series, i) => {
-      const seriesList = [];
-      series[2].forEach((aim, index) => {
-        const commentArr = aim.comment.split('/');
-        const slideNo = commentArr[2] || "";
-        const seriesIndex = commentArr[3] || "";
+            const imgIDs = Object.keys(aim?.imgIDs);
+            let imgMatches = false;
+            imgIDs.forEach(el => {
+              if (presentImgID && presentImgID.includes(el)) imgMatches = true;
 
-        const imgIDs = Object.keys(aim.imgIDs);
-        let imgMatches = false;
-        imgIDs.forEach(el => {
-          if (presentImgID && presentImgID.includes(el)) imgMatches = true;
+            })
+            const color = imgMatches && aimsList[aim.seriesUID] && aimsList[aim.seriesUID][aim.aimID]? aimsList[aim.seriesUID][aim.aimID]?.color.button.background : null;
+            seriesList.push((
+              <li style={{ background: color, listStyleType: 'none', cursor: 'pointer' }}
+                onClick={(e) => displayAnnotations(e, aim)}
+              >
+                {aim.name}
+                <span className="img-labels">
+                  <span className="img-num">  {slideNo ? `${slideNo}` : null}</span>
+                  <span className="img-ser">{seriesIndex ? `${seriesIndex}` : null}</span>
+                </span>
+              </li>
+            ))
 
-        })
-        const color = imgMatches ? aimsList[seriesUID][aim.aimID].color.button.background : null;
-        // studyAimsList.push((
-        seriesList.push((
-          <li style={{ background: color, listStyleType: 'none' }}
-            data-id={aim.aimID}
-            data-serie={seriesUID}
-            onClick={(e) => displayAnnotations(e, aim)}
-          >
-            {aim.name}
-            {/* <span>{aim.name}</span> */}
-            <span className="img-labels">
-              <span className="img-num">  {slideNo ? `${slideNo}` : null}</span>
-              <span className="img-ser">{seriesIndex ? `${seriesIndex}` : null}</span>
-            </span>
-          </li>
-        ))
+          })
+          studyAimsList.push((<ul className='series'>{seriesList}</ul>))
+        });
+      }
+    }
 
-      })
-      studyAimsList.push((<ul className='series'>{seriesList}</ul>))
-    });
-
+    if (studyAimsList.length === 0) return ("");
+    else return studyAimsList;
   }
-
-  if (list.length === 0 && studyAimsList.length === 0) return ("");
 
   return (
     <React.Fragment>
@@ -127,7 +120,7 @@ const annotationsLink = (props) => {
           <div className="other-annotations"> Other Annotations</div>
           <div className="annotation-back" >
             <p className="img-label">Image / Series</p>
-            {studyAimsList}
+            {renderUI()}
             {/* <ul>{studyAimsList}</ul> */}
           </div>
         </div>
