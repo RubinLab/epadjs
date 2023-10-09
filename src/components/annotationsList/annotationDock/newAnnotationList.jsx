@@ -274,30 +274,30 @@ class AnnotationsList extends React.Component {
     // }
     return (
       <React.Fragment>
-        <div>new list</div>
         <div className="annotationList-container" style={{ paddingTop: '5px' }}>
           <div className="checkbox-row">
-            <div className="label-toggle">
-              <div className="form-check form-switch form-check-inline">
-                <input className="form-check-input" type="checkbox" role="switch" id="showAnnotations" onChange={this.handleCalculations}
+            {/* <div className="label-toggle"> */}
+              <div className="form-check form-check-inline">
+                <input type="checkbox" role="switch" id="showAnnotations" onChange={this.handleCalculations}
                   checked={this.state.showCalculations} />
                 <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Calculations</label>
               </div>
-            </div>
-            <div className="label-toggle">
-              <div className="form-check form-switch form-check-inline">
-                <input className="form-check-input" type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllLabels}
+            {/* </div> */}
+            {/* <div className="label-toggle"> */}
+            {/* className="form-check-input"  */}
+              <div className="form-check form-check-inline">
+                <input type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllLabels}
                   checked={this.state.labelDisplayAll} />
                 <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Details</label>
               </div>
-            </div>
-            <div className="label-toggle">
-              <div className="form-check form-switch form-check-inline">
-                <input className="form-check-input" type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllAnnotations}
+            {/* </div> */}
+            {/* <div className="label-toggle"> */}
+              <div className="form-check form-check-inline">
+                <input type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllAnnotations}
                   checked={this.state.annsDisplayAll} />
                 <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Markups</label>
               </div>
-            </div>
+            {/* </div> */}
           </div>
         </div>
         <div>{annList}</div>
