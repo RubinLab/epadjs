@@ -385,7 +385,11 @@ svg {
 
 .selectionItem-text {
   text-transform: capitalize;
-  margin-left: 0.4rem;
+  /* margin-left: 0.4rem; */
+}
+
+.selectionItem-check {
+  margin-right: 0.4rem;
 }
 
 .serieSelection-title {
