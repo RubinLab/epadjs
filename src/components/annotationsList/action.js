@@ -916,24 +916,26 @@ const sortAims = (series) => {
 }
 
 const getStudyAimsDataSorted = (arr, projectID, patientID) => {
-  const { aims, seriesNovsUIDmap } = newGetOtherSeriesAimData(arr, projectID, patientID);
-  const studyUID = Object.keys(aims);
-  const seriesMap = Object.values(aims);
-  // get series' values
-  let series = Object.values(seriesMap[0]);
-  // sort them seriesNo
-  series.sort(function (a, b) {
-    return a[1] - b[1];
-  });
-  // remove map with new sorted array
-  series.forEach(el => {
-    const aimArr = Object.values(el[2]);
-    el[2] = aimArr;
-  });
-  aims[studyUID] = sortAims(series);
-  // write a sorting function for slice numbers
-  // and remove aimID map with sorted Array
-  return aims;
+  if (arr.length > 0) {
+    const { aims, seriesNovsUIDmap } = newGetOtherSeriesAimData(arr, projectID, patientID);
+    const studyUID = Object.keys(aims);
+    const seriesMap = Object.values(aims);
+    // get series' values
+    let series = Object.values(seriesMap[0]);
+    // sort them seriesNo
+    series.sort(function (a, b) {
+      return a[1] - b[1];
+    });
+    // remove map with new sorted array
+    series.forEach(el => {
+      const aimArr = Object.values(el[2]);
+      el[2] = aimArr;
+    });
+    aims[studyUID] = sortAims(series);
+    // write a sorting function for slice numbers
+    // and remove aimID map with sorted Array
+    return aims;
+  }
 }
 
 
@@ -977,7 +979,8 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
 
         aimsData = getAimListFields(aimsData, annotation);
         // const otherSeriesAimsData = getOtherSeriesAimData([...serieAims, ...otherSeriesAims], projectID, patientID);
-        const otherSeriesAimsData = getStudyAimsDataSorted([...serieAims, ...otherSeriesAims], projectID, patientID);
+        const allAims = [...serieAims, ...otherSeriesAims]
+        const otherSeriesAimsData = allAims.length === 0 ? {} : getStudyAimsDataSorted(allAims, projectID, patientID);
         // console.log(getStudyAimsDataSorted([...serieAims, ...otherSeriesAims], projectID, patientID));
         resolve({ aimsData, imageData, otherSeriesAimsData });
       })
