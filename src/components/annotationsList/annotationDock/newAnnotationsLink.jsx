@@ -90,7 +90,7 @@ const annotationsLink = (props) => {
               if (presentImgID && presentImgID.includes(el)) imgMatches = true;
 
             })
-            const color = imgMatches && aimsList[aim.seriesUID] && aimsList[aim.seriesUID][aim.aimID]? aimsList[aim.seriesUID][aim.aimID]?.color.button.background : null;
+            const color = imgMatches && aimsList[aim.seriesUID] && aimsList[aim.seriesUID][aim.aimID] ? aimsList[aim.seriesUID][aim.aimID]?.color.button.background : null;
             seriesList.push((
               <li style={{ background: color, listStyleType: 'none', cursor: 'pointer' }}
                 onClick={(e) => displayAnnotations(e, aim)}
