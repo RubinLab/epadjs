@@ -35,21 +35,14 @@ class AnnotationsList extends React.Component {
           prevProps.loading &&
           series.length === this.props.openSeries.length)
       ) {
-        const seriesUID = this.props.openSeries[this.props.activePort]
-          .seriesUID;
+        const { seriesUID } = this.props.openSeries[this.props.activePort];
         let annotations = Object.values(this.props.aimsList[seriesUID]);
         let labelDisplayAll = true;
         let annsDisplayAll = true;
-        for (let ann of annotations) {
-          if (ann.isDisplayed) {
-            annsDisplayAll = true;
-          }
-        }
-        for (let ann of annotations) {
-          if (ann.showLabel) {
-            labelDisplayAll = true;
-          }
-        }
+        
+        annsDisplayAll = annotations[0].isDisplayed;
+        labelDisplayAll = annotations[0].showLabel;
+
         this.setState({ labelDisplayAll, annsDisplayAll });
       }
     } catch (err) {
@@ -277,26 +270,26 @@ class AnnotationsList extends React.Component {
         <div className="annotationList-container" style={{ paddingTop: '5px' }}>
           <div className="checkbox-row">
             {/* <div className="label-toggle"> */}
-              <div className="form-check form-check-inline">
-                <input type="checkbox" role="switch" id="showAnnotations" onChange={this.handleCalculations}
-                  checked={this.state.showCalculations} />
-                <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Calculations</label>
-              </div>
+            <div className="form-check form-check-inline">
+              <input type="checkbox" role="switch" id="showAnnotations" onChange={this.handleCalculations}
+                checked={this.state.showCalculations} />
+              <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Calculations</label>
+            </div>
             {/* </div> */}
             {/* <div className="label-toggle"> */}
             {/* className="form-check-input"  */}
-              <div className="form-check form-check-inline">
-                <input type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllLabels}
-                  checked={this.state.labelDisplayAll} />
-                <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Details</label>
-              </div>
+            <div className="form-check form-check-inline">
+              <input type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllLabels}
+                checked={this.state.labelDisplayAll} />
+              <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Details</label>
+            </div>
             {/* </div> */}
             {/* <div className="label-toggle"> */}
-              <div className="form-check form-check-inline">
-                <input type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllAnnotations}
-                  checked={this.state.annsDisplayAll} />
-                <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Markups</label>
-              </div>
+            <div className="form-check form-check-inline">
+              <input type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllAnnotations}
+                checked={this.state.annsDisplayAll} />
+              <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Markups</label>
+            </div>
             {/* </div> */}
           </div>
         </div>
