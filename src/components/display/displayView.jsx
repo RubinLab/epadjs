@@ -618,6 +618,7 @@ class DisplayView extends Component {
   async getImages(serie, i) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
     if (urls.length > 0) {
+      console.log(' -- getImages if', urls[0]);
       const arr = urls[0].lossyImage.split('/');
       this.props.dispatch(updateSubpath(arr[1], i));
     }
@@ -656,6 +657,7 @@ class DisplayView extends Component {
     const imageUrls = await this.getImages(serie, index);
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
+    console.log(' ---> getImageStackWithWadors', imageUrls[0])
     const seriesURL = wadoUrlNoWadors + imageUrls[0].lossyImage.split('/instances/')[0];
     try {
       seriesMetadata = await getMetadata(seriesURL);
@@ -904,11 +906,11 @@ class DisplayView extends Component {
   };
 
   getImageIndexFromImageId = (cornerstoneImageIds, cornerstoneImageId) => {
-
     const { imageIds } = this.state;
     const wadors = wadoUrl.includes('wadors');
 
     if (!imageIds[cornerstoneImageId] && !wadors) {
+      console.log(" ---> getImageIndexFromImageId", cornerstoneImageId);
       cornerstoneImageId = cornerstoneImageId.split("&frame")[0];
     }
     for (let [key, value] of Object.entries(cornerstoneImageIds)) {
@@ -1228,6 +1230,7 @@ class DisplayView extends Component {
 
         if (this.state.imageIds && !this.state.imageIds[imageId] && !wadors) {
           //image is not multiframe so strip the frame number from the imageId
+          console.log('---> parseaims', imageId);
           imageId = imageId.split("&frame=")[0];
         }
 
@@ -1843,8 +1846,15 @@ class DisplayView extends Component {
   };
   // this is in aimEditor. should be somewhare common so both can use (the new aimapi library)
   parseImgeId = (imageId) => {
-    if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
-    if (imageId.includes('wadors')) return imageId.split('/instances/').pop();
+    if (imageId.includes("objectUID=")) {
+      console.log(' -- parseImgeId if 1', imageId);
+      return imageId.split("objectUID=")[1];
+    }
+    if (imageId.includes('wadors')) {
+      console.log(' -- parseImgeId if 2', imageId);  
+      return imageId.split('/instances/').pop();
+    }
+    console.log(' -- parseImgeId before return', imageId);
     return imageId.split("/").pop();
   };
 
