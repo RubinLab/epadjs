@@ -368,9 +368,20 @@ class selectSerieModal extends React.Component {
 
   saveTeachingFile = async () => {
     this.setState({ isButtonDisabled: true });
+    const selectedSeries = Object.keys(this.state.selectedToDisplay);
     if (this.semanticAnswers.checkFormSaveReady({ isTeachingModal: true })) {
       const result = window.confirm(
         "Please fill all required fields!"
+      );
+
+      if (result || !result) 
+        this.setState({ isButtonDisabled: false });
+      
+      return -1;
+    }
+    if (selectedSeries.length === 0) {
+      const result = window.confirm(
+        "Please select at least one series!"
       );
 
       if (result || !result) 
