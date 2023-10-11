@@ -314,7 +314,8 @@ class selectSerieModal extends React.Component {
         let disabled =
           !selectedToDisplay[seriesUID] &&
           limit >= this.maxPort;
-        let desc = series[i][k].seriesDescription || "Unnamed Serie";
+        let seriesNo = series[i][k].seriesNo || '';
+        let desc = `${seriesNo} - ${series[i][k].seriesDescription || "Unnamed Serie"}`;
         if (series[i][k].significanceOrder) {
           desc = desc + " (S)";
           isSignificant = true;
@@ -326,7 +327,7 @@ class selectSerieModal extends React.Component {
               key={k + "_" + seriesUID}
               className="alreadyOpen-disabled"
             >
-              <FaRegCheckSquare data-tip data-for={"alreadyOpenSeries"} />
+              <FaRegCheckSquare data-tip data-for={"alreadyOpenSeries"} style={{ marginRight: '0.4rem' }} />
               <div className="selectionItem-text">{desc}</div>
             </div>
             <ReactTooltip
