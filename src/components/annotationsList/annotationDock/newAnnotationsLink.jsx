@@ -44,8 +44,6 @@ const annotationsLink = (props) => {
   };
 
   const displayAnnotations = (e, selected) => {
-    console.log(' ---> selected');
-    console.log(selected);
     const maxPort = parseInt(sessionStorage.getItem('maxPort'));
 
     let isGridFull = openSeries.length === maxPort;
@@ -76,9 +74,6 @@ const annotationsLink = (props) => {
       if (otherSeriesAims) {
         otherSeriesAims.forEach((series, i) => {
           const seriesList = [];
-          // console.log(" ======= aimsList")
-          // console.log(aimsList);
-          // console.log(" =======")
           series[2].forEach((aim, index) => {
             const commentArr = aim?.comment.split('/');
             const slideNo = commentArr[2] || "";
@@ -121,7 +116,6 @@ const annotationsLink = (props) => {
           <div className="annotation-back" >
             <p className="img-label">Image / Series</p>
             {renderUI()}
-            {/* <ul>{studyAimsList}</ul> */}
           </div>
         </div>
       )

@@ -222,19 +222,6 @@ class AnnotationsList extends React.Component {
       }
     }
     const calculations = this.getLabelArray();
-    // annotations.sort(function(a, b) {
-    //   let nameA = a.name.toUpperCase();
-    //   let nameB = b.name.toUpperCase();
-    //   if (nameA < nameB) {
-    //     return -1;
-    //   }
-    //   if (nameA > nameB) {
-    //     return 1;
-    //   }
-    //   return 0;
-    // });
-
-    // let annotations = [];
     let annList = [];
     const imageAims = { ...annotations };
     annotations = Object.values(annotations);
@@ -269,28 +256,21 @@ class AnnotationsList extends React.Component {
       <React.Fragment>
         <div className="annotationList-container" style={{ paddingTop: '5px' }}>
           <div className="checkbox-row">
-            {/* <div className="label-toggle"> */}
             <div className="form-check form-check-inline">
               <input type="checkbox" role="switch" id="showAnnotations" onChange={this.handleCalculations}
                 checked={this.state.showCalculations} />
               <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Calculations</label>
             </div>
-            {/* </div> */}
-            {/* <div className="label-toggle"> */}
-            {/* className="form-check-input"  */}
             <div className="form-check form-check-inline">
               <input type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllLabels}
                 checked={this.state.labelDisplayAll} />
               <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Details</label>
             </div>
-            {/* </div> */}
-            {/* <div className="label-toggle"> */}
             <div className="form-check form-check-inline">
               <input type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllAnnotations}
                 checked={this.state.annsDisplayAll} />
               <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Markups</label>
             </div>
-            {/* </div> */}
           </div>
         </div>
         <div>{annList}</div>

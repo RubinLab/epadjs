@@ -194,14 +194,11 @@ const asyncReducer = (state = initialState, action) => {
 
         return { ...state, openSeries: openSeriesToUpdate };
       case CLOSE_SERIE: // tested
-        // TODO feat/annotaions-list
         let delSeriesUID = state.openSeries[state.activePort].seriesUID;
         let delStudyUID = state.openSeries[state.activePort].studyUID;
         let delOpenStudies = { ...state.openStudies };
         const delAims = { ...state.aimsList };
-        // const delOtherAims = { ...state.otherSeriesAimsList };
         delete delAims[delSeriesUID];
-        // delete delOtherAims[delSeriesUID];
         let delGrid = state.openSeries.slice(0, state.activePort);
         let delSubpath = state.openSeries.slice(0, state.activePort);
         delGrid = delGrid.concat(state.openSeries.slice(state.activePort + 1));
@@ -229,7 +226,6 @@ const asyncReducer = (state = initialState, action) => {
             aimsList: delAims,
             openStudies: delOpenStudies,
             activePort: delActivePort,
-            // otherSeriesAimsList: delOtherAims
           };
         }
 
@@ -292,12 +288,6 @@ const asyncReducer = (state = initialState, action) => {
               action.payload.aimsData,
               colors
             );
-        // const coloredOtherSeries = action.payload.otherSeriesAimsData;
-        // const coloredAimIds = Object.keys(colorAimsList);
-        // coloredAimIds.forEach(el => {
-        //   if (coloredOtherSeries[el])
-        //     coloredOtherSeries[el].color = colorAimsList[el].color;
-        // })
         const result = Object.assign({}, state, {
           loading: false,
           error: false,

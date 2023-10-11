@@ -805,43 +805,6 @@ const extractNonMarkupAims = (arr, seriesID) => {
   return { studyAims, serieAims, otherSeriesAims };
 };
 
-// const getOtherSeriesAimData = (arr, projectID, patientID) => {
-//   const aims = {};
-//   arr.forEach(el => {
-//     const aimID = el.ImageAnnotationCollection.uniqueIdentifier.root;
-//     const name = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].name.value;
-//     const comment = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].comment.value;
-//     const study = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-//       .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy;
-//     const studyUID = study.instanceUid.root;
-//     const seriesUID = study.imageSeries.instanceUid.root;
-//     aims[aimID] = { projectID, patientID, aimID, studyUID, seriesUID, name, comment };
-//   })
-//   return aims;
-// }
-
-const getOtherSeriesAimData = (arr, projectID, patientID) => {
-  const aims = {};
-  arr.forEach(el => {
-    const imgAnnItem = el.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
-    const imgRefEntity = imgAnnItem.imageReferenceEntityCollection.ImageReferenceEntity[0]
-    const imgs = imgRefEntity.imageStudy.imageSeries?.imageCollection?.Image;
-    const aimID = el.ImageAnnotationCollection.uniqueIdentifier.root;
-    const name = imgAnnItem.name.value;
-    const comment = imgAnnItem.comment.value;
-    const imgIDs = imgs.reduce((all, item) => {
-      all[item.sopInstanceUid.root] = true;
-      return all;
-    }, {})
-    const study = imgAnnItem
-      .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy;
-    const studyUID = study.instanceUid.root;
-    const seriesUID = study.imageSeries.instanceUid.root;
-    aims[aimID] = { projectID, patientID, aimID, studyUID, seriesUID, name, comment, imgIDs };
-  })
-  return aims;
-}
-
 const formAimData = (aim, projectID, patientID) => {
   const imgAnnItem = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
   const imgRefEntity = imgAnnItem.imageReferenceEntityCollection.ImageReferenceEntity[0]
@@ -978,10 +941,8 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
         };
 
         aimsData = getAimListFields(aimsData, annotation);
-        // const otherSeriesAimsData = getOtherSeriesAimData([...serieAims, ...otherSeriesAims], projectID, patientID);
         const allAims = [...serieAims, ...otherSeriesAims]
         const otherSeriesAimsData = allAims.length === 0 ? {} : getStudyAimsDataSorted(allAims, projectID, patientID);
-        // console.log(getStudyAimsDataSorted([...serieAims, ...otherSeriesAims], projectID, patientID));
         resolve({ aimsData, imageData, otherSeriesAimsData });
       })
       .catch((err) => {
