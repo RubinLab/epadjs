@@ -212,8 +212,10 @@ const asyncReducer = (state = initialState, action) => {
         }
 
         let delActivePort;
+        let delOtherSeriesAimsList;
         if (delGrid.length === 0) {
           delActivePort = null;
+          delOtherSeriesAimsList = {};
         } else {
           delActivePort = delGrid.length - 1;
         }
@@ -226,6 +228,7 @@ const asyncReducer = (state = initialState, action) => {
             aimsList: delAims,
             openStudies: delOpenStudies,
             activePort: delActivePort,
+            otherSeriesAimsList: delOtherSeriesAimsList,
           };
         }
 
