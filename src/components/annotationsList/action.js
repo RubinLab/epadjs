@@ -348,6 +348,8 @@ export const addToGrid = (serie, annotation, port) => {
 
   projectID = projectID ? projectID : "lite";
 
+  if (annotation) patientID = serie.originalSubjectID || serie.subjectID || serie.patientID;
+
   let reference = {
     projectID,
     patientID,

@@ -40,7 +40,7 @@ const annotationsLink = (props) => {
     return { isOpen, index };
   };
 
-  const displayAnnotations = async (e, selected) => {
+  const displayAnnotations = (e, selected) => {
     const { patientID, projectID, studyUID, seriesUID, aimID } = selected;
     const maxPort = parseInt(sessionStorage.getItem('maxPort'));
 
