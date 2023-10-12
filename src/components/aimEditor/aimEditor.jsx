@@ -16,7 +16,8 @@ import {
   getSingleSerie,
   segUploadStarted,
   segUploadRemove,
-  updateOtherAims
+  updateOtherAims,
+  clearAimId
 } from "../annotationsList/action";
 import RecistTable from "./RecistTable";
 import { Aim, enumAimType } from "aimapi";
@@ -1285,6 +1286,9 @@ class AimEditor extends Component {
     });
     const isStudyAim = aimRefs ? aimRefs.isStudyAim : false; //If upload has segmentation it can't be study aim
     if (isStudyAim) {
+      let encrypted = sessionStorage.getItem('encrypted');
+      encrypted = JSON.parse(encrypted);
+      if (encrypted === true && mode === 'teaching') this.props.dispatch(clearAimId());
       openSeries.forEach(({ seriesUID, studyUID }) => {
         if (openSeries[
           activePort
@@ -1301,8 +1305,6 @@ class AimEditor extends Component {
     );
     const aimObj = { ...aimRefs };
     delete aimObj.comment;
-
-    this.props.dispatch(updateOtherAims(aimObj))
 
     // Delete after tests Sept 2021
     // this.props.dispatch(

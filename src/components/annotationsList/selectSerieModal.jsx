@@ -95,6 +95,7 @@ class selectSerieModal extends React.Component {
       this.props.completeLoading();
     };// end teaching file related part
   }
+
   componentWillUnmount = () => {
     this._isMounted = false;
   };
@@ -313,7 +314,8 @@ class selectSerieModal extends React.Component {
         let disabled =
           !selectedToDisplay[seriesUID] &&
           limit >= this.maxPort;
-        let desc = series[i][k].seriesDescription || "Unnamed Serie";
+        let seriesNo = series[i][k].seriesNo || '';
+        let desc = `${seriesNo} - ${series[i][k].seriesDescription || "Unnamed Serie"}`;
         if (series[i][k].significanceOrder) {
           desc = desc + " (S)";
           isSignificant = true;
@@ -325,7 +327,7 @@ class selectSerieModal extends React.Component {
               key={k + "_" + seriesUID}
               className="alreadyOpen-disabled"
             >
-              <FaRegCheckSquare data-tip data-for={"alreadyOpenSeries"} />
+              <FaRegCheckSquare data-tip data-for={"alreadyOpenSeries"} style={{ marginRight: '0.4rem' }} />
               <div className="selectionItem-text">{desc}</div>
             </div>
             <ReactTooltip
@@ -367,10 +369,25 @@ class selectSerieModal extends React.Component {
 
   saveTeachingFile = async () => {
     this.setState({ isButtonDisabled: true });
+    const selectedSeries = Object.keys(this.state.selectedToDisplay);
     if (this.semanticAnswers.checkFormSaveReady({ isTeachingModal: true })) {
-      window.alert(
+      const result = window.confirm(
         "Please fill all required fields!"
       );
+
+      if (result || !result) 
+        this.setState({ isButtonDisabled: false });
+      
+      return -1;
+    }
+    if (selectedSeries.length === 0) {
+      const result = window.confirm(
+        "Please select at least one series!"
+      );
+
+      if (result || !result) 
+        this.setState({ isButtonDisabled: false });
+      
       return -1;
     }
     const { encrUrlArgs, decrArgs } = this.props;
@@ -512,7 +529,7 @@ class selectSerieModal extends React.Component {
             <div>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) { this.handleCancel(true); this.props.onSave() } }} disabled={this.state.isButtonDisabled}>Save Teaching File</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()} disabled={this.state.isButtonDisabled}>Save Teaching File & Display</Button>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>Discard</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>No New TF - Just Open Stella</Button>
             </div>
           )}
           {!isTeachingFile && (

@@ -4,7 +4,7 @@ import { withRouter } from "react-router-dom";
 import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
 import { BsArrowBarLeft, BsArrowBarRight } from "react-icons/bs";
 import Collapsible from "react-collapsible";
-import AnnotationList from "../annotationsList/annotationDock/annotationList";
+import AnnotationList from "../annotationsList/annotationDock/newAnnotationList";
 import AimEditor from "../aimEditor/aimEditor";
 import MediaExport from "../MediaExport/MediaExport";
 

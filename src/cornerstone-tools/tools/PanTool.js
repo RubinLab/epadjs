@@ -32,6 +32,8 @@ export default class PanTool extends BaseTool {
 
     const translation = this._getTranslation(eventData);
 
+    // window.dispatchEvent( new CustomEvent("updateImageStatus", { detail: { type: 'pan', value: translation } }));
+
     this._applyTranslation(viewport, translation);
     external.cornerstone.setViewport(element, viewport);
   }

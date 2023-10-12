@@ -209,9 +209,10 @@ class DisplayView extends Component {
     window.addEventListener("markupSelected", this.handleMarkupSelected);
     window.addEventListener("markupCreated", this.handleMarkupCreated);
     window.addEventListener("toggleAnnotations", this.toggleAnnotations);
-    window.addEventListener("updateWL", this.updateWL);
-    window.addEventListener('deleteViewportWL', this.deleteViewportWL);
-    window.addEventListener('resetViewportWL', this.resetViewportWL);
+    // window.addEventListener("updateWL", this.updateWL);
+    window.addEventListener("updateImageStatus", this.updateImageStatus);
+    window.addEventListener('deleteViewportImageStatus', this.deleteViewportImageStatus);
+    window.addEventListener('resetViewportImageStatus', this.resetViewportImageStatus);
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
@@ -267,9 +268,10 @@ class DisplayView extends Component {
     window.removeEventListener("markupSelected", this.handleMarkupSelected);
     window.removeEventListener("markupCreated", this.handleMarkupCreated);
     window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
-    window.removeEventListener("updateWL", this.updateWL);
-    window.removeEventListener('resetViewportWL', this.resetViewportWL);
-    window.removeEventListener('deleteViewportWL', this.deleteViewportWL);
+    // window.removeEventListener("updateWL", this.updateWL);
+    window.removeEventListener("updateImageStatus", this.updateImageStatus);
+    window.removeEventListener('resetViewportImageStatus', this.resetViewportImageStatus);
+    window.removeEventListener('deleteViewportImageStatus', this.deleteViewportImageStatus);
     window.removeEventListener("jumpToAimImage", this.jumpToAimImage);
     window.removeEventListener("editAim", this.editAimHandler);
     window.removeEventListener("deleteAim", this.deleteAimHandler);
@@ -438,6 +440,19 @@ class DisplayView extends Component {
     sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
   }
 
+  updateImageStatus = (event) => {
+    const { type, value } = event.detail;
+    // const { ww, wc } = event.detail;
+    let imgStatus = sessionStorage.getItem("imgStatus");
+    const max = parseInt(maxPort);
+    imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
+    let obj = imgStatus[this.props.activePort];
+    obj = obj && typeof obj === 'object' ? obj : {};
+    obj[type] = value;
+    imgStatus[this.props.activePort]= obj;
+    sessionStorage.setItem('imgStatus', JSON.stringify(imgStatus));
+  }
+
   // Traverse all shapes and set visibility, if aimID is passed only sets aim's shapes
   setVisibilityOfShapes = (visibility, aimID) => {
     const { series, activePort } = this.props;
@@ -560,7 +575,8 @@ class DisplayView extends Component {
   shouldOpenAimEditor = (notShowAimEditor = false) => {
     const { series } = this.props;
     series.forEach(({ aimID, seriesUID }) => {
-      if (aimID && !notShowAimEditor) this.openAimEditor(aimID, seriesUID);
+      if (aimID && !notShowAimEditor) {
+        this.openAimEditor(aimID, seriesUID);}
     });
   };
 
@@ -811,8 +827,9 @@ class DisplayView extends Component {
           this.setState({ hasSegmentation: true });
           // this.setSerieActiveLabelMap(aimID);
         }
-        if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
+        if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
           this.setState({ showAimEditor: false });
+        }
         this.setState({ showAimEditor: true, selectedAim: aimJson });
         if (markupTypes)
           setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
@@ -887,7 +904,6 @@ class DisplayView extends Component {
   };
 
   getImageIndexFromImageId = (cornerstoneImageIds, cornerstoneImageId) => {
-
     const { imageIds } = this.state;
     const wadors = wadoUrl.includes('wadors');
 
@@ -1525,7 +1541,13 @@ class DisplayView extends Component {
         }
       });
     }
-  };
+    
+    if (this.state.hiding) {
+      const vpElements = document.getElementsByClassName("viewportContainer");
+      for (var i = 0; i < vpElements.length; i++)
+        if (i !== this.props.activePort) vpElements[i].style.display = "none";
+    };
+  }
 
   getColorOfMarkup = (aimUid, seriesUid) => {
     try {
@@ -1748,21 +1770,38 @@ class DisplayView extends Component {
     delete brushModule.configuration.minInterval;
   }
 
-  resetViewportWL = () => {
-    let wwwc = sessionStorage.getItem("wwwc");
+  // resetViewportWL = () => {
+  //   let wwwc = sessionStorage.getItem("wwwc");
+  //   const max = parseInt(maxPort);
+  //   wwwc = wwwc ? JSON.parse(wwwc) : new Array(max);
+  //   wwwc[this.props.activePort] = null;
+  //   sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
+  // }
+
+  resetViewportImageStatus = () => {
+    let imgStatus = sessionStorage.getItem("imgStatus");
     const max = parseInt(maxPort);
-    wwwc = wwwc ? JSON.parse(wwwc) : new Array(max);
-    wwwc[this.props.activePort] = null;
-    sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
+    imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
+    imgStatus[this.props.activePort] = null;
+    sessionStorage.setItem('imgStatus', JSON.stringify(imgStatus));
   }
 
-  deleteViewportWL = () => {
-    let wwwc = sessionStorage.getItem("wwwc");
+  // deleteViewportWL = () => {
+  //   let wwwc = sessionStorage.getItem("wwwc");
+  //   const max = parseInt(maxPort);
+  //   wwwc = wwwc ? JSON.parse(wwwc) : new Array(max);
+  //   wwwc.splice(this.props.activePort, 1);
+  //   wwwc.push(null);
+  //   sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
+  // }
+
+  deleteViewportImageStatus = () => {
+    let imgStatus = sessionStorage.getItem("imgStatus");
     const max = parseInt(maxPort);
-    wwwc = wwwc ? JSON.parse(wwwc) : new Array(max);
-    wwwc.splice(this.props.activePort, 1);
-    wwwc.push(null);
-    sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
+    imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
+    imgStatus.splice(this.props.activePort, 1);
+    imgStatus.push(null);
+    sessionStorage.setItem('imgStatus', JSON.stringify(imgStatus));
   }
 
   closeViewport = () => {
@@ -1775,7 +1814,7 @@ class DisplayView extends Component {
       return;
     }
     this.props.dispatch(closeSerie());
-    this.deleteViewportWL();
+    this.deleteViewportImageStatus();
     // this.props.onSwitchView("search");
   };
 
@@ -1803,8 +1842,12 @@ class DisplayView extends Component {
   };
   // this is in aimEditor. should be somewhare common so both can use (the new aimapi library)
   parseImgeId = (imageId) => {
-    if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
-    if (imageId.includes('wadors')) return imageId.split('/instances/').pop();
+    if (imageId.includes("objectUID=")) {
+      return imageId.split("objectUID=")[1];
+    }
+    if (imageId.includes('wadors')) {
+      return imageId.split('/instances/').pop();
+    }
     return imageId.split("/").pop();
   };
 
