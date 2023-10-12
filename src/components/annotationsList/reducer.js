@@ -104,7 +104,7 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
-      case AIM_SAVE:
+      case AIM_SAVE: //tested
         const { seriesList, aimRefs } = action.payload;
         const clonedOtherAims = _.cloneDeep(state.otherSeriesAimsList);
         // to cover falsy isStudyAim value
@@ -114,9 +114,9 @@ const asyncReducer = (state = initialState, action) => {
             clonedOtherAims[el.seriesUID][aimRefs.aimID] = aimRefs;
           }
         })
-        return {...state, otherSeriesAimsList: clonedOtherAims };
+        return { ...state, otherSeriesAimsList: clonedOtherAims };
       case SUBPATH:
-        const {subpath, portIndex} = action.payload;
+        const { subpath, portIndex } = action.payload;
         const newSubpath = [...state.subpath];
         newSubpath[portIndex] = subpath;
         return { ...state, subpath: newSubpath };
@@ -193,18 +193,16 @@ const asyncReducer = (state = initialState, action) => {
         openSeriesToUpdate[port].imageID = action.imageID;
 
         return { ...state, openSeries: openSeriesToUpdate };
-      case CLOSE_SERIE:
+      case CLOSE_SERIE: // tested
         let delSeriesUID = state.openSeries[state.activePort].seriesUID;
         let delStudyUID = state.openSeries[state.activePort].studyUID;
         let delOpenStudies = { ...state.openStudies };
         const delAims = { ...state.aimsList };
-        const delOtherAims = { ...state.otherSeriesAimsList };
         delete delAims[delSeriesUID];
-        delete delOtherAims[delSeriesUID];
         let delGrid = state.openSeries.slice(0, state.activePort);
         let delSubpath = state.openSeries.slice(0, state.activePort);
         delGrid = delGrid.concat(state.openSeries.slice(state.activePort + 1));
-        delSubpath= delSubpath.concat(state.subpath.slice(state.activePort + 1));
+        delSubpath = delSubpath.concat(state.subpath.slice(state.activePort + 1));
         let shouldStudyExist = false;
         for (let item of delGrid) {
           if (item.studyUID === delStudyUID) {
@@ -214,8 +212,10 @@ const asyncReducer = (state = initialState, action) => {
         }
 
         let delActivePort;
+        let delOtherSeriesAimsList;
         if (delGrid.length === 0) {
           delActivePort = null;
+          delOtherSeriesAimsList = {};
         } else {
           delActivePort = delGrid.length - 1;
         }
@@ -228,7 +228,7 @@ const asyncReducer = (state = initialState, action) => {
             aimsList: delAims,
             openStudies: delOpenStudies,
             activePort: delActivePort,
-            otherSeriesAimsList: delOtherAims
+            otherSeriesAimsList: delOtherSeriesAimsList,
           };
         }
 
@@ -238,7 +238,7 @@ const asyncReducer = (state = initialState, action) => {
           aimsList: delAims,
           // patients: delPatients,
           activePort: delActivePort,
-          otherSeriesAimsList: delOtherAims,
+          // otherSeriesAimsList: delOtherAims,
           subpath: delSubpath
         };
       case LOAD_ANNOTATIONS:
@@ -291,7 +291,6 @@ const asyncReducer = (state = initialState, action) => {
               action.payload.aimsData,
               colors
             );
-
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
@@ -299,10 +298,7 @@ const asyncReducer = (state = initialState, action) => {
             ...state.aimsList,
             [action.payload.ref.seriesUID]: colorAimsList,
           },
-          otherSeriesAimsList: {
-            ...state.otherSeriesAimsList,
-            [action.payload.ref.seriesUID]: action.payload.otherSeriesAimsData
-          },
+          otherSeriesAimsList: { ...state.otherSeriesAimsList, ...action.payload.otherSeriesAimsData },
           openSeries: imageAddedSeries,
         });
         return result;
@@ -647,7 +643,7 @@ const asyncReducer = (state = initialState, action) => {
           isSegUploaded: { ...theRest },
         });
       }
-      case AIM_DELETE: {
+      case AIM_DELETE: { //tested
         const { aimRefs } = action.payload;
         const { seriesUID } = aimRefs;
         const deepOther = _.cloneDeep(state.otherSeriesAimsList);

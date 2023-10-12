@@ -904,7 +904,6 @@ class DisplayView extends Component {
   };
 
   getImageIndexFromImageId = (cornerstoneImageIds, cornerstoneImageId) => {
-
     const { imageIds } = this.state;
     const wadors = wadoUrl.includes('wadors');
 
@@ -1533,7 +1532,6 @@ class DisplayView extends Component {
 
   refreshAllViewports = () => {
     const elements = cornerstone.getEnabledElements();
-    console.log(elements);
     if (elements) {
       elements.map(({ element }) => {
         try {
@@ -1844,8 +1842,12 @@ class DisplayView extends Component {
   };
   // this is in aimEditor. should be somewhare common so both can use (the new aimapi library)
   parseImgeId = (imageId) => {
-    if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
-    if (imageId.includes('wadors')) return imageId.split('/instances/').pop();
+    if (imageId.includes("objectUID=")) {
+      return imageId.split("objectUID=")[1];
+    }
+    if (imageId.includes('wadors')) {
+      return imageId.split('/instances/').pop();
+    }
     return imageId.split("/").pop();
   };
 
