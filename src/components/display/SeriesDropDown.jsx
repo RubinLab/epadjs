@@ -16,7 +16,15 @@ const SeriesDropDown = (props) => {
     const [aimCounts, setAimCounts] = useState({});
 
     useEffect(() => {
-        const { studyUID, projectID, patientID } = props.serie;
+        let studyUID;
+        let projectID;
+        let patientID;
+        
+        if (props.serie) {  
+            studyUID = props.serie.studyUID;
+            projectID = props.serie.projectID;
+            patientID  = props.serie.patientID;
+        }
         const { openStudies } = props;
         async function fetchData() {
             const { data: seriesOfStudy } = await getSeries(projectID, patientID, studyUID);

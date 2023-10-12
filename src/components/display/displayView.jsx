@@ -184,7 +184,7 @@ class DisplayView extends Component {
     const { series } = this.props;
     const invertMap = { ...this.state.invertMap };
     series.forEach((el, i) => {
-      if (el.examType === 'NM') invertMap[i] = true;
+      invertMap[i] = el.examType === 'NM';
     })
     this.setState({ invertMap });
   }

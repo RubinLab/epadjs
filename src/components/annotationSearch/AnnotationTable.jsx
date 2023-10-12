@@ -383,6 +383,9 @@ function AnnotationTable(props) {
         if (isGridFull) {
           setShowSelectSeriesModal(true);
         } else {
+          if (!selected.examType) {
+            selected.examType = selected.modality;
+          }
           props.dispatch(addToGrid(selected, aimID));
           props.dispatch(getSingleSerie(selected, aimID));
           //if grid is NOT full check if patient data exists

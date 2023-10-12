@@ -8,14 +8,11 @@ import { getAnnotations } from '../../services/annotationServices';
 import { formatDate } from '../flexView/helperMethods';
 import SelectSerieModal from '../annotationsList/selectSerieModal';
 import {
-  alertViewPortFull,
   getSingleSerie,
   clearSelection,
   selectAnnotation,
   changeActivePort,
   addToGrid,
-  getWholeData,
-  updatePatient,
   jumpToAim
 } from '../annotationsList/action';
 
@@ -99,7 +96,7 @@ function Annotations(props) {
     return { isOpen, index };
   };
 
-  const displayAnnotations = selected => {
+  const displayAnnotations = async (selected) => {
     const { projectID, studyUID, seriesUID, aimID } = selected;
     setSelected(selected);
     const patientID = selected.subjectID;
@@ -122,7 +119,7 @@ function Annotations(props) {
         props.dispatch(addToGrid(selected, aimID));
         props
           .dispatch(getSingleSerie(selected, aimID))
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.error(err));
         //if grid is NOT full check if patient data exists
         // -----> Delete after v1.0 <-----

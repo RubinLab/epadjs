@@ -544,8 +544,8 @@ const asyncReducer = (state = initialState, action) => {
         const replacedOpenSeries = [...state.openSeries];
         const newAimsList = { ...state.aimsList };
         delete newAimsList[replacedOpenSeries[state.activePort].seriesUID];
-        replacedOpenSeries[state.activePort].seriesUID = action.seriesUID;
-
+        replacedOpenSeries[state.activePort].seriesUID = action.payload.seriesUID;
+        replacedOpenSeries[state.activePort].examType = action.payload.examType;
         return {
           ...state,
           openSeries: replacedOpenSeries,

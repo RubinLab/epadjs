@@ -40,8 +40,8 @@ class AnnotationsList extends React.Component {
         let labelDisplayAll = true;
         let annsDisplayAll = true;
         
-        annsDisplayAll = annotations[0].isDisplayed;
-        labelDisplayAll = annotations[0].showLabel;
+        annsDisplayAll = annotations[0]?.isDisplayed;
+        labelDisplayAll = annotations[0]?.showLabel;
 
         this.setState({ labelDisplayAll, annsDisplayAll });
       }
