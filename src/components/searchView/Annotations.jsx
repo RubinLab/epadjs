@@ -130,10 +130,6 @@ function Annotations(props) {
       if (isGridFull) {
         setShowSelectSerie(true);
       } else {
-        if (!selected.examType) {
-          const examType = await getExamtype(patientID, projectID, studyUID, seriesUID, aimID);
-          selected.examType = examType;
-        }
         props.dispatch(addToGrid(selected, aimID));
         props
           .dispatch(getSingleSerie(selected, aimID))

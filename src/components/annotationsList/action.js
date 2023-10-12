@@ -52,7 +52,7 @@ import {
   commonLabels,
 } from "./types";
 
-import { getSeries, getSingleSeries } from "../../services/seriesServices";
+import { getSeries } from "../../services/seriesServices";
 import { getStudies, getStudyAims } from "../../services/studyServices";
 import {
   getAnnotations,
@@ -341,7 +341,10 @@ export const selectAnnotation = (
 // opens a new port to display series
 // adds series details to the array
 export const addToGrid = (serie, annotation, port) => {
-  let { patientID, studyUID, seriesUID, projectID, patientName, examType } = serie;
+  let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment } = serie;
+  const modFmComment = comment ? comment.split('/')[0].trim() : '';
+  examType = examType ? examType.toUpperCase() : modality ? modality.toUpperCase() : modFmComment.toUpperCase();
+
   projectID = projectID ? projectID : "lite";
 
   let reference = {
