@@ -866,22 +866,12 @@ const sortAimsBasedOnName = (series) => {
         if (a.name > b.name) return 1;
         else if (a.name < b.name) return -1;
         else return 0;
-      }
+      } else return a.imageNo - b.imageNo;
     })
   })
 }
 
-const sortAimsBasedOnImageNo = (series) => {
-  for (let item of series) {
-    item[2].sort(function (a, b) {
-      return a.imageNo - b.imageNo;
-    });
-  }
-  return series;
-}
-
 const sortAims = (series) => {
-  series = sortAimsBasedOnImageNo(series);
   sortAimsBasedOnName(series);
   return series;
 }
