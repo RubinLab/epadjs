@@ -587,6 +587,8 @@ class CornerstoneViewport extends Component {
   // TODO: May need to throttle?
   onImageRendered = (event) => {
     const { viewport, element, image } = event.detail;
+    const { viewportIndex } = this.props;
+    
     event.detail.viewport.invert = this.props.shouldInvert;
     cornerstone.setViewport(element, viewport);
 
