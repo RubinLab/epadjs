@@ -807,19 +807,27 @@ const extractNonMarkupAims = (arr, seriesID) => {
 
 const formAimData = (aim, projectID, patientID) => {
   const imgAnnItem = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
-  const imgRefEntity = imgAnnItem.imageReferenceEntityCollection.ImageReferenceEntity[0]
-  const markupEntity = imgAnnItem.markupEntityCollection?.MarkupEntity
+  const imgRefEntity = imgAnnItem.imageReferenceEntityCollection.ImageReferenceEntity[0];
+  const markupEntity = imgAnnItem.markupEntityCollection?.MarkupEntity;
   // const imgs = imgRefEntity.imageStudy.imageSeries?.imageCollection?.Image;
   const imgs = imgRefEntity.imageStudy.imageSeries?.imageCollection?.Image;
   const aimID = aim.ImageAnnotationCollection.uniqueIdentifier.root;
   const name = imgAnnItem.name.value;
   const comment = imgAnnItem.comment.value;
-  const imgIDs = markupEntity.reduce((all, item) => {
-    const imgId = item.imageReferenceUid.root;
-    const frameNo = item.referencedFrameNumber.value;
-    all[`${imgId}/frames/${frameNo}`] = true;
-    return all;
-  }, {})
+  let imgIDs;
+  if (markupEntity) {
+    imgIDs = markupEntity.reduce((all, item) => {
+      const imgId = item.imageReferenceUid.root;
+      const frameNo = item.referencedFrameNumber.value;
+      all[`${imgId}/frames/${frameNo}`] = true;
+      return all;
+    }, {})
+  } else {
+    imgIDs = imgs.reduce((all, item) => {
+      all[item.sopInstanceUid.root] = true;
+      return all;
+    }, {})
+  }
   const study = imgAnnItem
     .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy;
   const studyUID = study.instanceUid.root;
