@@ -449,7 +449,7 @@ class DisplayView extends Component {
     let obj = imgStatus[this.props.activePort];
     obj = obj && typeof obj === 'object' ? obj : {};
     obj[type] = value;
-    imgStatus[this.props.activePort]= obj;
+    imgStatus[this.props.activePort] = obj;
     sessionStorage.setItem('imgStatus', JSON.stringify(imgStatus));
   }
 
@@ -576,7 +576,8 @@ class DisplayView extends Component {
     const { series } = this.props;
     series.forEach(({ aimID, seriesUID }) => {
       if (aimID && !notShowAimEditor) {
-        this.openAimEditor(aimID, seriesUID);}
+        this.openAimEditor(aimID, seriesUID);
+      }
     });
   };
 
@@ -617,8 +618,9 @@ class DisplayView extends Component {
 
   async getImages(serie, i) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
-    if (urls[0].length > 0) {
-      const arr = urls[0][0].lossyImage.split('/');
+    const firstSeriesIndex = this.findFirstSeriesIndex(urls);
+    if (urls[firstSeriesIndex].length > 0) {
+      const arr = urls[firstSeriesIndex][0].lossyImage.split('/');
       this.props.dispatch(updateSubpath(arr[1], i));
     }
     return urls;
@@ -647,6 +649,18 @@ class DisplayView extends Component {
       return this.getImageStackWithWadouri(serie, index);
   }
 
+  findFirstSeriesIndex = (imageUrls) => {
+    let firstSeriesIndex = 0;
+    let urlsLen = imageUrls.length;
+    for (let i = 0; i < urlsLen; i++) {
+      if (imageUrls[i].length > 0) { 
+        firstSeriesIndex = i; 
+        break;
+      }
+    }
+    return firstSeriesIndex;
+  }
+
   getImageStackWithWadors = async (serie, index) => {
     let stack = {};
     let newImageIds = {};
@@ -656,7 +670,8 @@ class DisplayView extends Component {
     const imageUrls = await this.getImages(serie, index);
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
-    const seriesURL = wadoUrlNoWadors + imageUrls[0][0].lossyImage.split('/instances/')[0];
+    const firstSeriesIndex = this.findFirstSeriesIndex(imageUrls);
+    const seriesURL = wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage.split('/instances/')[0];
     try {
       seriesMetadata = await getMetadata(seriesURL);
       seriesMetadata = seriesMetadata.data;
@@ -670,7 +685,7 @@ class DisplayView extends Component {
     // get first image
     let firstImage = null;
     if (!useSeriesData) {
-      const result = await getImageMetadata(wadoUrlNoWadors + imageUrls[0][0].lossyImage);
+      const result = await getImageMetadata(wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage);
       const data = result.data;
       firstImage = data[0];
     } else firstImage = seriesMetadata[0];
@@ -690,16 +705,16 @@ class DisplayView extends Component {
       scanAxis = dcmjs.normalizers.ImageNormalizer.vec3CrossProduct(rowVector, columnVector);
     }
 
-    const len = imageUrls[0].length;
+    const len = imageUrls[firstSeriesIndex].length;
     for (let k = 0; k < len; k++) {
-      baseUrl = wadoUrlNoWadors + imageUrls[0][k].lossyImage;
+      baseUrl = wadoUrlNoWadors + imageUrls[firstSeriesIndex][k].lossyImage;
       let imgData;
       let distance = null;
       if (!useSeriesData) {
         const result = await getImageMetadata(baseUrl);
         const data = result.data;
         imgData = data[0];
-      } else imgData = seriesMetadataMap[imageUrls[0][k].imageUID];
+      } else imgData = seriesMetadataMap[imageUrls[firstSeriesIndex][k].imageUID];
 
 
       if (sortByGeo) {
@@ -711,8 +726,8 @@ class DisplayView extends Component {
         distance = dcmjs.normalizers.ImageNormalizer.vec3Dot(positionVector, scanAxis);
       }
 
-      if (imageUrls[0][k].multiFrameImage === true) {
-        for (var i = 0; i < imageUrls[0][k].numberOfFrames; i++) {
+      if (imageUrls[firstSeriesIndex][k].multiFrameImage === true) {
+        for (var i = 0; i < imageUrls[firstSeriesIndex][k].numberOfFrames; i++) {
           let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           // using distanceDatasetPairs to sort instead of just adding to the array
@@ -1543,7 +1558,7 @@ class DisplayView extends Component {
         }
       });
     }
-    
+
     if (this.state.hiding) {
       const vpElements = document.getElementsByClassName("viewportContainer");
       for (var i = 0; i < vpElements.length; i++)
