@@ -22,7 +22,7 @@ export const handleSelectDeselectAll = (checked) => {
 export const resetSelectAllCheckbox = state => {
   let selectAllCheckbox = document.getElementsByClassName('__select-all');
   selectAllCheckbox = Array.from(selectAllCheckbox);
-  selectAllCheckbox[0].checked = state;
+  if (selectAllCheckbox.length > 0) selectAllCheckbox[0].checked = state;
 }
 
 export function styleEightDigitDate(rawDate) {
@@ -419,16 +419,16 @@ export const isSupportedModality = (serie) => {
 };
 
 export const getAllowedTermsOfTemplateComponent = (template, componentLabel) => {
-  const {Component:components} = template[0];
+  const { Component: components } = template[0];
   let allowedTerms;
   let termMeanings = [];
-  for(let i=0; i<components.length; i++){
-    if(components[i].label === componentLabel){
+  for (let i = 0; i < components.length; i++) {
+    if (components[i].label === componentLabel) {
       allowedTerms = components[i].AllowedTerm;
       break;
-    } 
+    }
   }
-  if(!allowedTerms)
+  if (!allowedTerms)
     return [];
   allowedTerms.forEach(term => {
     termMeanings.push(term.codeMeaning);
