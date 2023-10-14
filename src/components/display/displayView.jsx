@@ -617,8 +617,8 @@ class DisplayView extends Component {
 
   async getImages(serie, i) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
-    if (urls.length > 0) {
-      const arr = urls[0].lossyImage.split('/');
+    if (urls[0].length > 0) {
+      const arr = urls[0][0].lossyImage.split('/');
       this.props.dispatch(updateSubpath(arr[1], i));
     }
     return urls;
@@ -656,7 +656,7 @@ class DisplayView extends Component {
     const imageUrls = await this.getImages(serie, index);
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
-    const seriesURL = wadoUrlNoWadors + imageUrls[0].lossyImage.split('/instances/')[0];
+    const seriesURL = wadoUrlNoWadors + imageUrls[0][0].lossyImage.split('/instances/')[0];
     try {
       seriesMetadata = await getMetadata(seriesURL);
       seriesMetadata = seriesMetadata.data;
@@ -665,11 +665,12 @@ class DisplayView extends Component {
       console.log("Can not get series metadata");
       console.error(err);
     }
-    const useSeriesData = seriesMetadata.length > 0 && seriesMetadata.length === imageUrls.length;
+
+    const useSeriesData = seriesMetadata.length > 0 && seriesMetadata.length === imageUrls[0].length;
     // get first image
     let firstImage = null;
     if (!useSeriesData) {
-      const result = await getImageMetadata(wadoUrlNoWadors + imageUrls[0].lossyImage);
+      const result = await getImageMetadata(wadoUrlNoWadors + imageUrls[0][0].lossyImage);
       const data = result.data;
       firstImage = data[0];
     } else firstImage = seriesMetadata[0];
@@ -689,15 +690,16 @@ class DisplayView extends Component {
       scanAxis = dcmjs.normalizers.ImageNormalizer.vec3CrossProduct(rowVector, columnVector);
     }
 
-    for (let k = 0; k < imageUrls.length; k++) {
-      baseUrl = wadoUrlNoWadors + imageUrls[k].lossyImage;
+    const len = imageUrls[0].length;
+    for (let k = 0; k < len; k++) {
+      baseUrl = wadoUrlNoWadors + imageUrls[0][k].lossyImage;
       let imgData;
       let distance = null;
       if (!useSeriesData) {
         const result = await getImageMetadata(baseUrl);
         const data = result.data;
         imgData = data[0];
-      } else imgData = seriesMetadataMap[imageUrls[k].imageUID];
+      } else imgData = seriesMetadataMap[imageUrls[0][k].imageUID];
 
 
       if (sortByGeo) {
@@ -709,8 +711,8 @@ class DisplayView extends Component {
         distance = dcmjs.normalizers.ImageNormalizer.vec3Dot(positionVector, scanAxis);
       }
 
-      if (imageUrls[k].multiFrameImage === true) {
-        for (var i = 0; i < imageUrls[k].numberOfFrames; i++) {
+      if (imageUrls[0][k].multiFrameImage === true) {
+        for (var i = 0; i < imageUrls[0][k].numberOfFrames; i++) {
           let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           // using distanceDatasetPairs to sort instead of just adding to the array
