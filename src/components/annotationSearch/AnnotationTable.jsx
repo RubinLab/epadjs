@@ -9,7 +9,7 @@ import {
   useSortBy,
   useControlledState
 } from 'react-table';
-import { clearCarets, convertDateFormat } from '../../Utils/aid.js';
+import { clearCarets, convertDateFormat, findSelectedCheckboxes } from '../../Utils/aid.js';
 import {
   changeActivePort,
   jumpToAim,
@@ -18,14 +18,15 @@ import {
   startLoading,
   loadCompleted,
   annotationsLoadingError,
-  updateSearchTableIndex
+  updateSearchTableIndex,
+  storeSelectedAnnotations
 } from '../annotationsList/action';
 import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
 import SelectSerieModal from '../annotationsList/selectSerieModal';
 import { isSupportedModality } from "../../Utils/aid.js";
 import { COMP_MODALITIES as compModality } from "../../constants.js";
-const defaultPageSize = 200;
+const defaultPageSize = 10;
 
 let maxPort;
 let mode;
@@ -256,6 +257,13 @@ function AnnotationTable(props) {
   // const [aimMap, setAimMap] = useState({})
 
   const handlePageIndex = act => {
+    const selectedCheckboxes = findSelectedCheckboxes();
+    console.log(selectedCheckboxes);
+    const selectionMap = selectedCheckboxes.reduce((all, item) => {
+      all[item] = true;
+      return all;
+    }, {})
+    props.dispatch(storeSelectedAnnotations(selectionMap, props.searchTableIndex));
     let newIndex = act === 'prev' ? props.searchTableIndex - 1 : props.searchTableIndex + 1;
     props.dispatch(updateSearchTableIndex(newIndex));
   };
@@ -276,7 +284,7 @@ function AnnotationTable(props) {
         const aim = el.data ? el.data : el;
         pageData.push(aim);
         const { aimID, seriesUID, studyUID, subjectID, projectID, patientName, name } = aim;
-        map[aimID] = { aimID, seriesUID, studyUID, subjectID, projectID, patientName, name }   
+        map[aimID] = { aimID, seriesUID, studyUID, subjectID, projectID, patientName, name }
       }
     });
     // instead of writing 200 aims to storage, i can write a function
@@ -466,8 +474,8 @@ function AnnotationTable(props) {
                 type="checkbox"
                 className='form-check-input __search-checkbox'
                 id={row.original.aimID}
-                // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
-                // checked={listOfSelecteds[row.original.aimID]}
+              // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
+              // checked={listOfSelecteds[row.original.aimID]}
               // checked={props.allSelected}
               />
             );
@@ -624,8 +632,8 @@ function AnnotationTable(props) {
                 type="checkbox"
                 className='form-check-input __search-checkbox'
                 id={row.original.aimID}
-                // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
-                // checked={props.allSelected || listOfSelecteds[row.original.aimID]}
+              // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
+              // checked={props.allSelected || listOfSelecteds[row.original.aimID]}
               />
             );
           }

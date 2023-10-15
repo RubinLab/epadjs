@@ -49,6 +49,7 @@ import {
   REFRESH_MAP,
   AIM_SAVE,
   SUBPATH,
+  STORE_SELECTED_ANNOTATIONS,
   colors,
   commonLabels,
 } from "./types";
@@ -66,6 +67,10 @@ import { ConsoleWriter } from "istanbul-lib-report";
 import aimEntityData from "./annotationDock/aimEntityData";
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
+
+export const storeSelectedAnnotations = (selectionMap, pageIndex) => {
+  return { type: STORE_SELECTED_ANNOTATIONS, payload: { selectionMap, pageIndex } };
+}
 
 export const updateSubpath = (subpath, portIndex) => {
   return { type: SUBPATH, payload: { subpath, portIndex } }
