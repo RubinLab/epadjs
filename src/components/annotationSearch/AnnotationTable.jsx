@@ -20,7 +20,7 @@ import {
   loadCompleted,
   annotationsLoadingError,
   updateSearchTableIndex,
-  // storeSelectedAnnotations
+  storeSelectedAnnotations
 } from '../annotationsList/action';
 import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
@@ -258,12 +258,12 @@ function AnnotationTable(props) {
   // const [aimMap, setAimMap] = useState({})
 
   const handlePageIndex = act => {
-    // const selectedCheckboxes = findSelectedCheckboxes();
-    // // props.dispatch(storeSelectedAnnotations(selectedCheckboxes, props.searchTableIndex));
+    const selectedCheckboxes = findSelectedCheckboxes();
+    props.dispatch(storeSelectedAnnotations(selectedCheckboxes, props.searchTableIndex));
     // const newSelection = _.cloneDeep(aimSelection);
     // newSelection[props.searchTableIndex] = selectedCheckboxes;
     // setAimSelection(newSelection);
-    props.updateSelectedAims();
+    // props.updateSelectedAims();
     let newIndex = act === 'prev' ? props.searchTableIndex - 1 : props.searchTableIndex + 1;
     props.dispatch(updateSearchTableIndex(newIndex));
   };
@@ -328,8 +328,8 @@ function AnnotationTable(props) {
   }, [props.noOfRows, props.data, props.searchTableIndex]);
 
   useEffect(() => {
-    const { searchTableIndex } = props;
-    selectCheckboxes(props.aimSelection[searchTableIndex]);
+    const { searchTableIndex, selectedSearchAnnotations } = props;
+    selectCheckboxes(selectedSearchAnnotations[searchTableIndex]);
   })
 
   const getSeriesData = async selected => {
