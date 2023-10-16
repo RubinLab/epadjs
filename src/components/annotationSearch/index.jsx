@@ -164,6 +164,7 @@ const AnnotationSearch = props => {
   const [encArgs, setEncArgs] = useState('');
   const [decrArgs, setDecrArgs] = useState('');
   const [allSelected, setAllSelected] = useState(false);
+  const [aimSelection, setAimSelection] = useState([]);
 
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -418,10 +419,16 @@ const AnnotationSearch = props => {
     setQuery(newQuery);
   };
 
-  const updateSelectedAims = aimData => {
-    if (props.selectedAnnotations[aimData.aimID])
-      setAllSelected(false);
-    props.dispatch(selectAnnotation(aimData));
+  const updateSelectedAims = () => {
+    const selectedCheckboxes = findSelectedCheckboxes();
+    // props.dispatch(storeSelectedAnnotations(selectedCheckboxes, props.searchTableIndex));
+    const newSelection = _.cloneDeep(aimSelection);
+    newSelection[props.searchTableIndex] = selectedCheckboxes;
+    setAimSelection(newSelection);
+    // if (props.selectedAnnotations[aimData.aimID])
+    //   setAllSelected(false);
+    // props.dispatch(selectAnnotation(aimData));
+    
   };
 
   const renderContentItem = field => {
@@ -1460,6 +1467,7 @@ const AnnotationSearch = props => {
               handleSort={handleSort}
               handleFilter={handleFilter}
               filters={filters}
+              aimSelection={aimSelection}
             />
           )}
         </tbody>

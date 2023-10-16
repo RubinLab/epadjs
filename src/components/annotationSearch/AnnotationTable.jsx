@@ -258,11 +258,12 @@ function AnnotationTable(props) {
   // const [aimMap, setAimMap] = useState({})
 
   const handlePageIndex = act => {
-    const selectedCheckboxes = findSelectedCheckboxes();
-    // props.dispatch(storeSelectedAnnotations(selectedCheckboxes, props.searchTableIndex));
-    const newSelection = _.cloneDeep(aimSelection);
-    newSelection[props.searchTableIndex] = selectedCheckboxes;
-    setAimSelection(newSelection);
+    // const selectedCheckboxes = findSelectedCheckboxes();
+    // // props.dispatch(storeSelectedAnnotations(selectedCheckboxes, props.searchTableIndex));
+    // const newSelection = _.cloneDeep(aimSelection);
+    // newSelection[props.searchTableIndex] = selectedCheckboxes;
+    // setAimSelection(newSelection);
+    props.updateSelectedAims();
     let newIndex = act === 'prev' ? props.searchTableIndex - 1 : props.searchTableIndex + 1;
     props.dispatch(updateSearchTableIndex(newIndex));
   };
@@ -328,7 +329,7 @@ function AnnotationTable(props) {
 
   useEffect(() => {
     const { searchTableIndex } = props;
-    selectCheckboxes(aimSelection[searchTableIndex]);
+    selectCheckboxes(props.aimSelection[searchTableIndex]);
   })
 
   const getSeriesData = async selected => {
