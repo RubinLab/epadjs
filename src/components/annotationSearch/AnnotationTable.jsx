@@ -9,7 +9,7 @@ import {
   useSortBy,
   useControlledState
 } from 'react-table';
-import { clearCarets, convertDateFormat, findSelectedCheckboxes } from '../../Utils/aid.js';
+import { clearCarets, convertDateFormat, findSelectedCheckboxes, selectCheckboxes, isSupportedModality } from '../../Utils/aid.js';
 import {
   changeActivePort,
   jumpToAim,
@@ -24,7 +24,6 @@ import {
 import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
 import SelectSerieModal from '../annotationsList/selectSerieModal';
-import { isSupportedModality } from "../../Utils/aid.js";
 import { COMP_MODALITIES as compModality } from "../../constants.js";
 const defaultPageSize = 10;
 
@@ -258,12 +257,7 @@ function AnnotationTable(props) {
 
   const handlePageIndex = act => {
     const selectedCheckboxes = findSelectedCheckboxes();
-    console.log(selectedCheckboxes);
-    const selectionMap = selectedCheckboxes.reduce((all, item) => {
-      all[item] = true;
-      return all;
-    }, {})
-    props.dispatch(storeSelectedAnnotations(selectionMap, props.searchTableIndex));
+    props.dispatch(storeSelectedAnnotations(selectedCheckboxes, props.searchTableIndex));
     let newIndex = act === 'prev' ? props.searchTableIndex - 1 : props.searchTableIndex + 1;
     props.dispatch(updateSearchTableIndex(newIndex));
   };
@@ -326,6 +320,11 @@ function AnnotationTable(props) {
       preparePageData(props.data, defaultPageSize, props.searchTableIndex);
     }
   }, [props.noOfRows, props.data, props.searchTableIndex]);
+
+  useEffect(() => {
+    const { selectedSearchAnnotations, searchTableIndex } = props;
+    selectCheckboxes(selectedSearchAnnotations[searchTableIndex]);
+  })
 
   const getSeriesData = async selected => {
     props.dispatch(startLoading());
@@ -616,7 +615,6 @@ function AnnotationTable(props) {
         }],
       // [data, listOfSelecteds, props.selectedAnnotations]
       [data]
-
     );
   }
   else {
@@ -779,7 +777,8 @@ const mapsStateToProps = state => {
     refresh: state.annotationsListReducer.refresh,
     projectMap: state.annotationsListReducer.projectMap,
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
-    searchTableIndex: state.annotationsListReducer.searchTableIndex
+    searchTableIndex: state.annotationsListReducer.searchTableIndex,
+    selectedSearchAnnotations: state.annotationsListReducer.selectedSearchAnnotations
   };
 };
 

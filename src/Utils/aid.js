@@ -13,6 +13,13 @@ export const findSelectedCheckboxes = () => {
   return selected;
 }
 
+export const selectCheckboxes = (selectedCheckboxes) => {
+  selectedCheckboxes?.forEach(el => {
+    const checkbox = document.getElementById(el);
+    if (checkbox) checkbox.checked = true;
+  })
+}
+
 export const handleSelectDeselectAll = (checked) => {
   let checkboxes = document.getElementsByClassName('__search-checkbox');
   checkboxes = Array.from(checkboxes);
@@ -419,16 +426,16 @@ export const isSupportedModality = (serie) => {
 };
 
 export const getAllowedTermsOfTemplateComponent = (template, componentLabel) => {
-  const {Component:components} = template[0];
+  const { Component: components } = template[0];
   let allowedTerms;
   let termMeanings = [];
-  for(let i=0; i<components.length; i++){
-    if(components[i].label === componentLabel){
+  for (let i = 0; i < components.length; i++) {
+    if (components[i].label === componentLabel) {
       allowedTerms = components[i].AllowedTerm;
       break;
-    } 
+    }
   }
-  if(!allowedTerms)
+  if (!allowedTerms)
     return [];
   allowedTerms.forEach(term => {
     termMeanings.push(term.codeMeaning);
