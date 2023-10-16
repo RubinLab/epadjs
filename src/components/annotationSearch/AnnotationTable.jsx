@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { connect } from 'react-redux';
+import _ from 'lodash';
 import ReactTooltip from 'react-tooltip';
 import Modal from 'react-bootstrap/Modal';
 import {
@@ -19,7 +20,7 @@ import {
   loadCompleted,
   annotationsLoadingError,
   updateSearchTableIndex,
-  storeSelectedAnnotations
+  // storeSelectedAnnotations
 } from '../annotationsList/action';
 import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
@@ -253,11 +254,15 @@ function AnnotationTable(props) {
   // const [listOfSelecteds, setListOfSelecteds] = useState({});
   const [showNarrative, setShowNarrative] = useState(false);
   const [narrative, setNarrative] = useState('');
+  const [aimSelection, setAimSelection] = useState([]);
   // const [aimMap, setAimMap] = useState({})
 
   const handlePageIndex = act => {
     const selectedCheckboxes = findSelectedCheckboxes();
-    props.dispatch(storeSelectedAnnotations(selectedCheckboxes, props.searchTableIndex));
+    // props.dispatch(storeSelectedAnnotations(selectedCheckboxes, props.searchTableIndex));
+    const newSelection = _.cloneDeep(aimSelection);
+    newSelection[props.searchTableIndex] = selectedCheckboxes;
+    setAimSelection(newSelection);
     let newIndex = act === 'prev' ? props.searchTableIndex - 1 : props.searchTableIndex + 1;
     props.dispatch(updateSearchTableIndex(newIndex));
   };
@@ -322,8 +327,8 @@ function AnnotationTable(props) {
   }, [props.noOfRows, props.data, props.searchTableIndex]);
 
   useEffect(() => {
-    const { selectedSearchAnnotations, searchTableIndex } = props;
-    selectCheckboxes(selectedSearchAnnotations[searchTableIndex]);
+    const { searchTableIndex } = props;
+    selectCheckboxes(aimSelection[searchTableIndex]);
   })
 
   const getSeriesData = async selected => {

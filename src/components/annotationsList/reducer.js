@@ -106,11 +106,11 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
-      case STORE_SELECTED_ANNOTATIONS:
-        const clonedSelection = _.cloneDeep(state.selectedSearchAnnotations);
-        const { selectionMap, pageIndex } = action.payload;
-        clonedSelection[pageIndex] = selectionMap;
-        return { ...state, selectedSearchAnnotations: clonedSelection };
+      // case STORE_SELECTED_ANNOTATIONS:
+      //   const clonedSelection = _.cloneDeep(state.selectedSearchAnnotations);
+      //   const { selectionMap, pageIndex } = action.payload;
+      //   clonedSelection[pageIndex] = selectionMap;
+      //   return { ...state, selectedSearchAnnotations: clonedSelection };
       case AIM_SAVE: //tested
         const { seriesList, aimRefs } = action.payload;
         const clonedOtherAims = _.cloneDeep(state.otherSeriesAimsList);
