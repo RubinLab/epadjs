@@ -21,22 +21,27 @@ const ProjectAdd = (props) => {
     if (!aimsPassed && onSave) {
       onSave(projectId);
     } else {
+      let aimsArr;
       const storeIds = Object.keys(annotations);
-      const selectedIds = findSelectedCheckboxes();
-      // clone the storedaims
-      let storedAims = _.cloneDeep(selectedSearchAnnotations);
-      // remove the current page
-      if (storedAims[searchTableIndex]) delete storedAims[searchTableIndex];
-      // get aim ids in an array
-      storedAims = Object.values(storedAims);
-      // merge aimdIds of the map
-      let aimsArr = storedAims.reduce((all, item) => {
-        const arr = Object.keys(item);
-        if (all) return [...all, ...arr];
-        else return arr;
-      }, []);
-      // merge checkboxes for the current page on top of the map's
-      if (selectedIds.length > 0) aimsArr = [...aimsArr, ...selectedIds];
+      if (storeIds.length > 0) { 
+        aimsArr = Object.keys(annotations); 
+      } else {
+        const selectedIds = findSelectedCheckboxes();
+        // clone the storedaims
+        let storedAims = _.cloneDeep(selectedSearchAnnotations);
+        // remove the current page
+        if (storedAims[searchTableIndex]) delete storedAims[searchTableIndex];
+        // get aim ids in an array
+        storedAims = Object.values(storedAims);
+        // merge aimdIds of the map
+        aimsArr = storedAims.reduce((all, item) => {
+          const arr = Object.keys(item);
+          if (all) return [...all, ...arr];
+          else return arr;
+        }, []);
+        // merge checkboxes for the current page on top of the map's
+        if (selectedIds.length > 0) aimsArr = [...aimsArr, ...selectedIds];
+      }
       try {
         await addAimsToProject(projectId, aimsArr);
         window.dispatchEvent(new CustomEvent('refreshProjects', { detail: projectId }));
