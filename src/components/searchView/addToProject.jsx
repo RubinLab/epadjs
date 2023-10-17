@@ -1,5 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
+import _ from 'lodash';
 import { toast } from "react-toastify";
 import Dropdown from 'react-bootstrap/Dropdown';
 import { FaProjectDiagram } from 'react-icons/fa';
@@ -10,7 +11,7 @@ import { findSelectedCheckboxes, resetSelectAllCheckbox } from '../../Utils/aid.
 
 // const ProjectAdd = ({ projectMap, onSave, className, annotations, deselect, parent, showAddTo, history }) => {
 const ProjectAdd = (props) => {
-  const { projectMap, onSave, className, annotations, deselect, parent, showAddTo, updateUrl } = props;
+  const { projectMap, onSave, className, annotations, deselect, parent, showAddTo, updateUrl, selectedSearchAnnotations, searchTableIndex } = props;
   const projectNames = Object.values(projectMap);
   const projectIDs = Object.keys(projectMap);
 
@@ -22,9 +23,22 @@ const ProjectAdd = (props) => {
     } else {
       const storeIds = Object.keys(annotations);
       const selectedIds = findSelectedCheckboxes();
-      const aimIDs = storeIds.length > 0 ? storeIds : selectedIds;
+      // clone the storedaims
+      let storedAims = _.cloneDeep(selectedSearchAnnotations);
+      // remove the current page
+      if (storedAims[searchTableIndex]) delete storedAims[searchTableIndex];
+      // get aim ids in an array
+      storedAims = Object.values(storedAims);
+      // merge aimdIds of the map
+      let aimsArr = storedAims.reduce((all, item) => {
+        const arr = Object.keys(item);
+        if (all) return [...all, ...arr];
+        else return arr;
+      }, []);
+      // merge checkboxes for the current page on top of the map's
+      if (selectedIds.length > 0) aimsArr = [...aimsArr, ...selectedIds];
       try {
-        await addAimsToProject(projectId, aimIDs);
+        await addAimsToProject(projectId, aimsArr);
         window.dispatchEvent(new CustomEvent('refreshProjects', { detail: projectId }));
         toast.success("Annotation(s) succesfully copied.", {
           position: "top-right",
@@ -126,7 +140,9 @@ const mapStateToProps = (state) => {
     patients: state.annotationsListReducer.selectedPatients,
     studies: state.annotationsListReducer.selectedStudies,
     projectMap: state.annotationsListReducer.projectMap,
-    annotations: state.annotationsListReducer.selectedAnnotations
+    annotations: state.annotationsListReducer.selectedAnnotations,
+    selectedSearchAnnotations: state.annotationsListReducer.selectedSearchAnnotations,
+    searchTableIndex: state.annotationsListReducer.searchTableIndex,
   };
 };
 export default connect(mapStateToProps)(ProjectAdd);

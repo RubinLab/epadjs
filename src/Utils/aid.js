@@ -14,11 +14,9 @@ export const findSelectedCheckboxes = () => {
 }
 
 export const selectCheckboxes = (selectedCheckboxes) => {
-  console.log(selectedCheckboxes);
   const arr = selectedCheckboxes ? Object.keys(selectedCheckboxes) : [];
   arr.forEach(el => {
     const checkbox = document.getElementById(el);
-    console.log(checkbox);
     if (checkbox) checkbox.checked = true;
   })
 }
