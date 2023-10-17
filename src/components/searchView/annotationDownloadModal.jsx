@@ -1,5 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
+import _ from 'lodash';
 import PropTypes from "prop-types";
 import { Modal, Button } from "react-bootstrap";
 import {
@@ -21,13 +22,35 @@ class AnnnotationDownloadModal extends React.Component {
     this.setState({ [name]: checked });
   };
 
+  getSelectedAnnotations = () => {
+    const { selectedSearchAnnotations, searchTableIndex } = this.props;
+    let aimsArr = [];
+    const selectedIds = findSelectedCheckboxes();
+    // clone the storedaims
+    let storedAims = _.cloneDeep(selectedSearchAnnotations);
+    // remove the current page
+    if (storedAims[searchTableIndex]) delete storedAims[searchTableIndex];
+    // get aim ids in an array
+    storedAims = Object.values(storedAims);
+    // merge aimdIds of the map
+    aimsArr = storedAims.reduce((all, item) => {
+      const arr = Object.keys(item);
+      if (all) return [...all, ...arr];
+      else return arr;
+    }, []);
+    // merge checkboxes for the current page on top of the map's
+    if (selectedIds.length > 0) aimsArr = [...aimsArr, ...selectedIds];
+    console.log(aimsArr);
+    return aimsArr
+  }
+
   onDownload = () => {
     const optionObj = this.state;
     const { pid, projectID } = this.props;
     const annsToDownload =
       Object.keys(this.props.selectedAnnotations).length > 0
         ? this.props.selectedAnnotations : this.props.selected ?
-       this.props.selected : findSelectedCheckboxes();
+          this.props.selected : this.getSelectedAnnotations();
     const aimList = Array.isArray(annsToDownload) ? annsToDownload : Object.keys(annsToDownload);
     // this.props.updateStatus();
     const promise =
@@ -162,7 +185,9 @@ AnnnotationDownloadModal.propTypes = {};
 
 const mapStateToProps = state => {
   return {
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
+    selectedSearchAnnotations: state.annotationsListReducer.selectedSearchAnnotations,
+    searchTableIndex: state.annotationsListReducer.searchTableIndex,
   };
 };
 
