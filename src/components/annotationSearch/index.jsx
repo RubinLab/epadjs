@@ -1000,9 +1000,6 @@ const AnnotationSearch = props => {
     const notDeleted = {};
     // let newSelected = Object.assign({}, props.selectedAnnotations);
     let newSelected = formSelectedAnnotationsData();
-    console.log(' ====> newSelected');
-    console.log(newSelected);
-
     const toBeDeleted = {};
     const promiseArr = [];
     for (let annotation in newSelected) {
@@ -1016,8 +1013,6 @@ const AnnotationSearch = props => {
           : (toBeDeleted[projectID] = [annotation]);
       }
     }
-
-    console.log(toBeDeleted);
     const projects = Object.keys(toBeDeleted);
     const aims = Object.values(toBeDeleted);
 

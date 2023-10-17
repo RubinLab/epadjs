@@ -40,7 +40,6 @@ class AnnnotationDownloadModal extends React.Component {
     }, []);
     // merge checkboxes for the current page on top of the map's
     if (selectedIds.length > 0) aimsArr = [...aimsArr, ...selectedIds];
-    console.log(aimsArr);
     return aimsArr
   }
 
@@ -64,6 +63,7 @@ class AnnnotationDownloadModal extends React.Component {
         // this.props.updateStatus();
         resetSelectAllCheckbox(false);
         this.props.onSubmit();
+        this.props.dispatch(clearSelection());
       })
       .catch(err => {
         console.log(err);
