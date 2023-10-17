@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import _ from 'lodash';
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -10,9 +11,8 @@ import {
   addSubjectsToWorklist,
   addAimsToWorklist
 } from "../../services/worklistServices";
-import { clearSelection } from "../annotationsList/action";
+import { clearSelection, storeSelectedAnnotations } from "../annotationsList/action";
 import { findSelectedCheckboxes, resetSelectAllCheckbox } from '../../Utils/aid.js';
-
 
 const AddToWorklist = (props) => {
   const mode = sessionStorage.getItem('mode');
@@ -156,15 +156,34 @@ const AddToWorklist = (props) => {
   }
 
   const onSelect = (workListID) => {
-    const { selectedStudies, selectedPatients, selectedAnnotations } = props;
-    const storedAims = Object.keys(selectedAnnotations);
-    const selectedAims = storedAims.length > 0 ? storedAims : findSelectedCheckboxes();
+    const { selectedStudies, selectedPatients, selectedAnnotations, selectedSearchAnnotations, searchTableIndex, } = props;
+    const storedSelection = _.cloneDeep(selectedSearchAnnotations);
+    const selectedAims = findSelectedCheckboxes();
+    const aimMap = JSON.parse(sessionStorage.getItem('aimMap'));
+    let thickStoredAims = Object.keys(selectedAnnotations);
+    let teachingStoredAims = Object.keys(selectedSearchAnnotations);
+    let storedAims;
+    if (thickStoredAims.length > 0) storedAims = thickStoredAims;
+    else {
+      const currentPageSelection = selectedAims.reduce((all, item) => {
+        all[item] = aimMap[item];
+        return all;
+      }, {});
+      storedSelection[searchTableIndex] = currentPageSelection;
+      props.dispatch(storeSelectedAnnotations(currentPageSelection, searchTableIndex));
+      const aims = Object.values(storedSelection);
+      const mergedAims = aims.reduce((all, item) => {
+        all = { ...all, ...item };
+        return all;
+      }, {});
+      storedAims = Object.keys(mergedAims);
+    }
     if (Object.values(selectedStudies).length > 0) {
       addSelectedStudiesToWorklist(workListID, selectedData);
     } else if (Object.values(selectedPatients).length > 0) {
       addSelectedSubjectsToWorklist(workListID, selectedData);
-    } else if (selectedAims.length > 0) {
-      addAnnotationsToWorklist(selectedAims, workListID);
+    } else if (storedAims.length > 0) {
+      addAnnotationsToWorklist(storedAims, workListID);
     }
   };
 
@@ -249,7 +268,9 @@ const mapStateToProps = state => {
     selectedProjects: state.annotationsListReducer.selectedProjects,
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
+    selectedSearchAnnotations: state.annotationsListReducer.selectedSearchAnnotations,
+    searchTableIndex: state.annotationsListReducer.searchTableIndex,
   };
 };
 export default connect(mapStateToProps)(AddToWorklist);
