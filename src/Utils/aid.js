@@ -14,8 +14,11 @@ export const findSelectedCheckboxes = () => {
 }
 
 export const selectCheckboxes = (selectedCheckboxes) => {
-  selectedCheckboxes?.forEach(el => {
+  console.log(selectedCheckboxes);
+  const arr = selectedCheckboxes ? Object.keys(selectedCheckboxes) : [];
+  arr.forEach(el => {
     const checkbox = document.getElementById(el);
+    console.log(checkbox);
     if (checkbox) checkbox.checked = true;
   })
 }
@@ -29,7 +32,7 @@ export const handleSelectDeselectAll = (checked) => {
 export const resetSelectAllCheckbox = state => {
   let selectAllCheckbox = document.getElementsByClassName('__select-all');
   selectAllCheckbox = Array.from(selectAllCheckbox);
-  selectAllCheckbox[0].checked = state;
+  if (selectAllCheckbox && selectAllCheckbox[0]) selectAllCheckbox[0].checked = state;
 }
 
 export function styleEightDigitDate(rawDate) {

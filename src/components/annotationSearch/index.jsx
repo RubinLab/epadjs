@@ -31,7 +31,7 @@ import {
   deleteAnnotationsList
 } from '../../services/annotationServices.js';
 import AnnotationTable from './AnnotationTable.jsx';
-import { clearSelection, selectAnnotation, updateSearchTableIndex, refreshPage } from '../annotationsList/action';
+import { clearSelection, selectAnnotation, updateSearchTableIndex, refreshPage, storeSelectedAnnotations } from '../annotationsList/action';
 import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
 import UploadModal from '../searchView/uploadModal';
 import DeleteAlert from '../management/common/alertDeletionModal';
@@ -428,7 +428,7 @@ const AnnotationSearch = props => {
     // if (props.selectedAnnotations[aimData.aimID])
     //   setAllSelected(false);
     // props.dispatch(selectAnnotation(aimData));
-    
+
   };
 
   const renderContentItem = field => {
@@ -975,13 +975,24 @@ const AnnotationSearch = props => {
 
 
   const formSelectedAnnotationsData = () => {
-    const aimArray = findSelectedCheckboxes();
+    const { selectedSearchAnnotations, searchTableIndex } = props;
+    const selectedCheckboxes = findSelectedCheckboxes();
     const aimMap = JSON.parse(sessionStorage.getItem('aimMap'));
-    const aimObj = aimArray.reduce((all, item, index) => {
-      all[item] = { ...aimMap[item] };
+    const storedSelection = _.cloneDeep(selectedSearchAnnotations);
+    const currentPageSelection = selectedCheckboxes.reduce((all, item) => {
+      all[item] = aimMap[item];
       return all;
     }, {})
-    return aimObj;
+    storedSelection[searchTableIndex] = currentPageSelection;
+    props.dispatch(storeSelectedAnnotations(currentPageSelection, searchTableIndex));
+
+    // concatanate all selection
+    const aims = Object.values(storedSelection);
+    const mergedAims = aims.reduce((all, item) => {
+      all = { ...all, ...item };
+      return all;
+    }, {});
+    return mergedAims;
   }
 
 
@@ -989,6 +1000,9 @@ const AnnotationSearch = props => {
     const notDeleted = {};
     // let newSelected = Object.assign({}, props.selectedAnnotations);
     let newSelected = formSelectedAnnotationsData();
+    console.log(' ====> newSelected');
+    console.log(newSelected);
+
     const toBeDeleted = {};
     const promiseArr = [];
     for (let annotation in newSelected) {
@@ -1002,6 +1016,8 @@ const AnnotationSearch = props => {
           : (toBeDeleted[projectID] = [annotation]);
       }
     }
+
+    console.log(toBeDeleted);
     const projects = Object.keys(toBeDeleted);
     const aims = Object.values(toBeDeleted);
 
@@ -1467,7 +1483,7 @@ const AnnotationSearch = props => {
               handleSort={handleSort}
               handleFilter={handleFilter}
               filters={filters}
-              // aimSelection={aimSelection}
+            // aimSelection={aimSelection}
             />
           )}
         </tbody>
@@ -1520,7 +1536,8 @@ const mapsStateToProps = state => {
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
     openSeries: state.annotationsListReducer.openSeries,
     searchTableIndex: state.annotationsListReducer.searchTableIndex,
-    refreshMap: state.annotationsListReducer.refreshMap
+    refreshMap: state.annotationsListReducer.refreshMap,
+    selectedSearchAnnotations: state.annotationsListReducer.selectedSearchAnnotations
   };
 };
 

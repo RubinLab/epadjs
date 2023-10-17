@@ -465,6 +465,7 @@ const asyncReducer = (state = initialState, action) => {
           selectionState.selectedStudies = {};
           selectionState.selectedPatients = {};
           selectionState.selectedProject = null;
+          selectionState.selectedSearchAnnotations = [];
         }
         return selectionState;
       case SELECT_PATIENT:

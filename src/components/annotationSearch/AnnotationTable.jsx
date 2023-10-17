@@ -254,12 +254,17 @@ function AnnotationTable(props) {
   // const [listOfSelecteds, setListOfSelecteds] = useState({});
   const [showNarrative, setShowNarrative] = useState(false);
   const [narrative, setNarrative] = useState('');
-  const [aimSelection, setAimSelection] = useState([]);
   // const [aimMap, setAimMap] = useState({})
 
   const handlePageIndex = act => {
+    const aimData = JSON.parse(sessionStorage.getItem('aimMap'));
     const selectedCheckboxes = findSelectedCheckboxes();
-    props.dispatch(storeSelectedAnnotations(selectedCheckboxes, props.searchTableIndex));
+    const map = selectedCheckboxes.reduce((all, item) => {
+      all[item] = aimData[item];
+      return all;
+    }, {});    
+
+    props.dispatch(storeSelectedAnnotations(map, props.searchTableIndex));
     // const newSelection = _.cloneDeep(aimSelection);
     // newSelection[props.searchTableIndex] = selectedCheckboxes;
     // setAimSelection(newSelection);
