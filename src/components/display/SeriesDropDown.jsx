@@ -15,6 +15,9 @@ const SeriesDropDown = (props) => {
     const [seriesList, setSeriesList] = useState([]);
     const [aimCounts, setAimCounts] = useState({});
 
+    console.log(' ---> this.props');
+    console.log(props);
+
     useEffect(() => {
         let studyUID;
         let projectID;
@@ -28,10 +31,16 @@ const SeriesDropDown = (props) => {
         const { openStudies } = props;
         async function fetchData() {
             const { data: seriesOfStudy } = await getSeries(projectID, patientID, studyUID);
+            console.log(" ====> console.log(seriesOfStudy)");
+            console.log(seriesOfStudy);
             return seriesOfStudy;
         }
         if (openStudies && openStudies.hasOwnProperty(studyUID)) {
-            const series = openStudies[studyUID].filter(isSupportedModality);
+            let series = openStudies[studyUID].filter(isSupportedModality);
+            console.log(openStudies[studyUID]);
+            if (props.multiFrameData.length > 0) {
+                series = [...series, ...props.multiFrameData]
+            }
             setSeriesList(series);
         }
         else {
@@ -66,6 +75,7 @@ const SeriesDropDown = (props) => {
         const { studyUID, projectID, patientID } = props.serie;
         const isCountQuery = true;
         const { data: aimCounts } = await getStudyAims(patientID, studyUID, projectID, isCountQuery);
+        console.log('aimCounts', aimCounts);
         setAimCounts(aimCounts);
     }
 
@@ -83,8 +93,8 @@ const SeriesDropDown = (props) => {
             >
                 {seriesList && seriesList.length && seriesList.map(({ seriesDescription, seriesUID, seriesNo, i }) => {
                     let isCurrent = props.openSeries[props.activePort].seriesUID === seriesUID;
-                    let counts = aimCounts[seriesUID] ? `- ${aimCounts[seriesUID]} Ann -` : ""
-                    return (<Dropdown.Item key={seriesUID} eventKey={seriesUID} onSelect={handleSelect} style={{ textAlign: "left !important" }}>{seriesNo ? seriesNo : "#NA"} {counts} {seriesDescription?.length ? seriesDescription : "No Description"} {isCurrent ? "(Current)" : ""}</Dropdown.Item>);
+                    let counts = aimCounts[seriesUID] ? `${aimCounts[seriesUID]} Ann -` : ""
+                    return (<Dropdown.Item key={seriesUID} eventKey={seriesUID} onSelect={handleSelect} style={{ textAlign: "left !important" }}>{seriesNo ? seriesNo : "#NA"} {' - '} {counts} {seriesDescription?.length ? seriesDescription : "No Description"} {isCurrent ? "(Current)" : ""}</Dropdown.Item>);
                 })}
             </DropdownButton>
         </div >

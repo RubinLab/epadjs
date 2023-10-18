@@ -176,7 +176,8 @@ class DisplayView extends Component {
       activeTool: '',
       invertMap: {},
       isOverlayVisible: {},
-      wwwc: {}
+      wwwc: {},
+      multiFrameData: [],
     };
   }
 
@@ -616,8 +617,31 @@ class DisplayView extends Component {
     this.refreshAllViewports();
   };
 
+  formMultiframeImgData = (arr) => {
+    // form an object with the necessary fields
+    // pass to series dropdown
+    console.log(arr);
+    const multiArr = []
+    if (arr.length > 1) {
+
+      for (let i = 1; i < arr.length; i++) {
+        const { seriesUID, studyUID, patientID, projectID, multiFrameImage, numberOfFrames } = arr[i][0]
+        const seriesDescription = `Multiframe ${i} / ${numberOfFrames} frames`;
+        // seriesNo ??
+        // counts ?? aim counts ? aimCounts
+        // seriesDescription
+        // isCurrent => props.openSeries[props.activePort].seriesUID === seriesUID;
+        // const { data: aimCounts } = await getStudyAims(patientID, studyUID, projectID, isCountQuery);
+        multiArr.push({ seriesUID, studyUID, patientID, projectID, multiFrameImage, numberOfFrames, seriesDescription});
+      }
+
+    }
+    this.setState({ multiFrameData: multiArr });
+  }
+
   async getImages(serie, i) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
+    this.formMultiframeImgData(urls);
     const firstSeriesIndex = this.findFirstSeriesIndex(urls);
     if (urls[firstSeriesIndex].length > 0) {
       const arr = urls[firstSeriesIndex][0].lossyImage.split('/');
@@ -653,8 +677,8 @@ class DisplayView extends Component {
     let firstSeriesIndex = 0;
     let urlsLen = imageUrls.length;
     for (let i = 0; i < urlsLen; i++) {
-      if (imageUrls[i].length > 0) { 
-        firstSeriesIndex = i; 
+      if (imageUrls[i].length > 0) {
+        firstSeriesIndex = i;
         break;
       }
     }
@@ -2042,6 +2066,7 @@ class DisplayView extends Component {
                         isAimEditorShowing={this.state.showAimEditor}
                         onCloseAimEditor={this.closeAimEditor}
                         onSelect={this.jumpToImage}
+                        multiFrameData={this.state.multiFrameData}
                       />
                     </div>
                   </div>
