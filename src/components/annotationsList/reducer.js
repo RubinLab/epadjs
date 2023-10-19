@@ -291,6 +291,8 @@ const asyncReducer = (state = initialState, action) => {
               action.payload.aimsData,
               colors
             );
+        const oldStudySeries = _.cloneDeep(state.openStudies);
+        const newStudySeries = { ...oldStudySeries, ...action.payload.seriesOfStudy };
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
@@ -300,6 +302,7 @@ const asyncReducer = (state = initialState, action) => {
           },
           otherSeriesAimsList: { ...state.otherSeriesAimsList, ...action.payload.otherSeriesAimsData },
           openSeries: imageAddedSeries,
+          openStudies: newStudySeries
         });
         return result;
       case LOAD_ANNOTATIONS_ERROR:

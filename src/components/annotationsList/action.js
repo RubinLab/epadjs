@@ -464,10 +464,10 @@ export const refreshPage = (feature, condition) => {
 }
 
 // helpeer method
-export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann, otherSeriesAimsData) => {
+export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann, otherSeriesAimsData, seriesOfStudy) => {
   return {
     type: LOAD_SERIE_SUCCESS,
-    payload: { ref, aimsData, serID, imageData, ann, otherSeriesAimsData },
+    payload: { ref, aimsData, serID, imageData, ann, otherSeriesAimsData, seriesOfStudy },
   };
 };
 
@@ -717,14 +717,14 @@ export const getSingleSerie = (serie, annotation, wadoUrl) => {
         aimID: annotation,
       };
 
-      const { aimsData, imageData, otherSeriesAimsData } = await getSingleSerieData(
+      const { aimsData, imageData, otherSeriesAimsData, seriesOfStudy } = await getSingleSerieData(
         serie,
         annotation,
         wadoUrl
       );
 
       await dispatch(
-        singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData)
+        singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData, seriesOfStudy)
       );
     } catch (err) {
       console.error(err);
@@ -763,9 +763,9 @@ export const updateSingleSerie = (serie, annotation) => {
       numberOfAnnotations,
       aimID: annotation,
     };
-    const { aimsData, imageData, otherSeriesAimsData } = await getSingleSerieData(serie, annotation);
+    const { aimsData, imageData, otherSeriesAimsData, seriesOfStudy } = await getSingleSerieData(serie, annotation);
     await dispatch(
-      singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData)
+      singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData, seriesOfStudy)
     );
   };
 };
@@ -911,10 +911,13 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
     projectID = projectID ? projectID : "lite";
     patientID = patientID ? patientID : serie.subjectID;
     aimID = aimID ? aimID : annotation;
-    getStudyAims(patientID, studyUID, projectID)
+    const promises = [getStudyAims(patientID, studyUID, projectID)];
+    promises.push(getSeries(projectID, patientID, studyUID));
+
+    Promise.all(promises)
       .then(async (result) => {
         const { studyAims, serieAims, otherSeriesAims } = extractNonMarkupAims(
-          result.data.rows,
+          result[0].data.rows,
           seriesUID
         );
         aimsData = serieAims.concat(studyAims);
@@ -932,7 +935,6 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
             all[img] = all[img] ? [...all[img], ...item] : item;
             return all;
           }, {})
-
         }
 
         imageData = {
@@ -942,7 +944,9 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
         aimsData = getAimListFields(aimsData, annotation);
         const allAims = [...serieAims, ...otherSeriesAims]
         const otherSeriesAimsData = allAims.length === 0 ? {} : getStudyAimsDataSorted(allAims, projectID, patientID);
-        resolve({ aimsData, imageData, otherSeriesAimsData });
+        console.log(result[1]);
+        const seriesOfStudy = { [studyUID]: result[1].data }
+        resolve({ aimsData, imageData, otherSeriesAimsData, seriesOfStudy });
       })
       .catch((err) => {
         console.log(err);

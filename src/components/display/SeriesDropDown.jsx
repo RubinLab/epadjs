@@ -22,19 +22,17 @@ const SeriesDropDown = (props) => {
         let studyUID;
         let projectID;
         let patientID;
-        
-        if (props.serie) {  
+
+        if (props.serie) {
             studyUID = props.serie.studyUID;
             projectID = props.serie.projectID;
-            patientID  = props.serie.patientID;
+            patientID = props.serie.patientID;
         }
         const { openStudies } = props;
-        async function fetchData() {
-            const { data: seriesOfStudy } = await getSeries(projectID, patientID, studyUID);
-            console.log(" ====> console.log(seriesOfStudy)");
-            console.log(seriesOfStudy);
-            return seriesOfStudy;
-        }
+        // async function fetchData() {
+        //     const { data: seriesOfStudy } = await getSeries(projectID, patientID, studyUID);
+        //     return seriesOfStudy;
+        // }
         if (openStudies && openStudies.hasOwnProperty(studyUID)) {
             let series = openStudies[studyUID];
 
@@ -44,12 +42,12 @@ const SeriesDropDown = (props) => {
             }
             setSeriesList(series);
         }
-        else {
-            console.log('fetching');
-            fetchData().then(result => {
-                props.dispatch(addStudyToGrid({ [studyUID]: result }));
-            });
-        }
+        // else {
+        //     console.log('fetching');
+        //     fetchData().then(result => {
+        //         props.dispatch(addStudyToGrid({ [studyUID]: result }));
+        //     });
+        // }
     }, [props.openStudies]);
 
     const handleSelect = (e) => {
@@ -71,20 +69,19 @@ const SeriesDropDown = (props) => {
         window.dispatchEvent(new CustomEvent('deleteViewportWL'));
     }
 
-    const handleToggle = async (show) => {
-        if (!show)
-            return;
-        const { studyUID, projectID, patientID } = props.serie;
-        const isCountQuery = true;
-        const { data: aimCounts } = await getStudyAims(patientID, studyUID, projectID, isCountQuery);
-        console.log('aimCounts', aimCounts);
-        setAimCounts(aimCounts);
-    }
+    // const handleToggle = (show) => {
+    //     if (!show)
+    //         return;
+    //     const { studyUID, projectID, patientID } = props.serie;
+    //     const isCountQuery = true;
+    //     const { data: aimCounts } = await getStudyAims(patientID, studyUID, projectID, isCountQuery);
+    //     setAimCounts(aimCounts);
+    // }
 
     return (
         <div>
             <DropdownButton
-                onToggle={handleToggle}
+                // onToggle={handleToggle}
                 key='button'
                 id={`dropdown-button-drop-1`}
                 size="sm"
@@ -93,9 +90,9 @@ const SeriesDropDown = (props) => {
                 data-tip
                 data-for="dropdownOtherSeries"
             >
-                {seriesList && seriesList.length && seriesList.map(({ seriesDescription, seriesUID, seriesNo, i }) => {
+                {seriesList && seriesList.length && seriesList.map(({ seriesDescription, numberOfAnnotations, seriesUID, seriesNo, i }) => {
                     let isCurrent = props.openSeries[props.activePort].seriesUID === seriesUID;
-                    let counts = aimCounts[seriesUID] ? `${aimCounts[seriesUID]} Ann -` : ""
+                    let counts = numberOfAnnotations ? `${numberOfAnnotations} Ann -` : ""
                     return (<Dropdown.Item key={seriesUID} eventKey={seriesUID} onSelect={handleSelect} style={{ textAlign: "left !important" }}>{seriesNo ? seriesNo : "#NA"} {' - '} {counts} {seriesDescription?.length ? seriesDescription : "No Description"} {isCurrent ? "(Current)" : ""}</Dropdown.Item>);
                 })}
             </DropdownButton>
