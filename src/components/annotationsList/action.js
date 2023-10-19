@@ -64,6 +64,7 @@ import { getAllTemplates } from "../../services/templateServices";
 import { getImageIdAnnotations } from "aimapi";
 import { ConsoleWriter } from "istanbul-lib-report";
 import aimEntityData from "./annotationDock/aimEntityData";
+import { setToolOptionsForElement } from 'cornerstone-tools';
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
 
@@ -342,7 +343,7 @@ export const selectAnnotation = (
 // opens a new port to display series
 // adds series details to the array
 export const addToGrid = (serie, annotation, port) => {
-  let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment } = serie;
+  let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment, seriesDescription } = serie;
   const modFmComment = comment ? comment.split('/')[0].trim() : '';
   examType = examType ? examType.toUpperCase() : modality ? modality.toUpperCase() : modFmComment.toUpperCase();
 
@@ -357,7 +358,8 @@ export const addToGrid = (serie, annotation, port) => {
     seriesUID,
     patientName,
     aimID: annotation,
-    examType
+    examType,
+    seriesDescription
     // imageIndex: 0
   };
   return { type: ADD_TO_GRID, reference, port };

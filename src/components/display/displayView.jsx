@@ -623,16 +623,17 @@ class DisplayView extends Component {
     console.log(arr);
     const multiArr = []
     if (arr.length > 1) {
-
+      let { seriesDescription, seriesNo } = arr[0][0];
       for (let i = 1; i < arr.length; i++) {
+        // get the description and seriresno from index 0
         const { seriesUID, studyUID, patientID, projectID, multiFrameImage, numberOfFrames } = arr[i][0]
-        const seriesDescription = `Multiframe ${i} / ${numberOfFrames} frames`;
+        seriesDescription = `${seriesDescription} / ${numberOfFrames} frames`;
         // seriesNo ??
         // counts ?? aim counts ? aimCounts
         // seriesDescription
         // isCurrent => props.openSeries[props.activePort].seriesUID === seriesUID;
         // const { data: aimCounts } = await getStudyAims(patientID, studyUID, projectID, isCountQuery);
-        multiArr.push({ seriesUID, studyUID, patientID, projectID, multiFrameImage, numberOfFrames, seriesDescription});
+        multiArr.push({ seriesUID, studyUID, patientID, projectID, multiFrameImage, numberOfFrames, seriesDescription, seriesNo });
       }
 
     }
@@ -640,6 +641,7 @@ class DisplayView extends Component {
   }
 
   async getImages(serie, i) {
+    console.log(serie);
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
     this.formMultiframeImgData(urls);
     const firstSeriesIndex = this.findFirstSeriesIndex(urls);

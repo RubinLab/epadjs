@@ -36,14 +36,16 @@ const SeriesDropDown = (props) => {
             return seriesOfStudy;
         }
         if (openStudies && openStudies.hasOwnProperty(studyUID)) {
-            let series = openStudies[studyUID].filter(isSupportedModality);
-            console.log(openStudies[studyUID]);
+            let series = openStudies[studyUID];
+
             if (props.multiFrameData.length > 0) {
-                series = [...series, ...props.multiFrameData]
+                series = [...series, ...props.multiFrameData];
+                series = series.filter(isSupportedModality);
             }
             setSeriesList(series);
         }
         else {
+            console.log('fetching');
             fetchData().then(result => {
                 props.dispatch(addStudyToGrid({ [studyUID]: result }));
             });
