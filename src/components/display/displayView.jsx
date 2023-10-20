@@ -27,7 +27,8 @@ import {
   aimDelete,
   clearAimId,
   updateSubpath,
-  clearSelection
+  clearSelection,
+  addStudyToGrid
 } from "../annotationsList/action";
 import { deleteAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
@@ -618,32 +619,41 @@ class DisplayView extends Component {
   };
 
   formMultiframeImgData = (arr) => {
-    // form an object with the necessary fields
-    // pass to series dropdown
+    const { series, activePort } = this.props;
+    console.log(" ====> Arr");
     console.log(arr);
-    const multiArr = []
-    if (arr.length > 1) {
-      let { seriesDescription, seriesNo } = arr[0][0];
-      for (let i = 1; i < arr.length; i++) {
-        // get the description and seriresno from index 0
-        const { seriesUID, studyUID, patientID, projectID, multiFrameImage, numberOfFrames } = arr[i][0]
-        seriesDescription = `${seriesDescription} / ${numberOfFrames} frames`;
-        // seriesNo ??
-        // counts ?? aim counts ? aimCounts
-        // seriesDescription
-        // isCurrent => props.openSeries[props.activePort].seriesUID === seriesUID;
-        // const { data: aimCounts } = await getStudyAims(patientID, studyUID, projectID, isCountQuery);
-        multiArr.push({ seriesUID, studyUID, patientID, projectID, multiFrameImage, numberOfFrames, seriesDescription, seriesNo });
+    console.log(series[activePort]);
+    // create the same data shape for studySeries 
+    // update the reducer with the new data
+    const studySeries = arr.reduce((all, item) => {
+      console.log(item);
+      const obj = {
+        projectID: item[0].projectID,
+        patientID: item[0].patientID,
+        studyUID: item[0].studyUID,
+        seriesUID: item[0].seriesUID,
+        seriesDescription: series[activePort].seriesDescription,
+        examType: series[activePort].examType,
+        numberOfImages: series[activePort].numberOfImages,
+        numberOfAnnotations: series[activePort].numberOfAnnotations,
+        seriesNo: series[activePort].seriesNo,
+        significanceOrder: series[activePort].significanceOrder,
+        multiFrameImage: item[0].multiFrameImage,
+        numberOfFrames: item[0].numberOfFrames,
       }
-
-    }
-    this.setState({ multiFrameData: multiArr });
+      all.push(obj);
+      return all;
+    }, [])
+    const result = { [series[activePort].studyUID]: studySeries };
+    this.props.dispatch(addStudyToGrid(result));
   }
 
   async getImages(serie, i) {
     console.log(serie);
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
-    this.formMultiframeImgData(urls);
+    if (urls.length > 1) {
+      this.formMultiframeImgData(urls);
+    }
     const firstSeriesIndex = this.findFirstSeriesIndex(urls);
     if (urls[firstSeriesIndex].length > 0) {
       const arr = urls[firstSeriesIndex][0].lossyImage.split('/');
@@ -1930,6 +1940,7 @@ class DisplayView extends Component {
 
   // Triggered by event from right bar to jump to the image of aim
   jumpToAimImage = event => {
+    console.log(event);
     const { series, activePort } = this.props;
     const { aimId, index } = event.detail;
     const imageIndex = this.getImageIndex(series[index], this.state.data[index].stack.imageIds, aimId);
@@ -2068,7 +2079,7 @@ class DisplayView extends Component {
                         isAimEditorShowing={this.state.showAimEditor}
                         onCloseAimEditor={this.closeAimEditor}
                         onSelect={this.jumpToImage}
-                        multiFrameData={this.state.multiFrameData}
+                      // multiFrameData={this.state.multiFrameData}
                       />
                     </div>
                   </div>

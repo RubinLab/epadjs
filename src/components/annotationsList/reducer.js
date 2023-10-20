@@ -49,6 +49,7 @@ import {
   REFRESH_MAP,
   AIM_SAVE,
   SUBPATH,
+  CHECK_MULTIFRAME,
   colors,
   commonLabels,
 } from "./types";
@@ -104,6 +105,10 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case CHECK_MULTIFRAME:
+        const series = _.cloneDeep(state.openSeries);
+        series[state.activePort].hasMultiframe = action.hasMultiframe;
+        return { ...state, openSeries: series };
       case AIM_SAVE: //tested
         const { seriesList, aimRefs } = action.payload;
         const clonedOtherAims = _.cloneDeep(state.otherSeriesAimsList);
@@ -293,6 +298,10 @@ const asyncReducer = (state = initialState, action) => {
             );
         const oldStudySeries = _.cloneDeep(state.openStudies);
         const newStudySeries = { ...oldStudySeries, ...action.payload.seriesOfStudy };
+        // const serArr = Object.values(action.payload.seriesOfStudy);
+        // serArr.forEach(el => {
+
+        // });
         const result = Object.assign({}, state, {
           loading: false,
           error: false,

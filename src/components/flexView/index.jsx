@@ -89,6 +89,8 @@ class FlexView extends React.Component {
     let series;
     try {
       ({ data: series } = await getSeries(projectID, patientID, studyUID));
+      console.log(" ---> series call result")
+      console.log(series)
     } catch (err) {
       console.log("Error getting series of the study", err);
     }

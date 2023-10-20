@@ -15,9 +15,6 @@ const SeriesDropDown = (props) => {
     const [seriesList, setSeriesList] = useState([]);
     const [aimCounts, setAimCounts] = useState({});
 
-    console.log(' ---> this.props');
-    console.log(props);
-
     useEffect(() => {
         let studyUID;
         let projectID;
@@ -36,10 +33,10 @@ const SeriesDropDown = (props) => {
         if (openStudies && openStudies.hasOwnProperty(studyUID)) {
             let series = openStudies[studyUID];
 
-            if (props.multiFrameData.length > 0) {
-                series = [...series, ...props.multiFrameData];
-                series = series.filter(isSupportedModality);
-            }
+            // if (props.multiFrameData.length > 0) {
+            //     series = [...series, ...props.multiFrameData];
+            series = series.filter(isSupportedModality);
+            // }
             setSeriesList(series);
         }
         // else {
@@ -93,7 +90,7 @@ const SeriesDropDown = (props) => {
                 {seriesList && seriesList.length && seriesList.map(({ seriesDescription, numberOfAnnotations, seriesUID, seriesNo, i }) => {
                     let isCurrent = props.openSeries[props.activePort].seriesUID === seriesUID;
                     let counts = numberOfAnnotations ? `${numberOfAnnotations} Ann -` : ""
-                    return (<Dropdown.Item key={seriesUID} eventKey={seriesUID} onSelect={handleSelect} style={{ textAlign: "left !important" }}>{seriesNo ? seriesNo : "#NA"} {' - '} {counts} {seriesDescription?.length ? seriesDescription : "No Description"} {isCurrent ? "(Current)" : ""}</Dropdown.Item>);
+                    return (<Dropdown.Item key={seriesUID} data-multi={'test'} eventKey={seriesUID} onSelect={handleSelect} style={{ textAlign: "left !important" }}>{seriesNo ? seriesNo : "#NA"} {' - '} {counts} {seriesDescription?.length ? seriesDescription : "No Description"} {isCurrent ? "(Current)" : ""}</Dropdown.Item>);
                 })}
             </DropdownButton>
         </div >

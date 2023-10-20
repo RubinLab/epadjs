@@ -49,6 +49,7 @@ import {
   REFRESH_MAP,
   AIM_SAVE,
   SUBPATH,
+  CHECK_MULTIFRAME,
   colors,
   commonLabels,
 } from "./types";
@@ -67,6 +68,10 @@ import aimEntityData from "./annotationDock/aimEntityData";
 import { setToolOptionsForElement } from 'cornerstone-tools';
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
+
+export const updateGridWithMultiFrameInfo = hasMultiframe => {
+  return { type: CHECK_MULTIFRAME, hasMultiframe };
+}
 
 export const updateSubpath = (subpath, portIndex) => {
   return { type: SUBPATH, payload: { subpath, portIndex } }
@@ -343,7 +348,8 @@ export const selectAnnotation = (
 // opens a new port to display series
 // adds series details to the array
 export const addToGrid = (serie, annotation, port) => {
-  let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment, seriesDescription } = serie;
+  console.log(serie)
+  let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment, seriesDescription, numberOfAnnotations, numberOfImages, seriesNo } = serie;
   const modFmComment = comment ? comment.split('/')[0].trim() : '';
   examType = examType ? examType.toUpperCase() : modality ? modality.toUpperCase() : modFmComment.toUpperCase();
 
@@ -359,7 +365,10 @@ export const addToGrid = (serie, annotation, port) => {
     patientName,
     aimID: annotation,
     examType,
-    seriesDescription
+    seriesDescription,
+    numberOfAnnotations,
+    numberOfImages,
+    seriesNo
     // imageIndex: 0
   };
   return { type: ADD_TO_GRID, reference, port };
@@ -944,7 +953,6 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
         aimsData = getAimListFields(aimsData, annotation);
         const allAims = [...serieAims, ...otherSeriesAims]
         const otherSeriesAimsData = allAims.length === 0 ? {} : getStudyAimsDataSorted(allAims, projectID, patientID);
-        console.log(result[1]);
         const seriesOfStudy = { [studyUID]: result[1].data }
         resolve({ aimsData, imageData, otherSeriesAimsData, seriesOfStudy });
       })
