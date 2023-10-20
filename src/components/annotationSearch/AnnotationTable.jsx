@@ -18,7 +18,8 @@ import {
   startLoading,
   loadCompleted,
   annotationsLoadingError,
-  updateSearchTableIndex
+  updateSearchTableIndex,
+  addStudyToGrid
 } from '../annotationsList/action';
 import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
@@ -327,6 +328,7 @@ function AnnotationTable(props) {
     try {
       const { data: series } = await getSeries(projectID, patientID, studyUID);
       props.dispatch(loadCompleted());
+      props.dispatch(addStudyToGrid({[studyUID]: series}));
       return series;
     } catch (err) {
       props.dispatch(annotationsLoadingError(err));

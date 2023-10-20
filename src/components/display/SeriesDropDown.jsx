@@ -48,21 +48,36 @@ const SeriesDropDown = (props) => {
     }, [props.openStudies]);
 
     const handleSelect = (e) => {
-        if (props.openSeries[props.activePort].seriesUID === e)
-            return;
-        const serie = seriesList.find(element => element.seriesUID == e);
-        if (props.isAimEditorShowing) {
-            // if (!props.onCloseAimEditor(true))
-            //     return;
+        console.log(e);
+        const UIDArr = e.split('_');
+        const seriesUIDFmEvent = UIDArr[0];
+        const multiFrameIndex = UIDArr[1];
+        console.log(' -> multiFrameIndex', multiFrameIndex);
+        const { seriesUID } = props.openSeries[props.activePort];
+        console.log(seriesUID, seriesUIDFmEvent);
+        if (multiFrameIndex) {
+            if (`${seriesUID}_${multiFrameIndex}` === e) return;
+        } else {
+            if (seriesUID === seriesUIDFmEvent) return;
         }
-        props.onSelect(0, props.activePort);
-        props.dispatch(replaceInGrid(serie));
-        props.dispatch(getSingleSerie(serie));
-        window.dispatchEvent(
-            new CustomEvent("serieReplaced", {
-                detail: props.activePort
-            })
-        );
+        if (multiFrameIndex === undefined) {
+            console.log(" in old method");
+            const serie = seriesList.find(element => element.seriesUID == e);
+            if (props.isAimEditorShowing) {
+                // if (!props.onCloseAimEditor(true))
+                //     return;
+            }
+            props.onSelect(0, props.activePort);
+            props.dispatch(replaceInGrid(serie));
+            props.dispatch(getSingleSerie(serie));
+            window.dispatchEvent(
+                new CustomEvent("serieReplaced", {
+                    detail: props.activePort
+                })
+            );
+        } else {
+
+        }
         window.dispatchEvent(new CustomEvent('deleteViewportWL'));
     }
 
@@ -87,10 +102,11 @@ const SeriesDropDown = (props) => {
                 data-tip
                 data-for="dropdownOtherSeries"
             >
-                {seriesList && seriesList.length && seriesList.map(({ seriesDescription, numberOfAnnotations, seriesUID, seriesNo, i }) => {
+                {seriesList && seriesList.length && seriesList.map(({ seriesDescription, numberOfAnnotations, seriesUID, seriesNo, multiFrameImage, numberOfFrames }, i) => {
                     let isCurrent = props.openSeries[props.activePort].seriesUID === seriesUID;
-                    let counts = numberOfAnnotations ? `${numberOfAnnotations} Ann -` : ""
-                    return (<Dropdown.Item key={seriesUID} data-multi={'test'} eventKey={seriesUID} onSelect={handleSelect} style={{ textAlign: "left !important" }}>{seriesNo ? seriesNo : "#NA"} {' - '} {counts} {seriesDescription?.length ? seriesDescription : "No Description"} {isCurrent ? "(Current)" : ""}</Dropdown.Item>);
+                    let counts = numberOfAnnotations ? `${numberOfAnnotations} Ann -` : "";
+                    const uniqueKey = multiFrameImage ? `${seriesUID}_${i}` : seriesUID;
+                    return (<Dropdown.Item key={uniqueKey} eventKey={uniqueKey} onSelect={handleSelect} style={{ textAlign: "left !important" }}>{seriesNo ? seriesNo : "#NA"} {' - '} {counts} {seriesDescription?.length ? seriesDescription : "No Description"} {multiFrameImage ? `(${numberOfFrames})` : ``} {isCurrent ? "(Current)" : ""}</Dropdown.Item>);
                 })}
             </DropdownButton>
         </div >
