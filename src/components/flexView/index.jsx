@@ -90,8 +90,6 @@ class FlexView extends React.Component {
     try {
       ({ data: series } = await getSeries(projectID, patientID, studyUID));
       this.props.dispatch(addStudyToGrid({ [studyUID]: series }));
-      console.log(" ---> series call result")
-      console.log(series)
     } catch (err) {
       console.log("Error getting series of the study", err);
     }

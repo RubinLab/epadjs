@@ -178,7 +178,7 @@ class DisplayView extends Component {
       invertMap: {},
       isOverlayVisible: {},
       wwwc: {},
-      multiFrameData: [],
+      multiFrameData: {},
     };
   }
 
@@ -558,20 +558,27 @@ class DisplayView extends Component {
     }
   }
 
-  handleSerieReplace = ({ detail: viewportId }) => {
+  handleSerieReplace = (e) => {
+    // { detail: { viewportId, id, multiframe } }
     const { series } = this.props;
     var promises = [];
-
-    const promise = this.getImageStack(series[viewportId], viewportId);
+    const { viewportId, id, multiFrameIndex } = e.detail;
+    // if (!multiframeIndex) {
+    const promise = this.getImageStack(series[viewportId], viewportId, multiFrameIndex);
     promises.push(promise);
     Promise.all(promises).then((res) => {
       const newData = [...this.state.data];
       newData[viewportId] = res[0];
-      this.setState(
-        {
-          data: newData
-        })
+      this.setState({ data: newData });
     })
+    // } else {
+    //   const imgIds = this.state.multiFrameData[id];
+    //   const newData = { stack: { imgIds, currentImageIdIndex: 0 } }
+    //   const grid = _.cloneDeep(this.state.data);
+    //   console.log()
+    //   grid[viewportId] = newData;
+    //   this.setState({ data: grid });
+    // }
   }
 
   shouldOpenAimEditor = (notShowAimEditor = false) => {
@@ -620,13 +627,9 @@ class DisplayView extends Component {
 
   formMultiframeImgData = (arr) => {
     const { series, activePort } = this.props;
-    console.log(" ====> Arr");
-    console.log(arr);
-    console.log(series[activePort]);
     // create the same data shape for studySeries 
     // update the reducer with the new data
     const studySeries = arr.reduce((all, item) => {
-      console.log(item);
       const obj = {
         projectID: item[0].projectID,
         patientID: item[0].patientID,
@@ -649,7 +652,6 @@ class DisplayView extends Component {
   }
 
   async getImages(serie, i) {
-    console.log(serie);
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
     if (urls.length > 1) {
       this.formMultiframeImgData(urls);
@@ -677,10 +679,10 @@ class DisplayView extends Component {
     return metadataURI + "/frames/1";
   };
 
-  getImageStack = async (serie, index) => {
+  getImageStack = async (serie, index, multiFrameIndex) => {
     const wadoUrl = sessionStorage.getItem("wadoUrl");
     if (wadoUrl.includes('wadors'))
-      return this.getImageStackWithWadors(serie, index);
+      return this.getImageStackWithWadors(serie, index, multiFrameIndex);
     else
       return this.getImageStackWithWadouri(serie, index);
   }
@@ -697,7 +699,7 @@ class DisplayView extends Component {
     return firstSeriesIndex;
   }
 
-  getImageStackWithWadors = async (serie, index) => {
+  getImageStackWithWadors = async (serie, index, multiFrameIndex) => {
     let stack = {};
     let newImageIds = {};
     let cornerstoneImageIds = [];
@@ -706,7 +708,9 @@ class DisplayView extends Component {
     const imageUrls = await this.getImages(serie, index);
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
+    // const firstSeriesIndex = multiFrameIndex ? multiFrameIndex : this.findFirstSeriesIndex(imageUrls);
     const firstSeriesIndex = this.findFirstSeriesIndex(imageUrls);
+
     const seriesURL = wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage.split('/instances/')[0];
     try {
       seriesMetadata = await getMetadata(seriesURL);
@@ -762,7 +766,22 @@ class DisplayView extends Component {
         distance = dcmjs.normalizers.ImageNormalizer.vec3Dot(positionVector, scanAxis);
       }
 
-      if (imageUrls[firstSeriesIndex][k].multiFrameImage === true) {
+      if (multiFrameIndex) {
+        baseUrl = wadoUrlNoWadors + imageUrls[multiFrameIndex][0].lossyImage;
+        for (let i = 0; i < imageUrls[multiFrameIndex][0].numberOfFrames; i++) {
+          let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
+          // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
+          // using distanceDatasetPairs to sort instead of just adding to the array
+          if (!sortByGeo) cornerstoneImageIds.push(multiFrameUrl);
+          else distanceDatasetPairs.push([distance, multiFrameUrl]);
+          // cornerstone.loadAndCacheImage(multiFrameUrl);
+          newImageIds[multiFrameUrl] = true;
+          cornerstoneWADOImageLoader.wadors.metaDataManager.add(
+            multiFrameUrl,
+            imgData
+          );
+        }
+      } else if (imageUrls[firstSeriesIndex][k].multiFrameImage === true) {
         for (var i = 0; i < imageUrls[firstSeriesIndex][k].numberOfFrames; i++) {
           let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
@@ -792,6 +811,9 @@ class DisplayView extends Component {
       }
     }
     const { imageIds } = this.state;
+    console.log(" >>>>>>>>>>>>>>>>>>>>>>>>")
+    console.log(newImageIds);
+    console.log(" >>>>>>>>>>>>>>>>>>>>>>>>")
     this.setState({ imageIds: { ...imageIds, ...newImageIds } });
 
     //to jump to the same image after aim save
@@ -816,7 +838,39 @@ class DisplayView extends Component {
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
+    // form split series data 
+    // store it in state
+    if (imageUrls.length > 0) {
+      this.formSplitSeriesData(imageUrls, baseUrl);
+    }
     return { stack };
+  }
+
+  displaySplitSeriesMultiFrame = () => {
+
+  }
+
+  formSplitSeriesData = (urls, baseUrl) => {
+    // console.log(baseUrl);
+    const imagesObj = {};
+    let multiFrameIndex = 1;
+    for (let series = 0; series < urls.length; series++) {
+      // console.log(urls[series]);
+      const imagesArr = [];
+      const { multiFrameImage, seriesUID } = urls[series][0];
+      let id = seriesUID;
+      if (multiFrameImage) {
+        id = `${id}_${multiFrameIndex}`;
+        multiFrameIndex++;
+      }
+      const len = multiFrameImage ? urls[series][0].numberOfFrames : urls[series].length;
+      for (let image = 0; image < len; image++) {
+        if (multiFrameImage) imagesArr.push(`wadors:${baseUrl}/frames/${image + 1}`);
+        else imagesArr.push(`wadors:${baseUrl}/frames/1`);
+      }
+      imagesObj[id] = { images: imagesArr };
+    }
+    this.setState({ multiFrameData: imagesObj });
   }
 
   getImageStackWithWadouri = async (serie, index) => {
@@ -1940,7 +1994,7 @@ class DisplayView extends Component {
 
   // Triggered by event from right bar to jump to the image of aim
   jumpToAimImage = event => {
-    console.log(event);
+    // console.log(event);
     const { series, activePort } = this.props;
     const { aimId, index } = event.detail;
     const imageIndex = this.getImageIndex(series[index], this.state.data[index].stack.imageIds, aimId);
@@ -1950,11 +2004,13 @@ class DisplayView extends Component {
   // Don't take the activePort Index from props because store updates late so
   // activePort may be null while the event is triggered
   jumpToImage = (imageIndex, activePortIndex) => {
+    // console.log(this.state.data);
     const newData = [...this.state.data];
     newData[activePortIndex].stack.currentImageIdIndex = parseInt(
       imageIndex,
       10
     );
+    // console.log(newData);
     this.setState({ data: newData });
   };
 
@@ -1981,6 +2037,7 @@ class DisplayView extends Component {
   render() {
     const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
     const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
+    // console.log(' ===> data', data);
     // if (this.state.redirect) return <Redirect to="/list" />;
     const redirect = (mode === 'teaching' ? 'search' : 'list');
     return !Object.entries(series).length ? (

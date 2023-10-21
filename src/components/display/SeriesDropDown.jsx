@@ -40,7 +40,7 @@ const SeriesDropDown = (props) => {
             setSeriesList(series);
         }
         // else {
-        //     console.log('fetching');
+        //     
         //     fetchData().then(result => {
         //         props.dispatch(addStudyToGrid({ [studyUID]: result }));
         //     });
@@ -48,20 +48,19 @@ const SeriesDropDown = (props) => {
     }, [props.openStudies]);
 
     const handleSelect = (e) => {
-        console.log(e);
         const UIDArr = e.split('_');
+        // console.log(e);
         const seriesUIDFmEvent = UIDArr[0];
         const multiFrameIndex = UIDArr[1];
-        console.log(' -> multiFrameIndex', multiFrameIndex);
-        const { seriesUID } = props.openSeries[props.activePort];
-        console.log(seriesUID, seriesUIDFmEvent);
-        if (multiFrameIndex) {
-            if (`${seriesUID}_${multiFrameIndex}` === e) return;
-        } else {
-            if (seriesUID === seriesUIDFmEvent) return;
-        }
+        // console.log(" ---> multiFrameIndex", UIDArr, multiFrameIndex);
+        const { seriesUID } = props.openSeries[props.activePort];        
+        // if (multiFrameIndex) {
+        //     if (`${seriesUID}_${multiFrameIndex}` === e) return;
+        // } else {
+        //     if (seriesUID === seriesUIDFmEvent) return;
+        // }
+        console.log(' ++++++++++++> multiFrameIndex', multiFrameIndex);
         if (multiFrameIndex === undefined) {
-            console.log(" in old method");
             const serie = seriesList.find(element => element.seriesUID == e);
             if (props.isAimEditorShowing) {
                 // if (!props.onCloseAimEditor(true))
@@ -72,11 +71,25 @@ const SeriesDropDown = (props) => {
             props.dispatch(getSingleSerie(serie));
             window.dispatchEvent(
                 new CustomEvent("serieReplaced", {
-                    detail: props.activePort
+                    // detail: props.activePort
+                    detail: {
+                        viewportId: props.activePort,
+                        id: e,
+                        multiFrameIndex: parseInt(multiFrameIndex)
+                    }
                 })
             );
         } else {
-
+            props.onSelect(0, props.activePort, e);
+            window.dispatchEvent(
+                new CustomEvent("serieReplaced", {
+                    detail: {
+                        viewportId: props.activePort,
+                        id: e,
+                        multiFrameIndex: parseInt(multiFrameIndex)
+                    }
+                })
+            );
         }
         window.dispatchEvent(new CustomEvent('deleteViewportWL'));
     }
