@@ -53,12 +53,10 @@ const SeriesDropDown = (props) => {
         const seriesUIDFmEvent = UIDArr[0];
         const multiFrameIndex = UIDArr[1];
         // console.log(" ---> multiFrameIndex", UIDArr, multiFrameIndex);
-        const { seriesUID } = props.openSeries[props.activePort];        
-        // if (multiFrameIndex) {
-        //     if (`${seriesUID}_${multiFrameIndex}` === e) return;
-        // } else {
-        //     if (seriesUID === seriesUIDFmEvent) return;
-        // }
+        const { seriesUID } = props.openSeries[props.activePort];
+
+        if (seriesUID === seriesUIDFmEvent) return;
+
         console.log(' ++++++++++++> multiFrameIndex', multiFrameIndex);
         if (multiFrameIndex === undefined) {
             const serie = seriesList.find(element => element.seriesUID == e);
