@@ -52,12 +52,11 @@ const SeriesDropDown = (props) => {
         // console.log(e);
         const seriesUIDFmEvent = UIDArr[0];
         const multiFrameIndex = UIDArr[1];
-        // console.log(" ---> multiFrameIndex", UIDArr, multiFrameIndex);
+        console.log(" ---> multiFrameIndex", UIDArr, multiFrameIndex);
         const { seriesUID } = props.openSeries[props.activePort];
 
-        if (seriesUID === seriesUIDFmEvent) return;
+        // if (seriesUID === seriesUIDFmEvent) return;
 
-        console.log(' ++++++++++++> multiFrameIndex', multiFrameIndex);
         if (multiFrameIndex === undefined) {
             const serie = seriesList.find(element => element.seriesUID == e);
             if (props.isAimEditorShowing) {
@@ -78,6 +77,7 @@ const SeriesDropDown = (props) => {
                 })
             );
         } else {
+            console.log(" ----> in else")
             props.onSelect(0, props.activePort, e);
             window.dispatchEvent(
                 new CustomEvent("serieReplaced", {
