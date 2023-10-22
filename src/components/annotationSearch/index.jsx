@@ -601,7 +601,7 @@ const AnnotationSearch = props => {
       }
     }
     setShowSpinner(true);
-    const bm = pageIndex ? bookmark : '';
+    const bm = pageIndex && !afterDelete ? bookmark : '';
     let body = {};
     const fields = {};
     body['fields'] = fields;
