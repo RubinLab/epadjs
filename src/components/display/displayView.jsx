@@ -721,7 +721,7 @@ class DisplayView extends Component {
 
     try {
       seriesMetadata = await getMetadata(seriesURL);
-      console.log('seriesMetadata after right after call'); 
+      console.log('seriesMetadata after right after call');
       console.log(seriesMetadata);
       seriesMetadata = seriesMetadata.data;
       seriesMetadata[firstSeriesIndex].forEach(item => seriesMetadataMap[item['00080018'].Value[0]] = item);
@@ -754,9 +754,9 @@ class DisplayView extends Component {
     // console.log(" ||||||||||| metadata2D |||||||||")
 
     console.log(' --->firstSeriesIndex', firstSeriesIndex);
-    seriesMetadata = seriesMetadata[firstSeriesIndex] ;
+    seriesMetadata = seriesMetadata[firstSeriesIndex];
     const seriesMetadataExists = Array.isArray(seriesMetadata);
-    const useSeriesData = seriesMetadataExists &&  seriesMetadata.length > 0 && seriesMetadata.length === imageUrls[firstSeriesIndex].length;
+    const useSeriesData = seriesMetadataExists && seriesMetadata.length > 0 && seriesMetadata.length === imageUrls[firstSeriesIndex].length;
     // get first image
     let firstImage = null;
     if (!useSeriesData) {
@@ -809,8 +809,16 @@ class DisplayView extends Component {
       if (!useSeriesData) {
         const result = await getImageMetadata(baseUrl);
         const data = result.data;
-        imgData = data[0];
-      } else imgData = seriesMetadataMap[imageUrls[firstSeriesIndex][k].imageUID];
+        console.log(" ----> imagedata");
+        console.log(data);
+        console.log(data[0]);
+        imgData = data[0][0];
+      } else { 
+        console.log(" in else");
+        console.log(seriesMetadataMap);
+        console.log(imageUrls[firstSeriesIndex][k]);
+        imgData = seriesMetadataMap[imageUrls[firstSeriesIndex][k].imageUID]; 
+      }
 
 
       if (sortByGeo) {
