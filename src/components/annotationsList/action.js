@@ -473,6 +473,8 @@ export const refreshPage = (feature, condition) => {
 
 // helpeer method
 export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann, otherSeriesAimsData, seriesOfStudy) => {
+  console.log(' ----> seriesOfStudy');
+  console.log(seriesOfStudy);
   return {
     type: LOAD_SERIE_SUCCESS,
     payload: { ref, aimsData, serID, imageData, ann, otherSeriesAimsData, seriesOfStudy },

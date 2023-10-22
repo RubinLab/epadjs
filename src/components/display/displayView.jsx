@@ -721,12 +721,17 @@ class DisplayView extends Component {
 
     try {
       seriesMetadata = await getMetadata(seriesURL);
+      console.log('seriesMetadata after right after call'); 
+      console.log(seriesMetadata);
       seriesMetadata = seriesMetadata.data;
       seriesMetadata[firstSeriesIndex].forEach(item => seriesMetadataMap[item['00080018'].Value[0]] = item);
     } catch (err) {
       console.log("Can not get series metadata");
       console.error(err);
     }
+
+    console.log(" seriesmetadata after try catch");
+    console.log(seriesMetadata);
 
     // get the length of array off arrays 
     // divide the metadata array to mirror the image urls’ array
@@ -748,8 +753,10 @@ class DisplayView extends Component {
     // console.log(metadata2D);
     // console.log(" ||||||||||| metadata2D |||||||||")
 
+    console.log(' --->firstSeriesIndex', firstSeriesIndex);
     seriesMetadata = seriesMetadata[firstSeriesIndex] ;
-    const useSeriesData = seriesMetadata.length > 0 && seriesMetadata.length === imageUrls[firstSeriesIndex].length;
+    const seriesMetadataExists = Array.isArray(seriesMetadata);
+    const useSeriesData = seriesMetadataExists &&  seriesMetadata.length > 0 && seriesMetadata.length === imageUrls[firstSeriesIndex].length;
     // get first image
     let firstImage = null;
     if (!useSeriesData) {
