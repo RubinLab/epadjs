@@ -722,7 +722,7 @@ class DisplayView extends Component {
     try {
       seriesMetadata = await getMetadata(seriesURL);
       seriesMetadata = seriesMetadata.data;
-      seriesMetadata.forEach(item => seriesMetadataMap[item['00080018'].Value[0]] = item);
+      seriesMetadata[firstSeriesIndex].forEach(item => seriesMetadataMap[item['00080018'].Value[0]] = item);
     } catch (err) {
       console.log("Can not get series metadata");
       console.error(err);
@@ -735,20 +735,20 @@ class DisplayView extends Component {
     //   return all + item.length;
     // }, 0);
 
-    if (seriesMetadata.length !== imageUrls.length) {
-      let count = 0;
-      for (let i = 0; i < imageUrls.length; i++) {
-        const len = imageUrls[i].length;
-        metadata2D.push(seriesMetadata.slice(count, count + len));
-        count += len;
-      }
-    }
+    // if (seriesMetadata.length !== imageUrls.length) {
+    //   let count = 0;
+    //   for (let i = 0; i < imageUrls.length; i++) {
+    //     const len = imageUrls[i].length;
+    //     metadata2D.push(seriesMetadata.slice(count, count + len));
+    //     count += len;
+    //   }
+    // }
 
-    console.log(" ||||||||||| metadata2D |||||||||")
-    console.log(metadata2D);
-    console.log(" ||||||||||| metadata2D |||||||||")
+    // console.log(" ||||||||||| metadata2D |||||||||")
+    // console.log(metadata2D);
+    // console.log(" ||||||||||| metadata2D |||||||||")
 
-    seriesMetadata = multiFrameIndex ? metadata2D[multiFrameIndex] : seriesMetadata;
+    seriesMetadata = seriesMetadata[firstSeriesIndex] ;
     const useSeriesData = seriesMetadata.length > 0 && seriesMetadata.length === imageUrls[firstSeriesIndex].length;
     // get first image
     let firstImage = null;
