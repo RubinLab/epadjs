@@ -714,7 +714,7 @@ class DisplayView extends Component {
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
     // const firstSeriesIndex = multiFrameIndex ? multiFrameIndex : this.findFirstSeriesIndex(imageUrls);
-    const firstSeriesIndex = this.findFirstSeriesIndex(imageUrls);
+    const firstSeriesIndex = multiFrameIndex ? multiFrameIndex : this.findFirstSeriesIndex(imageUrls);
     // console.log(imageUrls);
     // console.log(imageUrls[firstSeriesIndex]);
     const seriesURL = wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage.split('/instances/')[0];
@@ -731,22 +731,25 @@ class DisplayView extends Component {
     // get the length of array off arrays 
     // divide the metadata array to mirror the image urls’ array
 
-    const imgURLsLen = imageUrls.reduce((all, item) => {
-      return all + item.length;
-    }, 0);
+    // const imgURLsLen = imageUrls.reduce((all, item) => {
+    //   return all + item.length;
+    // }, 0);
 
-    let count = 0;
-    for (let i = 0; i < imageUrls.length; i++) {
-      const len = imageUrls[i].length;
-      metadata2D.push(seriesMetadata.slice(count, count + len));
-      count += len;
+    if (seriesMetadata.length !== imageUrls.length) {
+      let count = 0;
+      for (let i = 0; i < imageUrls.length; i++) {
+        const len = imageUrls[i].length;
+        metadata2D.push(seriesMetadata.slice(count, count + len));
+        count += len;
+      }
     }
 
     console.log(" ||||||||||| metadata2D |||||||||")
     console.log(metadata2D);
     console.log(" ||||||||||| metadata2D |||||||||")
 
-    const useSeriesData = seriesMetadata.length > 0 && seriesMetadata.length === imgURLsLen;
+    seriesMetadata = multiFrameIndex ? metadata2D[multiFrameIndex] : seriesMetadata;
+    const useSeriesData = seriesMetadata.length > 0 && seriesMetadata.length === imageUrls[firstSeriesIndex].length;
     // get first image
     let firstImage = null;
     if (!useSeriesData) {
@@ -771,79 +774,79 @@ class DisplayView extends Component {
     }
 
 
-    if (multiFrameIndex) {
-      console.log(" ++++++ multiFrameIndex", multiFrameIndex)
-      baseUrl = wadoUrlNoWadors + imageUrls[multiFrameIndex][0].lossyImage;
-      console.log(baseUrl);
-      console.log(metadata2D[multiFrameIndex][0]);
-      for (let i = 0; i < imageUrls[multiFrameIndex][0].numberOfFrames; i++) {
-        let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
-        console.log(multiFrameUrl);
-        // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
-        // using distanceDatasetPairs to sort instead of just adding to the array
-        if (!sortByGeo) cornerstoneImageIds.push(multiFrameUrl);
-        else distanceDatasetPairs.push([distance, multiFrameUrl]);
-        // cornerstone.loadAndCacheImage(multiFrameUrl);
-        newImageIds[multiFrameUrl] = true;
-        cornerstoneWADOImageLoader.wadors.metaDataManager.add(
-          multiFrameUrl,
-          metadata2D[multiFrameIndex][0]
+    // if (multiFrameIndex) {
+    //   console.log(" ++++++ multiFrameIndex", multiFrameIndex)
+    //   baseUrl = wadoUrlNoWadors + imageUrls[multiFrameIndex][0].lossyImage;
+    //   console.log(baseUrl);
+    //   console.log(metadata2D[multiFrameIndex][0]);
+    //   for (let i = 0; i < imageUrls[multiFrameIndex][0].numberOfFrames; i++) {
+    //     let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
+    //     console.log(multiFrameUrl);
+    //     // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
+    //     // using distanceDatasetPairs to sort instead of just adding to the array
+    //     if (!sortByGeo) cornerstoneImageIds.push(multiFrameUrl);
+    //     else distanceDatasetPairs.push([distance, multiFrameUrl]);
+    //     // cornerstone.loadAndCacheImage(multiFrameUrl);
+    //     newImageIds[multiFrameUrl] = true;
+    //     cornerstoneWADOImageLoader.wadors.metaDataManager.add(
+    //       multiFrameUrl,
+    //       metadata2D[multiFrameIndex][0]
+    //     );
+    //   }
+    // } else {
+    const len = imageUrls[firstSeriesIndex].length;
+    for (let k = 0; k < len; k++) {
+      baseUrl = wadoUrlNoWadors + imageUrls[firstSeriesIndex][k].lossyImage;
+      let imgData;
+      let distance = null;
+      if (!useSeriesData) {
+        const result = await getImageMetadata(baseUrl);
+        const data = result.data;
+        imgData = data[0];
+      } else imgData = seriesMetadataMap[imageUrls[firstSeriesIndex][k].imageUID];
+
+
+      if (sortByGeo) {
+        const position = imgData['00200032'].Value.slice();
+        const positionVector = dcmjs.normalizers.ImageNormalizer.vec3Subtract(
+          position,
+          referencePosition
         );
+        distance = dcmjs.normalizers.ImageNormalizer.vec3Dot(positionVector, scanAxis);
       }
-    } else {
-      const len = imageUrls[firstSeriesIndex].length;
-      for (let k = 0; k < len; k++) {
-        baseUrl = wadoUrlNoWadors + imageUrls[firstSeriesIndex][k].lossyImage;
-        let imgData;
-        let distance = null;
-        if (!useSeriesData) {
-          const result = await getImageMetadata(baseUrl);
-          const data = result.data;
-          imgData = data[0];
-        } else imgData = seriesMetadataMap[imageUrls[firstSeriesIndex][k].imageUID];
 
 
-        if (sortByGeo) {
-          const position = imgData['00200032'].Value.slice();
-          const positionVector = dcmjs.normalizers.ImageNormalizer.vec3Subtract(
-            position,
-            referencePosition
-          );
-          distance = dcmjs.normalizers.ImageNormalizer.vec3Dot(positionVector, scanAxis);
-        }
-
-
-        console.log(" +++++++++++> ", multiFrameIndex);
-        if (imageUrls[firstSeriesIndex][k].multiFrameImage === true) {
-          for (var i = 0; i < imageUrls[firstSeriesIndex][k].numberOfFrames; i++) {
-            let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
-            // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
-            // using distanceDatasetPairs to sort instead of just adding to the array
-            if (!sortByGeo) cornerstoneImageIds.push(multiFrameUrl);
-            else distanceDatasetPairs.push([distance, multiFrameUrl]);
-            // cornerstone.loadAndCacheImage(multiFrameUrl);
-            newImageIds[multiFrameUrl] = true;
-            cornerstoneWADOImageLoader.wadors.metaDataManager.add(
-              multiFrameUrl,
-              imgData
-            );
-            // cornerstone.loadAndCacheImage(multiFrameUrl);
-          }
-        } else {
-          let singleFrameUrl = `wadors:${baseUrl}/frames/1`;
+      console.log(" +++++++++++> ", multiFrameIndex);
+      if (imageUrls[firstSeriesIndex][k].multiFrameImage === true) {
+        for (var i = 0; i < imageUrls[firstSeriesIndex][k].numberOfFrames; i++) {
+          let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
+          // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           // using distanceDatasetPairs to sort instead of just adding to the array
-          if (!sortByGeo) cornerstoneImageIds.push(singleFrameUrl);
-          else distanceDatasetPairs.push([distance, singleFrameUrl]);
-          // cornerstone.loadAndCacheImage(singleFrameUrl);
-          newImageIds[singleFrameUrl] = false;
+          if (!sortByGeo) cornerstoneImageIds.push(multiFrameUrl);
+          else distanceDatasetPairs.push([distance, multiFrameUrl]);
+          // cornerstone.loadAndCacheImage(multiFrameUrl);
+          newImageIds[multiFrameUrl] = true;
           cornerstoneWADOImageLoader.wadors.metaDataManager.add(
-            singleFrameUrl,
+            multiFrameUrl,
             imgData
           );
-          // cornerstone.loadAndCacheImage(singleFrameUrl);
+          // cornerstone.loadAndCacheImage(multiFrameUrl);
         }
+      } else {
+        let singleFrameUrl = `wadors:${baseUrl}/frames/1`;
+        // using distanceDatasetPairs to sort instead of just adding to the array
+        if (!sortByGeo) cornerstoneImageIds.push(singleFrameUrl);
+        else distanceDatasetPairs.push([distance, singleFrameUrl]);
+        // cornerstone.loadAndCacheImage(singleFrameUrl);
+        newImageIds[singleFrameUrl] = false;
+        cornerstoneWADOImageLoader.wadors.metaDataManager.add(
+          singleFrameUrl,
+          imgData
+        );
+        // cornerstone.loadAndCacheImage(singleFrameUrl);
       }
     }
+    // }
     const { imageIds } = this.state;
     // console.log(" >>>>>>>>>>>>>>>>>>>>>>>>")
     // console.log(newImageIds);
