@@ -134,6 +134,15 @@ export const clearCarets = (string) => {
   }
 };
 
+export const clearTildes = (string) => {
+  if (string) {
+    for (let i = 0; i < string.length; i++) {
+      string = string.replace("~", " ");
+    }
+    return string;
+  }
+};
+
 export const extractTreeData = (datasets, requirements) => {
   const result = {};
   if (datasets) {

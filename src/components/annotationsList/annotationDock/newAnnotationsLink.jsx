@@ -12,6 +12,7 @@ import {
   jumpToAim,
   updateImageId,
 } from '../action';
+import { clearTildes } from "../../../Utils/aid";
 import "../annotationsList.css";
 
 const handleJumpToAim = (aimId, index) => {
@@ -75,7 +76,8 @@ const annotationsLink = (props) => {
         otherSeriesAims.forEach((series, i) => {
           const seriesList = [];
           series[2].forEach((aim, index) => {
-            const commentArr = aim?.comment.split('/');
+            const clearedAimComment = aim ? clearTildes(aim.comment) : '';
+            const commentArr = clearedAimComment.split('/');
             const slideNo = commentArr[2] || "";
             const seriesIndex = commentArr[3] || "";
 
