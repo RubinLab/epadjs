@@ -69,8 +69,8 @@ import { setToolOptionsForElement } from 'cornerstone-tools';
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
 
-export const updateGridWithMultiFrameInfo = hasMultiframe => {
-  return { type: CHECK_MULTIFRAME, hasMultiframe };
+export const updateGridWithMultiFrameInfo = (hasMultiframe, multiframeIndex) => {
+  return { type: CHECK_MULTIFRAME, payload: { hasMultiframe, multiframeIndex } };
 }
 
 export const updateSubpath = (subpath, portIndex) => {
@@ -348,6 +348,7 @@ export const selectAnnotation = (
 // opens a new port to display series
 // adds series details to the array
 export const addToGrid = (serie, annotation, port) => {
+  console.log(' ---> addToGrid', serie);
   let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment, seriesDescription, numberOfAnnotations, numberOfImages, seriesNo } = serie;
   const modFmComment = comment ? comment.split('/')[0].trim() : '';
   examType = examType ? examType.toUpperCase() : modality ? modality.toUpperCase() : modFmComment.toUpperCase();
@@ -473,8 +474,14 @@ export const refreshPage = (feature, condition) => {
 
 // helpeer method
 export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann, otherSeriesAimsData, seriesOfStudy) => {
-  console.log(' ----> seriesOfStudy');
-  console.log(seriesOfStudy);
+  // console.log(' ----> seriesOfStudy');
+  // console.log(seriesOfStudy);
+  // console.log(' ---> ref', ref);
+  // console.log(' ----> aimsData', aimsData);
+  // console.log(' ----> imageData', imageData);
+  // console.log(' ----> ann', ann);
+  // console.log(' ----> otherSeriesAimsData', otherSeriesAimsData);
+
   return {
     type: LOAD_SERIE_SUCCESS,
     payload: { ref, aimsData, serID, imageData, ann, otherSeriesAimsData, seriesOfStudy },
@@ -715,6 +722,7 @@ const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
 
 // action to open series
 export const getSingleSerie = (serie, annotation, wadoUrl) => {
+  console.log(" getSingleSerie - serie", serie);
   return async (dispatch, getState) => {
     try {
       await dispatch(loadAnnotations());
@@ -727,11 +735,13 @@ export const getSingleSerie = (serie, annotation, wadoUrl) => {
         aimID: annotation,
       };
 
-      const { aimsData, imageData, otherSeriesAimsData, seriesOfStudy } = await getSingleSerieData(
+      const { aimsData, imageData, otherSeriesAimsData, seriesOfStudy, serieRef } = await getSingleSerieData(
         serie,
         annotation,
         wadoUrl
       );
+
+      reference = { ...reference, serieRef };
 
       await dispatch(
         singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData, seriesOfStudy)
@@ -912,6 +922,11 @@ const getStudyAimsDataSorted = (arr, projectID, patientID) => {
 }
 
 
+const getSeriesAdditionalData = (arr, uid) => {
+  const data = arr.filter((el) => el.seriesUID === uid);
+  const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo } = data;
+  return { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo };
+}
 // helper methods - calls backend and get data
 const getSingleSerieData = (serie, annotation, wadoUrl) => {
   return new Promise((resolve, reject) => {
@@ -951,11 +966,12 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
           ...imageAimMap,
         };
 
+        const serieRef = getSeriesAdditionalData(result[1].data, seriesUID);
         aimsData = getAimListFields(aimsData, annotation);
         const allAims = [...serieAims, ...otherSeriesAims]
         const otherSeriesAimsData = allAims.length === 0 ? {} : getStudyAimsDataSorted(allAims, projectID, patientID);
         const seriesOfStudy = { [studyUID]: result[1].data }
-        resolve({ aimsData, imageData, otherSeriesAimsData, seriesOfStudy });
+        resolve({ aimsData, imageData, otherSeriesAimsData, seriesOfStudy, serieRef });
       })
       .catch((err) => {
         console.log(err);

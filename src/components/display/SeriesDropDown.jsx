@@ -49,10 +49,8 @@ const SeriesDropDown = (props) => {
 
     const handleSelect = (e) => {
         const UIDArr = e.split('_');
-        // console.log(e);
         const seriesUIDFmEvent = UIDArr[0];
         const multiFrameIndex = UIDArr[1];
-        console.log(" ---> multiFrameIndex", UIDArr, multiFrameIndex);
         const { seriesUID } = props.openSeries[props.activePort];
 
         // if (seriesUID === seriesUIDFmEvent) return;
@@ -77,7 +75,6 @@ const SeriesDropDown = (props) => {
                 })
             );
         } else {
-            console.log(" ----> in else")
             props.onSelect(0, props.activePort, e);
             window.dispatchEvent(
                 new CustomEvent("serieReplaced", {
@@ -113,10 +110,19 @@ const SeriesDropDown = (props) => {
                 data-tip
                 data-for="dropdownOtherSeries"
             >
-                {seriesList && seriesList.length && seriesList.map(({ seriesDescription, numberOfAnnotations, seriesUID, seriesNo, multiFrameImage, numberOfFrames }, i) => {
-                    let isCurrent = props.openSeries[props.activePort].seriesUID === seriesUID;
-                    let counts = numberOfAnnotations ? `${numberOfAnnotations} Ann -` : "";
+                {seriesList && seriesList.length && seriesList.map((series, i) => {
+                    const { seriesDescription, numberOfAnnotations, seriesUID, seriesNo, multiFrameImage, numberOfFrames } = series;
+                    const openSeriesSeriesUID = props.openSeries[props.activePort].seriesUID;
+                    const openSeriesMultiFrameIndex = props.openSeries[props.activePort].multiFrameIndex;
                     const uniqueKey = multiFrameImage ? `${seriesUID}_${i}` : seriesUID;
+                    let isCurrent;
+                    if (!multiFrameImage) {
+                        isCurrent = openSeriesSeriesUID === uniqueKey && !openSeriesMultiFrameIndex;
+                    } else {
+                        const compound = `${openSeriesSeriesUID}_${openSeriesMultiFrameIndex}`
+                        isCurrent = compound === uniqueKey;
+                    }
+                    let counts = numberOfAnnotations ? `${numberOfAnnotations} Ann -` : "";
                     return (<Dropdown.Item key={uniqueKey} eventKey={uniqueKey} onSelect={handleSelect} style={{ textAlign: "left !important" }}>{seriesNo ? seriesNo : "#NA"} {' - '} {counts} {seriesDescription?.length ? seriesDescription : "No Description"} {multiFrameImage ? `(${numberOfFrames})` : ``} {isCurrent ? "(Current)" : ""}</Dropdown.Item>);
                 })}
             </DropdownButton>

@@ -107,7 +107,8 @@ const asyncReducer = (state = initialState, action) => {
       //   return { ...state, openSeries: updatedOpenSeries };
       case CHECK_MULTIFRAME:
         const series = _.cloneDeep(state.openSeries);
-        series[state.activePort].hasMultiframe = action.hasMultiframe;
+        series[state.activePort].hasMultiframe = action.payload.hasMultiframe;
+        series[state.activePort].multiFrameIndex = action.payload.multiframeIndex;
         return { ...state, openSeries: series };
       case AIM_SAVE: //tested
         const { seriesList, aimRefs } = action.payload;
@@ -258,10 +259,12 @@ const asyncReducer = (state = initialState, action) => {
         const viewPortStatus = !state.showGridFullAlert;
         return { ...state, showGridFullAlert: viewPortStatus };
       case LOAD_SERIE_SUCCESS:
+
         let imageAddedSeries = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
+
           }
           return newSerie;
         });
@@ -270,6 +273,10 @@ const asyncReducer = (state = initialState, action) => {
           for (let i = 0; i < imageAddedSeries.length; i++) {
             if (imageAddedSeries[i].seriesUID === action.payload.serID) {
               imageAddedSeries[i].imageAnnotations = action.payload.imageData;
+              if (!imageAddedSeries[i].numberOfAnnotations) imageAddedSeries[i].numberOfAnnotations = action.payload.ref.numberOfAnnotations;
+              if (!imageAddedSeries[i].numberOfImages) imageAddedSeries[i].numberOfImages = action.payload.ref.numberOfImages;
+              if (!imageAddedSeries[i].seriesDescription) imageAddedSeries[i].seriesDescription = action.payload.ref.seriesDescription;
+              if (!imageAddedSeries[i].seriesNo) imageAddedSeries[i].seriesNo = action.payload.ref.seriesNo;
             }
           }
         }
@@ -530,6 +537,7 @@ const asyncReducer = (state = initialState, action) => {
       //   };
       case ADD_TO_GRID:
         const seriesInfo = { ...action.reference };
+        console.log(action);
         const { projectMap } = state;
         if (projectMap[seriesInfo.projectID]) {
           seriesInfo.projectName = projectMap[seriesInfo.projectID].projectName;

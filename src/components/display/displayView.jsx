@@ -28,7 +28,8 @@ import {
   clearAimId,
   updateSubpath,
   clearSelection,
-  addStudyToGrid
+  addStudyToGrid,
+  updateGridWithMultiFrameInfo
 } from "../annotationsList/action";
 import { deleteAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
@@ -702,7 +703,6 @@ class DisplayView extends Component {
   }
 
   getImageStackWithWadors = async (serie, index, multiFrameIndex) => {
-
     let stack = {};
     let newImageIds = {};
     let cornerstoneImageIds = [];
@@ -710,6 +710,9 @@ class DisplayView extends Component {
     let seriesMetadataMap = {};
     let metadata2D = [];
     const imageUrls = await this.getImages(serie, index);
+    if (imageUrls.length > 1) {
+      this.props.dispatch(updateGridWithMultiFrameInfo(true, multiFrameIndex));
+    }
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
     // const firstSeriesIndex = multiFrameIndex ? multiFrameIndex : this.findFirstSeriesIndex(imageUrls);
