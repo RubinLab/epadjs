@@ -348,7 +348,6 @@ export const selectAnnotation = (
 // opens a new port to display series
 // adds series details to the array
 export const addToGrid = (serie, annotation, port) => {
-  console.log(' ---> addToGrid', serie);
   let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment, seriesDescription, numberOfAnnotations, numberOfImages, seriesNo } = serie;
   const modFmComment = comment ? comment.split('/')[0].trim() : '';
   examType = examType ? examType.toUpperCase() : modality ? modality.toUpperCase() : modFmComment.toUpperCase();
@@ -474,14 +473,6 @@ export const refreshPage = (feature, condition) => {
 
 // helpeer method
 export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann, otherSeriesAimsData, seriesOfStudy) => {
-  // console.log(' ----> seriesOfStudy');
-  // console.log(seriesOfStudy);
-  // console.log(' ---> ref', ref);
-  // console.log(' ----> aimsData', aimsData);
-  // console.log(' ----> imageData', imageData);
-  // console.log(' ----> ann', ann);
-  // console.log(' ----> otherSeriesAimsData', otherSeriesAimsData);
-
   return {
     type: LOAD_SERIE_SUCCESS,
     payload: { ref, aimsData, serID, imageData, ann, otherSeriesAimsData, seriesOfStudy },
@@ -722,7 +713,6 @@ const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
 
 // action to open series
 export const getSingleSerie = (serie, annotation, wadoUrl) => {
-  console.log(" getSingleSerie - serie", serie);
   return async (dispatch, getState) => {
     try {
       await dispatch(loadAnnotations());
@@ -741,7 +731,7 @@ export const getSingleSerie = (serie, annotation, wadoUrl) => {
         wadoUrl
       );
 
-      reference = { ...reference, serieRef };
+      reference = { ...reference, ...serieRef };
 
       await dispatch(
         singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData, seriesOfStudy)
@@ -924,8 +914,16 @@ const getStudyAimsDataSorted = (arr, projectID, patientID) => {
 
 const getSeriesAdditionalData = (arr, uid) => {
   const data = arr.filter((el) => el.seriesUID === uid);
-  const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo } = data;
+  const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo } = data[0];
   return { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo };
+}
+
+const insertAdditionalData = (arr, ref, uid) => {
+  arr.forEach(el => {
+    if (el.seriesUID === uid) {
+      el = { ...el, ...ref }
+    }
+  })
 }
 // helper methods - calls backend and get data
 const getSingleSerieData = (serie, annotation, wadoUrl) => {
@@ -970,7 +968,8 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
         aimsData = getAimListFields(aimsData, annotation);
         const allAims = [...serieAims, ...otherSeriesAims]
         const otherSeriesAimsData = allAims.length === 0 ? {} : getStudyAimsDataSorted(allAims, projectID, patientID);
-        const seriesOfStudy = { [studyUID]: result[1].data }
+        const seriesExtendedData = insertAdditionalData(result[1].data, serieRef, seriesUID);
+        const seriesOfStudy = { [studyUID]: seriesExtendedData }
         resolve({ aimsData, imageData, otherSeriesAimsData, seriesOfStudy, serieRef });
       })
       .catch((err) => {

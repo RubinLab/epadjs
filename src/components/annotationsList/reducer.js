@@ -259,12 +259,10 @@ const asyncReducer = (state = initialState, action) => {
         const viewPortStatus = !state.showGridFullAlert;
         return { ...state, showGridFullAlert: viewPortStatus };
       case LOAD_SERIE_SUCCESS:
-
         let imageAddedSeries = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
-
           }
           return newSerie;
         });
@@ -537,7 +535,6 @@ const asyncReducer = (state = initialState, action) => {
       //   };
       case ADD_TO_GRID:
         const seriesInfo = { ...action.reference };
-        console.log(action);
         const { projectMap } = state;
         if (projectMap[seriesInfo.projectID]) {
           seriesInfo.projectName = projectMap[seriesInfo.projectID].projectName;
