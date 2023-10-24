@@ -709,9 +709,15 @@ class DisplayView extends Component {
     let seriesMetadata = [];
     let seriesMetadataMap = {};
     let metadata2D = [];
+    const multiFrameMap = {}
     const imageUrls = await this.getImages(serie, index);
     if (imageUrls.length > 1) {
-      this.props.dispatch(updateGridWithMultiFrameInfo(true, multiFrameIndex));
+      for (let i = 0; i < imageUrls.length; i++) {
+        if (imageUrls[i][0].multiFrameImage) {
+          multiFrameMap[imageUrls[i][0].imageUID] = i;
+        }
+      }
+      this.props.dispatch(updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap));
     }
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
@@ -886,10 +892,6 @@ class DisplayView extends Component {
       this.formSplitSeriesData(imageUrls, baseUrl);
     }
     return { stack };
-  }
-
-  displaySplitSeriesMultiFrame = () => {
-
   }
 
   formSplitSeriesData = (urls, baseUrl) => {

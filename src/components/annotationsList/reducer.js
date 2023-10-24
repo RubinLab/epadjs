@@ -107,8 +107,11 @@ const asyncReducer = (state = initialState, action) => {
       //   return { ...state, openSeries: updatedOpenSeries };
       case CHECK_MULTIFRAME:
         const series = _.cloneDeep(state.openSeries);
-        series[state.activePort].hasMultiframe = action.payload.hasMultiframe;
-        series[state.activePort].multiFrameIndex = action.payload.multiframeIndex;
+        const {hasMultiframe, multiframeIndex, multiFrameMap} = action.payload;
+        series[state.activePort].hasMultiframe = hasMultiframe;
+        series[state.activePort].multiFrameIndex = multiframeIndex;
+        series[state.activePort].multiFrameMap = multiFrameMap;
+
         return { ...state, openSeries: series };
       case AIM_SAVE: //tested
         const { seriesList, aimRefs } = action.payload;

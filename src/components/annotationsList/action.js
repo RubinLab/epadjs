@@ -69,8 +69,8 @@ import { setToolOptionsForElement } from 'cornerstone-tools';
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
 
-export const updateGridWithMultiFrameInfo = (hasMultiframe, multiframeIndex) => {
-  return { type: CHECK_MULTIFRAME, payload: { hasMultiframe, multiframeIndex } };
+export const updateGridWithMultiFrameInfo = (hasMultiframe, multiframeIndex, multiFrameMap) => {
+  return { type: CHECK_MULTIFRAME, payload: { hasMultiframe, multiframeIndex, multiFrameMap } };
 }
 
 export const updateSubpath = (subpath, portIndex) => {
