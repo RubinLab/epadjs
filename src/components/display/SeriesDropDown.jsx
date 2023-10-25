@@ -35,7 +35,7 @@ const SeriesDropDown = (props) => {
 
             // if (props.multiFrameData.length > 0) {
             //     series = [...series, ...props.multiFrameData];
-            series = series.filter(isSupportedModality);
+            series = series?.filter(isSupportedModality);
             // }
             setSeriesList(series);
         }

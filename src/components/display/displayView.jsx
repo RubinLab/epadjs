@@ -530,13 +530,13 @@ class DisplayView extends Component {
     return segAims;
   };
 
-  getData() {
+  getData(multiFrameIndex, frameNo) {
     this.clearAllMarkups();//we are already clearing in it renderAims do we need to here? 
     try {
       const { series } = this.props;
       var promises = [];
       for (let i = 0; i < series.length; i++) {
-        const promise = this.getImageStack(series[i], i);
+        const promise = this.getImageStack(series[i], i, multiFrameIndex, frameNo);
         promises.push(promise);
 
       }
@@ -682,10 +682,10 @@ class DisplayView extends Component {
     return metadataURI + "/frames/1";
   };
 
-  getImageStack = async (serie, index, multiFrameIndex) => {
+  getImageStack = async (serie, index, multiFrameIndex, frameNo) => {
     const wadoUrl = sessionStorage.getItem("wadoUrl");
     if (wadoUrl.includes('wadors'))
-      return this.getImageStackWithWadors(serie, index, multiFrameIndex);
+      return this.getImageStackWithWadors(serie, index, multiFrameIndex, frameNo);
     else
       return this.getImageStackWithWadouri(serie, index);
   }
@@ -702,7 +702,9 @@ class DisplayView extends Component {
     return firstSeriesIndex;
   }
 
-  getImageStackWithWadors = async (serie, index, multiFrameIndex) => {
+  getImageStackWithWadors = async (serie, index, multiFrameIndex, frameNo) => {
+    console.log('  ====> serie, index, multiFrameIndex, frameNo')
+    console.log(serie, index, multiFrameIndex, frameNo)
     let stack = {};
     let newImageIds = {};
     let cornerstoneImageIds = [];
@@ -882,7 +884,8 @@ class DisplayView extends Component {
     }
 
     // if serie is being open from the annotation jump to that image and load the aim editor
-    if (serie.aimID) imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+    if (multiFrameIndex && frameNo) imageIndex = frameNo;
+    else if (serie.aimID) imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
@@ -891,6 +894,8 @@ class DisplayView extends Component {
     if (imageUrls.length > 0) {
       this.formSplitSeriesData(imageUrls, baseUrl);
     }
+    console.log(' ----> stack');
+    console.log(stack);
     return { stack };
   }
 
@@ -2039,22 +2044,31 @@ class DisplayView extends Component {
   // Triggered by event from right bar to jump to the image of aim
   jumpToAimImage = event => {
     // console.log(event);
+    // seperate this function to handle both
+    // if there are multiframe data call get image stack and pass frame data etc
+    // 
     const { series, activePort } = this.props;
-    const { aimId, index } = event.detail;
+    const { aimId, index, imageID, frameNo } = event.detail;
     const imageIndex = this.getImageIndex(series[index], this.state.data[index].stack.imageIds, aimId);
-    this.jumpToImage(imageIndex, index);
+    if (!series[activePort].hasMultiframe) 
+      this.jumpToImage(imageIndex, index);
+     else {
+      const multiFrameIndex = series[activePort].multiFrameMap[imageID];
+      this.getData(multiFrameIndex, frameNo);
+    }
   };
 
   // Don't take the activePort Index from props because store updates late so
   // activePort may be null while the event is triggered
   jumpToImage = (imageIndex, activePortIndex) => {
+    console.log(" in jumpToImage")
     // console.log(this.state.data);
     const newData = [...this.state.data];
     newData[activePortIndex].stack.currentImageIdIndex = parseInt(
       imageIndex,
       10
     );
-    // console.log(newData);
+    console.log(newData);
     this.setState({ data: newData });
   };
 
