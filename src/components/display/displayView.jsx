@@ -257,7 +257,8 @@ class DisplayView extends Component {
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData();
+      console.log(series[activePort].multiFrameIndex)
+      this.getData(series[activePort].multiFrameIndex);
       this.formInvertMap();
     }
     // This is to handle late loading of aimsList from store but it also calls getData

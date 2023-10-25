@@ -1289,6 +1289,7 @@ class AimEditor extends Component {
       let encrypted = sessionStorage.getItem('encrypted');
       encrypted = JSON.parse(encrypted);
       if (encrypted === true && mode === 'teaching') this.props.dispatch(clearAimId());
+      console.log(" aim saved", openSeries[activePort].multiframeIndex)
       openSeries.forEach(({ seriesUID, studyUID }) => {
         if (openSeries[
           activePort
