@@ -257,8 +257,15 @@ class DisplayView extends Component {
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      console.log(series[activePort].multiFrameIndex)
-      this.getData(series[activePort].multiFrameIndex);
+      const { hasMultiframe, multiFrameMap, aimID, frameData, multiFrameIndex } = series[activePort];
+      let mfIndex = 0;
+      let frameNo = null;
+      if (hasMultiframe && aimID) {
+        const imgDetails = frameData[aimID][0].split('/frames/');
+        mfIndex = multiFrameIndex ? parseInt(multiFrameIndex) : parseInt(multiFrameMap[imgDetails[0]]);
+        frameNo = parseInt(imgDetails[1]);
+      }
+      this.getData(mfIndex, frameNo);
       this.formInvertMap();
     }
     // This is to handle late loading of aimsList from store but it also calls getData
@@ -704,8 +711,6 @@ class DisplayView extends Component {
   }
 
   getImageStackWithWadors = async (serie, index, multiFrameIndex, frameNo) => {
-    console.log('  ====> serie, index, multiFrameIndex, frameNo')
-    console.log(serie, index, multiFrameIndex, frameNo)
     let stack = {};
     let newImageIds = {};
     let cornerstoneImageIds = [];
@@ -895,8 +900,6 @@ class DisplayView extends Component {
     if (imageUrls.length > 0) {
       this.formSplitSeriesData(imageUrls, baseUrl);
     }
-    console.log(' ----> stack');
-    console.log(stack);
     return { stack };
   }
 
@@ -2051,9 +2054,9 @@ class DisplayView extends Component {
     const { series, activePort } = this.props;
     const { aimId, index, imageID, frameNo } = event.detail;
     const imageIndex = this.getImageIndex(series[index], this.state.data[index].stack.imageIds, aimId);
-    if (!series[activePort].hasMultiframe) 
+    if (!series[activePort].hasMultiframe)
       this.jumpToImage(imageIndex, index);
-     else {
+    else {
       const multiFrameIndex = series[activePort].multiFrameMap[imageID];
       this.getData(multiFrameIndex, frameNo);
     }
