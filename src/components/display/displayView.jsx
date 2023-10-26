@@ -832,7 +832,7 @@ class DisplayView extends Component {
       }
 
       if (imageUrls[firstSeriesIndex][k].multiFrameImage === true) {
-        for (var i = 0; i < imageUrls[firstSeriesIndex][k].numberOfFrames; i++) {
+        for (var i = 1; i <= imageUrls[firstSeriesIndex][k].numberOfFrames; i++) {
           let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           // using distanceDatasetPairs to sort instead of just adding to the array
