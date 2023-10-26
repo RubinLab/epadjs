@@ -524,14 +524,14 @@ class Sidebar extends Component {
           )}
           <div className="drawer-control-left" onClick={this.handleOpenClose}>{open ? <BsArrowBarLeft className="bi bi-arrow-bar-left" /> : <BsArrowBarRight className="bi bi-arrow-bar-left" />}</div>
           <div className={open ? "left-tabs" : "left-tabs-closed"} style={{ marginLeft: tabMarginLeft }}>
-            <ul className="nav nav-tabs flex-column" style={{ borderLeft: 'none', padding: '0px' }} id="myTab" role="tablist">
-              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation" id="projects-tab__cont">
+            <ul className="nav nav-tabs" id="myTab" role="tablist">
+              <li className="nav-item" role="presentation" id="projects-tab__cont">
                 <button className={tab === 'projects' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'projects' })} id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects-tab-pane" type="button" role="tab" aria-controls="projects-tab-pane" aria-selected="false">Projects</button>
               </li>
-              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation" id="worklists-tab__cont">
+              <li className="nav-item" role="presentation" id="worklists-tab__cont">
                 <button className={tab === 'worklist' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'worklist' })} id="worklists-tab" data-bs-toggle="tab" data-bs-target="#worklists-tab-pane" type="button" role="tab" aria-controls="worklists-tab-pane" aria-selected="true">Worklists</button>
               </li>
-              <li className="nav-item" style={{ borderLeft: 'none' }} role="presentation" id="progress-tab__cont">
+              <li className="nav-item" role="presentation" id="progress-tab__cont">
                 <button className={tab === 'progress' ? "nav-link active" : "nav-link"} onClick={() => this.setState({ tab: 'progress' })} id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress-tab-pane" type="button" role="tab" aria-controls="progress-tab-pane" aria-selected="false">Progress</button>
               </li>
             </ul>
