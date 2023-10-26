@@ -367,6 +367,8 @@ function AnnotationTable(props) {
 
   const openAnnotation = async selected => {
     try {
+      console.log(' ---> selected');
+      console.log(selected);
       const { studyUID, seriesUID, aimID, patientName, name } = selected;
       const patientID = selected.subjectID;
       const projectID = selected.projectID ? selected.projectID : 'lite';
@@ -379,7 +381,9 @@ function AnnotationTable(props) {
       if (checkIfSerieOpen(selected, props.openSeries).isOpen) {
         const { index } = checkIfSerieOpen(selected, props.openSeries);
         props.dispatch(changeActivePort(index));
+        // if series has not multiframes continue with the old logic
         props.dispatch(jumpToAim(seriesUID, aimID, index));
+        // if there is a multiframe fire the event 
         props.switchToDisplay();
       } else {
         if (isGridFull) {
