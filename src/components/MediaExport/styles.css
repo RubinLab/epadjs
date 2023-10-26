@@ -185,6 +185,7 @@ body {
 .media-icon-bar {
         display: inline-block;
         background-color: #777;
+        width: 100%;
 /*        box-shadow: 0px 0px 3px 3px rgb(0 0 0 / 30%) !important;
           width: 100%;
 */
