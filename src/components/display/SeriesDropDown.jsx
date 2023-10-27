@@ -26,25 +26,12 @@ const SeriesDropDown = (props) => {
             patientID = props.serie.patientID;
         }
         const { openStudies } = props;
-        // async function fetchData() {
-        //     const { data: seriesOfStudy } = await getSeries(projectID, patientID, studyUID);
-        //     return seriesOfStudy;
-        // }
+        
         if (openStudies && openStudies.hasOwnProperty(studyUID)) {
             let series = openStudies[studyUID];
-
-            // if (props.multiFrameData.length > 0) {
-            //     series = [...series, ...props.multiFrameData];
             series = series?.filter(isSupportedModality);
-            // }
             setSeriesList(series);
         }
-        // else {
-        //     
-        //     fetchData().then(result => {
-        //         props.dispatch(addStudyToGrid({ [studyUID]: result }));
-        //     });
-        // }
     }, [props.openStudies]);
 
     const handleSelect = (e) => {
@@ -52,8 +39,6 @@ const SeriesDropDown = (props) => {
         const seriesUIDFmEvent = UIDArr[0];
         const multiFrameIndex = UIDArr[1];
         const { seriesUID } = props.openSeries[props.activePort];
-
-        // if (seriesUID === seriesUIDFmEvent) return;
 
         if (multiFrameIndex === undefined) {
             const serie = seriesList.find(element => element.seriesUID == e);
@@ -66,7 +51,6 @@ const SeriesDropDown = (props) => {
             props.dispatch(getSingleSerie(serie));
             window.dispatchEvent(
                 new CustomEvent("serieReplaced", {
-                    // detail: props.activePort
                     detail: {
                         viewportId: props.activePort,
                         id: e,
@@ -88,15 +72,6 @@ const SeriesDropDown = (props) => {
         }
         window.dispatchEvent(new CustomEvent('deleteViewportWL'));
     }
-
-    // const handleToggle = (show) => {
-    //     if (!show)
-    //         return;
-    //     const { studyUID, projectID, patientID } = props.serie;
-    //     const isCountQuery = true;
-    //     const { data: aimCounts } = await getStudyAims(patientID, studyUID, projectID, isCountQuery);
-    //     setAimCounts(aimCounts);
-    // }
 
     return (
         <div>

@@ -367,8 +367,6 @@ function AnnotationTable(props) {
 
   const openAnnotation = async selected => {
     try {
-      console.log(' ---> selected');
-      console.log(selected);
       const { studyUID, seriesUID, aimID, patientName, name } = selected;
       const patientID = selected.subjectID;
       const projectID = selected.projectID ? selected.projectID : 'lite';

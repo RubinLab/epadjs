@@ -945,9 +945,6 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
         );
         aimsData = serieAims.concat(studyAims);
         let imageAimMap = getImageIdAnnotations(serieAims);
-        // console.log('  ==========> imageAimMap  <==========');
-        // console.log(imageAimMap);
-        // TODO fix the env var retrieval
         const url = wadoUrl ? wadoUrl : sessionStorage.getItem('wadoUrl');
         const imgIds = Object.keys(imageAimMap);
         const aims = Object.values(imageAimMap);

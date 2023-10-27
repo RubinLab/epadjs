@@ -45,14 +45,12 @@ const annotationsLink = (props) => {
   };
 
   const displayAnnotations = (e, selected) => {
-    console.log(selected);
     const maxPort = parseInt(sessionStorage.getItem('maxPort'));
 
     let isGridFull = openSeries.length === maxPort;
     const { isOpen, index } = checkIfSerieOpen(selected.seriesUID);
 
     if (isOpen) {
-      console.log(" ---> is open");
       const imageUID = Object.keys(selected.imgIDs);
       const imgIDArr = imageUID[0].split('/frames/');
         props.dispatch(changeActivePort(index));

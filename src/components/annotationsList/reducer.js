@@ -270,8 +270,6 @@ const asyncReducer = (state = initialState, action) => {
           return newSerie;
         });
         let annCalc = Object.keys(action.payload.imageData);
-        // console.log(" ----> action.payload");
-        // console.log(action.payload);
 
         if (annCalc.length > 0) {
           for (let i = 0; i < imageAddedSeries.length; i++) {
@@ -310,10 +308,6 @@ const asyncReducer = (state = initialState, action) => {
             );
         const oldStudySeries = _.cloneDeep(state.openStudies);
         const newStudySeries = { ...oldStudySeries, ...action.payload.seriesOfStudy };
-        // const serArr = Object.values(action.payload.seriesOfStudy);
-        // serArr.forEach(el => {
-
-        // });
         
         const result = Object.assign({}, state, {
           loading: false,

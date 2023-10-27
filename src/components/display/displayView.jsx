@@ -568,13 +568,9 @@ class DisplayView extends Component {
   }
 
   handleSerieReplace = (e) => {
-    // { detail: { viewportId, id, multiframe } }
     const { series } = this.props;
     var promises = [];
     const { viewportId, id, multiFrameIndex } = e.detail;
-    console.log(" ----> in handleSerieReplace");
-    console.log(viewportId, id, multiFrameIndex);
-    // if (!multiframeIndex) {
     const promise = this.getImageStack(series[viewportId], viewportId, multiFrameIndex);
     promises.push(promise);
     Promise.all(promises).then((res) => {
@@ -582,14 +578,6 @@ class DisplayView extends Component {
       newData[viewportId] = res[0];
       this.setState({ data: newData });
     })
-    // } else {
-    //   const imgIds = this.state.multiFrameData[id];
-    //   const newData = { stack: { imgIds, currentImageIdIndex: 0 } }
-    //   const grid = _.cloneDeep(this.state.data);
-    //   console.log()
-    //   grid[viewportId] = newData;
-    //   this.setState({ data: grid });
-    // }
   }
 
   shouldOpenAimEditor = (notShowAimEditor = false) => {
@@ -729,12 +717,8 @@ class DisplayView extends Component {
     }
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
-    // const firstSeriesIndex = multiFrameIndex ? multiFrameIndex : this.findFirstSeriesIndex(imageUrls);
     const firstSeriesIndex = multiFrameIndex ? multiFrameIndex : this.findFirstSeriesIndex(imageUrls);
-    // console.log(imageUrls);
-    // console.log(imageUrls[firstSeriesIndex]);
     const seriesURL = wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage.split('/instances/')[0];
-    // use lookup
 
     try {
       seriesMetadata = await getMetadata(seriesURL);
@@ -751,19 +735,6 @@ class DisplayView extends Component {
     const imgURLsLen = imageUrls.reduce((all, item) => {
       return all + item.length;
     }, 0);
-
-    // if (seriesMetadata.length !== imageUrls.length) {
-    //   let count = 0;
-    //   for (let i = 0; i < imageUrls.length; i++) {
-    //     const len = imageUrls[i].length;
-    //     metadata2D.push(seriesMetadata.slice(count, count + len));
-    //     count += len;
-    //   }
-    // }
-
-    // console.log(" ||||||||||| metadata2D |||||||||")
-    // console.log(metadata2D);
-    // console.log(" ||||||||||| metadata2D |||||||||")
 
     seriesMetadata = seriesMetadata[firstSeriesIndex];
     const seriesMetadataExists = Array.isArray(seriesMetadata);
@@ -793,27 +764,6 @@ class DisplayView extends Component {
       scanAxis = dcmjs.normalizers.ImageNormalizer.vec3CrossProduct(rowVector, columnVector);
     }
 
-
-    // if (multiFrameIndex) {
-    //   console.log(" ++++++ multiFrameIndex", multiFrameIndex)
-    //   baseUrl = wadoUrlNoWadors + imageUrls[multiFrameIndex][0].lossyImage;
-    //   console.log(baseUrl);
-    //   console.log(metadata2D[multiFrameIndex][0]);
-    //   for (let i = 0; i < imageUrls[multiFrameIndex][0].numberOfFrames; i++) {
-    //     let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
-    //     console.log(multiFrameUrl);
-    //     // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
-    //     // using distanceDatasetPairs to sort instead of just adding to the array
-    //     if (!sortByGeo) cornerstoneImageIds.push(multiFrameUrl);
-    //     else distanceDatasetPairs.push([distance, multiFrameUrl]);
-    //     // cornerstone.loadAndCacheImage(multiFrameUrl);
-    //     newImageIds[multiFrameUrl] = true;
-    //     cornerstoneWADOImageLoader.wadors.metaDataManager.add(
-    //       multiFrameUrl,
-    //       metadata2D[multiFrameIndex][0]
-    //     );
-    //   }
-    // } else {
     const len = imageUrls[firstSeriesIndex].length;
     for (let k = 0; k < len; k++) {
       baseUrl = wadoUrlNoWadors + imageUrls[firstSeriesIndex][k].lossyImage;
@@ -839,37 +789,29 @@ class DisplayView extends Component {
       if (imageUrls[firstSeriesIndex][k].multiFrameImage === true) {
         for (var i = 0; i < imageUrls[firstSeriesIndex][k].numberOfFrames; i++) {
           let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
-          // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           // using distanceDatasetPairs to sort instead of just adding to the array
           if (!sortByGeo) cornerstoneImageIds.push(multiFrameUrl);
           else distanceDatasetPairs.push([distance, multiFrameUrl]);
-          // cornerstone.loadAndCacheImage(multiFrameUrl);
           newImageIds[multiFrameUrl] = true;
           cornerstoneWADOImageLoader.wadors.metaDataManager.add(
             multiFrameUrl,
             imgData
           );
-          // cornerstone.loadAndCacheImage(multiFrameUrl);
         }
       } else {
         let singleFrameUrl = `wadors:${baseUrl}/frames/1`;
         // using distanceDatasetPairs to sort instead of just adding to the array
         if (!sortByGeo) cornerstoneImageIds.push(singleFrameUrl);
         else distanceDatasetPairs.push([distance, singleFrameUrl]);
-        // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
         cornerstoneWADOImageLoader.wadors.metaDataManager.add(
           singleFrameUrl,
           imgData
         );
-        // cornerstone.loadAndCacheImage(singleFrameUrl);
       }
     }
-    // }
+
     const { imageIds } = this.state;
-    // console.log(" >>>>>>>>>>>>>>>>>>>>>>>>")
-    // console.log(newImageIds);
-    // console.log(" >>>>>>>>>>>>>>>>>>>>>>>>")
     this.setState({ imageIds: { ...imageIds, ...newImageIds } });
 
     //to jump to the same image after aim save
@@ -904,11 +846,9 @@ class DisplayView extends Component {
   }
 
   formSplitSeriesData = (urls, baseUrl) => {
-    // console.log(baseUrl);
     const imagesObj = {};
     let multiFrameIndex = 1;
     for (let series = 0; series < urls.length; series++) {
-      // console.log(urls[series]);
       const imagesArr = [];
       const { multiFrameImage, seriesUID } = urls[series][0];
       let id = seriesUID;
@@ -938,15 +878,12 @@ class DisplayView extends Component {
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
           let multiFrameUrl = baseUrl + "&frame=" + i;
-          // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           cornerstoneImageIds.push(multiFrameUrl);
-          // cornerstone.loadAndCacheImage(multiFrameUrl);
           newImageIds[multiFrameUrl] = true;
         }
       } else {
         let singleFrameUrl = baseUrl;
         cornerstoneImageIds.push(singleFrameUrl);
-        // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
       }
     });
@@ -1033,8 +970,6 @@ class DisplayView extends Component {
   isDicomSegEntity = (markupType) => {
     return markupType === "DicomSegmentationEntity";
   };
-
-
 
   // Returns the image index of the aim of the serie or the passed aim if aimID is passed 
   getImageIndex = (serie, cornerstoneImageIds, aimID = "") => {
@@ -2047,10 +1982,8 @@ class DisplayView extends Component {
 
   // Triggered by event from right bar to jump to the image of aim
   jumpToAimImage = event => {
-    // console.log(event);
     // seperate this function to handle both
     // if there are multiframe data call get image stack and pass frame data etc
-    // 
     const { series, activePort } = this.props;
     const { aimId, index, imageID, frameNo } = event.detail;
     const imageIndex = this.getImageIndex(series[index], this.state.data[index].stack.imageIds, aimId);
@@ -2065,14 +1998,11 @@ class DisplayView extends Component {
   // Don't take the activePort Index from props because store updates late so
   // activePort may be null while the event is triggered
   jumpToImage = (imageIndex, activePortIndex) => {
-    console.log(" in jumpToImage")
-    // console.log(this.state.data);
     const newData = [...this.state.data];
     newData[activePortIndex].stack.currentImageIdIndex = parseInt(
       imageIndex,
       10
     );
-    console.log(newData);
     this.setState({ data: newData });
   };
 
@@ -2099,7 +2029,6 @@ class DisplayView extends Component {
   render() {
     const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
     const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
-    // console.log(' ===> data', data);
     // if (this.state.redirect) return <Redirect to="/list" />;
     const redirect = (mode === 'teaching' ? 'search' : 'list');
     return !Object.entries(series).length ? (
@@ -2198,7 +2127,6 @@ class DisplayView extends Component {
                         isAimEditorShowing={this.state.showAimEditor}
                         onCloseAimEditor={this.closeAimEditor}
                         onSelect={this.jumpToImage}
-                      // multiFrameData={this.state.multiFrameData}
                       />
                     </div>
                   </div>
