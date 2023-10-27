@@ -176,7 +176,8 @@ class DisplayView extends Component {
       activeTool: '',
       invertMap: {},
       isOverlayVisible: {},
-      wwwc: {}
+      wwwc: {},
+      templateType: ''
     };
   }
 
@@ -218,6 +219,8 @@ class DisplayView extends Component {
     window.addEventListener("deleteAim", this.deleteAimHandler);
     window.addEventListener('keydown', this.handleKeyPressed);
     window.addEventListener('serieReplaced', this.handleSerieReplace);
+    window.addEventListener('saveTemplateType', this.saveTemplateType);
+
     if (this.props.keycloak && series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
@@ -228,6 +231,10 @@ class DisplayView extends Component {
     // this.props.closeLeftMenu();
   }
 
+  saveTemplateType = (data) => {
+    console.log('templateType in saving state', data);
+    this.setState({ templateType });
+  }
 
   async componentDidUpdate(prevProps, prevState) {
     const { pid, series, activePort, aimList } = this.props;
@@ -278,6 +285,7 @@ class DisplayView extends Component {
     window.removeEventListener("resize", this.setSubComponentHeights);
     window.removeEventListener('keydown', this.handleKeyPressed);
     window.removeEventListener('serieReplaced', this.handleSerieReplace);
+    window.removeEventListener('getTemplateType', this.saveTemplateType);
     // clear all aimID of openseries so aim editor doesn't open next time
     this.props.dispatch(clearAimId());
     clearInterval(this.state.tokenRefresh)
@@ -449,7 +457,7 @@ class DisplayView extends Component {
     let obj = imgStatus[this.props.activePort];
     obj = obj && typeof obj === 'object' ? obj : {};
     obj[type] = value;
-    imgStatus[this.props.activePort]= obj;
+    imgStatus[this.props.activePort] = obj;
     sessionStorage.setItem('imgStatus', JSON.stringify(imgStatus));
   }
 
@@ -576,7 +584,8 @@ class DisplayView extends Component {
     const { series } = this.props;
     series.forEach(({ aimID, seriesUID }) => {
       if (aimID && !notShowAimEditor) {
-        this.openAimEditor(aimID, seriesUID);}
+        this.openAimEditor(aimID, seriesUID);
+      }
     });
   };
 
@@ -1541,7 +1550,7 @@ class DisplayView extends Component {
         }
       });
     }
-    
+
     if (this.state.hiding) {
       const vpElements = document.getElementsByClassName("viewportContainer");
       for (var i = 0; i < vpElements.length; i++)
