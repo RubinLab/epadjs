@@ -268,6 +268,7 @@ export var AimEditor = function (
         tempTemplateType +
         " Template ";
       self.templateSelect.appendChild(templateOption);
+      console.log(" ---> tempTemplateType", tempTemplateType);
     }
 
     self.templateListDiv.appendChild(self.templateSelect);
@@ -310,7 +311,7 @@ export var AimEditor = function (
         } else {
           self.templateType = "Image";
         }
-
+        console.log(' ++++> templateType', self.templateType);
         self.extractTemplate(self.jsonTemplateCopy);
       }
     };
