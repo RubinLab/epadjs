@@ -102,7 +102,6 @@ class AimEditor extends Component {
     });
     this.semanticAnswers.createViewerWindow();
     const { aimId } = this.props;
-    console.log(this.semanticAnswers.getSelectedTemplateType());
     if (aimId != null && Object.entries(aimId).length) {
       try {
         this.semanticAnswers.loadAimJson(aimId);

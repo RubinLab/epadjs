@@ -268,7 +268,6 @@ export var AimEditor = function (
         tempTemplateType +
         " Template ";
       self.templateSelect.appendChild(templateOption);
-      console.log(" ---> tempTemplateType", tempTemplateType);
     }
 
     self.templateListDiv.appendChild(self.templateSelect);
