@@ -231,11 +231,6 @@ class DisplayView extends Component {
     // this.props.closeLeftMenu();
   }
 
-  saveTemplateType = (data) => {
-    console.log('templateType in saving state', data);
-    this.setState({ templateType });
-  }
-
   async componentDidUpdate(prevProps, prevState) {
     const { pid, series, activePort, aimList } = this.props;
     const {
@@ -289,6 +284,10 @@ class DisplayView extends Component {
     // clear all aimID of openseries so aim editor doesn't open next time
     this.props.dispatch(clearAimId());
     clearInterval(this.state.tokenRefresh)
+  }
+
+  saveTemplateType = (data) => {
+    this.setState({ templateType: data.detail });
   }
 
   handleKeyPressed = (event) => {
@@ -1202,9 +1201,14 @@ class DisplayView extends Component {
     if (activePort !== i) {
       if (this.state.showAimEditor) {
 
-        if (!this.closeAimEditor(true)) {
-          //means going to another viewport in the middle of creating/editing an aim
-          return;
+        // check if the series belongs to the same study
+        const oldStudy = series[activePort].studyUID;
+        const newStudy = series[i].studyUID;
+        if (this.state.templateType !== 'Study' || oldStudy !== newStudy) {
+          if (!this.closeAimEditor(true)) {
+            //means going to another viewport in the middle of creating/editing an aim
+            return;
+          }
         }
       }
       this.setState({ activePort: i });

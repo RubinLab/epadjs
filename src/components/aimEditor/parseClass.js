@@ -311,9 +311,7 @@ export var AimEditor = function (
         } else {
           self.templateType = "Image";
         }
-        console.log(' ++++> templateType', self.templateType);
         const tempType = self.templateType;
-        console.log(window.dispatchEvent)
         window.dispatchEvent(
           new CustomEvent("saveTemplateType", {
             detail: tempType,
