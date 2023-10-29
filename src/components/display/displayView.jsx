@@ -260,11 +260,27 @@ class DisplayView extends Component {
       const { hasMultiframe, multiFrameMap, aimID, frameData, multiFrameIndex } = series[activePort];
       let mfIndex = 0;
       let frameNo = null;
+
+      console.log(" ====> hasMultiframe", hasMultiframe);
+      console.log(" ====> aimID", aimID);
+
+      console.log(" ====> framedata");
+      console.log(frameData);
+
+      console.log(" ====> multiFrameIndex", multiFrameIndex);
+
+      console.log(" =====> multiFrameMap");
+      console.log(multiFrameMap);
+
       if (hasMultiframe && aimID) {
+        console.log(" ----> in if <----");
         const imgDetails = frameData[aimID][0].split('/frames/');
+        console.log(" ---> imgDetails");
+        console.log(imgDetails);
         mfIndex = multiFrameIndex ? parseInt(multiFrameIndex) : parseInt(multiFrameMap[imgDetails[0]]);
         frameNo = parseInt(imgDetails[1]);
       }
+      console.log(' ----> before getData', mfIndex, frameNo);
       this.getData(mfIndex, frameNo);
       this.formInvertMap();
     }
