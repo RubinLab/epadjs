@@ -641,14 +641,14 @@ class MediaExport extends Component {
               }
               else if (vr === 'OB' || vr === 'OW' || vr === 'UN' || vr === 'OF' || vr === 'UT') {
                 color = '#C8C8C8';
-                 // If it is some other length and we have no string
-                 if (element.length === 2) {
-                   text += dataDownloadLink(element, "binary data") + " of length " + element.length + " as uint16: " + dataSet.uint16(propertyName);
-                 } else if (element.length === 4) {
-                   text += dataDownloadLink(element, "binary data") + " of length " + element.length + " as uint32: " + dataSet.uint32(propertyName);
-                 } else {
-                   text += dataDownloadLink(element, "binary data") + " of length " + element.length + " and VR " + vr;
-                 }
+                // If it is some other length and we have no string
+                if (element.length === 2) {
+                  text += dataDownloadLink(element, "binary data") + " of length " + element.length + " as uint16: " + dataSet.uint16(propertyName);
+                } else if (element.length === 4) {
+                  text += dataDownloadLink(element, "binary data") + " of length " + element.length + " as uint32: " + dataSet.uint32(propertyName);
+                } else {
+                  text += dataDownloadLink(element, "binary data") + " of length " + element.length + " and VR " + vr;
+                }
               }
               else if (vr === 'AT') {
                 var group = dataSet.uint16(propertyName, 0);
@@ -670,13 +670,13 @@ class MediaExport extends Component {
             //}
           }
           else {
-          //   color = '#C8C8C8';
+            //   color = '#C8C8C8';
 
-             // Add text saying the data is too long to show...
-             text += dataDownloadLink(element, "data");
-             text += " of length " + element.length + " for VR " + vr + " too long to show";
-             text += this.sha1Text(dataSet.byteArray, element.dataOffset, element.length);
-           }
+            // Add text saying the data is too long to show...
+            text += dataDownloadLink(element, "data");
+            text += " of length " + element.length + " for VR " + vr + " too long to show";
+            text += this.sha1Text(dataSet.byteArray, element.dataOffset, element.length);
+          }
           // finally we add the string to our output array
           if (!isSensitiveTag) {
             array[0] += '  ' + text + '\n';
@@ -932,18 +932,20 @@ class MediaExport extends Component {
         </div>
         <div className="presentation">
           <div className="annotation-header-new">Presentation Controls </div>
-          <label className="accession-check icon-block2 form-check-label" htmlFor="toggleAccessionNumber">
-            <div className="form-check form-switch form-check-inline">
-              <input className="form-check-input" type="checkbox" role="switch" id="toggleAccessionNumber" onChange={this.toggleAccessionNumber}/>
-              <p style={{color: '#fff'}}>Save Accession #</p>
+          <div style={{ marginLeft: '2rem' }}>
+            <label className="accession-check icon-block2 form-check-label" htmlFor="toggleAccessionNumber">
+              <div className="form-check form-switch form-check-inline">
+                <input className="form-check-input" type="checkbox" role="switch" id="toggleAccessionNumber" onChange={this.toggleAccessionNumber} />
+                <p style={{ color: '#fff' }}>Save Accession #</p>
               </div>
             </label>
-          <div className="icon-block2" onClick={this.savePpt}>
-            <a style={{ textAlign: 'center' }}><i  className="bi bi-download"></i><p>Save Presentation</p></a>
-          </div>
+            <div className="icon-block2" onClick={this.savePpt}>
+              <a style={{ textAlign: 'center' }}><i className="bi bi-download"></i><p>Save Presentation</p></a>
+            </div>
 
-          <div className="icon-block2" onClick={this.clearPpt}>
-            <a style={{ textAlign: 'center' }}><i className="bi bi-x-circle"></i><p>Clear Presentation</p></a>
+            <div className="icon-block2" onClick={this.clearPpt}>
+              <a style={{ textAlign: 'center' }}><i className="bi bi-x-circle"></i><p>Clear Presentation</p></a>
+            </div>
           </div>
         </div>
         <br />

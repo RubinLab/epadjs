@@ -554,7 +554,7 @@ class DisplayView extends Component {
             this.jumpToAims();
             this.renderAims();
             this.refreshAllViewports();
-            this.shouldOpenAimEditor();
+            // this.shouldOpenAimEditor();
           }
         );
       });
@@ -579,14 +579,16 @@ class DisplayView extends Component {
     })
   }
 
-  shouldOpenAimEditor = (notShowAimEditor = false) => {
-    const { series } = this.props;
-    series.forEach(({ aimID, seriesUID }) => {
-      if (aimID && !notShowAimEditor) {
-        this.openAimEditor(aimID, seriesUID);
-      }
-    });
-  };
+  // Remove this function to disable openning aim editor by default
+  // once user clecked on an aim
+
+  // shouldOpenAimEditor = (notShowAimEditor = false) => {
+  //   const { series } = this.props;
+  //   series.forEach(({ aimID, seriesUID }) => {
+  //     if (aimID && !notShowAimEditor) {
+  //       this.openAimEditor(aimID, seriesUID);}
+  //   });
+  // };
 
   clearAllMarkups = () => {
     // clear the toolState they will be rendered again on next load
@@ -606,10 +608,14 @@ class DisplayView extends Component {
     this.clearAllMarkups();
 
     series.forEach((serie, serieIndex) => {
-      if (serie.aimID && !notShowAimEditor) {
-        const { aimID, seriesUID } = serie;
-        this.openAimEditor(aimID, seriesUID);
-      }
+      // Remove this part to disable openning aim editor by default
+      // once user clecked on an aim
+
+      // if (serie.aimID && !notShowAimEditor) {
+      //   const { aimID, seriesUID } = serie;
+      // this.openAimEditor(aimID, seriesUID);
+      // }
+
       if (serie.imageAnnotations)
         this.parseAims(
           serie.imageAnnotations,
