@@ -197,6 +197,7 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
+    console.log(" ---> in did mount");
     const { series, onSwitchView } = this.props;
     // if (series.length < 1) {
     //   onSwitchView('search');
@@ -255,11 +256,12 @@ class DisplayView extends Component {
       (prevProps.series.length !== this.props.series.length &&
         this.props.loading === false)
     ) {
+      console.log(" +++++++> in did update");
       await this.setState({ isLoading: true });
       this.getViewports();
       const { hasMultiframe, multiFrameMap, aimID, frameData, multiFrameIndex } = series[activePort];
       let mfIndex = 0;
-      let frameNo = null;
+      let frameNo = 1;
 
       console.log(" ====> hasMultiframe", hasMultiframe);
       console.log(" ====> aimID", aimID);
@@ -277,10 +279,13 @@ class DisplayView extends Component {
         const imgDetails = frameData[aimID][0].split('/frames/');
         console.log(" ---> imgDetails");
         console.log(imgDetails);
-        mfIndex = multiFrameIndex ? parseInt(multiFrameIndex) : parseInt(multiFrameMap[imgDetails[0]]);
+        // mfIndex = multiFrameIndex ? parseInt(multiFrameIndex) : parseInt(multiFrameMap[imgDetails[0]]);
+        mfIndex = parseInt(multiFrameMap[imgDetails[0]]);
         frameNo = parseInt(imgDetails[1]);
+        console.log(' ---->  mfIndex, frameNo in if', mfIndex, frameNo);
+
       }
-      console.log(' ----> before getData', mfIndex, frameNo);
+      console.log(' ---->  mfIndex, frameNo before getData', mfIndex, frameNo);
       this.getData(mfIndex, frameNo);
       this.formInvertMap();
     }
@@ -794,14 +799,19 @@ class DisplayView extends Component {
       baseUrl = wadoUrlNoWadors + imageUrls[firstSeriesIndex][k].lossyImage;
       let imgData;
       let distance = null;
-      if (!useSeriesData) {
-        const result = await getImageMetadata(baseUrl);
-        const data = result.data;
-        console.log(" ---> data again");
-        console.log(data);
-        imgData = data[0];
-      } else {
-        imgData = seriesMetadataMap[imageUrls[firstSeriesIndex][k].imageUID];
+      try {
+        if (!useSeriesData) {
+          const result = await getImageMetadata(baseUrl);
+          const data = result.data;
+          console.log(" ---> data again");
+          console.log(data);
+          imgData = data[0];
+        } else {
+          imgData = seriesMetadataMap[imageUrls[firstSeriesIndex][k].imageUID];
+        }
+      } catch (err) {
+        console.log(" error in getting image metadata");
+        console.error(err);
       }
 
       if (sortByGeo) {
