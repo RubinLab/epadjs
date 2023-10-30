@@ -176,7 +176,8 @@ class DisplayView extends Component {
       activeTool: '',
       invertMap: {},
       isOverlayVisible: {},
-      wwwc: {}
+      wwwc: {},
+      templateType: ''
     };
   }
 
@@ -218,6 +219,8 @@ class DisplayView extends Component {
     window.addEventListener("deleteAim", this.deleteAimHandler);
     window.addEventListener('keydown', this.handleKeyPressed);
     window.addEventListener('serieReplaced', this.handleSerieReplace);
+    window.addEventListener('saveTemplateType', this.saveTemplateType);
+
     if (this.props.keycloak && series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
@@ -227,7 +230,6 @@ class DisplayView extends Component {
     // cornerstone.enable(element);
     // this.props.closeLeftMenu();
   }
-
 
   async componentDidUpdate(prevProps, prevState) {
     const { pid, series, activePort, aimList } = this.props;
@@ -278,9 +280,14 @@ class DisplayView extends Component {
     window.removeEventListener("resize", this.setSubComponentHeights);
     window.removeEventListener('keydown', this.handleKeyPressed);
     window.removeEventListener('serieReplaced', this.handleSerieReplace);
+    window.removeEventListener('getTemplateType', this.saveTemplateType);
     // clear all aimID of openseries so aim editor doesn't open next time
     this.props.dispatch(clearAimId());
     clearInterval(this.state.tokenRefresh)
+  }
+
+  saveTemplateType = (data) => {
+    this.setState({ templateType: data.detail });
   }
 
   handleKeyPressed = (event) => {
@@ -1200,9 +1207,14 @@ class DisplayView extends Component {
     if (activePort !== i) {
       if (this.state.showAimEditor) {
 
-        if (!this.closeAimEditor(true)) {
-          //means going to another viewport in the middle of creating/editing an aim
-          return;
+        // check if the series belongs to the same study
+        const oldStudy = series[activePort].studyUID;
+        const newStudy = series[i].studyUID;
+        if (this.state.templateType !== 'Study' || oldStudy !== newStudy) {
+          if (!this.closeAimEditor(true)) {
+            //means going to another viewport in the middle of creating/editing an aim
+            return;
+          }
         }
       }
       this.setState({ activePort: i });
