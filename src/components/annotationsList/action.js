@@ -928,6 +928,7 @@ const insertAdditionalData = (arr, ref, uid) => {
 // helper methods - calls backend and get data
 const getSingleSerieData = (serie, annotation, wadoUrl) => {
   return new Promise((resolve, reject) => {
+    console.log(serie);
     let aimsData;
     let imageData;
     let { studyUID, seriesUID, projectID, patientID, aimID } = serie;
@@ -939,6 +940,7 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
 
     Promise.all(promises)
       .then(async (result) => {
+        console.log(result);
         const { studyAims, serieAims, otherSeriesAims } = extractNonMarkupAims(
           result[0].data.rows,
           seriesUID
@@ -959,9 +961,11 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
             return all;
           }, {})
 
+          // let max = 1;
           frameData = aims.reduce((all, aimsList, index) => {
             let img = imgIds[index].split('&frame=');
             let frameNo = img.length > 1 ? img[1] : 1;
+            // if (frameNo > max) max = frameNo;
             img = `${img[0]}/frames/${frameNo}`
             aimsList.forEach((el, i) => {
               if (all[el.aimUid]) all[el.aimUid].push(img);

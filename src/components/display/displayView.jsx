@@ -257,8 +257,8 @@ class DisplayView extends Component {
     const oldFrameData = JSON.stringify(prevProps.series[activePort].frameData);
     const newFrameData = JSON.stringify(this.props.series[activePort].frameData);
 
-    console.log(oldFrameData);
-    console.log(newFrameData);
+    // console.log(oldFrameData);
+    // console.log(newFrameData);
     const frameDataChanged = oldFrameData !== newFrameData;
 
 
@@ -267,47 +267,63 @@ class DisplayView extends Component {
         prevProps.loading === true &&
         this.props.loading === false) ||
       (prevProps.series.length !== this.props.series.length &&
-        this.props.loading === false) ||
-      (frameDataChanged && prevProps.activePort === activePort)
+        this.props.loading === false) || (multiFrameStatusChanged)
     ) {
       console.log(" +++++++> in did update");
       await this.setState({ isLoading: true });
       this.getViewports();
       this.formInvertMap();
-      const { hasMultiframe, multiFrameMap, aimID, frameData, multiFrameIndex } = series[activePort];
-      let mfIndex = 0;
-      let frameNo = 1;
 
-      console.log(" ====> hasMultiframe", hasMultiframe);
-      console.log(" ====> aimID", aimID);
-
-      console.log(" ====> framedata");
-      console.log(frameData);
-
-      console.log(" ====> multiFrameIndex", multiFrameIndex);
-
-      console.log(" =====> multiFrameMap");
-      console.log(multiFrameMap);
-
-      if (hasMultiframe && aimID) {
+      const { aimID, frameData, multiFrameMap } = series[activePort]
+      if (aimID && frameData && multiFrameMap) {
         console.log(" ----> in if <----");
-        const imgDetails = frameData[aimID][0].split('/frames/');
+        const imgDetails = series[activePort].frameData[aimID][0].split('/frames/');
         console.log(" ---> imgDetails");
         console.log(imgDetails);
         // mfIndex = multiFrameIndex ? parseInt(multiFrameIndex) : parseInt(multiFrameMap[imgDetails[0]]);
-        mfIndex = parseInt(multiFrameMap[imgDetails[0]]);
-        frameNo = parseInt(imgDetails[1]);
-        console.log(' ---->  mfIndex, frameNo in if', mfIndex, frameNo);
-
+        const mfIndex = parseInt(multiFrameMap[imgDetails[0]]);
+        const frameNo = parseInt(imgDetails[1]);
+        console.log(' ---->  mfIndex, frameNo before getData', mfIndex, frameNo);
+        this.getData(mfIndex, frameNo);
       }
-      console.log(' ---->  mfIndex, frameNo before getData', mfIndex, frameNo);
-      this.getData(mfIndex, frameNo);
+
     }
     // This is to handle late loading of aimsList from store but it also calls getData
     // each time visibility of aims change
     else if (Object.keys(aimList).length !== Object.keys(prevAimList).length) {
       this.renderAims();
     }
+
+    // if (multiFrameStatusChanged && prevProps.activePort === activePort && this.props.series[activePort].frameData) {
+    //   const { hasMultiframe, multiFrameMap, aimID, frameData, multiFrameIndex } = series[activePort];
+    //   let mfIndex = 0;
+    //   let frameNo = 1;
+
+    //   console.log(" ====> hasMultiframe", hasMultiframe);
+    //   console.log(" ====> aimID", aimID);
+
+    //   console.log(" ====> framedata");
+    //   console.log(frameData);
+
+    //   console.log(" ====> multiFrameIndex", multiFrameIndex);
+
+    //   console.log(" =====> multiFrameMap");
+    //   console.log(multiFrameMap);
+
+    //   if (hasMultiframe && aimID) {
+    //     console.log(" ----> in if <----");
+    //     const imgDetails = frameData[aimID][0].split('/frames/');
+    //     console.log(" ---> imgDetails");
+    //     console.log(imgDetails);
+    //     // mfIndex = multiFrameIndex ? parseInt(multiFrameIndex) : parseInt(multiFrameMap[imgDetails[0]]);
+    //     mfIndex = parseInt(multiFrameMap[imgDetails[0]]);
+    //     frameNo = parseInt(imgDetails[1]);
+    //     console.log(' ---->  mfIndex, frameNo in if', mfIndex, frameNo);
+
+    //   }
+    //   console.log(' ---->  mfIndex, frameNo before getData', mfIndex, frameNo);
+    //   this.getData(mfIndex, frameNo);
+    // }
     /*
     else if (frameDataChanged && prevProps.activePort === activePort) {
       const { hasMultiframe, multiFrameMap, aimID, frameData, multiFrameIndex } = series[activePort];
