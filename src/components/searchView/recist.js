@@ -754,17 +754,16 @@ function checkAndColor(
 ) {
   for (i = 0; i < data.tUIDs.length; i++) {
     var aNameTag = $('<a>', { href: '#', id: 'a' + i + '0' });
-    // doesn't work. Report.jsx handles the click
-    // aNameTag.click(
-    //   { projectID: projectID, patientID: patientID, row: data.tUIDs[i] },
-    //   function(event) {
-    //     openAllAimsOfLesion(
-    //       event.data.row,
-    //       event.data.patientID,
-    //       event.data.projectID
-    //     );
-    //   }
-    // );
+    aTag.on('click', 
+      { projectID: projectID, patientID: patientID, row: data.tUIDs[i] },
+      function(event) {
+        openAllAimsOfLesion(
+          event.data.row,
+          event.data.patientID,
+          event.data.projectID
+        );
+      }
+    );
     let txt = recisttable.find('#c' + i + '0').text();
     
     aNameTag.text(txt); // Populate the text with what's already there
