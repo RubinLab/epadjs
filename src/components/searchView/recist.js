@@ -753,17 +753,19 @@ function checkAndColor(
   numofHeaderCols
 ) {
   for (i = 0; i < data.tUIDs.length; i++) {
-    var aNameTag = $('<a>', { href: '#', id: 'a' + i + '0' });
-    aTag.on('click', 
-      { projectID: projectID, patientID: patientID, row: data.tUIDs[i] },
-      function(event) {
-        openAllAimsOfLesion(
-          event.data.row,
-          event.data.patientID,
-          event.data.projectID
-        );
-      }
-    );
+    var aNameTag = $('<a>', { href: '#', id: 'a' + i + '0' + '_' + data.tUIDs[i][0].index });
+    // doesn't work. Report.jsx handles the click
+    // aNameTag.on('click', 
+    //   { projectID: projectID, patientID: patientID, row: data.tUIDs[i] },
+    //   function(event) {
+    //     console.log('event222');
+    //     openAllAimsOfLesion(
+    //       event.data.row,
+    //       event.data.patientID,
+    //       event.data.projectID
+    //     );
+    //   }
+    // );
     let txt = recisttable.find('#c' + i + '0').text();
     
     aNameTag.text(txt); // Populate the text with what's already there
