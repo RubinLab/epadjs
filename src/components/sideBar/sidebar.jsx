@@ -55,7 +55,8 @@ class Sidebar extends Component {
       selected: null,
       type: "",
       height: 200,
-      tab: 'projects'
+      tab: 'projects',
+      shouldGetProgress: true
     };
   }
 
@@ -65,7 +66,7 @@ class Sidebar extends Component {
       // this.setTabHeight();
       const projects = await this.getProjectsData();
       this.setStateProjectData(projects, true);
-      this.getWorklistandProgressData();
+      // this.getWorklistandProgressData();
       // window.addEventListener("resize", this.setTabHeight);
     } catch (error) {
       console.error(error);
@@ -253,7 +254,11 @@ class Sidebar extends Component {
   };
 
   handleOpenClose = () => {
-    const { open } = this.state;
+    const { open, shouldGetProgress } = this.state;
+    if (shouldGetProgress) {
+      this.getWorklistandProgressData();
+      this.setState({ shouldGetProgress: false });
+    }
     if (open) {
       this.setState({
         width: "30px",
@@ -403,7 +408,11 @@ class Sidebar extends Component {
   };
 
   renderProgress = () => {
-    const { progressView, selected, type } = this.state;
+    console.log(" RENDER progress start")
+    // this.getWorklistandProgressData();
+    const { progressView, selected, type, worklistsCreated, worklistsAssigned } = this.state;
+    console.log(worklistsCreated)
+    console.log(worklistsAssigned)
     return (
       <div>
         <Collapsible
@@ -415,7 +424,7 @@ class Sidebar extends Component {
         // open={progressView[0]}
         >
           <WorklistSelect
-            list={this.state.worklistsCreated}
+            list={worklistsCreated}
             handleRoute={this.handleRoute}
             selected={selected}
             type={type}
@@ -430,7 +439,7 @@ class Sidebar extends Component {
         // open={progressView[1]}
         >
           <WorklistSelect
-            list={this.state.worklistsAssigned}
+            list={worklistsAssigned}
             handleRoute={this.handleRoute}
             selected={selected}
             type={type}
