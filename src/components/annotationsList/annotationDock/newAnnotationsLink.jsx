@@ -12,7 +12,6 @@ import {
   jumpToAim,
   updateImageId,
 } from '../action';
-import { clearTildes } from "../../../Utils/aid";
 import "../annotationsList.css";
 
 const handleJumpToAim = (aimId, index) => {
@@ -69,6 +68,14 @@ const annotationsLink = (props) => {
     }
   };
 
+  const clearTildes = (string, returnVal) => {
+    let result = '';
+    const valueArray = string?.split('~~');
+    if (valueArray.length > 0)
+      result = returnVal === 'auto' ? valueArray[0] : valueArray[1];
+    return result;
+  };
+
   const renderUI = () => {
     if (otherSeriesAimsList[studyUID]) {
       const otherSeriesAims = Object.values(otherSeriesAimsList[studyUID]);
@@ -76,10 +83,9 @@ const annotationsLink = (props) => {
         otherSeriesAims.forEach((series, i) => {
           const seriesList = [];
           series[2].forEach((aim, index) => {
-            const clearedAimComment = aim ? clearTildes(aim.comment) : '';
-            const commentArr = clearedAimComment.split('/');
-            const slideNo = commentArr[2] || "";
-            const seriesIndex = commentArr[3] || "";
+            const commentArr = aim.comment.split('/');
+            const slideNo = clearTildes(commentArr[2], 'auto');
+            const seriesIndex = clearTildes(commentArr[3], 'auto');;
 
             const imgIDs = Object.keys(aim?.imgIDs);
             let imgMatches = false;
