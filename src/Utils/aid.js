@@ -20,7 +20,7 @@ export const handleSelectDeselectAll = (checked) => {
 }
 
 export const resetSelectAllCheckbox = state => {
-  const selectAllCheckboxId = document.getElementById('seach-select_all');
+  const selectAllCheckboxId = document.getElementById('search-select_all');
   selectAllCheckboxId.checked = state;
 }
 

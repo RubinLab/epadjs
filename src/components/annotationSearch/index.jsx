@@ -1360,7 +1360,7 @@ const AnnotationSearch = props => {
           <tr>
             <th className="select_row">
               <div className="form-check">
-                <input id="seach-select_all" className="form-check-input __select-all" type="checkbox" onChange={({ target: { checked } }) => handleSelectDeselectAll(checked)} />
+                <input id="search-select_all" className="form-check-input __select-all" type="checkbox" onChange={({ target: { checked } }) => handleSelectDeselectAll(checked)} />
               </div>
             </th>
             <th>
