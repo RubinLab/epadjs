@@ -381,11 +381,8 @@ class Sidebar extends Component {
     return <ul className={'element'} style={{ listStyle: 'none' }}> {worklists}</ul >;
   };
 
-  renderProgress = () => {
-    console.log(" RENDER progress start")
-    const { progressView, selected, type, worklistsCreated, worklistsAssigned } = this.state;
-    console.log(worklistsCreated)
-    console.log(worklistsAssigned)
+  renderProgress = () => { 
+    const { selected, type, worklistsCreated, worklistsAssigned } = this.state;
     return (
       <div>
         <Collapsible
