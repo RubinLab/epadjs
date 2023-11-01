@@ -131,6 +131,7 @@ function findMeasurements(table) {
       }
     });
   });
+  allMeasurements.sort();
   return allMeasurements;
 }
 
@@ -211,7 +212,6 @@ function shrinkTable(filteredTable, data, numofHeaderCols, rowsWithNoValue) {
 
   let filteredduids = [];
   jQuery.each(data.tUIDs, function(i, elem) {
-    console.log('rows', rows[i], i, rowsWithNoValue.includes(i));
     if (rows[i] === true && !rowsWithNoValue.includes(i)) {
       let row = [];
       jQuery.each(elem, function(j, selem) {
@@ -225,7 +225,6 @@ function shrinkTable(filteredTable, data, numofHeaderCols, rowsWithNoValue) {
         }
       });
       
-      console.log('puhing row', row);
       filteredduids.push(row);
     }
   });
@@ -270,7 +269,6 @@ function shrinkTable(filteredTable, data, numofHeaderCols, rowsWithNoValue) {
       filtereddtLesionNames.push(elem);
   });
   shrinkedData.tLesionNames = filtereddtLesionNames;
-  console.log('shrinkedData', shrinkedData);
   return shrinkedData;
 }
 
@@ -323,14 +321,10 @@ function filterForMeasurementTemplateShape(
     if (!isThereLesionData) rowsWithNoValue.push(i);
     filteredTable.push(row);
   });
-  console.log('filteredTable', filteredTable);
-  console.log('rowsWithNoValue', rowsWithNoValue);
   return { filteredTable, rowsWithNoValue };
 }
 
 function calcSums(filteredTable, timepoints, numofHeaderCols) {
-  // console.log(' 0000000 ====> filteredTable, timepoints, numofHeaderCols');
-  // console.log(filteredTable, timepoints, numofHeaderCols);
   sums = [];
   if (filteredTable[0] != null) {
     for (k = 0; k < filteredTable[0].length - numofHeaderCols; k++) {
@@ -758,7 +752,6 @@ function checkAndColor(
     // aNameTag.on('click', 
     //   { projectID: projectID, patientID: patientID, row: data.tUIDs[i] },
     //   function(event) {
-    //     console.log('event222');
     //     openAllAimsOfLesion(
     //       event.data.row,
     //       event.data.patientID,
@@ -777,7 +770,6 @@ function checkAndColor(
       .text('')
       .append(aNameTag);
 
-    console.log('data', data, data.tUIDs);
     for (j = 0; j < data.tUIDs[i].length; j++) {
       //find if the cell is in a span
       //find which span
@@ -789,14 +781,6 @@ function checkAndColor(
           break;
         }
       }
-      console.log('item', i, j, data.tUIDs[i][j], createLinkUrl(
-        serverUrl,
-        data.tUIDs[i][j].studyUID,
-        data.tUIDs[i][j].seriesUID,
-        data.tUIDs[i][j].aimUID,
-        patientID,
-        projectID
-      ))
       //put link
       if (data.tUIDs[i][j] != null) {
         var aTag = $('<a>', {
@@ -820,9 +804,7 @@ function checkAndColor(
         //     aimUID: data.tUIDs[i][j].aimUID,
         //   },
         //   function(event) {
-        //     console.log('hereeeee');
         //     event.preventDefault();
-        //     console.log('event', event);
         //     window.loadSpecific(
         //       event.data.projectID,
         //       event.data.patientID,
@@ -1271,8 +1253,10 @@ function fillFilterSelect(
         }
       });
     } else {
+      console.log('selected value', selectedFilter? selectedFilter.val(): 'non');
       if (selectedFilter && selectedFilter.val()) filter.val(selectedFilter.val());
       else filter.selectedIndex = 0;
+      console.log('filter value after', filter? filter.val(): 'non');
       if (selectedTemplateFilter && selectedTemplateFilter.val()) templateFilter.val(selectedTemplateFilter.val());
       else templateFilter.selectedIndex = 0;
       if (selectedShapeFilter && selectedShapeFilter.val()) shapesFilter.val(selectedShapeFilter.val());

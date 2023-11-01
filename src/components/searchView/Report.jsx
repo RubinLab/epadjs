@@ -393,13 +393,11 @@ const Report = props => {
     try {
       const uidData = nontarget ? data[user].ntUIDs : data[user].tUIDs;
       const actualRow = rowIndex || row;
-      console.log('row', rowIndex, row, rowIndex || row, actualRow);
       const { openSeries } = props;
       const notOpenSeries = [];
       const { projectID, patientID, subjectName } = props.patient;
       // check if the col is 0 (one aim only)
       if (col !== -1) {
-        console.log('data', uidData, uidData[actualRow][col]);
         // if rowIndex is sent use that instead of the row (recist.js can filter the rows)
         const { seriesUID, aimUID, studyUID } = uidData[actualRow][col];
         // if not zero check if it is already open
@@ -531,8 +529,9 @@ const Report = props => {
               <select
                 onMouseDown={e => e.stopPropagation()}
                 onChange={e => {
+                  console.log('on change', e);
                   const userVal = e.target.value;
-                  getReportTable(data[userVal]);
+                  getReportTable(data[userVal], true);
                   setUser(userVal);
                 }}
                 defaultValue={user}
