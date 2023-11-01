@@ -197,7 +197,6 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
-    console.log(" ---> in did mount");
     const { series, onSwitchView } = this.props;
     // if (series.length < 1) {
     //   onSwitchView('search');
@@ -250,17 +249,9 @@ class DisplayView extends Component {
       return;
     }
 
-
     const oldMultiFrameStatus = prevProps.series[activePort].hasMultiframe;
     const newMultiFrameStatus = this.props.series[activePort].hasMultiframe;
     const multiFrameStatusChanged = oldMultiFrameStatus !== newMultiFrameStatus;
-    const oldFrameData = JSON.stringify(prevProps.series[activePort].frameData);
-    const newFrameData = JSON.stringify(this.props.series[activePort].frameData);
-
-    // console.log(oldFrameData);
-    // console.log(newFrameData);
-    const frameDataChanged = oldFrameData !== newFrameData;
-
 
     if (
       (prevProps.series !== this.props.series &&
@@ -269,21 +260,16 @@ class DisplayView extends Component {
       (prevProps.series.length !== this.props.series.length &&
         this.props.loading === false) || (multiFrameStatusChanged)
     ) {
-      console.log(" +++++++> in did update");
       await this.setState({ isLoading: true });
       this.getViewports();
       this.formInvertMap();
 
       const { aimID, frameData, multiFrameMap } = series[activePort]
       if (aimID && frameData && multiFrameMap) {
-        console.log(" ----> in if <----");
         const imgDetails = series[activePort].frameData[aimID][0].split('/frames/');
-        console.log(" ---> imgDetails");
-        console.log(imgDetails);
         // mfIndex = multiFrameIndex ? parseInt(multiFrameIndex) : parseInt(multiFrameMap[imgDetails[0]]);
         const mfIndex = parseInt(multiFrameMap[imgDetails[0]]);
         const frameNo = parseInt(imgDetails[1]);
-        console.log(' ---->  mfIndex, frameNo before getData', mfIndex, frameNo);
         this.getData(mfIndex, frameNo);
       }
 
@@ -293,70 +279,6 @@ class DisplayView extends Component {
     else if (Object.keys(aimList).length !== Object.keys(prevAimList).length) {
       this.renderAims();
     }
-
-    // if (multiFrameStatusChanged && prevProps.activePort === activePort && this.props.series[activePort].frameData) {
-    //   const { hasMultiframe, multiFrameMap, aimID, frameData, multiFrameIndex } = series[activePort];
-    //   let mfIndex = 0;
-    //   let frameNo = 1;
-
-    //   console.log(" ====> hasMultiframe", hasMultiframe);
-    //   console.log(" ====> aimID", aimID);
-
-    //   console.log(" ====> framedata");
-    //   console.log(frameData);
-
-    //   console.log(" ====> multiFrameIndex", multiFrameIndex);
-
-    //   console.log(" =====> multiFrameMap");
-    //   console.log(multiFrameMap);
-
-    //   if (hasMultiframe && aimID) {
-    //     console.log(" ----> in if <----");
-    //     const imgDetails = frameData[aimID][0].split('/frames/');
-    //     console.log(" ---> imgDetails");
-    //     console.log(imgDetails);
-    //     // mfIndex = multiFrameIndex ? parseInt(multiFrameIndex) : parseInt(multiFrameMap[imgDetails[0]]);
-    //     mfIndex = parseInt(multiFrameMap[imgDetails[0]]);
-    //     frameNo = parseInt(imgDetails[1]);
-    //     console.log(' ---->  mfIndex, frameNo in if', mfIndex, frameNo);
-
-    //   }
-    //   console.log(' ---->  mfIndex, frameNo before getData', mfIndex, frameNo);
-    //   this.getData(mfIndex, frameNo);
-    // }
-    /*
-    else if (frameDataChanged && prevProps.activePort === activePort) {
-      const { hasMultiframe, multiFrameMap, aimID, frameData, multiFrameIndex } = series[activePort];
-      let mfIndex = 0;
-      let frameNo = 1;
-
-      console.log(" ====> hasMultiframe", hasMultiframe);
-      console.log(" ====> aimID", aimID);
-
-      console.log(" ====> framedata");
-      console.log(frameData);
-
-      console.log(" ====> multiFrameIndex", multiFrameIndex);
-
-      console.log(" =====> multiFrameMap");
-      console.log(multiFrameMap);
-
-      if (hasMultiframe && aimID) {
-        console.log(" ----> in if <----");
-        const imgDetails = frameData[aimID][0].split('/frames/');
-        console.log(" ---> imgDetails");
-        console.log(imgDetails);
-        // mfIndex = multiFrameIndex ? parseInt(multiFrameIndex) : parseInt(multiFrameMap[imgDetails[0]]);
-        mfIndex = parseInt(multiFrameMap[imgDetails[0]]);
-        frameNo = parseInt(imgDetails[1]);
-        console.log(' ---->  mfIndex, frameNo in if', mfIndex, frameNo);
-
-      }
-      console.log(' ---->  mfIndex, frameNo before getData', mfIndex, frameNo);
-      this.getData(mfIndex, frameNo);
-    }
-*/
-
   }
 
   componentWillUnmount() {
@@ -801,9 +723,7 @@ class DisplayView extends Component {
     }
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
-    console.log(" --> multiFrameIndex used in finding firstSeriesIndex", multiFrameIndex);
     const firstSeriesIndex = multiFrameIndex ? multiFrameIndex : this.findFirstSeriesIndex(imageUrls);
-    console.log(" ====> firstSeriesIndex", firstSeriesIndex);
     const seriesURL = wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage.split('/instances/')[0];
 
     try {
@@ -822,11 +742,6 @@ class DisplayView extends Component {
       return all + item.length;
     }, 0);
 
-    console.log(" ===> seriesMetadata")
-    console.log(seriesMetadata);
-    console.log(" ===> seriesMetadata[firstSeriesIndex];")
-    console.log(seriesMetadata[firstSeriesIndex]);
-
     seriesMetadata = seriesMetadata[firstSeriesIndex];
     const seriesMetadataExists = Array.isArray(seriesMetadata);
     const useSeriesData = seriesMetadataExists && seriesMetadata.length > 0 && seriesMetadata.length === imgURLsLen;
@@ -835,8 +750,6 @@ class DisplayView extends Component {
     if (!useSeriesData) {
       const result = await getImageMetadata(wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage);
       const data = result.data;
-      console.log("data of image metadata");
-      console.log(data)
       firstImage = data[0];
     } else {
       firstImage = seriesMetadataMap[imageUrls[firstSeriesIndex][0].imageUID]
@@ -866,8 +779,6 @@ class DisplayView extends Component {
         if (!useSeriesData) {
           const result = await getImageMetadata(baseUrl);
           const data = result.data;
-          console.log(" ---> data again");
-          console.log(data);
           imgData = data[0];
         } else {
           imgData = seriesMetadataMap[imageUrls[firstSeriesIndex][k].imageUID];

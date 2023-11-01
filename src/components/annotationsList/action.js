@@ -928,7 +928,6 @@ const insertAdditionalData = (arr, ref, uid) => {
 // helper methods - calls backend and get data
 const getSingleSerieData = (serie, annotation, wadoUrl) => {
   return new Promise((resolve, reject) => {
-    console.log(serie);
     let aimsData;
     let imageData;
     let { studyUID, seriesUID, projectID, patientID, aimID } = serie;
@@ -940,7 +939,6 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
 
     Promise.all(promises)
       .then(async (result) => {
-        console.log(result);
         const { studyAims, serieAims, otherSeriesAims } = extractNonMarkupAims(
           result[0].data.rows,
           seriesUID
