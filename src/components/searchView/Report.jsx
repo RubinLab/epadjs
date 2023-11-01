@@ -244,7 +244,6 @@ const Report = props => {
           result = await getReport(projectID, patientID, filter);
           const userList = Object.keys(result.data);
           setUsers(userList);
-          // possible reason for other bug
           setUser(userList[0]);
           getReportTable(result.data[userList[0]]);
           setData(result.data);
