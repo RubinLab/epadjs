@@ -180,6 +180,7 @@ class DisplayView extends Component {
       isOverlayVisible: {},
       wwwc: {},
       multiFrameData: {},
+      templateType: ''
     };
   }
 
@@ -221,6 +222,8 @@ class DisplayView extends Component {
     window.addEventListener("deleteAim", this.deleteAimHandler);
     window.addEventListener('keydown', this.handleKeyPressed);
     window.addEventListener('serieReplaced', this.handleSerieReplace);
+    window.addEventListener('saveTemplateType', this.saveTemplateType);
+
     if (this.props.keycloak && series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
@@ -230,7 +233,6 @@ class DisplayView extends Component {
     // cornerstone.enable(element);
     // this.props.closeLeftMenu();
   }
-
 
   async componentDidUpdate(prevProps, prevState) {
     const { pid, series, activePort, aimList } = this.props;
@@ -295,9 +297,14 @@ class DisplayView extends Component {
     window.removeEventListener("resize", this.setSubComponentHeights);
     window.removeEventListener('keydown', this.handleKeyPressed);
     window.removeEventListener('serieReplaced', this.handleSerieReplace);
+    window.removeEventListener('getTemplateType', this.saveTemplateType);
     // clear all aimID of openseries so aim editor doesn't open next time
     this.props.dispatch(clearAimId());
     clearInterval(this.state.tokenRefresh)
+  }
+
+  saveTemplateType = (data) => {
+    this.setState({ templateType: data.detail });
   }
 
   handleKeyPressed = (event) => {
@@ -564,7 +571,7 @@ class DisplayView extends Component {
             this.jumpToAims();
             this.renderAims();
             this.refreshAllViewports();
-            this.shouldOpenAimEditor();
+            // this.shouldOpenAimEditor();
           }
         );
       });
@@ -586,14 +593,16 @@ class DisplayView extends Component {
     })
   }
 
-  shouldOpenAimEditor = (notShowAimEditor = false) => {
-    const { series } = this.props;
-    series.forEach(({ aimID, seriesUID }) => {
-      if (aimID && !notShowAimEditor) {
-        this.openAimEditor(aimID, seriesUID);
-      }
-    });
-  };
+  // Remove this function to disable openning aim editor by default
+  // once user clecked on an aim
+
+  // shouldOpenAimEditor = (notShowAimEditor = false) => {
+  //   const { series } = this.props;
+  //   series.forEach(({ aimID, seriesUID }) => {
+  //     if (aimID && !notShowAimEditor) {
+  //       this.openAimEditor(aimID, seriesUID);}
+  //   });
+  // };
 
   clearAllMarkups = () => {
     // clear the toolState they will be rendered again on next load
@@ -613,10 +622,14 @@ class DisplayView extends Component {
     this.clearAllMarkups();
 
     series.forEach((serie, serieIndex) => {
-      if (serie.aimID && !notShowAimEditor) {
-        const { aimID, seriesUID } = serie;
-        this.openAimEditor(aimID, seriesUID);
-      }
+      // Remove this part to disable openning aim editor by default
+      // once user clecked on an aim
+
+      // if (serie.aimID && !notShowAimEditor) {
+      //   const { aimID, seriesUID } = serie;
+      // this.openAimEditor(aimID, seriesUID);
+      // }
+
       if (serie.imageAnnotations)
         this.parseAims(
           serie.imageAnnotations,
@@ -1299,9 +1312,14 @@ class DisplayView extends Component {
     if (activePort !== i) {
       if (this.state.showAimEditor) {
 
-        if (!this.closeAimEditor(true)) {
-          //means going to another viewport in the middle of creating/editing an aim
-          return;
+        // check if the series belongs to the same study
+        const oldStudy = series[activePort].studyUID;
+        const newStudy = series[i].studyUID;
+        if (this.state.templateType !== 'Study' || oldStudy !== newStudy) {
+          if (!this.closeAimEditor(true)) {
+            //means going to another viewport in the middle of creating/editing an aim
+            return;
+          }
         }
       }
       this.setState({ activePort: i });
