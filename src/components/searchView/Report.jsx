@@ -529,7 +529,6 @@ const Report = props => {
               <select
                 onMouseDown={e => e.stopPropagation()}
                 onChange={e => {
-                  console.log('on change', e);
                   const userVal = e.target.value;
                   getReportTable(data[userVal], true);
                   setUser(userVal);
