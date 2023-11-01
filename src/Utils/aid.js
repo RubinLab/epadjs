@@ -134,6 +134,7 @@ export const clearCarets = (string) => {
   }
 };
 
+
 export const extractTreeData = (datasets, requirements) => {
   const result = {};
   if (datasets) {
