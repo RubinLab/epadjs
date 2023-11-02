@@ -19,7 +19,7 @@ import {
   RiCloseCircleFill
 } from 'react-icons/ri';
 import { FcAbout, FcClearFilters } from 'react-icons/fc';
-import { BiSearch, BiX, BiTrash, BiDownload, BiPlay } from 'react-icons/bi';
+import { BiSearch, BiX, BiTrash, BiDownload, BiPlay, BiUpload } from 'react-icons/bi';
 import { BsEyeFill } from 'react-icons/bs';
 import { AiOutlineSortAscending, AiOutlineSortDescending } from 'react-icons/ai';
 import ReactTooltip from 'react-tooltip';
@@ -35,6 +35,7 @@ import { clearSelection, selectAnnotation, updateSearchTableIndex, refreshPage }
 import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
 import UploadModal from '../searchView/uploadModal';
 import DeleteAlert from '../management/common/alertDeletionModal';
+import CSV2AIM from '../csv2aim/csv2aim'
 import {
   getPluginsForProject,
   addPluginsToQueue,
@@ -1294,6 +1295,7 @@ const AnnotationSearch = props => {
             {/* <button type="button" className="btn btn-sm" onClick={() => { setShowProjects(!showProjects) }}><BiDownload /><br />Copy to Project</button>
           {showProjects && (<Projects className='btn btn-sm worklist' onClose={() => { setShowProjects(false) }} />)} */}
             <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
+            <CSV2AIM />
           </div>
         </div>
         {(showPlugins && mode !== 'teaching') && (<div style={{
