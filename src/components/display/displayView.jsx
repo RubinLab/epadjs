@@ -27,7 +27,9 @@ import {
   aimDelete,
   clearAimId,
   updateSubpath,
-  clearSelection
+  clearSelection,
+  addStudyToGrid,
+  updateGridWithMultiFrameInfo
 } from "../annotationsList/action";
 import { deleteAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
@@ -177,6 +179,7 @@ class DisplayView extends Component {
       invertMap: {},
       isOverlayVisible: {},
       wwwc: {},
+      multiFrameData: {},
       templateType: ''
     };
   }
@@ -247,17 +250,31 @@ class DisplayView extends Component {
       else return;
       return;
     }
+
+    const oldMultiFrameStatus = prevProps.series[activePort].hasMultiframe;
+    const newMultiFrameStatus = this.props.series[activePort].hasMultiframe;
+    const multiFrameStatusChanged = oldMultiFrameStatus !== newMultiFrameStatus;
+
     if (
       (prevProps.series !== this.props.series &&
         prevProps.loading === true &&
         this.props.loading === false) ||
       (prevProps.series.length !== this.props.series.length &&
-        this.props.loading === false)
+        this.props.loading === false) || (multiFrameStatusChanged)
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData();
       this.formInvertMap();
+
+      const { aimID, frameData, multiFrameMap } = series[activePort]
+      if (aimID && frameData && multiFrameMap) {
+        const imgDetails = series[activePort].frameData[aimID][0].split('/frames/');
+        // mfIndex = multiFrameIndex ? parseInt(multiFrameIndex) : parseInt(multiFrameMap[imgDetails[0]]);
+        const mfIndex = parseInt(multiFrameMap[imgDetails[0]]);
+        const frameNo = parseInt(imgDetails[1]);
+        this.getData(mfIndex, frameNo);
+      }
+
     }
     // This is to handle late loading of aimsList from store but it also calls getData
     // each time visibility of aims change
@@ -534,13 +551,13 @@ class DisplayView extends Component {
     return segAims;
   };
 
-  getData() {
+  getData(multiFrameIndex, frameNo) {
     this.clearAllMarkups();//we are already clearing in it renderAims do we need to here? 
     try {
       const { series } = this.props;
       var promises = [];
       for (let i = 0; i < series.length; i++) {
-        const promise = this.getImageStack(series[i], i);
+        const promise = this.getImageStack(series[i], i, multiFrameIndex, frameNo);
         promises.push(promise);
 
       }
@@ -563,19 +580,16 @@ class DisplayView extends Component {
     }
   }
 
-  handleSerieReplace = ({ detail: viewportId }) => {
+  handleSerieReplace = (e) => {
     const { series } = this.props;
     var promises = [];
-
-    const promise = this.getImageStack(series[viewportId], viewportId);
+    const { viewportId, id, multiFrameIndex } = e.detail;
+    const promise = this.getImageStack(series[viewportId], viewportId, multiFrameIndex);
     promises.push(promise);
     Promise.all(promises).then((res) => {
       const newData = [...this.state.data];
       newData[viewportId] = res[0];
-      this.setState(
-        {
-          data: newData
-        })
+      this.setState({ data: newData });
     })
   }
 
@@ -629,10 +643,40 @@ class DisplayView extends Component {
     this.refreshAllViewports();
   };
 
+  formMultiframeImgData = (arr) => {
+    const { series, activePort } = this.props;
+    // create the same data shape for studySeries 
+    // update the reducer with the new data
+    const studySeries = arr.reduce((all, item) => {
+      const obj = {
+        projectID: item[0].projectID,
+        patientID: item[0].patientID,
+        studyUID: item[0].studyUID,
+        seriesUID: item[0].seriesUID,
+        seriesDescription: series[activePort].seriesDescription,
+        examType: series[activePort].examType,
+        numberOfImages: series[activePort].numberOfImages,
+        numberOfAnnotations: series[activePort].numberOfAnnotations,
+        seriesNo: series[activePort].seriesNo,
+        significanceOrder: series[activePort].significanceOrder,
+        multiFrameImage: item[0].multiFrameImage,
+        numberOfFrames: item[0].numberOfFrames,
+      }
+      all.push(obj);
+      return all;
+    }, [])
+    const result = { [series[activePort].studyUID]: studySeries };
+    this.props.dispatch(addStudyToGrid(result));
+  }
+
   async getImages(serie, i) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
-    if (urls.length > 0) {
-      const arr = urls[0].lossyImage.split('/');
+    if (urls.length > 1) {
+      this.formMultiframeImgData(urls);
+    }
+    const firstSeriesIndex = this.findFirstSeriesIndex(urls);
+    if (urls[firstSeriesIndex].length > 0) {
+      const arr = urls[firstSeriesIndex][0].lossyImage.split('/');
       this.props.dispatch(updateSubpath(arr[1], i));
     }
     return urls;
@@ -653,24 +697,48 @@ class DisplayView extends Component {
     return metadataURI + "/frames/1";
   };
 
-  getImageStack = async (serie, index) => {
+  getImageStack = async (serie, index, multiFrameIndex, frameNo) => {
     const wadoUrl = sessionStorage.getItem("wadoUrl");
     if (wadoUrl.includes('wadors'))
-      return this.getImageStackWithWadors(serie, index);
+      return this.getImageStackWithWadors(serie, index, multiFrameIndex, frameNo);
     else
       return this.getImageStackWithWadouri(serie, index);
   }
 
-  getImageStackWithWadors = async (serie, index) => {
+  findFirstSeriesIndex = (imageUrls) => {
+    let firstSeriesIndex = 0;
+    let urlsLen = imageUrls.length;
+    for (let i = 0; i < urlsLen; i++) {
+      if (imageUrls[i].length > 0) {
+        firstSeriesIndex = i;
+        break;
+      }
+    }
+    return firstSeriesIndex;
+  }
+
+  getImageStackWithWadors = async (serie, index, multiFrameIndex, frameNo) => {
     let stack = {};
     let newImageIds = {};
     let cornerstoneImageIds = [];
     let seriesMetadata = [];
     let seriesMetadataMap = {};
+    let metadata2D = [];
+    const multiFrameMap = {}
     const imageUrls = await this.getImages(serie, index);
+    if (imageUrls.length > 1) {
+      for (let i = 0; i < imageUrls.length; i++) {
+        if (imageUrls[i][0].multiFrameImage) {
+          multiFrameMap[imageUrls[i][0].imageUID] = i;
+        }
+      }
+      this.props.dispatch(updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap));
+    }
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
-    const seriesURL = wadoUrlNoWadors + imageUrls[0].lossyImage.split('/instances/')[0];
+    const firstSeriesIndex = multiFrameIndex ? multiFrameIndex : this.findFirstSeriesIndex(imageUrls);
+    const seriesURL = wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage.split('/instances/')[0];
+
     try {
       seriesMetadata = await getMetadata(seriesURL);
       seriesMetadata = seriesMetadata.data;
@@ -679,14 +747,26 @@ class DisplayView extends Component {
       console.log("Can not get series metadata");
       console.error(err);
     }
-    const useSeriesData = seriesMetadata.length > 0 && seriesMetadata.length === imageUrls.length;
+
+    // get the length of array off arrays 
+    // divide the metadata array to mirror the image urls’ array
+
+    const imgURLsLen = imageUrls.reduce((all, item) => {
+      return all + item.length;
+    }, 0);
+
+    seriesMetadata = seriesMetadata[firstSeriesIndex];
+    const seriesMetadataExists = Array.isArray(seriesMetadata);
+    const useSeriesData = seriesMetadataExists && seriesMetadata.length > 0 && seriesMetadata.length === imgURLsLen;
     // get first image
     let firstImage = null;
     if (!useSeriesData) {
-      const result = await getImageMetadata(wadoUrlNoWadors + imageUrls[0].lossyImage);
+      const result = await getImageMetadata(wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage);
       const data = result.data;
       firstImage = data[0];
-    } else firstImage = seriesMetadata[0];
+    } else {
+      firstImage = seriesMetadataMap[imageUrls[firstSeriesIndex][0].imageUID]
+    }
 
     let referencePosition = null;
     let rowVector = null;
@@ -703,16 +783,23 @@ class DisplayView extends Component {
       scanAxis = dcmjs.normalizers.ImageNormalizer.vec3CrossProduct(rowVector, columnVector);
     }
 
-    for (let k = 0; k < imageUrls.length; k++) {
-      baseUrl = wadoUrlNoWadors + imageUrls[k].lossyImage;
+    const len = imageUrls[firstSeriesIndex].length;
+    for (let k = 0; k < len; k++) {
+      baseUrl = wadoUrlNoWadors + imageUrls[firstSeriesIndex][k].lossyImage;
       let imgData;
       let distance = null;
-      if (!useSeriesData) {
-        const result = await getImageMetadata(baseUrl);
-        const data = result.data;
-        imgData = data[0];
-      } else imgData = seriesMetadataMap[imageUrls[k].imageUID];
-
+      try {
+        if (!useSeriesData) {
+          const result = await getImageMetadata(baseUrl);
+          const data = result.data;
+          imgData = data[0];
+        } else {
+          imgData = seriesMetadataMap[imageUrls[firstSeriesIndex][k].imageUID];
+        }
+      } catch (err) {
+        console.log(" error in getting image metadata");
+        console.error(err);
+      }
 
       if (sortByGeo) {
         const position = imgData['00200032'].Value.slice();
@@ -723,35 +810,31 @@ class DisplayView extends Component {
         distance = dcmjs.normalizers.ImageNormalizer.vec3Dot(positionVector, scanAxis);
       }
 
-      if (imageUrls[k].multiFrameImage === true) {
-        for (var i = 0; i < imageUrls[k].numberOfFrames; i++) {
+      if (imageUrls[firstSeriesIndex][k].multiFrameImage === true) {
+        for (var i = 0; i < imageUrls[firstSeriesIndex][k].numberOfFrames; i++) {
           let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
-          // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           // using distanceDatasetPairs to sort instead of just adding to the array
           if (!sortByGeo) cornerstoneImageIds.push(multiFrameUrl);
           else distanceDatasetPairs.push([distance, multiFrameUrl]);
-          // cornerstone.loadAndCacheImage(multiFrameUrl);
           newImageIds[multiFrameUrl] = true;
           cornerstoneWADOImageLoader.wadors.metaDataManager.add(
             multiFrameUrl,
             imgData
           );
-          // cornerstone.loadAndCacheImage(multiFrameUrl);
         }
       } else {
         let singleFrameUrl = `wadors:${baseUrl}/frames/1`;
         // using distanceDatasetPairs to sort instead of just adding to the array
         if (!sortByGeo) cornerstoneImageIds.push(singleFrameUrl);
         else distanceDatasetPairs.push([distance, singleFrameUrl]);
-        // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
         cornerstoneWADOImageLoader.wadors.metaDataManager.add(
           singleFrameUrl,
           imgData
         );
-        // cornerstone.loadAndCacheImage(singleFrameUrl);
       }
     }
+
     const { imageIds } = this.state;
     this.setState({ imageIds: { ...imageIds, ...newImageIds } });
 
@@ -773,11 +856,38 @@ class DisplayView extends Component {
     }
 
     // if serie is being open from the annotation jump to that image and load the aim editor
-    if (serie.aimID) imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+    if (multiFrameIndex && frameNo) imageIndex = frameNo;
+    else if (serie.aimID) imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
+    // form split series data 
+    // store it in state
+    if (imageUrls.length > 0) {
+      this.formSplitSeriesData(imageUrls, baseUrl);
+    }
     return { stack };
+  }
+
+  formSplitSeriesData = (urls, baseUrl) => {
+    const imagesObj = {};
+    let multiFrameIndex = 1;
+    for (let series = 0; series < urls.length; series++) {
+      const imagesArr = [];
+      const { multiFrameImage, seriesUID } = urls[series][0];
+      let id = seriesUID;
+      if (multiFrameImage) {
+        id = `${id}_${multiFrameIndex}`;
+        multiFrameIndex++;
+      }
+      const len = multiFrameImage ? urls[series][0].numberOfFrames : urls[series].length;
+      for (let image = 0; image < len; image++) {
+        if (multiFrameImage) imagesArr.push(`wadors:${baseUrl}/frames/${image + 1}`);
+        else imagesArr.push(`wadors:${baseUrl}/frames/1`);
+      }
+      imagesObj[id] = { images: imagesArr };
+    }
+    this.setState({ multiFrameData: imagesObj });
   }
 
   getImageStackWithWadouri = async (serie, index) => {
@@ -792,15 +902,12 @@ class DisplayView extends Component {
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
           let multiFrameUrl = baseUrl + "&frame=" + i;
-          // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           cornerstoneImageIds.push(multiFrameUrl);
-          // cornerstone.loadAndCacheImage(multiFrameUrl);
           newImageIds[multiFrameUrl] = true;
         }
       } else {
         let singleFrameUrl = baseUrl;
         cornerstoneImageIds.push(singleFrameUrl);
-        // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
       }
     });
@@ -887,8 +994,6 @@ class DisplayView extends Component {
   isDicomSegEntity = (markupType) => {
     return markupType === "DicomSegmentationEntity";
   };
-
-
 
   // Returns the image index of the aim of the serie or the passed aim if aimID is passed 
   getImageIndex = (serie, cornerstoneImageIds, aimID = "") => {
@@ -1906,10 +2011,17 @@ class DisplayView extends Component {
 
   // Triggered by event from right bar to jump to the image of aim
   jumpToAimImage = event => {
+    // seperate this function to handle both
+    // if there are multiframe data call get image stack and pass frame data etc
     const { series, activePort } = this.props;
-    const { aimId, index } = event.detail;
+    const { aimId, index, imageID, frameNo } = event.detail;
     const imageIndex = this.getImageIndex(series[index], this.state.data[index].stack.imageIds, aimId);
-    this.jumpToImage(imageIndex, index);
+    if (!series[activePort].hasMultiframe)
+      this.jumpToImage(imageIndex, index);
+    else {
+      const multiFrameIndex = series[activePort].multiFrameMap[imageID];
+      this.getData(multiFrameIndex, frameNo);
+    }
   };
 
   // Don't take the activePort Index from props because store updates late so

@@ -14,9 +14,10 @@ import {
 } from '../action';
 import "../annotationsList.css";
 
-const handleJumpToAim = (aimId, index) => {
+const handleJumpToAim = (aimId, index, imageID, frame) => {
+  const frameNo = frame - 1;
   window.dispatchEvent(
-    new CustomEvent("jumpToAimImage", { detail: { aimId, index } })
+    new CustomEvent("jumpToAimImage", { detail: { aimId, index, imageID, frameNo } })
   );
 };
 
@@ -50,9 +51,13 @@ const annotationsLink = (props) => {
     const { isOpen, index } = checkIfSerieOpen(selected.seriesUID);
 
     if (isOpen) {
-      props.dispatch(changeActivePort(index));
+      const imageUID = Object.keys(selected.imgIDs);
+      const imgIDArr = imageUID[0].split('/frames/');
+        props.dispatch(changeActivePort(index));
+      // No need to change
       props.dispatch(jumpToAim(selected.seriesUID, selected.aimID, index));
-      handleJumpToAim(selected.aimID, index);
+      // change the arguments to handle the multiframe
+      handleJumpToAim(selected.aimID, index, imgIDArr[0], imgIDArr[1]);
       props.dispatch(clearSelection());
     } else {
       if (isGridFull) {

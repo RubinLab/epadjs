@@ -18,7 +18,8 @@ import {
   startLoading,
   loadCompleted,
   annotationsLoadingError,
-  updateSearchTableIndex
+  updateSearchTableIndex,
+  addStudyToGrid
 } from '../annotationsList/action';
 import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
@@ -327,6 +328,7 @@ function AnnotationTable(props) {
     try {
       const { data: series } = await getSeries(projectID, patientID, studyUID);
       props.dispatch(loadCompleted());
+      props.dispatch(addStudyToGrid({[studyUID]: series}));
       return series;
     } catch (err) {
       props.dispatch(annotationsLoadingError(err));
@@ -377,7 +379,9 @@ function AnnotationTable(props) {
       if (checkIfSerieOpen(selected, props.openSeries).isOpen) {
         const { index } = checkIfSerieOpen(selected, props.openSeries);
         props.dispatch(changeActivePort(index));
+        // if series has not multiframes continue with the old logic
         props.dispatch(jumpToAim(seriesUID, aimID, index));
+        // if there is a multiframe fire the event 
         props.switchToDisplay();
       } else {
         if (isGridFull) {

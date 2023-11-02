@@ -62,6 +62,7 @@ export const UPDATE_SEARCH_TABLE_INDEX = "epadjs/annotationList/UPDATE_SEARCH_TA
 export const REFRESH_MAP = "epadjs/annotationList/REFRESH_MAP";
 export const AIM_SAVE = "epadjs/annotationList/AIM_SAVE";
 export const SUBPATH = "epadjs/annotationList/SUBPATH";
+export const CHECK_MULTIFRAME = 'epadjs/annotationList/CHECK_MULTIFRAME'
 
 export const commonLabels = {
   button: { background: "#c0c0c0", color: "black" },

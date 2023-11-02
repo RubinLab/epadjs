@@ -49,6 +49,7 @@ import {
   REFRESH_MAP,
   AIM_SAVE,
   SUBPATH,
+  CHECK_MULTIFRAME,
   colors,
   commonLabels,
 } from "./types";
@@ -64,8 +65,13 @@ import { getAllTemplates } from "../../services/templateServices";
 import { getImageIdAnnotations } from "aimapi";
 import { ConsoleWriter } from "istanbul-lib-report";
 import aimEntityData from "./annotationDock/aimEntityData";
+import { setToolOptionsForElement } from 'cornerstone-tools';
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
+
+export const updateGridWithMultiFrameInfo = (hasMultiframe, multiframeIndex, multiFrameMap) => {
+  return { type: CHECK_MULTIFRAME, payload: { hasMultiframe, multiframeIndex, multiFrameMap } };
+}
 
 export const updateSubpath = (subpath, portIndex) => {
   return { type: SUBPATH, payload: { subpath, portIndex } }
@@ -342,7 +348,7 @@ export const selectAnnotation = (
 // opens a new port to display series
 // adds series details to the array
 export const addToGrid = (serie, annotation, port) => {
-  let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment } = serie;
+  let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment, seriesDescription, numberOfAnnotations, numberOfImages, seriesNo } = serie;
   const modFmComment = comment ? comment.split('/')[0].trim() : '';
   examType = examType ? examType.toUpperCase() : modality ? modality.toUpperCase() : modFmComment.toUpperCase();
 
@@ -357,7 +363,11 @@ export const addToGrid = (serie, annotation, port) => {
     seriesUID,
     patientName,
     aimID: annotation,
-    examType
+    examType,
+    seriesDescription,
+    numberOfAnnotations,
+    numberOfImages,
+    seriesNo
     // imageIndex: 0
   };
   return { type: ADD_TO_GRID, reference, port };
@@ -462,10 +472,10 @@ export const refreshPage = (feature, condition) => {
 }
 
 // helpeer method
-export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann, otherSeriesAimsData) => {
+export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann, otherSeriesAimsData, seriesOfStudy, frameData) => {
   return {
     type: LOAD_SERIE_SUCCESS,
-    payload: { ref, aimsData, serID, imageData, ann, otherSeriesAimsData },
+    payload: { ref, aimsData, serID, imageData, ann, otherSeriesAimsData, seriesOfStudy, frameData },
   };
 };
 
@@ -715,14 +725,16 @@ export const getSingleSerie = (serie, annotation, wadoUrl) => {
         aimID: annotation,
       };
 
-      const { aimsData, imageData, otherSeriesAimsData } = await getSingleSerieData(
+      const { aimsData, imageData, otherSeriesAimsData, seriesOfStudy, serieRef, frameData } = await getSingleSerieData(
         serie,
         annotation,
         wadoUrl
       );
 
+      reference = { ...reference, ...serieRef };
+
       await dispatch(
-        singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData)
+        singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData, seriesOfStudy, frameData)
       );
     } catch (err) {
       console.error(err);
@@ -761,9 +773,9 @@ export const updateSingleSerie = (serie, annotation) => {
       numberOfAnnotations,
       aimID: annotation,
     };
-    const { aimsData, imageData, otherSeriesAimsData } = await getSingleSerieData(serie, annotation);
+    const { aimsData, imageData, otherSeriesAimsData, seriesOfStudy } = await getSingleSerieData(serie, annotation);
     await dispatch(
-      singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData)
+      singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData, seriesOfStudy)
     );
   };
 };
@@ -900,6 +912,19 @@ const getStudyAimsDataSorted = (arr, projectID, patientID) => {
 }
 
 
+const getSeriesAdditionalData = (arr, uid) => {
+  const data = arr.filter((el) => el.seriesUID === uid);
+  const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo } = data[0];
+  return { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo };
+}
+
+const insertAdditionalData = (arr, ref, uid) => {
+  arr.forEach(el => {
+    if (el.seriesUID === uid) {
+      el = { ...el, ...ref }
+    }
+  })
+}
 // helper methods - calls backend and get data
 const getSingleSerieData = (serie, annotation, wadoUrl) => {
   return new Promise((resolve, reject) => {
@@ -909,19 +934,22 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
     projectID = projectID ? projectID : "lite";
     patientID = patientID ? patientID : serie.subjectID;
     aimID = aimID ? aimID : annotation;
-    getStudyAims(patientID, studyUID, projectID)
+    const promises = [getStudyAims(patientID, studyUID, projectID)];
+    promises.push(getSeries(projectID, patientID, studyUID));
+
+    Promise.all(promises)
       .then(async (result) => {
         const { studyAims, serieAims, otherSeriesAims } = extractNonMarkupAims(
-          result.data.rows,
+          result[0].data.rows,
           seriesUID
         );
         aimsData = serieAims.concat(studyAims);
         let imageAimMap = getImageIdAnnotations(serieAims);
-        // TODO fix the env var retrieval
         const url = wadoUrl ? wadoUrl : sessionStorage.getItem('wadoUrl');
+        const imgIds = Object.keys(imageAimMap);
+        const aims = Object.values(imageAimMap);
+        let frameData = {}
         if (url.includes('wadors')) {
-          const imgIds = Object.keys(imageAimMap);
-          const aims = Object.values(imageAimMap);
           imageAimMap = aims.reduce((all, item, i) => {
             // Aimapi sends wadouri format including &frame= wadors format is handled here
             let img = imgIds[i].split('&frame=');
@@ -931,16 +959,31 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
             return all;
           }, {})
 
+          // let max = 1;
+          frameData = aims.reduce((all, aimsList, index) => {
+            let img = imgIds[index].split('&frame=');
+            let frameNo = img.length > 1 ? img[1] : 1;
+            // if (frameNo > max) max = frameNo;
+            img = `${img[0]}/frames/${frameNo}`
+            aimsList.forEach((el, i) => {
+              if (all[el.aimUid]) all[el.aimUid].push(img);
+              else all[el.aimUid] = [img];
+            })
+            return all;
+          }, {})
         }
 
         imageData = {
           ...imageAimMap,
         };
 
+        const serieRef = getSeriesAdditionalData(result[1].data, seriesUID);
         aimsData = getAimListFields(aimsData, annotation);
         const allAims = [...serieAims, ...otherSeriesAims]
         const otherSeriesAimsData = allAims.length === 0 ? {} : getStudyAimsDataSorted(allAims, projectID, patientID);
-        resolve({ aimsData, imageData, otherSeriesAimsData });
+        const seriesExtendedData = insertAdditionalData(result[1].data, serieRef, seriesUID);
+        const seriesOfStudy = { [studyUID]: seriesExtendedData }
+        resolve({ aimsData, imageData, otherSeriesAimsData, seriesOfStudy, serieRef, frameData });
       })
       .catch((err) => {
         console.log(err);

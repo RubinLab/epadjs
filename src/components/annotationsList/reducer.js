@@ -49,6 +49,7 @@ import {
   REFRESH_MAP,
   AIM_SAVE,
   SUBPATH,
+  CHECK_MULTIFRAME,
   colors,
   commonLabels,
 } from "./types";
@@ -104,6 +105,14 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case CHECK_MULTIFRAME:
+        const series = _.cloneDeep(state.openSeries);
+        const {hasMultiframe, multiframeIndex, multiFrameMap} = action.payload;
+        series[state.activePort].hasMultiframe = hasMultiframe;
+        series[state.activePort].multiFrameIndex = multiframeIndex;
+        series[state.activePort].multiFrameMap = multiFrameMap;
+
+        return { ...state, openSeries: series };
       case AIM_SAVE: //tested
         const { seriesList, aimRefs } = action.payload;
         const clonedOtherAims = _.cloneDeep(state.otherSeriesAimsList);
@@ -261,10 +270,16 @@ const asyncReducer = (state = initialState, action) => {
           return newSerie;
         });
         let annCalc = Object.keys(action.payload.imageData);
+
         if (annCalc.length > 0) {
           for (let i = 0; i < imageAddedSeries.length; i++) {
             if (imageAddedSeries[i].seriesUID === action.payload.serID) {
               imageAddedSeries[i].imageAnnotations = action.payload.imageData;
+              imageAddedSeries[i].frameData = action.payload.frameData;
+              if (!imageAddedSeries[i].numberOfAnnotations) imageAddedSeries[i].numberOfAnnotations = action.payload.ref.numberOfAnnotations;
+              if (!imageAddedSeries[i].numberOfImages) imageAddedSeries[i].numberOfImages = action.payload.ref.numberOfImages;
+              if (!imageAddedSeries[i].seriesDescription) imageAddedSeries[i].seriesDescription = action.payload.ref.seriesDescription;
+              if (!imageAddedSeries[i].seriesNo) imageAddedSeries[i].seriesNo = action.payload.ref.seriesNo;      
             }
           }
         }
@@ -291,6 +306,9 @@ const asyncReducer = (state = initialState, action) => {
               action.payload.aimsData,
               colors
             );
+        const oldStudySeries = _.cloneDeep(state.openStudies);
+        const newStudySeries = { ...oldStudySeries, ...action.payload.seriesOfStudy };
+        
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
@@ -300,6 +318,7 @@ const asyncReducer = (state = initialState, action) => {
           },
           otherSeriesAimsList: { ...state.otherSeriesAimsList, ...action.payload.otherSeriesAimsData },
           openSeries: imageAddedSeries,
+          openStudies: newStudySeries,
         });
         return result;
       case LOAD_ANNOTATIONS_ERROR:

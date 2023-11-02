@@ -12,7 +12,7 @@ import StudyTable from "./StudyTable";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
 import SeriesTable from "./SeriesTable";
 import { isSupportedModality } from "../../Utils/aid.js";
-import { addToGrid, getSingleSerie, clearSelection } from '../annotationsList/action';
+import { addToGrid, getSingleSerie, clearSelection, addStudyToGrid } from '../annotationsList/action';
 import 'react-table-v6/react-table.css';
 // import "../annotationSearch/annotationSearch.css";
 // import "./flexView.css";
@@ -89,6 +89,7 @@ class FlexView extends React.Component {
     let series;
     try {
       ({ data: series } = await getSeries(projectID, patientID, studyUID));
+      this.props.dispatch(addStudyToGrid({ [studyUID]: series }));
     } catch (err) {
       console.log("Error getting series of the study", err);
     }
