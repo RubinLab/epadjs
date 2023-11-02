@@ -131,6 +131,7 @@ function findMeasurements(table) {
       }
     });
   });
+  allMeasurements.sort();
   return allMeasurements;
 }
 
@@ -176,23 +177,24 @@ function checkForShapes(aimShapes, filterShapes) {
   return match;
 }
 
-function shrinkTable(filteredTable, data, numofHeaderCols) {
+function shrinkTable(filteredTable, data, numofHeaderCols, rowsWithNoValue) {
   let shrinkedData = {};
   let rows = [];
   let cols = [];
   jQuery.each(filteredTable, function(i, elem) {
     rows[i] = false;
-    jQuery.each(elem, function(j, selem) {
-      if (selem != null && selem != 'undefined') {
-        if (j >= numofHeaderCols) rows[i] = true;
-        cols[j] = true;
-      }
-    });
+    if (!rowsWithNoValue.includes(i))
+      jQuery.each(elem, function(j, selem) {
+        if (selem != null && selem != 'undefined') {
+          if (j >= numofHeaderCols) rows[i] = true;
+          cols[j] = true;
+        }
+      });
   });
 
   let filtereddtTable = [];
   jQuery.each(data.tTable, function(i, elem) {
-    if (rows[i] === true) {
+    if (rows[i] === true && !rowsWithNoValue.includes(i)) {
       let row = [];
       jQuery.each(elem, function(j, selem) {
         if (
@@ -210,16 +212,19 @@ function shrinkTable(filteredTable, data, numofHeaderCols) {
 
   let filteredduids = [];
   jQuery.each(data.tUIDs, function(i, elem) {
-    if (rows[i] === true) {
+    if (rows[i] === true && !rowsWithNoValue.includes(i)) {
       let row = [];
       jQuery.each(elem, function(j, selem) {
         if (
           cols[j + numofHeaderCols] != null &&
           cols[j + numofHeaderCols] != 'undefined' &&
           cols[j + numofHeaderCols] == true
-        )
+        ) {
+          selem.index = i;
           row.push(selem);
+        }
       });
+      
       filteredduids.push(row);
     }
   });
@@ -276,6 +281,7 @@ function filterForMeasurementTemplateShape(
   shapes,
   numofHeaderCols
 ) {
+  let rowsWithNoValue = [];
   if (template === 'All') {
     template = null;
   }
@@ -311,16 +317,14 @@ function filterForMeasurementTemplateShape(
         } else {
           return selem;
         }
-      })
-    if (isThereLesionData) filteredTable.push(row);
+    });
+    if (!isThereLesionData) rowsWithNoValue.push(i);
+    filteredTable.push(row);
   });
-
-  return filteredTable;
+  return { filteredTable, rowsWithNoValue };
 }
 
 function calcSums(filteredTable, timepoints, numofHeaderCols) {
-  // console.log(' 0000000 ====> filteredTable, timepoints, numofHeaderCols');
-  // console.log(filteredTable, timepoints, numofHeaderCols);
   sums = [];
   if (filteredTable[0] != null) {
     for (k = 0; k < filteredTable[0].length - numofHeaderCols; k++) {
@@ -743,17 +747,18 @@ function checkAndColor(
   numofHeaderCols
 ) {
   for (i = 0; i < data.tUIDs.length; i++) {
-    var aNameTag = $('<a>', { href: '#', id: 'a' + i + '0' });
-    aNameTag.click(
-      { projectID: projectID, patientID: patientID, row: data.tUIDs[i] },
-      function(event) {
-        openAllAimsOfLesion(
-          event.data.row,
-          event.data.patientID,
-          event.data.projectID
-        );
-      }
-    );
+    var aNameTag = $('<a>', { href: '#', id: 'a' + i + '0' + '_' + data.tUIDs[i][0].index });
+    // doesn't work. Report.jsx handles the click
+    // aNameTag.on('click', 
+    //   { projectID: projectID, patientID: patientID, row: data.tUIDs[i] },
+    //   function(event) {
+    //     openAllAimsOfLesion(
+    //       event.data.row,
+    //       event.data.patientID,
+    //       event.data.projectID
+    //     );
+    //   }
+    // );
     let txt = recisttable.find('#c' + i + '0').text();
     
     aNameTag.text(txt); // Populate the text with what's already there
@@ -764,6 +769,7 @@ function checkAndColor(
       .find('#c' + i + '0')
       .text('')
       .append(aNameTag);
+
     for (j = 0; j < data.tUIDs[i].length; j++) {
       //find if the cell is in a span
       //find which span
@@ -778,7 +784,7 @@ function checkAndColor(
       //put link
       if (data.tUIDs[i][j] != null) {
         var aTag = $('<a>', {
-          id: 'a' + i + (j + 1),
+          id: 'a' + i + (j + 1) + '_' + data.tUIDs[i][j].index,
           href: createLinkUrl(
             serverUrl,
             data.tUIDs[i][j].studyUID,
@@ -788,33 +794,36 @@ function checkAndColor(
             projectID
           ),
         });
-        aTag.click(
-          {
-            projectID: projectID,
-            patientID: patientID,
-            studyUID: data.tUIDs[i][j].studyUID,
-            seriesUID: data.tUIDs[i][j].seriesUID,
-            aimUID: data.tUIDs[i][j].aimUID,
-          },
-          function(event) {
-            window.loadSpecific(
-              event.data.projectID,
-              event.data.patientID,
-              event.data.studyUID,
-              event.data.seriesUID,
-              event.data.aimUID
-            );
-          }
-        );
+        // doesn't work. Report.jsx handles the click
+        // aTag.on('click', 
+        //   {
+        //     projectID: projectID,
+        //     patientID: patientID,
+        //     studyUID: data.tUIDs[i][j].studyUID,
+        //     seriesUID: data.tUIDs[i][j].seriesUID,
+        //     aimUID: data.tUIDs[i][j].aimUID,
+        //   },
+        //   function(event) {
+        //     event.preventDefault();
+        //     window.loadSpecific(
+        //       event.data.projectID,
+        //       event.data.patientID,
+        //       event.data.studyUID,
+        //       event.data.seriesUID,
+        //       event.data.aimUID
+        //     );
+        //   }
+        // );
         txt = recisttable.find('#c' + i + (j + numofHeaderCols)).text();
         aTag.text(txt); // Populate the text with what's already there
         aTag.css('color', linkColor);
         aTag.css('text-decoration', 'none');
         //                aTag.attr('target', '_blank');
         recisttable
-          .find('#c' + i + (j + numofHeaderCols))
-          .text('')
-          .append(aTag);
+        .find('#c' + i + (j + numofHeaderCols))
+        .text('')
+        .append(aTag);
+        
 
         //                recisttable.find('#c'+i+'1').hide();
         //the cell num of location is important! Assumes it is goig to be on second column
@@ -1117,7 +1126,7 @@ function filterAndFillInTables(
   if (filter) filterVal = filter.val();
   if (templateFilter) templateFilterVal = templateFilter.val();
   if (shapesFilter) shapesFilterVal = shapesFilter.val();
-  let filteredTable = filterForMeasurementTemplateShape(
+  let { filteredTable, rowsWithNoValue } = filterForMeasurementTemplateShape(
     data,
     table,
     filterVal,
@@ -1127,7 +1136,12 @@ function filterAndFillInTables(
     numofHeaderCols
   );
   let shrinkedData;
-  shrinkedData = shrinkTable(filteredTable, data, numofHeaderCols);
+  shrinkedData = shrinkTable(
+    filteredTable,
+    data,
+    numofHeaderCols,
+    rowsWithNoValue
+  );
   //filter change should calculate everything
   shrinkedData = makeCalcs(shrinkedData, numofHeaderCols);
   recisttable = fillInTables(
@@ -1188,7 +1202,6 @@ function fillFilterSelect(
   loadFilter,
   refreshFilter
 ) {
-  let filteredTable = table;
   let shrinkedData = data;
   // get the selected if already added
   var selectedFilter = $('#'+id+'filter');
@@ -1240,14 +1253,16 @@ function fillFilterSelect(
         }
       });
     } else {
+      console.log('selected value', selectedFilter? selectedFilter.val(): 'non');
       if (selectedFilter && selectedFilter.val()) filter.val(selectedFilter.val());
       else filter.selectedIndex = 0;
+      console.log('filter value after', filter? filter.val(): 'non');
       if (selectedTemplateFilter && selectedTemplateFilter.val()) templateFilter.val(selectedTemplateFilter.val());
       else templateFilter.selectedIndex = 0;
       if (selectedShapeFilter && selectedShapeFilter.val()) shapesFilter.val(selectedShapeFilter.val());
       else shapesFilter.selectedIndex = 0;
     }
-    filteredTable = filterForMeasurementTemplateShape(
+    let { filteredTable, rowsWithNoValue } = filterForMeasurementTemplateShape(
       data,
       table,
       filter.val(),
@@ -1256,7 +1271,12 @@ function fillFilterSelect(
       shapesFilter.val(),
       numofHeaderCols
     );
-    shrinkedData = shrinkTable(filteredTable, data, numofHeaderCols);
+    shrinkedData = shrinkTable(
+      filteredTable,
+      data,
+      numofHeaderCols,
+      rowsWithNoValue
+    );
   }
   
   if (shrinkedData.tSums == null) {
