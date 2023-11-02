@@ -363,10 +363,11 @@ const Report = props => {
       const col = id.startsWith('a')
         ? parseInt(id[2]) - 1
         : parseInt(id[3]) - 1;
+      const rowIndex =  id.startsWith('a') ? id.split('_')[1] : null;
       setSelectedRow(row);
       setSelectedCol(col);
       const nontarget = id.startsWith('nc');
-      handleLesionClick(row, col, nontarget);
+      handleLesionClick(row, col, nontarget, rowIndex);
     }
   };
 
@@ -387,15 +388,17 @@ const Report = props => {
     }
   };
 
-  const handleLesionClick = (row, col, nontarget) => {
+  const handleLesionClick = (row, col, nontarget, rowIndex) => {
     try {
       const uidData = nontarget ? data[user].ntUIDs : data[user].tUIDs;
+      const actualRow = rowIndex || row;
       const { openSeries } = props;
       const notOpenSeries = [];
       const { projectID, patientID, subjectName } = props.patient;
       // check if the col is 0 (one aim only)
       if (col !== -1) {
-        const { seriesUID, aimUID, studyUID } = uidData[row][col];
+        // if rowIndex is sent use that instead of the row (recist.js can filter the rows)
+        const { seriesUID, aimUID, studyUID } = uidData[actualRow][col];
         // if not zero check if it is already open
         const { isOpen, index } = checkIfSeriesOpen(
           openSeries,
@@ -414,14 +417,14 @@ const Report = props => {
             setShowConfirmModal(true);
           } else {
             //if not open the series
-            openAims([uidData[row][col]], projectID, patientID);
+            openAims([uidData[actualRow][col]], projectID, patientID);
           }
         }
         // if the column is 0 (all aims for the lesion)
       } else {
         // check if open series has any of the selected series
         // if so copy the input array and delete the item from the copied input array
-        uidData[row].forEach((el, index) => {
+        uidData[actualRow].forEach((el, index) => {
           if (
             !checkIfSeriesOpen(openSeries, el.seriesUID, 'seriesUID').isOpen
           ) {
@@ -526,7 +529,7 @@ const Report = props => {
                 onMouseDown={e => e.stopPropagation()}
                 onChange={e => {
                   const userVal = e.target.value;
-                  getReportTable(data[userVal]);
+                  getReportTable(data[userVal], true);
                   setUser(userVal);
                 }}
                 defaultValue={user}
