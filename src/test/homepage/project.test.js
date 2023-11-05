@@ -54,7 +54,6 @@ describe('executing test scenario on ePAD', () => {
 
   test('it opens management menu', async () => {
     const result = await navbar.selectTabById('management', '.mng-menu');
-    console.log(result);
     expect(result).toBeTruthy();
   });
 

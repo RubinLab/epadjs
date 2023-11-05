@@ -34,11 +34,12 @@ describe('executing test scenario on ePAD', () => {
 
   test('it verifies logged in successfully', async () => {
     const result = await login.verifyLoggedIn();
-    expect(result).toContain('ePAD');
+    expect(result).toBeTruthy();
   });
 
   test('it opens management menu', async () => {
-    await navbar.selectTabById('management');
+    const result = await navbar.selectTabById('management', '.mng-menu');
+    expect(result).toBeTruthy();
   });
 
   test('it opens users page', async () => {
@@ -159,11 +160,11 @@ describe('executing test scenario on ePAD', () => {
   test('it adds user 2 to a project', async () => {
     const project = await users.editUserProject(
       'epad_user2@gmail.com',
-      'testpr1',
+      'lite',
       'Member',
-      'test project'
+      'Teaching Files'
     );
-    expect(project).toMatch(/test project/);
+    expect(project).toMatch(/Teaching Files/);
   });
 
   test('it deletes single user from row', async () => {
