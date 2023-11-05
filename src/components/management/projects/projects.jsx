@@ -390,6 +390,7 @@ class Projects extends React.Component {
         accessor: '',
         width: 30,
         Cell: ({ original }) => {
+          console.log(original.id);
           return (
             <input
               type="checkbox"
@@ -604,7 +605,7 @@ class Projects extends React.Component {
           className="pro-table"
           data={this.state.data}
           columns={this.defineColumns()}
-          defaultPageSize={10}
+          defaultPageSize={20}
           NoDataComponent={() => null}
         />
         <DeleteAlert

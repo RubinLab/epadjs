@@ -23,12 +23,12 @@ class Project extends Basepage {
   async confirmDelete() {
     //click delete on confirmation modal
     await this.driver.wait(
-        until.elementLocated(By.id('modal-delete-button'), 1000)
-      );
-      const modalDeleteButton = await this.driver.findElement(
-        By.id('modal-delete-button')
-      );
-      await modalDeleteButton.click();
+      until.elementLocated(By.id('modal-delete-button'), 1000)
+    );
+    const modalDeleteButton = await this.driver.findElement(
+      By.id('modal-delete-button')
+    );
+    await modalDeleteButton.click();
   }
 
   async singleDelete(projectID) {
@@ -95,13 +95,28 @@ class Project extends Basepage {
     await this.driver.sleep(500);
   }
 
-  async createProject(name, id, description, template, type) {
-    if (name) await super.enterTextByCss('#projectName', name);
-    if (id) await super.enterTextByCss('#projectID', id);
-    if (description)
-      await super.enterTextByCss('#projectDescription', description);
-    if (template) await this.selectDropdownOption('#projectTemplate', template);
-    if (type) await this.selectDropdownOption('#projectType', type);
+  async createProject({ name, id, desc, template, type }) {
+    console.log(" ---> name, id, description", name, id, desc);
+
+    await this.driver.sleep(4000);
+
+    if (name) { await super.enterTextByCss('#projectName', name); }
+
+    await this.driver.sleep(4000);
+
+    if (id) { await super.enterTextByCss('#projectID', id); }
+
+    await this.driver.sleep(4000);
+
+    if (desc) {
+      console.log(" ||||||||||||| description", desc)
+      await super.enterTextByCss('#projectDescription', desc);
+    }
+
+    await this.driver.sleep(2000);
+    if (template) { await this.selectDropdownOption('#projectTemplate', template); }
+    await this.driver.sleep(2000);
+    if (type) { await this.selectDropdownOption('#projectType', type); }
     await super.clickById('submit-button');
     await this.driver.sleep(200);
   }

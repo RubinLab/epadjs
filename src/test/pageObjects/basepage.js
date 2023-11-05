@@ -20,7 +20,10 @@ class Basepage {
   }
 
   async enterTextByCss(css, text) {
-    await this.driver.findElement(By.css(css)).sendKeys(text);
+    const element =  await this.driver.findElement(By.css(css));
+    // console.log(' ----> form element', css, text)
+    // console.log(element)
+    await element.sendKeys(text);
   }
 
  

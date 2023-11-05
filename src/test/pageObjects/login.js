@@ -22,8 +22,10 @@ class LoginPage extends Basepage {
     await this.driver.wait(until.elementLocated(By.id('epad-logo')));
   }
 
+  
   async verifyLoggedIn() {
-    const epadLogo = await super.getTextByCss('#epad-logo');
+    await this.driver.wait(until.elementLocated(By.id('epad-logo')));
+    const epadLogo = await this.driver.findElement(By.id('epad-logo'));
     return epadLogo;
   }
 }

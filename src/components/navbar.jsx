@@ -140,7 +140,7 @@ const NavBar = ({
             )}
             {user && (
               <>
-                <li className="nav-item" style={{ paddingRight: '0px' }}>
+                <li className="nav-item" style={{ paddingRight: '0px' }} id="mng-icon">
                   <a className="mng-icon nav-link" onClick={e => openGearMenu(e)} id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <BsFillGearFill />
                   </a>

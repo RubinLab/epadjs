@@ -12,10 +12,11 @@ class Navbar extends Basepage {
     this.management = null;
   }
 
-  async selectTabById(tabname) {
+  async selectTabById(tabname, expectedElementCSS) {
     await this.driver.wait(until.elementLocated(By.id(this.tabIds[tabname])));
     await super.clickById(this.tabIds[tabname]);
-    await this.driver.wait(until.elementLocated(By.className('mng-menu')));
+    await this.driver.wait(until.elementLocated(By.css(expectedElementCSS)));
+    return await this.driver.findElement(By.css(expectedElementCSS));
   }
 
   async formManagementMenu() {
