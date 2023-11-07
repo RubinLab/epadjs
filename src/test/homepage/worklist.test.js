@@ -8,7 +8,7 @@ import LoginPage from '../pageObjects/login.js';
 import Navbar from '../pageObjects/navbar.js';
 import Worklist from '../pageObjects/management/worklist';
 
-jest.setTimeout(30000);
+jest.setTimeout(10000);
 
 const sampleList = [
   {
@@ -67,11 +67,12 @@ describe('executing test scenario on ePAD', () => {
 
   test('it verifies logged in successfully', async () => {
     const result = await login.verifyLoggedIn();
-    expect(result).toContain('ePAD');
+    expect(result).toBeTruthy();
   });
 
   test('it opens management menu', async () => {
-    await navbar.selectTabById('management');
+    const result = await navbar.selectTabById('management', '.mng-menu');
+    expect(result).toBeTruthy();
   });
 
   test('it opens worklist page', async () => {

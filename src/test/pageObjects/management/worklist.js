@@ -198,7 +198,7 @@ class Worklist extends Basepage {
     }
     // await this.driver.wait(until.elementIsEnabled(By.id('next-btn'), 1000));
     await this.driver.sleep(1000);
-    await this.clickById('Next');
+    await this.clickById('next-btn');
     // await this.driver.wait(
     //   until.elementIsVisible(By.id('addWorklist-users'), 1000)
     // );

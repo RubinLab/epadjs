@@ -1,7 +1,7 @@
 {
   "mode": "lite",
   "apiUrl": "http://localhost:8080",
-  "testUrl": "http://localhost:3000",
+  "testUrl": "http://bds-c02gm1e0q05n.local:3000/",
   "apiUrlV1": "http://localhost:8080/epad",
   "wadoUrl": "wadouri:http://localhost:8080/wado",
   "clientKey": "Swa9Ci6Hr7n8eb6JqlEZpaujC7ZQq1fM",
