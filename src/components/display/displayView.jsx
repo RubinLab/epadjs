@@ -260,20 +260,21 @@ class DisplayView extends Component {
         prevProps.loading === true &&
         this.props.loading === false) ||
       (prevProps.series.length !== this.props.series.length &&
-        this.props.loading === false) || (multiFrameStatusChanged)
+        this.props.loading === false) 
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
+      this.getData();
       this.formInvertMap();
 
-      const { aimID, frameData, multiFrameMap } = series[activePort]
-      if (aimID && frameData && multiFrameMap) {
-        const imgDetails = series[activePort].frameData[aimID][0].split('/frames/');
-        // mfIndex = multiFrameIndex ? parseInt(multiFrameIndex) : parseInt(multiFrameMap[imgDetails[0]]);
-        const mfIndex = parseInt(multiFrameMap[imgDetails[0]]);
-        const frameNo = parseInt(imgDetails[1]);
-        this.getData(mfIndex, frameNo);
-      }
+      // const { aimID, frameData, multiFrameMap } = series[activePort]
+      // if (aimID && frameData && multiFrameMap) {
+      //   const imgDetails = series[activePort].frameData[aimID][0].split('/frames/');
+      //   // mfIndex = multiFrameIndex ? parseInt(multiFrameIndex) : parseInt(multiFrameMap[imgDetails[0]]);
+      //   const mfIndex = parseInt(multiFrameMap[imgDetails[0]]);
+      //   const frameNo = parseInt(imgDetails[1]);
+      //   this.getData(mfIndex, frameNo);
+      // }
 
     }
     // This is to handle late loading of aimsList from store but it also calls getData
