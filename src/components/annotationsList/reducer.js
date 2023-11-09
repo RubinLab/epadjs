@@ -299,7 +299,6 @@ const asyncReducer = (state = initialState, action) => {
           }
         }
 
-        
         let jumpArr1 = []
         if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
           const imgArr = state.openSeries.frameData[state.openSeries.aimID].split('/frames/');

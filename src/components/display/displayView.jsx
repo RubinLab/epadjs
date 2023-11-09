@@ -2,12 +2,12 @@ import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
-import PropagateLoader from "react-spinners/PropagateLoader";
+import PropagateLoader from 'react-spinners/PropagateLoader';
 import {
   getImageIds,
   getWadoImagePath,
   getSegmentation,
-  getMetadata,
+  getMetadata
 } from "../../services/seriesServices";
 import { getImageMetadata } from "../../services/imageServices";
 import { connect } from "react-redux";
@@ -29,7 +29,7 @@ import {
   updateSubpath,
   clearSelection,
   addStudyToGrid,
-  updateGridWithMultiFrameInfo,
+  updateGridWithMultiFrameInfo
 } from "../annotationsList/action";
 import { deleteAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
@@ -51,9 +51,9 @@ import { refreshToken } from "../../services/authService";
 // import { isThisSecond } from "date-fns/esm";
 import { FiMessageSquare } from "react-icons/fi";
 import { errorMonitor } from "events";
-import FreehandRoiSculptorTool from "../../cornerstone-tools/tools/FreehandRoiSculptorTool";
+import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
 import getVPDimensions from "./ViewportCalculations";
-import SeriesDropDown from "./SeriesDropDown";
+import SeriesDropDown from './SeriesDropDown';
 
 let mode;
 let wadoUrl;
@@ -249,7 +249,6 @@ class DisplayView extends Component {
   async componentDidUpdate(prevProps, prevState) {
     const { pid, series, activePort, aimList, multiFrameAimJumpData } =
       this.props;
-    const { aimID } = series[activePort];
     const {
       series: prevSeries,
       activePort: prevActivePort,
@@ -268,13 +267,12 @@ class DisplayView extends Component {
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
       multiFrameAimJumpData &&
-      `${aimID}-${multiFrameAimJumpData[0]}-${multiFrameAimJumpData[1]}` !==
+      `${series[activePort].aimID}-${multiFrameAimJumpData[0]}-${multiFrameAimJumpData[1]}` !==
         this.state.multiFrameAimJumped
     ) {
-      // await this.setState({ isLoading: true });
+      await this.setState({ isLoading: true });
       this.getViewports();
       this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1]);
-      console.log(" ---> in here");
       this.formInvertMap();
     } else if (
       (prevProps.series !== this.props.series &&
@@ -285,7 +283,6 @@ class DisplayView extends Component {
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      console.log(" in the old con");
       this.getData();
       this.formInvertMap();
     }
@@ -364,7 +361,6 @@ class DisplayView extends Component {
         newData[i].stack.currentImageIdIndex = imageIndex;
       }
     });
-    console.log(" data is changing in jumpToAims");
     this.setState({ data: newData });
   };
 
@@ -406,13 +402,10 @@ class DisplayView extends Component {
     const { showAimEditor, selectedAim, dirty } = this.state;
     const { aim, openSerie } = event.detail;
     if (showAimEditor) {
-      if (aim.id === selectedAim.aimId)
-        //if aim to be deleted is being edited
+      if (aim.id === selectedAim.aimId) //if aim to be deleted is being edited
         this.closeAimEditor(false);
       else if (dirty) {
-        alert(
-          "You should first close the aim editor before deleting another aim!"
-        );
+        alert( "You should first close the aim editor before deleting another aim!" );
         return;
       }
     }
@@ -579,21 +572,7 @@ class DisplayView extends Component {
     return segAims;
   };
 
-  shouldComponentUpdate(prevProps, prevState) {
-    // console.log(" in shouldComponentUpdate", prevState.multiFrameAimJumped, this.state.multiFrameAimJumped);
-
-    if (
-      this.state.multiFrameAimJumped &&
-      prevState.multiFrameAimJumped !== this.state.multiFrameAimJumped
-    ) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
   getData(multiFrameIndex, frameNo) {
-    console.log(" ===> in getData ", multiFrameIndex, frameNo);
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
       const { series, activePort } = this.props;
@@ -612,21 +591,15 @@ class DisplayView extends Component {
           multiFrameIndex && frameNo && series[activePort].aimID
             ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
             : null;
-
-        console.log('====> key', key);    
-        console.log('====> this.state.multiFrameAimJumped', this.state.multiFrameAimJumped);    
+ 
         if (key === null && !this.state.multiFrameAimJumped) {
           this.setState({ data: res });
         } else if (key && key !== this.state.multiFrameAimJumped) {
-          this.setState({ data: res });
-          this.setState({
-            multiFrameAimJumped: key,
-          });
+          this.setState({ data: res, multiFrameAimJumped: key });
         }
-        console.log(" data is changing getData", res[0].stack.imageIds.length);
+
         this.setState(
           {
-            // data: res,
             isLoading: false,
           },
           () => {
@@ -655,7 +628,6 @@ class DisplayView extends Component {
     Promise.all(promises).then((res) => {
       const newData = [...this.state.data];
       newData[viewportId] = res[0];
-      console.log("data is changing handleSerieReplace");
       this.setState({ data: newData });
     });
   };
@@ -932,7 +904,6 @@ class DisplayView extends Component {
     }
 
     const { imageIds } = this.state;
-    console.log(" imageId's are changing in getimagestackwith wadors");
     this.setState({ imageIds: { ...imageIds, ...newImageIds } });
 
     //to jump to the same image after aim save
@@ -1012,7 +983,6 @@ class DisplayView extends Component {
       }
     });
     const { imageIds } = this.state;
-    console.log(" --> getImageStackWithWadouri");
     this.setState({ imageIds: { ...imageIds, ...newImageIds } });
 
     //to jump to the same image after aim save
@@ -2149,7 +2119,6 @@ class DisplayView extends Component {
       imageIndex,
       10
     );
-    console.log(" data in jumpToImage");
     this.setState({ data: newData });
   };
 

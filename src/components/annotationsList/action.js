@@ -70,7 +70,6 @@ import { setToolOptionsForElement } from 'cornerstone-tools';
 const wadoUrl = sessionStorage.getItem('wadoUrl');
 
 export const updateGridWithMultiFrameInfo = (hasMultiframe, multiframeIndex, multiFrameMap) => {
-  console.log(" ---> updateGridWithMultiFrameInfo");
   return { type: CHECK_MULTIFRAME, payload: { hasMultiframe, multiframeIndex, multiFrameMap } };
 }
 
@@ -474,7 +473,6 @@ export const refreshPage = (feature, condition) => {
 
 // helpeer method
 export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann, otherSeriesAimsData, seriesOfStudy, frameData) => {
-  console.log(" ---> framedata arrived")
   return {
     type: LOAD_SERIE_SUCCESS,
     payload: { ref, aimsData, serID, imageData, ann, otherSeriesAimsData, seriesOfStudy, frameData },
