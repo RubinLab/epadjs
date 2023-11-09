@@ -50,6 +50,7 @@ import {
   AIM_SAVE,
   SUBPATH,
   CHECK_MULTIFRAME,
+  CLEAR_MULTIFRAME_AIM_JUMP,
   colors,
   commonLabels,
 } from "./types";
@@ -68,6 +69,10 @@ import aimEntityData from "./annotationDock/aimEntityData";
 import { setToolOptionsForElement } from 'cornerstone-tools';
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
+
+export const clearMultiFrameAimJumpFlags = () => {
+  return { type: CLEAR_MULTIFRAME_AIM_JUMP };
+}
 
 export const updateGridWithMultiFrameInfo = (hasMultiframe, multiframeIndex, multiFrameMap) => {
   return { type: CHECK_MULTIFRAME, payload: { hasMultiframe, multiframeIndex, multiFrameMap } };

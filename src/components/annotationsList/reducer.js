@@ -50,6 +50,7 @@ import {
   AIM_SAVE,
   SUBPATH,
   CHECK_MULTIFRAME,
+  CLEAR_MULTIFRAME_AIM_JUMP,
   colors,
   commonLabels,
 } from "./types";
@@ -106,6 +107,10 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case CLEAR_MULTIFRAME_AIM_JUMP: 
+        const aimClearedSeries = _.cloneDeep(state.openSeries);
+        aimClearedSeries[state.activePort].aimID = null;
+        return { ...state, openSeries: aimClearedSeries, multiFrameAimJumpData: null };
       case CHECK_MULTIFRAME:
         const series = _.cloneDeep(state.openSeries);
         const {hasMultiframe, multiframeIndex, multiFrameMap} = action.payload;
@@ -114,7 +119,7 @@ const asyncReducer = (state = initialState, action) => {
         const fmData = series[state.activePort].frameData;
         if (series[state.activePort].aimID && hasMultiframe && fmData) {
           const imgArr = fmData[series[state.activePort].aimID][0].split('/frames/');
-          jumpArr = [multiFrameMap[imgArr[0]], parseInt(imgArr[1])];
+          jumpArr = [multiFrameMap[imgArr[0]], parseInt(imgArr[1] - 1)];
         }
         series[state.activePort].hasMultiframe = hasMultiframe;
         series[state.activePort].multiFrameIndex = multiframeIndex;
@@ -302,7 +307,7 @@ const asyncReducer = (state = initialState, action) => {
         let jumpArr1 = []
         if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
           const imgArr = state.openSeries.frameData[state.openSeries.aimID].split('/frames/');
-          jumpArr = [multiFrameMap[imgArr[0]], parseInt(imgArr[1])];
+          jumpArr = [multiFrameMap[imgArr[0]], parseInt(imgArr[1] - 1)];
         }
         const newDataKeys = Object.keys(action.payload.aimsData);
         const stateKeys = state.aimsList[action.payload.serID]

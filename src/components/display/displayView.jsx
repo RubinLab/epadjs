@@ -2,12 +2,12 @@ import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
-import PropagateLoader from 'react-spinners/PropagateLoader';
+import PropagateLoader from "react-spinners/PropagateLoader";
 import {
   getImageIds,
   getWadoImagePath,
   getSegmentation,
-  getMetadata
+  getMetadata,
 } from "../../services/seriesServices";
 import { getImageMetadata } from "../../services/imageServices";
 import { connect } from "react-redux";
@@ -29,7 +29,8 @@ import {
   updateSubpath,
   clearSelection,
   addStudyToGrid,
-  updateGridWithMultiFrameInfo
+  updateGridWithMultiFrameInfo,
+  clearMultiFrameAimJumpFlags,
 } from "../annotationsList/action";
 import { deleteAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
@@ -51,9 +52,9 @@ import { refreshToken } from "../../services/authService";
 // import { isThisSecond } from "date-fns/esm";
 import { FiMessageSquare } from "react-icons/fi";
 import { errorMonitor } from "events";
-import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
+import FreehandRoiSculptorTool from "../../cornerstone-tools/tools/FreehandRoiSculptorTool";
 import getVPDimensions from "./ViewportCalculations";
-import SeriesDropDown from './SeriesDropDown';
+import SeriesDropDown from "./SeriesDropDown";
 
 let mode;
 let wadoUrl;
@@ -402,10 +403,13 @@ class DisplayView extends Component {
     const { showAimEditor, selectedAim, dirty } = this.state;
     const { aim, openSerie } = event.detail;
     if (showAimEditor) {
-      if (aim.id === selectedAim.aimId) //if aim to be deleted is being edited
+      if (aim.id === selectedAim.aimId)
+        //if aim to be deleted is being edited
         this.closeAimEditor(false);
       else if (dirty) {
-        alert( "You should first close the aim editor before deleting another aim!" );
+        alert(
+          "You should first close the aim editor before deleting another aim!"
+        );
         return;
       }
     }
@@ -591,7 +595,7 @@ class DisplayView extends Component {
           multiFrameIndex && frameNo && series[activePort].aimID
             ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
             : null;
- 
+
         if (key === null && !this.state.multiFrameAimJumped) {
           this.setState({ data: res });
         } else if (key && key !== this.state.multiFrameAimJumped) {
@@ -2120,6 +2124,7 @@ class DisplayView extends Component {
       10
     );
     this.setState({ data: newData });
+    this.props.dispatch(clearMultiFrameAimJumpFlags());
   };
 
   handleJumpChange = (i, event) => {
