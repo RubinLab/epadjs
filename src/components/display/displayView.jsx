@@ -186,6 +186,7 @@ class DisplayView extends Component {
       wwwc: {},
       multiFrameData: {},
       templateType: "",
+      multiFrameAimJumped: false,
     };
   }
 
@@ -248,6 +249,7 @@ class DisplayView extends Component {
   async componentDidUpdate(prevProps, prevState) {
     const { pid, series, activePort, aimList, multiFrameAimJumpData } =
       this.props;
+    const { aimID } = series[activePort];
     const {
       series: prevSeries,
       activePort: prevActivePort,
@@ -263,14 +265,15 @@ class DisplayView extends Component {
       return;
     }
 
-    const oldMultiFrameStatus = prevProps.series[activePort].hasMultiframe;
-    const newMultiFrameStatus = this.props.series[activePort].hasMultiframe;
-    const multiFrameStatusChanged = oldMultiFrameStatus !== newMultiFrameStatus;
-
-    if (prevProps.multiFrameAimJumpData !== multiFrameAimJumpData && multiFrameAimJumpData) {
+    if (
+      prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
+      multiFrameAimJumpData &&
+      `${aimID}-${multiFrameAimJumpData[0]}-${multiFrameAimJumpData[1]}` !==
+        this.state.multiFrameAimJumped
+    ) {
       // await this.setState({ isLoading: true });
       this.getViewports();
-      this.getImageStackWithWadors(series[activePort], activePort, multiFrameAimJumpData[0], multiFrameAimJumpData[1]);
+      this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1]);
       console.log(" ---> in here");
       this.formInvertMap();
     } else if (
@@ -282,7 +285,7 @@ class DisplayView extends Component {
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      console.log(" in the old con")
+      console.log(" in the old con");
       this.getData();
       this.formInvertMap();
     }
@@ -361,6 +364,7 @@ class DisplayView extends Component {
         newData[i].stack.currentImageIdIndex = imageIndex;
       }
     });
+    console.log(" data is changing in jumpToAims");
     this.setState({ data: newData });
   };
 
@@ -575,11 +579,24 @@ class DisplayView extends Component {
     return segAims;
   };
 
+  shouldComponentUpdate(prevProps, prevState) {
+    // console.log(" in shouldComponentUpdate", prevState.multiFrameAimJumped, this.state.multiFrameAimJumped);
+
+    if (
+      this.state.multiFrameAimJumped &&
+      prevState.multiFrameAimJumped !== this.state.multiFrameAimJumped
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   getData(multiFrameIndex, frameNo) {
     console.log(" ===> in getData ", multiFrameIndex, frameNo);
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
-      const { series } = this.props;
+      const { series, activePort } = this.props;
       var promises = [];
       for (let i = 0; i < series.length; i++) {
         const promise = this.getImageStack(
@@ -591,9 +608,25 @@ class DisplayView extends Component {
         promises.push(promise);
       }
       Promise.all(promises).then((res) => {
+        const key =
+          multiFrameIndex && frameNo && series[activePort].aimID
+            ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
+            : null;
+
+        console.log('====> key', key);    
+        console.log('====> this.state.multiFrameAimJumped', this.state.multiFrameAimJumped);    
+        if (key === null && !this.state.multiFrameAimJumped) {
+          this.setState({ data: res });
+        } else if (key && key !== this.state.multiFrameAimJumped) {
+          this.setState({ data: res });
+          this.setState({
+            multiFrameAimJumped: key,
+          });
+        }
+        console.log(" data is changing getData", res[0].stack.imageIds.length);
         this.setState(
           {
-            data: res,
+            // data: res,
             isLoading: false,
           },
           () => {
@@ -622,6 +655,7 @@ class DisplayView extends Component {
     Promise.all(promises).then((res) => {
       const newData = [...this.state.data];
       newData[viewportId] = res[0];
+      console.log("data is changing handleSerieReplace");
       this.setState({ data: newData });
     });
   };
@@ -898,6 +932,7 @@ class DisplayView extends Component {
     }
 
     const { imageIds } = this.state;
+    console.log(" imageId's are changing in getimagestackwith wadors");
     this.setState({ imageIds: { ...imageIds, ...newImageIds } });
 
     //to jump to the same image after aim save
@@ -977,6 +1012,7 @@ class DisplayView extends Component {
       }
     });
     const { imageIds } = this.state;
+    console.log(" --> getImageStackWithWadouri");
     this.setState({ imageIds: { ...imageIds, ...newImageIds } });
 
     //to jump to the same image after aim save
@@ -2113,6 +2149,7 @@ class DisplayView extends Component {
       imageIndex,
       10
     );
+    console.log(" data in jumpToImage");
     this.setState({ data: newData });
   };
 
@@ -2147,6 +2184,8 @@ class DisplayView extends Component {
       data,
       activeTool,
     } = this.state;
+    // if (this.state.data[0])
+    // console.log(this.state.data[0].stack.imageIds.length);
     // if (this.state.redirect) return <Redirect to="/list" />;
     const redirect = mode === "teaching" ? "search" : "list";
     return !Object.entries(series).length ? (
