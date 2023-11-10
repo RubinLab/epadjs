@@ -595,12 +595,10 @@ class DisplayView extends Component {
           multiFrameIndex && frameNo && series[activePort].aimID
             ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
             : null;
-
-        if (key === null && !this.state.multiFrameAimJumped) {
-          this.setState({ data: res });
-        } else if (key && key !== this.state.multiFrameAimJumped) {
+          
+        if (key && key !== this.state.multiFrameAimJumped) {
           this.setState({ data: res, multiFrameAimJumped: key });
-        }
+        } else this.setState({ data: res });
 
         this.setState(
           {
