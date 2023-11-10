@@ -929,6 +929,7 @@ const insertAdditionalData = (arr, ref, uid) => {
       el = { ...el, ...ref }
     }
   })
+  return arr;
 }
 // helper methods - calls backend and get data
 const getSingleSerieData = (serie, annotation, wadoUrl) => {
@@ -987,6 +988,7 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
         const allAims = [...serieAims, ...otherSeriesAims]
         const otherSeriesAimsData = allAims.length === 0 ? {} : getStudyAimsDataSorted(allAims, projectID, patientID);
         const seriesExtendedData = insertAdditionalData(result[1].data, serieRef, seriesUID);
+
         const seriesOfStudy = { [studyUID]: seriesExtendedData }
         resolve({ aimsData, imageData, otherSeriesAimsData, seriesOfStudy, serieRef, frameData });
       })
