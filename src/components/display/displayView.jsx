@@ -2,12 +2,12 @@ import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
-import PropagateLoader from 'react-spinners/PropagateLoader';
+import PropagateLoader from "react-spinners/PropagateLoader";
 import {
   getImageIds,
   getWadoImagePath,
   getSegmentation,
-  getMetadata
+  getMetadata,
 } from "../../services/seriesServices";
 import { getImageMetadata } from "../../services/imageServices";
 import { connect } from "react-redux";
@@ -29,7 +29,8 @@ import {
   updateSubpath,
   clearSelection,
   addStudyToGrid,
-  updateGridWithMultiFrameInfo
+  updateGridWithMultiFrameInfo,
+  clearMultiFrameAimJumpFlags,
 } from "../annotationsList/action";
 import { deleteAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
@@ -51,9 +52,9 @@ import { refreshToken } from "../../services/authService";
 // import { isThisSecond } from "date-fns/esm";
 import { FiMessageSquare } from "react-icons/fi";
 import { errorMonitor } from "events";
-import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
+import FreehandRoiSculptorTool from "../../cornerstone-tools/tools/FreehandRoiSculptorTool";
 import getVPDimensions from "./ViewportCalculations";
-import SeriesDropDown from './SeriesDropDown';
+import SeriesDropDown from "./SeriesDropDown";
 
 let mode;
 let wadoUrl;
@@ -73,7 +74,11 @@ const tools = [
   },
   { name: "Probe", modeOptions: { mouseButtonMasks: 1 }, mode: "passive" },
   { name: "Length", modeOptions: { mouseButtonMasks: 1 }, mode: "passive" },
-  { name: "ArrowAnnotate", modeOptions: { mouseButtonMasks: 1 }, mode: "passive" },
+  {
+    name: "ArrowAnnotate",
+    modeOptions: { mouseButtonMasks: 1 },
+    mode: "passive",
+  },
   // {
   //   name: "EllipticalRoi",
   //   configuration: {
@@ -108,7 +113,7 @@ const tools = [
   {
     name: "FreehandRoiSculptor",
     modeOptions: { mouseButtonMask: 1 },
-    mode: "passive"
+    mode: "passive",
   },
   // {
   //   name: "FreehandRoi3DTool",
@@ -148,16 +153,17 @@ const mapStateToProps = (state) => {
     activePort: state.annotationsListReducer.activePort,
     aimList: state.annotationsListReducer.aimsList,
     aimSegLabelMaps: state.annotationsListReducer.aimSegLabelMaps,
-    subpath: state.annotationsListReducer.subpath
+    subpath: state.annotationsListReducer.subpath,
+    multiFrameAimJumpData: state.annotationsListReducer.multiFrameAimJumpData,
   };
 };
 
 class DisplayView extends Component {
   constructor(props) {
     super(props);
-    mode = sessionStorage.getItem('mode');
-    wadoUrl = sessionStorage.getItem('wadoUrl');
-    maxPort = sessionStorage.getItem('maxPort');
+    mode = sessionStorage.getItem("mode");
+    wadoUrl = sessionStorage.getItem("wadoUrl");
+    maxPort = sessionStorage.getItem("maxPort");
     this.state = {
       width: "100%",
       height: "100%",
@@ -175,12 +181,13 @@ class DisplayView extends Component {
       redirect: this.props.series.length < 1 ? true : false,
       containerHeight: 0,
       tokenRefresh: null,
-      activeTool: '',
+      activeTool: "",
       invertMap: {},
       isOverlayVisible: {},
       wwwc: {},
       multiFrameData: {},
-      templateType: ''
+      templateType: "",
+      multiFrameAimJumped: false,
     };
   }
 
@@ -188,14 +195,14 @@ class DisplayView extends Component {
     const { series } = this.props;
     const invertMap = { ...this.state.invertMap };
     series.forEach((el, i) => {
-      invertMap[i] = el.examType === 'NM';
-    })
+      invertMap[i] = el.examType === "NM";
+    });
     this.setState({ invertMap });
-  }
+  };
 
   setWwwc = (ww, wc) => {
-    this.setState({ wwwc: { ww, wc } })
-  }
+    this.setState({ wwwc: { ww, wc } });
+  };
 
   componentDidMount() {
     const { series, onSwitchView } = this.props;
@@ -208,26 +215,32 @@ class DisplayView extends Component {
     this.formInvertMap();
     if (series.length > 0) {
       this.setSubComponentHeights();
-      window.addEventListener("resize", e => this.setSubComponentHeights(e));
+      window.addEventListener("resize", (e) => this.setSubComponentHeights(e));
     }
     window.addEventListener("markupSelected", this.handleMarkupSelected);
     window.addEventListener("markupCreated", this.handleMarkupCreated);
     window.addEventListener("toggleAnnotations", this.toggleAnnotations);
     // window.addEventListener("updateWL", this.updateWL);
     window.addEventListener("updateImageStatus", this.updateImageStatus);
-    window.addEventListener('deleteViewportImageStatus', this.deleteViewportImageStatus);
-    window.addEventListener('resetViewportImageStatus', this.resetViewportImageStatus);
+    window.addEventListener(
+      "deleteViewportImageStatus",
+      this.deleteViewportImageStatus
+    );
+    window.addEventListener(
+      "resetViewportImageStatus",
+      this.resetViewportImageStatus
+    );
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
-    window.addEventListener('keydown', this.handleKeyPressed);
-    window.addEventListener('serieReplaced', this.handleSerieReplace);
-    window.addEventListener('saveTemplateType', this.saveTemplateType);
+    window.addEventListener("keydown", this.handleKeyPressed);
+    window.addEventListener("serieReplaced", this.handleSerieReplace);
+    window.addEventListener("saveTemplateType", this.saveTemplateType);
 
     if (this.props.keycloak && series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
-      this.setState({ tokenRefresh })
-    };
+      this.setState({ tokenRefresh });
+    }
     // const element = document.getElementById("petViewport");
     // console.log("element is", cornerstone);
     // cornerstone.enable(element);
@@ -235,7 +248,8 @@ class DisplayView extends Component {
   }
 
   async componentDidUpdate(prevProps, prevState) {
-    const { pid, series, activePort, aimList } = this.props;
+    const { pid, series, activePort, aimList, multiFrameAimJumpData } =
+      this.props;
     const {
       series: prevSeries,
       activePort: prevActivePort,
@@ -245,39 +259,35 @@ class DisplayView extends Component {
     const prevActiveSerie = prevSeries[prevActivePort];
 
     if (this.props.series.length < 1) {
-      if (mode === 'teaching') this.props.history.push('/search');
+      if (mode === "teaching") this.props.history.push("/search");
       else if (pid) this.props.history.push(`/list/${pid}`);
       else return;
       return;
     }
 
-    const oldMultiFrameStatus = prevProps.series[activePort].hasMultiframe;
-    const newMultiFrameStatus = this.props.series[activePort].hasMultiframe;
-    const multiFrameStatusChanged = oldMultiFrameStatus !== newMultiFrameStatus;
-
     if (
+      prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
+      multiFrameAimJumpData &&
+      `${series[activePort].aimID}-${multiFrameAimJumpData[0]}-${multiFrameAimJumpData[1]}` !==
+        this.state.multiFrameAimJumped
+    ) {
+      await this.setState({ isLoading: true });
+      this.getViewports();
+      this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1]);
+      this.formInvertMap();
+    } else if (
       (prevProps.series !== this.props.series &&
         prevProps.loading === true &&
         this.props.loading === false) ||
       (prevProps.series.length !== this.props.series.length &&
-        this.props.loading === false) 
+        this.props.loading === false)
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
       this.formInvertMap();
-
-      // const { aimID, frameData, multiFrameMap } = series[activePort]
-      // if (aimID && frameData && multiFrameMap) {
-      //   const imgDetails = series[activePort].frameData[aimID][0].split('/frames/');
-      //   // mfIndex = multiFrameIndex ? parseInt(multiFrameIndex) : parseInt(multiFrameMap[imgDetails[0]]);
-      //   const mfIndex = parseInt(multiFrameMap[imgDetails[0]]);
-      //   const frameNo = parseInt(imgDetails[1]);
-      //   this.getData(mfIndex, frameNo);
-      // }
-
     }
-    // This is to handle late loading of aimsList from store but it also calls getData
+    // This is to handle late loading of aimsList from store but it also calls get Data
     // each time visibility of aims change
     else if (Object.keys(aimList).length !== Object.keys(prevAimList).length) {
       this.renderAims();
@@ -290,23 +300,29 @@ class DisplayView extends Component {
     window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
     // window.removeEventListener("updateWL", this.updateWL);
     window.removeEventListener("updateImageStatus", this.updateImageStatus);
-    window.removeEventListener('resetViewportImageStatus', this.resetViewportImageStatus);
-    window.removeEventListener('deleteViewportImageStatus', this.deleteViewportImageStatus);
+    window.removeEventListener(
+      "resetViewportImageStatus",
+      this.resetViewportImageStatus
+    );
+    window.removeEventListener(
+      "deleteViewportImageStatus",
+      this.deleteViewportImageStatus
+    );
     window.removeEventListener("jumpToAimImage", this.jumpToAimImage);
     window.removeEventListener("editAim", this.editAimHandler);
     window.removeEventListener("deleteAim", this.deleteAimHandler);
     window.removeEventListener("resize", this.setSubComponentHeights);
-    window.removeEventListener('keydown', this.handleKeyPressed);
-    window.removeEventListener('serieReplaced', this.handleSerieReplace);
-    window.removeEventListener('getTemplateType', this.saveTemplateType);
+    window.removeEventListener("keydown", this.handleKeyPressed);
+    window.removeEventListener("serieReplaced", this.handleSerieReplace);
+    window.removeEventListener("getTemplateType", this.saveTemplateType);
     // clear all aimID of openseries so aim editor doesn't open next time
     this.props.dispatch(clearAimId());
-    clearInterval(this.state.tokenRefresh)
+    clearInterval(this.state.tokenRefresh);
   }
 
   saveTemplateType = (data) => {
     this.setState({ templateType: data.detail });
-  }
+  };
 
   handleKeyPressed = (event) => {
     if (event.key === "Enter") {
@@ -319,19 +335,22 @@ class DisplayView extends Component {
       window.dispatchEvent(evnt);
     }
     // i => info
-    if (event.target.nodeName !== 'INPUT' && event.target.nodeName !== 'TEXTAREA') {
+    if (
+      event.target.nodeName !== "INPUT" &&
+      event.target.nodeName !== "TEXTAREA"
+    ) {
       if (event.keyCode == 73 && event.ctrlKey) {
         this.toggleOverlay();
       }
     }
-  }
+  };
 
   // Sets the activeTool state getting it from session storage
   handleActiveTool = () => {
     const activeTool = sessionStorage.getItem("activeTool");
     if (activeTool && activeTool !== this.state.activeTool)
       this.setState({ activeTool });
-  }
+  };
 
   jumpToAims = () => {
     const { series } = this.props;
@@ -365,12 +384,12 @@ class DisplayView extends Component {
     }
   };
 
-  setSubComponentHeights = e => {
+  setSubComponentHeights = (e) => {
     try {
       if (e && e.detail) var { isMaximize } = e.detail;
       const navbar = document.getElementsByClassName("navbar")[0].clientHeight;
-      let toolbarHeight = document.getElementsByClassName("toolbar")[0]
-        .clientHeight;
+      let toolbarHeight =
+        document.getElementsByClassName("toolbar")[0].clientHeight;
       const windowInner = window.innerHeight;
       const containerHeight = windowInner - toolbarHeight - navbar - 10;
       this.setState({ containerHeight });
@@ -384,10 +403,13 @@ class DisplayView extends Component {
     const { showAimEditor, selectedAim, dirty } = this.state;
     const { aim, openSerie } = event.detail;
     if (showAimEditor) {
-      if (aim.id === selectedAim.aimId) //if aim to be deleted is being edited
+      if (aim.id === selectedAim.aimId)
+        //if aim to be deleted is being edited
         this.closeAimEditor(false);
       else if (dirty) {
-        alert("You should first close the aim editor before deleting another aim!");
+        alert(
+          "You should first close the aim editor before deleting another aim!"
+        );
         return;
       }
     }
@@ -396,7 +418,7 @@ class DisplayView extends Component {
     );
     if (!answer) return 0;
     this.deleteAim(aim.id, openSerie);
-  }
+  };
 
   editAimHandler = (event) => {
     const { aimID, seriesUID } = event.detail;
@@ -410,17 +432,18 @@ class DisplayView extends Component {
       aimJson["aimId"] = aimID;
 
       // check if is already editing an aim
-      if (showAimEditor && (selectedAim !== aimJson)) {
+      if (showAimEditor && selectedAim !== aimJson) {
         // temporal fix for aimEiditor form fields not setting dirty flag
-        alert("You should close the Aim Editor before starting to edit this aim.");
+        alert(
+          "You should close the Aim Editor before starting to edit this aim."
+        );
         return;
         let message = this.prepWarningMessage(
           selectedAim.name.value,
           aimJson.name.value
         );
         const shouldContinue = this.closeAimEditor(true, message);
-        if (!shouldContinue)
-          return;
+        if (!shouldContinue) return;
       }
 
       // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
@@ -437,13 +460,13 @@ class DisplayView extends Component {
       this.props.dispatch(jumpToAim(seriesUID, aimID, activePort));
 
       this.setState({ showAimEditor: true, selectedAim: aimJson }, () => {
-        setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
+        setMarkupsOfAimActive(aimID); //set the selected markups color to yellow
         this.refreshAllViewports();
       });
     }
   };
 
-  toggleAnnotations = event => {
+  toggleAnnotations = (event) => {
     const { aimID, isVisible } = event.detail;
     const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
@@ -462,8 +485,8 @@ class DisplayView extends Component {
     wwwc = wwwc ? JSON.parse(wwwc) : new Array(max);
     wwwc[this.props.activePort] = { ww, wc };
 
-    sessionStorage.setItem('wwwc', JSON.stringify(wwwc));
-  }
+    sessionStorage.setItem("wwwc", JSON.stringify(wwwc));
+  };
 
   updateImageStatus = (event) => {
     const { type, value } = event.detail;
@@ -472,11 +495,11 @@ class DisplayView extends Component {
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
     let obj = imgStatus[this.props.activePort];
-    obj = obj && typeof obj === 'object' ? obj : {};
+    obj = obj && typeof obj === "object" ? obj : {};
     obj[type] = value;
     imgStatus[this.props.activePort] = obj;
-    sessionStorage.setItem('imgStatus', JSON.stringify(imgStatus));
-  }
+    sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+  };
 
   // Traverse all shapes and set visibility, if aimID is passed only sets aim's shapes
   setVisibilityOfShapes = (visibility, aimID) => {
@@ -494,7 +517,8 @@ class DisplayView extends Component {
   getShapesOfSerie = (seriesUID) => {
     const { aimList } = this.props;
     const seriesAims = aimList[seriesUID];
-    const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const toolState =
+      cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     const shapes = [];
     Object.values(toolState).forEach((imageState) => {
       Object.values(imageState).forEach((tools) => {
@@ -553,19 +577,31 @@ class DisplayView extends Component {
   };
 
   getData(multiFrameIndex, frameNo) {
-    this.clearAllMarkups();//we are already clearing in it renderAims do we need to here? 
+    this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
-      const { series } = this.props;
+      const { series, activePort } = this.props;
       var promises = [];
       for (let i = 0; i < series.length; i++) {
-        const promise = this.getImageStack(series[i], i, multiFrameIndex, frameNo);
+        const promise = this.getImageStack(
+          series[i],
+          i,
+          multiFrameIndex,
+          frameNo
+        );
         promises.push(promise);
-
       }
       Promise.all(promises).then((res) => {
+        const key =
+          multiFrameIndex && frameNo && series[activePort].aimID
+            ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
+            : null;
+          
+        if (key && key !== this.state.multiFrameAimJumped) {
+          this.setState({ data: res, multiFrameAimJumped: key });
+        } else this.setState({ data: res });
+
         this.setState(
           {
-            data: res,
             isLoading: false,
           },
           () => {
@@ -585,14 +621,18 @@ class DisplayView extends Component {
     const { series } = this.props;
     var promises = [];
     const { viewportId, id, multiFrameIndex } = e.detail;
-    const promise = this.getImageStack(series[viewportId], viewportId, multiFrameIndex);
+    const promise = this.getImageStack(
+      series[viewportId],
+      viewportId,
+      multiFrameIndex
+    );
     promises.push(promise);
     Promise.all(promises).then((res) => {
       const newData = [...this.state.data];
       newData[viewportId] = res[0];
       this.setState({ data: newData });
-    })
-  }
+    });
+  };
 
   // Remove this function to disable openning aim editor by default
   // once user clecked on an aim
@@ -611,7 +651,7 @@ class DisplayView extends Component {
     cornerstoneTools.store.modules.freehand3D.state.seriesCollection = [];
     // clear the segmentation data as well
     cornerstoneTools.store.modules.segmentation.state.series = {};
-  }
+  };
 
   renderAims = (notShowAimEditor = false) => {
     const { series } = this.props;
@@ -646,7 +686,7 @@ class DisplayView extends Component {
 
   formMultiframeImgData = (arr) => {
     const { series, activePort } = this.props;
-    // create the same data shape for studySeries 
+    // create the same data shape for studySeries
     // update the reducer with the new data
     const studySeries = arr.reduce((all, item) => {
       const obj = {
@@ -662,13 +702,13 @@ class DisplayView extends Component {
         significanceOrder: series[activePort].significanceOrder,
         multiFrameImage: item[0].multiFrameImage,
         numberOfFrames: item[0].numberOfFrames,
-      }
+      };
       all.push(obj);
       return all;
-    }, [])
+    }, []);
     const result = { [series[activePort].studyUID]: studySeries };
     this.props.dispatch(addStudyToGrid(result));
-  }
+  };
 
   async getImages(serie, i) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
@@ -677,7 +717,7 @@ class DisplayView extends Component {
     }
     const firstSeriesIndex = this.findFirstSeriesIndex(urls);
     if (urls[firstSeriesIndex].length > 0) {
-      const arr = urls[firstSeriesIndex][0].lossyImage.split('/');
+      const arr = urls[firstSeriesIndex][0].lossyImage.split("/");
       this.props.dispatch(updateSubpath(arr[1], i));
     }
     return urls;
@@ -700,11 +740,15 @@ class DisplayView extends Component {
 
   getImageStack = async (serie, index, multiFrameIndex, frameNo) => {
     const wadoUrl = sessionStorage.getItem("wadoUrl");
-    if (wadoUrl.includes('wadors'))
-      return this.getImageStackWithWadors(serie, index, multiFrameIndex, frameNo);
-    else
-      return this.getImageStackWithWadouri(serie, index);
-  }
+    if (wadoUrl.includes("wadors"))
+      return this.getImageStackWithWadors(
+        serie,
+        index,
+        multiFrameIndex,
+        frameNo
+      );
+    else return this.getImageStackWithWadouri(serie, index);
+  };
 
   findFirstSeriesIndex = (imageUrls) => {
     let firstSeriesIndex = 0;
@@ -716,7 +760,7 @@ class DisplayView extends Component {
       }
     }
     return firstSeriesIndex;
-  }
+  };
 
   getImageStackWithWadors = async (serie, index, multiFrameIndex, frameNo) => {
     let stack = {};
@@ -725,7 +769,7 @@ class DisplayView extends Component {
     let seriesMetadata = [];
     let seriesMetadataMap = {};
     let metadata2D = [];
-    const multiFrameMap = {}
+    const multiFrameMap = {};
     const imageUrls = await this.getImages(serie, index);
     if (imageUrls.length > 1) {
       for (let i = 0; i < imageUrls.length; i++) {
@@ -733,23 +777,33 @@ class DisplayView extends Component {
           multiFrameMap[imageUrls[i][0].imageUID] = i;
         }
       }
-      this.props.dispatch(updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap));
+      this.props.dispatch(
+        updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap)
+      );
     }
     let baseUrl;
-    let wadoUrlNoWadors = sessionStorage.getItem("wadoUrl").replace('wadors:', '');
-    const firstSeriesIndex = multiFrameIndex ? multiFrameIndex : this.findFirstSeriesIndex(imageUrls);
-    const seriesURL = wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage.split('/instances/')[0];
+    let wadoUrlNoWadors = sessionStorage
+      .getItem("wadoUrl")
+      .replace("wadors:", "");
+    const firstSeriesIndex = multiFrameIndex
+      ? multiFrameIndex
+      : this.findFirstSeriesIndex(imageUrls);
+    const seriesURL =
+      wadoUrlNoWadors +
+      imageUrls[firstSeriesIndex][0].lossyImage.split("/instances/")[0];
 
     try {
       seriesMetadata = await getMetadata(seriesURL);
       seriesMetadata = seriesMetadata.data;
-      seriesMetadata.forEach(item => seriesMetadataMap[item['00080018'].Value[0]] = item);
+      seriesMetadata.forEach(
+        (item) => (seriesMetadataMap[item["00080018"].Value[0]] = item)
+      );
     } catch (err) {
       console.log("Can not get series metadata");
       console.error(err);
     }
 
-    // get the length of array off arrays 
+    // get the length of array off arrays
     // divide the metadata array to mirror the image urls’ array
 
     const imgURLsLen = imageUrls.reduce((all, item) => {
@@ -758,15 +812,20 @@ class DisplayView extends Component {
 
     seriesMetadata = seriesMetadata[firstSeriesIndex];
     const seriesMetadataExists = Array.isArray(seriesMetadata);
-    const useSeriesData = seriesMetadataExists && seriesMetadata.length > 0 && seriesMetadata.length === imgURLsLen;
+    const useSeriesData =
+      seriesMetadataExists &&
+      seriesMetadata.length > 0 &&
+      seriesMetadata.length === imgURLsLen;
     // get first image
     let firstImage = null;
     if (!useSeriesData) {
-      const result = await getImageMetadata(wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage);
+      const result = await getImageMetadata(
+        wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage
+      );
       const data = result.data;
       firstImage = data[0];
     } else {
-      firstImage = seriesMetadataMap[imageUrls[firstSeriesIndex][0].imageUID]
+      firstImage = seriesMetadataMap[imageUrls[firstSeriesIndex][0].imageUID];
     }
 
     let referencePosition = null;
@@ -776,12 +835,15 @@ class DisplayView extends Component {
 
     const distanceDatasetPairs = [];
 
-    const sortByGeo = !!firstImage['00200032'] && !!firstImage['00200037'];
+    const sortByGeo = !!firstImage["00200032"] && !!firstImage["00200037"];
     if (sortByGeo) {
-      referencePosition = firstImage['00200032'].Value;
-      rowVector = firstImage['00200037'].Value.slice(0, 3);
-      columnVector = firstImage['00200037'].Value.slice(3, 6);
-      scanAxis = dcmjs.normalizers.ImageNormalizer.vec3CrossProduct(rowVector, columnVector);
+      referencePosition = firstImage["00200032"].Value;
+      rowVector = firstImage["00200037"].Value.slice(0, 3);
+      columnVector = firstImage["00200037"].Value.slice(3, 6);
+      scanAxis = dcmjs.normalizers.ImageNormalizer.vec3CrossProduct(
+        rowVector,
+        columnVector
+      );
     }
 
     const len = imageUrls[firstSeriesIndex].length;
@@ -803,16 +865,23 @@ class DisplayView extends Component {
       }
 
       if (sortByGeo) {
-        const position = imgData['00200032'].Value.slice();
+        const position = imgData["00200032"].Value.slice();
         const positionVector = dcmjs.normalizers.ImageNormalizer.vec3Subtract(
           position,
           referencePosition
         );
-        distance = dcmjs.normalizers.ImageNormalizer.vec3Dot(positionVector, scanAxis);
+        distance = dcmjs.normalizers.ImageNormalizer.vec3Dot(
+          positionVector,
+          scanAxis
+        );
       }
 
       if (imageUrls[firstSeriesIndex][k].multiFrameImage === true) {
-        for (var i = 0; i < imageUrls[firstSeriesIndex][k].numberOfFrames; i++) {
+        for (
+          var i = 0;
+          i < imageUrls[firstSeriesIndex][k].numberOfFrames;
+          i++
+        ) {
           let multiFrameUrl = `wadors:${baseUrl}/frames/${i + 1}`;
           // using distanceDatasetPairs to sort instead of just adding to the array
           if (!sortByGeo) cornerstoneImageIds.push(multiFrameUrl);
@@ -846,7 +915,6 @@ class DisplayView extends Component {
       this.state.data[index].stack.currentImageIdIndex
     )
       imageIndex = this.state.data[index].stack.currentImageIdIndex;
-
     else imageIndex = 0;
 
     if (sortByGeo) {
@@ -858,17 +926,18 @@ class DisplayView extends Component {
 
     // if serie is being open from the annotation jump to that image and load the aim editor
     if (multiFrameIndex && frameNo) imageIndex = frameNo;
-    else if (serie.aimID) imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+    else if (serie.aimID)
+      imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
-    // form split series data 
+    // form split series data
     // store it in state
     if (imageUrls.length > 0) {
-      this.formSplitSeriesData(imageUrls, baseUrl);
+      // this.formSplitSeriesData(imageUrls, baseUrl);
     }
     return { stack };
-  }
+  };
 
   formSplitSeriesData = (urls, baseUrl) => {
     const imagesObj = {};
@@ -881,15 +950,18 @@ class DisplayView extends Component {
         id = `${id}_${multiFrameIndex}`;
         multiFrameIndex++;
       }
-      const len = multiFrameImage ? urls[series][0].numberOfFrames : urls[series].length;
+      const len = multiFrameImage
+        ? urls[series][0].numberOfFrames
+        : urls[series].length;
       for (let image = 0; image < len; image++) {
-        if (multiFrameImage) imagesArr.push(`wadors:${baseUrl}/frames/${image + 1}`);
+        if (multiFrameImage)
+          imagesArr.push(`wadors:${baseUrl}/frames/${image + 1}`);
         else imagesArr.push(`wadors:${baseUrl}/frames/1`);
       }
       imagesObj[id] = { images: imagesArr };
     }
     this.setState({ multiFrameData: imagesObj });
-  }
+  };
 
   getImageStackWithWadouri = async (serie, index) => {
     let stack = {};
@@ -942,8 +1014,7 @@ class DisplayView extends Component {
         const aimJson = aimList[seriesUID][aimID].json;
         aimJson.aimID = aimID;
         const markupTypes = this.getMarkupTypesForAim(aimID);
-        if (markupTypes)
-          aimJson["markupType"] = [...markupTypes];
+        if (markupTypes) aimJson["markupType"] = [...markupTypes];
         aimJson["aimId"] = aimID;
         if (this.hasSegmentation(aimJson)) {
           this.setState({ hasSegmentation: true });
@@ -953,8 +1024,7 @@ class DisplayView extends Component {
           this.setState({ showAimEditor: false });
         }
         this.setState({ showAimEditor: true, selectedAim: aimJson });
-        if (markupTypes)
-          setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
+        if (markupTypes) setMarkupsOfAimActive(aimID); //set the selected markups color to yellow
         this.refreshAllViewports();
       }
     } catch (err) {
@@ -996,10 +1066,9 @@ class DisplayView extends Component {
     return markupType === "DicomSegmentationEntity";
   };
 
-  // Returns the image index of the aim of the serie or the passed aim if aimID is passed 
+  // Returns the image index of the aim of the serie or the passed aim if aimID is passed
   getImageIndex = (serie, cornerstoneImageIds, aimID = "") => {
-    if (aimID === "")
-      aimID = serie.aimID;
+    if (aimID === "") aimID = serie.aimID;
     const { imageAnnotations, studyUID, seriesUID } = serie;
     if (imageAnnotations) {
       for (let [key, values] of Object.entries(imageAnnotations)) {
@@ -1025,7 +1094,7 @@ class DisplayView extends Component {
 
   getImageIndexFromImageId = (cornerstoneImageIds, cornerstoneImageId) => {
     const { imageIds } = this.state;
-    const wadors = wadoUrl.includes('wadors');
+    const wadors = wadoUrl.includes("wadors");
 
     if (!imageIds[cornerstoneImageId] && !wadors) {
       cornerstoneImageId = cornerstoneImageId.split("&frame")[0];
@@ -1101,7 +1170,8 @@ class DisplayView extends Component {
   getShapes = () => {
     const { series, activePort } = this.props;
     const aimId = series[activePort].aimID || undefined;
-    const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const toolState =
+      cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     return getMarkups(toolState, aimId);
   };
 
@@ -1115,7 +1185,7 @@ class DisplayView extends Component {
       "Length",
       "CircleRoi",
       "FreehandRoi3DTool",
-      "ArrowAnnotate"
+      "ArrowAnnotate",
     ];
     if (toolsOfInterest.includes(toolName) || toolType === "Bidirectional") {
       this.setState({ showAimEditor: true });
@@ -1127,13 +1197,15 @@ class DisplayView extends Component {
   getActiveSerie = () => {
     const { series, activePort } = this.props;
     return series[activePort];
-  }
+  };
 
   measurementRemoved = (event) => {
     const serie = this.getActiveSerie();
     const { aimId } = event.detail.measurementData;
     if (aimId && this.isLastShapeInAim(aimId)) {
-      const shouldDeleteAim = window.confirm("This is the last markup in Aim. Would yo like to delete the Aim file as well?");
+      const shouldDeleteAim = window.confirm(
+        "This is the last markup in Aim. Would yo like to delete the Aim file as well?"
+      );
       if (shouldDeleteAim) {
         this.deleteAim(aimId, serie);
         this.closeAimEditor(false);
@@ -1154,8 +1226,7 @@ class DisplayView extends Component {
     const aimJson = this.getAimJson(aimId, serie);
     const { name, comment } = aimJson;
     let isStudyAim = false;
-    if (this.getAimType(aimId, serie) === "study")
-      isStudyAim = true;
+    if (this.getAimType(aimId, serie) === "study") isStudyAim = true;
     const { projectID, patientID, studyUID, seriesUID } = serie;
     const aimRefs = {
       aimID: aimId,
@@ -1168,7 +1239,7 @@ class DisplayView extends Component {
     };
     deleteAnnotation({ aimID: aimId, projectID }).then(() => {
       this.props.dispatch(clearAimId());
-      this.props.dispatch(aimDelete({ aimRefs }))
+      this.props.dispatch(aimDelete({ aimRefs }));
       // Delete the comment down below after tests Sept 2021
       // this.props.dispatch(
       //   updateSingleSerie({
@@ -1190,20 +1261,20 @@ class DisplayView extends Component {
       this.props.dispatch(
         getSingleSerie({ patientID, projectID, seriesUID, studyUID })
       );
-    })
-  }
+    });
+  };
 
   getAimType = (aimId, serie) => {
     const { seriesUID } = serie;
     const { aimList } = this.props;
     return aimList[seriesUID][aimId].type;
-  }
+  };
 
   getAimJson = (aimId, serie) => {
     const { seriesUID } = serie;
     const { aimList } = this.props;
     return aimList[seriesUID][aimId].json;
-  }
+  };
 
   // returns true if delted shape is the last shape in aim
   isLastShapeInAim = (aimId) => {
@@ -1211,7 +1282,9 @@ class DisplayView extends Component {
     const { seriesUID } = series[activePort];
     const shapesOfSerie = this.getShapesOfSerie(seriesUID);
     if (shapesOfSerie) {
-      return shapesOfSerie.find(shape => shape.aimId === aimId) ? false : true;
+      return shapesOfSerie.find((shape) => shape.aimId === aimId)
+        ? false
+        : true;
     }
     return true;
   };
@@ -1219,7 +1292,7 @@ class DisplayView extends Component {
   measuremementModified = (event, action) => {
     this.setDirtyFlag();
     // considering fusion, other viewports may need update so refresh all of them
-    // TODO: may look at a flag of fusion 
+    // TODO: may look at a flag of fusion
     this.refreshAllViewports();
   };
 
@@ -1281,7 +1354,7 @@ class DisplayView extends Component {
         );
       }
 
-      setMarkupsOfAimActive(aimId);//set the selected markups color to yellow
+      setMarkupsOfAimActive(aimId); //set the selected markups color to yellow
       this.refreshAllViewports();
 
       //The following dispatched is a wrongly named method. it's dispatched to set the selected
@@ -1296,7 +1369,7 @@ class DisplayView extends Component {
     return `You are trying to edit Aim named: ${destinationAim}. All unsaved changes in Aim named: ${currentAim} will be lost!!!`;
   };
 
-  handleMarkupCreated = event => {
+  handleMarkupCreated = (event) => {
     const { detail } = event;
     const { hasSegmentation } = this.state;
 
@@ -1312,11 +1385,10 @@ class DisplayView extends Component {
     const { activePort, series } = this.props;
     if (activePort !== i) {
       if (this.state.showAimEditor) {
-
         // check if the series belongs to the same study
         const oldStudy = series[activePort].studyUID;
         const newStudy = series[i].studyUID;
-        if (this.state.templateType !== 'Study' || oldStudy !== newStudy) {
+        if (this.state.templateType !== "Study" || oldStudy !== newStudy) {
           if (!this.closeAimEditor(true)) {
             //means going to another viewport in the middle of creating/editing an aim
             return;
@@ -1334,7 +1406,7 @@ class DisplayView extends Component {
 
   parseAims = (aimList, seriesUid, studyUid, serieIndex) => {
     const seriesSegmentations = [];
-    const wadors = wadoUrl.includes('wadors');
+    const wadors = wadoUrl.includes("wadors");
     Object.entries(aimList).forEach(([key, values]) => {
       this.linesToPerpendicular(values); //change the perendicular lines to bidirectional to render by CS
       values.forEach((value) => {
@@ -1348,7 +1420,12 @@ class DisplayView extends Component {
           });
         }
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
-        let imageId = getWadoImagePath(studyUid, seriesUid, key, this.props.subpath[this.props.activePort]);
+        let imageId = getWadoImagePath(
+          studyUid,
+          seriesUid,
+          key,
+          this.props.subpath[this.props.activePort]
+        );
 
         if (this.state.imageIds && !this.state.imageIds[imageId] && !wadors) {
           //image is not multiframe so strip the frame number from the imageId
@@ -1458,7 +1535,7 @@ class DisplayView extends Component {
     }, {});
   };
 
-  handleSegmentations = seriesSegmentations => {
+  handleSegmentations = (seriesSegmentations) => {
     let segLabelMaps = {};
     let activeLabelMapIndex;
     const { serieIndex } = seriesSegmentations[0];
@@ -1510,7 +1587,7 @@ class DisplayView extends Component {
     }
   };
 
-  setSerieActiveLabelMap = aimId => {
+  setSerieActiveLabelMap = (aimId) => {
     const { series, activePort } = this.props;
     const { seriesLabelMaps } = this.state;
     if (!seriesLabelMaps[activePort]) {
@@ -1575,13 +1652,15 @@ class DisplayView extends Component {
       dicomData.dict
     );
 
-    const sourceImageSequence = dataset?.SharedFunctionalGroupsSequence?.DerivationImageSequence?.SourceImageSequence;
+    const sourceImageSequence =
+      dataset?.SharedFunctionalGroupsSequence?.DerivationImageSequence
+        ?.SourceImageSequence;
     if (sourceImageSequence) {
-      sourceImageSequence.forEach(sourceImage => {
+      sourceImageSequence.forEach((sourceImage) => {
         delete sourceImage.ReferencesFrameNumber;
-      })
+      });
     }
-  }
+  };
 
   renderSegmentation = (arrayBuffer, aimId, serieIndex, labelMapIndex) => {
     this.clearFrameNumber(arrayBuffer);
@@ -1597,12 +1676,14 @@ class DisplayView extends Component {
       // Promise.all(imagePromises).then(() => {
       // const stackToolState = cornerstoneTools.getToolState(element, "stack");
       // const imageIds = stackToolState.data[0].imageIds;
-      const provider = wadoUrl.includes('wadors') ? cornerstoneWADOImageLoader.wadors.metaDataManager : cornerstone.metaData;
+      const provider = wadoUrl.includes("wadors")
+        ? cornerstoneWADOImageLoader.wadors.metaDataManager
+        : cornerstone.metaData;
       const {
         labelmapBufferArray,
         segMetadata,
         segmentsOnFrame,
-        segmentsOnFrameArray
+        segmentsOnFrameArray,
       } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
         imageIds,
         arrayBuffer,
@@ -1671,8 +1752,8 @@ class DisplayView extends Component {
       const vpElements = document.getElementsByClassName("viewportContainer");
       for (var i = 0; i < vpElements.length; i++)
         if (i !== this.props.activePort) vpElements[i].style.display = "none";
-    };
-  }
+    }
+  };
 
   getColorOfMarkup = (aimUid, seriesUid) => {
     try {
@@ -1722,7 +1803,8 @@ class DisplayView extends Component {
     data.aimId = markup.aimUid;
     data.invalidated = true;
     this.createBidirectionalPoints(data, markup.coordinates);
-    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const currentState =
+      cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imageId, "Bidirectional");
     currentState[imageId]["Bidirectional"].data.push(data);
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
@@ -1750,7 +1832,8 @@ class DisplayView extends Component {
     data.aimId = markup.aimUid;
     data.invalidated = true;
     this.createLinePoints(data, markup.coordinates);
-    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const currentState =
+      cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imageId, "ArrowAnnotate");
     currentState[imageId]["ArrowAnnotate"].data.push(data);
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
@@ -1764,7 +1847,8 @@ class DisplayView extends Component {
     data.aimId = markup.aimUid;
     data.invalidated = true;
     this.createLinePoints(data, markup.coordinates);
-    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const currentState =
+      cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imageId, "Length");
     currentState[imageId]["Length"].data.push(data);
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
@@ -1785,7 +1869,8 @@ class DisplayView extends Component {
     data.aimId = markup.aimUid;
     data.invalidated = true;
     this.createPolygonPoints(data, markup.coordinates);
-    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const currentState =
+      cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imageId, "FreehandRoi");
     currentState[imageId]["FreehandRoi"].data.push(data);
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
@@ -1817,7 +1902,8 @@ class DisplayView extends Component {
     data.aimId = markup.aimUid;
     data.handles.end.x = markup.coordinates[0].x.value;
     data.handles.end.y = markup.coordinates[0].y.value;
-    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const currentState =
+      cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imageId, "Probe");
     currentState[imageId]["Probe"].data.push(data);
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
@@ -1834,7 +1920,8 @@ class DisplayView extends Component {
     data.handles.start.y = markup.coordinates[0].y.value;
     data.handles.end.x = markup.coordinates[1].x.value;
     data.handles.end.y = markup.coordinates[1].y.value;
-    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const currentState =
+      cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imageId, "CircleRoi");
     currentState[imageId]["CircleRoi"].data.push(data);
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
@@ -1886,14 +1973,14 @@ class DisplayView extends Component {
         return;
       }
     }
-  }
+  };
 
   clearSmartBrushState = () => {
     const brushModule = cornerstoneTools.store.modules.segmentation;
     delete brushModule.configuration.applyToImage;
     delete brushModule.configuration.maxInterval;
     delete brushModule.configuration.minInterval;
-  }
+  };
 
   // resetViewportWL = () => {
   //   let wwwc = sessionStorage.getItem("wwwc");
@@ -1908,8 +1995,8 @@ class DisplayView extends Component {
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
     imgStatus[this.props.activePort] = null;
-    sessionStorage.setItem('imgStatus', JSON.stringify(imgStatus));
-  }
+    sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+  };
 
   // deleteViewportWL = () => {
   //   let wwwc = sessionStorage.getItem("wwwc");
@@ -1926,8 +2013,8 @@ class DisplayView extends Component {
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
     imgStatus.splice(this.props.activePort, 1);
     imgStatus.push(null);
-    sessionStorage.setItem('imgStatus', JSON.stringify(imgStatus));
-  }
+    sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+  };
 
   closeViewport = () => {
     const { showAimEditor, dirty } = this.state;
@@ -1950,8 +2037,8 @@ class DisplayView extends Component {
   getMarkupTypesForAim = (aimUid) => {
     let markupTypes = [];
     try {
-      const imageAnnotations = this.props.series[this.props.activePort]
-        .imageAnnotations;
+      const imageAnnotations =
+        this.props.series[this.props.activePort].imageAnnotations;
       if (!imageAnnotations) {
         return undefined;
       }
@@ -1970,8 +2057,8 @@ class DisplayView extends Component {
     if (imageId.includes("objectUID=")) {
       return imageId.split("objectUID=")[1];
     }
-    if (imageId.includes('wadors')) {
-      return imageId.split('/instances/').pop();
+    if (imageId.includes("wadors")) {
+      return imageId.split("/instances/").pop();
     }
     return imageId.split("/").pop();
   };
@@ -1994,9 +2081,7 @@ class DisplayView extends Component {
     event.detail.viewportIndex = index;
     this.props.dispatch(updateImageId(imageId, event.detail.viewportIndex));
     const yaw = event.detail;
-    window.dispatchEvent(
-      new CustomEvent("newImage", { detail: yaw })
-    );
+    window.dispatchEvent(new CustomEvent("newImage", { detail: yaw }));
   };
 
   onAnnotate = () => {
@@ -2011,14 +2096,17 @@ class DisplayView extends Component {
   };
 
   // Triggered by event from right bar to jump to the image of aim
-  jumpToAimImage = event => {
+  jumpToAimImage = (event) => {
     // seperate this function to handle both
     // if there are multiframe data call get image stack and pass frame data etc
     const { series, activePort } = this.props;
     const { aimId, index, imageID, frameNo } = event.detail;
-    const imageIndex = this.getImageIndex(series[index], this.state.data[index].stack.imageIds, aimId);
-    if (!series[activePort].hasMultiframe)
-      this.jumpToImage(imageIndex, index);
+    const imageIndex = this.getImageIndex(
+      series[index],
+      this.state.data[index].stack.imageIds,
+      aimId
+    );
+    if (!series[activePort].hasMultiframe) this.jumpToImage(imageIndex, index);
     else {
       const multiFrameIndex = series[activePort].multiFrameMap[imageID];
       this.getData(multiFrameIndex, frameNo);
@@ -2034,6 +2122,7 @@ class DisplayView extends Component {
       10
     );
     this.setState({ data: newData });
+    this.props.dispatch(clearMultiFrameAimJumpFlags());
   };
 
   handleJumpChange = (i, event) => {
@@ -2049,18 +2138,28 @@ class DisplayView extends Component {
   };
 
   toggleOverlay = (e, i) => {
-    const showHide = { ... this.state.isOverlayVisible };
+    const showHide = { ...this.state.isOverlayVisible };
     const index = i || i === 0 ? i : this.props.activePort;
     if (showHide[index]) delete showHide[index];
     else showHide[index] = true;
     this.setState({ isOverlayVisible: showHide });
-  }
+  };
 
   render() {
-    const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
-    const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
+    const { series, activePort, updateProgress, updateTreeDataOnSave } =
+      this.props;
+    const {
+      showAimEditor,
+      selectedAim,
+      hasSegmentation,
+      activeLabelMapIndex,
+      data,
+      activeTool,
+    } = this.state;
+    // if (this.state.data[0])
+    // console.log(this.state.data[0].stack.imageIds.length);
     // if (this.state.redirect) return <Redirect to="/list" />;
-    const redirect = (mode === 'teaching' ? 'search' : 'list');
+    const redirect = mode === "teaching" ? "search" : "list";
     return !Object.entries(series).length ? (
       <Redirect to={`/${redirect}`} />
     ) : (
@@ -2077,19 +2176,22 @@ class DisplayView extends Component {
           saveData={this.props.saveData}
           savedData={this.props.savedData}
         >
-          <ToolMenu
-            onSwitchView={this.props.onSwitchView}
-          />
-          {this.state.isLoading && <div style={{ marginTop: '30%', marginLeft: '50%' }}>
-            <PropagateLoader color={'#7A8288'} loading={this.state.isLoading} margin={8} />
-          </div>}
+          <ToolMenu onSwitchView={this.props.onSwitchView} />
+          {this.state.isLoading && (
+            <div style={{ marginTop: "30%", marginLeft: "50%" }}>
+              <PropagateLoader
+                color={"#7A8288"}
+                loading={this.state.isLoading}
+                margin={8}
+              />
+            </div>
+          )}
           {!this.state.isLoading &&
             Object.entries(series).length &&
             data.map((data, i) => (
               <div
                 className={
-                  "viewportContainer" +
-                  (activePort == i ? " selected" : "")
+                  "viewportContainer" + (activePort == i ? " selected" : "")
                 }
                 key={i}
                 id={"viewportContainer" + i}
@@ -2119,7 +2221,9 @@ class DisplayView extends Component {
                     <span
                       className={"dot"}
                       style={{ background: "deepskyblue" }}
-                      onClick={(e) => { this.toggleOverlay(e, i) }}
+                      onClick={(e) => {
+                        this.toggleOverlay(e, i);
+                      }}
                     >
                       <FaTag />
                     </span>
@@ -2127,24 +2231,35 @@ class DisplayView extends Component {
                   {/* <div className={"column middle"}>
                     <label>{series[i].seriesUID}</label>
                   </div> */}
-                  <div className={"column middle-right"} style={{ paddingTop: '0px' }}>
-                    <div style={{ paddingTop: '10px' }}>
+                  <div
+                    className={"column middle-right"}
+                    style={{ paddingTop: "0px" }}
+                  >
+                    <div style={{ paddingTop: "10px" }}>
                       <Form inline className="slice-form">
                         <Form.Group className="slice-number">
-                          <Form.Label htmlFor="imageNum" className="slice-label" style={{ color: 'white' }}>
+                          <Form.Label
+                            htmlFor="imageNum"
+                            className="slice-label"
+                            style={{ color: "white" }}
+                          >
                             {"Image # "}
                           </Form.Label>
                           <Form.Control
                             type="number"
                             min="1"
-                            value={parseInt(data?.stack?.currentImageIdIndex) + 1}
+                            value={
+                              parseInt(data?.stack?.currentImageIdIndex) + 1
+                            }
                             className={"slice-field"}
-                            onChange={(event) => this.handleJumpChange(i, event)}
+                            onChange={(event) =>
+                              this.handleJumpChange(i, event)
+                            }
                             style={{
                               width: "60px",
                               height: "10px",
                               opacity: 1,
-                              display: 'inline'
+                              display: "inline",
                             }}
                           />
                         </Form.Group>
@@ -2163,7 +2278,7 @@ class DisplayView extends Component {
                   <div className={"column right"}>
                     <span
                       className={"dot"}
-                      style={{ background: "#FDD800", float: 'right' }}
+                      style={{ background: "#FDD800", float: "right" }}
                       onClick={() => {
                         this.setState({ showAimEditor: true });
                       }}
