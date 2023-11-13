@@ -167,7 +167,7 @@ const AnnotationSearch = props => {
 
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
-    if ((typeof pagination === 'number' || pagination) && !afterDelete) {
+    if ((typeof pagination === 'number' || pagination) && !afterDelete) {     
       setData(data.concat(result.data.rows));
     } else {
       setData(result.data.rows);
@@ -621,6 +621,8 @@ const AnnotationSearch = props => {
       body['filter'] = newFilters;
     searchAnnotations(body, bm)
       .then(res => {
+        console.log(' ---> searchAnnotations resolved and calls populateSearchResult');
+        console.log(res.data.rows);
         populateSearchResult(res, pageIndex, afterDelete);
         setRows(res.data.total_rows);
         setShowSpinner(false);
@@ -629,7 +631,9 @@ const AnnotationSearch = props => {
   }
 
   const getNewData = (pageIndex, afterDelete) => {
+    // const searchTableIndex = pageIndex || props.searchTableIndex || 0;
     if (mode === 'teaching') {
+      console.log(" in getNewdata");
       getFieldSearchResults(props.searchTableIndex, afterDelete);
       return;
     }
