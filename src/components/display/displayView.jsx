@@ -267,7 +267,7 @@ class DisplayView extends Component {
 
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
-      multiFrameAimJumpData &&
+      (multiFrameAimJumpData && multiFrameAimJumpData[0]) &&
       `${series[activePort].aimID}-${multiFrameAimJumpData[0]}-${multiFrameAimJumpData[1]}` !==
         this.state.multiFrameAimJumped
     ) {
@@ -595,10 +595,12 @@ class DisplayView extends Component {
           multiFrameIndex && frameNo && series[activePort].aimID
             ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
             : null;
-          
+
         if (key && key !== this.state.multiFrameAimJumped) {
           this.setState({ data: res, multiFrameAimJumped: key });
-        } else this.setState({ data: res });
+        } else {
+          this.setState({ data: res });
+        }
 
         this.setState(
           {
@@ -2099,6 +2101,7 @@ class DisplayView extends Component {
   jumpToAimImage = (event) => {
     // seperate this function to handle both
     // if there are multiframe data call get image stack and pass frame data etc
+    console.log(event);
     const { series, activePort } = this.props;
     const { aimId, index, imageID, frameNo } = event.detail;
     const imageIndex = this.getImageIndex(
@@ -2109,6 +2112,7 @@ class DisplayView extends Component {
     if (!series[activePort].hasMultiframe) this.jumpToImage(imageIndex, index);
     else {
       const multiFrameIndex = series[activePort].multiFrameMap[imageID];
+      console.log(" ---> multiFrameIndex, frameNo", multiFrameIndex, frameNo);
       this.getData(multiFrameIndex, frameNo);
     }
   };
