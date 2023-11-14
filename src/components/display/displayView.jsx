@@ -267,7 +267,8 @@ class DisplayView extends Component {
 
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
-      (multiFrameAimJumpData && multiFrameAimJumpData[0]) &&
+      multiFrameAimJumpData &&
+      multiFrameAimJumpData[0] &&
       `${series[activePort].aimID}-${multiFrameAimJumpData[0]}-${multiFrameAimJumpData[1]}` !==
         this.state.multiFrameAimJumped
     ) {
@@ -356,7 +357,7 @@ class DisplayView extends Component {
     const { series } = this.props;
     const newData = [...this.state.data];
     series.forEach((serie, i) => {
-      if (serie.aimId && this.state.data[i] && this.state.data[i].stack) {
+      if (serie.aimID && this.state.data[i] && this.state.data[i].stack) {
         const { imageIds } = this.state.data[i].stack;
         const imageIndex = this.getImageIndex(serie, imageIds);
         newData[i].stack.currentImageIdIndex = imageIndex;
@@ -2101,18 +2102,25 @@ class DisplayView extends Component {
   jumpToAimImage = (event) => {
     // seperate this function to handle both
     // if there are multiframe data call get image stack and pass frame data etc
-    console.log(event);
     const { series, activePort } = this.props;
     const { aimId, index, imageID, frameNo } = event.detail;
+
     const imageIndex = this.getImageIndex(
       series[index],
       this.state.data[index].stack.imageIds,
       aimId
     );
-    if (!series[activePort].hasMultiframe) this.jumpToImage(imageIndex, index);
-    else {
+
+    const { hasMultiframe } = series[activePort];
+
+    if (!hasMultiframe) {
+      this.jumpToImage(imageIndex, index);
+    } else if (hasMultiframe && !series[activePort].multiFrameMap[imageID]) {
+      this.setState({ isLoading: true });
+      this.getData(null, null, [0, 10]);
+      // this.jumpToImage(10, 0);
+    } else {
       const multiFrameIndex = series[activePort].multiFrameMap[imageID];
-      console.log(" ---> multiFrameIndex, frameNo", multiFrameIndex, frameNo);
       this.getData(multiFrameIndex, frameNo);
     }
   };
