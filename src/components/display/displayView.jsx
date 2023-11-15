@@ -810,7 +810,6 @@ class DisplayView extends Component {
       return all + item.length;
     }, 0);
 
-    seriesMetadata = seriesMetadata[firstSeriesIndex];
     const seriesMetadataExists = Array.isArray(seriesMetadata);
     const useSeriesData =
       seriesMetadataExists &&
