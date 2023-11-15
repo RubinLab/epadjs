@@ -353,6 +353,7 @@ class DisplayView extends Component {
       this.setState({ activeTool });
   };
 
+  
   jumpToAims = () => {
     const { series } = this.props;
     const newData = [...this.state.data];
@@ -2117,8 +2118,7 @@ class DisplayView extends Component {
       this.jumpToImage(imageIndex, index);
     } else if (hasMultiframe && !series[activePort].multiFrameMap[imageID]) {
       this.setState({ isLoading: true });
-      this.getData(null, null, [0, 10]);
-      // this.jumpToImage(10, 0);
+      this.getData(null, null);
     } else {
       const multiFrameIndex = series[activePort].multiFrameMap[imageID];
       this.getData(multiFrameIndex, frameNo);
