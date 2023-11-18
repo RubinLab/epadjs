@@ -320,12 +320,14 @@ function AnnotationTable(props) {
     }
   }, [props.noOfRows, props.data, props.searchTableIndex]);
 
+  // TODO: spinner doesn't appear anymore check the logic
   const getSeriesData = async selected => {
     props.dispatch(startLoading());
     const { projectID, studyUID } = selected;
     let { patientID, subjectID } = selected;
     patientID = patientID ? patientID : subjectID;
     try {
+      console.log(" is this the one +++++")
       const { data: series } = await getSeries(projectID, patientID, studyUID);
       props.dispatch(loadCompleted());
       props.dispatch(addStudyToGrid({[studyUID]: series}));
@@ -365,6 +367,7 @@ function AnnotationTable(props) {
     return { isOpen, index };
   };
 
+  // CHECK
   const openAnnotation = async selected => {
     try {
       const { studyUID, seriesUID, aimID, patientName, name } = selected;
@@ -417,6 +420,7 @@ function AnnotationTable(props) {
     }
   };
 
+  // CHECK
   const displaySeries = async selected => {
     const { subjectID: patientID, studyUID, aimID } = selected;
     let seriesArr = await getSeriesData(selected);
@@ -432,7 +436,7 @@ function AnnotationTable(props) {
     seriesArr = seriesArr.filter(isSupportedModality);
 
     //check if there is enough room
-    if (seriesArr.length + props.openSeries.length > 4) {
+    if (seriesArr.length + props.openSeries.length > maxPort) {
       //if there is not bring the modal
       setShowSelectSeriesModal(true);
       // TODO show toast

@@ -356,7 +356,7 @@ class DisplayView extends Component {
   
   jumpToAims = () => {
     const { series } = this.props;
-    const newData = [...this.state.data];
+    const newData = [...this.state.data]; // this should be deepclone
     series.forEach((serie, i) => {
       if (serie.aimID && this.state.data[i] && this.state.data[i].stack) {
         const { imageIds } = this.state.data[i].stack;
@@ -584,6 +584,9 @@ class DisplayView extends Component {
       const { series, activePort } = this.props;
       var promises = [];
       for (let i = 0; i < series.length; i++) {
+        // TODO: in order to not to get same stack again and again
+        // add seriesUID-PrID etc info and look it up if we need to get it
+        // [{stack -> UIDkey, ycurImgIndex, imfIds}, {}]
         const promise = this.getImageStack(
           series[i],
           i,
@@ -598,6 +601,8 @@ class DisplayView extends Component {
             ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
             : null;
 
+        // TODO: how this logic works if it is not a multiframe img/series like patient7
+        // should i add a isMultiFrame constol before checking key    
         if (key && key !== this.state.multiFrameAimJumped) {
           this.setState({ data: res, multiFrameAimJumped: key });
         } else {
@@ -611,7 +616,7 @@ class DisplayView extends Component {
           () => {
             this.jumpToAims();
             this.renderAims();
-            this.refreshAllViewports();
+            this.refreshAllViewports(); // TODO: this may be unnecessary since it is caalled in renderAims
             // this.shouldOpenAimEditor();
           }
         );
@@ -912,6 +917,8 @@ class DisplayView extends Component {
     this.setState({ imageIds: { ...imageIds, ...newImageIds } });
 
     //to jump to the same image after aim save
+    // TODO reorganize the imageIndex assigning logic / if statements
+
     let imageIndex;
     if (
       this.state.data[index] &&
