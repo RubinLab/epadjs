@@ -440,6 +440,8 @@ class selectSerieModal extends React.Component {
         });
         await this.setSignificantSeries(series);
         window.dispatchEvent(new Event("refreshProjects"));
+        // to prevent concatanating the annotation list pass afterDelete parameter true
+        this.props.onSave(this.props.searchTableIndex, true);
         this.setState({ isButtonDisabled: false });
         return result;
       })
@@ -527,7 +529,7 @@ class selectSerieModal extends React.Component {
         <Modal.Footer className="select-serie-footer">
           {isTeachingFile && (
             <div>
-              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) { this.handleCancel(true); this.props.onSave() } }} disabled={this.state.isButtonDisabled}>Save Teaching File</Button>
+              <Button className={"modal-button"} variant="secondary" size="sm" onClick={async () => { if (await this.saveTeachingFile() !== -1) { this.handleCancel(true) } }} disabled={this.state.isButtonDisabled}>Save Teaching File</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={() => this.saveTeachingFileAndDisplay()} disabled={this.state.isButtonDisabled}>Save Teaching File & Display</Button>
               <Button className={"modal-button"} variant="secondary" size="sm" onClick={this.handleCancel}>No New TF - Just Open Stella</Button>
             </div>
@@ -552,6 +554,7 @@ const mapStateToProps = state => {
     patients: state.annotationsListReducer.patients,
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
+    searchTableIndex: state.annotationsListReducer.searchTableIndex
   };
 };
 
