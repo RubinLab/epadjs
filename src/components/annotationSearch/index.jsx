@@ -621,8 +621,6 @@ const AnnotationSearch = props => {
       body['filter'] = newFilters;
     searchAnnotations(body, bm)
       .then(res => {
-        console.log(' ---> searchAnnotations resolved and calls populateSearchResult');
-        console.log(res.data.rows);
         populateSearchResult(res, pageIndex, afterDelete);
         setRows(res.data.total_rows);
         setShowSpinner(false);
