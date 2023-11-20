@@ -257,13 +257,6 @@ const AnnotationSearch = props => {
     };
   }, [handleUserKeyPress]);
 
-  useEffect(() => {
-    window.addEventListener('openTeachingFilesModal', handleTeachingFilesModal);
-    return () => {
-      window.removeEventListener('openTeachingFilesModal', handleTeachingFilesModal);
-    };
-  }, [handleTeachingFilesModal]);
-
   const handleTeachingFilesModal = event => {
     let { seriesArray, args, packedData } = event.detail;
 
@@ -278,6 +271,13 @@ const AnnotationSearch = props => {
     setEncArgs(args);
     setDecrArgs(packedData);
   }
+
+  useEffect(() => {
+    window.addEventListener('openTeachingFilesModal', handleTeachingFilesModal);
+    return () => {
+      window.removeEventListener('openTeachingFilesModal', handleTeachingFilesModal);
+    };
+  }, [handleTeachingFilesModal]);
 
   const useDebouncedEffect = (effect, deps, delay) => {
     useEffect(() => {

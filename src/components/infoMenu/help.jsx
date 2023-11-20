@@ -6,18 +6,17 @@ let mode;
 let apiUrl;
 
 class Help extends React.Component {
-
-  downloadManual = async () => {
-    fetch(`${process.env.PUBLIC_URL}/STELLA_User_Manual.pdf`).then(response => {
-      response.blob().then(blob => {
-        const fileURL = window.URL.createObjectURL(blob);
-        let alink = document.createElement('a');
-        alink.href = fileURL;
-        alink.download = 'STELLA_User_Manual.pdf';
-        alink.click();
-      }).catch(error => console.error('Reading STELLA_User_Manual', error))
-    }).catch(err => console.error("Downloading STELLA_User_Manual", err))
-  }
+  // downloadManual = async () => {
+  //   fetch(`${process.env.PUBLIC_URL}/STELLA_User_Manual.pdf`).then(response => {
+  //     response.blob().then(blob => {
+  //       const fileURL = window.URL.createObjectURL(blob);
+  //       let alink = document.createElement('a');
+  //       alink.href = fileURL;
+  //       alink.download = 'STELLA_User_Manual.pdf';
+  //       alink.click();
+  //     }).catch(error => console.error('Reading STELLA_User_Manual', error))
+  //   }).catch(err => console.error("Downloading STELLA_User_Manual", err))
+  // }
 
   render = () => {
     const mode = sessionStorage.getItem("mode");
@@ -30,9 +29,9 @@ class Help extends React.Component {
         </Modal.Header>
         <Modal.Body className={"notification-modal"}>
           <div>
-            {`Learning to use ${mode === 'teaching' ? 'STELLA' : 'ePAD'}?`}
-            <div >
-              {mode !== 'teaching' && (
+            {`Learning to use ${mode === "teaching" ? "STELLA" : "ePAD"}?`}
+            <div>
+              {mode !== "teaching" && (
                 <button
                   className="info-about__button"
                   onClick={() => {
@@ -44,53 +43,78 @@ class Help extends React.Component {
                   }}
                 >
                   Get help with ePAD
-                </button>)}
-              {mode === 'teaching' && (<button
-                className="info-about__button"
-                onClick={this.downloadManual}
-              >
-                Online User Manual
-              </button>)}
-            </div>
-            <div>
-              {`Please give your feedback on ${mode === 'teaching' ? 'STELLA' : 'ePAD'} and recommendations for improvements`}
-              <div>
+                </button>
+              )}
+              {mode === "teaching" && (
                 <button
                   className="info-about__button"
                   onClick={() => {
-                    {
-                      mode !== 'teaching' ? window.open(
-                        "https://epad.stanford.edu/ways-contact-us",
-                        "_blank",
-                        ""
-                      ) : feedback !== 'undefined' ?
-                        window.open(
-                          feedback,
-                          "_blank",
-                          ""
-                        )
-                        : null
-                    }
+                    window.open(
+                      "https://stella.stanford.edu/user-guide/",
+                      "_blank",
+                      ""
+                    );
                   }}
                 >
-                  {mode === 'teaching' ? 'Open Feedback Form' : 'Report an issue'}
+                  Online User Manual
                 </button>
-              </div>
+              )}
             </div>
-            {mode === 'teaching' && (<div>
-              <p>
-                Having technical issues such as login or crashes? <br />
-                Please submit a Help Ticket to IT
-              </p>
+            <div>
+              {mode !== "teaching" && (
+                <div>
+                  Please give your feedback on ePAD and recommendations for
+                  improvements
+                  <button
+                    className="info-about__button"
+                    onClick={() => {
+                      {
+                        mode !== "teaching"
+                          ? window.open(
+                              "https://epad.stanford.edu/ways-contact-us",
+                              "_blank",
+                              ""
+                            )
+                          : feedback !== "undefined"
+                          ? window.open(feedback, "_blank", "")
+                          : null;
+                      }
+                    }}
+                  >
+                    Report an issue
+                  </button>
+                </div>
+              )}
+            </div>
+            <div>
+              {mode === "teaching" && (
+                <div style={{marginBottom: '2rem', marginTop: '1rem'}}>
+                  For further background information and to provide user feedback, please see the <a href="https://example.com">Public Website</a>               
+                </div>
+              )}
+            </div>
+            {mode === "teaching" && (
               <div>
-                <button
-                  className="info-about__button"
-                  onClick={() => window.open("https://itcare.stanfordhealthcare.org/", "_blank", "")}
-                >
-                  Submit Help Ticket
-                </button>
+                <p>
+                  Having technical issues such as login or crashes? <br />
+                  Please submit a Help Ticket to IT
+                </p>
+                <div>
+                  <button
+                    className="info-about__button"
+                    onClick={() =>
+                      window.open(
+                        "https://itcare.stanfordhealthcare.org/",
+                        "_blank",
+                        ""
+                      )
+                    }
+                  >
+                    Submit Help Ticket
+                  </button>
+                </div>
               </div>
-            </div>)}
+            )}
           </div>
         </Modal.Body>
         <Modal.Footer>
