@@ -51,6 +51,7 @@ import {
   SUBPATH,
   CHECK_MULTIFRAME,
   CLEAR_MULTIFRAME_AIM_JUMP,
+  SET_SERIES_DATA,
   colors,
   commonLabels,
 } from "./types";
@@ -69,6 +70,10 @@ import aimEntityData from "./annotationDock/aimEntityData";
 import { setToolOptionsForElement } from 'cornerstone-tools';
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
+
+export const setSeriesData = (projectID, patientID, studyUID, data) => {
+  return { type: SET_SERIES_DATA, payload: { projectID, patientID, studyUID, data }};
+}
 
 export const clearMultiFrameAimJumpFlags = () => {
   return { type: CLEAR_MULTIFRAME_AIM_JUMP };

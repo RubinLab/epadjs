@@ -51,6 +51,7 @@ import {
   SUBPATH,
   CHECK_MULTIFRAME,
   CLEAR_MULTIFRAME_AIM_JUMP,
+  SET_SERIES_DATA,
   colors,
   commonLabels,
 } from "./types";
@@ -89,7 +90,8 @@ const initialState = {
   otherSeriesAimsList: {},
   refreshMap: {},
   subpath: [],
-  multiFrameAimJumpData: null
+  multiFrameAimJumpData: null,
+  seriesData: {}
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -107,6 +109,11 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case SET_SERIES_DATA: 
+        const newSeriesData = _.cloneDeep(state.seriesData);
+        const { projectID, patientID, studyUID, data } = action.payload;
+        newSeriesData[projectID][patientID][studyUID] = data;
+        return { ...state, seriesData: newSeriesData };
       case CLEAR_MULTIFRAME_AIM_JUMP: 
         const aimClearedSeries = _.cloneDeep(state.openSeries);
         aimClearedSeries[state.activePort].aimID = null;
