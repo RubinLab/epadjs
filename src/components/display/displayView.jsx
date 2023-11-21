@@ -264,7 +264,8 @@ class DisplayView extends Component {
       else return;
       return;
     }
-
+ 
+    // TODO: check if loading/true-false control is required for the first condition
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
       multiFrameAimJumpData &&
@@ -292,6 +293,9 @@ class DisplayView extends Component {
     // each time visibility of aims change
     else if (Object.keys(aimList).length !== Object.keys(prevAimList).length) {
       this.renderAims();
+      //TODO: check if filling aimsList process changes openseries
+      // if chanes sever that data from openseries
+      // refresh only cornerstone by calling this.renderAims();
     }
   }
 
@@ -2120,6 +2124,7 @@ class DisplayView extends Component {
 
     const { hasMultiframe } = series[activePort];
 
+    // TODO: if jumping on the same multiframe series it shouldn't call the getData
     if (!hasMultiframe) {
       this.jumpToImage(imageIndex, index);
     } else if (hasMultiframe && !series[activePort].multiFrameMap[imageID]) {
@@ -2306,7 +2311,7 @@ class DisplayView extends Component {
                   </div>
                 </div>
                 <CornerstoneViewport
-                  key={i}
+                  key={`${i}-port`}
                   imageIds={data.stack.imageIds}
                   imageIdIndex={parseInt(data.stack.currentImageIdIndex)}
                   viewportIndex={i}

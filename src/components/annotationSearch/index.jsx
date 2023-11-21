@@ -250,15 +250,6 @@ const AnnotationSearch = props => {
     }
   });
 
-  useEffect(() => {
-    window.addEventListener('keydown', handleUserKeyPress);
-    return () => {
-      window.removeEventListener('keydown', handleUserKeyPress);
-    };
-  }, [handleUserKeyPress]);
-
-
-
   const handleTeachingFilesModal = event => {
     let { seriesArray, args, packedData } = event.detail;
 
@@ -273,6 +264,13 @@ const AnnotationSearch = props => {
     setEncArgs(args);
     setDecrArgs(packedData);
   }
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleUserKeyPress);
+    return () => {
+      window.removeEventListener('keydown', handleUserKeyPress);
+    };
+  }, [handleUserKeyPress]);
 
   useEffect(() => {
     window.addEventListener('openTeachingFilesModal', handleTeachingFilesModal);

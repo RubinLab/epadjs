@@ -940,6 +940,8 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
     projectID = projectID ? projectID : "lite";
     patientID = patientID ? patientID : serie.subjectID;
     aimID = aimID ? aimID : annotation;
+
+    //  TODO: getseries call should get its data from the initial data
     const promises = [getStudyAims(patientID, studyUID, projectID)];
     promises.push(getSeries(projectID, patientID, studyUID));
 
