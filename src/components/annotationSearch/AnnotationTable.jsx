@@ -1,15 +1,15 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { connect } from 'react-redux';
-import ReactTooltip from 'react-tooltip';
-import Modal from 'react-bootstrap/Modal';
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { connect } from "react-redux";
+import ReactTooltip from "react-tooltip";
+import Modal from "react-bootstrap/Modal";
 import {
   useTable,
   usePagination,
   useRowSelect,
   useSortBy,
-  useControlledState
-} from 'react-table';
-import { clearCarets, convertDateFormat } from '../../Utils/aid.js';
+  useControlledState,
+} from "react-table";
+import { clearCarets, convertDateFormat } from "../../Utils/aid.js";
 import {
   changeActivePort,
   jumpToAim,
@@ -19,11 +19,12 @@ import {
   loadCompleted,
   annotationsLoadingError,
   updateSearchTableIndex,
-  addStudyToGrid
-} from '../annotationsList/action';
-import { formatDate } from '../flexView/helperMethods';
-import { getSeries } from '../../services/seriesServices';
-import SelectSerieModal from '../annotationsList/selectSerieModal';
+  addStudyToGrid,
+  setSeriesData,
+} from "../annotationsList/action";
+import { formatDate } from "../flexView/helperMethods";
+import { getSeries } from "../../services/seriesServices";
+import SelectSerieModal from "../annotationsList/selectSerieModal";
 import { isSupportedModality } from "../../Utils/aid.js";
 import { COMP_MODALITIES as compModality } from "../../constants.js";
 const defaultPageSize = 200;
@@ -81,26 +82,26 @@ function Table({
     previousPage,
     setPageSize,
     toggleAllRowsExpanded,
-    state: { selectedRowIds, expanded, pageIndex, pageSize }
+    state: { selectedRowIds, expanded, pageIndex, pageSize },
   } = useTable(
     {
       columns,
       data,
       initialState: {
-        pageSize: defaultPageSize
+        pageSize: defaultPageSize,
       },
       autoResetPage: false,
       manualPagination: true,
       pageCount,
-      useControlledState: state => {
+      useControlledState: (state) => {
         return React.useMemo(
           () => ({
             ...state,
-            pageIndex: controlledPageIndex
+            pageIndex: controlledPageIndex,
           }),
           [state, controlledPageIndex]
         );
-      }
+      },
     },
     useSortBy,
     usePagination,
@@ -132,7 +133,9 @@ function Table({
   }, [fetchData, pageIndex, pageSize]);
   return (
     <>
-      {mode !== 'teaching' && (<>{/* <table {...getTableProps()} style={{ width: '100%' }}>
+      {mode !== "teaching" && (
+        <>
+          {/* <table {...getTableProps()} style={{ width: '100%' }}>
         <thead
           style={{
             color: 'aliceblue',
@@ -154,30 +157,33 @@ function Table({
             </tr>
           ))}
         </thead> */}
-        {/* <tbody {...getTableBodyProps()}> */}</>)}
+          {/* <tbody {...getTableBodyProps()}> */}
+        </>
+      )}
       {rows.map((row, i) => {
         prepareRow(row);
         return (
           <tr {...row.getRowProps()}>
-            {row.cells.map(cell => {
-              if (cell.column.id === 'select')
+            {row.cells.map((cell) => {
+              if (cell.column.id === "select")
                 return (
-                  <td {...cell.getCellProps()} className='select_row'>
-                    {cell.render('Cell')}
+                  <td {...cell.getCellProps()} className="select_row">
+                    {cell.render("Cell")}
                   </td>
                 );
               else
                 return (
                   <td
                     {...cell.getCellProps()}
-                  // style={{
-                  //   margin: '0',
-                  //   padding: '0.8rem 0.4rem',
-                  //   borderBottom: '0.2px solid #6c757d'
-                  // }}
+                    // style={{
+                    //   margin: '0',
+                    //   padding: '0.8rem 0.4rem',
+                    //   borderBottom: '0.2px solid #6c757d'
+                    // }}
                   >
-                    {cell.render('Cell')}
-                  </td>)
+                    {cell.render("Cell")}
+                  </td>
+                );
             })}
           </tr>
         );
@@ -186,48 +192,50 @@ function Table({
         <tr>
           <td colSpan="10000">
             Showing {defaultPageSize * pageIndex}-
-            {defaultPageSize * (pageIndex + 1)} of ~{pageCount * pageSize}{' '}
+            {defaultPageSize * (pageIndex + 1)} of ~{pageCount * pageSize}{" "}
             results
           </td>
         </tr>
       )}
-      {mode !== 'teaching' && (<>{/* </tbody>
-      </table> */}</>)}
-      {
-        pageCount > 1 && (
-          <div className="pagination-search">
-            <button
-              onClick={() => {
-                handlePageIndex('prev');
-              }}
-              disabled={!canPreviousPage}
-              className={!canPreviousPage ? 'disabled' : ''}
-            >
-              {'<'}
-            </button>
-            <select
-              value={pageSize}
-              onChange={e => {
-                setPageSize(Number(e.target.value));
-              }}
-            >
-              {[defaultPageSize].map((pageSize, i) => (
-                <option key={`${pageSize}-${i}`} value={pageSize}>
-                  {pageSize}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={() => {
-                handlePageIndex('next');
-              }}
-              disabled={!canNextPage}
-            >
-              {'>'}
-            </button>
-          </div>
-        )
-      }
+      {mode !== "teaching" && (
+        <>
+          {/* </tbody>
+      </table> */}
+        </>
+      )}
+      {pageCount > 1 && (
+        <div className="pagination-search">
+          <button
+            onClick={() => {
+              handlePageIndex("prev");
+            }}
+            disabled={!canPreviousPage}
+            className={!canPreviousPage ? "disabled" : ""}
+          >
+            {"<"}
+          </button>
+          <select
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+            }}
+          >
+            {[defaultPageSize].map((pageSize, i) => (
+              <option key={`${pageSize}-${i}`} value={pageSize}>
+                {pageSize}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => {
+              handlePageIndex("next");
+            }}
+            disabled={!canNextPage}
+          >
+            {">"}
+          </button>
+        </div>
+      )}
     </>
   );
 }
@@ -245,19 +253,20 @@ function Table({
 // };
 
 function AnnotationTable(props) {
-  maxPort = parseInt(sessionStorage.getItem('maxPort'));
-  mode = sessionStorage.getItem('mode');
+  maxPort = parseInt(sessionStorage.getItem("maxPort"));
+  mode = sessionStorage.getItem("mode");
   const [pageCount, setPageCount] = useState(0);
   const [data, setData] = useState([]);
   const [showSelectSeriesModal, setShowSelectSeriesModal] = useState(false);
   const [selected, setSelected] = useState({});
   // const [listOfSelecteds, setListOfSelecteds] = useState({});
   const [showNarrative, setShowNarrative] = useState(false);
-  const [narrative, setNarrative] = useState('');
+  const [narrative, setNarrative] = useState("");
   // const [aimMap, setAimMap] = useState({})
 
-  const handlePageIndex = act => {
-    let newIndex = act === 'prev' ? props.searchTableIndex - 1 : props.searchTableIndex + 1;
+  const handlePageIndex = (act) => {
+    let newIndex =
+      act === "prev" ? props.searchTableIndex - 1 : props.searchTableIndex + 1;
     props.dispatch(updateSearchTableIndex(newIndex));
   };
 
@@ -276,8 +285,24 @@ function AnnotationTable(props) {
       if (i >= startIndex && i < endIndex) {
         const aim = el.data ? el.data : el;
         pageData.push(aim);
-        const { aimID, seriesUID, studyUID, subjectID, projectID, patientName, name } = aim;
-        map[aimID] = { aimID, seriesUID, studyUID, subjectID, projectID, patientName, name }   
+        const {
+          aimID,
+          seriesUID,
+          studyUID,
+          subjectID,
+          projectID,
+          patientName,
+          name,
+        } = aim;
+        map[aimID] = {
+          aimID,
+          seriesUID,
+          studyUID,
+          subjectID,
+          projectID,
+          patientName,
+          name,
+        };
       }
     });
     // instead of writing 200 aims to storage, i can write a function
@@ -321,23 +346,34 @@ function AnnotationTable(props) {
   }, [props.noOfRows, props.data, props.searchTableIndex]);
 
   // TODO: spinner doesn't appear anymore check the logic
-  const getSeriesData = async selected => {
+  const getSeriesData = async (selected) => {
     props.dispatch(startLoading());
+    const { seriesData } = this.props;
     const { projectID, studyUID } = selected;
     let { patientID, subjectID } = selected;
     patientID = patientID ? patientID : subjectID;
     try {
-      console.log(" is this the one +++++")
-      const { data: series } = await getSeries(projectID, patientID, studyUID);
-      props.dispatch(loadCompleted());
-      props.dispatch(addStudyToGrid({[studyUID]: series}));
-      return series;
+      const dataExists =
+        seriesData[projectID] &&
+        seriesData[projectID][patientID] &&
+        seriesData[projectID][patientID][studyUID];
+      if (!dataExists) {
+        const { data: series } = await getSeries(
+          projectID,
+          patientID,
+          studyUID
+        );
+        props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
+        props.dispatch(loadCompleted());
+        props.dispatch(addStudyToGrid({ [studyUID]: series }));
+        return series;
+      } else return seriesData[projectID][projectID][studyUID];
     } catch (err) {
       props.dispatch(annotationsLoadingError(err));
     }
   };
 
-  const excludeOpenSeries = allSeriesArr => {
+  const excludeOpenSeries = (allSeriesArr) => {
     const result = [];
     //get all series number in an array
     const idArr = props.openSeries.reduce((all, item, index) => {
@@ -345,7 +381,7 @@ function AnnotationTable(props) {
       return all;
     }, []);
     //if array doesnot include that serie number
-    allSeriesArr.forEach(serie => {
+    allSeriesArr.forEach((serie) => {
       if (!idArr.includes(serie.seriesUID)) {
         //push that serie in the result arr
         result.push(serie);
@@ -368,11 +404,11 @@ function AnnotationTable(props) {
   };
 
   // CHECK
-  const openAnnotation = async selected => {
+  const openAnnotation = async (selected) => {
     try {
       const { studyUID, seriesUID, aimID, patientName, name } = selected;
       const patientID = selected.subjectID;
-      const projectID = selected.projectID ? selected.projectID : 'lite';
+      const projectID = selected.projectID ? selected.projectID : "lite";
       const { openSeries } = props;
       setSelected(selected);
       // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
@@ -384,7 +420,7 @@ function AnnotationTable(props) {
         props.dispatch(changeActivePort(index));
         // if series has not multiframes continue with the old logic
         props.dispatch(jumpToAim(seriesUID, aimID, index));
-        // if there is a multiframe fire the event 
+        // if there is a multiframe fire the event
         props.switchToDisplay();
       } else {
         if (isGridFull) {
@@ -421,7 +457,7 @@ function AnnotationTable(props) {
   };
 
   // CHECK
-  const displaySeries = async selected => {
+  const displaySeries = async (selected) => {
     const { subjectID: patientID, studyUID, aimID } = selected;
     let seriesArr = await getSeriesData(selected);
     setSelected(seriesArr);
@@ -450,8 +486,10 @@ function AnnotationTable(props) {
       }
       //getsingleSerie
       Promise.all(promiseArr)
-        .then(() => { props.switchToDisplay(); })
-        .catch(err => console.error(err));
+        .then(() => {
+          props.switchToDisplay();
+        })
+        .catch((err) => console.error(err));
     }
   };
 
@@ -461,144 +499,157 @@ function AnnotationTable(props) {
   // added to columns and filtered that way
 
   let columns = [];
-  if (mode === 'teaching') {
+  if (mode === "teaching") {
     columns = React.useMemo(
       () => [
         {
-          Header: 'Select',
-          id: 'select',
-          class: 'select_row',
+          Header: "Select",
+          id: "select",
+          class: "select_row",
           Cell: ({ row }) => {
             return (
               <input
                 type="checkbox"
-                className='form-check-input __search-checkbox'
+                className="form-check-input __search-checkbox"
                 id={row.original.aimID}
                 // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
                 // checked={listOfSelecteds[row.original.aimID]}
-              // checked={props.allSelected}
+                // checked={props.allSelected}
               />
             );
-          }
+          },
         },
         {
-          Header: 'Patient Name',
-          accessor: 'patientName',
+          Header: "Patient Name",
+          accessor: "patientName",
           Cell: ({ row }) => {
-            return <div onClick={() => {
-              if (
-                row.original.seriesUID === 'noseries' ||
-                !row.original.seriesUID
-              ) {
-                // study aim opening
-                displaySeries(row.original);
-              } else {
-                // series opening
-                openAnnotation(row.original);
-              }
-            }} style={{ textDecoration: 'underline', cursor: 'pointer' }}>{clearCarets(row.original.patientName)}</div >;
-          }
+            return (
+              <div
+                onClick={() => {
+                  if (
+                    row.original.seriesUID === "noseries" ||
+                    !row.original.seriesUID
+                  ) {
+                    // study aim opening
+                    displaySeries(row.original);
+                  } else {
+                    // series opening
+                    openAnnotation(row.original);
+                  }
+                }}
+                style={{ textDecoration: "underline", cursor: "pointer" }}
+              >
+                {clearCarets(row.original.patientName)}
+              </div>
+            );
+          },
         },
         {
-          Header: 'MRN',
-          accessor: 'subjectID',
+          Header: "MRN",
+          accessor: "subjectID",
         },
         {
-          Header: 'Acc No',
-          accessor: 'accessionNumber',
+          Header: "Acc No",
+          accessor: "accessionNumber",
         },
         {
-          accessor: 'name',
+          accessor: "name",
         },
         {
-          Header: 'Age',
-          accessor: 'age',
+          Header: "Age",
+          accessor: "age",
         },
         {
-          Header: 'Sex',
-          accessor: 'sex',
+          Header: "Sex",
+          accessor: "sex",
         },
         {
-          Header: 'Modality',
-          accessor: 'modality',
-          Cell: ({ row: { original: { modality } } }) => {
-            if (modality && compModality[modality]) return <div className={'modality-capital'}>{compModality[modality]}</div>;
-            else return <div className={'modality-capital'}>{modality}</div>;
-          }
+          Header: "Modality",
+          accessor: "modality",
+          Cell: ({
+            row: {
+              original: { modality },
+            },
+          }) => {
+            if (modality && compModality[modality])
+              return (
+                <div className={"modality-capital"}>
+                  {compModality[modality]}
+                </div>
+              );
+            else return <div className={"modality-capital"}>{modality}</div>;
+          },
         },
         {
-          Header: 'Study Date',
-          accessor: 'studyDate',
+          Header: "Study Date",
+          accessor: "studyDate",
           Cell: ({ row }) => {
-            if (!row.original.studyDate)
-              return <div></div>;
+            if (!row.original.studyDate) return <div></div>;
             const studyDateArr = convertDateFormat(
               row.original.studyDate,
-              'studyDate'
-            ).split(' ');
+              "studyDate"
+            ).split(" ");
             return <div>{formatDate(studyDateArr[0])}</div>;
-          }
+          },
         },
         {
-          Header: 'Anatomy',
-          accessor: 'anatomy',
+          Header: "Anatomy",
+          accessor: "anatomy",
           Cell: ({ row }) => {
             return (
               <div>
                 {Array.isArray(row.original.anatomy)
-                  ? row.original.anatomy.join(', ')
+                  ? row.original.anatomy.join(", ")
                   : row.original.anatomy}
               </div>
             );
-          }
+          },
         },
         {
-          Header: 'Observation',
-          accessor: 'observation',
-          style: { 'whiteSpace': 'nowrap' },
+          Header: "Observation",
+          accessor: "observation",
+          style: { whiteSpace: "nowrap" },
           Cell: ({ row }) => {
             return (
               <div>
                 {Array.isArray(row.original.observation)
-                  ? row.original.observation.join(', ')
+                  ? row.original.observation.join(", ")
                   : row.original.observation}
               </div>
             );
-          }
+          },
         },
         {
-          Header: 'Created',
-          id: 'date',
-          accessor: 'date',
+          Header: "Created",
+          id: "date",
+          accessor: "date",
           Cell: ({ row }) => {
             const studyDateArr = convertDateFormat(
               row.original.date,
-              'date'
-            ).split(' ');
+              "date"
+            ).split(" ");
             return <div>{formatDate(studyDateArr[0])}</div>;
-          }
+          },
         },
         {
-          Header: 'Template',
-          accessor: 'templateType',
+          Header: "Template",
+          accessor: "templateType",
         },
         {
-          Header: 'User',
-          accessor: 'fullName',
-          style: { whiteSpace: 'normal' },
+          Header: "User",
+          accessor: "fullName",
+          style: { whiteSpace: "normal" },
         },
         {
-          Header: 'Narrative',
+          Header: "Narrative",
           // accessor: 'userComment',
           Cell: ({ row }) => {
             const text = row.original.userComment;
-            const subText = text || text?.length >= 100 ? text.substring(0, 100) + '...' : '';
+            const subText =
+              text || text?.length >= 100 ? text.substring(0, 100) + "..." : "";
             return (
               <>
-                <div
-                  data-tip
-                  data-for="narrative"
-                >
+                <div data-tip data-for="narrative">
                   {subText}
                 </div>
                 <ReactTooltip
@@ -607,125 +658,130 @@ function AnnotationTable(props) {
                   type="info"
                   delayShow={500}
                 >
-                  <span className="filter-label">Please open aim to see the narrative!</span>
+                  <span className="filter-label">
+                    Please open aim to see the narrative!
+                  </span>
                 </ReactTooltip>
               </>
-            )
-
-          }
-        }],
+            );
+          },
+        },
+      ],
       // [data, listOfSelecteds, props.selectedAnnotations]
       [data]
-
     );
-  }
-  else {
+  } else {
     columns = React.useMemo(
       () => [
         {
-          Header: 'Select',
-          id: 'select',
-          class: 'select_row',
+          Header: "Select",
+          id: "select",
+          class: "select_row",
           Cell: ({ row }) => {
             return (
               <input
                 type="checkbox"
-                className='form-check-input __search-checkbox'
+                className="form-check-input __search-checkbox"
                 id={row.original.aimID}
                 // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
                 // checked={props.allSelected || listOfSelecteds[row.original.aimID]}
               />
             );
-          }
+          },
         },
         {
-          Header: 'Patient Name',
-          accessor: 'patientName',
+          Header: "Patient Name",
+          accessor: "patientName",
           Cell: ({ row }) => {
-            return <div onClick={() => {
-              if (
-                row.original.seriesUID === 'noseries' ||
-                !row.original.seriesUID
-              ) {
-                // study aim opening
-                displaySeries(row.original);
-              } else {
-                // series opening
-                openAnnotation(row.original);
-              }
-            }} style={{ textDecoration: 'underline', cursor: 'pointer' }}>{clearCarets(row.original.patientName)}</div >;
-          }
+            return (
+              <div
+                onClick={() => {
+                  if (
+                    row.original.seriesUID === "noseries" ||
+                    !row.original.seriesUID
+                  ) {
+                    // study aim opening
+                    displaySeries(row.original);
+                  } else {
+                    // series opening
+                    openAnnotation(row.original);
+                  }
+                }}
+                style={{ textDecoration: "underline", cursor: "pointer" }}
+              >
+                {clearCarets(row.original.patientName)}
+              </div>
+            );
+          },
         },
         {
-          Header: 'Patient Id',
-          accessor: 'subjectID',
+          Header: "Patient Id",
+          accessor: "subjectID",
         },
         {
-          Header: 'Annotation Name',
-          accessor: 'name',
+          Header: "Annotation Name",
+          accessor: "name",
         },
         {
-          Header: 'Age',
-          accessor: 'age',
+          Header: "Age",
+          accessor: "age",
         },
         {
-          Header: 'Sex',
-          accessor: 'sex',
+          Header: "Sex",
+          accessor: "sex",
         },
         {
-          Header: 'Modality',
-          accessor: 'modality',
+          Header: "Modality",
+          accessor: "modality",
         },
         {
-          Header: 'Study Date',
+          Header: "Study Date",
           sortable: true,
-          accessor: 'studyDate',
+          accessor: "studyDate",
           filterMethod: (filter, rows) =>
-            matchSorter(rows, filter.value, { keys: ['date'] }),
+            matchSorter(rows, filter.value, { keys: ["date"] }),
           filterAll: true,
           Cell: ({ row }) => {
-            if (!row.original.studyDate)
-              return <div></div>;
+            if (!row.original.studyDate) return <div></div>;
             const studyDateArr = convertDateFormat(
               row.original.studyDate,
-              'studyDate'
-            ).split(' ');
+              "studyDate"
+            ).split(" ");
             return <div>{formatDate(studyDateArr[0])}</div>;
-          }
+          },
         },
         {
-          Header: 'Created',
+          Header: "Created",
           sortable: true,
-          id: 'date',
-          accessor: 'date',
+          id: "date",
+          accessor: "date",
           filterMethod: (filter, rows) =>
-            matchSorter(rows, filter.value, { keys: ['date'] }),
+            matchSorter(rows, filter.value, { keys: ["date"] }),
           filterAll: true,
           Cell: ({ row }) => {
             const studyDateArr = convertDateFormat(
               row.original.date,
-              'date'
-            ).split(' ');
+              "date"
+            ).split(" ");
             return <div>{formatDate(studyDateArr[0])}</div>;
-          }
+          },
         },
         {
-          Header: 'Template',
-          accessor: 'template',
+          Header: "Template",
+          accessor: "template",
         },
         {
-          Header: 'User',
-          accessor: 'fullName',
-          style: { whiteSpace: 'normal' },
+          Header: "User",
+          accessor: "fullName",
+          style: { whiteSpace: "normal" },
         },
         {
-          Header: 'Comment',
-          accessor: 'userComment'
-        }
+          Header: "Comment",
+          accessor: "userComment",
+        },
       ],
       // [data, listOfSelecteds, props.selectedAnnotations]
       [data]
-
     );
   }
 
@@ -763,14 +819,14 @@ function AnnotationTable(props) {
             setShowSelectSeriesModal(false);
             setSelected({});
           }}
-        // studyName={serie.studyDescription}
+          // studyName={serie.studyDescription}
         />
       )}
     </>
   );
 }
 
-const mapsStateToProps = state => {
+const mapsStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
@@ -779,7 +835,8 @@ const mapsStateToProps = state => {
     refresh: state.annotationsListReducer.refresh,
     projectMap: state.annotationsListReducer.projectMap,
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
-    searchTableIndex: state.annotationsListReducer.searchTableIndex
+    searchTableIndex: state.annotationsListReducer.searchTableIndex,
+    seriesData: state.annotationsListReducer.seriesData,
   };
 };
 
