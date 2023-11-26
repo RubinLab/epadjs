@@ -112,7 +112,14 @@ const asyncReducer = (state = initialState, action) => {
       case SET_SERIES_DATA: 
         const newSeriesData = _.cloneDeep(state.seriesData);
         const { projectID, patientID, studyUID, data } = action.payload;
-        newSeriesData[projectID][patientID][studyUID] = data;
+        const projectExists = newSeriesData[projectID];
+        const patientExists = projectExists ? newSeriesData[projectID][patientID] : false;
+        const studyExists = patientExists ? newSeriesData[projectID][patientID][studyUID] : false;
+
+        if (studyExists) newSeriesData[projectID][patientID][studyUID] = data;
+        else if (patientExists) newSeriesData[projectID][patientID][studyUID] = data;
+        else if (projectExists) newSeriesData[projectID][patientID] = { [studyUID]: data };
+        else newSeriesData[projectID] = { [patientID]: { [studyUID]: data } };
         return { ...state, seriesData: newSeriesData };
       case CLEAR_MULTIFRAME_AIM_JUMP: 
         const aimClearedSeries = _.cloneDeep(state.openSeries);
