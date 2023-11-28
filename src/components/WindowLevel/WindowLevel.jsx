@@ -7,7 +7,7 @@ export class WindowLevel extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: props.selectedPreset
+      name: props.selectedPreset,
     };
   }
 
@@ -15,7 +15,7 @@ export class WindowLevel extends Component {
     const voi = this.getCurrentWL()?.voi;
     this.setState({
       level: voi.windowCenter,
-      windowWidth: voi.windowWidth
+      windowWidth: voi.windowWidth,
     });
   }
 
@@ -26,7 +26,7 @@ export class WindowLevel extends Component {
       return cornerstone.getViewport(element);
     }
     return undefined;
-  }
+  };
 
   applyWL = (preset) => {
     const { name, level } = preset;
@@ -40,10 +40,15 @@ export class WindowLevel extends Component {
 
     window.dispatchEvent(
       // new CustomEvent("updateWL", { detail: { wc: preset.level, ww: preset.window } })
-      new CustomEvent("updateImageStatus", { detail: { type: 'wwwc', value: { wc: preset.level, ww: preset.window } } })
+      new CustomEvent("updateImageStatus", {
+        detail: {
+          type: "wwwc",
+          value: { wc: preset.level, ww: preset.window },
+        },
+      })
     );
 
-    vp.voiLUT = undefined;
+    // vp.voiLUT = undefined;
     cornerstone.setViewport(element, vp);
     this.setState({ name, level, windowWidth: preset.window });
     this.props.onClose(name);
@@ -61,10 +66,13 @@ export class WindowLevel extends Component {
 
   checkPreset = (preset) => {
     const voi = this.getCurrentWL()?.voi;
-    if (voi?.windowCenter === preset.level && voi?.windowWidth === preset.window) return true;
+    if (
+      voi?.windowCenter === preset.level &&
+      voi?.windowWidth === preset.window
+    )
+      return true;
     return false;
-  }
-
+  };
 
   render() {
     const winLevel = (
