@@ -188,6 +188,7 @@ class DisplayView extends Component {
       multiFrameData: {},
       templateType: "",
       multiFrameAimJumped: false,
+      dataIndexMap: {},
     };
   }
 
@@ -264,7 +265,7 @@ class DisplayView extends Component {
       else return;
       return;
     }
- 
+
     // TODO: check if loading/true-false control is required for the first condition
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
@@ -357,7 +358,6 @@ class DisplayView extends Component {
       this.setState({ activeTool });
   };
 
-  
   jumpToAims = () => {
     const { series } = this.props;
     const newData = [...this.state.data]; // this should be deepclone
@@ -586,33 +586,71 @@ class DisplayView extends Component {
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
       const { series, activePort } = this.props;
+      const { dataIndexMap, data } = this.state;
       var promises = [];
+      const indexKeys = {};
+      const newData = new Array(series.length);
+      const indexOrder = [];
       for (let i = 0; i < series.length; i++) {
         // TODO: in order to not to get same stack again and again
         // add seriesUID-PrID etc info and look it up if we need to get it
         // [{stack -> UIDkey, ycurImgIndex, imfIds}, {}]
-        const promise = this.getImageStack(
-          series[i],
-          i,
-          multiFrameIndex,
-          frameNo
-        );
-        promises.push(promise);
-      }
-      Promise.all(promises).then((res) => {
-        const key =
-          multiFrameIndex && frameNo && series[activePort].aimID
-            ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
-            : null;
 
-        // TODO: how this logic works if it is not a multiframe img/series like patient7
-        // should i add a isMultiFrame constol before checking key    
-        if (key && key !== this.state.multiFrameAimJumped) {
-          this.setState({ data: res, multiFrameAimJumped: key });
+        const { projectID, patientID, studyUID, seriesUID } = series[i];
+        const indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
+
+        // if (typeof dataIndexMap[indexKey] !== "number") {
+        if (!(dataIndexMap[indexKey] >= 0)) {
+          console.log(" ^^^^^^^^^^^^^^^^^^^^ ");
+          console.log(" should be here one time", indexKey);
+          console.log(" ^^^^^^^^^^^^^^^^^^^^ ");
+          const promise = this.getImageStack(
+            series[i],
+            i,
+            multiFrameIndex,
+            frameNo
+          );
+          promises.push(promise);
+          indexKeys[indexKey] = i;
+          indexOrder.push(i);
         } else {
-          this.setState({ data: res });
+          const index = dataIndexMap[indexKey];
+          newData[index] = this.state.data[index];
         }
+      }
+      if (promises.length > 0) {
+        Promise.all(promises).then((res) => {
+          const key =
+            multiFrameIndex && frameNo && series[activePort].aimID
+              ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
+              : null;
 
+          // TODO: how this logic works if it is not a multiframe img/series like patient7
+          // should i add a isMultiFrame constol before checking key
+          console.log(res);
+
+          res.forEach((el, inx) => {
+            newData[indexOrder[inx]] = el;
+          });
+
+          if (key && key !== this.state.multiFrameAimJumped) {
+            this.setState({ data: newData, multiFrameAimJumped: key });
+          } else {
+            this.setState({ data: newData });
+          }
+
+          this.setState(
+            {
+              isLoading: false,
+              dataIndexMap: { ...this.state.dataIndexMap, ...indexKeys },
+            },
+            () => {
+              this.jumpToAims();
+              this.renderAims();
+            }
+          );
+        });
+      } else {
         this.setState(
           {
             isLoading: false,
@@ -620,11 +658,9 @@ class DisplayView extends Component {
           () => {
             this.jumpToAims();
             this.renderAims();
-            this.refreshAllViewports(); // TODO: this may be unnecessary since it is caalled in renderAims
-            // this.shouldOpenAimEditor();
           }
         );
-      });
+      }
     } catch (error) {
       console.error(error);
     }
