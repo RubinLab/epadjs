@@ -951,8 +951,9 @@ class DisplayView extends Component {
       }
     }
 
-    const { imageIds } = this.state;
-    this.setState({ imageIds: { ...imageIds, ...newImageIds } });
+    // DELETE_1
+    // const { imageIds } = this.state;
+    // this.setState({ imageIds: { ...imageIds, ...newImageIds } });
 
     //to jump to the same image after aim save
     // TODO reorganize the imageIndex assigning logic / if statements
@@ -1032,8 +1033,10 @@ class DisplayView extends Component {
         newImageIds[singleFrameUrl] = false;
       }
     });
-    const { imageIds } = this.state;
-    this.setState({ imageIds: { ...imageIds, ...newImageIds } });
+
+    // DELETE_2
+    // const { imageIds } = this.state;
+    // this.setState({ imageIds: { ...imageIds, ...newImageIds } });
 
     //to jump to the same image after aim save
     let imageIndex;
@@ -1141,12 +1144,15 @@ class DisplayView extends Component {
   };
 
   getImageIndexFromImageId = (cornerstoneImageIds, cornerstoneImageId) => {
-    const { imageIds } = this.state;
-    const wadors = wadoUrl.includes("wadors");
+    //DELETE_3
+    // const { imageIds } = this.state;
+    // const wadors = wadoUrl.includes("wadors");
 
-    if (!imageIds[cornerstoneImageId] && !wadors) {
-      cornerstoneImageId = cornerstoneImageId.split("&frame")[0];
-    }
+    //DELETE_4
+    // if (!imageIds[cornerstoneImageId] && !wadors) {
+    //   cornerstoneImageId = cornerstoneImageId.split("&frame")[0];
+    // }
+
     for (let [key, value] of Object.entries(cornerstoneImageIds)) {
       if (value === cornerstoneImageId) {
         return key;
@@ -1475,10 +1481,11 @@ class DisplayView extends Component {
           this.props.subpath[this.props.activePort]
         );
 
-        if (this.state.imageIds && !this.state.imageIds[imageId] && !wadors) {
-          //image is not multiframe so strip the frame number from the imageId
-          imageId = imageId.split("&frame=")[0];
-        }
+        //DELETE_5 wadouri support
+        // if (this.state.imageIds && !this.state.imageIds[imageId] && !wadors) {
+        //   //image is not multiframe so strip the frame number from the imageId
+        //   imageId = imageId.split("&frame=")[0];
+        // }
 
         this.renderMarkup(imageId, value, color);
       });
