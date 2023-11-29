@@ -592,7 +592,7 @@ class DisplayView extends Component {
       const newData = new Array(series.length);
       const indexOrder = [];
       for (let i = 0; i < series.length; i++) {
-        // TODO: in order to not to get same stack again and again
+        // DONE/TODO: in order to not to get same stack again and again
         // add seriesUID-PrID etc info and look it up if we need to get it
         // [{stack -> UIDkey, ycurImgIndex, imfIds}, {}]
 
@@ -600,7 +600,7 @@ class DisplayView extends Component {
         const indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
 
         // if (typeof dataIndexMap[indexKey] !== "number") {
-        if (!(dataIndexMap[indexKey] >= 0)) {
+        if (!(dataIndexMap[indexKey] >= 0) || multiFrameIndex) {
           console.log(" ^^^^^^^^^^^^^^^^^^^^ ");
           console.log(" should be here one time", indexKey);
           console.log(" ^^^^^^^^^^^^^^^^^^^^ ");
