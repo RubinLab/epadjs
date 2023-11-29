@@ -19,7 +19,6 @@ import {
   loadCompleted,
   annotationsLoadingError,
   updateSearchTableIndex,
-  addStudyToGrid,
   setSeriesData,
 } from "../annotationsList/action";
 import { formatDate } from "../flexView/helperMethods";
@@ -365,7 +364,6 @@ function AnnotationTable(props) {
         );
         props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
         props.dispatch(loadCompleted());
-        props.dispatch(addStudyToGrid({ [studyUID]: series }));
         return series;
       } else return seriesData[projectID][projectID][studyUID];
     } catch (err) {

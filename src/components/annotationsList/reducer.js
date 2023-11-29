@@ -611,13 +611,6 @@ const asyncReducer = (state = initialState, action) => {
           aimsList: newAimsList
         };
 
-      case ADD_STUDY_TO_GRID:
-        const newStudy = { ...action.seriesOfStudy };
-        let newOpenStudies = { ...state.openStudies, ...newStudy };
-        return {
-          ...state,
-          openStudies: newOpenStudies
-        };
       // -----> Delete after v1.0 <-----
       // case UPDATE_PATIENT:
       //   let updatedPt = { ...state.patients[action.payload.patient] };

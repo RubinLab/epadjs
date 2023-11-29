@@ -43,7 +43,6 @@ import {
   SEG_UPLOAD_REMOVE,
   AIM_DELETE,
   SAVE_PATIENT_FILTER,
-  ADD_STUDY_TO_GRID,
   REPLACE_IN_GRID,
   UPDATE_SEARCH_TABLE_INDEX,
   REFRESH_MAP,
@@ -389,11 +388,6 @@ export const replaceInGrid = (serie) => {
   //   await dispatch(getSingleSerie(serie));
   return { type: REPLACE_IN_GRID, payload: { seriesUID, examType } };
   // } 
-}
-
-// Adds the series list of study to grid. Series sdropdown in the viewpoert uses this.
-export const addStudyToGrid = (seriesOfStudy) => {
-  return { type: ADD_STUDY_TO_GRID, seriesOfStudy };
 }
 
 // toggle annotation details at the right side bar in display view

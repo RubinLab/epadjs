@@ -28,7 +28,6 @@ import {
   clearAimId,
   updateSubpath,
   clearSelection,
-  addStudyToGrid,
   updateGridWithMultiFrameInfo,
   clearMultiFrameAimJumpFlags,
 } from "../annotationsList/action";
@@ -756,7 +755,6 @@ class DisplayView extends Component {
       return all;
     }, []);
     const result = { [series[activePort].studyUID]: studySeries };
-    this.props.dispatch(addStudyToGrid(result));
   };
 
   async getImages(serie, i) {

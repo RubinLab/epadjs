@@ -16,7 +16,6 @@ import {
   addToGrid,
   getSingleSerie,
   clearSelection,
-  addStudyToGrid,
   setSeriesData,
 } from "../annotationsList/action";
 import "react-table-v6/react-table.css";
@@ -102,12 +101,10 @@ class FlexView extends React.Component {
     try {
       if (!dataExists) {
         ({ data: series } = await getSeries(projectID, patientID, studyUID));
-        this.props.dispatch(addStudyToGrid({ [studyUID]: series }));
         this.props.dispatch(
           setSeriesData(projectID, patientID, studyUID, series)
         );
       } else series = seriesData[projectID][patientID][studyUID];
-      this.props.dispatch(addStudyToGrid({ [studyUID]: series }));
     } catch (err) {
       console.log("Error getting series of the study", err);
     }
