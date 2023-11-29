@@ -251,9 +251,11 @@ const asyncReducer = (state = initialState, action) => {
 
         let delActivePort;
         let delOtherSeriesAimsList;
+        let delSeriesData;
         if (delGrid.length === 0) {
           delActivePort = null;
           delOtherSeriesAimsList = {};
+          delSeriesData = {};
         } else {
           delActivePort = delGrid.length - 1;
         }
@@ -267,6 +269,7 @@ const asyncReducer = (state = initialState, action) => {
             openStudies: delOpenStudies,
             activePort: delActivePort,
             otherSeriesAimsList: delOtherSeriesAimsList,
+            seriesData: delSeriesData
           };
         }
 
@@ -483,7 +486,8 @@ const asyncReducer = (state = initialState, action) => {
           openSeries: [],
           aimsList: {},
           activePort: 0,
-          openStudies: {}
+          openStudies: {},
+          seriesData: {}
         };
       case CLEAR_SELECTION:
         let selectionState = { ...state };
