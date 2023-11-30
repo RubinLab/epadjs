@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import _ from "lodash";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
@@ -2071,8 +2072,10 @@ class DisplayView extends Component {
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
   };
 
-  closeViewport = () => {
+  closeViewport = (index) => {
     const { showAimEditor, dirty } = this.state;
+    const { series } = this.props;
+    const { projectID, patientID, studyUID, seriesUID } = series[index];
     // closes the active viewport
     if (showAimEditor && dirty) {
       window.alert(
@@ -2080,9 +2083,35 @@ class DisplayView extends Component {
       );
       return;
     }
-    this.props.dispatch(closeSerie());
-    this.deleteViewportImageStatus();
-    // this.props.onSwitchView("search");
+
+    try {
+      const key = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
+      const gridIndex = this.state.dataIndexMap[key];
+      console.log(" --> index", gridIndex);
+      const newData = _.cloneDeep(this.state.data);
+      const newDataIndexMap = { ...this.state.dataIndexMap };
+      // build the from the uids
+      // get the index number using the key
+      // delete key from the object
+      // splice the state data
+      newData.splice(gridIndex, 1);
+      console.log(" --> newData", newData);
+      delete newDataIndexMap[key];
+      for (let key in newDataIndexMap) {
+        if (newDataIndexMap[key] > gridIndex) {
+          newDataIndexMap[key] -= 1;
+        }
+      }
+      console.log(" ====> newDataIndexMap", newDataIndexMap);
+      this.props.dispatch(closeSerie());
+      this.deleteViewportImageStatus();
+      this.setState({ data: newData, dataIndexMap: newDataIndexMap });
+      // this.jumpToAims();
+      this.renderAims();
+      // this.props.onSwitchView("search");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   handleHideAnnotations = () => {
@@ -2142,12 +2171,13 @@ class DisplayView extends Component {
   onAnnotate = () => {
     this.setState({ showAimEditor: true });
   };
+
   handleClose = (i) => {
     if (this.props.activePort !== i) {
       this.setActive(i);
       return;
     }
-    this.closeViewport();
+    this.closeViewport(i);
   };
 
   // Triggered by event from right bar to jump to the image of aim
@@ -2220,6 +2250,7 @@ class DisplayView extends Component {
       data,
       activeTool,
     } = this.state;
+    console.log(" ---> in render", data);
     // if (this.state.data[0])
     // console.log(this.state.data[0].stack.imageIds.length);
     // if (this.state.redirect) return <Redirect to="/list" />;
