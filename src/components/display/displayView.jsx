@@ -149,6 +149,7 @@ const tools = [
 const mapStateToProps = (state) => {
   return {
     series: state.annotationsListReducer.openSeries,
+    seriesAddition: state.annotationsListReducer.openSeriesAddition,
     loading: state.annotationsListReducer.loading,
     activePort: state.annotationsListReducer.activePort,
     aimList: state.annotationsListReducer.aimsList,
@@ -359,12 +360,12 @@ class DisplayView extends Component {
   };
 
   jumpToAims = () => {
-    const { series } = this.props;
+    const { series, seriesAddition } = this.props;
     const newData = [...this.state.data]; // this should be deepclone
     series.forEach((serie, i) => {
       if (serie.aimID && this.state.data[i] && this.state.data[i].stack) {
         const { imageIds } = this.state.data[i].stack;
-        const imageIndex = this.getImageIndex(serie, imageIds);
+        const imageIndex = this.getImageIndex(seriesAddition[i], imageIds);
         newData[i].stack.currentImageIdIndex = imageIndex;
       }
     });
@@ -703,7 +704,7 @@ class DisplayView extends Component {
   };
 
   renderAims = (notShowAimEditor = false) => {
-    const { series } = this.props;
+    const { seriesAddition } = this.props;
     this.setState({
       activeLabelMapIndex: 0,
       prospectiveLabelMapIndex: 0,
@@ -711,7 +712,7 @@ class DisplayView extends Component {
     // markups will be rendered so clear all previously renders
     this.clearAllMarkups();
 
-    series.forEach((serie, serieIndex) => {
+    seriesAddition.forEach((serie, serieIndex) => {
       // Remove this part to disable openning aim editor by default
       // once user clecked on an aim
 
@@ -977,7 +978,10 @@ class DisplayView extends Component {
     // if serie is being open from the annotation jump to that image and load the aim editor
     if (multiFrameIndex && frameNo) imageIndex = frameNo;
     else if (serie.aimID)
-      imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+      imageIndex = this.getImageIndex(
+        this.props.seriesAddition[index],
+        cornerstoneImageIds
+      );
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
@@ -1050,7 +1054,10 @@ class DisplayView extends Component {
 
     // if serie is being open from the annotation jump to that image and load the aim editor
     if (serie.aimID) {
-      imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+      imageIndex = this.getImageIndex(
+        this.props.seriesAddition[index],
+        cornerstoneImageIds
+      );
     }
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
@@ -2122,7 +2129,7 @@ class DisplayView extends Component {
     let markupTypes = [];
     try {
       const imageAnnotations =
-        this.props.series[this.props.activePort].imageAnnotations;
+        this.props.seriesAddition[this.props.activePort].imageAnnotations;
       if (!imageAnnotations) {
         return undefined;
       }
@@ -2184,25 +2191,28 @@ class DisplayView extends Component {
   jumpToAimImage = (event) => {
     // seperate this function to handle both
     // if there are multiframe data call get image stack and pass frame data etc
-    const { series, activePort } = this.props;
+    const { seriesAddition, series, activePort } = this.props;
     const { aimId, index, imageID, frameNo } = event.detail;
 
     const imageIndex = this.getImageIndex(
-      series[index],
+      seriesAddition[index],
       this.state.data[index].stack.imageIds,
       aimId
     );
 
-    const { hasMultiframe } = series[activePort];
+    const { hasMultiframe } = seriesAddition[activePort];
 
     // TODO: if jumping on the same multiframe series it shouldn't call the getData
     if (!hasMultiframe) {
       this.jumpToImage(imageIndex, index);
-    } else if (hasMultiframe && !series[activePort].multiFrameMap[imageID]) {
+    } else if (
+      hasMultiframe &&
+      !seriesAddition[activePort].multiFrameMap[imageID]
+    ) {
       this.setState({ isLoading: true });
       this.getData(null, null);
     } else {
-      const multiFrameIndex = series[activePort].multiFrameMap[imageID];
+      const multiFrameIndex = seriesAddition[activePort].multiFrameMap[imageID];
       this.getData(multiFrameIndex, frameNo);
     }
   };
