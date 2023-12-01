@@ -2250,7 +2250,6 @@ class DisplayView extends Component {
       data,
       activeTool,
     } = this.state;
-    console.log(" ---> in render", data);
     // if (this.state.data[0])
     // console.log(this.state.data[0].stack.imageIds.length);
     // if (this.state.redirect) return <Redirect to="/list" />;
