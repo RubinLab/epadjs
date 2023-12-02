@@ -279,13 +279,14 @@ class DisplayView extends Component {
       this.getViewports();
       this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1]);
       this.formInvertMap();
-    } else if (
-      (prevProps.series !== this.props.series &&
-        prevProps.loading === true &&
-        this.props.loading === false) ||
-      (prevProps.series.length !== this.props.series.length &&
-        this.props.loading === false)
-    ) {
+      // } else if (
+      //   (prevProps.series !== this.props.series &&
+      //     prevProps.loading === true &&
+      //     this.props.loading === false) ||
+      //   (prevProps.series.length !== this.props.series.length &&
+      //     this.props.loading === false)
+      // ) {
+    } else if (prevProps.series.length !== this.props.series.length) {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
