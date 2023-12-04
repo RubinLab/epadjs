@@ -257,8 +257,8 @@ class DisplayView extends Component {
       activePort: prevActivePort,
       aimList: prevAimList,
     } = prevProps;
-    const activeSerie = series[activePort];
-    const prevActiveSerie = prevSeries[prevActivePort];
+    const activeSerie = series[activePort].seriesUID;
+    const prevActiveSerie = prevSeries[prevActivePort].seriesUID;
 
     if (this.props.series.length < 1) {
       if (mode === "teaching") this.props.history.push("/search");
@@ -286,7 +286,11 @@ class DisplayView extends Component {
       //   (prevProps.series.length !== this.props.series.length &&
       //     this.props.loading === false)
       // ) {
-    } else if (prevProps.series.length !== this.props.series.length) {
+    } else if (
+      prevProps.series.length !== series.length ||
+      activeSerie !== prevActiveSerie
+    ) {
+      // } else if (prevProps.series.length !== series.length) {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
@@ -1821,7 +1825,8 @@ class DisplayView extends Component {
 
   getColorOfMarkup = (aimUid, seriesUid) => {
     try {
-      return this.props.aimList[seriesUid][aimUid].color.button.background;
+      const series = this.props.aimList[seriesUid];
+      return series ? series[aimUid]?.color.button.background : null;
     } catch (error) {
       console.error(error);
     }
