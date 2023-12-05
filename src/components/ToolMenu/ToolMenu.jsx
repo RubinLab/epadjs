@@ -300,22 +300,22 @@ class ToolMenu extends Component {
       }
       // d => Length
       else if (event.keyCode == 68) {
-        const index = mode === "teaching" ? 9 : 11;
+        const index = mode === "teaching" ? 10 : 12;
         this.handleToolClicked(index, "Length");
       }
       // o => Perpendicular/Bidirectional
       else if (event.keyCode == 79) {
-        const index = mode === "teaching" ? 12 : 14;
+        const index = mode === "teaching" ? 13 : 15;
         this.handleToolClicked(index, "Bidirectional");
       }
       // f => Arrow
       else if (event.keyCode == 70) {
-        const index = mode === "teaching" ? 10 : 12;
+        const index = mode === "teaching" ? 11 : 13;
         this.handleToolClicked(index, "ArrowAnnotate");
       }
       // r => Circle
       else if (event.keyCode == 82) {
-        const index = mode === "teaching" ? 11 : 13;
+        const index = mode === "teaching" ? 12 : 14;
         this.handleToolClicked(index, "CircleRoi");
       }
       // z => zoom
@@ -324,7 +324,7 @@ class ToolMenu extends Component {
       }
       // p => Pan
       else if (event.keyCode == 80) {
-        this.handleToolClicked(6, "Pan");
+        this.handleToolClicked(7, "Pan");
       }
       // w => Wwwc
       else if (event.keyCode == 87) {
