@@ -30,7 +30,7 @@ import {
   FaObjectUngroup,
   FaDotCircle,
   FaTimes,
-  FaCamera
+  FaCamera,
 } from "react-icons/fa";
 import { BsArrowUpLeft } from "react-icons/bs";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
@@ -46,9 +46,7 @@ import { MdWbIridescent } from "react-icons/md";
 import AnnotationList from "../annotationsList";
 import ResizeAndDrag from "../management/common/resizeAndDrag";
 import CustomModal from "../management/common/resizeAndDrag";
-import {
-  clearGrid
-} from "../annotationsList/action";
+import { clearGrid } from "../annotationsList/action";
 import Spinner from "../common/circleSpinner";
 import "../../font-icons/styles.css";
 import "react-input-range/lib/css/index.css";
@@ -109,7 +107,7 @@ const tools = [
   { name: "Brush3DHUGated" },
   { name: "BrushSphericalHUGated" },
   { name: "Brush3DAutoGated" },
-  { name: "ArrowAnnotate" }
+  { name: "ArrowAnnotate" },
 ];
 
 class ToolMenu extends Component {
@@ -117,8 +115,8 @@ class ToolMenu extends Component {
 
   constructor(props) {
     super(props);
-    mode = sessionStorage.getItem('mode');
-    wadoUrl = sessionStorage.getItem('wadoUrl');
+    mode = sessionStorage.getItem("mode");
+    wadoUrl = sessionStorage.getItem("wadoUrl");
     this.tools = tools;
     this.invert = this.invert.bind(this);
 
@@ -138,16 +136,26 @@ class ToolMenu extends Component {
       showInterpolation: false,
       activeTool: "",
       activeToolIdx: 1,
-      fuse: false
+      fuse: false,
     };
 
     this.imagingTools = [
-      { name: "Close All", icon: <FaTimes />, tool: "ClearGrid", teaching: true },
-      { name: "Select", icon: <FaMousePointer />, tool: "Noop", teaching: true },
+      {
+        name: "Close All",
+        icon: <FaTimes />,
+        tool: "ClearGrid",
+        teaching: true,
+      },
+      {
+        name: "Select",
+        icon: <FaMousePointer />,
+        tool: "Noop",
+        teaching: true,
+      },
       { name: "Levels", icon: <FiSun />, tool: "Wwwc", teaching: true },
       { name: "Presets", icon: <FiSunset />, tool: "Presets", teaching: true },
       { name: "Zoom", icon: <FiZoomIn />, tool: "Zoom", teaching: true },
-      // { name: "Invert", icon: <FaAdjust />, tool: "Invert" },
+      { name: "Invert", icon: <FaAdjust />, tool: "Invert", teaching: true },
       { name: "Reset", icon: <MdLoop />, tool: "Reset", teaching: true },
       { name: "Pan", icon: <MdPanTool />, tool: "Pan", teaching: true },
       // { name: "MetaData", icon: <FaListAlt />, tool: "MetaData", teaching: true },
@@ -180,19 +188,19 @@ class ToolMenu extends Component {
         name: "Circle",
         icon: <div className="icon-circle fontastic-icons" />,
         tool: "CircleRoi",
-        teaching: true
+        teaching: true,
       },
       {
         name: "Perpendicular",
         icon: <div className="icon-perpendicular fontastic-icons" />,
         tool: "Bidirectional",
-        teaching: true
+        teaching: true,
       },
       {
         name: "Poly/Freehand",
         icon: <div className="icon-polygon fontastic-icons" />,
         tool: "FreehandRoi3DTool",
-        teaching: true
+        teaching: true,
         // child: (
         //   <span>
         //     Interpolation{" "}
@@ -218,13 +226,13 @@ class ToolMenu extends Component {
         name: "Sculpt 2D",
         icon: <FaScrewdriver />,
         tool: "FreehandRoiSculptor",
-        teaching: true
+        teaching: true,
       },
       {
         name: "Sculpt 3D",
         icon: <FaScrewdriver />,
         tool: "FreehandRoi3DSculptor",
-        teaching: true
+        teaching: true,
       },
       { name: "Eraser", icon: <FaEraser />, tool: "Eraser", teaching: true },
     ];
@@ -258,79 +266,85 @@ class ToolMenu extends Component {
       {
         name: "Freehand Scissors",
         icon: <FaHandScissors />,
-        tool: "FreehandScissors"
+        tool: "FreehandScissors",
       },
       { name: "Circle Scissors", icon: <FaCircle />, tool: "CircleScissors" },
       {
         name: "Correction Scissors",
         icon: <TiScissorsOutline />,
-        tool: "CorrectionScissors"
-      }
+        tool: "CorrectionScissors",
+      },
     ];
-    if (mode === 'teaching') {
-      this.imagingTools = this.imagingTools.filter(tool => tool.teaching);
+    if (mode === "teaching") {
+      this.imagingTools = this.imagingTools.filter((tool) => tool.teaching);
     }
   }
 
   componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyPressed);
+    window.addEventListener("keydown", this.handleKeyPressed);
   }
 
   componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleKeyPressed);
+    window.removeEventListener("keydown", this.handleKeyPressed);
     sessionStorage.removeItem("activeTool");
   }
 
   handleKeyPressed = (event) => {
     // ctrl + r => Reset
-    if (event.target.nodeName !== 'INPUT' && event.target.nodeName !== 'TEXTAREA') {
+    if (
+      event.target.nodeName !== "INPUT" &&
+      event.target.nodeName !== "TEXTAREA"
+    ) {
       if (event.keyCode == 82 && event.ctrlKey) {
-        this.handleToolClicked(1, 'Reset');
+        this.handleToolClicked(1, "Reset");
       }
       // d => Length
       else if (event.keyCode == 68) {
-        const index = mode === 'teaching' ? 9 : 11;
-        this.handleToolClicked(index, 'Length');
+        const index = mode === "teaching" ? 9 : 11;
+        this.handleToolClicked(index, "Length");
       }
-      // o => Perpendicular/Bidirectional 
+      // o => Perpendicular/Bidirectional
       else if (event.keyCode == 79) {
-        const index = mode === 'teaching' ? 12 : 14;
-        this.handleToolClicked(index, 'Bidirectional');
+        const index = mode === "teaching" ? 12 : 14;
+        this.handleToolClicked(index, "Bidirectional");
       }
-      // f => Arrow 
+      // f => Arrow
       else if (event.keyCode == 70) {
-        const index = mode === 'teaching' ? 10 : 12;
-        this.handleToolClicked(index, 'ArrowAnnotate');
+        const index = mode === "teaching" ? 10 : 12;
+        this.handleToolClicked(index, "ArrowAnnotate");
       }
       // r => Circle
       else if (event.keyCode == 82) {
-        const index = mode === 'teaching' ? 11 : 13;
-        this.handleToolClicked(index, 'CircleRoi');
+        const index = mode === "teaching" ? 11 : 13;
+        this.handleToolClicked(index, "CircleRoi");
       }
       // z => zoom
       else if (event.keyCode == 90) {
-        this.handleToolClicked(4, 'Zoom');
+        this.handleToolClicked(4, "Zoom");
       }
       // p => Pan
       else if (event.keyCode == 80) {
-        this.handleToolClicked(6, 'Pan');
+        this.handleToolClicked(6, "Pan");
       }
       // w => Wwwc
       else if (event.keyCode == 87) {
-        this.handleToolClicked(2, 'Wwwc');
+        this.handleToolClicked(2, "Wwwc");
       }
       // s => Select
       else if (event.keyCode == 83) {
-        this.handleToolClicked(1, 'Noop');
+        this.handleToolClicked(1, "Noop");
       }
     }
-  }
+  };
 
   //TODO: instead of disabling all tools we can just disable the active tool
   disableAllTools = () => {
     const { activeTool } = this.state;
     if (activeTool) {
-      if (activeTool === "FreehandRoiTool" || activeTool === "FreehandRoi3DTool") {
+      if (
+        activeTool === "FreehandRoiTool" ||
+        activeTool === "FreehandRoi3DTool"
+      ) {
         this.deselectFreehand();
       }
       this.setState({ activeToolIdx: 1 });
@@ -378,11 +392,9 @@ class ToolMenu extends Component {
       return;
     } else if (tool === "ClearGrid") {
       this.props.dispatch(clearGrid());
-      sessionStorage.removeItem('wwwc');
-      if (mode !== 'teaching')
-        this.props.onSwitchView("search");
-      else
-        this.props.onSwitchView("annotations");
+      sessionStorage.removeItem("wwwc");
+      if (mode !== "teaching") this.props.onSwitchView("search");
+      else this.props.onSwitchView("annotations");
       return;
     } else if (tool === "Presets") {
       this.showPresets();
@@ -406,14 +418,38 @@ class ToolMenu extends Component {
       } //Dont" select the HUGated if the modality is not CT
       this.setState({ showBrushSize: true });
     } else if (tool === "Brush3DHUGated") {
-      if (this.checkIfMultiframe()) { alert("Segmentation tools only works with singleframe images"); return; }
-      this.setState({ showBrushSize: true, isHuGated: true, showSmartBrush: true, isSpherical: false });
+      if (this.checkIfMultiframe()) {
+        alert("Segmentation tools only works with singleframe images");
+        return;
+      }
+      this.setState({
+        showBrushSize: true,
+        isHuGated: true,
+        showSmartBrush: true,
+        isSpherical: false,
+      });
     } else if (tool === "BrushSphericalHUGated") {
-      if (this.checkIfMultiframe()) { alert("Segmentation tools only works with singleframe images"); return; }
-      this.setState({ showBrushSize: true, isHuGated: true, showSmartBrush: true, isSpherical: true });
+      if (this.checkIfMultiframe()) {
+        alert("Segmentation tools only works with singleframe images");
+        return;
+      }
+      this.setState({
+        showBrushSize: true,
+        isHuGated: true,
+        showSmartBrush: true,
+        isSpherical: true,
+      });
     } else if (tool === "Brush3DAutoGated") {
-      if (this.checkIfMultiframe()) { alert("Segmentation tools only works with singleframe images"); return; }
-      this.setState({ showBrushSize: true, isHuGated: false, showSmartBrush: true, isSpherical: false });
+      if (this.checkIfMultiframe()) {
+        alert("Segmentation tools only works with singleframe images");
+        return;
+      }
+      this.setState({
+        showBrushSize: true,
+        isHuGated: false,
+        showSmartBrush: true,
+        isSpherical: false,
+      });
     } else if (tool === "FreehandRoi3DTool") {
       this.selectFreehand();
       this.setState({ showInterpolation: true });
@@ -436,22 +472,24 @@ class ToolMenu extends Component {
   };
 
   selectFreehand = () => {
-    window.addEventListener('escPressed', this.cancelPolygon);
-  }
+    window.addEventListener("escPressed", this.cancelPolygon);
+  };
 
   deselectFreehand = () => {
-    window.removeEventListener('escPressed', this.cancelPolygon);
-  }
+    window.removeEventListener("escPressed", this.cancelPolygon);
+  };
 
   cancelPolygon = () => {
     const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
     let tools = cornerstoneTools.store.state.tools;
 
-    tools = tools.filter(tool => tool.element === element && tool.mode === 'active');
-    tools = tools.filter(tool => (tool.name === "FreehandRoi3DTool"));
+    tools = tools.filter(
+      (tool) => tool.element === element && tool.mode === "active"
+    );
+    tools = tools.filter((tool) => tool.name === "FreehandRoi3DTool");
     tools[0].cancelDrawing(element);
-  }
+  };
 
   getActiveImage = () => {
     const { activePort } = this.props;
@@ -470,21 +508,23 @@ class ToolMenu extends Component {
 
   checkIfMultiframe = () => {
     const image = this.getActiveImage();
-    const wadors = wadoUrl.includes('wadors');
+    const wadors = wadoUrl.includes("wadors");
     if (wadors) {
-      const imgMetadata = cornerstoneWADOImageLoader.wadors.metaDataManager.get(image.imageId);
+      const imgMetadata = cornerstoneWADOImageLoader.wadors.metaDataManager.get(
+        image.imageId
+      );
       return imgMetadata.isMultiframe;
     } else if (!wadors && image.data.string("x00280008")) return true;
-     else return false;
+    else return false;
   };
 
   invert() {
-    const activeElement = cornerstone.getEnabledElements()[
-      this.props.activePort
-    ].element;
-    const viewport = cornerstone.getViewport(activeElement);
-    viewport.invert = !viewport.invert;
-    cornerstone.setViewport(activeElement, viewport);
+    this.props.onInvertClick(true, this.props.activePort);
+    // const activeElement =
+    //   cornerstone.getEnabledElements()[this.props.activePort].element;
+    // const viewport = cornerstone.getViewport(activeElement);
+    // viewport.invert = !viewport.invert;
+    // cornerstone.setViewport(activeElement, viewport);
   }
 
   reset = () => {
@@ -495,37 +535,41 @@ class ToolMenu extends Component {
     if (layers.length || (colormap && colormap !== "gray"))
       this.resetRenderCanvas(element);
     cornerstone.reset(element);
-    window.dispatchEvent(new CustomEvent('resetViewportImageStatus'));
+    window.dispatchEvent(new CustomEvent("resetViewportImageStatus"));
   };
 
   resetRenderCanvas = (element) => {
-
     const enabledElement = cornerstone.getEnabledElement(element);
 
     enabledElement.renderingTools.colormapId = undefined;
     enabledElement.renderingTools.colorLut = undefined;
 
     const renderCanvas = enabledElement.renderingTools.renderCanvas;
-    const canvasContext = renderCanvas.getContext('2d');
+    const canvasContext = renderCanvas.getContext("2d");
 
-    // NOTE - we need to fill the render canvas with white pixels since we 
-    // control the luminance using the alpha channel to improve rendering performance. 
-    canvasContext.fillStyle = 'white';
+    // NOTE - we need to fill the render canvas with white pixels since we
+    // control the luminance using the alpha channel to improve rendering performance.
+    canvasContext.fillStyle = "white";
     canvasContext.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
 
-    const renderCanvasData = canvasContext.getImageData(0, 0, renderCanvas.width, renderCanvas.height);
+    const renderCanvasData = canvasContext.getImageData(
+      0,
+      0,
+      renderCanvas.width,
+      renderCanvas.height
+    );
 
     enabledElement.renderingTools.renderCanvasContext = canvasContext;
     enabledElement.renderingTools.renderCanvasData = renderCanvasData;
-  }
+  };
 
   showMetaData = () => {
     this.setState({ showMetaData: !this.state.showMetaData });
   };
 
   handleClip = () => {
-    const element = cornerstone.getEnabledElements()[this.props.activePort]
-      .element;
+    const element =
+      cornerstone.getEnabledElements()[this.props.activePort].element;
     if (!this.state.playing) cornerstoneTools.playClip(element, 40);
     else cornerstoneTools.stopClip(element);
     this.setState({ playing: !this.state.playing });
@@ -539,7 +583,7 @@ class ToolMenu extends Component {
     const elements = cornerstone.getEnabledElements();
     elements.forEach(({ element }) => {
       element.style.cursor = cursorStyle;
-    })
+    });
   };
 
   closeBrushSize = () => {
@@ -556,15 +600,19 @@ class ToolMenu extends Component {
 
   closeColormap = () => {
     this.setState({ showColormap: false });
-  }
+  };
 
   closeFuse = () => {
     this.setState({ showFuse: false });
-  }
+  };
 
   render() {
     const { activeTool } = this.state;
-    if (activeTool !== undefined && activeTool !== "" && activeTool !== "FreehandRoiSculptor")
+    if (
+      activeTool !== undefined &&
+      activeTool !== "" &&
+      activeTool !== "FreehandRoiSculptor"
+    )
       this.setToolStateForAllElements(activeTool, "active");
     return (
       <div className="toolbar">
@@ -739,19 +787,20 @@ class ToolMenu extends Component {
                     </div> */}
         {/* </Collapsible> */}
         {/* <Collapsible trigger={"Segmentation Tools"} transitionTime={100}> */}
-        {mode !== 'teaching' && this.segmentationTools.map((segmentationTool, i) => {
-          i = i + this.imagingTools.length + this.markupTools.length;
-          return (
-            <ToolMenuItem
-              key={segmentationTool.name}
-              name={segmentationTool.name}
-              icon={segmentationTool.icon}
-              index={i}
-              isActive={this.state.activeToolIdx === i}
-              onClick={() => this.handleToolClicked(i, segmentationTool.tool)}
-            />
-          );
-        })}
+        {mode !== "teaching" &&
+          this.segmentationTools.map((segmentationTool, i) => {
+            i = i + this.imagingTools.length + this.markupTools.length;
+            return (
+              <ToolMenuItem
+                key={segmentationTool.name}
+                name={segmentationTool.name}
+                icon={segmentationTool.icon}
+                index={i}
+                isActive={this.state.activeToolIdx === i}
+                onClick={() => this.handleToolClicked(i, segmentationTool.tool)}
+              />
+            );
+          })}
         {/* <div
                         id="brush"
                         tabIndex="8"
@@ -855,9 +904,16 @@ class ToolMenu extends Component {
           this.state.showBrushSize && (
             <BrushSizeSelector onClose={this.closeBrushSize} />
           )}
-        {(this.state.activeTool === "Brush3DHUGated" || this.state.activeTool === "BrushSphericalHUGated" || this.state.activeTool === "Brush3DAutoGated") &&
+        {(this.state.activeTool === "Brush3DHUGated" ||
+          this.state.activeTool === "BrushSphericalHUGated" ||
+          this.state.activeTool === "Brush3DAutoGated") &&
           this.state.showSmartBrush && (
-            <SmartBrushMenu activePort={this.props.activePort} onClose={this.closeSmartBrushMenu} isHuGated={this.state.isHuGated} isSphericalBrush={this.state.isSpherical} />
+            <SmartBrushMenu
+              activePort={this.props.activePort}
+              onClose={this.closeSmartBrushMenu}
+              isHuGated={this.state.isHuGated}
+              isSphericalBrush={this.state.isSpherical}
+            />
           )}
         {this.state.showPresets && (
           <WindowLevel
@@ -868,19 +924,14 @@ class ToolMenu extends Component {
         {this.state.activeTool === "FreehandRoi3DTool" &&
           this.state.showInterpolation && (
             <Interpolation onClose={this.showInterpolation} />
-          )
-        }
+          )}
         {this.state.showColormap && (
           <ColormapSelector
             activePort={this.props.activePort}
             onClose={this.closeColormap}
           />
         )}
-        {this.state.showFuse && (
-          <FuseSelector
-            onClose={this.closeFuse}
-          />
-        )}
+        {this.state.showFuse && <FuseSelector onClose={this.closeFuse} />}
       </div>
     );
   }
