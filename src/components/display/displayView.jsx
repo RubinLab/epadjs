@@ -286,11 +286,7 @@ class DisplayView extends Component {
       //   (prevProps.series.length !== this.props.series.length &&
       //     this.props.loading === false)
       // ) {
-    } else if (
-      prevProps.series.length !== series.length ||
-      activeSerie !== prevActiveSerie
-    ) {
-      // } else if (prevProps.series.length !== series.length) {
+    } else if (prevProps.series.length !== series.length) {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
@@ -607,9 +603,6 @@ class DisplayView extends Component {
 
         // if (typeof dataIndexMap[indexKey] !== "number") {
         if (!(dataIndexMap[indexKey] >= 0) || multiFrameIndex) {
-          console.log(" ^^^^^^^^^^^^^^^^^^^^ ");
-          console.log(" should be here one time", indexKey);
-          console.log(" ^^^^^^^^^^^^^^^^^^^^ ");
           const promise = this.getImageStack(
             series[i],
             i,
@@ -633,8 +626,6 @@ class DisplayView extends Component {
 
           // TODO: how this logic works if it is not a multiframe img/series like patient7
           // should i add a isMultiFrame constol before checking key
-          console.log(res);
-
           res.forEach((el, inx) => {
             newData[indexOrder[inx]] = el;
           });
@@ -2100,7 +2091,6 @@ class DisplayView extends Component {
     try {
       const key = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
       const gridIndex = this.state.dataIndexMap[key];
-      console.log(" --> index", gridIndex);
       const newData = _.cloneDeep(this.state.data);
       const newDataIndexMap = { ...this.state.dataIndexMap };
       // build the from the uids
@@ -2108,19 +2098,17 @@ class DisplayView extends Component {
       // delete key from the object
       // splice the state data
       newData.splice(gridIndex, 1);
-      console.log(" --> newData", newData);
       delete newDataIndexMap[key];
       for (let key in newDataIndexMap) {
         if (newDataIndexMap[key] > gridIndex) {
           newDataIndexMap[key] -= 1;
         }
       }
-      console.log(" ====> newDataIndexMap", newDataIndexMap);
       this.props.dispatch(closeSerie());
       this.deleteViewportImageStatus();
       this.setState({ data: newData, dataIndexMap: newDataIndexMap });
       // this.jumpToAims();
-      this.renderAims();
+      // this.renderAims();
       // this.props.onSwitchView("search");
     } catch (err) {
       console.error(err);
@@ -2298,143 +2286,148 @@ class DisplayView extends Component {
           )}
           {!this.state.isLoading &&
             Object.entries(series).length &&
-            data.map((data, i) => (
-              <div
-                className={
-                  "viewportContainer" + (activePort == i ? " selected" : "")
-                }
-                key={i}
-                id={"viewportContainer" + i}
-                style={{
-                  width: this.state.width,
-                  height: this.state.height,
-                  display: "inline-block",
-                }}
-                onClick={() => this.setActive(i)}
-              >
-                <div className={"row"}>
-                  <div className={"column left"}>
-                    <span
-                      className={"dot"}
-                      style={{ background: "#ED594A" }}
-                      onClick={() => this.handleClose(i)}
-                    >
-                      <FaTimes />
-                    </span>
-                    <span
-                      className={"dot"}
-                      style={{ background: "#5AC05A" }}
-                      onClick={() => this.hideShow(i)}
-                    >
-                      <FaExpandArrowsAlt />
-                    </span>
-                    <span
-                      className={"dot"}
-                      style={{ background: "deepskyblue" }}
-                      onClick={(e) => {
-                        this.toggleOverlay(e, i);
-                      }}
-                    >
-                      <FaTag />
-                    </span>
-                  </div>
-                  {/* <div className={"column middle"}>
+            data.map((data, i) => {
+              return (
+                <div
+                  className={
+                    "viewportContainer" + (activePort == i ? " selected" : "")
+                  }
+                  key={i}
+                  id={"viewportContainer" + i}
+                  style={{
+                    width: this.state.width,
+                    height: this.state.height,
+                    display: "inline-block",
+                  }}
+                  onClick={() => this.setActive(i)}
+                >
+                  <div className={"row"}>
+                    <div className={"column left"}>
+                      <span
+                        className={"dot"}
+                        style={{ background: "#ED594A" }}
+                        onClick={() => this.handleClose(i)}
+                      >
+                        <FaTimes />
+                      </span>
+                      <span
+                        className={"dot"}
+                        style={{ background: "#5AC05A" }}
+                        onClick={() => this.hideShow(i)}
+                      >
+                        <FaExpandArrowsAlt />
+                      </span>
+                      <span
+                        className={"dot"}
+                        style={{ background: "deepskyblue" }}
+                        onClick={(e) => {
+                          this.toggleOverlay(e, i);
+                        }}
+                      >
+                        <FaTag />
+                      </span>
+                    </div>
+                    {/* <div className={"column middle"}>
                     <label>{series[i].seriesUID}</label>
                   </div> */}
-                  <div
-                    className={"column middle-right"}
-                    style={{ paddingTop: "0px" }}
-                  >
-                    <div style={{ paddingTop: "10px" }}>
-                      <Form inline className="slice-form">
-                        <Form.Group className="slice-number">
-                          <Form.Label
-                            htmlFor="imageNum"
-                            className="slice-label"
-                            style={{ color: "white" }}
-                          >
-                            {"Image # "}
-                          </Form.Label>
-                          <Form.Control
-                            type="number"
-                            min="1"
-                            value={
-                              parseInt(data?.stack?.currentImageIdIndex) + 1
-                            }
-                            className={"slice-field"}
-                            onChange={(event) =>
-                              this.handleJumpChange(i, event)
-                            }
-                            style={{
-                              width: "60px",
-                              height: "10px",
-                              opacity: 1,
-                              display: "inline",
-                            }}
-                          />
-                        </Form.Group>
-                      </Form>
-                    </div>
-                    <div className={"series-dd"}>
-                      <SeriesDropDown
-                        style={{ lineHeight: "1" }}
-                        serie={series[i]}
-                        isAimEditorShowing={this.state.showAimEditor}
-                        onCloseAimEditor={this.closeAimEditor}
-                        onSelect={this.jumpToImage}
-                      />
-                    </div>
-                  </div>
-                  <div className={"column right"}>
-                    <span
-                      className={"dot"}
-                      style={{ background: "#FDD800", float: "right" }}
-                      onClick={() => {
-                        this.setState({ showAimEditor: true });
-                      }}
+                    <div
+                      className={"column middle-right"}
+                      style={{ paddingTop: "0px" }}
                     >
-                      <FaPen />
-                    </span>
+                      <div style={{ paddingTop: "10px" }}>
+                        <Form inline className="slice-form">
+                          <Form.Group className="slice-number">
+                            <Form.Label
+                              htmlFor="imageNum"
+                              className="slice-label"
+                              style={{ color: "white" }}
+                            >
+                              {"Image # "}
+                            </Form.Label>
+                            <Form.Control
+                              type="number"
+                              min="1"
+                              value={
+                                parseInt(data?.stack?.currentImageIdIndex) + 1
+                              }
+                              className={"slice-field"}
+                              onChange={(event) =>
+                                this.handleJumpChange(i, event)
+                              }
+                              style={{
+                                width: "60px",
+                                height: "10px",
+                                opacity: 1,
+                                display: "inline",
+                              }}
+                            />
+                          </Form.Group>
+                        </Form>
+                      </div>
+                      <div className={"series-dd"}>
+                        <SeriesDropDown
+                          style={{ lineHeight: "1" }}
+                          serie={series[i]}
+                          isAimEditorShowing={this.state.showAimEditor}
+                          onCloseAimEditor={this.closeAimEditor}
+                          onSelect={this.jumpToImage}
+                        />
+                      </div>
+                    </div>
+                    <div className={"column right"}>
+                      <span
+                        className={"dot"}
+                        style={{ background: "#FDD800", float: "right" }}
+                        onClick={() => {
+                          this.setState({ showAimEditor: true });
+                        }}
+                      >
+                        <FaPen />
+                      </span>
+                    </div>
                   </div>
+                  <CornerstoneViewport
+                    key={i}
+                    imageIds={data.stack.imageIds}
+                    imageIdIndex={parseInt(data.stack.currentImageIdIndex)}
+                    viewportIndex={i}
+                    tools={tools}
+                    shouldInvert={this.state.invertMap[i]}
+                    eventListeners={[
+                      {
+                        target: "element",
+                        eventName: "cornerstonetoolsmeasurementcompleted",
+                        handler: this.measurementCompleted,
+                      },
+                      {
+                        target: "element",
+                        eventName: "cornerstonetoolsmeasurementmodified",
+                        handler: this.measuremementModified,
+                      },
+                      {
+                        target: "element",
+                        eventName: "cornerstonetoolsmeasurementremoved",
+                        handler: this.measurementRemoved,
+                      },
+                      {
+                        target: "element",
+                        eventName: "cornerstonenewimage",
+                        handler: (e) => this.newImage(e, i),
+                      },
+                    ]}
+                    setViewportActive={() => {
+                      console.log(" --- cornestone");
+                      this.setActive(i);
+                    }}
+                    isStackPrefetchEnabled={true}
+                    style={{ height: "calc(100% - 26px)" }}
+                    activeTool={activeTool}
+                    isOverlayVisible={this.state.isOverlayVisible[i] || false}
+                    jumpToImage={() => this.jumpToImage(0, i)}
+                  />
                 </div>
-                <CornerstoneViewport
-                  key={`${i}-port`}
-                  imageIds={data.stack.imageIds}
-                  imageIdIndex={parseInt(data.stack.currentImageIdIndex)}
-                  viewportIndex={i}
-                  tools={tools}
-                  shouldInvert={this.state.invertMap[i]}
-                  eventListeners={[
-                    {
-                      target: "element",
-                      eventName: "cornerstonetoolsmeasurementcompleted",
-                      handler: this.measurementCompleted,
-                    },
-                    {
-                      target: "element",
-                      eventName: "cornerstonetoolsmeasurementmodified",
-                      handler: this.measuremementModified,
-                    },
-                    {
-                      target: "element",
-                      eventName: "cornerstonetoolsmeasurementremoved",
-                      handler: this.measurementRemoved,
-                    },
-                    {
-                      target: "element",
-                      eventName: "cornerstonenewimage",
-                      handler: (e) => this.newImage(e, i),
-                    },
-                  ]}
-                  setViewportActive={() => this.setActive(i)}
-                  isStackPrefetchEnabled={true}
-                  style={{ height: "calc(100% - 26px)" }}
-                  activeTool={activeTool}
-                  isOverlayVisible={this.state.isOverlayVisible[i] || false}
-                  jumpToImage={() => this.jumpToImage(0, i)}
-                />
-              </div>
-            ))}
+              );
+            })}
           {/* <ContextMenu
             onAnnotate={this.onAnnotate}
             closeViewport={this.closeViewport}

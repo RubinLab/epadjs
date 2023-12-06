@@ -374,7 +374,7 @@ const asyncReducer = (state = initialState, action) => {
           otherSeriesAimsList: { ...state.otherSeriesAimsList, ...action.payload.otherSeriesAimsData },
           openSeriesAddition: imageAddedSeries,
           openStudies: newStudySeries,
-          multiFrameAimJumpData: jumpArr1
+          multiFrameAimJumpData: jumpArr1,
         });
         return result;
       case LOAD_ANNOTATIONS_ERROR:
@@ -608,16 +608,24 @@ const asyncReducer = (state = initialState, action) => {
         }
         const arePortsOccupied = action.port !== undefined && typeof action.port === 'number';
         let newOpenSeries = [...state.openSeries];
+        let newOpenSeriesAddtition = _.cloneDeep(state.openSeriesAddition);
 
-        if (arePortsOccupied) newOpenSeries[action.port] = seriesInfo;
-        else newOpenSeries = newOpenSeries.concat([seriesInfo]);
+        if (arePortsOccupied) {
+          newOpenSeries[action.port] = seriesInfo;
+          newOpenSeriesAddtition[action.port] = seriesInfo;
+        } else { 
+          newOpenSeries = newOpenSeries.concat([seriesInfo]);
+          newOpenSeriesAddtition = newOpenSeriesAddtition.concat([seriesInfo]);
+        }
 
         const newActivePort = arePortsOccupied ? state.activePort : newOpenSeries.length - 1;
+        console.log(" ---> newActivePort", newActivePort);
+        console.log(' -> newOpenSeries', newOpenSeries.length);
         return {
           ...state,
           openSeries: newOpenSeries,
           activePort: newActivePort,
-          openSeriesAddition: newOpenSeries
+          openSeriesAddition: newOpenSeriesAddtition
         };
 
       case REPLACE_IN_GRID:
