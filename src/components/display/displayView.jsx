@@ -821,7 +821,6 @@ class DisplayView extends Component {
       seriesMetadata.length === imgURLsLen;
     // get the first and the middle image
     const middleIndex =  Math.floor(imgURLsLen / 2);
-    console.log('middleIndex', middleIndex);
     let firstImage = null;
     let middleImage = null;
     if (!useSeriesData) {
@@ -845,7 +844,6 @@ class DisplayView extends Component {
 
     // get position from the first image but orientation from the middle
     const sortByGeo = !!firstImage["00200032"] && !!middleImage["00200037"];
-    console.log('first position', firstImage["00200032"], 'middle orientation',  middleImage["00200037"], 'sortbygeo', sortByGeo);
     if (sortByGeo) {
       referencePosition = firstImage["00200032"].Value;
       rowVector = middleImage["00200037"].Value.slice(0, 3);
