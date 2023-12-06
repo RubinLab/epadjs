@@ -340,7 +340,7 @@ const asyncReducer = (state = initialState, action) => {
 
         let jumpArr1 = []
         if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
-          const imgArr = state.imageAddedSeries.frameData[state.openSeries.aimID].split('/frames/');
+          const imgArr = imageAddedSeries.frameData[state.openSeries.aimID].split('/frames/');
           jumpArr = [imageAddedSeries.multiFrameMap[imgArr[0]], parseInt(imgArr[1] - 1)];
         }
         const newDataKeys = Object.keys(action.payload.aimsData);
