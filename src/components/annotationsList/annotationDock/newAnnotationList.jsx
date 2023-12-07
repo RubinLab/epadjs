@@ -1,5 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
+import PropagateLoader from "react-spinners/PropagateLoader";
 import Annotation from "./annotation";
 import AnnotationsLink from "./newAnnotationsLink";
 import {
@@ -257,59 +258,76 @@ class AnnotationsList extends React.Component {
     //   console.log("Error: ", e);
     // }
     return (
-      <React.Fragment>
-        <div className="annotationList-container" style={{ paddingTop: "5px" }}>
-          <div className="checkbox-row">
-            <div className="form-check form-check-inline">
-              <input
-                type="checkbox"
-                role="switch"
-                id="showAnnotations"
-                onChange={this.handleCalculations}
-                checked={this.state.showCalculations}
-              />
-              <label
-                className="form-check-label"
-                htmlFor="flexSwitchCheckDefault"
-              >
-                Show Calculations
-              </label>
-            </div>
-            <div className="form-check form-check-inline">
-              <input
-                type="checkbox"
-                role="switch"
-                id="showAnnotations"
-                onChange={this.handleToggleAllLabels}
-                checked={this.state.labelDisplayAll}
-              />
-              <label
-                className="form-check-label"
-                htmlFor="flexSwitchCheckDefault"
-              >
-                Show Details
-              </label>
-            </div>
-            <div className="form-check form-check-inline">
-              <input
-                type="checkbox"
-                role="switch"
-                id="showAnnotations"
-                onChange={this.handleToggleAllAnnotations}
-                checked={this.state.annsDisplayAll}
-              />
-              <label
-                className="form-check-label"
-                htmlFor="flexSwitchCheckDefault"
-              >
-                Show Markups
-              </label>
-            </div>
+      <>
+        {this.props.loading && (
+          <div style={{ marginTop: "10%", marginLeft: "30%" }}>
+            <PropagateLoader
+              color={"#ccc"}
+              loading={this.props.loading}
+              margin={8}
+            />
           </div>
-        </div>
-        <div>{annList}</div>
-        <AnnotationsLink imageAims={imageAims} />
-      </React.Fragment>
+        )}
+        {!this.props.loading && (
+          <React.Fragment>
+            <div
+              className="annotationList-container"
+              style={{ paddingTop: "5px" }}
+            >
+              <div className="checkbox-row">
+                <div className="form-check form-check-inline">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    id="showAnnotations"
+                    onChange={this.handleCalculations}
+                    checked={this.state.showCalculations}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor="flexSwitchCheckDefault"
+                  >
+                    Show Calculations
+                  </label>
+                </div>
+                <div className="form-check form-check-inline">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    id="showAnnotations"
+                    onChange={this.handleToggleAllLabels}
+                    checked={this.state.labelDisplayAll}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor="flexSwitchCheckDefault"
+                  >
+                    Show Details
+                  </label>
+                </div>
+                <div className="form-check form-check-inline">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    id="showAnnotations"
+                    onChange={this.handleToggleAllAnnotations}
+                    checked={this.state.annsDisplayAll}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor="flexSwitchCheckDefault"
+                  >
+                    Show Markups
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div>{annList}</div>
+            <AnnotationsLink imageAims={imageAims} />
+          </React.Fragment>
+        )}
+      </>
     );
   };
 }
