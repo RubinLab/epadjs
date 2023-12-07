@@ -360,7 +360,6 @@ class Projects extends React.Component {
   handleFormInput = (e, isId = false) => {
     const { name, value } = e.target;
     const mode = sessionStorage.getItem("mode");
-    console.log(name, value);
     if (
       name === "defaulttemplate" &&
       (value === "none" || value === null) &&
