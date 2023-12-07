@@ -260,6 +260,13 @@ const AnnotationSearch = (props) => {
       //}
     }
   };
+  
+  useEffect(() => {
+    window.addEventListener("keydown", handleUserKeyPress);
+    return () => {
+      window.removeEventListener("keydown", handleUserKeyPress);
+    };
+  }, [handleUserKeyPress]);
 
   const handleTeachingFilesModal = (event) => {
     let { seriesArray, args, packedData } = event.detail;
@@ -277,44 +284,12 @@ const AnnotationSearch = (props) => {
   };
 
   useEffect(() => {
-    window.addEventListener('keydown', handleUserKeyPress);
-    return () => {
-      window.removeEventListener('keydown', handleUserKeyPress);
-    };
-  }, [handleUserKeyPress]);
-
-
-  useEffect(() => {
     window.addEventListener("openTeachingFilesModal", handleTeachingFilesModal);
     return () => {
       window.removeEventListener(
         "openTeachingFilesModal",
         handleTeachingFilesModal
       );
-    };
-  }, [handleTeachingFilesModal]);
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleUserKeyPress);
-    return () => {
-      window.removeEventListener("keydown", handleUserKeyPress);
-    };
-  }, [handleUserKeyPress]);
-
-  useEffect(() => {
-    window.addEventListener("openTeachingFilesModal", handleTeachingFilesModal);
-    return () => {
-      window.removeEventListener(
-        "openTeachingFilesModal",
-        handleTeachingFilesModal
-      );
-    };
-  }, [handleTeachingFilesModal]);
-
-  useEffect(() => {
-    window.addEventListener('openTeachingFilesModal', handleTeachingFilesModal);
-    return () => {
-      window.removeEventListener('openTeachingFilesModal', handleTeachingFilesModal);
     };
   }, [handleTeachingFilesModal]);
 

@@ -192,12 +192,14 @@ class DisplayView extends Component {
     };
   }
 
-  formInvertMap = () => {
+  formInvertMap = (buttonClicked, index) => {
     const { series } = this.props;
     const invertMap = { ...this.state.invertMap };
-    series.forEach((el, i) => {
-      invertMap[i] = el.examType === "NM";
-    });
+    if (buttonClicked) invertMap[index] = !invertMap[index];
+    else
+      series.forEach((el, i) => {
+        invertMap[i] = el.examType === "NM";
+      });
     this.setState({ invertMap });
   };
 
@@ -2279,7 +2281,10 @@ class DisplayView extends Component {
           saveData={this.props.saveData}
           savedData={this.props.savedData}
         >
-          <ToolMenu onSwitchView={this.props.onSwitchView} />
+          <ToolMenu
+            onSwitchView={this.props.onSwitchView}
+            onInvertClick={this.formInvertMap}
+          />
           {this.state.isLoading && (
             <div style={{ marginTop: "30%", marginLeft: "50%" }}>
               <PropagateLoader
