@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import _ from "lodash";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
@@ -18,7 +19,6 @@ import "./viewport.css";
 import {
   changeActivePort,
   updateImageId,
-  clearActivePortAimID,
   closeSerie,
   jumpToAim,
   setSegLabelMapIndex,
@@ -28,7 +28,6 @@ import {
   clearAimId,
   updateSubpath,
   clearSelection,
-  addStudyToGrid,
   updateGridWithMultiFrameInfo,
   clearMultiFrameAimJumpFlags,
 } from "../annotationsList/action";
@@ -149,6 +148,7 @@ const tools = [
 const mapStateToProps = (state) => {
   return {
     series: state.annotationsListReducer.openSeries,
+    seriesAddition: state.annotationsListReducer.openSeriesAddition,
     loading: state.annotationsListReducer.loading,
     activePort: state.annotationsListReducer.activePort,
     aimList: state.annotationsListReducer.aimsList,
@@ -188,6 +188,7 @@ class DisplayView extends Component {
       multiFrameData: {},
       templateType: "",
       multiFrameAimJumped: false,
+      dataIndexMap: {},
     };
   }
 
@@ -257,8 +258,6 @@ class DisplayView extends Component {
       activePort: prevActivePort,
       aimList: prevAimList,
     } = prevProps;
-    const activeSerie = series[activePort];
-    const prevActiveSerie = prevSeries[prevActivePort];
 
     if (this.props.series.length < 1) {
       if (mode === "teaching") this.props.history.push("/search");
@@ -267,6 +266,7 @@ class DisplayView extends Component {
       return;
     }
 
+    // TODO: check if loading/true-false control is required for the first condition
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
       multiFrameAimJumpData &&
@@ -278,13 +278,14 @@ class DisplayView extends Component {
       this.getViewports();
       this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1]);
       this.formInvertMap();
-    } else if (
-      (prevProps.series !== this.props.series &&
-        prevProps.loading === true &&
-        this.props.loading === false) ||
-      (prevProps.series.length !== this.props.series.length &&
-        this.props.loading === false)
-    ) {
+      // } else if (
+      //   (prevProps.series !== this.props.series &&
+      //     prevProps.loading === true &&
+      //     this.props.loading === false) ||
+      //   (prevProps.series.length !== this.props.series.length &&
+      //     this.props.loading === false)
+      // ) {
+    } else if (prevProps.series.length !== series.length) {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
@@ -294,6 +295,9 @@ class DisplayView extends Component {
     // each time visibility of aims change
     else if (Object.keys(aimList).length !== Object.keys(prevAimList).length) {
       this.renderAims();
+      //TODO: check if filling aimsList process changes openseries
+      // if chanes sever that data from openseries
+      // refresh only cornerstone by calling this.renderAims();
     }
   }
 
@@ -356,12 +360,12 @@ class DisplayView extends Component {
   };
 
   jumpToAims = () => {
-    const { series } = this.props;
-    const newData = [...this.state.data];
+    const { series, seriesAddition } = this.props;
+    const newData = [...this.state.data]; // this should be deepclone
     series.forEach((serie, i) => {
       if (serie.aimID && this.state.data[i] && this.state.data[i].stack) {
         const { imageIds } = this.state.data[i].stack;
-        const imageIndex = this.getImageIndex(serie, imageIds);
+        const imageIndex = this.getImageIndex(seriesAddition[i], imageIds);
         newData[i].stack.currentImageIdIndex = imageIndex;
       }
     });
@@ -583,28 +587,66 @@ class DisplayView extends Component {
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
       const { series, activePort } = this.props;
+      const { dataIndexMap, data } = this.state;
       var promises = [];
+      const indexKeys = {};
+      const newData = new Array(series.length);
+      const indexOrder = [];
       for (let i = 0; i < series.length; i++) {
-        const promise = this.getImageStack(
-          series[i],
-          i,
-          multiFrameIndex,
-          frameNo
-        );
-        promises.push(promise);
-      }
-      Promise.all(promises).then((res) => {
-        const key =
-          multiFrameIndex && frameNo && series[activePort].aimID
-            ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
-            : null;
+        // DONE/TODO: in order to not to get same stack again and again
+        // add seriesUID-PrID etc info and look it up if we need to get it
+        // [{stack -> UIDkey, ycurImgIndex, imfIds}, {}]
 
-        if (key && key !== this.state.multiFrameAimJumped) {
-          this.setState({ data: res, multiFrameAimJumped: key });
+        const { projectID, patientID, studyUID, seriesUID } = series[i];
+        const indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
+
+        // if (typeof dataIndexMap[indexKey] !== "number") {
+        if (!(dataIndexMap[indexKey] >= 0) || multiFrameIndex) {
+          const promise = this.getImageStack(
+            series[i],
+            i,
+            multiFrameIndex,
+            frameNo
+          );
+          promises.push(promise);
+          indexKeys[indexKey] = i;
+          indexOrder.push(i);
         } else {
-          this.setState({ data: res });
+          const index = dataIndexMap[indexKey];
+          newData[index] = this.state.data[index];
         }
+      }
+      if (promises.length > 0) {
+        Promise.all(promises).then((res) => {
+          const key =
+            multiFrameIndex && frameNo && series[activePort].aimID
+              ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
+              : null;
 
+          // TODO: how this logic works if it is not a multiframe img/series like patient7
+          // should i add a isMultiFrame constol before checking key
+          res.forEach((el, inx) => {
+            newData[indexOrder[inx]] = el;
+          });
+
+          if (key && key !== this.state.multiFrameAimJumped) {
+            this.setState({ data: newData, multiFrameAimJumped: key });
+          } else {
+            this.setState({ data: newData });
+          }
+
+          this.setState(
+            {
+              isLoading: false,
+              dataIndexMap: { ...this.state.dataIndexMap, ...indexKeys },
+            },
+            () => {
+              this.jumpToAims();
+              this.renderAims();
+            }
+          );
+        });
+      } else {
         this.setState(
           {
             isLoading: false,
@@ -612,11 +654,9 @@ class DisplayView extends Component {
           () => {
             this.jumpToAims();
             this.renderAims();
-            this.refreshAllViewports();
-            // this.shouldOpenAimEditor();
           }
         );
-      });
+      }
     } catch (error) {
       console.error(error);
     }
@@ -659,7 +699,7 @@ class DisplayView extends Component {
   };
 
   renderAims = (notShowAimEditor = false) => {
-    const { series } = this.props;
+    const { seriesAddition } = this.props;
     this.setState({
       activeLabelMapIndex: 0,
       prospectiveLabelMapIndex: 0,
@@ -667,7 +707,7 @@ class DisplayView extends Component {
     // markups will be rendered so clear all previously renders
     this.clearAllMarkups();
 
-    series.forEach((serie, serieIndex) => {
+    seriesAddition.forEach((serie, serieIndex) => {
       // Remove this part to disable openning aim editor by default
       // once user clecked on an aim
 
@@ -712,7 +752,6 @@ class DisplayView extends Component {
       return all;
     }, []);
     const result = { [series[activePort].studyUID]: studySeries };
-    this.props.dispatch(addStudyToGrid(result));
   };
 
   async getImages(serie, i) {
@@ -820,16 +859,21 @@ class DisplayView extends Component {
       seriesMetadataExists &&
       seriesMetadata.length > 0 &&
       seriesMetadata.length === imgURLsLen;
-    // get first image
+    // get the first and the middle image
+    const middleIndex = Math.floor(imgURLsLen / 2);
     let firstImage = null;
+    let middleImage = null;
     if (!useSeriesData) {
       const result = await getImageMetadata(
         wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage
       );
       const data = result.data;
       firstImage = data[0];
+      middleImage = data[middleIndex];
     } else {
       firstImage = seriesMetadataMap[imageUrls[firstSeriesIndex][0].imageUID];
+      middleImage =
+        seriesMetadataMap[imageUrls[firstSeriesIndex][middleIndex].imageUID];
     }
 
     let referencePosition = null;
@@ -839,11 +883,12 @@ class DisplayView extends Component {
 
     const distanceDatasetPairs = [];
 
-    const sortByGeo = !!firstImage["00200032"] && !!firstImage["00200037"];
+    // get position from the first image but orientation from the middle
+    const sortByGeo = !!firstImage["00200032"] && !!middleImage["00200037"];
     if (sortByGeo) {
       referencePosition = firstImage["00200032"].Value;
-      rowVector = firstImage["00200037"].Value.slice(0, 3);
-      columnVector = firstImage["00200037"].Value.slice(3, 6);
+      rowVector = middleImage["00200037"].Value.slice(0, 3);
+      columnVector = middleImage["00200037"].Value.slice(3, 6);
       scanAxis = dcmjs.normalizers.ImageNormalizer.vec3CrossProduct(
         rowVector,
         columnVector
@@ -909,10 +954,13 @@ class DisplayView extends Component {
       }
     }
 
-    const { imageIds } = this.state;
-    this.setState({ imageIds: { ...imageIds, ...newImageIds } });
+    // DELETE_1
+    // const { imageIds } = this.state;
+    // this.setState({ imageIds: { ...imageIds, ...newImageIds } });
 
     //to jump to the same image after aim save
+    // TODO reorganize the imageIndex assigning logic / if statements
+
     let imageIndex;
     if (
       this.state.data[index] &&
@@ -931,7 +979,10 @@ class DisplayView extends Component {
     // if serie is being open from the annotation jump to that image and load the aim editor
     if (multiFrameIndex && frameNo) imageIndex = frameNo;
     else if (serie.aimID)
-      imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+      imageIndex = this.getImageIndex(
+        this.props.seriesAddition[index],
+        cornerstoneImageIds
+      );
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
@@ -988,8 +1039,10 @@ class DisplayView extends Component {
         newImageIds[singleFrameUrl] = false;
       }
     });
-    const { imageIds } = this.state;
-    this.setState({ imageIds: { ...imageIds, ...newImageIds } });
+
+    // DELETE_2
+    // const { imageIds } = this.state;
+    // this.setState({ imageIds: { ...imageIds, ...newImageIds } });
 
     //to jump to the same image after aim save
     let imageIndex;
@@ -1002,7 +1055,10 @@ class DisplayView extends Component {
 
     // if serie is being open from the annotation jump to that image and load the aim editor
     if (serie.aimID) {
-      imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+      imageIndex = this.getImageIndex(
+        this.props.seriesAddition[index],
+        cornerstoneImageIds
+      );
     }
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
@@ -1097,12 +1153,15 @@ class DisplayView extends Component {
   };
 
   getImageIndexFromImageId = (cornerstoneImageIds, cornerstoneImageId) => {
-    const { imageIds } = this.state;
-    const wadors = wadoUrl.includes("wadors");
+    //DELETE_3
+    // const { imageIds } = this.state;
+    // const wadors = wadoUrl.includes("wadors");
 
-    if (!imageIds[cornerstoneImageId] && !wadors) {
-      cornerstoneImageId = cornerstoneImageId.split("&frame")[0];
-    }
+    //DELETE_4
+    // if (!imageIds[cornerstoneImageId] && !wadors) {
+    //   cornerstoneImageId = cornerstoneImageId.split("&frame")[0];
+    // }
+
     for (let [key, value] of Object.entries(cornerstoneImageIds)) {
       if (value === cornerstoneImageId) {
         return key;
@@ -1431,10 +1490,11 @@ class DisplayView extends Component {
           this.props.subpath[this.props.activePort]
         );
 
-        if (this.state.imageIds && !this.state.imageIds[imageId] && !wadors) {
-          //image is not multiframe so strip the frame number from the imageId
-          imageId = imageId.split("&frame=")[0];
-        }
+        //DELETE_5 wadouri support
+        // if (this.state.imageIds && !this.state.imageIds[imageId] && !wadors) {
+        //   //image is not multiframe so strip the frame number from the imageId
+        //   imageId = imageId.split("&frame=")[0];
+        // }
 
         this.renderMarkup(imageId, value, color);
       });
@@ -1761,7 +1821,8 @@ class DisplayView extends Component {
 
   getColorOfMarkup = (aimUid, seriesUid) => {
     try {
-      return this.props.aimList[seriesUid][aimUid].color.button.background;
+      const series = this.props.aimList[seriesUid];
+      return series ? series[aimUid]?.color.button.background : null;
     } catch (error) {
       console.error(error);
     }
@@ -1959,7 +2020,9 @@ class DisplayView extends Component {
       hasSegmentation: false,
       dirty: false,
     });
-    this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
+
+    // use clearMultiFrameAimJumpFlags to replace clear-active-aimid
+    this.props.dispatch(clearMultiFrameAimJumpFlags()); // this data is rendered so clear the aim Id in props
     this.clearSculptState();
     this.clearSmartBrushState();
     this.renderAims(true);
@@ -2020,8 +2083,10 @@ class DisplayView extends Component {
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
   };
 
-  closeViewport = () => {
+  closeViewport = (index) => {
     const { showAimEditor, dirty } = this.state;
+    const { series } = this.props;
+    const { projectID, patientID, studyUID, seriesUID } = series[index];
     // closes the active viewport
     if (showAimEditor && dirty) {
       window.alert(
@@ -2029,9 +2094,32 @@ class DisplayView extends Component {
       );
       return;
     }
-    this.props.dispatch(closeSerie());
-    this.deleteViewportImageStatus();
-    // this.props.onSwitchView("search");
+
+    try {
+      const key = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
+      const gridIndex = this.state.dataIndexMap[key];
+      const newData = _.cloneDeep(this.state.data);
+      const newDataIndexMap = { ...this.state.dataIndexMap };
+      // build the from the uids
+      // get the index number using the key
+      // delete key from the object
+      // splice the state data
+      newData.splice(gridIndex, 1);
+      delete newDataIndexMap[key];
+      for (let key in newDataIndexMap) {
+        if (newDataIndexMap[key] > gridIndex) {
+          newDataIndexMap[key] -= 1;
+        }
+      }
+      this.props.dispatch(closeSerie());
+      this.deleteViewportImageStatus();
+      this.setState({ data: newData, dataIndexMap: newDataIndexMap });
+      // this.jumpToAims();
+      // this.renderAims();
+      // this.props.onSwitchView("search");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   handleHideAnnotations = () => {
@@ -2042,7 +2130,7 @@ class DisplayView extends Component {
     let markupTypes = [];
     try {
       const imageAnnotations =
-        this.props.series[this.props.activePort].imageAnnotations;
+        this.props.seriesAddition[this.props.activePort].imageAnnotations;
       if (!imageAnnotations) {
         return undefined;
       }
@@ -2091,36 +2179,41 @@ class DisplayView extends Component {
   onAnnotate = () => {
     this.setState({ showAimEditor: true });
   };
+
   handleClose = (i) => {
     if (this.props.activePort !== i) {
       this.setActive(i);
       return;
     }
-    this.closeViewport();
+    this.closeViewport(i);
   };
 
   // Triggered by event from right bar to jump to the image of aim
   jumpToAimImage = (event) => {
     // seperate this function to handle both
     // if there are multiframe data call get image stack and pass frame data etc
-    const { series, activePort } = this.props;
+    const { seriesAddition, series, activePort } = this.props;
     const { aimId, index, imageID, frameNo } = event.detail;
 
     const imageIndex = this.getImageIndex(
-      series[index],
+      seriesAddition[index],
       this.state.data[index].stack.imageIds,
       aimId
     );
 
-    const { hasMultiframe } = series[activePort];
+    const { hasMultiframe } = seriesAddition[activePort];
 
+    // TODO: if jumping on the same multiframe series it shouldn't call the getData
     if (!hasMultiframe) {
       this.jumpToImage(imageIndex, index);
-    } else if (hasMultiframe && !series[activePort].multiFrameMap[imageID]) {
+    } else if (
+      hasMultiframe &&
+      !seriesAddition[activePort].multiFrameMap[imageID]
+    ) {
       this.setState({ isLoading: true });
       this.getData(null, null);
     } else {
-      const multiFrameIndex = series[activePort].multiFrameMap[imageID];
+      const multiFrameIndex = seriesAddition[activePort].multiFrameMap[imageID];
       this.getData(multiFrameIndex, frameNo);
     }
   };
@@ -2203,143 +2296,147 @@ class DisplayView extends Component {
           )}
           {!this.state.isLoading &&
             Object.entries(series).length &&
-            data.map((data, i) => (
-              <div
-                className={
-                  "viewportContainer" + (activePort == i ? " selected" : "")
-                }
-                key={i}
-                id={"viewportContainer" + i}
-                style={{
-                  width: this.state.width,
-                  height: this.state.height,
-                  display: "inline-block",
-                }}
-                onClick={() => this.setActive(i)}
-              >
-                <div className={"row"}>
-                  <div className={"column left"}>
-                    <span
-                      className={"dot"}
-                      style={{ background: "#ED594A" }}
-                      onClick={() => this.handleClose(i)}
-                    >
-                      <FaTimes />
-                    </span>
-                    <span
-                      className={"dot"}
-                      style={{ background: "#5AC05A" }}
-                      onClick={() => this.hideShow(i)}
-                    >
-                      <FaExpandArrowsAlt />
-                    </span>
-                    <span
-                      className={"dot"}
-                      style={{ background: "deepskyblue" }}
-                      onClick={(e) => {
-                        this.toggleOverlay(e, i);
-                      }}
-                    >
-                      <FaTag />
-                    </span>
-                  </div>
-                  {/* <div className={"column middle"}>
+            data.map((data, i) => {
+              return (
+                <div
+                  className={
+                    "viewportContainer" + (activePort == i ? " selected" : "")
+                  }
+                  key={i}
+                  id={"viewportContainer" + i}
+                  style={{
+                    width: this.state.width,
+                    height: this.state.height,
+                    display: "inline-block",
+                  }}
+                  onClick={() => this.setActive(i)}
+                >
+                  <div className={"row"}>
+                    <div className={"column left"}>
+                      <span
+                        className={"dot"}
+                        style={{ background: "#ED594A" }}
+                        onClick={() => this.handleClose(i)}
+                      >
+                        <FaTimes />
+                      </span>
+                      <span
+                        className={"dot"}
+                        style={{ background: "#5AC05A" }}
+                        onClick={() => this.hideShow(i)}
+                      >
+                        <FaExpandArrowsAlt />
+                      </span>
+                      <span
+                        className={"dot"}
+                        style={{ background: "deepskyblue" }}
+                        onClick={(e) => {
+                          this.toggleOverlay(e, i);
+                        }}
+                      >
+                        <FaTag />
+                      </span>
+                    </div>
+                    {/* <div className={"column middle"}>
                     <label>{series[i].seriesUID}</label>
                   </div> */}
-                  <div
-                    className={"column middle-right"}
-                    style={{ paddingTop: "0px" }}
-                  >
-                    <div style={{ paddingTop: "10px" }}>
-                      <Form inline className="slice-form">
-                        <Form.Group className="slice-number">
-                          <Form.Label
-                            htmlFor="imageNum"
-                            className="slice-label"
-                            style={{ color: "white" }}
-                          >
-                            {"Image # "}
-                          </Form.Label>
-                          <Form.Control
-                            type="number"
-                            min="1"
-                            value={
-                              parseInt(data?.stack?.currentImageIdIndex) + 1
-                            }
-                            className={"slice-field"}
-                            onChange={(event) =>
-                              this.handleJumpChange(i, event)
-                            }
-                            style={{
-                              width: "60px",
-                              height: "10px",
-                              opacity: 1,
-                              display: "inline",
-                            }}
-                          />
-                        </Form.Group>
-                      </Form>
-                    </div>
-                    <div className={"series-dd"}>
-                      <SeriesDropDown
-                        style={{ lineHeight: "1" }}
-                        serie={series[i]}
-                        isAimEditorShowing={this.state.showAimEditor}
-                        onCloseAimEditor={this.closeAimEditor}
-                        onSelect={this.jumpToImage}
-                      />
-                    </div>
-                  </div>
-                  <div className={"column right"}>
-                    <span
-                      className={"dot"}
-                      style={{ background: "#FDD800", float: "right" }}
-                      onClick={() => {
-                        this.setState({ showAimEditor: true });
-                      }}
+                    <div
+                      className={"column middle-right"}
+                      style={{ paddingTop: "0px" }}
                     >
-                      <FaPen />
-                    </span>
+                      <div style={{ paddingTop: "10px" }}>
+                        <Form inline className="slice-form">
+                          <Form.Group className="slice-number">
+                            <Form.Label
+                              htmlFor="imageNum"
+                              className="slice-label"
+                              style={{ color: "white" }}
+                            >
+                              {"Image # "}
+                            </Form.Label>
+                            <Form.Control
+                              type="number"
+                              min="1"
+                              value={
+                                parseInt(data?.stack?.currentImageIdIndex) + 1
+                              }
+                              className={"slice-field"}
+                              onChange={(event) =>
+                                this.handleJumpChange(i, event)
+                              }
+                              style={{
+                                width: "60px",
+                                height: "10px",
+                                opacity: 1,
+                                display: "inline",
+                              }}
+                            />
+                          </Form.Group>
+                        </Form>
+                      </div>
+                      <div className={"series-dd"}>
+                        <SeriesDropDown
+                          style={{ lineHeight: "1" }}
+                          serie={series[i]}
+                          isAimEditorShowing={this.state.showAimEditor}
+                          onCloseAimEditor={this.closeAimEditor}
+                          onSelect={this.jumpToImage}
+                        />
+                      </div>
+                    </div>
+                    <div className={"column right"}>
+                      <span
+                        className={"dot"}
+                        style={{ background: "#FDD800", float: "right" }}
+                        onClick={() => {
+                          this.setState({ showAimEditor: true });
+                        }}
+                      >
+                        <FaPen />
+                      </span>
+                    </div>
                   </div>
+                  <CornerstoneViewport
+                    key={i}
+                    imageIds={data.stack.imageIds}
+                    imageIdIndex={parseInt(data.stack.currentImageIdIndex)}
+                    viewportIndex={i}
+                    tools={tools}
+                    shouldInvert={this.state.invertMap[i]}
+                    eventListeners={[
+                      {
+                        target: "element",
+                        eventName: "cornerstonetoolsmeasurementcompleted",
+                        handler: this.measurementCompleted,
+                      },
+                      {
+                        target: "element",
+                        eventName: "cornerstonetoolsmeasurementmodified",
+                        handler: this.measuremementModified,
+                      },
+                      {
+                        target: "element",
+                        eventName: "cornerstonetoolsmeasurementremoved",
+                        handler: this.measurementRemoved,
+                      },
+                      {
+                        target: "element",
+                        eventName: "cornerstonenewimage",
+                        handler: (e) => this.newImage(e, i),
+                      },
+                    ]}
+                    setViewportActive={() => {
+                      this.setActive(i);
+                    }}
+                    isStackPrefetchEnabled={true}
+                    style={{ height: "calc(100% - 26px)" }}
+                    activeTool={activeTool}
+                    isOverlayVisible={this.state.isOverlayVisible[i] || false}
+                    jumpToImage={() => this.jumpToImage(0, i)}
+                  />
                 </div>
-                <CornerstoneViewport
-                  key={i}
-                  imageIds={data.stack.imageIds}
-                  imageIdIndex={parseInt(data.stack.currentImageIdIndex)}
-                  viewportIndex={i}
-                  tools={tools}
-                  shouldInvert={this.state.invertMap[i]}
-                  eventListeners={[
-                    {
-                      target: "element",
-                      eventName: "cornerstonetoolsmeasurementcompleted",
-                      handler: this.measurementCompleted,
-                    },
-                    {
-                      target: "element",
-                      eventName: "cornerstonetoolsmeasurementmodified",
-                      handler: this.measuremementModified,
-                    },
-                    {
-                      target: "element",
-                      eventName: "cornerstonetoolsmeasurementremoved",
-                      handler: this.measurementRemoved,
-                    },
-                    {
-                      target: "element",
-                      eventName: "cornerstonenewimage",
-                      handler: (e) => this.newImage(e, i),
-                    },
-                  ]}
-                  setViewportActive={() => this.setActive(i)}
-                  isStackPrefetchEnabled={true}
-                  style={{ height: "calc(100% - 26px)" }}
-                  activeTool={activeTool}
-                  isOverlayVisible={this.state.isOverlayVisible[i] || false}
-                  jumpToImage={() => this.jumpToImage(0, i)}
-                />
-              </div>
-            ))}
+              );
+            })}
           {/* <ContextMenu
             onAnnotate={this.onAnnotate}
             closeViewport={this.closeViewport}

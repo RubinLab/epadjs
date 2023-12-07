@@ -180,6 +180,7 @@ const AnnotationSearch = (props) => {
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
     if ((typeof pagination === "number" || pagination) && !afterDelete) {
+
       setData(data.concat(result.data.rows));
     } else {
       setData(result.data.rows);
@@ -259,7 +260,7 @@ const AnnotationSearch = (props) => {
       //}
     }
   };
-
+  
   useEffect(() => {
     window.addEventListener("keydown", handleUserKeyPress);
     return () => {
@@ -681,8 +682,7 @@ const AnnotationSearch = (props) => {
 
   const getNewData = (pageIndex, afterDelete) => {
     // const searchTableIndex = pageIndex || props.searchTableIndex || 0;
-    if (mode === "teaching") {
-      console.log(" in getNewdata");
+    if (mode === 'teaching') {
       getFieldSearchResults(props.searchTableIndex, afterDelete);
       return;
     }
