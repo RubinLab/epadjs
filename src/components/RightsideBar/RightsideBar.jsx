@@ -18,8 +18,8 @@ class Rightsidebar extends Component {
     let rightDim = x.matches ? "320px" : "420px";
     this.state = {
       rightDim,
-      width: '0px',
-      marginRight: '0',
+      width: "0px",
+      marginRight: "0",
       buttonDisplay: "block",
       showMediaExport: false,
       open: false,
@@ -27,23 +27,22 @@ class Rightsidebar extends Component {
   }
 
   componentDidMount() {
-    // if mode is thick 
+    // if mode is thick
     const encrypted = sessionStorage.getItem("encrypted");
     const mode = sessionStorage.getItem("mode");
     if (mode === "thick" && encrypted) {
       this.setState({
-        open: false, 
+        open: false,
         width: "0px",
         marginRight: "0",
-      })
+      });
     } else {
       this.setState({
         width: this.state.rightDim,
         marginRight: this.state.rightDim,
         open: true,
-      })
+      });
     }
-
   }
 
   handleToggle = () => {
@@ -53,7 +52,7 @@ class Rightsidebar extends Component {
         width: "0px",
         marginRight: "0",
         open: false,
-        showMediaExport: false
+        showMediaExport: false,
       });
     } else {
       this.setState({
@@ -69,7 +68,12 @@ class Rightsidebar extends Component {
       this.handleToggle();
     }
     if (!this.state.showMediaExport || this.props.showAimEditor) {
-      if (this.props.onCancel(true, 'All unsaved annotation data will be lost! Do you want to continue?') == 1) {
+      if (
+        this.props.onCancel(
+          true,
+          "All unsaved annotation data will be lost! Do you want to continue?"
+        ) == 1
+      ) {
         if (!this.state.open) {
           this.handleToggle();
         }
@@ -84,14 +88,14 @@ class Rightsidebar extends Component {
     if (!this.state.showMediaExport || this.props.showAimEditor) {
       this.showMediaExport();
     }
-  }
+  };
 
   annotationsTabClicked = () => {
     if (!this.state.open) {
       this.handleToggle();
     }
     this.setState({ showMediaExport: false });
-  }
+  };
 
   //saveMediaData = (obj) => {
   //  this.state.mediaExportData = obj;
@@ -106,14 +110,22 @@ class Rightsidebar extends Component {
         <div>
           <div className="right-tab-menu" style={{ marginRight: marginRight }}>
             <div className="drawer-control" onClick={this.handleToggle}>
-            {!open ? (<BsArrowBarLeft className="bi bi-arrow-bar-left" />) : (<BsArrowBarRight className="bi bi-arrow-bar-left" />)}
-          </div>
-            {/*<div className="right-tabs">Annotations</div>*/}
+              {!open ? (
+                <BsArrowBarLeft className="bi bi-arrow-bar-left" />
+              ) : (
+                <BsArrowBarRight className="bi bi-arrow-bar-left" />
+              )}
+            </div>
+            {/*<div className='right-tabs'>Annotations</div>*/}
             <div className="right-tabs">
               <ul className="nav nav-tabs" id="myTab1" role="tablist">
                 <li className="nav-item" role="presentation">
                   <button
-                    className={this.state.showMediaExport ? "nav-link" : "nav-link active"}
+                    className={
+                      this.state.showMediaExport
+                        ? "nav-link"
+                        : "nav-link active"
+                    }
                     id="annotations-tab"
                     data-bs-toggle="tab"
                     data-bs-target="#annotations-tab-pane"
@@ -128,11 +140,16 @@ class Rightsidebar extends Component {
                 </li>
                 <li className="nav-item" role="presentation">
                   <button
-                    className={this.state.showMediaExport ? "nav-link active" : "nav-link"}
+                    className={
+                      this.state.showMediaExport
+                        ? "nav-link active"
+                        : "nav-link"
+                    }
                     id="media-tab"
                     data-bs-toggle="tab"
                     data-bs-target="#media-tab-pane"
-                    type="button" role="tab"
+                    type="button"
+                    role="tab"
                     aria-controls="media-tab-pane"
                     aria-selected={this.state.showMediaExport}
                     onClick={this.mediaExportTabClicked}
@@ -141,16 +158,18 @@ class Rightsidebar extends Component {
                   </button>
                 </li>
               </ul>
-            </div> 
+            </div>
           </div>
         </div>
         {/* } */}
-        <div
-          id="mySidebar"
-          className="rightsidenav"
-          style={{ width: width }}
-        >
-          {!showAimEditor && this.state.showMediaExport && (<MediaExport data={this.props.savedData} saveData={this.saveMediaData} onClose={this.showMediaExport} />)}
+        <div id="mySidebar" className="rightsidenav" style={{ width: width }}>
+          {!showAimEditor && this.state.showMediaExport && (
+            <MediaExport
+              data={this.props.savedData}
+              saveData={this.saveMediaData}
+              onClose={this.showMediaExport}
+            />
+          )}
           {showAimEditor && (
             <div className="AimEditor-Wrapper">
               <AimEditor
@@ -167,13 +186,20 @@ class Rightsidebar extends Component {
             </div>
           )}
           {!showAimEditor && (
-            <AnnotationList updateTreeDataOnSave={this.props.updateTreeDataOnSave} onDelete={this.props.onCancel} />
+            <AnnotationList
+              updateTreeDataOnSave={this.props.updateTreeDataOnSave}
+              onDelete={this.props.onCancel}
+            />
           )}
         </div>
         <div
           className={this.state.open ? "mainView" : "mainView-closed"}
           style={{
-            marginRight: (open ? (this.state.rightDim === "420px") ? '455px' : '355px' : '35px'),
+            marginRight: open
+              ? this.state.rightDim === "420px"
+                ? "455px"
+                : "355px"
+              : "35px",
             height: "calc(100% - 5px)",
           }}
         >

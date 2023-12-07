@@ -33,7 +33,6 @@ import {
   // UPDATE_PATIENT_AIM_SAVE,
   // UPDATE_PATIENT_AIM_DELETE,
   GET_NOTIFICATIONS,
-  CLEAR_ACTIVE_AIMID,
   UPDATE_IMAGE_INDEX,
   GET_PROJECT_MAP,
   SET_SEG_LABEL_MAP_INDEX,
@@ -43,7 +42,6 @@ import {
   SEG_UPLOAD_REMOVE,
   AIM_DELETE,
   SAVE_PATIENT_FILTER,
-  ADD_STUDY_TO_GRID,
   REPLACE_IN_GRID,
   UPDATE_SEARCH_TABLE_INDEX,
   REFRESH_MAP,
@@ -51,6 +49,7 @@ import {
   SUBPATH,
   CHECK_MULTIFRAME,
   CLEAR_MULTIFRAME_AIM_JUMP,
+  SET_SERIES_DATA,
   colors,
   commonLabels,
 } from "./types";
@@ -69,6 +68,10 @@ import aimEntityData from "./annotationDock/aimEntityData";
 import { setToolOptionsForElement } from 'cornerstone-tools';
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
+
+export const setSeriesData = (projectID, patientID, studyUID, data) => {
+  return { type: SET_SERIES_DATA, payload: { projectID, patientID, studyUID, data }};
+}
 
 export const clearMultiFrameAimJumpFlags = () => {
   return { type: CLEAR_MULTIFRAME_AIM_JUMP };
@@ -118,10 +121,6 @@ export const getTemplates = () => {
 // closes all ports in display view
 export const clearGrid = (item) => {
   return { type: CLEAR_GRID };
-};
-
-export const clearActivePortAimID = () => {
-  return { type: CLEAR_ACTIVE_AIMID };
 };
 
 // clears aimID of the all open series
@@ -384,11 +383,6 @@ export const replaceInGrid = (serie) => {
   //   await dispatch(getSingleSerie(serie));
   return { type: REPLACE_IN_GRID, payload: { seriesUID, examType } };
   // } 
-}
-
-// Adds the series list of study to grid. Series sdropdown in the viewpoert uses this.
-export const addStudyToGrid = (seriesOfStudy) => {
-  return { type: ADD_STUDY_TO_GRID, seriesOfStudy };
 }
 
 // toggle annotation details at the right side bar in display view
@@ -940,6 +934,8 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
     projectID = projectID ? projectID : "lite";
     patientID = patientID ? patientID : serie.subjectID;
     aimID = aimID ? aimID : annotation;
+
+    //  TODO: getseries call should get its data from the initial data
     const promises = [getStudyAims(patientID, studyUID, projectID)];
     promises.push(getSeries(projectID, patientID, studyUID));
 
