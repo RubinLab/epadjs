@@ -39,6 +39,7 @@ import {
   getTemplates,
   segUploadCompleted,
   annotationsLoadingError,
+  setSeriesData
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
@@ -872,9 +873,14 @@ class App extends Component {
 
   getSeriesData = async (studyData) => {
     const { projectID, patientID, studyUID } = studyData;
+    const { seriesData } = this.props;
     try {
-      const { data: series } = await getSeries(projectID, patientID, studyUID);
-      return series;
+      const dataExists = seriesData[projectID] && seriesData[projectID][patientID] && seriesData[projectID][patientID][studyUID];
+      if (!dataExists) {
+        const { data: series } = await getSeries(projectID, patientID, studyUID);
+        this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
+        return series;
+      } else return seriesData[projectID][projectID][studyUID];
     } catch (err) {
       console.error(err);
       this.props.dispatch(annotationsLoadingError(err));
@@ -1672,6 +1678,7 @@ const mapStateToProps = (state) => {
     lastEventId,
     notificationAction,
     isSegUploaded,
+    seriesData
   } = state.annotationsListReducer;
   return {
     showGridFullAlert,
@@ -1686,6 +1693,7 @@ const mapStateToProps = (state) => {
     lastEventId,
     notificationAction,
     isSegUploaded,
+    seriesData,
     selection: state.managementReducer.selection,
   };
 };

@@ -1,139 +1,151 @@
-import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
-import { toast } from 'react-toastify';
-import PropagateLoader from 'react-spinners/PropagateLoader';
-import _ from 'lodash';
-import Collapsible from 'react-collapsible';
-import { HiOutlineFolderDownload } from 'react-icons/hi';
+import React, { useState, useEffect } from "react";
+import { connect } from "react-redux";
+import { toast } from "react-toastify";
+import PropagateLoader from "react-spinners/PropagateLoader";
+import _ from "lodash";
+import Collapsible from "react-collapsible";
+import { HiOutlineFolderDownload } from "react-icons/hi";
 import {
   FaDownload,
   FaUpload,
   FaRegTrashAlt,
   FaSearch,
   FaPlus,
-  FaEraser
-} from 'react-icons/fa';
+  FaEraser,
+} from "react-icons/fa";
 import {
   RiCheckboxMultipleFill,
   RiCheckboxMultipleBlankFill,
-  RiCloseCircleFill
-} from 'react-icons/ri';
-import { FcAbout, FcClearFilters } from 'react-icons/fc';
-import { BiSearch, BiX, BiTrash, BiDownload, BiPlay } from 'react-icons/bi';
-import { BsEyeFill } from 'react-icons/bs';
-import { AiOutlineSortAscending, AiOutlineSortDescending } from 'react-icons/ai';
-import ReactTooltip from 'react-tooltip';
+  RiCloseCircleFill,
+} from "react-icons/ri";
+import { FcAbout, FcClearFilters } from "react-icons/fc";
+import { BiSearch, BiX, BiTrash, BiDownload, BiPlay } from "react-icons/bi";
+import { BsEyeFill } from "react-icons/bs";
+import {
+  AiOutlineSortAscending,
+  AiOutlineSortDescending,
+} from "react-icons/ai";
+import ReactTooltip from "react-tooltip";
 import {
   searchAnnotations,
   getAllAnnotations,
   getSummaryAnnotations,
   downloadProjectAnnotation,
-  deleteAnnotationsList
-} from '../../services/annotationServices.js';
-import AnnotationTable from './AnnotationTable.jsx';
-import { clearSelection, selectAnnotation, updateSearchTableIndex, refreshPage } from '../annotationsList/action';
-import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
-import UploadModal from '../searchView/uploadModal';
-import DeleteAlert from '../management/common/alertDeletionModal';
+  deleteAnnotationsList,
+} from "../../services/annotationServices.js";
+import AnnotationTable from "./AnnotationTable.jsx";
+import {
+  clearSelection,
+  selectAnnotation,
+  updateSearchTableIndex,
+  refreshPage,
+} from "../annotationsList/action";
+import AnnotationDownloadModal from "../searchView/annotationDownloadModal";
+import UploadModal from "../searchView/uploadModal";
+import DeleteAlert from "../management/common/alertDeletionModal";
 import {
   getPluginsForProject,
   addPluginsToQueue,
-  runPluginsQueue
-} from '../../services/pluginServices';
-import TeachingFilters from './TeachingFilters.jsx';
-import AddToWorklist from '../searchView/addWorklist';
-import Projects from '../searchView/addToProject';
-import Spinner from 'react-bootstrap/Spinner';
-import SeriesModal from '../annotationsList/selectSerieModal';
-import WarningModal from '../common/warningModal';
+  runPluginsQueue,
+} from "../../services/pluginServices";
+import TeachingFilters from "./TeachingFilters.jsx";
+import AddToWorklist from "../searchView/addWorklist";
+import Projects from "../searchView/addToProject";
+import Spinner from "react-bootstrap/Spinner";
+import SeriesModal from "../annotationsList/selectSerieModal";
+import WarningModal from "../common/warningModal";
 import { COMP_MODALITIES as compModality } from "../../constants.js";
-import { isSupportedModality, findSelectedCheckboxes, handleSelectDeselectAll, resetSelectAllCheckbox } from 'Utils/aid.js';
+import {
+  isSupportedModality,
+  findSelectedCheckboxes,
+  handleSelectDeselectAll,
+  resetSelectAllCheckbox,
+} from "Utils/aid.js";
 
-import './annotationSearch.css';
+import "./annotationSearch.css";
 
 const lists = {
-  organize: ['AND', 'OR', '(', ')'],
-  paranthesis: ['(', ')'],
-  condition: ['AND', 'OR'],
+  organize: ["AND", "OR", "(", ")"],
+  paranthesis: ["(", ")"],
+  condition: ["AND", "OR"],
   type: [
-    'modality',
-    'observation',
-    'anatomy',
-    'lesion_name',
-    'patient',
-    'template',
-    'user',
-    'comment'
+    "modality",
+    "observation",
+    "anatomy",
+    "lesion_name",
+    "patient",
+    "template",
+    "user",
+    "comment",
   ],
-  criteria: ['contains'] // 'equals'
+  criteria: ["contains"], // 'equals'
 };
 
 const pageSize = 200;
 
 const explanation = {
-  invalidQuery: 'This search query is not valid.',
-  deleteSelected: 'Delete selected annotations? This cannot be undone.',
-  organize: 'Group and/or organize your query: ',
-  type: 'Select a field from annotation',
-  criteria: 'Select a criteria',
-  term: 'Type the key word that you want to look for above',
-  project: 'Search in all ePAD',
-  noResult: 'Can not find any result!',
+  invalidQuery: "This search query is not valid.",
+  deleteSelected: "Delete selected annotations? This cannot be undone.",
+  organize: "Group and/or organize your query: ",
+  type: "Select a field from annotation",
+  criteria: "Select a criteria",
+  term: "Type the key word that you want to look for above",
+  project: "Search in all ePAD",
+  noResult: "Can not find any result!",
   downloadProject:
-    'Preparing project for download. The link to the files will be sent with a notification after completion!',
-  pluginAnnotations: 'You need to select an annotation first.',
-  selectPlugin: 'You need to select a plugin first.'
+    "Preparing project for download. The link to the files will be sent with a notification after completion!",
+  pluginAnnotations: "You need to select an annotation first.",
+  selectPlugin: "You need to select a plugin first.",
 };
 
 const styles = {
   buttonStyles: {
-    width: '5rem',
-    margin: '0.2rem',
-    padding: '0.3rem 0.5rem',
-    fontSize: '1.2 rem'
+    width: "5rem",
+    margin: "0.2rem",
+    padding: "0.3rem 0.5rem",
+    fontSize: "1.2 rem",
   },
   downloadButton: {
-    width: '8rem',
-    margin: '1rem 0.5rem',
-    padding: '0.3rem 0.5rem',
-    fontSize: '1.2 rem'
+    width: "8rem",
+    margin: "1rem 0.5rem",
+    padding: "0.3rem 0.5rem",
+    fontSize: "1.2 rem",
   },
   error: {
-    color: 'orangered',
-    padding: '0.3rem 0.5rem',
-    height: 'fit-content',
-    fontSize: '1.2rem',
-    margin: '0.3rem 2rem'
+    color: "orangered",
+    padding: "0.3rem 0.5rem",
+    height: "fit-content",
+    fontSize: "1.2rem",
+    margin: "0.3rem 2rem",
   },
   enabledRunButton: {
-    height: '41.98px',
-    'color': '#eaddb2',
-    cursor: 'pointer'
+    height: "41.98px",
+    color: "#eaddb2",
+    cursor: "pointer",
   },
-  disabledRunButton:
-  {
-    height: '41.98px',
-    'color': '#eaddb2',
-    cursor: 'default'
-  }
+  disabledRunButton: {
+    height: "41.98px",
+    color: "#eaddb2",
+    cursor: "default",
+  },
 };
 
 let mode;
 
-const AnnotationSearch = props => {
-  mode = sessionStorage.getItem('mode');
-  const [query, setQuery] = useState('');
+const AnnotationSearch = (props) => {
+  mode = sessionStorage.getItem("mode");
+  const [query, setQuery] = useState("");
   const [partialQuery, setPartialQuery] = useState({
     type: lists.type[0],
     criteria: lists.criteria[0],
-    term: ''
+    term: "",
   });
-  const [selectedProject, setSelectedProject] = useState('');
+  const [selectedProject, setSelectedProject] = useState("");
   const [data, setData] = useState([]);
   const [rows, setRows] = useState(0);
   const [downloadClicked, setDownloadClicked] = useState(false);
-  const [error, setError] = useState('');
-  const [bookmark, setBookmark] = useState('');
+  const [error, setError] = useState("");
+  const [bookmark, setBookmark] = useState("");
   const [uploadClicked, setUploadClicked] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [checkboxSelected, setCheckboxSelected] = useState(false);
@@ -149,7 +161,7 @@ const AnnotationSearch = props => {
   const [selectedMods, setSelectedMods] = useState([]);
   const [selectedAnatomies, setSelectedAnatomies] = useState([]);
   const [selectedDiagnosis, setSelectedDiagnosis] = useState([]);
-  const [tfOnly, setTfOnly] = useState(mode === 'teaching' ? true : false);
+  const [tfOnly, setTfOnly] = useState(mode === "teaching" ? true : false);
   // const [myCases, setMyCases] = useState(mode === 'teaching' ? false : true);
   const [myCases, setMyCases] = useState(false);
   const [filters, setFilters] = useState({});
@@ -161,13 +173,14 @@ const AnnotationSearch = props => {
   const [showSelectSeries, setShowSelectSeries] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
   const [seriesList, setSeriesList] = useState([]);
-  const [encArgs, setEncArgs] = useState('');
-  const [decrArgs, setDecrArgs] = useState('');
+  const [encArgs, setEncArgs] = useState("");
+  const [decrArgs, setDecrArgs] = useState("");
   const [allSelected, setAllSelected] = useState(false);
 
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
-    if ((typeof pagination === 'number' || pagination) && !afterDelete) {     
+    if ((typeof pagination === "number" || pagination) && !afterDelete) {
+
       setData(data.concat(result.data.rows));
     } else {
       setData(result.data.rows);
@@ -175,12 +188,12 @@ const AnnotationSearch = props => {
     setRows(result.data.total_rows);
     setBookmark(result.data.bookmark);
     if (result.data.total_rows === 0) {
-      toast.info(explanation.noResult, { position: 'top-right' });
+      toast.info(explanation.noResult, { position: "top-right" });
     }
   };
 
   const getAnnotationsOfProjets = (pageIndex, afterdelete) => {
-    const bm = pageIndex ? bookmark : '';
+    const bm = pageIndex ? bookmark : "";
     // const promise =
     //   props.pid === 'all'
     //     ? getAllAnnotations(bm)
@@ -195,11 +208,10 @@ const AnnotationSearch = props => {
 
   useEffect(() => {
     resetSelectAllCheckbox(false);
-    if (mode === "teaching")
-      return;
+    if (mode === "teaching") return;
     setSelectedProject(props.pid);
-    setQuery('');
-    setBookmark('');
+    setQuery("");
+    setBookmark("");
     setCheckboxSelected(false);
     props.dispatch(clearSelection());
     persistSearch();
@@ -230,14 +242,13 @@ const AnnotationSearch = props => {
       setShowRunPluginButton(false);
       setSelectedPluginDbId(-1);
       getPluginProjects();
-      props.dispatch(refreshPage('plugins', false))
+      props.dispatch(refreshPage("plugins", false));
     }
+  }, [props.refreshMap.plugins]);
 
-  }, [props.refreshMap.plugins])
-
-  const handleUserKeyPress = (e => {
+  const handleUserKeyPress = (e) => {
     const teachingFields = document.getElementById("questionaire");
-    if (e.key === 'Enter' && !teachingFields) {
+    if (e.key === "Enter" && !teachingFields) {
       getFieldSearchResults(undefined, undefined, true);
       props.dispatch(updateSearchTableIndex(0));
       //if (mode !== 'teaching') {
@@ -248,23 +259,16 @@ const AnnotationSearch = props => {
       //  props.dispatch(updateSearchTableIndex(0));
       //}
     }
-  });
-
+  };
+  
   useEffect(() => {
-    window.addEventListener('keydown', handleUserKeyPress);
+    window.addEventListener("keydown", handleUserKeyPress);
     return () => {
-      window.removeEventListener('keydown', handleUserKeyPress);
+      window.removeEventListener("keydown", handleUserKeyPress);
     };
   }, [handleUserKeyPress]);
 
-  useEffect(() => {
-    window.addEventListener('openTeachingFilesModal', handleTeachingFilesModal);
-    return () => {
-      window.removeEventListener('openTeachingFilesModal', handleTeachingFilesModal);
-    };
-  }, [handleTeachingFilesModal]);
-
-  const handleTeachingFilesModal = event => {
+  const handleTeachingFilesModal = (event) => {
     let { seriesArray, args, packedData } = event.detail;
 
     for (let i = 0; i < seriesArray.length; i++) {
@@ -277,105 +281,142 @@ const AnnotationSearch = props => {
     setSeriesList(seriesList);
     setEncArgs(args);
     setDecrArgs(packedData);
-  }
+  };
+
+  useEffect(() => {
+    window.addEventListener("openTeachingFilesModal", handleTeachingFilesModal);
+    return () => {
+      window.removeEventListener(
+        "openTeachingFilesModal",
+        handleTeachingFilesModal
+      );
+    };
+  }, [handleTeachingFilesModal]);
 
   const useDebouncedEffect = (effect, deps, delay) => {
     useEffect(() => {
       const handler = setTimeout(() => effect(), delay);
-      return () => { persistSearch(); clearTimeout(handler) };
-    }, [...deps || [], delay]);
-  }
+      return () => {
+        persistSearch();
+        clearTimeout(handler);
+      };
+    }, [...(deps || []), delay]);
+  };
 
-  useDebouncedEffect(() => {
-    if (selectedProject !== props.pid) {
-      setSelectedProject(props.pid);
-    }
-    if (firstRun) {
-      if (sessionStorage.searchState) {
-        loadSearchState();
-        setFirstRun(false);
-        return;
+  useDebouncedEffect(
+    () => {
+      if (selectedProject !== props.pid) {
+        setSelectedProject(props.pid);
       }
-      setFirstRun(false);
-    }
-    getFieldSearchResults();
-    props.dispatch(updateSearchTableIndex(0));
-    return persistSearch;
-  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid, query, sort, filters, props.update], 500)
+      if (firstRun) {
+        if (sessionStorage.searchState) {
+          loadSearchState();
+          setFirstRun(false);
+          return;
+        }
+        setFirstRun(false);
+      }
+      getFieldSearchResults();
+      props.dispatch(updateSearchTableIndex(0));
+      return persistSearch;
+    },
+    [
+      tfOnly,
+      myCases,
+      selectedSubs,
+      selectedMods,
+      selectedAnatomies,
+      selectedDiagnosis,
+      props.pid,
+      query,
+      sort,
+      filters,
+      props.update,
+    ],
+    500
+  );
 
   const handleSort = (column) => {
-    if (!sort.length || (sort[0] !== column && sort[0] !== ("-" + column)))
+    if (!sort.length || (sort[0] !== column && sort[0] !== "-" + column))
       setSort([column]);
     else if (sort[0] === column) {
       setSort(["-" + column]);
-    }
-    else if (sort[0] === ("-" + column))
-      setSort([]);
-  }
+    } else if (sort[0] === "-" + column) setSort([]);
+  };
 
   const handleFilter = (column, target) => {
     const { value } = target;
     const newFilters = { ...filters };
-    if (value.length)
-      newFilters[column] = value;
-    else if (newFilters[column] && value === '')
-      delete newFilters[column];
+    if (value.length) newFilters[column] = value;
+    else if (newFilters[column] && value === "") delete newFilters[column];
     setFilters(newFilters);
-  }
+  };
 
   const clearSubspecialty = (sub) => {
     let index = selectedSubs.indexOf(sub);
     setSelectedSubs(selectedSubs.filter((_, i) => i !== index));
-  }
+  };
 
   const clearModality = (mod) => {
     let index = selectedMods.indexOf(mod);
     setSelectedMods(selectedMods.filter((_, i) => i !== index));
-  }
+  };
 
   const clearAnatomy = (anatomy) => {
     let index = selectedAnatomies.indexOf(anatomy);
     setSelectedAnatomies(selectedAnatomies.filter((_, i) => i !== index));
-  }
+  };
 
   const clearDiagnosis = (diagnose) => {
     let index = selectedDiagnosis.indexOf(diagnose);
     setSelectedDiagnosis(selectedDiagnosis.filter((_, i) => i !== index));
-  }
+  };
 
   const persistSearch = () => {
-    const searchState = { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject, filters, sort };
+    const searchState = {
+      tfOnly,
+      myCases,
+      selectedSubs,
+      selectedMods,
+      selectedAnatomies,
+      selectedDiagnosis,
+      query,
+      selectedProject,
+      filters,
+      sort,
+    };
     sessionStorage.searchState = JSON.stringify(searchState);
-  }
+  };
 
   const loadSearchState = () => {
     const searchState = JSON.parse(sessionStorage.searchState);
-    const { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject, filters, sort } = searchState;
-    if (filters)
-      setFilters(filters);
-    if (tfOnly !== undefined)
-      setTfOnly(tfOnly);
-    if (myCases !== undefined)
-      setMyCases(myCases);
-    if (selectedSubs.length)
-      setSelectedSubs(selectedSubs);
-    if (selectedMods.length)
-      setSelectedMods(selectedMods);
-    if (selectedAnatomies)
-      setSelectedAnatomies(selectedAnatomies);
-    if (selectedDiagnosis)
-      setSelectedDiagnosis(selectedDiagnosis);
-    if (query)
-      setQuery(query);
-    if (selectedProject)
-      setSelectedProject(selectedProject);
-    if (sort.length)
-      setSort(sort);
-  }
+    const {
+      tfOnly,
+      myCases,
+      selectedSubs,
+      selectedMods,
+      selectedAnatomies,
+      selectedDiagnosis,
+      query,
+      selectedProject,
+      filters,
+      sort,
+    } = searchState;
+    if (filters) setFilters(filters);
+    if (tfOnly !== undefined) setTfOnly(tfOnly);
+    if (myCases !== undefined) setMyCases(myCases);
+    if (selectedSubs.length) setSelectedSubs(selectedSubs);
+    if (selectedMods.length) setSelectedMods(selectedMods);
+    if (selectedAnatomies) setSelectedAnatomies(selectedAnatomies);
+    if (selectedDiagnosis) setSelectedDiagnosis(selectedDiagnosis);
+    if (query) setQuery(query);
+    if (selectedProject) setSelectedProject(selectedProject);
+    if (sort.length) setSort(sort);
+  };
 
-  const insertIntoQueryOnSelection = el => {
+  const insertIntoQueryOnSelection = (el) => {
     const field = document.getElementsByClassName(
-      'form-control annotationSearch-text'
+      "form-control annotationSearch-text"
     )[0];
     const start = field.selectionStart;
     if (start === query.length) {
@@ -387,11 +428,11 @@ const AnnotationSearch = props => {
     }
   };
 
-  const renderOrganizeItem = name => {
+  const renderOrganizeItem = (name) => {
     return (
       <div className="annotationSearch-cont__item">
         <div className="annotaionSearch-title">{`${explanation[name]}`}</div>
-        <div style={{ margin: '0rem 1rem' }}>
+        <div style={{ margin: "0rem 1rem" }}>
           {lists[name]?.map((el, i) => {
             return (
               <button
@@ -419,20 +460,19 @@ const AnnotationSearch = props => {
     setQuery(newQuery);
   };
 
-  const updateSelectedAims = aimData => {
-    if (props.selectedAnnotations[aimData.aimID])
-      setAllSelected(false);
+  const updateSelectedAims = (aimData) => {
+    if (props.selectedAnnotations[aimData.aimID]) setAllSelected(false);
     props.dispatch(selectAnnotation(aimData));
   };
 
-  const renderContentItem = field => {
+  const renderContentItem = (field) => {
     return (
       <select
-        onChange={e =>
+        onChange={(e) =>
           setPartialQuery({ ...partialQuery, [field]: e.target.value })
         }
         name={field}
-        onMouseDown={e => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
         className="annotationSearch-cont__item__sub"
       >
         {lists[field]?.map((el, i) => {
@@ -449,21 +489,21 @@ const AnnotationSearch = props => {
   const renderQueryItem = () => {
     return (
       <div className="annotationSearch-cont__item">
-        {renderContentItem('type')}
-        {renderContentItem('criteria')}
+        {renderContentItem("type")}
+        {renderContentItem("criteria")}
         <input
           type="text"
           autoComplete="off"
           className="form-control annotationSearch-cont__item__sub"
           aria-label="Large"
           name="term"
-          onChange={e =>
+          onChange={(e) =>
             setPartialQuery({ ...partialQuery, term: e.target.value })
           }
           style={{
-            padding: '0.15rem',
-            height: 'fit-content',
-            fontSize: '1.2rem'
+            padding: "0.15rem",
+            height: "fit-content",
+            fontSize: "1.2rem",
           }}
         />
         <button
@@ -473,11 +513,11 @@ const AnnotationSearch = props => {
           type="button"
           name="add-button"
           style={{
-            padding: '0.3rem 0.5rem',
-            height: 'fit-content',
-            fontSize: '1rem',
-            margin: '0rem 0.3rem',
-            width: '5%'
+            padding: "0.3rem 0.5rem",
+            height: "fit-content",
+            fontSize: "1rem",
+            margin: "0rem 0.3rem",
+            width: "5%",
           }}
         >
           <FaPlus />
@@ -517,33 +557,33 @@ const AnnotationSearch = props => {
   };
 
   // Returns true if the string is valid, false otherwise.
-  const syntaxVerify = inputString => {
+  const syntaxVerify = (inputString) => {
     // Erase anything within quotes, because nothing in quotes can be invalid
     // Replace fancy quotes with regular quotes
     inputString = inputString.replace(/[\u201C\u201D]/g, '"').toLowerCase();
-    // Matches `""...""` where the `...` doesn't start or end with `"` and doesn't 
+    // Matches `""...""` where the `...` doesn't start or end with `"` and doesn't
     // contain any double quotes, ie `""a"a""`
-    inputString = inputString.replace(/""(?!"").+?""/g, '==');
+    inputString = inputString.replace(/""(?!"").+?""/g, "==");
     // Matches anything in quotation marks.
-    inputString = inputString.replace(/"[^"]+?"/g, '##');
+    inputString = inputString.replace(/"[^"]+?"/g, "##");
     if (inputString.includes('"')) {
       // Remaining quotes == quotation mark mismatch
       return false;
     }
     return checkParens(inputString) && checkOperators(inputString);
-  }
+  };
 
   // Returns false if it finds a problem with the string, true otherwise.
   // This checks:
   // 1. The number of '(' is the same as the number of ')'
   // 2. The parentheses are a valid arrangement, so '(a)' is valid but ')a('
   //    is not.
-  const checkParens = inputString => {
+  const checkParens = (inputString) => {
     let netParens = 0;
     for (const character of inputString) {
-      if (character == '(') {
+      if (character == "(") {
         netParens += 1;
-      } else if (character == ')') {
+      } else if (character == ")") {
         netParens -= 1;
         if (netParens < 0) {
           return false;
@@ -551,29 +591,31 @@ const AnnotationSearch = props => {
       }
     }
     return netParens == 0;
-  }
+  };
 
   // Returns false if it finds a problem with the string, true otherwise.
   // Checks various things related to the search operators '(', ')', 'and', 'or', 'not'.
-  const checkOperators = inputString => {
-    const operatorRegex = new RegExp('\(' +
-      '\\( *\\)|' + // "()" and "( )" are invalid
-      '\\( *and|\\( *or|\\( *not|' + // ( then operator
-      'and *\\)|or *\\)|not *\\)|' + // ) then operator
-      '^ *and *$|^ *or *$|^ *not *$|' + // Whole query is an operator
-      '^ *and[ (]|^ *or[ (]|^ *not[ (]|' + // Unpaired operators at start of query
-      '[ )]and *$|[ )]or *$|[ )]not *$|' + // Unpaired operators at end of the query
-      'and +and|and +or|or +and|or +or|not +and|not +or|not +not' + // 2 operators other than "OR NOT", "AND NOT"
-      '\)')
+  const checkOperators = (inputString) => {
+    const operatorRegex = new RegExp(
+      "(" +
+        "\\( *\\)|" + // "()" and "( )" are invalid
+        "\\( *and|\\( *or|\\( *not|" + // ( then operator
+        "and *\\)|or *\\)|not *\\)|" + // ) then operator
+        "^ *and *$|^ *or *$|^ *not *$|" + // Whole query is an operator
+        "^ *and[ (]|^ *or[ (]|^ *not[ (]|" + // Unpaired operators at start of query
+        "[ )]and *$|[ )]or *$|[ )]not *$|" + // Unpaired operators at end of the query
+        "and +and|and +or|or +and|or +or|not +and|not +or|not +not" + // 2 operators other than "OR NOT", "AND NOT"
+        ")"
+    );
     return !operatorRegex.test(inputString);
-  }
+  };
 
   // This handles the search.
   const getFieldSearchResults = (pageIndex, afterDelete, enterPressed) => {
     if (query.length) {
       if (!syntaxVerify(query)) {
         if (enterPressed) {
-          toast.info(explanation.invalidQuery, { position: 'top-right' });
+          toast.info(explanation.invalidQuery, { position: "top-right" });
         }
         return;
       }
@@ -585,53 +627,62 @@ const AnnotationSearch = props => {
     if (filterArray.length > 0) {
       for (const filt of filterArray) {
         let filterText = filt[1];
-        filterText.replaceAll('\\\\', '\\');
-        const charsToEscape = ['+', '!', '{', '}', '[', ']', '^', '~',
-          '*', '?', ':', '/', '.', '$', '^', '(', ')'];
+        filterText.replaceAll("\\\\", "\\");
+        const charsToEscape = [
+          "+",
+          "!",
+          "{",
+          "}",
+          "[",
+          "]",
+          "^",
+          "~",
+          "*",
+          "?",
+          ":",
+          "/",
+          ".",
+          "$",
+          "^",
+          "(",
+          ")",
+        ];
         for (const char of charsToEscape) {
-          filterText = filterText.replaceAll(char, '\\' + char);
+          filterText = filterText.replaceAll(char, "\\" + char);
         }
         newFilters[filt[0]] = filterText;
       }
     }
     setShowSpinner(true);
-    const bm = pageIndex ? bookmark : '';
+    const bm = pageIndex ? bookmark : "";
     let body = {};
     const fields = {};
-    body['fields'] = fields;
-    if (props.pid)
-      fields['project'] = props.pid;
-    if (query.length)
-      fields['query'] = query;
-    if (selectedSubs.length)
-      fields['subSpecialty'] = selectedSubs;
-    if (selectedMods.length)
-      fields['modality'] = selectedMods;
-    if (selectedAnatomies.length)
-      fields['anatomy'] = selectedAnatomies;
-    if (selectedDiagnosis.length)
-      fields['diagnosis'] = selectedDiagnosis;
-    if (mode === 'teaching' && tfOnly)
-      fields['teachingFiles'] = tfOnly;
-    if (myCases)
-      fields['myCases'] = myCases;
-    if (sort.length)
-      body['sort'] = sort;
-    if (Object.keys(filters).length)
-      body['filter'] = newFilters;
+    body["fields"] = fields;
+    if (props.pid) fields["project"] = props.pid;
+    if (query.length) fields["query"] = query;
+    if (selectedSubs.length) fields["subSpecialty"] = selectedSubs;
+    if (selectedMods.length) fields["modality"] = selectedMods;
+    if (selectedAnatomies.length) fields["anatomy"] = selectedAnatomies;
+    if (selectedDiagnosis.length) fields["diagnosis"] = selectedDiagnosis;
+    if (mode === "teaching" && tfOnly) fields["teachingFiles"] = tfOnly;
+    if (myCases) fields["myCases"] = myCases;
+    if (sort.length) body["sort"] = sort;
+    if (Object.keys(filters).length) body["filter"] = newFilters;
     searchAnnotations(body, bm)
-      .then(res => {
+      .then((res) => {
         populateSearchResult(res, pageIndex, afterDelete);
         setRows(res.data.total_rows);
         setShowSpinner(false);
       })
-      .catch(err => { console.error(err); setShowSpinner(false); });
-  }
+      .catch((err) => {
+        console.error(err);
+        setShowSpinner(false);
+      });
+  };
 
   const getNewData = (pageIndex, afterDelete) => {
     // const searchTableIndex = pageIndex || props.searchTableIndex || 0;
     if (mode === 'teaching') {
-      console.log(" in getNewdata");
       getFieldSearchResults(props.searchTableIndex, afterDelete);
       return;
     }
@@ -647,13 +698,13 @@ const AnnotationSearch = props => {
     const projectNames = Object.values(props.projectMap);
     const projectID = Object.keys(props.projectMap);
     const defaultOption = (
-      <option key="default" data-project-id={''} value={''}>
+      <option key="default" data-project-id={""} value={""}>
         in all ePad
       </option>
     );
     const options = [defaultOption];
     projectNames.forEach((el, i) => {
-      if (projectID[i] !== 'all' && projectID[i] !== 'nonassigned') {
+      if (projectID[i] !== "all" && projectID[i] !== "nonassigned") {
         options.push(
           <option
             key={projectID[i]}
@@ -668,33 +719,35 @@ const AnnotationSearch = props => {
     return options;
   };
 
-  const handleMultipleSelect = action => {
+  const handleMultipleSelect = (action) => {
     const pages = Math.ceil(props.rows / pageSize);
     const indexStart = props.searchTableIndex * pageSize;
     const indexEnd =
-      props.searchTableIndex + 1 === pages ? rows : pageSize * (props.searchTableIndex + 1);
+      props.searchTableIndex + 1 === pages
+        ? rows
+        : pageSize * (props.searchTableIndex + 1);
     const arrayToSelect = data.slice(indexStart, indexEnd);
-    if (action === 'selectPageAll') {
-      arrayToSelect.forEach(el => {
+    if (action === "selectPageAll") {
+      arrayToSelect.forEach((el) => {
         if (!props.selectedAnnotations[el.aimID])
           props.dispatch(selectAnnotation(el));
       });
-    } else if (action === 'unselectPageAll') {
+    } else if (action === "unselectPageAll") {
       // arrayToSelect.forEach(el => {
       //   if (props.selectedAnnotations[el.aimID])
       //     props.dispatch(selectAnnotation(el));
       // });
       props.dispatch(clearSelection());
-    } else if (action === 'unselectAll') {
+    } else if (action === "unselectAll") {
       props.dispatch(clearSelection());
     }
   };
 
   const triggerBrowserDownload = (blob, fileName) => {
     const url = window.URL.createObjectURL(new Blob([blob]));
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     document.body.appendChild(link);
-    link.style = 'display: none';
+    link.style = "display: none";
     link.href = url;
     link.download = `${fileName}.zip`;
     link.click();
@@ -702,38 +755,38 @@ const AnnotationSearch = props => {
   };
 
   const downloadProjectAim = () => {
-    if (props.pid === 'all' || props.pid === 'nonassigned') return;
+    if (props.pid === "all" || props.pid === "nonassigned") return;
     downloadProjectAnnotation(props.pid)
-      .then(result => {
-        if (result.data.type === 'application/octet-stream') {
-          let blob = new Blob([result.data], { type: 'application/zip' });
+      .then((result) => {
+        if (result.data.type === "application/octet-stream") {
+          let blob = new Blob([result.data], { type: "application/zip" });
           triggerBrowserDownload(blob, `Project ${props.pid}`);
         } else
           toast.success(explanation.downloadProject, {
             autoClose: false,
-            position: 'bottom-left'
+            position: "bottom-left",
           });
       })
-      .catch(err => console.error(err));
+      .catch((err) => console.error(err));
   };
 
   const renderProjectSelect = () => {
     return (
       <div
         className="annotationSearch-cont__item"
-        style={{ margin: '1rem 0rem' }}
+        style={{ margin: "1rem 0rem" }}
       >
         <div
           className="searchView-toolbar__group"
-          style={{ padding: '0.2rem' }}
+          style={{ padding: "0.2rem" }}
         >
           <>
             <RiCheckboxMultipleFill
               className="tool-icon"
               data-tip
               data-for="selectPageAll-icon"
-              style={{ fontSize: '1.4rem' }}
-              onClick={() => handleMultipleSelect('selectPageAll')}
+              style={{ fontSize: "1.4rem" }}
+              onClick={() => handleMultipleSelect("selectPageAll")}
             />
             <ReactTooltip
               id="selectPageAll-icon"
@@ -749,8 +802,8 @@ const AnnotationSearch = props => {
               className="tool-icon"
               data-tip
               data-for="unselectPageAll-icon"
-              style={{ fontSize: '1.4rem' }}
-              onClick={() => handleMultipleSelect('unselectPageAll')}
+              style={{ fontSize: "1.4rem" }}
+              onClick={() => handleMultipleSelect("unselectPageAll")}
             />
             <ReactTooltip
               id="unselectPageAll-icon"
@@ -766,8 +819,8 @@ const AnnotationSearch = props => {
               className="tool-icon"
               data-tip
               data-for="unSelectAll-icon"
-              style={{ fontSize: '1.4rem' }}
-              onClick={() => handleMultipleSelect('unselectAll')}
+              style={{ fontSize: "1.4rem" }}
+              onClick={() => handleMultipleSelect("unselectAll")}
             />
             <ReactTooltip
               id="unSelectAll-icon"
@@ -781,7 +834,7 @@ const AnnotationSearch = props => {
         </div>
         <div
           className="searchView-toolbar__group"
-          style={{ padding: '0.2rem' }}
+          style={{ padding: "0.2rem" }}
         >
           <>
             <div onClick={() => setUploadClicked(true)}>
@@ -817,11 +870,11 @@ const AnnotationSearch = props => {
             <div onClick={downloadProjectAim}>
               <HiOutlineFolderDownload
                 className={
-                  props.pid === 'all_aims' ? 'hide-delete' : 'tool-icon'
+                  props.pid === "all_aims" ? "hide-delete" : "tool-icon"
                 }
                 data-tip
                 data-for="downloadProject-icon"
-                style={{ fontSize: '1.7rem' }}
+                style={{ fontSize: "1.7rem" }}
               />
             </div>
             <ReactTooltip
@@ -844,10 +897,10 @@ const AnnotationSearch = props => {
                 style={
                   Object.keys(props.selectedAnnotations).length === 0
                     ? {
-                      fontSize: '1.1rem',
-                      color: 'rgb(107, 107, 107)',
-                      cursor: 'not-allowed'
-                    }
+                        fontSize: "1.1rem",
+                        color: "rgb(107, 107, 107)",
+                        cursor: "not-allowed",
+                      }
                     : null
                 }
                 data-tip
@@ -864,59 +917,59 @@ const AnnotationSearch = props => {
             </ReactTooltip>
           </>
         </div>
-        {mode !== 'lite' && (
+        {mode !== "lite" && (
           <div
             className="searchView-toolbar__group"
-            style={{ padding: '0.2rem' }}
+            style={{ padding: "0.2rem" }}
           >
-            {' '}
+            {" "}
             <div
               className="annotaionSearch-title"
-              style={{ fontsize: '1.2rem' }}
+              style={{ fontsize: "1.2rem" }}
             >{`${explanation.project}`}</div>
             <input
               name="project-dropdown"
               type="checkbox"
               checked={checkboxSelected}
-              onChange={e => {
+              onChange={(e) => {
                 if (e.target.checked === false) {
                   const project =
                     props.searchQuery &&
-                      Object.values(props.searchQuery)[0].project
+                    Object.values(props.searchQuery)[0].project
                       ? Object.values(props.searchQuery)[0].project
                       : props.pid;
                   setSelectedProject(project);
                   setCheckboxSelected(false);
                 } else {
-                  setSelectedProject('');
+                  setSelectedProject("");
                   setCheckboxSelected(true);
                 }
-                setBookmark('');
+                setBookmark("");
               }}
-              onMouseDown={e => e.stopPropagation()}
-              style={{ margin: '0rem 1rem', padding: '1.8px' }}
-            />{' '}
+              onMouseDown={(e) => e.stopPropagation()}
+              style={{ margin: "0rem 1rem", padding: "1.8px" }}
+            />{" "}
           </div>
         )}
         <div
           className="searchView-toolbar__group"
-          style={{ padding: '0.2rem' }}
+          style={{ padding: "0.2rem" }}
         >
           <div
-            style={{ fontSize: '1.2rem', color: 'aliceblue' }}
+            style={{ fontSize: "1.2rem", color: "aliceblue" }}
             onClick={() => {
               getPluginProjects();
             }}
           >
-            select plugin :{' '}
+            select plugin :{" "}
           </div>
           {showPlugins && (
             <div>
               <select
                 style={{
-                  fontSize: '1.1rem',
-                  marginLeft: '5px',
-                  marginRight: '10px'
+                  fontSize: "1.1rem",
+                  marginLeft: "5px",
+                  marginRight: "10px",
                 }}
                 className="pluginaddqueueselect"
                 id="plugins"
@@ -934,9 +987,9 @@ const AnnotationSearch = props => {
             <div>
               <button
                 style={{
-                  fontSize: '1.2rem',
-                  background: '#861737',
-                  marginLeft: '5px'
+                  fontSize: "1.2rem",
+                  background: "#861737",
+                  marginLeft: "5px",
                 }}
                 variant="primary"
                 className="btn btn-sm btn-outline-light"
@@ -969,17 +1022,15 @@ const AnnotationSearch = props => {
     return { isOpen, index };
   };
 
-
   const formSelectedAnnotationsData = () => {
     const aimArray = findSelectedCheckboxes();
-    const aimMap = JSON.parse(sessionStorage.getItem('aimMap'));
+    const aimMap = JSON.parse(sessionStorage.getItem("aimMap"));
     const aimObj = aimArray.reduce((all, item, index) => {
       all[item] = { ...aimMap[item] };
       return all;
-    }, {})
+    }, {});
     return aimObj;
-  }
-
+  };
 
   const deleteAllSelected = () => {
     const notDeleted = {};
@@ -1010,7 +1061,7 @@ const AnnotationSearch = props => {
         getNewData(props.searchTableIndex, true);
         resetSelectAllCheckbox(false);
       })
-      .catch(error => {
+      .catch((error) => {
         if (
           error.response &&
           error.response.data &&
@@ -1049,7 +1100,7 @@ const AnnotationSearch = props => {
     setShowPluginDropdown(true);
   };
 
-  const handleChangePlugin = e => {
+  const handleChangePlugin = (e) => {
     const tempSelectedPluign = parseInt(e.target.value);
     setSelectedPluginDbId(parseInt(e.target.value));
     if (tempSelectedPluign > -1) {
@@ -1078,16 +1129,16 @@ const AnnotationSearch = props => {
       const tempQueueObject = {};
       tempQueueObject.projectDbId = tempPluginObject.project_plugin.project_id;
       tempQueueObject.projectId = props.selectedProject;
-      tempQueueObject.projectName = '';
+      tempQueueObject.projectName = "";
 
       tempQueueObject.pluginDbId = tempPluginObject.id;
       tempQueueObject.pluginId = tempPluginObject.plugin_id;
       tempQueueObject.pluginName = tempPluginObject.name;
-      tempQueueObject.pluginType = 'local';
+      tempQueueObject.pluginType = "local";
       tempQueueObject.processMultipleAims =
         tempPluginObject.processmultipleaims;
       tempQueueObject.runtimeParams = {};
-      tempQueueObject.parameterType = 'default';
+      tempQueueObject.parameterType = "default";
       tempQueueObject.aims = {};
 
       const resultAddQueue = await addPluginsToQueue(tempQueueObject);
@@ -1107,7 +1158,7 @@ const AnnotationSearch = props => {
       //     console.log("error happened while running queue");
       //  }
     } else if (tempPluginObject.processmultipleaims === 0) {
-      Object.keys(props.selectedAnnotations).forEach(async eachAnnt => {
+      Object.keys(props.selectedAnnotations).forEach(async (eachAnnt) => {
         let aimObj = {};
         aimObj[eachAnnt] = props.selectedAnnotations[eachAnnt];
 
@@ -1117,21 +1168,21 @@ const AnnotationSearch = props => {
         tempQueueObject.projectDbId =
           tempPluginObject.project_plugin.project_id;
         tempQueueObject.projectId = props.selectedProject;
-        tempQueueObject.projectName = '';
+        tempQueueObject.projectName = "";
 
         tempQueueObject.pluginDbId = tempPluginObject.id;
         tempQueueObject.pluginId = tempPluginObject.plugin_id;
         tempQueueObject.pluginName = tempPluginObject.name;
-        tempQueueObject.pluginType = 'local';
+        tempQueueObject.pluginType = "local";
         tempQueueObject.processMultipleAims =
           tempPluginObject.processmultipleaims;
         tempQueueObject.runtimeParams = {};
-        tempQueueObject.parameterType = 'default';
+        tempQueueObject.parameterType = "default";
         tempQueueObject.aims = aimObj;
 
         const resultAddQueue = await addPluginsToQueue(tempQueueObject);
         let responseRunPluginsQueue = null;
-        console.log('plugin running queue ', JSON.stringify(resultAddQueue));
+        console.log("plugin running queue ", JSON.stringify(resultAddQueue));
         // if (resultAddQueue && resultAddQueue.data){
         //   if (Array.isArray(resultAddQueue.data)){
         //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
@@ -1150,16 +1201,16 @@ const AnnotationSearch = props => {
       const tempQueueObject = {};
       tempQueueObject.projectDbId = tempPluginObject.project_plugin.project_id;
       tempQueueObject.projectId = props.selectedProject;
-      tempQueueObject.projectName = '';
+      tempQueueObject.projectName = "";
 
       tempQueueObject.pluginDbId = tempPluginObject.id;
       tempQueueObject.pluginId = tempPluginObject.plugin_id;
       tempQueueObject.pluginName = tempPluginObject.name;
-      tempQueueObject.pluginType = 'local';
+      tempQueueObject.pluginType = "local";
       tempQueueObject.processMultipleAims =
         tempPluginObject.processmultipleaims;
       tempQueueObject.runtimeParams = {};
-      tempQueueObject.parameterType = 'default';
+      tempQueueObject.parameterType = "default";
       if (props && props.selectedAnnotations) {
         tempQueueObject.aims = { ...props.selectedAnnotations };
       } else {
@@ -1168,7 +1219,7 @@ const AnnotationSearch = props => {
 
       const resultAddQueue = await addPluginsToQueue(tempQueueObject);
       let responseRunPluginsQueue = null;
-      console.log('plugin running queue ', JSON.stringify(resultAddQueue));
+      console.log("plugin running queue ", JSON.stringify(resultAddQueue));
       // if (resultAddQueue && resultAddQueue.data){
       //   if (Array.isArray(resultAddQueue.data)){
       //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
@@ -1195,31 +1246,51 @@ const AnnotationSearch = props => {
     setSelectedMods([]);
     setSelectedDiagnosis([]);
     setSelectedAnatomies([]);
-  }
+  };
 
   const clearAllFilters = () => {
     setFilters({});
-    setQuery('');
+    setQuery("");
     clearAllTeachingFilers();
-  }
+  };
 
   return (
     <>
-      <div className="container-fluid body-dk" style={{
-        'zIndex': 6,
-        'position': 'sticky',
-        'top': 0
-      }}>
+      <div
+        className="container-fluid body-dk"
+        style={{
+          zIndex: 6,
+          position: "sticky",
+          top: 0,
+        }}
+      >
         {/* search / filters */}
         <div className="search_filter">
           <div className="row">
             <div className="col-4">
               <div className="input-group input-group-sm mb-3">
-                <input className="form-control" type="text" placeholder="Enter Search Terms and/or Use Filters at Right" aria-label="default input example" onChange={e => { setQuery(e.target.value) }} value={query} />
-                <span className="input-group-text" id="basic-addon1"><BiSearch /></span>
+                <input
+                  className="form-control"
+                  type="text"
+                  placeholder="Enter Search Terms and/or Use Filters at Right"
+                  aria-label="default input example"
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                  }}
+                  value={query}
+                />
+                <span className="input-group-text" id="basic-addon1">
+                  <BiSearch />
+                </span>
 
                 <div>
-                  <button data-tip data-for='clearAll' className="btn btn-dark btn-sm color-schema" style={{ marginLeft: '0.5rem' }} onClick={clearAllFilters}>
+                  <button
+                    data-tip
+                    data-for="clearAll"
+                    className="btn btn-dark btn-sm color-schema"
+                    style={{ marginLeft: "0.5rem" }}
+                    onClick={clearAllFilters}
+                  >
                     <FcClearFilters />
                   </button>
                 </div>
@@ -1232,222 +1303,533 @@ const AnnotationSearch = props => {
                   Clear all filters
                 </ReactTooltip>
               </div>
-
             </div>
-            {mode === 'teaching' && (<TeachingFilters selectedAnatomies={selectedAnatomies}
-              setSelectedAnatomies={setSelectedAnatomies}
-              selectedDiagnosis={selectedDiagnosis}
-              setSelectedDiagnosis={setSelectedDiagnosis}
-              selectedSubs={selectedSubs}
-              setSelectedSubs={setSelectedSubs}
-              selectedMods={selectedMods}
-              setSelectedMods={setSelectedMods}
-              tfOnly={tfOnly}
-              setTfOnly={setTfOnly}
-              myCases={myCases}
-              setMyCases={setMyCases} />)}
+            {mode === "teaching" && (
+              <TeachingFilters
+                selectedAnatomies={selectedAnatomies}
+                setSelectedAnatomies={setSelectedAnatomies}
+                selectedDiagnosis={selectedDiagnosis}
+                setSelectedDiagnosis={setSelectedDiagnosis}
+                selectedSubs={selectedSubs}
+                setSelectedSubs={setSelectedSubs}
+                selectedMods={selectedMods}
+                setSelectedMods={setSelectedMods}
+                tfOnly={tfOnly}
+                setTfOnly={setTfOnly}
+                myCases={myCases}
+                setMyCases={setMyCases}
+              />
+            )}
           </div>
-          {(selectedSubs.length + selectedMods.length + selectedAnatomies.length + selectedDiagnosis.length) > 0 &&
-            (<div className="filter-control" style={{ paddingLeft: '0.9rem', paddingTop: '0.9rem' }}>
+          {selectedSubs.length +
+            selectedMods.length +
+            selectedAnatomies.length +
+            selectedDiagnosis.length >
+            0 && (
+            <div
+              className="filter-control"
+              style={{ paddingLeft: "0.9rem", paddingTop: "0.9rem" }}
+            >
               Filters Applied: &nbsp;
-              {selectedSubs.map(sub => {
-                return (<button key={sub} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearSubspecialty(sub)} > {sub} < BiX /></button>);
+              {selectedSubs.map((sub) => {
+                return (
+                  <button
+                    key={sub}
+                    type="button"
+                    className="btn btn-dark btn-sm color-schema"
+                    style={{ marginRight: "0.5rem" }}
+                    onClick={() => clearSubspecialty(sub)}
+                  >
+                    {" "}
+                    {sub} <BiX />
+                  </button>
+                );
               })}
-              {selectedMods.map(mod => {
-                return (<button key={mod} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearModality(mod)} > {compModality[mod.toLowerCase()] ? compModality[mod.toLowerCase()] : mod} < BiX /></button>);
+              {selectedMods.map((mod) => {
+                return (
+                  <button
+                    key={mod}
+                    type="button"
+                    className="btn btn-dark btn-sm color-schema"
+                    style={{ marginRight: "0.5rem" }}
+                    onClick={() => clearModality(mod)}
+                  >
+                    {" "}
+                    {compModality[mod.toLowerCase()]
+                      ? compModality[mod.toLowerCase()]
+                      : mod}{" "}
+                    <BiX />
+                  </button>
+                );
               })}
-              {selectedAnatomies.map(anatomy => {
-                return (<button key={anatomy} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearAnatomy(anatomy)} > {anatomy} < BiX /></button>);
+              {selectedAnatomies.map((anatomy) => {
+                return (
+                  <button
+                    key={anatomy}
+                    type="button"
+                    className="btn btn-dark btn-sm color-schema"
+                    style={{ marginRight: "0.5rem" }}
+                    onClick={() => clearAnatomy(anatomy)}
+                  >
+                    {" "}
+                    {anatomy} <BiX />
+                  </button>
+                );
               })}
-              {selectedDiagnosis.map(diagnose => {
-                return (<button key={diagnose} type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={() => clearDiagnosis(diagnose)} > {diagnose
-                } < BiX /></button>);
+              {selectedDiagnosis.map((diagnose) => {
+                return (
+                  <button
+                    key={diagnose}
+                    type="button"
+                    className="btn btn-dark btn-sm color-schema"
+                    style={{ marginRight: "0.5rem" }}
+                    onClick={() => clearDiagnosis(diagnose)}
+                  >
+                    {" "}
+                    {diagnose} <BiX />
+                  </button>
+                );
               })}
-              {(selectedSubs.length + selectedMods.length + selectedAnatomies.length + selectedDiagnosis) > 1 && (<button type="button" className="btn btn-dark btn-sm color-schema" style={{ marginRight: '0.5rem' }} onClick={clearAllFilters}>Clear All Filters <BiX /></button>)}
-            </div>)
-          }
+              {selectedSubs.length +
+                selectedMods.length +
+                selectedAnatomies.length +
+                selectedDiagnosis >
+                1 && (
+                <button
+                  type="button"
+                  className="btn btn-dark btn-sm color-schema"
+                  style={{ marginRight: "0.5rem" }}
+                  onClick={clearAllFilters}
+                >
+                  Clear All Filters <BiX />
+                </button>
+              )}
+            </div>
+          )}
         </div>
-      </div >
-      <div style={{
-        'width': 'auto',
-        'display': 'flex',
-        'flexDirection': 'row',
-        'alignItems': 'center',
-        'justifyContent': 'flex-start',
-        'position': 'sticky',
-        'top': '84px',
-        'width': '100%',
-        'zIndex': 5,
-        background: '#222222'
-      }}>
-        <div className="icon_row" style={{
-          // 'position': 'sticky',
-          // 'top': '84px',
-          // // 'width': '100%',
-          // 'zIndex': 5
-        }}>
+      </div>
+      <div
+        style={{
+          width: "auto",
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          position: "sticky",
+          top: "84px",
+          width: "100%",
+          zIndex: 5,
+          background: "#222222",
+        }}
+      >
+        <div
+          className="icon_row"
+          style={
+            {
+              // 'position': 'sticky',
+              // 'top': '84px',
+              // // 'width': '100%',
+              // 'zIndex': 5
+            }
+          }
+        >
           <div className="icon_r">
             {/* <button type="button" className="btn btn-sm" ><BsEyeFill /><br />View</button> */}
-            <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
+            <button
+              type="button"
+              className="btn btn-sm"
+              onClick={() => setShowDownload(!showDownload)}
+            >
+              <BiDownload />
+              <br />
+              Download
+            </button>
             {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
           {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
-            <AddToWorklist deselect={() => { handleSelectDeselectAll(false); resetSelectAllCheckbox(false) }} forceUpdatePage={props.forceUpdatePage} />
-            <Projects deselect={() => { handleSelectDeselectAll(false); resetSelectAllCheckbox(false) }} updateUrl={props.history.push} />
+            <AddToWorklist
+              deselect={() => {
+                handleSelectDeselectAll(false);
+                resetSelectAllCheckbox(false);
+              }}
+              forceUpdatePage={props.forceUpdatePage}
+            />
+            <Projects
+              deselect={() => {
+                handleSelectDeselectAll(false);
+                resetSelectAllCheckbox(false);
+              }}
+              updateUrl={props.history.push}
+            />
             {/* <button type="button" className="btn btn-sm" onClick={() => { setShowProjects(!showProjects) }}><BiDownload /><br />Copy to Project</button>
           {showProjects && (<Projects className='btn btn-sm worklist' onClose={() => { setShowProjects(false) }} />)} */}
-            <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
+            <button
+              type="button"
+              className="btn btn-sm"
+              onClick={() => {
+                setShowDeleteModal(true);
+              }}
+            >
+              <BiTrash />
+              <br />
+              Delete
+            </button>
           </div>
         </div>
-        {(showPlugins && mode !== 'teaching') && (<div style={{
-          'textAlign': 'left',
-          'color': '#eaddb2',
-          'borderRight': '1px solid #ececec',
-          'backgroundColor': '#555',
-          'borderTop': '1px solid #ececec',
-          'marginRight': '3px',
-          'display': 'flex',
-          // 'height': "42.58px",
-          'alignItems': 'flex-end',
-        }}>
-          <div
-            style={{ padding: '5px 3px' }}
-          >
-            <div
-              style={{
-                color: '#eaddb2',
-                fontSize: '.8em'
-              }}
-              onClick={() => {
-                getPluginProjects();
-              }}
-            >
-
-              Select Plugin
-            </div>
-          </div>
+        {showPlugins && mode !== "teaching" && (
           <div
             style={{
-              fontSize: '0.8rem',
-              margin: '5px 3px',
+              textAlign: "left",
+              color: "#eaddb2",
+              borderRight: "1px solid #ececec",
+              backgroundColor: "#555",
+              borderTop: "1px solid #ececec",
+              marginRight: "3px",
+              display: "flex",
+              // 'height': "42.58px",
+              alignItems: "flex-end",
             }}
           >
-            <select
-              className="pluginaddqueueselect"
-              id="plugins"
-              onChange={handleChangePlugin}
-              value={selectedPluginDbId}
-              style={{ minWidth: '8rem' }}
+            <div style={{ padding: "5px 3px" }}>
+              <div
+                style={{
+                  color: "#eaddb2",
+                  fontSize: ".8em",
+                }}
+                onClick={() => {
+                  getPluginProjects();
+                }}
+              >
+                Select Plugin
+              </div>
+            </div>
+            <div
+              style={{
+                fontSize: "0.8rem",
+                margin: "5px 3px",
+              }}
             >
-              <option key="-1" value="-1">
-                select
-              </option>
-              {prepareDropDownHtmlForPlugins()}
-            </select>
+              <select
+                className="pluginaddqueueselect"
+                id="plugins"
+                onChange={handleChangePlugin}
+                value={selectedPluginDbId}
+                style={{ minWidth: "8rem" }}
+              >
+                <option key="-1" value="-1">
+                  select
+                </option>
+                {prepareDropDownHtmlForPlugins()}
+              </select>
+            </div>
+            <button
+              style={
+                showRunPluginButton
+                  ? styles.enabledRunButton
+                  : styles.disabledRunButton
+              }
+              className="btn btn-sm"
+              onClick={() =>
+                showRunPluginButton
+                  ? runPlugin()
+                  : toast.info(explanation.selectPlugin, {
+                      position: "top-right",
+                    })
+              }
+            >
+              <BiPlay />
+              <br />
+              Run
+            </button>
           </div>
-          <button
-            style={showRunPluginButton ? styles.enabledRunButton : styles.disabledRunButton}
-            className="btn btn-sm"
-            onClick={() => showRunPluginButton ? runPlugin() : toast.info(explanation.selectPlugin, { position: 'top-right' })}
-          >
-            <BiPlay />
-            <br />Run
-          </button>
-        </div>)}
+        )}
       </div>
-      <table className="table table-dark table-striped table-hover title-case" style={{ "height": "100%" }}>
-        <colgroup><col className="select_row" />
+      <table
+        className="table table-dark table-striped table-hover title-case"
+        style={{ height: "100%" }}
+      >
+        <colgroup>
+          <col className="select_row" />
           <col span="15" />
         </colgroup>
         <thead className="sticky">
           <tr>
             <th className="select_row">
               <div className="form-check">
-                <input id="search-select_all" className="form-check-input __select-all" type="checkbox" onChange={({ target: { checked } }) => handleSelectDeselectAll(checked)} />
+                <input
+                  id="search-select_all"
+                  className="form-check-input __select-all"
+                  type="checkbox"
+                  onChange={({ target: { checked } }) =>
+                    handleSelectDeselectAll(checked)
+                  }
+                />
               </div>
             </th>
             <th>
-              <span onClick={() => handleSort('patientName')}>Patient Name </span>{
-                sort[0] === 'patientName' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
-                sort[0] === '-patientName' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)} < br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('patientName', target)} value={filters.patientName || ""} />
+              <span onClick={() => handleSort("patientName")}>
+                Patient Name{" "}
+              </span>
+              {(sort[0] === "patientName" && (
+                <AiOutlineSortAscending style={{ fontSize: "1.5em" }} />
+              )) ||
+                (sort[0] === "-patientName" && (
+                  <AiOutlineSortDescending style={{ fontSize: "1.5em" }} />
+                ))}{" "}
+              <br />
+              <input
+                className="form-control form-control-sm"
+                type="text"
+                aria-label=".form-control-sm example"
+                onInput={({ target }) => handleFilter("patientName", target)}
+                value={filters.patientName || ""}
+              />
             </th>
             <th>
-              <span onClick={() => handleSort('subjectID')}>{mode === 'teaching' ? 'MRN' : 'Patient Id'} </span>{
-                sort[0] === 'subjectID' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
-                sort[0] === '-subjectID' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)} <br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('subjectID', target)} value={filters.subjectID || ""} />
+              <span onClick={() => handleSort("subjectID")}>
+                {mode === "teaching" ? "MRN" : "Patient Id"}{" "}
+              </span>
+              {(sort[0] === "subjectID" && (
+                <AiOutlineSortAscending style={{ fontSize: "1.5em" }} />
+              )) ||
+                (sort[0] === "-subjectID" && (
+                  <AiOutlineSortDescending style={{ fontSize: "1.5em" }} />
+                ))}{" "}
+              <br />
+              <input
+                className="form-control form-control-sm"
+                type="text"
+                aria-label=".form-control-sm example"
+                onInput={({ target }) => handleFilter("subjectID", target)}
+                value={filters.subjectID || ""}
+              />
             </th>
-            {mode === 'teaching' && (<th><span onClick={() => handleSort('accessionNumber')}>Accession # </span>{
-              sort[0] === 'accessionNumber' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
-              sort[0] === '-accessionNumber' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)} < br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('accessionNumber', target)} value={filters.accessionNumber || ""} />
-            </th>)}
-            <th><span onClick={() => handleSort('name')}>{mode === 'teaching' ? 'Case Title' : 'Annotation Name'} </span>{
-              sort[0] === 'name' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
-              sort[0] === '-name' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('name', target)} value={filters.name || ""} />
+            {mode === "teaching" && (
+              <th>
+                <span onClick={() => handleSort("accessionNumber")}>
+                  Accession #{" "}
+                </span>
+                {(sort[0] === "accessionNumber" && (
+                  <AiOutlineSortAscending style={{ fontSize: "1.5em" }} />
+                )) ||
+                  (sort[0] === "-accessionNumber" && (
+                    <AiOutlineSortDescending style={{ fontSize: "1.5em" }} />
+                  ))}{" "}
+                <br />
+                <input
+                  className="form-control form-control-sm"
+                  type="text"
+                  aria-label=".form-control-sm example"
+                  onInput={({ target }) =>
+                    handleFilter("accessionNumber", target)
+                  }
+                  value={filters.accessionNumber || ""}
+                />
+              </th>
+            )}
+            <th>
+              <span onClick={() => handleSort("name")}>
+                {mode === "teaching" ? "Case Title" : "Annotation Name"}{" "}
+              </span>
+              {(sort[0] === "name" && (
+                <AiOutlineSortAscending style={{ fontSize: "1.5em" }} />
+              )) ||
+                (sort[0] === "-name" && (
+                  <AiOutlineSortDescending style={{ fontSize: "1.5em" }} />
+                ))}
+              <br />
+              <input
+                className="form-control form-control-sm"
+                type="text"
+                aria-label=".form-control-sm example"
+                onInput={({ target }) => handleFilter("name", target)}
+                value={filters.name || ""}
+              />
             </th>
-            <th style={{ width: '3.5rem' }} >
-              <span onClick={() => handleSort('age')}>Age </span>{
-                sort[0] === 'age' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
-                sort[0] === '-age' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('age', target)} value={filters.age || ""} />
+            <th style={{ width: "3.5rem" }}>
+              <span onClick={() => handleSort("age")}>Age </span>
+              {(sort[0] === "age" && (
+                <AiOutlineSortAscending style={{ fontSize: "1.5em" }} />
+              )) ||
+                (sort[0] === "-age" && (
+                  <AiOutlineSortDescending style={{ fontSize: "1.5em" }} />
+                ))}
+              <br />
+              <input
+                className="form-control form-control-sm"
+                type="text"
+                aria-label=".form-control-sm example"
+                onInput={({ target }) => handleFilter("age", target)}
+                value={filters.age || ""}
+              />
             </th>
-            <th style={{ width: '3rem' }}>
-              <span onClick={() => handleSort('sex')}>Sex </span>{
-                sort[0] === 'sex' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
-                sort[0] === '-sex' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('sex', target)} value={filters.sex || ""} />
+            <th style={{ width: "3rem" }}>
+              <span onClick={() => handleSort("sex")}>Sex </span>
+              {(sort[0] === "sex" && (
+                <AiOutlineSortAscending style={{ fontSize: "1.5em" }} />
+              )) ||
+                (sort[0] === "-sex" && (
+                  <AiOutlineSortDescending style={{ fontSize: "1.5em" }} />
+                ))}
+              <br />
+              <input
+                className="form-control form-control-sm"
+                type="text"
+                aria-label=".form-control-sm example"
+                onInput={({ target }) => handleFilter("sex", target)}
+                value={filters.sex || ""}
+              />
             </th>
             <th>
-              <span onClick={() => handleSort('modality')}>Modality </span>{
-                sort[0] === 'modality' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
-                sort[0] === '-modality' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('modality', target)} value={filters.modality || ""} />
+              <span onClick={() => handleSort("modality")}>Modality </span>
+              {(sort[0] === "modality" && (
+                <AiOutlineSortAscending style={{ fontSize: "1.5em" }} />
+              )) ||
+                (sort[0] === "-modality" && (
+                  <AiOutlineSortDescending style={{ fontSize: "1.5em" }} />
+                ))}
+              <br />
+              <input
+                className="form-control form-control-sm"
+                type="text"
+                aria-label=".form-control-sm example"
+                onInput={({ target }) => handleFilter("modality", target)}
+                value={filters.modality || ""}
+              />
             </th>
             <th>
-              <span onClick={() => handleSort('studyDate')}>Study Date </span>{
-                sort[0] === 'studyDate' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
-                sort[0] === '-studyDate' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('studyDate', target)} value={filters.studyDate || ""} />
+              <span onClick={() => handleSort("studyDate")}>Study Date </span>
+              {(sort[0] === "studyDate" && (
+                <AiOutlineSortAscending style={{ fontSize: "1.5em" }} />
+              )) ||
+                (sort[0] === "-studyDate" && (
+                  <AiOutlineSortDescending style={{ fontSize: "1.5em" }} />
+                ))}
+              <br />
+              <input
+                className="form-control form-control-sm"
+                type="text"
+                aria-label=".form-control-sm example"
+                onInput={({ target }) => handleFilter("studyDate", target)}
+                value={filters.studyDate || ""}
+              />
             </th>
-            {mode === 'teaching' && (<th>
-              <span onClick={() => handleSort('anatomy')}>Anatomy </span>{
-                sort[0] === 'anatomy' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
-                sort[0] === '-anatomy' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('anatomy', target)} value={filters.anatomy || ""} />
-            </th>)}
-            {mode === 'teaching' && (<th><span onClick={() => handleSort('observation')}>Observation </span>{
-              sort[0] === 'observation' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
-              sort[0] === '-observation' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('observation', target)} value={filters.observation || ""} />
-            </th>)}
+            {mode === "teaching" && (
+              <th>
+                <span onClick={() => handleSort("anatomy")}>Anatomy </span>
+                {(sort[0] === "anatomy" && (
+                  <AiOutlineSortAscending style={{ fontSize: "1.5em" }} />
+                )) ||
+                  (sort[0] === "-anatomy" && (
+                    <AiOutlineSortDescending style={{ fontSize: "1.5em" }} />
+                  ))}
+                <br />
+                <input
+                  className="form-control form-control-sm"
+                  type="text"
+                  aria-label=".form-control-sm example"
+                  onInput={({ target }) => handleFilter("anatomy", target)}
+                  value={filters.anatomy || ""}
+                />
+              </th>
+            )}
+            {mode === "teaching" && (
+              <th>
+                <span onClick={() => handleSort("observation")}>
+                  Observation{" "}
+                </span>
+                {(sort[0] === "observation" && (
+                  <AiOutlineSortAscending style={{ fontSize: "1.5em" }} />
+                )) ||
+                  (sort[0] === "-observation" && (
+                    <AiOutlineSortDescending style={{ fontSize: "1.5em" }} />
+                  ))}
+                <br />
+                <input
+                  className="form-control form-control-sm"
+                  type="text"
+                  aria-label=".form-control-sm example"
+                  onInput={({ target }) => handleFilter("observation", target)}
+                  value={filters.observation || ""}
+                />
+              </th>
+            )}
             <th>
-              <span onClick={() => handleSort('date')}>Created </span>{
-                sort[0] === 'date' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
-                sort[0] === '-date' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('date', target)} value={filters.date || ""} />
+              <span onClick={() => handleSort("date")}>Created </span>
+              {(sort[0] === "date" && (
+                <AiOutlineSortAscending style={{ fontSize: "1.5em" }} />
+              )) ||
+                (sort[0] === "-date" && (
+                  <AiOutlineSortDescending style={{ fontSize: "1.5em" }} />
+                ))}
+              <br />
+              <input
+                className="form-control form-control-sm"
+                type="text"
+                aria-label=".form-control-sm example"
+                onInput={({ target }) => handleFilter("date", target)}
+                value={filters.date || ""}
+              />
             </th>
             <th>
-              <span onClick={() => handleSort('templateType')}>Template </span>{
-                sort[0] === 'templateType' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
-                sort[0] === '-templateType' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('templateType', target)} value={filters.templateType || ""} />
+              <span onClick={() => handleSort("templateType")}>Template </span>
+              {(sort[0] === "templateType" && (
+                <AiOutlineSortAscending style={{ fontSize: "1.5em" }} />
+              )) ||
+                (sort[0] === "-templateType" && (
+                  <AiOutlineSortDescending style={{ fontSize: "1.5em" }} />
+                ))}
+              <br />
+              <input
+                className="form-control form-control-sm"
+                type="text"
+                aria-label=".form-control-sm example"
+                onInput={({ target }) => handleFilter("templateType", target)}
+                value={filters.templateType || ""}
+              />
             </th>
             <th>
-              <span onClick={() => handleSort('fullName')}>User </span>{
-                sort[0] === 'fullName' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
-                sort[0] === '-fullName' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('fullName', target)} value={filters.fullName || ""} />
+              <span onClick={() => handleSort("fullName")}>User </span>
+              {(sort[0] === "fullName" && (
+                <AiOutlineSortAscending style={{ fontSize: "1.5em" }} />
+              )) ||
+                (sort[0] === "-fullName" && (
+                  <AiOutlineSortDescending style={{ fontSize: "1.5em" }} />
+                ))}
+              <br />
+              <input
+                className="form-control form-control-sm"
+                type="text"
+                aria-label=".form-control-sm example"
+                onInput={({ target }) => handleFilter("fullName", target)}
+                value={filters.fullName || ""}
+              />
             </th>
-            <th><span onClick={() => handleSort('userComment')}>{mode === 'teaching' ? 'Narrative' : 'Comment'} </span>{
-              sort[0] === 'userComment' && (<AiOutlineSortAscending style={{ fontSize: '1.5em' }} />) ||
-              sort[0] === '-userComment' && (<AiOutlineSortDescending style={{ fontSize: '1.5em' }} />)}<br />
-              <input className="form-control form-control-sm" type="text" aria-label=".form-control-sm example" onInput={({ target }) => handleFilter('userComment', target)} value={filters.userComment || ""} />
+            <th>
+              <span onClick={() => handleSort("userComment")}>
+                {mode === "teaching" ? "Narrative" : "Comment"}{" "}
+              </span>
+              {(sort[0] === "userComment" && (
+                <AiOutlineSortAscending style={{ fontSize: "1.5em" }} />
+              )) ||
+                (sort[0] === "-userComment" && (
+                  <AiOutlineSortDescending style={{ fontSize: "1.5em" }} />
+                ))}
+              <br />
+              <input
+                className="form-control form-control-sm"
+                type="text"
+                aria-label=".form-control-sm example"
+                onInput={({ target }) => handleFilter("userComment", target)}
+                value={filters.userComment || ""}
+              />
             </th>
           </tr>
         </thead>
-        <PropagateLoader color={'#7A8288'} loading={props.loading} margin-left={'8rem'} />
+        <PropagateLoader
+          color={"#7A8288"}
+          loading={props.loading}
+          margin-left={"8rem"}
+        />
         <tbody>
           {data.length > 0 && !showSpinner && (
             <AnnotationTable
@@ -1458,7 +1840,7 @@ const AnnotationSearch = props => {
               noOfRows={rows}
               getNewData={getNewData}
               bookmark={bookmark}
-              switchToDisplay={() => props.history.push('/display')}
+              switchToDisplay={() => props.history.push("/display")}
               pid={props.pid}
               handleSort={handleSort}
               handleFilter={handleFilter}
@@ -1469,7 +1851,9 @@ const AnnotationSearch = props => {
         {showSelectSeries && (
           <SeriesModal
             seriesPassed={seriesList}
-            onCancel={() => { setShowSelectSeries(false) }}
+            onCancel={() => {
+              setShowSelectSeries(false);
+            }}
             isTeachingFile={true}
             encrUrlArgs={encArgs}
             decrArgs={decrArgs}
@@ -1500,22 +1884,29 @@ const AnnotationSearch = props => {
         projectID={selectedProject}
         show={showDownload}
       />
-      {showWarning && (<WarningModal
-        onOK={() => { setShowWarning(false); props.completeLoading() }}
-        title={'No series to display'}
-        message={`There is no Series to display in the Study. ${mode === 'teaching' ? 'The teaching file can not be created!' : ''}`}
-      />)}
+      {showWarning && (
+        <WarningModal
+          onOK={() => {
+            setShowWarning(false);
+            props.completeLoading();
+          }}
+          title={"No series to display"}
+          message={`There is no Series to display in the Study. ${
+            mode === "teaching" ? "The teaching file can not be created!" : ""
+          }`}
+        />
+      )}
     </>
   );
 };
 
-const mapsStateToProps = state => {
+const mapsStateToProps = (state) => {
   return {
     projectMap: state.annotationsListReducer.projectMap,
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
     openSeries: state.annotationsListReducer.openSeries,
     searchTableIndex: state.annotationsListReducer.searchTableIndex,
-    refreshMap: state.annotationsListReducer.refreshMap
+    refreshMap: state.annotationsListReducer.refreshMap,
   };
 };
 

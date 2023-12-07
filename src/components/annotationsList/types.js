@@ -43,7 +43,6 @@ export const CLEAR_AIMID = "epadjs/annotationList/CLEAR_AIMID";
 // export const UPDATE_PATIENT_AIM_DELETE =
 //   'epadjs/annotationList/UPDATE_PATIENT_AIM_DELETE';
 export const GET_NOTIFICATIONS = "epadjs/annotationList/GET_NOTIFICATIONS";
-export const CLEAR_ACTIVE_AIMID = "epadjs/annotationList/CLEAR_ACTIVE_AIMID";
 // -----> Delete after v1.0 <-----
 // export const UPDATE_IMAGE_INDEX = 'epadjs/annotationList/UPDATE_IMAGE_INDEX ';
 export const GET_PROJECT_MAP = "epadjs/annotationList/GET_PROJECT_MAP";
@@ -56,7 +55,6 @@ export const SEG_UPLOAD_COMPLETED =
 export const SEG_UPLOAD_REMOVE = "epadjs/annotationList/SEG_UPLOAD_REMOVE";
 export const AIM_DELETE = "epadjs/annotationList/AIM_DELETE";
 export const SAVE_PATIENT_FILTER = "epadjs/annotationList/SAVE_PATIENT_FILTER";
-export const ADD_STUDY_TO_GRID = "epadjs/annotationList/ADD_STUDY_TO_GRID";
 export const REPLACE_IN_GRID = "epadjs/annotationList/REPLACE_IN_GRID";
 export const UPDATE_SEARCH_TABLE_INDEX = "epadjs/annotationList/UPDATE_SEARCH_TABLE_INDEX ";
 export const REFRESH_MAP = "epadjs/annotationList/REFRESH_MAP";
@@ -64,6 +62,7 @@ export const AIM_SAVE = "epadjs/annotationList/AIM_SAVE";
 export const SUBPATH = "epadjs/annotationList/SUBPATH";
 export const CHECK_MULTIFRAME = 'epadjs/annotationList/CHECK_MULTIFRAME';
 export const CLEAR_MULTIFRAME_AIM_JUMP = 'epadjs/annotationList/CLEAR_MULTIFRAME_AIM_JUMP';
+export const SET_SERIES_DATA = 'epadjs/annotationList/SET_SERIES_DATA';
 
 export const commonLabels = {
   button: { background: "#c0c0c0", color: "black" },

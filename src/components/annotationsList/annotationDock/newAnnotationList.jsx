@@ -133,11 +133,11 @@ class AnnotationsList extends React.Component {
     const calculations = {};
     const wadors = this.wadoUrl.includes("wadors");
     try {
-      const { openSeries, activePort } = this.props;
+      const { openSeries, activePort, openSeriesAddition } = this.props;
       const { imageID } = openSeries[activePort];
       let imageAnnotations;
-      if (openSeries[activePort].imageAnnotations) {
-        const annotations = openSeries[activePort].imageAnnotations;
+      if (openSeriesAddition[activePort].imageAnnotations) {
+        const annotations = openSeriesAddition[activePort].imageAnnotations;
         imageAnnotations = annotations[imageID];
         // TODO: check frame number ??
         if (!imageAnnotations) {
@@ -172,7 +172,7 @@ class AnnotationsList extends React.Component {
 
   render = () => {
     // try {
-    const { openSeries, aimsList } = this.props;
+    const { openSeries, openSeriesAddition, aimsList } = this.props;
     let { activePort } = this.props;
     activePort = activePort || activePort === 0 ? activePort : 0;
     const { imageID } = openSeries[activePort];
@@ -190,7 +190,7 @@ class AnnotationsList extends React.Component {
 
     const wadors = this.wadoUrl.includes("wadors");
 
-    const aimList = openSeries[activePort].imageAnnotations;
+    const aimList = openSeriesAddition[activePort].imageAnnotations;
     if (aimList) {
       let imageAnnotations;
 
@@ -335,6 +335,7 @@ class AnnotationsList extends React.Component {
 const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
+    openSeriesAddition: state.annotationsListReducer.openSeriesAddition,
     activePort: state.annotationsListReducer.activePort,
     aimsList: state.annotationsListReducer.aimsList,
     imageID: state.annotationsListReducer.imageID,
