@@ -2,7 +2,7 @@
   position: absolute;
   background-color: #777;
   padding: 5px 5px;
-  width: 320px;
+  width: 'inherit';
   right: 0;
   margin-left: 4px;
   height: 100%;

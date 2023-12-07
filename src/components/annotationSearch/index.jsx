@@ -180,6 +180,7 @@ const AnnotationSearch = (props) => {
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
     if ((typeof pagination === "number" || pagination) && !afterDelete) {
+
       setData(data.concat(result.data.rows));
     } else {
       setData(result.data.rows);
@@ -276,6 +277,14 @@ const AnnotationSearch = (props) => {
   };
 
   useEffect(() => {
+    window.addEventListener('keydown', handleUserKeyPress);
+    return () => {
+      window.removeEventListener('keydown', handleUserKeyPress);
+    };
+  }, [handleUserKeyPress]);
+
+
+  useEffect(() => {
     window.addEventListener("openTeachingFilesModal", handleTeachingFilesModal);
     return () => {
       window.removeEventListener(
@@ -299,6 +308,13 @@ const AnnotationSearch = (props) => {
         "openTeachingFilesModal",
         handleTeachingFilesModal
       );
+    };
+  }, [handleTeachingFilesModal]);
+
+  useEffect(() => {
+    window.addEventListener('openTeachingFilesModal', handleTeachingFilesModal);
+    return () => {
+      window.removeEventListener('openTeachingFilesModal', handleTeachingFilesModal);
     };
   }, [handleTeachingFilesModal]);
 
@@ -690,7 +706,8 @@ const AnnotationSearch = (props) => {
   };
 
   const getNewData = (pageIndex, afterDelete) => {
-    if (mode === "teaching") {
+    // const searchTableIndex = pageIndex || props.searchTableIndex || 0;
+    if (mode === 'teaching') {
       getFieldSearchResults(props.searchTableIndex, afterDelete);
       return;
     }

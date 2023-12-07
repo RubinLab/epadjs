@@ -465,6 +465,8 @@ class selectSerieModal extends React.Component {
         });
         await this.setSignificantSeries(series);
         window.dispatchEvent(new Event("refreshProjects"));
+        // to prevent concatanating the annotation list pass afterDelete parameter true
+        this.props.onSave(this.props.searchTableIndex, true);
         this.setState({ isButtonDisabled: false });
         return result;
       })
@@ -635,6 +637,7 @@ const mapStateToProps = (state) => {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
     seriesData: state.annotationsListReducer.seriesData,
+    searchTableIndex: state.annotationsListReducer.searchTableIndex
   };
 };
 
