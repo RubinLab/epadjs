@@ -33,7 +33,6 @@ import {
   // UPDATE_PATIENT_AIM_SAVE,
   // UPDATE_PATIENT_AIM_DELETE,
   GET_NOTIFICATIONS,
-  CLEAR_ACTIVE_AIMID,
   UPDATE_IMAGE_INDEX,
   GET_PROJECT_MAP,
   SET_SEG_LABEL_MAP_INDEX,
@@ -122,10 +121,6 @@ export const getTemplates = () => {
 // closes all ports in display view
 export const clearGrid = (item) => {
   return { type: CLEAR_GRID };
-};
-
-export const clearActivePortAimID = () => {
-  return { type: CLEAR_ACTIVE_AIMID };
 };
 
 // clears aimID of the all open series

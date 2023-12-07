@@ -112,9 +112,7 @@ class selectSerieModal extends React.Component {
         seriesData[projectID] &&
         seriesData[projectID][patientID] &&
         seriesData[projectID][patientID][studyUID];
-      console.log(" data exists", dataExists);
       if (!dataExists) {
-        console.log(" AnnotationTable +++++");
         const { data: series } = await getSeries(
           projectID,
           patientID,
@@ -637,7 +635,7 @@ const mapStateToProps = (state) => {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
     seriesData: state.annotationsListReducer.seriesData,
-    searchTableIndex: state.annotationsListReducer.searchTableIndex
+    searchTableIndex: state.annotationsListReducer.searchTableIndex,
   };
 };
 

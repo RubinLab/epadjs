@@ -6,7 +6,6 @@ import { getStudyAims } from "../../services/studyServices";
 import {
   replaceInGrid,
   getSingleSerie,
-  clearActivePortAimID,
 } from "components/annotationsList/action";
 import { isSupportedModality } from "../../Utils/aid.js";
 

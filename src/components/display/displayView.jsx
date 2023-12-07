@@ -19,7 +19,6 @@ import "./viewport.css";
 import {
   changeActivePort,
   updateImageId,
-  clearActivePortAimID,
   closeSerie,
   jumpToAim,
   setSegLabelMapIndex,
@@ -257,8 +256,6 @@ class DisplayView extends Component {
       activePort: prevActivePort,
       aimList: prevAimList,
     } = prevProps;
-    const activeSerie = series[activePort].seriesUID;
-    const prevActiveSerie = prevSeries[prevActivePort].seriesUID;
 
     if (this.props.series.length < 1) {
       if (mode === "teaching") this.props.history.push("/search");
@@ -861,7 +858,7 @@ class DisplayView extends Component {
       seriesMetadata.length > 0 &&
       seriesMetadata.length === imgURLsLen;
     // get the first and the middle image
-    const middleIndex =  Math.floor(imgURLsLen / 2);
+    const middleIndex = Math.floor(imgURLsLen / 2);
     let firstImage = null;
     let middleImage = null;
     if (!useSeriesData) {
@@ -873,7 +870,8 @@ class DisplayView extends Component {
       middleImage = data[middleIndex];
     } else {
       firstImage = seriesMetadataMap[imageUrls[firstSeriesIndex][0].imageUID];
-      middleImage = seriesMetadataMap[imageUrls[firstSeriesIndex][middleIndex].imageUID];
+      middleImage =
+        seriesMetadataMap[imageUrls[firstSeriesIndex][middleIndex].imageUID];
     }
 
     let referencePosition = null;
@@ -2020,7 +2018,9 @@ class DisplayView extends Component {
       hasSegmentation: false,
       dirty: false,
     });
-    this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
+
+    // use clearMultiFrameAimJumpFlags to replace clear-active-aimid
+    this.props.dispatch(clearMultiFrameAimJumpFlags()); // this data is rendered so clear the aim Id in props
     this.clearSculptState();
     this.clearSmartBrushState();
     this.renderAims(true);
@@ -2421,7 +2421,6 @@ class DisplayView extends Component {
                       },
                     ]}
                     setViewportActive={() => {
-                      console.log(" --- cornestone");
                       this.setActive(i);
                     }}
                     isStackPrefetchEnabled={true}

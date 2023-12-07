@@ -33,7 +33,6 @@ import {
   UPDATE_PATIENT_AIM_SAVE,
   UPDATE_PATIENT_AIM_DELETE,
   GET_NOTIFICATIONS,
-  CLEAR_ACTIVE_AIMID,
   // UPDATE_IMAGE_INDEX,
   GET_PROJECT_MAP,
   SET_SEG_LABEL_MAP_INDEX,
@@ -214,31 +213,7 @@ const asyncReducer = (state = initialState, action) => {
         for (let serie of aimIDClearedOpenSeries) {
           serie.aimID = null;
         }
-        return { ...state, openSeries: aimIDClearedOpenSeries };
-      case CLEAR_ACTIVE_AIMID:
-        aimIDClearedOpenSeries = _.cloneDeep(state.openSeries);
-        aimIDClearedOpenSeriesAddition = state.openSeriesAddition.map((serie) => {
-          const newSerie = _.cloneDeep(serie);
-          if (serie.imageAnnotations) {
-            newSerie.imageAnnotations = { ...serie.imageAnnotations };
-          }
-          return newSerie;
-        });
-        aimIDClearedOpenSeries[state.activePort].aimID = null;
-        aimIDClearedOpenSeriesAddition[state.activePort].aimID = null;
-        return { ...state, openSeries: aimIDClearedOpenSeries,  openSeriesAddition: aimIDClearedOpenSeriesAddition};
-      // case UPDATE_IMAGEID:
-      //   const openSeriesToUpdate = state.openSeries.map((serie) => {
-      //     const newSerie = { ...serie };
-      //     if (serie.imageAnnotations) {
-      //       newSerie.imageAnnotations = { ...serie.imageAnnotations };
-      //     }
-      //     return newSerie;
-      //   });
-      //   const port = action.port || state.activePort;
-      //   openSeriesToUpdate[port].imageID = action.imageID;
-
-      //   return { ...state, openSeries: openSeriesToUpdate };
+        return { ...state, openSeries: aimIDClearedOpenSeries, openSeriesAddition: aimIDClearedOpenSeriesAddition };
       case UPDATE_IMAGEID:
         let openSeriesToUpdate = _.cloneDeep(state.openSeries);
         const port = action.port || state.activePort;
@@ -311,15 +286,8 @@ const asyncReducer = (state = initialState, action) => {
         const viewPortStatus = !state.showGridFullAlert;
         return { ...state, showGridFullAlert: viewPortStatus };
       case LOAD_SERIE_SUCCESS:
-        let imageAddedSeries = state.openSeriesAddition.map((serie) => {
-          const newSerie = _.cloneDeep(serie);
-          if (serie.imageAnnotations) {
-            newSerie.imageAnnotations = { ...serie.imageAnnotations };
-          }
-          return newSerie;
-        });
+        let imageAddedSeries = _.cloneDeep(state.openSeriesAddition);
         let annCalc = Object.keys(action.payload.imageData);
-
         if (annCalc.length > 0) {
           for (let i = 0; i < imageAddedSeries.length; i++) {
             if (imageAddedSeries[i].seriesUID === action.payload.serID) {
@@ -401,11 +369,10 @@ const asyncReducer = (state = initialState, action) => {
         //get openseries iterate over the
         const changedPortSeriesAddition = state.openSeriesAddition.map((serie) => {
           const newSerie = _.cloneDeep(serie);
-          if (serie.imageAnnotations) {
-            newSerie.imageAnnotations = { ...serie.imageAnnotations };
-          }
+          newSerie.aimID = null;
           return newSerie;
         });
+
         const changedPortSeries = _.cloneDeep(state.openSeries);
         for (let i = 0; i < changedPortSeries.length; i++) {
           if (i !== action.portIndex) {
@@ -619,8 +586,6 @@ const asyncReducer = (state = initialState, action) => {
         }
 
         const newActivePort = arePortsOccupied ? state.activePort : newOpenSeries.length - 1;
-        console.log(" ---> newActivePort", newActivePort);
-        console.log(' -> newOpenSeries', newOpenSeries.length);
         return {
           ...state,
           openSeries: newOpenSeries,
@@ -672,13 +637,7 @@ const asyncReducer = (state = initialState, action) => {
         let { aimID, index } = action.payload;
         let serUID = action.payload.seriesUID;
         let updatedGrid = _.cloneDeep(state.openSeries)
-        let updatedOpenSeriesAddition = state.openSeriesAddition.map((serie) => {
-          const newSerie = _.cloneDeep(serie);
-          if (serie.imageAnnotations) {
-            newSerie.imageAnnotations = { ...serie.imageAnnotations };
-          }
-          return newSerie;
-        });
+        let updatedOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
         updatedGrid[index].aimID = aimID;
         updatedOpenSeriesAddition[index].aimID = aimID;
 

@@ -43,7 +43,6 @@ export const CLEAR_AIMID = "epadjs/annotationList/CLEAR_AIMID";
 // export const UPDATE_PATIENT_AIM_DELETE =
 //   'epadjs/annotationList/UPDATE_PATIENT_AIM_DELETE';
 export const GET_NOTIFICATIONS = "epadjs/annotationList/GET_NOTIFICATIONS";
-export const CLEAR_ACTIVE_AIMID = "epadjs/annotationList/CLEAR_ACTIVE_AIMID";
 // -----> Delete after v1.0 <-----
 // export const UPDATE_IMAGE_INDEX = 'epadjs/annotationList/UPDATE_IMAGE_INDEX ';
 export const GET_PROJECT_MAP = "epadjs/annotationList/GET_PROJECT_MAP";

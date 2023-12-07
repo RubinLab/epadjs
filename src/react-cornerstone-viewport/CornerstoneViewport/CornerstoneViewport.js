@@ -240,8 +240,8 @@ class CornerstoneViewport extends Component {
     if (shouldStopStartStackPrefetch) {
       const clear = true;
 
-      if (this.element) _enableStackPrefetching(this.element, clear);
-      if (this.element) _enableStackPrefetching(this.element);
+      _enableStackPrefetching(this.element, clear);
+      _enableStackPrefetching(this.element);
     }
 
     // ~~ ACTIVE TOOL
