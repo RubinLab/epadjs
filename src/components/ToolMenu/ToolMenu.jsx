@@ -520,11 +520,6 @@ class ToolMenu extends Component {
 
   invert() {
     this.props.onInvertClick(true, this.props.activePort);
-    // const activeElement =
-    //   cornerstone.getEnabledElements()[this.props.activePort].element;
-    // const viewport = cornerstone.getViewport(activeElement);
-    // viewport.invert = !viewport.invert;
-    // cornerstone.setViewport(activeElement, viewport);
   }
 
   reset = () => {
