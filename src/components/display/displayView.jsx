@@ -819,16 +819,20 @@ class DisplayView extends Component {
       seriesMetadataExists &&
       seriesMetadata.length > 0 &&
       seriesMetadata.length === imgURLsLen;
-    // get first image
+    // get the first and the middle image
+    const middleIndex =  Math.floor(imgURLsLen / 2);
     let firstImage = null;
+    let middleImage = null;
     if (!useSeriesData) {
       const result = await getImageMetadata(
         wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage
       );
       const data = result.data;
       firstImage = data[0];
+      middleImage = data[middleIndex];
     } else {
       firstImage = seriesMetadataMap[imageUrls[firstSeriesIndex][0].imageUID];
+      middleImage = seriesMetadataMap[imageUrls[firstSeriesIndex][middleIndex].imageUID];
     }
 
     let referencePosition = null;
@@ -838,11 +842,12 @@ class DisplayView extends Component {
 
     const distanceDatasetPairs = [];
 
-    const sortByGeo = !!firstImage["00200032"] && !!firstImage["00200037"];
+    // get position from the first image but orientation from the middle
+    const sortByGeo = !!firstImage["00200032"] && !!middleImage["00200037"];
     if (sortByGeo) {
       referencePosition = firstImage["00200032"].Value;
-      rowVector = firstImage["00200037"].Value.slice(0, 3);
-      columnVector = firstImage["00200037"].Value.slice(3, 6);
+      rowVector = middleImage["00200037"].Value.slice(0, 3);
+      columnVector = middleImage["00200037"].Value.slice(3, 6);
       scanAxis = dcmjs.normalizers.ImageNormalizer.vec3CrossProduct(
         rowVector,
         columnVector
