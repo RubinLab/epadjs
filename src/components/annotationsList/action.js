@@ -889,6 +889,7 @@ const sortAims = (series) => {
 
 const getStudyAimsDataSorted = (arr, projectID, patientID) => {
   if (arr.length > 0) {
+    const result = {};
     const { aims, seriesNovsUIDmap } = newGetOtherSeriesAimData(arr, projectID, patientID);
     const studyUID = Object.keys(aims);
     const seriesMap = Object.values(aims);
@@ -903,10 +904,11 @@ const getStudyAimsDataSorted = (arr, projectID, patientID) => {
       const aimArr = Object.values(el[2]);
       el[2] = aimArr;
     });
-    aims[studyUID] = sortAims(series);
+    result[projectID] = {[studyUID]: sortAims(series)}
+    // aims[studyUID] = sortAims(series);
     // write a sorting function for slice numbers
     // and remove aimID map with sorted Array
-    return aims;
+    return result;
   }
 }
 
