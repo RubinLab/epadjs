@@ -243,6 +243,7 @@ const asyncReducer = (state = initialState, action) => {
         let delOtherSeriesAimsList;
         let delSeriesData;
         if (delGrid.length === 0) {
+          console.log(" -------> it should be here");
           delActivePort = null;
           delOtherSeriesAimsList = {};
           delSeriesData = {};
@@ -692,10 +693,10 @@ const asyncReducer = (state = initialState, action) => {
       }
       case AIM_DELETE: { //tested
         const { aimRefs } = action.payload;
-        const { seriesUID } = aimRefs;
+        const { seriesUID, studyUID,  projectID, aimID } = aimRefs;
         const deepOther = _.cloneDeep(state.otherSeriesAimsList);
-        const deepOtherArrKeys = Object.keys(deepOther);
-        const deepOtherArrValues = Object.values(deepOther);
+        const projectAims = deepOther[projectID];
+        const deepOtherArrValues = projectAims ? Object.values(projectAims[studyUID]) : null;
         let serieToUpdateIndex;
         const newOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
         const serieToUpdate = newOpenSeriesAddition.find((serie, index) => {
@@ -715,17 +716,41 @@ const asyncReducer = (state = initialState, action) => {
           }
         });
 
+        if (deepOtherArrValues) {
         deepOtherArrValues.forEach((el => {
           if (el[aimRefs.aimID]) delete el[aimRefs.aimID];
         }))
 
-        const reformedOtherSeries = deepOtherArrKeys.reduce((all, item, index) => {
-          all[item] = deepOtherArrValues[index];
+        let reformedOtherSeries = deepOtherArrValues.reduce((all, item, index) => {
+          if (item[0] === seriesUID) {
+            let aimIndex = -1;
+            for (let i = 0; i < item[2].length; i++) {
+              if (item[2][i].aimID === aimID) {
+                aimIndex = i;
+                break;
+              }
+            }
+            if (aimIndex > -1) {
+              item[2].splice(aimIndex, 1);
+            }       
+          } 
+          all[index] = item;
           return all;
-        }, {});
-
-        newOpenSeries[serieToUpdateIndex] = updatedSerie;
-        return { ...state, openSeriesAddition: newOpenSeriesAddition, otherSeriesAimsList: reformedOtherSeries };
+        }, []);
+    
+        if (reformedOtherSeries[serieToUpdateIndex][2].length === 0) {
+          if (deepOther[projectID][studyUID].length === 1) {
+            delete deepOther[projectID][studyUID];
+          } else {
+            const arr1 = deepOther[projectID][studyUID].slice(0, serieToUpdateIndex + 1);
+            const arr2 = deepOther[projectID][studyUID].slice(serieToUpdateIndex + 1);
+            reformedOtherSeries = arr1.concat(arr2); 
+            deepOther[projectID][studyUID] = reformedOtherSeries;
+          }
+        }
+        newOpenSeriesAddition[serieToUpdateIndex] = updatedSerie;
+      }
+        return { ...state, openSeriesAddition: newOpenSeriesAddition, otherSeriesAimsList: deepOther };
       }
       default:
         return state;
