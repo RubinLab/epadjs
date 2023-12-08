@@ -26,7 +26,7 @@ const handleJumpToAim = (aimId, index, imageID, frame) => {
 const annotationsLink = (props) => {
   const [presentImgID, setPresentImgID] = useState("");
   const { openSeries, activePort, aimsList, otherSeriesAimsList } = props;
-  const { seriesUID, studyUID } = openSeries[activePort];
+  const { seriesUID, studyUID, projectID } = openSeries[activePort];
   let studyAimsList = [];
 
   useEffect(() => {
@@ -76,8 +76,10 @@ const annotationsLink = (props) => {
   };
 
   const renderUI = () => {
-    if (otherSeriesAimsList[studyUID]) {
-      const otherSeriesAims = Object.values(otherSeriesAimsList[studyUID]);
+    if (otherSeriesAimsList[projectID][studyUID]) {
+      const otherSeriesAims = Object.values(
+        otherSeriesAimsList[projectID][studyUID]
+      );
       if (otherSeriesAims) {
         otherSeriesAims.forEach((series, i) => {
           const seriesList = [];
@@ -132,15 +134,16 @@ const annotationsLink = (props) => {
 
   return (
     <React.Fragment>
-      {otherSeriesAimsList[studyUID] && (
-        <div>
-          <div className="other-annotations"> Other Annotations</div>
-          <div className="annotation-back">
-            <p className="img-label">Image / Series</p>
-            {renderUI()}
+      {otherSeriesAimsList[projectID] &&
+        otherSeriesAimsList[projectID][studyUID] && (
+          <div>
+            <div className="other-annotations"> Other Annotations</div>
+            <div className="annotation-back">
+              <p className="img-label">Image / Series</p>
+              {renderUI()}
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </React.Fragment>
   );
 };
