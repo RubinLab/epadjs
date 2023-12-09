@@ -739,13 +739,15 @@ class DisplayView extends Component {
       // this.openAimEditor(aimID, seriesUID);
       // }
 
-      this.parseAims(
-        serie.imageAnnotations,
-        serie.seriesUID,
-        serie.studyUID,
-        serieIndex,
-        serie
-      );
+      if (serie.imageAnnotations) {
+        this.parseAims(
+          serie.imageAnnotations,
+          serie.seriesUID,
+          serie.studyUID,
+          serieIndex,
+          serie
+        );
+      }
     });
 
     this.refreshAllViewports();
