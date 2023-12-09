@@ -251,8 +251,14 @@ class DisplayView extends Component {
   }
 
   async componentDidUpdate(prevProps, prevState) {
-    const { pid, series, activePort, aimList, multiFrameAimJumpData } =
-      this.props;
+    const {
+      pid,
+      series,
+      activePort,
+      aimList,
+      multiFrameAimJumpData,
+      seriesAddition,
+    } = this.props;
     const {
       series: prevSeries,
       activePort: prevActivePort,
@@ -265,6 +271,23 @@ class DisplayView extends Component {
       else return;
       return;
     }
+
+    const newAimsListLen = Object.keys(aimList).length;
+    const oldAimsListLen = Object.keys(prevAimList).length;
+    let aimsDeletedOrSaved;
+    let currentAimsCalc;
+    let prevAimsCalc;
+    if (seriesAddition[activePort]) {
+      currentAimsCalc = seriesAddition[activePort].numberOfAnnotations;
+    }
+    if (prevProps.seriesAddition[activePort]) {
+      prevAimsCalc = prevProps.seriesAddition[activePort].numberOfAnnotations;
+    }
+    prevProps.seriesAddition[activePort].numberOfAnnotations;
+    aimsDeletedOrSaved = currentAimsCalc !== prevAimsCalc;
+
+    const rerenderAims =
+      newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved;
 
     // TODO: check if loading/true-false control is required for the first condition
     if (
@@ -293,7 +316,7 @@ class DisplayView extends Component {
     }
     // This is to handle late loading of aimsList from store but it also calls get Data
     // each time visibility of aims change
-    else if (Object.keys(aimList).length !== Object.keys(prevAimList).length) {
+    else if (rerenderAims) {
       this.renderAims();
       //TODO: check if filling aimsList process changes openseries
       // if chanes sever that data from openseries
@@ -716,14 +739,13 @@ class DisplayView extends Component {
       // this.openAimEditor(aimID, seriesUID);
       // }
 
-      if (serie.imageAnnotations)
-        this.parseAims(
-          serie.imageAnnotations,
-          serie.seriesUID,
-          serie.studyUID,
-          serieIndex,
-          serie
-        );
+      this.parseAims(
+        serie.imageAnnotations,
+        serie.seriesUID,
+        serie.studyUID,
+        serieIndex,
+        serie
+      );
     });
 
     this.refreshAllViewports();

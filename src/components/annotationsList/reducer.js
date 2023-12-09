@@ -243,7 +243,6 @@ const asyncReducer = (state = initialState, action) => {
         let delOtherSeriesAimsList;
         let delSeriesData;
         if (delGrid.length === 0) {
-          console.log(" -------> it should be here");
           delActivePort = null;
           delOtherSeriesAimsList = {};
           delSeriesData = {};
@@ -294,7 +293,7 @@ const asyncReducer = (state = initialState, action) => {
             if (imageAddedSeries[i].seriesUID === action.payload.serID) {
               imageAddedSeries[i].imageAnnotations = action.payload.imageData;
               imageAddedSeries[i].frameData = action.payload.frameData;
-              if (!imageAddedSeries[i].numberOfAnnotations) imageAddedSeries[i].numberOfAnnotations = action.payload.ref.numberOfAnnotations;
+              imageAddedSeries[i].numberOfAnnotations = action.payload.ref.numberOfAnnotations;
               if (!imageAddedSeries[i].numberOfImages) imageAddedSeries[i].numberOfImages = action.payload.ref.numberOfImages;
               if (!imageAddedSeries[i].seriesDescription) imageAddedSeries[i].seriesDescription = action.payload.ref.seriesDescription;
               if (!imageAddedSeries[i].seriesNo) imageAddedSeries[i].seriesNo = action.payload.ref.seriesNo;      
@@ -331,8 +330,7 @@ const asyncReducer = (state = initialState, action) => {
             );
         const oldStudySeries = _.cloneDeep(state.openStudies);
         const newStudySeries = { ...oldStudySeries, ...action.payload.seriesOfStudy };
-        
-        
+
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
