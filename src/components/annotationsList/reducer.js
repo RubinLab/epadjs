@@ -85,7 +85,6 @@ const initialState = {
   reports: [],
   isSegUploaded: {},
   patientFilter: {},
-  openStudies: {},
   searchTableIndex: 0,
   otherSeriesAimsList: {},
   refreshMap: {},
@@ -222,7 +221,6 @@ const asyncReducer = (state = initialState, action) => {
       case CLOSE_SERIE: // tested
         let delSeriesUID = state.openSeries[state.activePort].seriesUID;
         let delStudyUID = state.openSeries[state.activePort].studyUID;
-        let delOpenStudies = { ...state.openStudies };
         let delOpenStudiesAddition = _.cloneDeep(state.openSeriesAddition);
         delOpenStudiesAddition.splice(state.activePort, 1);
         const delAims = { ...state.aimsList };
@@ -256,7 +254,6 @@ const asyncReducer = (state = initialState, action) => {
             ...state,
             openSeries: delGrid,
             aimsList: delAims,
-            openStudies: delOpenStudies,
             activePort: delActivePort,
             otherSeriesAimsList: delOtherSeriesAimsList,
             seriesData: delSeriesData,
@@ -337,8 +334,6 @@ const asyncReducer = (state = initialState, action) => {
               action.payload.aimsData,
               colors
             );
-        const oldStudySeries = _.cloneDeep(state.openStudies);
-        const newStudySeries = { ...oldStudySeries, ...action.payload.seriesOfStudy };
 
         const result = Object.assign({}, state, {
           loading: false,
@@ -349,7 +344,6 @@ const asyncReducer = (state = initialState, action) => {
           },
           otherSeriesAimsList: latestOtherSeriesAimsList,
           openSeriesAddition: imageAddedSeries,
-          openStudies: newStudySeries,
           multiFrameAimJumpData: jumpArr1,
         });
         return result;
@@ -480,7 +474,6 @@ const asyncReducer = (state = initialState, action) => {
           openSeries: [],
           aimsList: {},
           activePort: 0,
-          openStudies: {},
           seriesData: {},
           openSeriesAddition: []
         };
