@@ -70,7 +70,7 @@ import { setToolOptionsForElement } from 'cornerstone-tools';
 const wadoUrl = sessionStorage.getItem('wadoUrl');
 
 export const setSeriesData = (projectID, patientID, studyUID, data) => {
-  return { type: SET_SERIES_DATA, payload: { projectID, patientID, studyUID, data }};
+  return { type: SET_SERIES_DATA, payload: { projectID, patientID, studyUID, data } };
 }
 
 export const clearMultiFrameAimJumpFlags = () => {
@@ -711,23 +711,25 @@ const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
 // };
 
 // action to open series
-export const getSingleSerie = (serie, annotation, wadoUrl) => {
+export const getSingleSerie = (serie, annotation, wadoUrl, seriesData) => {
   return async (dispatch, getState) => {
     try {
       await dispatch(loadAnnotations());
-      let { patientID, studyUID, seriesUID, numberOfAnnotations } = serie;
+      let { patientID, studyUID, seriesUID, numberOfAnnotations, projectID } = serie;
       let reference = {
         patientID,
         studyUID,
         seriesUID,
         numberOfAnnotations,
         aimID: annotation,
+        projectID
       };
 
       const { aimsData, imageData, otherSeriesAimsData, seriesOfStudy, serieRef, frameData } = await getSingleSerieData(
         serie,
         annotation,
-        wadoUrl
+        wadoUrl,
+        seriesData
       );
 
       reference = { ...reference, ...serieRef };
@@ -735,6 +737,7 @@ export const getSingleSerie = (serie, annotation, wadoUrl) => {
       await dispatch(
         singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData, seriesOfStudy, frameData)
       );
+
     } catch (err) {
       console.error(err);
     }
@@ -764,13 +767,14 @@ export const updateOtherAims = (aimrefs) => {
 
 export const updateSingleSerie = (serie, annotation) => {
   return async (dispatch, getState) => {
-    let { patientID, studyUID, seriesUID, numberOfAnnotations } = serie;
+    let { patientID, studyUID, seriesUID, numberOfAnnotations, projectID } = serie;
     let reference = {
       patientID,
       studyUID,
       seriesUID,
       numberOfAnnotations,
       aimID: annotation,
+      projectID
     };
     const { aimsData, imageData, otherSeriesAimsData, seriesOfStudy } = await getSingleSerieData(serie, annotation);
     await dispatch(
@@ -904,7 +908,7 @@ const getStudyAimsDataSorted = (arr, projectID, patientID) => {
       const aimArr = Object.values(el[2]);
       el[2] = aimArr;
     });
-    result[projectID] = {[studyUID]: sortAims(series)}
+    result[projectID] = { [studyUID]: sortAims(series) }
     // aims[studyUID] = sortAims(series);
     // write a sorting function for slice numbers
     // and remove aimID map with sorted Array
@@ -928,7 +932,7 @@ const insertAdditionalData = (arr, ref, uid) => {
   return arr;
 }
 // helper methods - calls backend and get data
-const getSingleSerieData = (serie, annotation, wadoUrl) => {
+const getSingleSerieData = (serie, annotation, wadoUrl, seriesData) => {
   return new Promise((resolve, reject) => {
     let aimsData;
     let imageData;
@@ -939,7 +943,7 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
 
     //  TODO: getseries call should get its data from the initial data
     const promises = [getStudyAims(patientID, studyUID, projectID)];
-    promises.push(getSeries(projectID, patientID, studyUID));
+    if (!seriesData) promises.push(getSeries(projectID, patientID, studyUID));
 
     Promise.all(promises)
       .then(async (result) => {
@@ -981,11 +985,12 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
           ...imageAimMap,
         };
 
-        const serieRef = getSeriesAdditionalData(result[1].data, seriesUID);
+        const serData = seriesData ? seriesData : result[1].data;
+        const serieRef = getSeriesAdditionalData(serData, seriesUID);
         aimsData = getAimListFields(aimsData, annotation);
         const allAims = [...serieAims, ...otherSeriesAims]
         const otherSeriesAimsData = allAims.length === 0 ? {} : getStudyAimsDataSorted(allAims, projectID, patientID);
-        const seriesExtendedData = insertAdditionalData(result[1].data, serieRef, seriesUID);
+        const seriesExtendedData = insertAdditionalData(serData, serieRef, seriesUID);
 
         const seriesOfStudy = { [studyUID]: seriesExtendedData }
         resolve({ aimsData, imageData, otherSeriesAimsData, seriesOfStudy, serieRef, frameData });

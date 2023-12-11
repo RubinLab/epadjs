@@ -8,9 +8,6 @@ import {
   toggleAllLabels,
   toggleSingleLabel,
   toggleAllAnnotations,
-  updateSingleSerie,
-  getSingleSerie,
-  aimDelete,
 } from "../action";
 import { deleteAnnotation } from "../../../services/annotationServices";
 import cornerstone from "cornerstone-core";
