@@ -189,6 +189,7 @@ class DisplayView extends Component {
       templateType: "",
       multiFrameAimJumped: false,
       dataIndexMap: {},
+      aimEdited: false
     };
   }
 
@@ -250,6 +251,10 @@ class DisplayView extends Component {
     // this.props.closeLeftMenu();
   }
 
+  handleEditedAimSaved = () => {
+    // check if the state 
+  }
+
   async componentDidUpdate(prevProps, prevState) {
     const {
       pid,
@@ -258,11 +263,13 @@ class DisplayView extends Component {
       aimList,
       multiFrameAimJumpData,
       seriesAddition,
+      loading
     } = this.props;
     const {
       series: prevSeries,
       activePort: prevActivePort,
       aimList: prevAimList,
+      loading: prevLoading,
     } = prevProps;
 
     if (this.props.series.length < 1) {
@@ -283,11 +290,11 @@ class DisplayView extends Component {
     if (prevProps.seriesAddition[activePort]) {
       prevAimsCalc = prevProps.seriesAddition[activePort].numberOfAnnotations;
     }
-    prevProps.seriesAddition[activePort].numberOfAnnotations;
+    // prevProps.seriesAddition[activePort].numberOfAnnotations;
     aimsDeletedOrSaved = currentAimsCalc !== prevAimsCalc;
-
+    const aimEditSaved = this.state.aimEdited && prevLoading && !loading;
     const rerenderAims =
-      newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved;
+      newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved;
 
     // TODO: check if loading/true-false control is required for the first condition
     if (
@@ -316,12 +323,15 @@ class DisplayView extends Component {
     }
     // This is to handle late loading of aimsList from store but it also calls get Data
     // each time visibility of aims change
-    else if (rerenderAims) {
+    // else if (rerenderAims) {
+      else if (rerenderAims) {
       this.renderAims();
+
       //TODO: check if filling aimsList process changes openseries
       // if chanes sever that data from openseries
       // refresh only cornerstone by calling this.renderAims();
-    }
+    } 
+
   }
 
   componentWillUnmount() {
@@ -726,6 +736,7 @@ class DisplayView extends Component {
     this.setState({
       activeLabelMapIndex: 0,
       prospectiveLabelMapIndex: 0,
+      // aimEdited: false
     });
     // markups will be rendered so clear all previously renders
     this.clearAllMarkups();
@@ -1841,6 +1852,7 @@ class DisplayView extends Component {
       for (var i = 0; i < vpElements.length; i++)
         if (i !== this.props.activePort) vpElements[i].style.display = "none";
     }
+    // if (this.state.aimEdited) this.setState({ aimEdited: false })
   };
 
   getColorOfMarkup = (aimUid, seriesUid) => {
@@ -2038,6 +2050,10 @@ class DisplayView extends Component {
     }
     // if aim editor has been cancelled ask to user
     // if (this.state.dirty && !this.checkUnsavedData(isCancel, message)) return;
+    if (this.state.selectedAim && !isCancel) {
+      this.setState({ aimEdited: true});
+    } 
+
     this.setState({
       showAimEditor: false,
       selectedAim: undefined,
