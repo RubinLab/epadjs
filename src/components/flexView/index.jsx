@@ -98,6 +98,11 @@ class FlexView extends React.Component {
       seriesData[projectID] &&
       seriesData[projectID][patientID] &&
       seriesData[projectID][patientID][studyUID];
+
+    const existingData = dataExists
+      ? seriesData[projectID][patientID][studyUID]
+      : null;
+
     try {
       if (!dataExists) {
         ({ data: series } = await getSeries(projectID, patientID, studyUID));
@@ -130,7 +135,7 @@ class FlexView extends React.Component {
         const promiseArr = [];
         for (let i = 0; i < series.length; i++) {
           this.props.dispatch(addToGrid(series[i]));
-          promiseArr.push(this.props.dispatch(getSingleSerie(series[i])));
+          promiseArr.push(this.props.dispatch(getSingleSerie(series[i], null, nul, existingData)));
         }
         //getsingleSerie
         Promise.all(promiseArr)

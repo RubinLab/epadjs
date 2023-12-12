@@ -217,6 +217,7 @@ function Studies(props) {
     const maxPort = parseInt(sessionStorage.getItem("maxPort"));
     const { patientID, studyUID } = selected;
     let seriesArr = await getSeriesData(selected);
+    const list = seriesArr.length > 0 ? seriesArr : null;
     //check if the patient is there (create a patient exist flag)
     // const patientExists = props.patients[patientID];
     //if there is patient iterate over the series object of the study (form an array of series)
@@ -249,7 +250,7 @@ function Studies(props) {
       const promiseArr = [];
       for (let serie of seriesArr) {
         props.dispatch(addToGrid(serie));
-        promiseArr.push(props.dispatch(getSingleSerie(serie)));
+        promiseArr.push(props.dispatch(getSingleSerie(serie, null, null, list)));
       }
       //getsingleSerie
       Promise.all(promiseArr)

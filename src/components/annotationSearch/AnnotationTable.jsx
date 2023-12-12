@@ -365,7 +365,7 @@ function AnnotationTable(props) {
         props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
         props.dispatch(loadCompleted());
         return series;
-      } else return seriesData[projectID][projectID][studyUID];
+      } else return seriesData[projectID][patientID][studyUID];
     } catch (err) {
       props.dispatch(annotationsLoadingError(err));
     }
@@ -407,7 +407,19 @@ function AnnotationTable(props) {
       const { studyUID, seriesUID, aimID, patientName, name } = selected;
       const patientID = selected.subjectID;
       const projectID = selected.projectID ? selected.projectID : "lite";
-      const { openSeries } = props;
+      const { openSeries, seriesData } = props;
+
+      const dataExists =
+      seriesData[projectID] &&
+      seriesData[projectID][patientID] &&
+      seriesData[projectID][patientID][studyUID];
+
+      const existingData = dataExists
+      ? seriesData[projectID][patientID][studyUID]
+      : null;
+
+      console.log(existingData);
+
       setSelected(selected);
       // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
       //check if there is enough space in the grid
@@ -428,7 +440,7 @@ function AnnotationTable(props) {
             selected.examType = selected.modality;
           }
           props.dispatch(addToGrid(selected, aimID));
-          props.dispatch(getSingleSerie(selected, aimID));
+          props.dispatch(getSingleSerie(selected, aimID, null, existingData));
           //if grid is NOT full check if patient data exists
           // -----> Delete after v1.0 <-----
           // if (!props.patients[patientID]) {
@@ -456,15 +468,28 @@ function AnnotationTable(props) {
 
   // CHECK
   const displaySeries = async (selected) => {
-    const { subjectID: patientID, studyUID, aimID } = selected;
+    const { seriesData } = props;
+    const { subjectID: patientID, studyUID, aimID, projectID } = selected;
     let seriesArr = await getSeriesData(selected);
+
+    const dataExists =
+    seriesData[projectID] &&
+    seriesData[projectID][patientID] &&
+    seriesData[projectID][patientID][studyUID];
+
+    const existingData = dataExists
+    ? seriesData[projectID][patientID][studyUID]
+    : null;
+
+    console.log(existingData);
+
     setSelected(seriesArr);
     if (props.openSeries.length === maxPort) {
       setShowSelectSeriesModal(true);
       return;
     }
     //get extraction of the series (extract unopen series)
-    if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
+    if (seriesArr && seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
 
     // filter the series according to displayable modalities
     seriesArr = seriesArr.filter(isSupportedModality);
@@ -480,7 +505,7 @@ function AnnotationTable(props) {
       const promiseArr = [];
       for (let i = 0; i < seriesArr.length; i++) {
         props.dispatch(addToGrid(seriesArr[i], aimID));
-        promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i], aimID)));
+        promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i], aimID, null, existingData)));
       }
       //getsingleSerie
       Promise.all(promiseArr)

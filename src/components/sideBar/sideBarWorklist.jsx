@@ -644,7 +644,22 @@ class WorkList extends React.Component {
     return { isOpen, index };
   };
 
+  getExistingSeriesData = (serie) => {
+    const { projectID, patientID, studyUID } = serie;
+    const { seriesData } = this.props;
+    const dataExists =
+        seriesData[projectID] &&
+        seriesData[projectID][patientID] &&
+        seriesData[projectID][patientID][studyUID];
+
+    const existingData = dataExists
+      ? seriesData[projectID][patientID][studyUID]
+      : null;
+    return existingData;
+  }
+
   viewSelection = async () => {
+    const { seriesData } = this.props;
     const maxPort = parseInt(sessionStorage.getItem("maxPort"));
     const notOpenSeries = [];
     const selectedSeries = Object.values(this.state.selectedSeries);
@@ -678,8 +693,9 @@ class WorkList extends React.Component {
           } else {
             //else get data for each serie for display
             selectedSeries.forEach((serie) => {
+              const list = this.getExistingSeriesData(serie);
               this.props.dispatch(addToGrid(serie));
-              this.props.dispatch(getSingleSerie(serie));
+              this.props.dispatch(getSingleSerie(serie, null, null, list));
             });
             // -----> Delete after v1.0 <-----
             // for (let series of selectedSeries) {
