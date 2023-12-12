@@ -347,7 +347,7 @@ function AnnotationTable(props) {
   // TODO: spinner doesn't appear anymore check the logic
   const getSeriesData = async (selected) => {
     props.dispatch(startLoading());
-    const { seriesData } = this.props;
+    const { seriesData } = props;
     const { projectID, studyUID } = selected;
     let { patientID, subjectID } = selected;
     patientID = patientID ? patientID : subjectID;
