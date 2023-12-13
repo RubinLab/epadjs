@@ -169,6 +169,7 @@ class AnnotationsList extends React.Component {
 
   render = () => {
     // try {
+    let preparing = true;  
     const { openSeries, openSeriesAddition, aimsList } = this.props;
     let { activePort } = this.props;
     activePort = activePort || activePort === 0 ? activePort : 0;
@@ -184,7 +185,6 @@ class AnnotationsList extends React.Component {
           : (annotations[id] = [aims[aim]]);
       }
     }
-
     const wadors = this.wadoUrl.includes("wadors");
 
     const aimList = openSeriesAddition[activePort].imageAnnotations;
@@ -223,6 +223,7 @@ class AnnotationsList extends React.Component {
         } catch (e) {}
       }
     }
+    preparing = false;  
     const calculations = this.getLabelArray();
     let annList = [];
     const imageAims = { ...annotations };
@@ -256,11 +257,11 @@ class AnnotationsList extends React.Component {
     // }
     return (
       <>
-        {this.props.loading && (
+        {(this.props.loading || preparing) && (
           <div style={{ marginTop: "10%", marginLeft: "30%" }}>
             <PropagateLoader
               color={"#ccc"}
-              loading={this.props.loading}
+              loading={this.props.loading || preparing}
               margin={8}
             />
           </div>
