@@ -188,7 +188,7 @@ function Studies(props) {
   };
 
   const getSeriesData = async (selected) => {
-    const { seriesData } = this.props;
+    const { seriesData } = props;
     props.dispatch(startLoading());
     const { projectID, patientID, studyUID } = selected;
     const dataExists =

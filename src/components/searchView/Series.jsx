@@ -443,7 +443,7 @@ function Series(props) {
   );
 
   const getDataFromStorage = (projectID, subjectID, studyUID) => {
-    const { seriesData } = this.props;
+    const { seriesData } = props;
     const dataExists =
       seriesData[projectID] &&
       seriesData[projectID][patientID] &&
