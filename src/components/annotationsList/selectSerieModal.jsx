@@ -185,6 +185,20 @@ class selectSerieModal extends React.Component {
     }
   };
 
+  getExistingSeriesData = (serie) => {
+    const { projectID, patientID, studyUID } = serie;
+    const {seriesData} = this.props;
+    const dataExists =
+        seriesData[projectID] &&
+        seriesData[projectID][patientID] &&
+        seriesData[projectID][patientID][studyUID];
+
+    const existingData = dataExists
+      ? seriesData[projectID][patientID][studyUID]
+      : null;
+    return existingData;
+  }
+
   displaySelection = async (aimID) => {
     let studies = Object.values(this.props.seriesPassed);
     const { selectedToDisplay } = this.state;
@@ -198,14 +212,15 @@ class selectSerieModal extends React.Component {
     //concatanete all arrays to getther
     for (let key of Object.keys(selectedToDisplay)) {
       let serie = this.findSerieFromSeries(key, series);
+      const existingData = this.getExistingSeriesData(serie);
       if (aimID) this.props.dispatch(addToGrid(serie, aimID));
       else this.props.dispatch(addToGrid(serie, serie.aimID));
       if (this.state.selectionType === "aim") {
-        this.props.dispatch(getSingleSerie(serie, serie.aimID, this.wadoUrl));
+        this.props.dispatch(getSingleSerie(serie, serie.aimID, this.wadoUrl, existingData));
       } else {
         if (aimID)
-          this.props.dispatch(getSingleSerie(serie, aimID, this.wadoUrl));
-        else this.props.dispatch(getSingleSerie(serie, null, this.wadoUrl));
+          this.props.dispatch(getSingleSerie(serie, aimID, this.wadoUrl, existingData));
+        else this.props.dispatch(getSingleSerie(serie, null, this.wadoUrl, existingData));
       }
     }
     this.props.history.push("/display");

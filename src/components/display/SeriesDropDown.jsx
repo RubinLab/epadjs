@@ -52,7 +52,8 @@ const SeriesDropDown = (props) => {
       }
       // props.onSelect(0, props.activePort, true);
       props.dispatch(replaceInGrid(serie));
-      props.dispatch(getSingleSerie(serie));
+      const list = seriesList.length > 0 ? seriesList : null;
+      props.dispatch(getSingleSerie(serie, null, null, list));
       window.dispatchEvent(
         new CustomEvent("serieReplaced", {
           detail: {

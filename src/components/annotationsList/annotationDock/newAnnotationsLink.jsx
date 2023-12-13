@@ -46,6 +46,20 @@ const annotationsLink = (props) => {
     return { isOpen, index };
   };
 
+  const getExistingSeriesData = (serie) => {
+    const { projectID, patientID, studyUID } = serie;
+    const { seriesData } = props;
+    const dataExists =
+        seriesData[projectID] &&
+        seriesData[projectID][patientID] &&
+        seriesData[projectID][patientID][studyUID];
+
+    const existingData = dataExists
+      ? seriesData[projectID][patientID][studyUID]
+      : null;
+    return existingData;
+  }
+
   const displayAnnotations = (e, selected) => {
     const maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
@@ -67,8 +81,9 @@ const annotationsLink = (props) => {
       } else {
         props.dispatch(addToGrid(selected, selected.aimID));
       }
+      const list = getExistingSeriesData(selected);
       props
-        .dispatch(getSingleSerie(selected, selected.aimID))
+        .dispatch(getSingleSerie(selected, selected.aimID, null, list))
         .then(() => {})
         .catch((err) => console.error(err));
       props.dispatch(clearSelection());
@@ -154,6 +169,7 @@ const mapStateToProps = (state) => {
     activePort: state.annotationsListReducer.activePort,
     aimsList: state.annotationsListReducer.aimsList,
     otherSeriesAimsList: state.annotationsListReducer.otherSeriesAimsList,
+    seriesData: state.annotationsListReducer.seriesData
   };
 };
 export default connect(mapStateToProps)(annotationsLink);

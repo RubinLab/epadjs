@@ -287,8 +287,9 @@ const asyncReducer = (state = initialState, action) => {
         let annCalc = Object.keys(action.payload.imageData);
         const latestOtherSeriesAimsList = { ...state.otherSeriesAimsList, ...action.payload.otherSeriesAimsData };
         let numberOfimageAnnotationsMap = {};
-        if (latestOtherSeriesAimsList[action.payload.ref.projectID] && latestOtherSeriesAimsList[action.payload.ref.projectID][action.payload.ref.studyUID]) {
-          numberOfimageAnnotationsMap = latestOtherSeriesAimsList[action.payload.ref.projectID][action.payload.ref.studyUID]
+        const pidFromRef = action.payload.ref.projectID;
+        if (pidFromRef && latestOtherSeriesAimsList[pidFromRef] && latestOtherSeriesAimsList[pidFromRef][action.payload.ref.studyUID]) {
+          numberOfimageAnnotationsMap = latestOtherSeriesAimsList[pidFromRef][action.payload.ref.studyUID]
             .reduce((all, item, index) => {
               all[item[0]] = item[2].length;
               return all;

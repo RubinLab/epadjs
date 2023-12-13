@@ -164,8 +164,18 @@ function Series(props) {
   };
 
   const dispatchSerieDisplay = (selected) => {
+    const { seriesData } = props;
     const openSeries = Object.values(props.openSeries);
-    const { patientID, studyUID } = selected;
+    const { patientID, studyUID, projectID } = selected;
+    const dataExists =
+    seriesData[projectID] &&
+    seriesData[projectID][patientID] &&
+    seriesData[projectID][patientID][studyUID];
+
+    const existingData = dataExists
+      ? seriesData[projectID][patientID][studyUID]
+      : null;
+
     let isSerieOpen = false;
     const maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
@@ -194,7 +204,7 @@ function Series(props) {
       } else {
         props.dispatch(addToGrid(selected));
         props
-          .dispatch(getSingleSerie(selected))
+          .dispatch(getSingleSerie(selected, null, null, existingData))
           .then(() => {})
           .catch((err) => console.error(err));
         //if grid is NOT full check if patient data exists

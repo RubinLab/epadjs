@@ -880,7 +880,7 @@ class App extends Component {
         const { data: series } = await getSeries(projectID, patientID, studyUID);
         this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
         return series;
-      } else return seriesData[projectID][projectID][studyUID];
+      } else return seriesData[projectID][patientID][studyUID];
     } catch (err) {
       console.error(err);
       this.props.dispatch(annotationsLoadingError(err));
