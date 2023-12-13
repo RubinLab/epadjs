@@ -179,15 +179,12 @@ class AnnotationsList extends React.Component {
     let aims = aimsList[seriesUID];
     for (let aim in aims) {
       if (aims[aim].type === "study" || aims[aim].type === "serie") {
-        console.log(" in loop", aims[aim]);
         let { id } = aims[aim];
         annotations[id]
           ? annotations[id].push(aims[aim])
           : (annotations[id] = [aims[aim]]);
       }
     }
-    console.log(' ---> annotations at first', annotations);
-
     const wadors = this.wadoUrl.includes("wadors");
 
     const aimList = openSeriesAddition[activePort].imageAnnotations;
