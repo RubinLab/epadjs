@@ -128,7 +128,13 @@ const asyncReducer = (state = initialState, action) => {
       case CHECK_MULTIFRAME:
         // const series = _.cloneDeep(state.openSeries);
         const seriesAddition = _.cloneDeep(state.openSeriesAddition);
-        const { hasMultiframe, multiframeIndex, multiFrameMap } = action.payload;
+        const { hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData } = action.payload;
+        let seriesDataMulti = Object.values(multiframeSeriesData);
+        const {
+          projectID: multiPID,
+          patientID: multiPatID,
+          studyUID: multiStudyUID
+        } = seriesDataMulti[0];
         let jumpArr = null;
         // check if framedata exists
         const fmData = seriesAddition[state.activePort].frameData;
@@ -141,6 +147,18 @@ const asyncReducer = (state = initialState, action) => {
         seriesAddition[state.activePort].multiFrameIndex = multiframeIndex;
         seriesAddition[state.activePort].multiFrameMap = multiFrameMap;
         const newState = { ...state };
+        let newSeriesDataMulti = _.cloneDeep(state.seriesData);
+        const seriesExists = newSeriesDataMulti[multiPID] && newSeriesDataMulti[multiPID][multiPatID] && newSeriesDataMulti[multiPID][multiPatID][multiStudyUID];
+        if (seriesExists && !state.openSeriesAddition[state.activePort].multiFrameMap) {
+          const seriesToCopyFm = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].find((element) => element.seriesUID === seriesDataMulti[0].seriesUID);
+          seriesDataMulti = seriesDataMulti.map((el) => {
+            el.seriesDescription = seriesToCopyFm.seriesDescription;
+            el.seriesNo = seriesToCopyFm.seriesNo;
+            return el;
+          })
+          newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = [...newSeriesDataMulti[multiPID][multiPatID][multiStudyUID], ...seriesDataMulti];
+          newState.seriesData = newSeriesDataMulti;
+        }
         // newState.openSeries= series;
         newState.openSeriesAddition = seriesAddition;
         newState.multiFrameAimJumpData = jumpArr;
