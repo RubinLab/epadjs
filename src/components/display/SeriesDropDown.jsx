@@ -104,7 +104,7 @@ const SeriesDropDown = (props) => {
             const openSeriesSeriesUID =
               props.openSeries[props.activePort].seriesUID;
             const openSeriesMultiFrameIndex =
-              props.openSeries[props.activePort].multiFrameIndex;
+              props.openSeriesAddition[props.activePort].multiFrameIndex;
             const uniqueKey = multiFrameImage ? `${seriesUID}_${i}` : seriesUID;
             let isCurrent;
             if (!multiFrameImage) {
@@ -143,6 +143,7 @@ const mapStateToProps = (state) => {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
     seriesData: state.annotationsListReducer.seriesData,
+    openSeriesAddition: state.annotationsListReducer.openSeriesAddition
   };
 };
 export default connect(mapStateToProps)(SeriesDropDown);

@@ -896,7 +896,7 @@ class DisplayView extends Component {
       seriesMetadata.length > 0 &&
       seriesMetadata.length === imgURLsLen;
     // get the first and the middle image
-    const middleIndex = Math.floor(imgURLsLen / 2);
+    const middleIndex = imageUrls[firstSeriesIndex][0].multiFrameImage ? 0 : Math.floor(imgURLsLen / 2);
     let firstImage = null;
     let middleImage = null;
 
