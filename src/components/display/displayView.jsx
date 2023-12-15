@@ -706,6 +706,7 @@ class DisplayView extends Component {
     Promise.all(promises).then((res) => {
       const newData = [...this.state.data];
       newData[viewportId] = res[0];
+      newData[viewportId].stack.currentImageIdIndex = 0; 
       this.setState({ data: newData });
     });
   };
