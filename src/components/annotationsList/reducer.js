@@ -145,8 +145,13 @@ const asyncReducer = (state = initialState, action) => {
         // check if framedata exists
         const fmData = seriesAddition[state.activePort].frameData;
         const aimSelected = state.openSeries[state.activePort].aimID || seriesAddition[state.activePort].aimID;
+        console.log(' ====> aimSelected', aimSelected);
+        console.log(' ====> hasMultiframe', hasMultiframe);
+        console.log(' ====> fmData', fmData);
         if (aimSelected && hasMultiframe && fmData) {
+          console.log(" ===> in if fmData[aimSelected]", fmData[aimSelected]);
           const imgArr = fmData[aimSelected][0].split('/frames/');
+          console.log(" ---> imgArr", imgArr);
           jumpArr = [multiFrameMap[imgArr[0]], parseInt(imgArr[1] - 1)];
         }
         seriesAddition[state.activePort].hasMultiframe = hasMultiframe;
