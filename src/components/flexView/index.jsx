@@ -135,7 +135,7 @@ class FlexView extends React.Component {
         const promiseArr = [];
         for (let i = 0; i < series.length; i++) {
           this.props.dispatch(addToGrid(series[i]));
-          promiseArr.push(this.props.dispatch(getSingleSerie(series[i], null, nul, existingData)));
+          promiseArr.push(this.props.dispatch(getSingleSerie(series[i], null, null, existingData)));
         }
         //getsingleSerie
         Promise.all(promiseArr)

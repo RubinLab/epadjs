@@ -850,13 +850,15 @@ class DisplayView extends Component {
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
     if (imageUrls.length > 1) {
+      const multiframeSeriesData = {};
       for (let i = 0; i < imageUrls.length; i++) {
         if (imageUrls[i][0].multiFrameImage) {
           multiFrameMap[imageUrls[i][0].imageUID] = i;
+          multiframeSeriesData[`${imageUrls[i][0].seriesUID}_${i}`] = imageUrls[i][0];
         }
       }
       this.props.dispatch(
-        updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap)
+        updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData)
       );
     }
     let baseUrl;
@@ -889,14 +891,16 @@ class DisplayView extends Component {
     }, 0);
 
     const seriesMetadataExists = Array.isArray(seriesMetadata);
+
     const useSeriesData =
       seriesMetadataExists &&
       seriesMetadata.length > 0 &&
       seriesMetadata.length === imgURLsLen;
     // get the first and the middle image
-    const middleIndex = Math.floor(imgURLsLen / 2);
+    const middleIndex = imageUrls[firstSeriesIndex][0].multiFrameImage ? 0 : Math.floor(imgURLsLen / 2);
     let firstImage = null;
     let middleImage = null;
+
     if (!useSeriesData) {
       const result = await getImageMetadata(
         wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage
