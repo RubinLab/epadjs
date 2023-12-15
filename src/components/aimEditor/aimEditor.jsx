@@ -40,7 +40,7 @@ class AimEditor extends Component {
     this.semanticAnswers = {};
     this.state = {
       buttonGroupShow: false,
-      saveButtonIsActive: false,
+      saveButtonIsActive: true,
       isUpdate: false,
       autoFill: false,
     };
@@ -279,13 +279,20 @@ class AimEditor extends Component {
             <button
               className='btn btn-sm btn-outline-light aim-editor-button'
               onClick={() => this.props.onCancel(true)}
+              disabled={!this.state.saveButtonIsActive}
             >
+
               Cancel
             </button>
             <button
               className='btn btn-sm btn-outline-light aim-editor-button'
               onClick={this.save}
+              disabled={!this.state.saveButtonIsActive}
             >
+            {!this.state.saveButtonIsActive && 
+              (<div class="spinner-border" role="status" style={{'height': '12px', 'width': '12px', 'fontSize': '8px', 'marginRight': '10px', 'marginLeft': '-22px'}}>
+                {/* <span class="sr-only">Loading...</span> */}
+              </div>)}
               Save
             </button>
             &nbsp;
@@ -648,6 +655,7 @@ class AimEditor extends Component {
       comment,
       isStudyAim,
     };
+    this.setState({ saveButtonIsActive: false });
     uploadAim(aimSaved, projectID, this.state.isUpdate, this.updatedAimId)
       .then(() => {
         // Write the aim to session storage for further autoFill
@@ -1325,6 +1333,7 @@ class AimEditor extends Component {
       pauseOnHover: true,
       draggable: true,
     });
+    this.setState({ saveButtonIsActive: true });
     const isStudyAim = aimRefs ? aimRefs.isStudyAim : false; //If upload has segmentation it can't be study aim
     if (isStudyAim) {
       let encrypted = sessionStorage.getItem('encrypted');

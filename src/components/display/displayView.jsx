@@ -847,6 +847,7 @@ class DisplayView extends Component {
     let seriesMetadataMap = {};
     let metadata2D = [];
     const multiFrameMap = {};
+    this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
     if (imageUrls.length > 1) {
       for (let i = 0; i < imageUrls.length; i++) {
@@ -1024,6 +1025,7 @@ class DisplayView extends Component {
     if (imageUrls.length > 0) {
       // this.formSplitSeriesData(imageUrls, baseUrl);
     }
+    this.setState({ isLoading: false });
     return { stack };
   };
 
