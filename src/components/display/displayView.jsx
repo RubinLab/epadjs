@@ -848,7 +848,6 @@ class DisplayView extends Component {
     let metadata2D = [];
     const multiFrameMap = {};
     const imageUrls = await this.getImages(serie, index);
-    console.log(" ---> imageUrls.length", imageUrls.length);
     if (imageUrls.length > 1) {
       const multiframeSeriesData = {};
       for (let i = 0; i < imageUrls.length; i++) {
@@ -856,7 +855,6 @@ class DisplayView extends Component {
           multiFrameMap[imageUrls[i][0].imageUID] = i;
           multiframeSeriesData[`${imageUrls[i][0].seriesUID}_${i}`] = imageUrls[i][0];
         }
-        console.log(" ---> multiframeSeriesData", multiframeSeriesData);  
       }
       this.props.dispatch(
         updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData)

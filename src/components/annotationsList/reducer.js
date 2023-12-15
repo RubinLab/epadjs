@@ -118,7 +118,6 @@ const asyncReducer = (state = initialState, action) => {
           let newArr = newSeriesData[projectID][patientID][studyUID].map(el => el.multiFrameImage === true);
           newArr = [...newArr, ...data];
           newSeriesData[projectID][patientID][studyUID] = newArr;
-          console.log(' ---> newArr to see in hospital', newArr);
         } else if (patientExists) newSeriesData[projectID][patientID][studyUID] = newArr;
         else if (projectExists) newSeriesData[projectID][patientID] = { [studyUID]: data };
         else newSeriesData[projectID] = { [patientID]: { [studyUID]: data } };
@@ -139,19 +138,12 @@ const asyncReducer = (state = initialState, action) => {
           patientID: multiPatID,
           studyUID: multiStudyUID
         } = seriesDataMulti[0];
-        console.log(' ----> multiPID, multiPatID, multiStudyUID');
-        console.log(multiPID, multiPatID, multiStudyUID);
         let jumpArr = null;
         // check if framedata exists
         const fmData = seriesAddition[state.activePort].frameData;
         const aimSelected = state.openSeries[state.activePort].aimID || seriesAddition[state.activePort].aimID;
-        console.log(' ====> aimSelected', aimSelected);
-        console.log(' ====> hasMultiframe', hasMultiframe);
-        console.log(' ====> fmData', fmData);
         if (aimSelected && hasMultiframe && fmData[aimSelected]) {
-          console.log(" ===> in if fmData[aimSelected]", fmData[aimSelected]);
           const imgArr = fmData[aimSelected][0].split('/frames/');
-          console.log(" ---> imgArr", imgArr);
           jumpArr = [multiFrameMap[imgArr[0]], parseInt(imgArr[1] - 1)];
         }
         seriesAddition[state.activePort].hasMultiframe = hasMultiframe;
@@ -162,12 +154,8 @@ const asyncReducer = (state = initialState, action) => {
         const multiPIDExists = newSeriesDataMulti[multiPID];
         const multiPatIDExists = multiPIDExists && newSeriesDataMulti[multiPID][multiPatID];
         const seriesExists = multiPIDExists && multiPatIDExists && newSeriesDataMulti[multiPID][multiPatID][multiStudyUID];
-        console.log(' ---> seriesExists', seriesExists);
-        console.log(' ---> multiframeSeriesData');
-        console.log(multiframeSeriesData);
         if (!state.openSeriesAddition[state.activePort].multiFrameMap) {
           if (seriesExists) {
-            console.log(" ---> in if data exists")
             const seriesToCopyFm = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].find((element) => element.seriesUID === seriesDataMulti[0].seriesUID);
             seriesDataMulti = seriesDataMulti.map((el) => {
               el.seriesDescription = seriesToCopyFm.seriesDescription;
@@ -176,7 +164,6 @@ const asyncReducer = (state = initialState, action) => {
             })
             newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = [...newSeriesDataMulti[multiPID][multiPatID][multiStudyUID], ...seriesDataMulti];
           } else {
-            console.log(" ---> in else data doesn't exist")
             if (multiPatIDExists) {
               newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = seriesDataMulti;
             } else if (multiPIDExists) {
