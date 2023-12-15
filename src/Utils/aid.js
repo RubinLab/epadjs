@@ -21,7 +21,7 @@ export const handleSelectDeselectAll = (checked) => {
 
 export const resetSelectAllCheckbox = state => {
   const selectAllCheckboxId = document.getElementById('search-select_all');
-  selectAllCheckboxId.checked = state;
+  if (selectAllCheckboxId) selectAllCheckboxId.checked = state;
 }
 
 export function styleEightDigitDate(rawDate) {
