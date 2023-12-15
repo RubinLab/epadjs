@@ -148,7 +148,7 @@ const asyncReducer = (state = initialState, action) => {
         console.log(' ====> aimSelected', aimSelected);
         console.log(' ====> hasMultiframe', hasMultiframe);
         console.log(' ====> fmData', fmData);
-        if (aimSelected && hasMultiframe && fmData) {
+        if (aimSelected && hasMultiframe && fmData[aimSelected]) {
           console.log(" ===> in if fmData[aimSelected]", fmData[aimSelected]);
           const imgArr = fmData[aimSelected][0].split('/frames/');
           console.log(" ---> imgArr", imgArr);
