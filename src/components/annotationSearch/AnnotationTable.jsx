@@ -345,7 +345,7 @@ function AnnotationTable(props) {
   }, [props.noOfRows, props.data, props.searchTableIndex]);
 
   // TODO: spinner doesn't appear anymore check the logic
-  const getSeriesData = async (selected) => {
+  const getSeriesData = async (selected, force) => {
     props.dispatch(startLoading());
     const { seriesData } = props;
     const { projectID, studyUID } = selected;
@@ -359,10 +359,12 @@ function AnnotationTable(props) {
       seriesData[projectID][patientID][studyUID];
       console.log(' ---> seriesData', seriesData);
       if (!dataExists) {
+        console.log(" %%%%%%%%%%%%%%%%%%%%%%%%%% came here once already")
         const { data: series } = await getSeries(
           projectID,
           patientID,
-          studyUID
+          studyUID, 
+          force
           );
         console.log(" ---> series in getSeriesData", series)  
         props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
@@ -517,8 +519,7 @@ function AnnotationTable(props) {
         setShowSelectSeriesModal(true);
       } else {
         console.log(" ----> 5");
-        // use the one that won't return description but uid's only for fast opening????
-        seriesArr = await getSeriesData(selected);
+        seriesArr = await getSeriesData(selected, true);
       }
     } else {
       seriesArr = await getSeriesData(selected);
