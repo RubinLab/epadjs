@@ -357,16 +357,13 @@ function AnnotationTable(props) {
       seriesData[projectID] &&
       seriesData[projectID][patientID] &&
       seriesData[projectID][patientID][studyUID];
-      console.log(' ---> seriesData', seriesData);
       if (!dataExists) {
-        console.log(" %%%%%%%%%%%%%%%%%%%%%%%%%% came here once already")
         const { data: series } = await getSeries(
           projectID,
           patientID,
           studyUID, 
           force
           );
-        console.log(" ---> series in getSeriesData", series)  
         props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
         props.dispatch(loadCompleted());
         return series;
@@ -423,8 +420,6 @@ function AnnotationTable(props) {
       ? seriesData[projectID][patientID][studyUID]
       : null;
 
-      console.log(existingData);
-
       setSelected(selected);
       // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
       //check if there is enough space in the grid
@@ -473,8 +468,6 @@ function AnnotationTable(props) {
 
   const getSignificantSeriesData = async (selected) => {
     try {
-      console.log(" +++ in try")
-      console.log(selected)
       const { subjectID: patientID, studyUID, projectID } = selected;
       getSeriesData(selected).then(res => console.log("seriesdata received and filled store")).catch(err => console.error(err))
       const { data: seriesArr } = await getSignificantSeries(projectID, patientID, studyUID);
@@ -486,7 +479,6 @@ function AnnotationTable(props) {
 
   // CHECK
   const displaySeries = async (selected) => {
-    console.log(" ---> this one is clicked, right place", selected);
     const { seriesData } = props;
     const { subjectID: patientID, studyUID, aimID, projectID, template } = selected;
     let isTeachingFile = teachingFileTempCode === template;
@@ -501,32 +493,22 @@ function AnnotationTable(props) {
     ? seriesData[projectID][patientID][studyUID]
     : null;
 
-    console.log(existingData);
-
     if (isTeachingFile) {
-      console.log(" ----> 1");
       seriesArr =  await getSignificantSeriesData(selected);
       if (seriesArr.length > 0){
-        console.log(" ----> 2");
         seriesArr = seriesArr.map( el => ({...el, patientID, studyUID, projectID }));}
       else if (existingData && existingData.length <= maxPort) {
-        console.log(" ----> 3");
         seriesArr = existingData;
       } else if (existingData && existingData.length > maxPort) {
-        console.log(" ----> 4");
         seriesArr = existingData;
         setSelected(seriesArr);
         setShowSelectSeriesModal(true);
       } else {
-        console.log(" ----> 5");
         seriesArr = await getSeriesData(selected, true);
       }
     } else {
       seriesArr = await getSeriesData(selected);
     }
-    
-    console.log(' ----> seriesArr');
-    console.log(seriesArr);
 
     setSelected(seriesArr);
     if (props.openSeries.length === maxPort) {
