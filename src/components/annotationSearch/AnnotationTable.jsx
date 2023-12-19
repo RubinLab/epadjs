@@ -22,10 +22,10 @@ import {
   setSeriesData,
 } from "../annotationsList/action";
 import { formatDate } from "../flexView/helperMethods";
-import { getSeries } from "../../services/seriesServices";
+import { getSeries, getSignificantSeries } from "../../services/seriesServices";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
 import { isSupportedModality } from "../../Utils/aid.js";
-import { COMP_MODALITIES as compModality } from "../../constants.js";
+import { COMP_MODALITIES as compModality, teachingFileTempCode } from "../../constants.js";
 const defaultPageSize = 200;
 
 let maxPort;
@@ -466,11 +466,26 @@ function AnnotationTable(props) {
     }
   };
 
+  const getSignificantSeriesData = async (selected) => {
+    try {
+      console.log(" +++ in try")
+      console.log(selected)
+      const { subjectID: patientID, studyUID, projectID } = selected;
+      getSeriesData(selected).then(res => console.log("seriesdata received and filled store")).catch(err => console.error(err))
+      const { data: seriesArr } = await getSignificantSeries(projectID, patientID, studyUID);
+      return seriesArr;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   // CHECK
   const displaySeries = async (selected) => {
+    console.log(" ---> this one is clicked, right place", selected);
     const { seriesData } = props;
-    const { subjectID: patientID, studyUID, aimID, projectID } = selected;
-    let seriesArr = await getSeriesData(selected);
+    const { subjectID: patientID, studyUID, aimID, projectID, template } = selected;
+    let isTeachingFile = teachingFileTempCode === template;
+    let seriesArr;
 
     const dataExists =
     seriesData[projectID] &&
@@ -482,6 +497,32 @@ function AnnotationTable(props) {
     : null;
 
     console.log(existingData);
+
+    if (isTeachingFile) {
+      console.log(" ----> 1");
+      seriesArr =  await getSignificantSeriesData(selected);
+      if (seriesArr.length > 0){
+        console.log(" ----> 2");
+        seriesArr = seriesArr.map( el => ({...el, patientID, studyUID, projectID }));}
+      else if (existingData && existingData.length <= maxPort) {
+        console.log(" ----> 3");
+        seriesArr = existingData;
+      } else if (existingData && existingData.length > maxPort) {
+        console.log(" ----> 4");
+        seriesArr = existingData;
+        setSelected(seriesArr);
+        setShowSelectSeriesModal(true);
+      } else {
+        console.log(" ----> 5");
+        // use the one that won't return description but uid's only for fast opening????
+        seriesArr = await getSeriesData(selected);
+      }
+    } else {
+      seriesArr = await getSeriesData(selected);
+    }
+    
+    console.log(' ----> seriesArr');
+    console.log(seriesArr);
 
     setSelected(seriesArr);
     if (props.openSeries.length === maxPort) {

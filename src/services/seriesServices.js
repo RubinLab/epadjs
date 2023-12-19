@@ -1,5 +1,15 @@
 import http from "./httpService";
 
+export function getSignificantSeries(projectId, subjectId, studyId) {
+  return http.get(
+    http.apiUrl() + "/projects/" +
+    encodeURIComponent(projectId) +
+    "/subjects/" +
+    encodeURIComponent(subjectId) +
+    "/studies/" +
+    encodeURIComponent(studyId) + "/significantseries");
+}
+
 export function getSeries(projectId, subjectId, studyId) {
   if (http.mode() === "lite")
     return http.get(
