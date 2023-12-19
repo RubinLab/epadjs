@@ -33,7 +33,6 @@ import {
   // UPDATE_PATIENT_AIM_SAVE,
   // UPDATE_PATIENT_AIM_DELETE,
   GET_NOTIFICATIONS,
-  CLEAR_ACTIVE_AIMID,
   UPDATE_IMAGE_INDEX,
   GET_PROJECT_MAP,
   SET_SEG_LABEL_MAP_INDEX,
@@ -43,7 +42,6 @@ import {
   SEG_UPLOAD_REMOVE,
   AIM_DELETE,
   SAVE_PATIENT_FILTER,
-  ADD_STUDY_TO_GRID,
   REPLACE_IN_GRID,
   UPDATE_SEARCH_TABLE_INDEX,
   REFRESH_MAP,
@@ -51,6 +49,7 @@ import {
   SUBPATH,
   CHECK_MULTIFRAME,
   CLEAR_MULTIFRAME_AIM_JUMP,
+  SET_SERIES_DATA,
   colors,
   commonLabels,
 } from "./types";
@@ -70,12 +69,16 @@ import { setToolOptionsForElement } from 'cornerstone-tools';
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
 
+export const setSeriesData = (projectID, patientID, studyUID, data) => {
+  return { type: SET_SERIES_DATA, payload: { projectID, patientID, studyUID, data } };
+}
+
 export const clearMultiFrameAimJumpFlags = () => {
   return { type: CLEAR_MULTIFRAME_AIM_JUMP };
 }
 
-export const updateGridWithMultiFrameInfo = (hasMultiframe, multiframeIndex, multiFrameMap) => {
-  return { type: CHECK_MULTIFRAME, payload: { hasMultiframe, multiframeIndex, multiFrameMap } };
+export const updateGridWithMultiFrameInfo = (hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData) => {
+  return { type: CHECK_MULTIFRAME, payload: { hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData } };
 }
 
 export const updateSubpath = (subpath, portIndex) => {
@@ -118,10 +121,6 @@ export const getTemplates = () => {
 // closes all ports in display view
 export const clearGrid = (item) => {
   return { type: CLEAR_GRID };
-};
-
-export const clearActivePortAimID = () => {
-  return { type: CLEAR_ACTIVE_AIMID };
 };
 
 // clears aimID of the all open series
@@ -384,11 +383,6 @@ export const replaceInGrid = (serie) => {
   //   await dispatch(getSingleSerie(serie));
   return { type: REPLACE_IN_GRID, payload: { seriesUID, examType } };
   // } 
-}
-
-// Adds the series list of study to grid. Series sdropdown in the viewpoert uses this.
-export const addStudyToGrid = (seriesOfStudy) => {
-  return { type: ADD_STUDY_TO_GRID, seriesOfStudy };
 }
 
 // toggle annotation details at the right side bar in display view
@@ -717,23 +711,25 @@ const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
 // };
 
 // action to open series
-export const getSingleSerie = (serie, annotation, wadoUrl) => {
+export const getSingleSerie = (serie, annotation, wadoUrl, seriesData) => {
   return async (dispatch, getState) => {
     try {
       await dispatch(loadAnnotations());
-      let { patientID, studyUID, seriesUID, numberOfAnnotations } = serie;
+      let { patientID, studyUID, seriesUID, numberOfAnnotations, projectID } = serie;
       let reference = {
         patientID,
         studyUID,
         seriesUID,
         numberOfAnnotations,
         aimID: annotation,
+        projectID
       };
 
       const { aimsData, imageData, otherSeriesAimsData, seriesOfStudy, serieRef, frameData } = await getSingleSerieData(
         serie,
         annotation,
-        wadoUrl
+        wadoUrl,
+        seriesData
       );
 
       reference = { ...reference, ...serieRef };
@@ -741,6 +737,7 @@ export const getSingleSerie = (serie, annotation, wadoUrl) => {
       await dispatch(
         singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation, otherSeriesAimsData, seriesOfStudy, frameData)
       );
+
     } catch (err) {
       console.error(err);
     }
@@ -770,13 +767,14 @@ export const updateOtherAims = (aimrefs) => {
 
 export const updateSingleSerie = (serie, annotation) => {
   return async (dispatch, getState) => {
-    let { patientID, studyUID, seriesUID, numberOfAnnotations } = serie;
+    let { patientID, studyUID, seriesUID, numberOfAnnotations, projectID } = serie;
     let reference = {
       patientID,
       studyUID,
       seriesUID,
       numberOfAnnotations,
       aimID: annotation,
+      projectID
     };
     const { aimsData, imageData, otherSeriesAimsData, seriesOfStudy } = await getSingleSerieData(serie, annotation);
     await dispatch(
@@ -895,6 +893,7 @@ const sortAims = (series) => {
 
 const getStudyAimsDataSorted = (arr, projectID, patientID) => {
   if (arr.length > 0) {
+    const result = {};
     const { aims, seriesNovsUIDmap } = newGetOtherSeriesAimData(arr, projectID, patientID);
     const studyUID = Object.keys(aims);
     const seriesMap = Object.values(aims);
@@ -909,10 +908,11 @@ const getStudyAimsDataSorted = (arr, projectID, patientID) => {
       const aimArr = Object.values(el[2]);
       el[2] = aimArr;
     });
-    aims[studyUID] = sortAims(series);
+    result[projectID] = { [studyUID]: sortAims(series) }
+    // aims[studyUID] = sortAims(series);
     // write a sorting function for slice numbers
     // and remove aimID map with sorted Array
-    return aims;
+    return result;
   }
 }
 
@@ -932,7 +932,7 @@ const insertAdditionalData = (arr, ref, uid) => {
   return arr;
 }
 // helper methods - calls backend and get data
-const getSingleSerieData = (serie, annotation, wadoUrl) => {
+const getSingleSerieData = (serie, annotation, wadoUrl, seriesData) => {
   return new Promise((resolve, reject) => {
     let aimsData;
     let imageData;
@@ -940,8 +940,10 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
     projectID = projectID ? projectID : "lite";
     patientID = patientID ? patientID : serie.subjectID;
     aimID = aimID ? aimID : annotation;
+
+    //  TODO: getseries call should get its data from the initial data
     const promises = [getStudyAims(patientID, studyUID, projectID)];
-    promises.push(getSeries(projectID, patientID, studyUID));
+    if (!seriesData) promises.push(getSeries(projectID, patientID, studyUID));
 
     Promise.all(promises)
       .then(async (result) => {
@@ -983,11 +985,12 @@ const getSingleSerieData = (serie, annotation, wadoUrl) => {
           ...imageAimMap,
         };
 
-        const serieRef = getSeriesAdditionalData(result[1].data, seriesUID);
+        const serData = seriesData ? seriesData : result[1].data;
+        const serieRef = getSeriesAdditionalData(serData, seriesUID);
         aimsData = getAimListFields(aimsData, annotation);
         const allAims = [...serieAims, ...otherSeriesAims]
         const otherSeriesAimsData = allAims.length === 0 ? {} : getStudyAimsDataSorted(allAims, projectID, patientID);
-        const seriesExtendedData = insertAdditionalData(result[1].data, serieRef, seriesUID);
+        const seriesExtendedData = insertAdditionalData(serData, serieRef, seriesUID);
 
         const seriesOfStudy = { [studyUID]: seriesExtendedData }
         resolve({ aimsData, imageData, otherSeriesAimsData, seriesOfStudy, serieRef, frameData });

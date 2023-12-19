@@ -1,5 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
+import PropagateLoader from "react-spinners/PropagateLoader";
 import Annotation from "./annotation";
 import AnnotationsLink from "./newAnnotationsLink";
 import {
@@ -7,9 +8,6 @@ import {
   toggleAllLabels,
   toggleSingleLabel,
   toggleAllAnnotations,
-  updateSingleSerie,
-  getSingleSerie,
-  aimDelete
 } from "../action";
 import { deleteAnnotation } from "../../../services/annotationServices";
 import cornerstone from "cornerstone-core";
@@ -22,10 +20,10 @@ class AnnotationsList extends React.Component {
   state = {
     labelDisplayAll: false,
     annsDisplayAll: true,
-    showCalculations: false
+    showCalculations: false,
   };
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps) => {
     try {
       const series = Object.keys(this.props.aimsList);
       if (
@@ -39,7 +37,7 @@ class AnnotationsList extends React.Component {
         let annotations = Object.values(this.props.aimsList[seriesUID]);
         let labelDisplayAll = true;
         let annsDisplayAll = true;
-        
+
         annsDisplayAll = annotations[0]?.isDisplayed;
         labelDisplayAll = annotations[0]?.showLabel;
 
@@ -50,14 +48,13 @@ class AnnotationsList extends React.Component {
     }
   };
 
-  handleDisplayClick = e => {
-    const { seriesUID, patientID, studyUID } = this.props.openSeries[
-      this.props.activePort
-    ];
+  handleDisplayClick = (e) => {
+    const { seriesUID, patientID, studyUID } =
+      this.props.openSeries[this.props.activePort];
     const aimID = e.target.id;
     if (aimID) {
-      const currentDisplayStatus = this.props.aimsList[seriesUID][aimID]
-        .isDisplayed;
+      const currentDisplayStatus =
+        this.props.aimsList[seriesUID][aimID].isDisplayed;
       this.props.dispatch(
         updateAnnotationDisplay(
           patientID,
@@ -69,7 +66,7 @@ class AnnotationsList extends React.Component {
       );
       window.dispatchEvent(
         new CustomEvent("toggleAnnotations", {
-          detail: { aimID, isVisible: !currentDisplayStatus }
+          detail: { aimID, isVisible: !currentDisplayStatus },
         })
       );
     }
@@ -105,12 +102,14 @@ class AnnotationsList extends React.Component {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.dispatch(toggleAllAnnotations(seriesUID, target.checked));
     window.dispatchEvent(
-      new CustomEvent("toggleAnnotations", { detail: { isVisible: target.checked } })
+      new CustomEvent("toggleAnnotations", {
+        detail: { isVisible: target.checked },
+      })
     );
     this.setState({ annsDisplayAll: target.checked });
   };
 
-  handleToggleSingleLabel = e => {
+  handleToggleSingleLabel = (e) => {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.dispatch(toggleSingleLabel(seriesUID, e.target.dataset.id));
   };
@@ -129,18 +128,19 @@ class AnnotationsList extends React.Component {
 
   getLabelArray = () => {
     const calculations = {};
-    const wadors = this.wadoUrl.includes('wadors');
+    const wadors = this.wadoUrl.includes("wadors");
     try {
-      const { openSeries, activePort } = this.props;
+      const { openSeries, activePort, openSeriesAddition } = this.props;
       const { imageID } = openSeries[activePort];
       let imageAnnotations;
-      if (openSeries[activePort].imageAnnotations) {
-        const annotations = openSeries[activePort].imageAnnotations;
+      if (openSeriesAddition[activePort].imageAnnotations) {
+        const annotations = openSeriesAddition[activePort].imageAnnotations;
         imageAnnotations = annotations[imageID];
         // TODO: check frame number ??
         if (!imageAnnotations) {
-          imageAnnotations = wadors ? annotations[imageID] :
-            annotations[imageID + "&frame=1"];
+          imageAnnotations = wadors
+            ? annotations[imageID]
+            : annotations[imageID + "&frame=1"];
         }
       }
       if (imageAnnotations) {
@@ -148,14 +148,14 @@ class AnnotationsList extends React.Component {
           if (calculations[aim.aimUid]) {
             calculations[aim.aimUid][aim.markupUid] = {
               calculations: [...aim.calculations],
-              markupType: aim.markupType
+              markupType: aim.markupType,
             };
             // calculations[aim.markupUid].push({ markupType: aim.markupType });
           } else {
             calculations[aim.aimUid] = {};
             calculations[aim.aimUid][aim.markupUid] = {
               calculations: aim.calculations ? [...aim.calculations] : [],
-              markupType: aim.markupType
+              markupType: aim.markupType,
             };
             // calculations[aim.markupUid].push({ markupType: aim.markupType });
           }
@@ -169,7 +169,8 @@ class AnnotationsList extends React.Component {
 
   render = () => {
     // try {
-    const { openSeries, aimsList } = this.props;
+    let preparing = true;  
+    const { openSeries, openSeriesAddition, aimsList } = this.props;
     let { activePort } = this.props;
     activePort = activePort || activePort === 0 ? activePort : 0;
     const { imageID } = openSeries[activePort];
@@ -184,21 +185,22 @@ class AnnotationsList extends React.Component {
           : (annotations[id] = [aims[aim]]);
       }
     }
+    const wadors = this.wadoUrl.includes("wadors");
 
-    const wadors = this.wadoUrl.includes('wadors');
-
-    const aimList = openSeries[activePort].imageAnnotations;
+    const aimList = openSeriesAddition[activePort].imageAnnotations;
     if (aimList) {
       let imageAnnotations;
 
       const singleFrameAnnotations = aimList[imageID];
-      const multiFrameAnnotations = wadors ? aimList[imageID] : aimList[imageID + "&frame=1"];
+      const multiFrameAnnotations = wadors
+        ? aimList[imageID]
+        : aimList[imageID + "&frame=1"];
       const noMarkupAnnotations = aimList[imageID + "-img"];
 
       if (singleFrameAnnotations && multiFrameAnnotations)
         imageAnnotations = [
           ...singleFrameAnnotations,
-          ...multiFrameAnnotations
+          ...multiFrameAnnotations,
         ];
       else if (singleFrameAnnotations)
         imageAnnotations = singleFrameAnnotations;
@@ -218,9 +220,10 @@ class AnnotationsList extends React.Component {
               ? annotations[aimUid].push(aimsList[seriesUID][aim.aimUid])
               : (annotations[aimUid] = [aimsList[seriesUID][aim.aimUid]]);
           }
-        } catch (e) { }
+        } catch (e) {}
       }
     }
+    preparing = false;  
     const calculations = this.getLabelArray();
     let annList = [];
     const imageAims = { ...annotations };
@@ -253,40 +256,88 @@ class AnnotationsList extends React.Component {
     //   console.log("Error: ", e);
     // }
     return (
-      <React.Fragment>
-        <div className="annotationList-container" style={{ paddingTop: '5px' }}>
-          <div className="checkbox-row">
-            <div className="form-check form-check-inline">
-              <input type="checkbox" role="switch" id="showAnnotations" onChange={this.handleCalculations}
-                checked={this.state.showCalculations} />
-              <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Calculations</label>
-            </div>
-            <div className="form-check form-check-inline">
-              <input type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllLabels}
-                checked={this.state.labelDisplayAll} />
-              <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Details</label>
-            </div>
-            <div className="form-check form-check-inline">
-              <input type="checkbox" role="switch" id="showAnnotations" onChange={this.handleToggleAllAnnotations}
-                checked={this.state.annsDisplayAll} />
-              <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Show Markups</label>
-            </div>
+      <>
+        {(this.props.loading || preparing) && (
+          <div style={{ marginTop: "10%", marginLeft: "30%" }}>
+            <PropagateLoader
+              color={"#ccc"}
+              loading={this.props.loading || preparing}
+              margin={8}
+            />
           </div>
-        </div>
-        <div>{annList}</div>
-        <AnnotationsLink imageAims={imageAims} />
-      </React.Fragment >
+        )}
+        {!this.props.loading && (
+          <React.Fragment>
+            <div
+              className="annotationList-container"
+              style={{ paddingTop: "5px" }}
+            >
+              <div className="checkbox-row">
+                <div className="form-check form-check-inline">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    id="showAnnotations"
+                    onChange={this.handleCalculations}
+                    checked={this.state.showCalculations}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor="flexSwitchCheckDefault"
+                  >
+                    Show Calculations
+                  </label>
+                </div>
+                <div className="form-check form-check-inline">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    id="showAnnotations"
+                    onChange={this.handleToggleAllLabels}
+                    checked={this.state.labelDisplayAll}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor="flexSwitchCheckDefault"
+                  >
+                    Show Details
+                  </label>
+                </div>
+                <div className="form-check form-check-inline">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    id="showAnnotations"
+                    onChange={this.handleToggleAllAnnotations}
+                    checked={this.state.annsDisplayAll}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor="flexSwitchCheckDefault"
+                  >
+                    Show Markups
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div>{annList}</div>
+            <AnnotationsLink imageAims={imageAims} />
+          </React.Fragment>
+        )}
+      </>
     );
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
+    openSeriesAddition: state.annotationsListReducer.openSeriesAddition,
     activePort: state.annotationsListReducer.activePort,
     aimsList: state.annotationsListReducer.aimsList,
     imageID: state.annotationsListReducer.imageID,
-    loading: state.annotationsListReducer.loading
+    loading: state.annotationsListReducer.loading,
   };
 };
 export default connect(mapStateToProps)(AnnotationsList);

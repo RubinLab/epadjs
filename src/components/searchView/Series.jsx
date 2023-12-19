@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useTable, useExpanded } from 'react-table';
-import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
-import ReactTooltip from 'react-tooltip';
-import PropagateLoader from 'react-spinners/PropagateLoader';
-import { formatDate } from '../flexView/helperMethods';
-import Annotations from './Annotations';
-import { getSeries } from '../../services/seriesServices';
-import SelectSerieModal from '../annotationsList/selectSerieModal';
+import React, { useEffect, useState, useCallback } from "react";
+import { useTable, useExpanded } from "react-table";
+import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
+import ReactTooltip from "react-tooltip";
+import PropagateLoader from "react-spinners/PropagateLoader";
+import { formatDate } from "../flexView/helperMethods";
+import Annotations from "./Annotations";
+import { getSeries } from "../../services/seriesServices";
+import SelectSerieModal from "../annotationsList/selectSerieModal";
 import {
   alertViewPortFull,
   getSingleSerie,
@@ -17,8 +17,8 @@ import {
   addToGrid,
   getWholeData,
   updatePatient,
-  selectAnnotation
-} from '../annotationsList/action';
+  selectAnnotation,
+} from "../annotationsList/action";
 
 function Table({
   columns,
@@ -29,17 +29,17 @@ function Table({
   getTreeExpandAll,
   treeExpand,
   studyIndex,
-  update
+  update,
 }) {
   const {
     rows,
     prepareRow,
     toggleAllRowsExpanded,
-    state: { expanded }
+    state: { expanded },
   } = useTable(
     {
       columns,
-      data
+      data,
     },
     useExpanded // Use the useExpanded plugin hook
   );
@@ -48,7 +48,7 @@ function Table({
     const obj = {
       patient: patientIndex,
       study: studyIndex,
-      series: data.length
+      series: data.length,
     };
 
     if (expandLevel === 3) {
@@ -73,7 +73,7 @@ function Table({
                 : false;
             const rowExpanded =
               row.isExpanded || isExpandedFromToolbar || expandLevel === 4;
-            const style = { height: '2.5rem', background: '#30343b' };
+            const style = { height: "2.5rem", background: "#30343b" };
             return (
               <>
                 <tr {...row.getRowProps()} style={style} key={`series${i}`}>
@@ -81,11 +81,11 @@ function Table({
                     return (
                       <td
                         {...cell.getCellProps({
-                          className: cell.column.className
+                          className: cell.column.className,
                         })}
                         key={`series-d${k}`}
                       >
-                        {cell.render('Cell')}
+                        {cell.render("Cell")}
                       </td>
                     );
                   })}
@@ -128,23 +128,23 @@ function Series(props) {
     const annotations = Object.values(selectedAnnotations);
 
     if (patients.length) {
-      setSelectedLevel('patients');
+      setSelectedLevel("patients");
       setSelectedCount(patients.length);
     } else if (studies.length) {
-      setSelectedLevel('studies');
+      setSelectedLevel("studies");
       setSelectedCount(studies.length);
     } else if (annotations.length) {
-      setSelectedLevel('annotations');
+      setSelectedLevel("annotations");
       setSelectedCount(annotations.length);
-    } else setSelectedLevel('');
+    } else setSelectedLevel("");
   }, [
     props.selectedStudies,
     props.selectedPatients,
-    props.selectedAnnotations
+    props.selectedAnnotations,
   ]);
 
   const deselectChildLevels = (patientID, studyUID, seriesUID) => {
-    if (selectedLevel === 'annotations') {
+    if (selectedLevel === "annotations") {
       const annotations = Object.values(props.selectedAnnotations);
       const annotationsToDeselect = annotations.reduce((all, item, i) => {
         const correctAnnotation =
@@ -155,7 +155,7 @@ function Series(props) {
         if (correctAnnotation) all.push(item);
         return all;
       }, []);
-      annotationsToDeselect.forEach(el =>
+      annotationsToDeselect.forEach((el) =>
         props.dispatch(
           selectAnnotation(el, el.studyDescription, el.seriesDescription)
         )
@@ -163,11 +163,21 @@ function Series(props) {
     }
   };
 
-  const dispatchSerieDisplay = selected => {
+  const dispatchSerieDisplay = (selected) => {
+    const { seriesData } = props;
     const openSeries = Object.values(props.openSeries);
-    const { patientID, studyUID } = selected;
+    const { patientID, studyUID, projectID } = selected;
+    const dataExists =
+    seriesData[projectID] &&
+    seriesData[projectID][patientID] &&
+    seriesData[projectID][patientID][studyUID];
+
+    const existingData = dataExists
+      ? seriesData[projectID][patientID][studyUID]
+      : null;
+
     let isSerieOpen = false;
-    const maxPort = parseInt(sessionStorage.getItem('maxPort'));
+    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
     //check if there is enough space in the grid
     let isGridFull = openSeries.length === maxPort;
@@ -194,9 +204,9 @@ function Series(props) {
       } else {
         props.dispatch(addToGrid(selected));
         props
-          .dispatch(getSingleSerie(selected))
-          .then(() => { })
-          .catch(err => console.error(err));
+          .dispatch(getSingleSerie(selected, null, null, existingData))
+          .then(() => {})
+          .catch((err) => console.error(err));
         //if grid is NOT full check if patient data exists
         // -----> Delete after v1.0 <-----
         // if (!props.patients[selected.patientID]) {
@@ -213,43 +223,45 @@ function Series(props) {
         //     )
         //   );
         // }
-        props.history.push('/display');
+        props.history.push("/display");
       }
     } else {
-      props.history.push('/display');
+      props.history.push("/display");
     }
     props.dispatch(clearSelection());
   };
 
-  const handleCheckboxSelect = row => {
-    props.dispatch(clearSelection('serie'));
+  const handleCheckboxSelect = (row) => {
+    props.dispatch(clearSelection("serie"));
     props.dispatch(selectSerie(row.original));
     // setChecked(row.original);
   };
   const columns = React.useMemo(
     () => [
       {
-        id: 'series-expander',
+        id: "series-expander",
         width: 35,
         Cell: ({ row, toggleRowExpanded }) => {
           const style = {
-            display: 'flex',
-            width: 'fit-content',
-            paddingLeft: '20px'
+            display: "flex",
+            width: "fit-content",
+            paddingLeft: "20px",
           };
 
           const treeExpPatient = props.treeExpand[props.patientIndex];
-          const treeStudies = treeExpPatient && props.treeExpand[props.patientIndex][props.studyIndex];
+          const treeStudies =
+            treeExpPatient &&
+            props.treeExpand[props.patientIndex][props.studyIndex];
 
           return (
             <div style={style}>
               <div>
                 <input
                   type="checkbox"
-                  style={{ marginRight: '5px' }}
+                  style={{ marginRight: "5px" }}
                   disabled={selectedLevel}
                   onClick={() => {
-                    props.dispatch(clearSelection('serie'));
+                    props.dispatch(clearSelection("serie"));
                     props.dispatch(
                       selectSerie(row.original, props.studyDescription)
                     );
@@ -260,20 +272,20 @@ function Series(props) {
               <span
                 {...row.getToggleRowExpandedProps({
                   style: {
-                    cursor: 'pointer',
+                    cursor: "pointer",
                     fontSize: 10,
-                    textAlign: 'center',
-                    userSelect: 'none',
-                    color: '#fafafa',
-                    verticalAlign: 'middle'
-                  }
+                    textAlign: "center",
+                    userSelect: "none",
+                    color: "#fafafa",
+                    verticalAlign: "middle",
+                  },
                 })}
                 onClick={() => {
                   const expandStatus = row.isExpanded ? false : true;
                   const obj = {
                     patient: props.patientIndex,
                     study: props.studyIndex,
-                    series: { [row.index]: expandStatus ? {} : false }
+                    series: { [row.index]: expandStatus ? {} : false },
                   };
                   toggleRowExpanded(row.id, expandStatus);
                   props.getTreeExpandSingle(obj);
@@ -283,25 +295,22 @@ function Series(props) {
                   }
                 }}
               >
-                {row.isExpanded || (treeStudies && treeStudies[
-                  row.index
-                ])
-                  ? (
-                    <span>&#x25BC;</span>
-                  ) : (
-                    <span>&#x25B6;</span>
-                  )}
+                {row.isExpanded || (treeStudies && treeStudies[row.index]) ? (
+                  <span>&#x25BC;</span>
+                ) : (
+                  <span>&#x25B6;</span>
+                )}
               </span>
             </div>
           );
-        }
+        },
       },
       {
         width: widthUnit * 12,
-        id: 'study-desc',
+        id: "study-desc",
         Cell: ({ row }) => {
-          let desc = row.original.seriesDescription || 'Unnamed Series';
-          let id = 'desc' + row.original.seriesUID;
+          let desc = row.original.seriesDescription || "Unnamed Series";
+          let id = "desc" + row.original.seriesUID;
           const { studyDescription } = props;
           return (
             <>
@@ -313,10 +322,10 @@ function Series(props) {
                 onDoubleClick={() =>
                   dispatchSerieDisplay({
                     ...row.original,
-                    studyDescription
+                    studyDescription,
                   })
                 }
-                style={{ paddingLeft: '20px' }}
+                style={{ paddingLeft: "20px" }}
               >
                 {desc}
               </span>
@@ -331,16 +340,16 @@ function Series(props) {
               </ReactTooltip>
             </>
           );
-        }
+        },
       },
       {
         width: widthUnit * 2,
-        id: 'numberOfAnnotations',
-        className: 'searchView-table__cell',
+        id: "numberOfAnnotations",
+        className: "searchView-table__cell",
         Cell: ({ row }) => (
           <div className="searchView-table__cell">
             {row.original.numberOfAnnotations === 0 ? (
-              ''
+              ""
             ) : (
               <span
                 // className="badge badge-secondary"
@@ -350,64 +359,64 @@ function Series(props) {
               </span>
             )}
           </div>
-        )
+        ),
       },
       {
         //subitem
         width: widthUnit * 3,
-        id: 'series-subitem',
-        className: 'searchView-table__cell',
-        Cell: () => <div />
+        id: "series-subitem",
+        className: "searchView-table__cell",
+        Cell: () => <div />,
       },
       {
         width: widthUnit * 3,
-        accessor: 'numberOfImages',
-        className: 'searchView-table__cell'
+        accessor: "numberOfImages",
+        className: "searchView-table__cell",
       },
       {
         width: widthUnit * 5,
-        id: 'series-examtype',
-        className: 'searchView-table__cell',
+        id: "series-examtype",
+        className: "searchView-table__cell",
         Cell: ({ row }) => (
           <span className="searchView-table__cell">
             {row.original.examType}
           </span>
-        )
+        ),
       },
       {
         width: widthUnit * 7,
-        id: 'series-seriesDate',
-        className: 'searchView-table__cell',
+        id: "series-seriesDate",
+        className: "searchView-table__cell",
         Cell: ({ row }) => (
           <div className="searchView-table__cell">
             {formatDate(row.original.seriesDate)}
           </div>
-        )
+        ),
       },
       {
         width: widthUnit * 7,
-        id: 'series-createdTime',
-        className: 'searchView-table__cell',
+        id: "series-createdTime",
+        className: "searchView-table__cell",
         Cell: ({ row }) => (
           <div className="searchView-table__cell">
             {formatDate(row.original.createdTime)}
           </div>
-        )
+        ),
       },
       {
-        Header: 'Accession',
+        Header: "Accession",
         width: widthUnit * 6,
-        className: 'searchView-table__cell',
+        className: "searchView-table__cell",
         Cell: ({ row }) => (
           <div className="searchView-table__cell">
             {row.original.accessionNumber}
           </div>
-        )
+        ),
       },
       {
         width: widthUnit * 10,
-        id: 'seriesUID',
-        className: 'searchView-table__cell',
+        id: "seriesUID",
+        className: "searchView-table__cell",
         Cell: ({ row }) => (
           <>
             <div
@@ -416,7 +425,7 @@ function Series(props) {
               data-for={row.original.seriesUID}
             >
               {row.original.seriesUID}
-            </div>{' '}
+            </div>{" "}
             <ReactTooltip
               id={row.original.seriesUID}
               place="top"
@@ -427,42 +436,50 @@ function Series(props) {
               <span>{row.original.seriesUID}</span>
             </ReactTooltip>
           </>
-        )
-      }
+        ),
+      },
     ],
     [selectedLevel, selectedCount, props.openSeries, props.update]
   );
 
   const getDataFromStorage = (projectID, subjectID, studyUID) => {
-    const treeData = JSON.parse(localStorage.getItem('treeData'));
-    const project = treeData[projectID];
-    const patient = project && project[subjectID] ? project[subjectID] : null;
-    const study =
-      patient && patient.studies[studyUID] ? patient.studies[studyUID] : null;
-    const seriesArray = study
-      ? Object.values(study.series).map(el => el.data)
-      : [];
+    const { seriesData } = props;
+    const dataExists =
+      seriesData[projectID] &&
+      seriesData[projectID][patientID] &&
+      seriesData[projectID][patientID][studyUID];
 
-    return seriesArray;
+    if (dataExists) return seriesData[projectID][patientID][studyUID];
+    else {
+      const treeData = JSON.parse(localStorage.getItem("treeData"));
+      const project = treeData[projectID];
+      const patient = project && project[subjectID] ? project[subjectID] : null;
+      let study =
+        patient && patient.studies[studyUID] ? patient.studies[studyUID] : null;
+      const seriesArray = study
+        ? Object.values(study.series).map((el) => el.data)
+        : [];
+      return seriesArray;
+    }
   };
 
   useEffect(() => {
     const { pid, subjectID, studyUID, getTreeData } = props;
     const dataFromStorage = getDataFromStorage(pid, subjectID, studyUID);
     let data = [];
-    if (pid && pid !== 'null' && subjectID) {
+    if (pid && pid !== "null" && subjectID) {
       if (dataFromStorage?.length > 0) {
         data = dataFromStorage;
         setData(data);
       } else {
         setLoading(true);
         getSeries(pid, subjectID, studyUID)
-          .then(res => {
+          .then((res) => {
             setLoading(false);
-            getTreeData(pid, 'series', res.data);
+            getTreeData(pid, "series", res.data);
             setData(res.data);
           })
-          .catch(err => {
+          .catch((err) => {
             console.error(err);
           });
       }
@@ -472,8 +489,8 @@ function Series(props) {
   return (
     <>
       {loading && (
-        <tr style={{ width: 'fit-content', margin: 'auto', marginTop: '10%' }}>
-          <PropagateLoader color={'#7A8288'} loading={loading} margin={8} />
+        <tr style={{ width: "fit-content", margin: "auto", marginTop: "10%" }}>
+          <PropagateLoader color={"#7A8288"} loading={loading} margin={8} />
         </tr>
       )}
       <Table
@@ -487,7 +504,7 @@ function Series(props) {
         studyIndex={props.studyIndex}
         getTreeExpandSingle={props.getTreeExpandSingle}
         update={props.update}
-      // progressUpdated={this.props.progressUpdated}
+        // progressUpdated={this.props.progressUpdated}
       />
       {showSelectSerie && (
         <SelectSerieModal
@@ -503,14 +520,15 @@ function Series(props) {
   );
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
     selectedSeries: state.annotationsListReducer.selectedSeries,
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
     openSeries: state.annotationsListReducer.openSeries,
-    patients: state.annotationsListReducer.patients
+    patients: state.annotationsListReducer.patients,
+    seriesData: state.annotationsListReducer.seriesData,
   };
 };
 

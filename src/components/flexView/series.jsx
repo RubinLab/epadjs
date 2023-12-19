@@ -8,17 +8,14 @@ import "./flexView.css";
 class Series extends React.Component {
   state = {
     columns: [],
-    data: []
+    data: [],
   };
 
   componentDidMount = async () => {
     this.defineColumns();
     //get series data
-    const { data } = await getSeries(
-      this.props.projectId,
-      this.props.subjectId,
-      this.props.studyId
-    );
+    const { projectId, subjectId, studyId } = this.props;
+    const { data } = await getSeries(projectId, subjectId, studyId);
     this.setState({ data });
   };
 
@@ -31,7 +28,7 @@ class Series extends React.Component {
     this.setState({ columns: tableColumns });
   };
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps) => {
     const columnAdded = prevProps.order.length !== this.props.order.length;
     const orderChanged = !_.isEqual(prevProps.order, this.props.order);
     if (columnAdded || orderChanged) {
@@ -47,7 +44,7 @@ class Series extends React.Component {
         data={this.state.data}
         columns={this.state.columns}
         showPagination={false}
-        TheadComponent={props => null}
+        TheadComponent={(props) => null}
         pageSize={this.state.data.length}
       />
     );
