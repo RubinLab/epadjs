@@ -115,12 +115,17 @@ const asyncReducer = (state = initialState, action) => {
         const studyExists = patientExists ? newSeriesData[projectID][patientID][studyUID] : false;
 
         if (studyExists) {
-          let newArr = newSeriesData[projectID][patientID][studyUID].map(el => el.multiFrameImage === true);
+          console.log(" ---> existing", newSeriesData[projectID][patientID][studyUID]);
+          let newArr = newSeriesData[projectID][patientID][studyUID].reduce((all, item) => {
+            if (item.multiFrameImage === true) all.push(item);
+            return all;
+          }, []);
           newArr = [...newArr, ...data];
           newSeriesData[projectID][patientID][studyUID] = newArr;
         } else if (patientExists) newSeriesData[projectID][patientID][studyUID] = newArr;
         else if (projectExists) newSeriesData[projectID][patientID] = { [studyUID]: data };
         else newSeriesData[projectID] = { [patientID]: { [studyUID]: data } };
+        console.log(" ---> in SET_SERIES", newSeriesData);
         return { ...state, seriesData: newSeriesData };
       case CLEAR_MULTIFRAME_AIM_JUMP:
         const aimClearedSeries = _.cloneDeep(state.openSeries);

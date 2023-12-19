@@ -351,17 +351,20 @@ function AnnotationTable(props) {
     const { projectID, studyUID } = selected;
     let { patientID, subjectID } = selected;
     patientID = patientID ? patientID : subjectID;
+    
     try {
       const dataExists =
-        seriesData[projectID] &&
-        seriesData[projectID][patientID] &&
-        seriesData[projectID][patientID][studyUID];
+      seriesData[projectID] &&
+      seriesData[projectID][patientID] &&
+      seriesData[projectID][patientID][studyUID];
+      console.log(' ---> seriesData', seriesData);
       if (!dataExists) {
         const { data: series } = await getSeries(
           projectID,
           patientID,
           studyUID
-        );
+          );
+        console.log(" ---> series in getSeriesData", series)  
         props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
         props.dispatch(loadCompleted());
         return series;
