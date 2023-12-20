@@ -469,7 +469,6 @@ function AnnotationTable(props) {
   const getSignificantSeriesData = async (selected) => {
     try {
       const { subjectID: patientID, studyUID, projectID } = selected;
-      getSeriesData(selected).then(res => console.log("seriesdata received and filled store")).catch(err => console.error(err))
       const { data: seriesArr } = await getSignificantSeries(projectID, patientID, studyUID);
       return seriesArr;
     } catch (err) {
@@ -496,7 +495,7 @@ function AnnotationTable(props) {
     if (isTeachingFile) {
       seriesArr =  await getSignificantSeriesData(selected);
       if (seriesArr.length > 0){
-        seriesArr = seriesArr.map( el => ({...el, patientID, studyUID, projectID }));}
+        seriesArr = seriesArr.map( el => ({...el, patientID, studyUID, projectID, template }));}
       else if (existingData && existingData.length <= maxPort) {
         seriesArr = existingData;
       } else if (existingData && existingData.length > maxPort) {

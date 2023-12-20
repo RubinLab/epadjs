@@ -58,7 +58,7 @@ import {
   persistColorInSaveAim,
   persistColorInDeleteAim,
 } from "../../Utils/aid";
-import { MdSatellite } from "react-icons/md";
+import { teachingFileTempCode } from "../../constants";
 const initialState = {
   openSeries: [],
   openSeriesAddition: [],
@@ -372,6 +372,21 @@ const asyncReducer = (state = initialState, action) => {
               colors
             );
 
+        // check if openSeries[activeport] is significant and teaching file 
+        // if so check if seriesData is filled  // if not fill the data
+        const { significanceOrder: order, template: tempCode } = state.openSeries[state.activePort];
+        const seriesDataForTeaching = _.cloneDeep(state.seriesData);
+        if (order && tempCode === teachingFileTempCode) {
+          const seriesDataForTFProject = state.seriesData[pidFromRef]
+          const seriesDataForTFPatient = seriesDataForTFProject && state.seriesData[pidFromRef][action.payload.ref.patientID]
+          const seriesDataForTFStudy = seriesDataForTFPatient && state.seriesData[pidFromRef][action.payload.ref.studyUID];
+          if (!seriesDataForTFStudy) {
+            if (seriesDataForTFPatient)
+              seriesDataForTeaching[pidFromRef][action.payload.ref.patientID] = { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] };
+            else seriesDataForTeaching[pidFromRef] = { [action.payload.ref.patientID]: { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] } };
+          }
+        }
+
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
@@ -382,6 +397,7 @@ const asyncReducer = (state = initialState, action) => {
           otherSeriesAimsList: latestOtherSeriesAimsList,
           openSeriesAddition: imageAddedSeries,
           multiFrameAimJumpData: jumpArr1,
+          seriesData: seriesDataForTeaching
         });
         return result;
       case LOAD_ANNOTATIONS_ERROR:
