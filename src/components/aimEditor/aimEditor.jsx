@@ -542,7 +542,7 @@ class AimEditor extends Component {
     // create the modified blob
     // const segmentationBlob = dcmjs.data.datasetToBlob(dataset);
     dicomData.dict = dcmjs.data.DicomMetaDictionary.denaturalizeDataset(dataset);
-    const segmentationBlob = DicomDict.write();
+    const segmentationBlob = dicomData.write();
 
     return { aim, segmentationBlob, segId };
     // } catch (error) {
