@@ -44,26 +44,26 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
   if (mode === "lite")
     return http.get(
       apiUrl +
-        "/projects/lite/subjects/" +
-        encodeURIComponent(subjectId) +
-        "/studies/" +
-        encodeURIComponent(studyId) +
-        "/series/" +
-        encodeURIComponent(seriesId) +
-        "/aims?format=json"
+      "/projects/lite/subjects/" +
+      encodeURIComponent(subjectId) +
+      "/studies/" +
+      encodeURIComponent(studyId) +
+      "/series/" +
+      encodeURIComponent(seriesId) +
+      "/aims?format=json"
     );
   else
     return http.get(
       apiUrl +
-        "/projects/" +
-        encodeURIComponent(projectId) +
-        "/subjects/" +
-        encodeURIComponent(subjectId) +
-        "/studies/" +
-        encodeURIComponent(studyId) +
-        "/series/" +
-        encodeURIComponent(seriesId) +
-        "/aims?format=json"
+      "/projects/" +
+      encodeURIComponent(projectId) +
+      "/subjects/" +
+      encodeURIComponent(subjectId) +
+      "/studies/" +
+      encodeURIComponent(studyId) +
+      "/series/" +
+      encodeURIComponent(seriesId) +
+      "/aims?format=json"
     );
 }
 
@@ -73,9 +73,8 @@ export function getAnnotations2() {
 
 export function searchAnnotations(body, bookmark) {
   // body["fields"]={"teachingFiles":true};
-  const url = `${http.apiUrl()}/search${
-    bookmark ? `?bookmark=${bookmark}` : ``
-  }`;
+  const url = `${http.apiUrl()}/search${bookmark ? `?bookmark=${bookmark}` : ``
+    }`;
   return http.put(url, body);
 }
 
@@ -102,9 +101,8 @@ export function downloadProjectAnnotation(pid) {
 }
 
 export function getAllAnnotations(bookmark) {
-  const url = `${http.apiUrl()}/aims?format=summary${
-    bookmark ? `&bookmark=${bookmark}` : ``
-  }`;
+  const url = `${http.apiUrl()}/aims?format=summary${bookmark ? `&bookmark=${bookmark}` : ``
+    }`;
   return http.get(url);
 }
 
@@ -113,13 +111,13 @@ export function getSummaryAnnotations(projectID, bookmark) {
   const pid = projectID || "lite";
   return bookmark
     ? http.get(
-        `${apiUrl}/projects/${encodeURIComponent(
-          pid
-        )}/aims?format=summary&bookmark=${bookmark}`
-      )
+      `${apiUrl}/projects/${encodeURIComponent(
+        pid
+      )}/aims?format=summary&bookmark=${bookmark}`
+    )
     : http.get(
-        `${apiUrl}/projects/${encodeURIComponent(pid)}/aims?format=summary`
-      );
+      `${apiUrl}/projects/${encodeURIComponent(pid)}/aims?format=summary`
+    );
 }
 
 export function deleteAnnotation(aimObj, delSys) {
@@ -127,12 +125,12 @@ export function deleteAnnotation(aimObj, delSys) {
   const { aimID, projectID } = aimObj;
   return http.delete(
     http.apiUrl() +
-      "/projects/" +
-      encodeURIComponent(projectID) +
-      "/aims/" +
-      encodeURIComponent(aimID) +
-      "?deleteDSO=true" +
-      query
+    "/projects/" +
+    encodeURIComponent(projectID) +
+    "/aims/" +
+    encodeURIComponent(aimID) +
+    "?deleteDSO=true" +
+    query
   );
 }
 
@@ -140,9 +138,9 @@ export function deleteAnnotationsList(projectID, aimList) {
   return http.post(
     // apiUrl + "/projects/" + projectID + "/aims/delete?all=true"
     http.apiUrl() +
-      "/projects/" +
-      encodeURIComponent(projectID) +
-      "/aims/delete",
+    "/projects/" +
+    encodeURIComponent(projectID) +
+    "/aims/delete",
     aimList
   );
 }
@@ -185,7 +183,12 @@ export function uploadSegmentation(segmentation, segName, projectId = "lite") {
   const url =
     http.apiUrl() + "/projects/" + encodeURIComponent(projectId) + "/files";
   const segData = new FormData();
+  console.log(" ---> segdata before append");
+  console.log(segData);
+  console.log(typeof segData);
   segData.append("file", segmentation, `${segName}.dcm`);
+  console.log(" ---> segdata after append");
+  console.log(segData);
   const config = {
     headers: {
       "content-type": "multipart/form-data"

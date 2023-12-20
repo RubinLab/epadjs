@@ -5,6 +5,8 @@ import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import { getTemplates } from '../../services/templateServices';
 import cornerstone from 'cornerstone-core';
 import cornerstoneTools from 'cornerstone-tools';
+import toArrayBuffer from 'to-array-buffer';
+// import {Blob} from 'buffer';
 import {
   uploadAim,
   uploadSegmentation,
@@ -542,7 +544,11 @@ class AimEditor extends Component {
     // create the modified blob
     // const segmentationBlob = dcmjs.data.datasetToBlob(dataset);
     dicomData.dict = dcmjs.data.DicomMetaDictionary.denaturalizeDataset(dataset);
-    const segmentationBlob = dicomData.write();
+    // const segmentationBlob = new Blob(dicomData.write());
+    let buff = toArrayBuffer(dicomData.write());
+    console.log(' buff', buff);
+    const segmentationBlob = new File([buff], 'caveaim.dcm');
+
 
     return { aim, segmentationBlob, segId };
     // } catch (error) {

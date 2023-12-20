@@ -57,7 +57,8 @@
     "react-tooltip": "^4.2.21",
     "redux": "^4.0.5",
     "redux-devtools-extension": "^2.13.8",
-    "redux-thunk": "^2.3.0"
+    "redux-thunk": "^2.3.0",
+    "to-array-buffer": "^3.2.0"
   },
   "scripts": {
     "start": "react-app-rewired start",
@@ -89,6 +90,6 @@
     "webpack": "^5.75.0"
   },
   "overrides": {
-    "istanbul-lib-report@>3.0.0":  "3.0.0"
+    "istanbul-lib-report@>3.0.0": "3.0.0"
   }
 }
