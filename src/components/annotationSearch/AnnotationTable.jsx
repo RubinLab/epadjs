@@ -488,7 +488,7 @@ function AnnotationTable(props) {
     seriesData[projectID][patientID] &&
     seriesData[projectID][patientID][studyUID];
 
-    const existingData = dataExists
+    let existingData = dataExists
     ? seriesData[projectID][patientID][studyUID]
     : null;
 
@@ -529,10 +529,13 @@ function AnnotationTable(props) {
       //if there is enough room
       //add serie to the grid
       const promiseArr = [];
+
       for (let i = 0; i < seriesArr.length; i++) {
         props.dispatch(addToGrid(seriesArr[i], aimID));
+        if (isTeachingFile && i > 0) existingData = true;
         promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i], aimID, null, existingData)));
       }
+    
       //getsingleSerie
       Promise.all(promiseArr)
         .then(() => {
