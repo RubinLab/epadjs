@@ -529,7 +529,7 @@ class AimEditor extends Component {
       this.state.trackingUId
     );
 
-    let dataset = await this.getDatasetFromBlob(segBlob);
+    let {dicomData, dataset} = await this.getDatasetFromBlob(segBlob);
     // set segmentation series description with the aim name
     dataset.SeriesDescription = answers.name.value;
 
@@ -540,7 +540,9 @@ class AimEditor extends Component {
     const segId = this.addSegmentationToAim(aim, segEntityData, segStats);
 
     // create the modified blob
-    const segmentationBlob = dcmjs.data.datasetToBlob(dataset);
+    // const segmentationBlob = dcmjs.data.datasetToBlob(dataset);
+    dicomData.dict = dcmjs.data.DicomMetaDictionary.denaturalizeDataset(dataset);
+    const segmentationBlob = DicomDict.write();
 
     return { aim, segmentationBlob, segId };
     // } catch (error) {
@@ -1252,7 +1254,7 @@ class AimEditor extends Component {
         dataset._meta = dcmjs.data.DicomMetaDictionary.namifyDataset(
           dicomData.meta
         );
-        resolve(dataset);
+        resolve({dicomData, dataset});
       };
       fileReader.readAsArrayBuffer(segBlob);
     });
