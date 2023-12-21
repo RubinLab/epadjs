@@ -51,6 +51,7 @@ import {
   CHECK_MULTIFRAME,
   CLEAR_MULTIFRAME_AIM_JUMP,
   SET_SERIES_DATA,
+  FILL_DESC,
   colors,
   commonLabels,
 } from "./types";
@@ -58,7 +59,7 @@ import {
   persistColorInSaveAim,
   persistColorInDeleteAim,
 } from "../../Utils/aid";
-import { MdSatellite } from "react-icons/md";
+import { teachingFileTempCode } from "../../constants";
 const initialState = {
   openSeries: [],
   openSeriesAddition: [],
@@ -107,6 +108,28 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case FILL_DESC:
+        const descFilledOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
+        const descFilledSeriesData = _.cloneDeep(state.seriesData);
+        for (let i = 0; i < action.data.length; i++) {
+          const { projectID: fillPID, patientID: fillPatID, studyUID: fillStUID } = action.data[i];
+          for (let k = 0; k < descFilledOpenSeriesAddition.length; k++) {
+            if (descFilledOpenSeriesAddition[k].seriesUID === action.data[i].seriesUID) {
+              descFilledOpenSeriesAddition[k].seriesDescription = action.data[i].seriesDescription;
+              break;
+            }
+          }
+          const stExists = descFilledSeriesData[fillPID] && descFilledSeriesData[fillPID][fillPatID] && descFilledSeriesData[fillPID][fillPatID][fillStUID];
+          if (stExists) {
+            for (let k = 0; k < descFilledSeriesData[fillPID][fillPatID][fillStUID].length; k++) {
+              if (descFilledSeriesData[fillPID][fillPatID][fillStUID][k].seriesUID === action.data[i].seriesUID) {
+                descFilledSeriesData[fillPID][fillPatID][fillStUID][k].seriesDescription = action.data[i].seriesDescription;
+                break;
+              }
+            }
+          }
+        }
+        return { ...state, seriesData: descFilledSeriesData, openSeriesAddition: descFilledOpenSeriesAddition };
       case SET_SERIES_DATA:
         const newSeriesData = _.cloneDeep(state.seriesData);
         const { projectID, patientID, studyUID, data } = action.payload;
@@ -115,7 +138,10 @@ const asyncReducer = (state = initialState, action) => {
         const studyExists = patientExists ? newSeriesData[projectID][patientID][studyUID] : false;
 
         if (studyExists) {
-          let newArr = newSeriesData[projectID][patientID][studyUID].map(el => el.multiFrameImage === true);
+          let newArr = newSeriesData[projectID][patientID][studyUID].reduce((all, item) => {
+            if (item.multiFrameImage === true) all.push(item);
+            return all;
+          }, []);
           newArr = [...newArr, ...data];
           newSeriesData[projectID][patientID][studyUID] = newArr;
         } else if (patientExists) newSeriesData[projectID][patientID][studyUID] = newArr;
@@ -369,6 +395,21 @@ const asyncReducer = (state = initialState, action) => {
               colors
             );
 
+        // check if openSeries[activeport] is significant and teaching file 
+        // if so check if seriesData is filled  // if not fill the data
+        const { significanceOrder: order, template: tempCode } = state.openSeries[state.activePort];
+        const seriesDataForTeaching = _.cloneDeep(state.seriesData);
+        if (order && tempCode === teachingFileTempCode) {
+          const seriesDataForTFProject = state.seriesData[pidFromRef]
+          const seriesDataForTFPatient = seriesDataForTFProject && state.seriesData[pidFromRef][action.payload.ref.patientID]
+          const seriesDataForTFStudy = seriesDataForTFPatient && state.seriesData[pidFromRef][action.payload.ref.studyUID];
+          if (!seriesDataForTFStudy) {
+            if (seriesDataForTFPatient)
+              seriesDataForTeaching[pidFromRef][action.payload.ref.patientID] = { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] };
+            else seriesDataForTeaching[pidFromRef] = { [action.payload.ref.patientID]: { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] } };
+          }
+        }
+
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
@@ -379,6 +420,7 @@ const asyncReducer = (state = initialState, action) => {
           otherSeriesAimsList: latestOtherSeriesAimsList,
           openSeriesAddition: imageAddedSeries,
           multiFrameAimJumpData: jumpArr1,
+          seriesData: seriesDataForTeaching
         });
         return result;
       case LOAD_ANNOTATIONS_ERROR:

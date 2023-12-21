@@ -50,6 +50,7 @@ import {
   CHECK_MULTIFRAME,
   CLEAR_MULTIFRAME_AIM_JUMP,
   SET_SERIES_DATA,
+  FILL_DESC,
   colors,
   commonLabels,
 } from "./types";
@@ -68,6 +69,10 @@ import aimEntityData from "./annotationDock/aimEntityData";
 import { setToolOptionsForElement } from 'cornerstone-tools';
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
+
+export const fillSeriesDescfullData = (data) => {
+  return { type: FILL_DESC, data };
+}
 
 export const setSeriesData = (projectID, patientID, studyUID, data) => {
   return { type: SET_SERIES_DATA, payload: { projectID, patientID, studyUID, data } };
@@ -352,7 +357,7 @@ export const selectAnnotation = (
 // opens a new port to display series
 // adds series details to the array
 export const addToGrid = (serie, annotation, port) => {
-  let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment, seriesDescription, numberOfAnnotations, numberOfImages, seriesNo } = serie;
+  let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment, seriesDescription, numberOfAnnotations, numberOfImages, seriesNo, template, significanceOrder } = serie;
   const modFmComment = comment ? comment.split('/')[0].trim() : '';
   examType = examType ? examType.toUpperCase() : modality ? modality.toUpperCase() : modFmComment.toUpperCase();
 
@@ -371,7 +376,9 @@ export const addToGrid = (serie, annotation, port) => {
     seriesDescription,
     numberOfAnnotations,
     numberOfImages,
-    seriesNo
+    seriesNo,
+    template,
+    significanceOrder
     // imageIndex: 0
   };
   return { type: ADD_TO_GRID, reference, port };
@@ -943,7 +950,7 @@ const getSingleSerieData = (serie, annotation, wadoUrl, seriesData) => {
 
     //  TODO: getseries call should get its data from the initial data
     const promises = [getStudyAims(patientID, studyUID, projectID)];
-    if (!seriesData) promises.push(getSeries(projectID, patientID, studyUID));
+    if (!seriesData) promises.push(getSeries(projectID, patientID, studyUID, true));
 
     Promise.all(promises)
       .then(async (result) => {

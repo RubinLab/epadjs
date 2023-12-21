@@ -1,26 +1,22 @@
 import http from "./httpService";
 
-export function getSeries(projectId, subjectId, studyId) {
-  if (http.mode() === "lite")
-    return http.get(
-      http.apiUrl() +
-      "/projects/lite/subjects/" +
-      encodeURIComponent(subjectId) +
-      "/studies/" +
-      encodeURIComponent(studyId) +
-      "/series?&filterDSO=true"
-    );
-  else
-    return http.get(
-      http.apiUrl() +
-      "/projects/" +
-      encodeURIComponent(projectId) +
-      "/subjects/" +
-      encodeURIComponent(subjectId) +
-      "/studies/" +
-      encodeURIComponent(studyId) +
-      "/series?filterDSO=true"
-    );
+export function getSignificantSeries(projectId, subjectId, studyId) {
+  return http.get(
+    http.apiUrl() + "/projects/" +
+    encodeURIComponent(projectId) +
+    "/subjects/" +
+    encodeURIComponent(subjectId) +
+    "/studies/" +
+    encodeURIComponent(studyId) + "/significantseries");
+}
+
+export function getSeries(projectId, subjectId, studyId, forceDicomweb) {
+  const endpointProject = http.mode() === "lite" ?
+    http.apiUrl() + "/projects/lite/subjects/"
+    : http.apiUrl() + "/projects/" + encodeURIComponent(projectId) + "/subjects/";
+  let endPoint = endpointProject + encodeURIComponent(subjectId) + "/studies/" + encodeURIComponent(studyId) + "/series?&filterDSO=true";
+  endPoint = forceDicomweb ? endPoint + "&forceDicomweb=true" : endPoint;
+  return http.get(endPoint);
 }
 export function getImageIds(series) {
   if (http.mode() === "lite") {

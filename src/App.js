@@ -118,7 +118,7 @@ class App extends Component {
       leftMenuState: "open",
       update: 0,
       savedData: {},
-      loading: false,
+      loading: true,
       freeze: "auto",
     };
   }
@@ -755,6 +755,7 @@ class App extends Component {
   };
 
   handleArgs = async (args) => {
+    this.setState({ loading: true, freeze: 'none' });
     const { data } = await decryptAndGrantAccess(args);
     const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
     const { openSeries } = this.props;
