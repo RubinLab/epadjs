@@ -33,12 +33,18 @@ const SeriesDropDown = (props) => {
       data[projectID][patientID] &&
       data[projectID][patientID][studyUID];
 
-    if (studyExist) {
+    const list = studyExist ? data[projectID][patientID][studyUID] : null
+
+    const firstDescExists = list && list[0].seriesDescription;
+    const lastDescExists = list && list[list.length - 1].seriesDescription;
+
+    if (studyExist && firstDescExists && lastDescExists) {
       let series = data[projectID][patientID][studyUID];
       series = series?.filter(isSupportedModality);
       setSeriesList(series);
     } else {
       getSeries(projectID, patientID, studyUID).then(res => {
+        console.log(" ===> in seriesDropdown getSeries");
         setSeriesList(res.data);
       }).catch((err) => console.error(err));
     }
