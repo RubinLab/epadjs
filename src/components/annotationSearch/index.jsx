@@ -166,7 +166,7 @@ const AnnotationSearch = (props) => {
   const [myCases, setMyCases] = useState(false);
   const [filters, setFilters] = useState({});
   const [sort, setSort] = useState([]);
-  const [showSpinner, setShowSpinner] = useState(false);
+  const [showSpinner, setShowSpinner] = useState(true);
   const [showWorklist, setShowWorklist] = useState(false);
   const [showProjects, setShowProjects] = useState(false);
   const [showDownload, setShowDownload] = useState(false);
@@ -673,6 +673,7 @@ const AnnotationSearch = (props) => {
         populateSearchResult(res, pageIndex, afterDelete);
         setRows(res.data.total_rows);
         setShowSpinner(false);
+        props.completeLoading();
       })
       .catch((err) => {
         console.error(err);
@@ -1825,11 +1826,11 @@ const AnnotationSearch = (props) => {
             </th>
           </tr>
         </thead>
-        <PropagateLoader
-          color={"#7A8288"}
-          loading={props.loading}
-          margin-left={"8rem"}
-        />
+          <PropagateLoader
+            color={"#7A8288"}
+            loading={props.loading || showSpinner}
+            margin={"8"}
+          />
         <tbody>
           {data.length > 0 && !showSpinner && (
             <AnnotationTable
