@@ -3,9 +3,11 @@ import { connect } from "react-redux";
 import Dropdown from "react-bootstrap/Dropdown";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import { getStudyAims } from "../../services/studyServices";
+import { getSeries } from "../../services/seriesServices"
 import {
   replaceInGrid,
   getSingleSerie,
+  setSeriesData
 } from "components/annotationsList/action";
 import { isSupportedModality } from "../../Utils/aid.js";
 
@@ -35,6 +37,10 @@ const SeriesDropDown = (props) => {
       let series = data[projectID][patientID][studyUID];
       series = series?.filter(isSupportedModality);
       setSeriesList(series);
+    } else {
+      getSeries(projectID, patientID, studyUID).then(res => {
+        setSeriesList(res.data);
+      }).catch((err) => console.error(err));
     }
   }, [props.seriesData]);
 
