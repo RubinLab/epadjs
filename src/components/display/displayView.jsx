@@ -885,13 +885,6 @@ class DisplayView extends Component {
       console.error(err);
     }
 
-    try {
-    const { data: fullData } = await getSeries(serie.projectID, serie.patientID, serie.studyUID);
-    this.props.dispatch(fillSeriesDescfullData(fullData));
-    } catch (err) {
-      console.error(err);
-    }
-
     // get the length of array off arrays
     // divide the metadata array to mirror the image urls’ array
 
@@ -1039,6 +1032,16 @@ class DisplayView extends Component {
       // this.formSplitSeriesData(imageUrls, baseUrl);
     }
     this.setState({ isLoading: false });
+
+    if (mode === 'teaching') {
+      try {
+        const { data: fullData } = await getSeries(serie.projectID, serie.patientID, serie.studyUID);
+        this.props.dispatch(fillSeriesDescfullData(fullData));
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    
     return { stack };
   };
 
