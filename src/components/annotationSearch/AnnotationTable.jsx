@@ -532,7 +532,6 @@ function AnnotationTable(props) {
 
       for (let i = 0; i < seriesArr.length; i++) {
         props.dispatch(addToGrid(seriesArr[i], aimID));
-        if (isTeachingFile && i > 0) existingData = true;
         promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i], aimID, null, existingData)));
       }
     

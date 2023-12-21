@@ -9,6 +9,7 @@ import {
   getWadoImagePath,
   getSegmentation,
   getMetadata,
+  getSeries
 } from "../../services/seriesServices";
 import { getImageMetadata } from "../../services/imageServices";
 import { connect } from "react-redux";
@@ -30,6 +31,7 @@ import {
   clearSelection,
   updateGridWithMultiFrameInfo,
   clearMultiFrameAimJumpFlags,
+  fillSeriesDescfullData
 } from "../annotationsList/action";
 import { deleteAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
@@ -880,6 +882,13 @@ class DisplayView extends Component {
       );
     } catch (err) {
       console.log("Can not get series metadata");
+      console.error(err);
+    }
+
+    try {
+    const { data: fullData } = await getSeries(serie.projectID, serie.patientID, serie.studyUID);
+    this.props.dispatch(fillSeriesDescfullData(fullData));
+    } catch (err) {
       console.error(err);
     }
 

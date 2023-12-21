@@ -51,6 +51,7 @@ import {
   CHECK_MULTIFRAME,
   CLEAR_MULTIFRAME_AIM_JUMP,
   SET_SERIES_DATA,
+  FILL_DESC,
   colors,
   commonLabels,
 } from "./types";
@@ -107,6 +108,28 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case FILL_DESC:
+        const descFilledOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
+        const descFilledSeriesData = _.cloneDeep(state.seriesData);
+        for (let i = 0; i < action.data.length; i++) {
+          const { projectID: fillPID, patientID: fillPatID, studyUID: fillStUID } = action.data[i];
+          for (let k = 0; k < descFilledOpenSeriesAddition.length; k++) {
+            if (descFilledOpenSeriesAddition[k].seriesUID === action.data[i].seriesUID) {
+              descFilledOpenSeriesAddition[k].seriesDescription = action.data[i].seriesDescription;
+              break;
+            }
+          }
+          const stExists = descFilledSeriesData[fillPID] && descFilledSeriesData[fillPID][fillPatID] && descFilledSeriesData[fillPID][fillPatID][fillStUID];
+          if (stExists) {
+            for (let k = 0; k < descFilledSeriesData[fillPID][fillPatID][fillStUID].length; k++) {
+              if (descFilledSeriesData[fillPID][fillPatID][fillStUID][k].seriesUID === action.data[i].seriesUID) {
+                descFilledSeriesData[fillPID][fillPatID][fillStUID][k].seriesDescription = action.data[i].seriesDescription;
+                break;
+              }
+            }
+          }
+        }
+        return { ...state, seriesData: descFilledSeriesData, openSeriesAddition: descFilledOpenSeriesAddition };
       case SET_SERIES_DATA:
         const newSeriesData = _.cloneDeep(state.seriesData);
         const { projectID, patientID, studyUID, data } = action.payload;
