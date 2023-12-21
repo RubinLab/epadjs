@@ -656,6 +656,12 @@ class DisplayView extends Component {
               ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
               : null;
 
+          if (mode === 'teaching') {
+            getSeries(series[activePort].projectID, series[activePort].patientID, series[activePort].studyUID).then((res) => {
+              this.props.dispatch(fillSeriesDescfullData(res.data));
+            }).catch(err => console.error(err));
+          }
+
           // TODO: how this logic works if it is not a multiframe img/series like patient7
           // should i add a isMultiFrame constol before checking key
           res.forEach((el, inx) => {
@@ -690,6 +696,7 @@ class DisplayView extends Component {
           }
         );
       }
+
     } catch (error) {
       console.error(error);
     }
@@ -1033,15 +1040,6 @@ class DisplayView extends Component {
     }
     this.setState({ isLoading: false });
 
-    if (mode === 'teaching') {
-      try {
-        const { data: fullData } = await getSeries(serie.projectID, serie.patientID, serie.studyUID);
-        this.props.dispatch(fillSeriesDescfullData(fullData));
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    
     return { stack };
   };
 
