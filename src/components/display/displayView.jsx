@@ -9,6 +9,7 @@ import {
   getWadoImagePath,
   getSegmentation,
   getMetadata,
+  getSeries
 } from "../../services/seriesServices";
 import { getImageMetadata } from "../../services/imageServices";
 import { connect } from "react-redux";
@@ -30,6 +31,7 @@ import {
   clearSelection,
   updateGridWithMultiFrameInfo,
   clearMultiFrameAimJumpFlags,
+  fillSeriesDescfullData
 } from "../annotationsList/action";
 import { deleteAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
@@ -654,6 +656,12 @@ class DisplayView extends Component {
               ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
               : null;
 
+          if (mode === 'teaching') {
+            getSeries(series[activePort].projectID, series[activePort].patientID, series[activePort].studyUID).then((res) => {
+              this.props.dispatch(fillSeriesDescfullData(res.data));
+            }).catch(err => console.error(err));
+          }
+
           // TODO: how this logic works if it is not a multiframe img/series like patient7
           // should i add a isMultiFrame constol before checking key
           res.forEach((el, inx) => {
@@ -688,6 +696,7 @@ class DisplayView extends Component {
           }
         );
       }
+
     } catch (error) {
       console.error(error);
     }
@@ -1031,6 +1040,7 @@ class DisplayView extends Component {
       // this.formSplitSeriesData(imageUrls, baseUrl);
     }
     this.setState({ isLoading: false });
+
     return { stack };
   };
 

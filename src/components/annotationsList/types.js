@@ -63,6 +63,7 @@ export const SUBPATH = "epadjs/annotationList/SUBPATH";
 export const CHECK_MULTIFRAME = 'epadjs/annotationList/CHECK_MULTIFRAME';
 export const CLEAR_MULTIFRAME_AIM_JUMP = 'epadjs/annotationList/CLEAR_MULTIFRAME_AIM_JUMP';
 export const SET_SERIES_DATA = 'epadjs/annotationList/SET_SERIES_DATA';
+export const FILL_DESC = 'epadjs/annotationList/FILL_DESC';
 
 export const commonLabels = {
   button: { background: "#c0c0c0", color: "black" },

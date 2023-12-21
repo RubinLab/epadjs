@@ -22,10 +22,10 @@ import {
   setSeriesData,
 } from "../annotationsList/action";
 import { formatDate } from "../flexView/helperMethods";
-import { getSeries } from "../../services/seriesServices";
+import { getSeries, getSignificantSeries } from "../../services/seriesServices";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
 import { isSupportedModality } from "../../Utils/aid.js";
-import { COMP_MODALITIES as compModality } from "../../constants.js";
+import { COMP_MODALITIES as compModality, teachingFileTempCode } from "../../constants.js";
 const defaultPageSize = 200;
 
 let maxPort;
@@ -345,23 +345,25 @@ function AnnotationTable(props) {
   }, [props.noOfRows, props.data, props.searchTableIndex]);
 
   // TODO: spinner doesn't appear anymore check the logic
-  const getSeriesData = async (selected) => {
+  const getSeriesData = async (selected, force) => {
     props.dispatch(startLoading());
     const { seriesData } = props;
     const { projectID, studyUID } = selected;
     let { patientID, subjectID } = selected;
     patientID = patientID ? patientID : subjectID;
+    
     try {
       const dataExists =
-        seriesData[projectID] &&
-        seriesData[projectID][patientID] &&
-        seriesData[projectID][patientID][studyUID];
+      seriesData[projectID] &&
+      seriesData[projectID][patientID] &&
+      seriesData[projectID][patientID][studyUID];
       if (!dataExists) {
         const { data: series } = await getSeries(
           projectID,
           patientID,
-          studyUID
-        );
+          studyUID, 
+          force
+          );
         props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
         props.dispatch(loadCompleted());
         return series;
@@ -418,8 +420,6 @@ function AnnotationTable(props) {
       ? seriesData[projectID][patientID][studyUID]
       : null;
 
-      console.log(existingData);
-
       setSelected(selected);
       // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
       //check if there is enough space in the grid
@@ -466,22 +466,48 @@ function AnnotationTable(props) {
     }
   };
 
+  const getSignificantSeriesData = async (selected) => {
+    try {
+      const { subjectID: patientID, studyUID, projectID } = selected;
+      const { data: seriesArr } = await getSignificantSeries(projectID, patientID, studyUID);
+      return seriesArr;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   // CHECK
   const displaySeries = async (selected) => {
     const { seriesData } = props;
-    const { subjectID: patientID, studyUID, aimID, projectID } = selected;
-    let seriesArr = await getSeriesData(selected);
+    const { subjectID: patientID, studyUID, aimID, projectID, template } = selected;
+    let isTeachingFile = teachingFileTempCode === template;
+    let seriesArr;
 
     const dataExists =
     seriesData[projectID] &&
     seriesData[projectID][patientID] &&
     seriesData[projectID][patientID][studyUID];
 
-    const existingData = dataExists
+    let existingData = dataExists
     ? seriesData[projectID][patientID][studyUID]
     : null;
 
-    console.log(existingData);
+    if (isTeachingFile) {
+      seriesArr =  await getSignificantSeriesData(selected);
+      if (seriesArr.length > 0){
+        seriesArr = seriesArr.map( el => ({...el, patientID, studyUID, projectID, template }));}
+      else if (existingData && existingData.length <= maxPort) {
+        seriesArr = existingData;
+      } else if (existingData && existingData.length > maxPort) {
+        seriesArr = existingData;
+        setSelected(seriesArr);
+        setShowSelectSeriesModal(true);
+      } else {
+        seriesArr = await getSeriesData(selected, true);
+      }
+    } else {
+      seriesArr = await getSeriesData(selected);
+    }
 
     setSelected(seriesArr);
     if (props.openSeries.length === maxPort) {
@@ -503,10 +529,12 @@ function AnnotationTable(props) {
       //if there is enough room
       //add serie to the grid
       const promiseArr = [];
+
       for (let i = 0; i < seriesArr.length; i++) {
         props.dispatch(addToGrid(seriesArr[i], aimID));
         promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i], aimID, null, existingData)));
       }
+    
       //getsingleSerie
       Promise.all(promiseArr)
         .then(() => {
