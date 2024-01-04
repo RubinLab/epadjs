@@ -1039,7 +1039,7 @@ class DisplayView extends Component {
     if (imageUrls.length > 0) {
       // this.formSplitSeriesData(imageUrls, baseUrl);
     }
-    this.setState({ isLoading: false });
+    // this.setState({ isLoading: false });
 
     return { stack };
   };
