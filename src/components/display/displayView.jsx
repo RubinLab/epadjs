@@ -619,6 +619,7 @@ class DisplayView extends Component {
   getData(multiFrameIndex, frameNo) {
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
+      console.log(" ======> this.state.multiFrameAimJumped", this.state.multiFrameAimJumped);
       const { series, activePort } = this.props;
       const { dataIndexMap, data } = this.state;
       var promises = [];
@@ -631,10 +632,17 @@ class DisplayView extends Component {
         // [{stack -> UIDkey, ycurImgIndex, imfIds}, {}]
 
         const { projectID, patientID, studyUID, seriesUID } = series[i];
-        const indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
+        let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
+        // indexKey = multiFrameIndex ? `${indexKey}-${multiFrameIndex}` : indexKey;
+
+        console.log(" ---> indexkey", indexKey);
+        console.log(" ---> frameNo", frameNo);
+        console.log(" ---> multiFrameIndex", multiFrameIndex);
 
         // if (typeof dataIndexMap[indexKey] !== "number") {
         if (!(dataIndexMap[indexKey] >= 0) || multiFrameIndex) {
+          console.log(' ---> !(dataIndexMap[indexKey] >= 0', !(dataIndexMap[indexKey] >= 0));
+          console.log(" ---> multiFrameIndex", multiFrameIndex);
           const promise = this.getImageStack(
             series[i],
             i,
@@ -652,9 +660,10 @@ class DisplayView extends Component {
       if (promises.length > 0) {
         Promise.all(promises).then((res) => {
           const key =
-            multiFrameIndex && frameNo && series[activePort].aimID
-              ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
-              : null;
+          multiFrameIndex && frameNo && series[activePort].aimID
+          ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
+          : null;
+          console.log(' +++++  promises resolve ---> key', key);
 
           // if (mode === 'teaching') {
           //   getSeries(series[activePort].projectID, series[activePort].patientID, series[activePort].studyUID).then((res) => {
@@ -901,6 +910,7 @@ class DisplayView extends Component {
     }, 0);
 
     const seriesMetadataExists = Array.isArray(seriesMetadata);
+    // const seriesMetadataExists = false;
 
     const useSeriesData =
       seriesMetadataExists &&
@@ -912,6 +922,7 @@ class DisplayView extends Component {
     let middleImage = null;
 
     if (!useSeriesData) {
+      console.log(" --- useSeriesData is false in 1");
       const result = await getImageMetadata(
         wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage
       );
@@ -950,6 +961,7 @@ class DisplayView extends Component {
       let distance = null;
       try {
         if (!useSeriesData) {
+          console.log(" --- useSeriesData is false in 2");
           const result = await getImageMetadata(baseUrl);
           const data = result.data;
           imgData = data[0];
