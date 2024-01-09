@@ -674,11 +674,11 @@ class DisplayView extends Component {
           : null;
           console.log(' +++++  promises resolve ---> key', key);
 
-          if (mode === 'teaching') {
-            getSeries(series[activePort].projectID, series[activePort].patientID, series[activePort].studyUID).then((res) => {
-              this.props.dispatch(fillSeriesDescfullData(res.data));
-            }).catch(err => console.error(err));
-          }
+          // if (mode === 'teaching') {
+          //   getSeries(series[activePort].projectID, series[activePort].patientID, series[activePort].studyUID).then((res) => {
+          //     this.props.dispatch(fillSeriesDescfullData(res.data));
+          //   }).catch(err => console.error(err));
+          // }
 
           // TODO: how this logic works if it is not a multiframe img/series like patient7
           // should i add a isMultiFrame constol before checking key
