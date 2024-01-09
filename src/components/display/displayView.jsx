@@ -311,7 +311,7 @@ class DisplayView extends Component {
       `${series[activePort].aimID}-${multiFrameAimJumpData[0]}-${multiFrameAimJumpData[1]}` !==
         this.state.multiFrameAimJumped
     ) {
-      console.log(" passes in if");
+      console.log(" %%%%%%%%%%% passes in if get data ", multiFrameAimJumpData[0], multiFrameAimJumpData[1]);
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1]);
@@ -324,6 +324,7 @@ class DisplayView extends Component {
       //     this.props.loading === false)
       // ) {
     } else if (prevProps.series.length !== series.length) {
+      console.log(" ########### in else if ")
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
@@ -333,6 +334,7 @@ class DisplayView extends Component {
     // each time visibility of aims change
     // else if (rerenderAims) {
       else if (rerenderAims) {
+      console.log('$$$$$  renderAims ???');  
       this.renderAims(false, rerenderAims);
       //TODO: check if filling aimsList process changes openseries
       // if chanes sever that data from openseries
@@ -676,7 +678,7 @@ class DisplayView extends Component {
           console.log(' == multiFrameIndex', multiFrameIndex);
           console.log(' == frameNo', frameNo);
           console.log(' == series[activePort].aimID', series[activePort].aimID);
-          console.log(" ////// key definers:");
+          console.log(" ////// key definers /////");
           console.log(' +++++  promises resolve ---> key', key);
 
           // if (mode === 'teaching') {
@@ -2275,6 +2277,7 @@ class DisplayView extends Component {
     // if there are multiframe data call get image stack and pass frame data etc
     const { seriesAddition, series, activePort } = this.props;
     const { aimId, index, imageID, frameNo } = event.detail;
+    console.log(" &&&&&&&& jumpToAimImage", aimId, index, imageID, frameNo);
 
     const imageIndex = this.getImageIndex(
       seriesAddition[index],
@@ -2292,9 +2295,11 @@ class DisplayView extends Component {
       !seriesAddition[activePort].multiFrameMap[imageID]
     ) {
       this.setState({ isLoading: true });
+      console.log(" |||| before null null")
       this.getData(null, null);
     } else {
       const multiFrameIndex = seriesAddition[activePort].multiFrameMap[imageID];
+      console.log(" ||||| in else multiFrameIndex, frameNo", multiFrameIndex, frameNo);
       this.getData(multiFrameIndex, frameNo);
     }
   };
