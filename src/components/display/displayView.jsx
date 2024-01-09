@@ -643,6 +643,8 @@ class DisplayView extends Component {
         if (!(dataIndexMap[indexKey] >= 0) || multiFrameIndex) {
           console.log(' ---> !(dataIndexMap[indexKey] >= 0', !(dataIndexMap[indexKey] >= 0));
           console.log(" ---> multiFrameIndex", multiFrameIndex);
+          console.log(" ====> series[activePort].aimID", series[activePort].aimID);
+
           const promise = this.getImageStack(
             series[i],
             i,
@@ -657,10 +659,11 @@ class DisplayView extends Component {
           newData[index] = this.state.data[index];
         }
       }
+
       if (promises.length > 0) {
         Promise.all(promises).then((res) => {
           const key =
-          multiFrameIndex && frameNo && series[activePort].aimID
+          multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
           ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
           : null;
           console.log(' +++++  promises resolve ---> key', key);
