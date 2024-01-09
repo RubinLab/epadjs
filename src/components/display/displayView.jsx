@@ -641,15 +641,15 @@ class DisplayView extends Component {
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
         // indexKey = multiFrameIndex ? `${indexKey}-${multiFrameIndex}` : indexKey;
 
-        console.log(" ---> indexkey", indexKey);
-        console.log(" ---> frameNo", frameNo);
-        console.log(" ---> multiFrameIndex", multiFrameIndex);
+        // console.log(" ---> indexkey", indexKey);
+        // console.log(" ---> frameNo", frameNo);
+        // console.log(" ---> multiFrameIndex", multiFrameIndex);
 
         // if (typeof dataIndexMap[indexKey] !== "number") {
         if (!(dataIndexMap[indexKey] >= 0) || multiFrameIndex) {
-          console.log(' ---> !(dataIndexMap[indexKey] >= 0', !(dataIndexMap[indexKey] >= 0));
-          console.log(" ---> multiFrameIndex", multiFrameIndex);
-          console.log(" ====> series[activePort].aimID", series[activePort].aimID);
+          // console.log(' ---> !(dataIndexMap[indexKey] >= 0', !(dataIndexMap[indexKey] >= 0));
+          // console.log(" ---> multiFrameIndex", multiFrameIndex);
+          // console.log(" ====> series[activePort].aimID", series[activePort].aimID);
 
           const promise = this.getImageStack(
             series[i],
@@ -672,6 +672,11 @@ class DisplayView extends Component {
           multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
           ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
           : null;
+          console.log(" ////// key definers:")
+          console.log(' == multiFrameIndex', multiFrameIndex);
+          console.log(' == frameNo', frameNo);
+          console.log(' == series[activePort].aimID', series[activePort].aimID);
+          console.log(" ////// key definers:");
           console.log(' +++++  promises resolve ---> key', key);
 
           // if (mode === 'teaching') {
