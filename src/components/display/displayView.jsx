@@ -303,6 +303,7 @@ class DisplayView extends Component {
     console.log(' ===> prevProps.multiFrameAimJumpData', prevProps.multiFrameAimJumpData);
     console.log(' =====> this.state.multiFrameAimJumped', this.state.multiFrameAimJumped);
     console.log(" ==> series[activePort].aimID", series[activePort].aimID);
+
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
       multiFrameAimJumpData &&
@@ -310,6 +311,7 @@ class DisplayView extends Component {
       `${series[activePort].aimID}-${multiFrameAimJumpData[0]}-${multiFrameAimJumpData[1]}` !==
         this.state.multiFrameAimJumped
     ) {
+      console.log(" passes in if");
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1]);
