@@ -299,6 +299,10 @@ class DisplayView extends Component {
       newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved;
 
     // TODO: check if loading/true-false control is required for the first condition
+    console.log(' ====> multiFrameAimJumpData', multiFrameAimJumpData);
+    console.log(' ===> prevProps.multiFrameAimJumpData', prevProps.multiFrameAimJumpData);
+    console.log(' =====> this.state.multiFrameAimJumped', this.state.multiFrameAimJumped);
+    console.log(" ==> series[activePort].aimID", series[activePort].aimID);
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
       multiFrameAimJumpData &&
@@ -669,9 +673,9 @@ class DisplayView extends Component {
           console.log(' +++++  promises resolve ---> key', key);
 
           if (mode === 'teaching') {
-            // getSeries(series[activePort].projectID, series[activePort].patientID, series[activePort].studyUID).then((res) => {
-            //   this.props.dispatch(fillSeriesDescfullData(res.data));
-            // }).catch(err => console.error(err));
+            getSeries(series[activePort].projectID, series[activePort].patientID, series[activePort].studyUID).then((res) => {
+              this.props.dispatch(fillSeriesDescfullData(res.data));
+            }).catch(err => console.error(err));
           }
 
           // TODO: how this logic works if it is not a multiframe img/series like patient7
