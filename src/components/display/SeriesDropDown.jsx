@@ -8,9 +8,10 @@ import { getSeries } from "../../services/seriesServices"
 import {
   replaceInGrid,
   getSingleSerie,
-  setSeriesData
+  setSeriesData,
+  getSeriesAdditional
 } from "components/annotationsList/action";
-import { isSupportedModality } from "../../Utils/aid.js";
+import { isSupportedModality, otherSeriesOpened } from "../../Utils/aid.js";
 
 import "./SeriesDropDown.css";
 
@@ -37,21 +38,26 @@ const SeriesDropDown = (props) => {
       data[projectID][patientID][studyUID];
 
     const list = studyExist ? data[projectID][patientID][studyUID] : null
+    const isString = (currentValue) => currentValue.seriesDescription === '' || typeof currentValue.seriesDescription === 'string';
+    const hasDescription = list ? list.every(isString) : false;
 
-    const firstDescExists = list && list[0].seriesDescription;
-    const lastDescExists = list && list[list.length - 1].seriesDescription;
-
-    if (studyExist && firstDescExists && lastDescExists) {
+    if (studyExist &&  hasDescription) {
       let series = data[projectID][patientID][studyUID];
       series = series?.filter(isSupportedModality);
       setSeriesList(series);
     } else {
       setLoading(true);
-      getSeries(projectID, patientID, studyUID).then(res => {
-        console.log(" ===> in seriesDropdown getSeries");
-        setSeriesList(res.data);
-        setLoading(false);
-      }).catch((err) => console.error(err));
+      const shouldFill = props.index === 0 ? true : !otherSeriesOpened(props.openSeries, props.index);
+      if (studyExist && shouldFill && (studyUID && projectID && patientID)) {
+        props.dispatch(getSeriesAdditional({studyUID, projectID, patientID}))
+      } else {
+        getSeries(projectID, patientID, studyUID).then(res => {
+          console.log(" ===> in seriesDropdown getSeries", res.data);
+          props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data));
+          setLoading(false);
+        }).catch((err) => console.error(err));
+        
+      }
     }
   }, [props.seriesData]);
 
