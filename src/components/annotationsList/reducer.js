@@ -115,7 +115,8 @@ const asyncReducer = (state = initialState, action) => {
           const { projectID: fillPID, patientID: fillPatID, studyUID: fillStUID } = action.data[i];
           for (let k = 0; k < descFilledOpenSeriesAddition.length; k++) {
             if (descFilledOpenSeriesAddition[k].seriesUID === action.data[i].seriesUID) {
-              descFilledOpenSeriesAddition[k].seriesDescription = action.data[i].seriesDescription;
+              // descFilledOpenSeriesAddition[k].seriesDescription = action.data[i].seriesDescription;
+              descFilledOpenSeriesAddition[k] = { ...descFilledOpenSeriesAddition[k], ...action.data[i] };
               break;
             }
           }
@@ -123,7 +124,8 @@ const asyncReducer = (state = initialState, action) => {
           if (stExists) {
             for (let k = 0; k < descFilledSeriesData[fillPID][fillPatID][fillStUID].length; k++) {
               if (descFilledSeriesData[fillPID][fillPatID][fillStUID][k].seriesUID === action.data[i].seriesUID) {
-                descFilledSeriesData[fillPID][fillPatID][fillStUID][k].seriesDescription = action.data[i].seriesDescription;
+                // descFilledSeriesData[fillPID][fillPatID][fillStUID][k].seriesDescription = action.data[i].seriesDescription;
+                descFilledSeriesData[fillPID][fillPatID][fillStUID][k] = { ...descFilledSeriesData[fillPID][fillPatID][fillStUID][k], ...action.data[i] };
                 break;
               }
             }
@@ -399,16 +401,16 @@ const asyncReducer = (state = initialState, action) => {
         // if so check if seriesData is filled  // if not fill the data
         const { significanceOrder: order, template: tempCode } = state.openSeries[state.activePort];
         const seriesDataForTeaching = _.cloneDeep(state.seriesData);
-        if (order && tempCode === teachingFileTempCode) {
-          const seriesDataForTFProject = state.seriesData[pidFromRef]
-          const seriesDataForTFPatient = seriesDataForTFProject && state.seriesData[pidFromRef][action.payload.ref.patientID]
-          const seriesDataForTFStudy = seriesDataForTFPatient && state.seriesData[pidFromRef][action.payload.ref.studyUID];
-          if (!seriesDataForTFStudy) {
-            if (seriesDataForTFPatient)
-              seriesDataForTeaching[pidFromRef][action.payload.ref.patientID] = { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] };
-            else seriesDataForTeaching[pidFromRef] = { [action.payload.ref.patientID]: { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] } };
-          }
+        // if (order && tempCode === teachingFileTempCode) {
+        const seriesDataForTFProject = state.seriesData[pidFromRef]
+        const seriesDataForTFPatient = seriesDataForTFProject && state.seriesData[pidFromRef][action.payload.ref.patientID]
+        const seriesDataForTFStudy = seriesDataForTFPatient && state.seriesData[pidFromRef][action.payload.ref.studyUID];
+        if (!seriesDataForTFStudy) {
+          if (seriesDataForTFPatient)
+            seriesDataForTeaching[pidFromRef][action.payload.ref.patientID] = { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] };
+          else seriesDataForTeaching[pidFromRef] = { [action.payload.ref.patientID]: { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] } };
         }
+        // }
 
         const result = Object.assign({}, state, {
           loading: false,

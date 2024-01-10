@@ -752,6 +752,47 @@ export const getSingleSerie = (serie, annotation, wadoUrl, seriesData) => {
 };
 
 
+const getSeriesAdditionalInfo = (uids) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let { studyUID, projectID, patientID } = uids;
+      const { data: series } = await getSeries(projectID, patientID, studyUID);
+      const additionalaDataArray = series.reduce((all, item) => {
+        const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo, seriesUID } = item;
+        const filled = true;
+        all.push({ numberOfAnnotations, numberOfImages, seriesDescription, seriesNo, projectID, patientID, studyUID, filled, seriesUID });
+        return all;
+      }, []);
+      resolve(additionalaDataArray);
+    } catch (err) {
+      console.log(err);
+      reject("Error while getting getSeriesAdditionalInfo", err)
+    }
+  });
+}
+
+const addtionalSeriesDataLoaded = async () => {
+
+}
+
+export const getSeriesAdditional = (uids) => {
+  return async (dispatch, getState) => {
+    try {
+      const seriesData = await getSeriesAdditionalInfo(
+        uids
+      );
+
+
+      await dispatch(
+        fillSeriesDescfullData(seriesData)
+      );
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+};
+
 export const updateOtherAims = (aimrefs) => {
   return async (dispatch) => {
     try {
@@ -925,17 +966,24 @@ const getStudyAimsDataSorted = (arr, projectID, patientID) => {
 
 
 const getSeriesAdditionalData = (arr, uid) => {
-  const data = arr.filter((el) => el.seriesUID === uid);
-  const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo } = data[0];
-  return { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo };
+  if (arr) {
+    const data = arr.filter((el) => el.seriesUID === uid);
+    const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo } = data[0];
+    return { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo };
+  } else return {};
 }
 
+// if (!seriesData) promises.push(getSeries(projectID, patientID, studyUID, true));
+
+
 const insertAdditionalData = (arr, ref, uid) => {
-  arr.forEach(el => {
-    if (el.seriesUID === uid) {
-      el = { ...el, ...ref }
-    }
-  })
+  if (arr) {
+    arr.forEach(el => {
+      if (el.seriesUID === uid) {
+        el = { ...el, ...ref }
+      }
+    })
+  }
   return arr;
 }
 // helper methods - calls backend and get data
@@ -950,7 +998,9 @@ const getSingleSerieData = (serie, annotation, wadoUrl, seriesData) => {
 
     //  TODO: getseries call should get its data from the initial data
     const promises = [getStudyAims(patientID, studyUID, projectID)];
-    if (!seriesData) promises.push(getSeries(projectID, patientID, studyUID, true));
+    if (!seriesData) {
+      promises.push(getSeries(projectID, patientID, studyUID, true));
+    }
 
     Promise.all(promises)
       .then(async (result) => {
@@ -992,7 +1042,7 @@ const getSingleSerieData = (serie, annotation, wadoUrl, seriesData) => {
           ...imageAimMap,
         };
 
-        const serData = seriesData ? seriesData : result[1].data;
+        const serData = seriesData ? seriesData : result[1] ? result[1].data : null;
         const serieRef = getSeriesAdditionalData(serData, seriesUID);
         aimsData = getAimListFields(aimsData, annotation);
         const allAims = [...serieAims, ...otherSeriesAims]
