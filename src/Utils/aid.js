@@ -438,8 +438,9 @@ export const getAllowedTermsOfTemplateComponent = (template, componentLabel) => 
 
 export const otherSeriesOpened = (seriesList, index) => {
   const map = {};
-  const count = 0;
+  let count = 0;
   while (count < index) {
+    let pid, patID, stUID;
     ({ projectID: pid, patientID: patID, studyUID: stUID } = seriesList[count]);
     map[`${pid}-${patID}-${stUID}`] = true;
     count++;

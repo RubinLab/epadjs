@@ -759,8 +759,7 @@ const getSeriesAdditionalInfo = (uids) => {
       const { data: series } = await getSeries(projectID, patientID, studyUID);
       const additionalaDataArray = series.reduce((all, item) => {
         const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo, seriesUID } = item;
-        const filled = true;
-        all.push({ numberOfAnnotations, numberOfImages, seriesDescription, seriesNo, projectID, patientID, studyUID, filled, seriesUID });
+        all.push({ numberOfAnnotations, numberOfImages, seriesDescription, seriesNo, projectID, patientID, studyUID, seriesUID });
         return all;
       }, []);
       resolve(additionalaDataArray);
