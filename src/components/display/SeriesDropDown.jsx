@@ -41,19 +41,18 @@ const SeriesDropDown = (props) => {
     const isString = (currentValue) => currentValue.seriesDescription === '' || typeof currentValue.seriesDescription === 'string';
     const hasDescription = list ? list.every(isString) : false;
 
-    if (studyExist &&  hasDescription) {
+    if (studyExist && hasDescription) {
       let series = data[projectID][patientID][studyUID];
       series = series?.filter(isSupportedModality);
       setSeriesList(series);
     } else {
       setLoading(true);
       const shouldFill = props.index === 0 ? true : !otherSeriesOpened(props.openSeries, props.index);
-      if (studyExist && shouldFill && (studyUID && projectID && patientID)) {
+      if (studyExist && shouldFill && studyUID && projectID && patientID) {
         props.dispatch(getSeriesAdditional({studyUID, projectID, patientID}))
       } else {
         getSeries(projectID, patientID, studyUID).then(res => {
-          console.log(" ===> in seriesDropdown getSeries", res.data);
-          props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data));
+          props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
           setLoading(false);
         }).catch((err) => console.error(err));
         
