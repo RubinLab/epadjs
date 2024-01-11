@@ -115,7 +115,8 @@ const asyncReducer = (state = initialState, action) => {
           const { projectID: fillPID, patientID: fillPatID, studyUID: fillStUID } = action.data[i];
           for (let k = 0; k < descFilledOpenSeriesAddition.length; k++) {
             if (descFilledOpenSeriesAddition[k].seriesUID === action.data[i].seriesUID) {
-              descFilledOpenSeriesAddition[k].seriesDescription = action.data[i].seriesDescription;
+              // descFilledOpenSeriesAddition[k].seriesDescription = action.data[i].seriesDescription;
+              descFilledOpenSeriesAddition[k] = { ...descFilledOpenSeriesAddition[k], ...action.data[i] };
               break;
             }
           }
@@ -123,7 +124,8 @@ const asyncReducer = (state = initialState, action) => {
           if (stExists) {
             for (let k = 0; k < descFilledSeriesData[fillPID][fillPatID][fillStUID].length; k++) {
               if (descFilledSeriesData[fillPID][fillPatID][fillStUID][k].seriesUID === action.data[i].seriesUID) {
-                descFilledSeriesData[fillPID][fillPatID][fillStUID][k].seriesDescription = action.data[i].seriesDescription;
+                // descFilledSeriesData[fillPID][fillPatID][fillStUID][k].seriesDescription = action.data[i].seriesDescription;
+                descFilledSeriesData[fillPID][fillPatID][fillStUID][k] = { ...descFilledSeriesData[fillPID][fillPatID][fillStUID][k], ...action.data[i] };
                 break;
               }
             }
@@ -134,8 +136,8 @@ const asyncReducer = (state = initialState, action) => {
         const newSeriesData = _.cloneDeep(state.seriesData);
         const { projectID, patientID, studyUID, data } = action.payload;
         const projectExists = newSeriesData[projectID];
-        const patientExists = projectExists ? newSeriesData[projectID][patientID] : false;
-        const studyExists = patientExists ? newSeriesData[projectID][patientID][studyUID] : false;
+        const patientExists = projectExists && projectExists[patientID] ? projectExists[patientID] : false;
+        const studyExists = patientExists && patientExists[studyUID] ? patientExists[studyUID] : false;
 
         if (studyExists) {
           let newArr = newSeriesData[projectID][patientID][studyUID].reduce((all, item) => {
@@ -144,7 +146,7 @@ const asyncReducer = (state = initialState, action) => {
           }, []);
           newArr = [...newArr, ...data];
           newSeriesData[projectID][patientID][studyUID] = newArr;
-        } else if (patientExists) newSeriesData[projectID][patientID][studyUID] = newArr;
+        } else if (patientExists) newSeriesData[projectID][patientID][studyUID] = data;
         else if (projectExists) newSeriesData[projectID][patientID] = { [studyUID]: data };
         else newSeriesData[projectID] = { [patientID]: { [studyUID]: data } };
         return { ...state, seriesData: newSeriesData };

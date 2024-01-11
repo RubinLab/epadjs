@@ -435,3 +435,17 @@ export const getAllowedTermsOfTemplateComponent = (template, componentLabel) => 
   })
   return termMeanings;
 }
+
+export const otherSeriesOpened = (seriesList, index) => {
+  const map = {};
+  let count = 0;
+  while (count < index) {
+    let pid, patID, stUID;
+    ({ projectID: pid, patientID: patID, studyUID: stUID } = seriesList[count]);
+    map[`${pid}-${patID}-${stUID}`] = true;
+    count++;
+  }
+  const { projectID, patientID, studyUID } = seriesList[index];
+  const key = `${projectID}-${patientID}-${studyUID}`;
+  return map[key];
+}

@@ -107,7 +107,7 @@ class FlexView extends React.Component {
       if (!dataExists) {
         ({ data: series } = await getSeries(projectID, patientID, studyUID));
         this.props.dispatch(
-          setSeriesData(projectID, patientID, studyUID, series)
+          setSeriesData(projectID, patientID, studyUID, series, true)
         );
       } else series = seriesData[projectID][patientID][studyUID];
     } catch (err) {

@@ -31,7 +31,7 @@ import {
   clearSelection,
   updateGridWithMultiFrameInfo,
   clearMultiFrameAimJumpFlags,
-  fillSeriesDescfullData
+  // fillSeriesDescfullData
 } from "../annotationsList/action";
 import { deleteAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
@@ -656,11 +656,11 @@ class DisplayView extends Component {
               ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
               : null;
 
-          if (mode === 'teaching') {
-            getSeries(series[activePort].projectID, series[activePort].patientID, series[activePort].studyUID).then((res) => {
-              this.props.dispatch(fillSeriesDescfullData(res.data));
-            }).catch(err => console.error(err));
-          }
+          // if (mode === 'teaching') {
+          //   getSeries(series[activePort].projectID, series[activePort].patientID, series[activePort].studyUID).then((res) => {
+          //     this.props.dispatch(fillSeriesDescfullData(res.data));
+          //   }).catch(err => console.error(err));
+          // }
 
           // TODO: how this logic works if it is not a multiframe img/series like patient7
           // should i add a isMultiFrame constol before checking key
@@ -2214,19 +2214,23 @@ class DisplayView extends Component {
     const { activePort } = this.props;
     const tempData = [...this.state.data];
     const activeElement = cornerstone.getEnabledElements()[activePort];
-    const { data } = cornerstoneTools.getToolState(
-      activeElement.element,
-      "stack"
-    );
-    tempData[activePort].stack = data[0];
-    Object.assign(tempData[activePort].stack, data[0]);
-    // set the state to preserve the imageId
-    // this.setState({ data: tempData });
-    // // dispatch to write the newImageId to store
-    event.detail.viewportIndex = index;
-    this.props.dispatch(updateImageId(imageId, event.detail.viewportIndex));
-    const yaw = event.detail;
-    window.dispatchEvent(new CustomEvent("newImage", { detail: yaw }));
+    let data = [];
+    if (activeElement) {  
+      data = cornerstoneTools.getToolState(
+        activeElement.element,
+        "stack"
+      ).data; 
+    
+      tempData[activePort].stack = data[0];
+      Object.assign(tempData[activePort].stack, data[0]);
+      // set the state to preserve the imageId
+      // this.setState({ data: tempData });
+      // // dispatch to write the newImageId to store
+      event.detail.viewportIndex = index;
+      this.props.dispatch(updateImageId(imageId, event.detail.viewportIndex));
+      const yaw = event.detail;
+      window.dispatchEvent(new CustomEvent("newImage", { detail: yaw }));
+    }
   };
 
   onAnnotate = () => {
@@ -2434,6 +2438,7 @@ class DisplayView extends Component {
                           isAimEditorShowing={this.state.showAimEditor}
                           onCloseAimEditor={this.closeAimEditor}
                           onSelect={this.jumpToImage}
+                          index={i}
                         />
                       </div>
                     </div>
