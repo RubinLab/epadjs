@@ -2315,7 +2315,8 @@ class DisplayView extends Component {
       10
     );
     this.setState({ data: newData });
-    this.props.dispatch(clearMultiFrameAimJumpFlags());
+    console.log(" &&&&&&&&&&&&&&&&&&&&& this one is called");
+    // this.props.dispatch(clearMultiFrameAimJumpFlags());
   };
 
   handleJumpChange = (i, event) => {
