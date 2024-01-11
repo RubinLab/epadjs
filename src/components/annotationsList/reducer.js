@@ -401,16 +401,16 @@ const asyncReducer = (state = initialState, action) => {
         // if so check if seriesData is filled  // if not fill the data
         const { significanceOrder: order, template: tempCode } = state.openSeries[state.activePort];
         const seriesDataForTeaching = _.cloneDeep(state.seriesData);
-        // if (order && tempCode === teachingFileTempCode) {
-        const seriesDataForTFProject = state.seriesData[pidFromRef]
-        const seriesDataForTFPatient = seriesDataForTFProject && state.seriesData[pidFromRef][action.payload.ref.patientID]
-        const seriesDataForTFStudy = seriesDataForTFPatient && state.seriesData[pidFromRef][action.payload.ref.studyUID];
-        if (!seriesDataForTFStudy) {
-          if (seriesDataForTFPatient)
-            seriesDataForTeaching[pidFromRef][action.payload.ref.patientID] = { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] };
-          else seriesDataForTeaching[pidFromRef] = { [action.payload.ref.patientID]: { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] } };
+        if (order && tempCode === teachingFileTempCode) {
+          const seriesDataForTFProject = state.seriesData[pidFromRef]
+          const seriesDataForTFPatient = seriesDataForTFProject && state.seriesData[pidFromRef][action.payload.ref.patientID]
+          const seriesDataForTFStudy = seriesDataForTFPatient && state.seriesData[pidFromRef][action.payload.ref.studyUID];
+          if (!seriesDataForTFStudy) {
+            if (seriesDataForTFPatient)
+              seriesDataForTeaching[pidFromRef][action.payload.ref.patientID] = { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] };
+            else seriesDataForTeaching[pidFromRef] = { [action.payload.ref.patientID]: { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] } };
+          }
         }
-        // }
 
         const result = Object.assign({}, state, {
           loading: false,
