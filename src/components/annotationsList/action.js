@@ -74,7 +74,11 @@ export const fillSeriesDescfullData = (data) => {
   return { type: FILL_DESC, data };
 }
 
-export const setSeriesData = (projectID, patientID, studyUID, data) => {
+export const setSeriesData = (projectID, patientID, studyUID, seriesData, filled) => {
+  const data = seriesData.map(el => {
+    el.filled = filled;
+    return el;
+  });
   return { type: SET_SERIES_DATA, payload: { projectID, patientID, studyUID, data } };
 }
 
@@ -722,7 +726,8 @@ export const getSingleSerie = (serie, annotation, wadoUrl, seriesData) => {
   return async (dispatch, getState) => {
     try {
       await dispatch(loadAnnotations());
-      let { patientID, studyUID, seriesUID, numberOfAnnotations, projectID } = serie;
+      let { patientID, studyUID, seriesUID, numberOfAnnotations, projectID, subjectID } = serie;
+      patientID = patientID ? patientID : subjectID;
       let reference = {
         patientID,
         studyUID,
@@ -758,8 +763,9 @@ const getSeriesAdditionalInfo = (uids) => {
       let { studyUID, projectID, patientID } = uids;
       const { data: series } = await getSeries(projectID, patientID, studyUID);
       const additionalaDataArray = series.reduce((all, item) => {
+        const filled = true;
         const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo, seriesUID } = item;
-        all.push({ numberOfAnnotations, numberOfImages, seriesDescription, seriesNo, projectID, patientID, studyUID, seriesUID });
+        all.push({ numberOfAnnotations, numberOfImages, seriesDescription, seriesNo, projectID, patientID, studyUID, filled, seriesUID });
         return all;
       }, []);
       resolve(additionalaDataArray);
