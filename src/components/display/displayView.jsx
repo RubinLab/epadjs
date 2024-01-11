@@ -217,6 +217,7 @@ class DisplayView extends Component {
     // }
     this.props.dispatch(clearSelection());
     this.getViewports();
+    console.log(" $$$$$ in component did mount before getdata - no args")
     this.getData();
     this.formInvertMap();
     if (series.length > 0) {
@@ -327,6 +328,7 @@ class DisplayView extends Component {
       console.log(" ########### in else if ")
       await this.setState({ isLoading: true });
       this.getViewports();
+      console.log("$$$$$$$$ - call getData line330 - no args")
       this.getData();
       this.formInvertMap();
     }
@@ -627,7 +629,7 @@ class DisplayView extends Component {
   getData(multiFrameIndex, frameNo) {
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
-      console.log(" ======> this.state.multiFrameAimJumped", this.state.multiFrameAimJumped);
+      console.log(" ======> this.state.multiFrameAimJumped in getData", this.state.multiFrameAimJumped);
       const { series, activePort } = this.props;
       const { dataIndexMap, data } = this.state;
       var promises = [];
