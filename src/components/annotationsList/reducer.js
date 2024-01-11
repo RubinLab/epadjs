@@ -136,8 +136,8 @@ const asyncReducer = (state = initialState, action) => {
         const newSeriesData = _.cloneDeep(state.seriesData);
         const { projectID, patientID, studyUID, data } = action.payload;
         const projectExists = newSeriesData[projectID];
-        const patientExists = projectExists ? newSeriesData[projectID][patientID] : false;
-        const studyExists = patientExists ? newSeriesData[projectID][patientID][studyUID] : false;
+        const patientExists = projectExists && projectExists[patientID] ? projectExists[patientID] : false;
+        const studyExists = patientExists && patientExists[studyUID] ? patientExists[studyUID] : false;
 
         if (studyExists) {
           let newArr = newSeriesData[projectID][patientID][studyUID].reduce((all, item) => {
@@ -146,7 +146,7 @@ const asyncReducer = (state = initialState, action) => {
           }, []);
           newArr = [...newArr, ...data];
           newSeriesData[projectID][patientID][studyUID] = newArr;
-        } else if (patientExists) newSeriesData[projectID][patientID][studyUID] = newArr;
+        } else if (patientExists) newSeriesData[projectID][patientID][studyUID] = data;
         else if (projectExists) newSeriesData[projectID][patientID] = { [studyUID]: data };
         else newSeriesData[projectID] = { [patientID]: { [studyUID]: data } };
         return { ...state, seriesData: newSeriesData };
