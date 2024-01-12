@@ -218,7 +218,7 @@ class DisplayView extends Component {
     this.props.dispatch(clearSelection());
     this.getViewports();
     console.log(" $$$$$ in component did mount before getdata - no args")
-    this.getData();
+    this.getData(undefined, undefined, "^^^^ componentDidMount");
     this.formInvertMap();
     if (series.length > 0) {
       this.setSubComponentHeights();
@@ -315,7 +315,7 @@ class DisplayView extends Component {
       console.log(" %%%%%%%%%%% passes in if get data ", multiFrameAimJumpData[0], multiFrameAimJumpData[1]);
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1]);
+      this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1], " ^^^^^ didupdate 1");
       this.formInvertMap();
       // } else if (
       //   (prevProps.series !== this.props.series &&
@@ -329,7 +329,7 @@ class DisplayView extends Component {
       await this.setState({ isLoading: true });
       this.getViewports();
       console.log("$$$$$$$$ - call getData line330 - no args")
-      this.getData();
+      this.getData(undefined, undefined, " ^^^^^ didupdated 2");
       this.formInvertMap();
     }
     // This is to handle late loading of aimsList from store but it also calls get Data
@@ -626,7 +626,7 @@ class DisplayView extends Component {
     return segAims;
   };
 
-  getData(multiFrameIndex, frameNo) {
+  getData(multiFrameIndex, frameNo, fm) {
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
       console.log(" ======> this.state.multiFrameAimJumped in getData", this.state.multiFrameAimJumped);
@@ -659,7 +659,8 @@ class DisplayView extends Component {
             series[i],
             i,
             multiFrameIndex,
-            frameNo
+            frameNo, 
+            fm
           );
           promises.push(promise);
           indexKeys[indexKey] = i;
@@ -680,7 +681,7 @@ class DisplayView extends Component {
           console.log(' == multiFrameIndex', multiFrameIndex);
           console.log(' == frameNo', frameNo);
           console.log(' == series[activePort].aimID', series[activePort].aimID);
-          console.log(" ////// key definers /////");
+          console.log(" ////// key definers ///// fm ^^", fm);
           console.log(' +++++  promises resolve ---> key', key);
 
           // if (mode === 'teaching') {
@@ -733,10 +734,13 @@ class DisplayView extends Component {
     const { series } = this.props;
     var promises = [];
     const { viewportId, id, multiFrameIndex } = e.detail;
+    console.log(" $$$$$$$$$ handleSerieReplace");
     const promise = this.getImageStack(
       series[viewportId],
       viewportId,
-      multiFrameIndex
+      multiFrameIndex,
+      undefined,
+      " ^^^^ handleSerieReplace"
     );
     promises.push(promise);
     Promise.all(promises).then((res) => {
@@ -852,7 +856,8 @@ class DisplayView extends Component {
     return metadataURI + "/frames/1";
   };
 
-  getImageStack = async (serie, index, multiFrameIndex, frameNo) => {
+  getImageStack = async (serie, index, multiFrameIndex, frameNo, fm) => {
+    console.log(" $$$$$$$$ fm", fm);
     const wadoUrl = sessionStorage.getItem("wadoUrl");
     if (wadoUrl.includes("wadors"))
       return this.getImageStackWithWadors(
@@ -2298,11 +2303,11 @@ class DisplayView extends Component {
     ) {
       this.setState({ isLoading: true });
       console.log(" |||| before null null")
-      this.getData(null, null);
+      this.getData(null, null, " ^^^ jumpToAimImage 1");
     } else {
       const multiFrameIndex = seriesAddition[activePort].multiFrameMap[imageID];
       console.log(" ||||| in else multiFrameIndex, frameNo", multiFrameIndex, frameNo);
-      this.getData(multiFrameIndex, frameNo);
+      this.getData(multiFrameIndex, frameNo, " ^^^^ jumpToAimImage 2");
     }
   };
 
