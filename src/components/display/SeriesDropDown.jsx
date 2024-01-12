@@ -112,6 +112,8 @@ const SeriesDropDown = (props) => {
         data-for="dropdownOtherSeries"
       >
       {loading && seriesList.length === 0 && <div class="spinner-border" role="status" style={{'height': '12px', 'width': '12px', 'fontSize': '8px', 'marginRight': '10px', 'marginLeft': '10px'}}/>} 
+      {<div style={{maxHeight: `${props.height - 50}px`, overflow: 'auto'}}
+>
         {seriesList &&
           seriesList.length > 0 &&
           seriesList.map((series, i) => {
@@ -155,6 +157,7 @@ const SeriesDropDown = (props) => {
                 </Dropdown.Item>
             );
           })}
+      </div>}
       </DropdownButton>
     </div>
   );
