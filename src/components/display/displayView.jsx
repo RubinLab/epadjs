@@ -2439,6 +2439,7 @@ class DisplayView extends Component {
                           onCloseAimEditor={this.closeAimEditor}
                           onSelect={this.jumpToImage}
                           index={i}
+                          height={this.state.height}
                         />
                       </div>
                     </div>
