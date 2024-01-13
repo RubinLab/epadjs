@@ -887,21 +887,18 @@ class DisplayView extends Component {
     let cornerstoneImageIds = [];
     let seriesMetadata = [];
     let seriesMetadataMap = {};
+    const multiframeSeriesData = {};
     let metadata2D = [];
     const multiFrameMap = {};
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
     if (imageUrls.length > 1) {
-      const multiframeSeriesData = {};
       for (let i = 0; i < imageUrls.length; i++) {
         if (imageUrls[i][0].multiFrameImage) {
           multiFrameMap[imageUrls[i][0].imageUID] = i;
           multiframeSeriesData[`${imageUrls[i][0].seriesUID}_${i}`] = imageUrls[i][0];
         }
       }
-      this.props.dispatch(
-        updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData)
-      );
     }
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage
@@ -1037,6 +1034,10 @@ class DisplayView extends Component {
       }
     }
 
+    this.props.dispatch(
+      updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData)
+    );
+    
     // DELETE_1
     // const { imageIds } = this.state;
     // this.setState({ imageIds: { ...imageIds, ...newImageIds } });
