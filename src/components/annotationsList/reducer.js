@@ -160,6 +160,7 @@ const asyncReducer = (state = initialState, action) => {
         // const series = _.cloneDeep(state.openSeries);
         const seriesAddition = _.cloneDeep(state.openSeriesAddition);
         const { hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData } = action.payload;
+        console.log(' ---> multiframeSeriesData', multiframeSeriesData);
         let seriesDataMulti = Object.values(multiframeSeriesData);
         const {
           projectID: multiPID,
@@ -190,6 +191,8 @@ const asyncReducer = (state = initialState, action) => {
               el.seriesNo = seriesToCopyFm.seriesNo;
               return el;
             })
+            console.log(" ----> newSeriesDataMulti[multiPID][multiPatID][multiStudyUID]", newSeriesDataMulti[multiPID][multiPatID][multiStudyUID]);
+            console.log(" ---> seriesDataMulti", seriesDataMulti);
             newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = [...newSeriesDataMulti[multiPID][multiPatID][multiStudyUID], ...seriesDataMulti];
           } else {
             if (multiPatIDExists) {
