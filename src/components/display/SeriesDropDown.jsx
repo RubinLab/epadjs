@@ -47,13 +47,11 @@ const SeriesDropDown = (props) => {
       setSeriesList(series);
     } else {
       setLoading(true);
-      // getSeries(projectID, patientID, studyUID).then(res => {
-      //   console.log(" ===> in seriesDropdown getSeries");
-      //   setSeriesList(res.data);
-      //   setLoading(false);
-      // }).catch((err) => console.error(err));
-      setSeriesList([]);
-
+      getSeries(projectID, patientID, studyUID).then(res => {
+        console.log(" ===> in seriesDropdown getSeries");
+        setSeriesList(res.data);
+        setLoading(false);
+      }).catch((err) => console.error(err));
     }
   }, [props.seriesData]);
 
