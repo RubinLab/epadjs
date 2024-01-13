@@ -633,7 +633,6 @@ class DisplayView extends Component {
 
         const { projectID, patientID, studyUID, seriesUID } = series[i];
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
-        // indexKey = multiFrameIndex ? `${indexKey}-${multiFrameIndex}` : indexKey;
 
         // if (typeof dataIndexMap[indexKey] !== "number") {
         if (!(dataIndexMap[indexKey] >= 0) || multiFrameIndex) {
@@ -905,7 +904,6 @@ class DisplayView extends Component {
     }, 0);
 
     const seriesMetadataExists = Array.isArray(seriesMetadata);
-    // const seriesMetadataExists = false;
 
     const useSeriesData =
       seriesMetadataExists &&
@@ -2290,7 +2288,7 @@ class DisplayView extends Component {
       10
     );
     this.setState({ data: newData });
-    // this.props.dispatch(clearMultiFrameAimJumpFlags());
+    this.props.dispatch(clearMultiFrameAimJumpFlags());
   };
 
   handleJumpChange = (i, event) => {
