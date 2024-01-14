@@ -55,7 +55,6 @@ const SeriesDropDown = (props) => {
           props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
           setLoading(false);
         }).catch((err) => console.error(err));
-        
       }
     }
   }, [props.seriesData]);

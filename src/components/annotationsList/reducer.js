@@ -182,10 +182,15 @@ const asyncReducer = (state = initialState, action) => {
         let newSeriesDataMulti = _.cloneDeep(state.seriesData);
         const multiPIDExists = newSeriesDataMulti[multiPID];
         const multiPatIDExists = multiPIDExists && newSeriesDataMulti[multiPID][multiPatID];
-        const seriesExists = multiPIDExists && multiPatIDExists && newSeriesDataMulti[multiPID][multiPatID][multiStudyUID];
+        const existingSeries = multiPIDExists && multiPatIDExists && newSeriesDataMulti[multiPID][multiPatID][multiStudyUID];
+        let mfLookUpMap = {};
         if (!state.openSeriesAddition[state.activePort].multiFrameMap) {
-          if (seriesExists) {
+          if (existingSeries) {
             const seriesToCopyFm = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].find((element) => element.seriesUID === seriesDataMulti[0].seriesUID);
+            mfLookUpMap = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].reduce((all, item, index) => {
+              all[item.imageID] = true;
+              return all;
+            }, {})
             seriesDataMulti = seriesDataMulti.map((el) => {
               el.seriesDescription = seriesToCopyFm.seriesDescription;
               el.seriesNo = seriesToCopyFm.seriesNo;
@@ -193,7 +198,11 @@ const asyncReducer = (state = initialState, action) => {
             })
             console.log(" ----> newSeriesDataMulti[multiPID][multiPatID][multiStudyUID]", newSeriesDataMulti[multiPID][multiPatID][multiStudyUID]);
             console.log(" ---> seriesDataMulti", seriesDataMulti);
-            newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = [...newSeriesDataMulti[multiPID][multiPatID][multiStudyUID], ...seriesDataMulti];
+            seriesDataMulti.forEach((el) => {
+              if (!mfLookUpMap[el.imageID]) {
+                newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].push(el);
+              }
+            });
           } else {
             if (multiPatIDExists) {
               newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = seriesDataMulti;
