@@ -188,18 +188,25 @@ const asyncReducer = (state = initialState, action) => {
           if (existingSeries) {
             const seriesToCopyFm = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].find((element) => element.seriesUID === seriesDataMulti[0].seriesUID);
             mfLookUpMap = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].reduce((all, item, index) => {
-              all[item.imageID] = true;
-              return all;
+              if (item.multiFrameImage) {
+                const { projectID, patientID, studyUID, seriesUID, imageUID } = item;
+                const key = `${projectID}-${patientID}-${studyUID}-${seriesUID}-${imageUID}`;
+                all[key] = true;
+                return all;
+              }
             }, {})
             seriesDataMulti = seriesDataMulti.map((el) => {
               el.seriesDescription = seriesToCopyFm.seriesDescription;
               el.seriesNo = seriesToCopyFm.seriesNo;
               return el;
             })
+            console.log(" +++> map, mfLookUpMap", mfLookUpMap);
             console.log(" ----> newSeriesDataMulti[multiPID][multiPatID][multiStudyUID]", newSeriesDataMulti[multiPID][multiPatID][multiStudyUID]);
             console.log(" ---> seriesDataMulti", seriesDataMulti);
             seriesDataMulti.forEach((el) => {
-              if (!mfLookUpMap[el.imageID]) {
+              const { projectID, patientID, studyUID, seriesUID, imageUID } = el;
+              const key = `${projectID}-${patientID}-${studyUID}-${seriesUID}-${imageUID}`;
+              if (!mfLookUpMap[key]) {
                 newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].push(el);
               }
             });
