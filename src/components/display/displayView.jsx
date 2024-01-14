@@ -217,7 +217,7 @@ class DisplayView extends Component {
     // }
     this.props.dispatch(clearSelection());
     this.getViewports();
-    this.getData();
+    this.getData(undefined, undefined, "componentDidMount");
     this.formInvertMap();
     if (series.length > 0) {
       this.setSubComponentHeights();
@@ -299,6 +299,7 @@ class DisplayView extends Component {
       newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved;
 
     // TODO: check if loading/true-false control is required for the first condition
+
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
       multiFrameAimJumpData &&
@@ -308,7 +309,7 @@ class DisplayView extends Component {
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1]);
+      this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1], "didupdate 1");
       this.formInvertMap();
       // } else if (
       //   (prevProps.series !== this.props.series &&
@@ -320,7 +321,7 @@ class DisplayView extends Component {
     } else if (prevProps.series.length !== series.length) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData();
+      this.getData(undefined, undefined, "didupdated 2");
       this.formInvertMap();
     }
     // This is to handle late loading of aimsList from store but it also calls get Data
@@ -616,7 +617,7 @@ class DisplayView extends Component {
     return segAims;
   };
 
-  getData(multiFrameIndex, frameNo) {
+  getData(multiFrameIndex, frameNo, fm) {
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
       const { series, activePort } = this.props;
@@ -631,7 +632,7 @@ class DisplayView extends Component {
         // [{stack -> UIDkey, ycurImgIndex, imfIds}, {}]
 
         const { projectID, patientID, studyUID, seriesUID } = series[i];
-        const indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
+        let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
 
         // if (typeof dataIndexMap[indexKey] !== "number") {
         if (!(dataIndexMap[indexKey] >= 0) || multiFrameIndex) {
@@ -639,7 +640,8 @@ class DisplayView extends Component {
             series[i],
             i,
             multiFrameIndex,
-            frameNo
+            frameNo, 
+            fm
           );
           promises.push(promise);
           indexKeys[indexKey] = i;
@@ -649,12 +651,14 @@ class DisplayView extends Component {
           newData[index] = this.state.data[index];
         }
       }
+
       if (promises.length > 0) {
         Promise.all(promises).then((res) => {
           const key =
-            multiFrameIndex && frameNo && series[activePort].aimID
-              ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
-              : null;
+          multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
+          ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
+          : null;
+          console.log(" getData fm ^^", fm);
 
           // if (mode === 'teaching') {
           //   getSeries(series[activePort].projectID, series[activePort].patientID, series[activePort].studyUID).then((res) => {
@@ -709,7 +713,9 @@ class DisplayView extends Component {
     const promise = this.getImageStack(
       series[viewportId],
       viewportId,
-      multiFrameIndex
+      multiFrameIndex,
+      undefined,
+      "handleSerieReplace"
     );
     promises.push(promise);
     Promise.all(promises).then((res) => {
@@ -825,7 +831,7 @@ class DisplayView extends Component {
     return metadataURI + "/frames/1";
   };
 
-  getImageStack = async (serie, index, multiFrameIndex, frameNo) => {
+  getImageStack = async (serie, index, multiFrameIndex, frameNo, fm) => {
     const wadoUrl = sessionStorage.getItem("wadoUrl");
     if (wadoUrl.includes("wadors"))
       return this.getImageStackWithWadors(
@@ -855,21 +861,18 @@ class DisplayView extends Component {
     let cornerstoneImageIds = [];
     let seriesMetadata = [];
     let seriesMetadataMap = {};
+    const multiframeSeriesData = {};
     let metadata2D = [];
     const multiFrameMap = {};
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
     if (imageUrls.length > 1) {
-      const multiframeSeriesData = {};
       for (let i = 0; i < imageUrls.length; i++) {
         if (imageUrls[i][0].multiFrameImage) {
           multiFrameMap[imageUrls[i][0].imageUID] = i;
           multiframeSeriesData[`${imageUrls[i][0].seriesUID}_${i}`] = imageUrls[i][0];
         }
       }
-      this.props.dispatch(
-        updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData)
-      );
     }
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage
@@ -1002,6 +1005,10 @@ class DisplayView extends Component {
       }
     }
 
+    this.props.dispatch(
+      updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData)
+    );
+    
     // DELETE_1
     // const { imageIds } = this.state;
     // this.setState({ imageIds: { ...imageIds, ...newImageIds } });
@@ -2251,7 +2258,6 @@ class DisplayView extends Component {
     // if there are multiframe data call get image stack and pass frame data etc
     const { seriesAddition, series, activePort } = this.props;
     const { aimId, index, imageID, frameNo } = event.detail;
-
     const imageIndex = this.getImageIndex(
       seriesAddition[index],
       this.state.data[index].stack.imageIds,
@@ -2268,10 +2274,10 @@ class DisplayView extends Component {
       !seriesAddition[activePort].multiFrameMap[imageID]
     ) {
       this.setState({ isLoading: true });
-      this.getData(null, null);
+      this.getData(null, null, "jumpToAimImage 1");
     } else {
       const multiFrameIndex = seriesAddition[activePort].multiFrameMap[imageID];
-      this.getData(multiFrameIndex, frameNo);
+      this.getData(multiFrameIndex, frameNo, "jumpToAimImage 2");
     }
   };
 
