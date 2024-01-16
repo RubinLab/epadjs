@@ -153,8 +153,8 @@ class AimEditor extends Component {
   };
   // returns the next default lesion name according to the # of lesions in the series
   getDefaultLesionName = () => {
-    const { openSeries, activePort } = this.props;
-    const { imageAnnotations } = openSeries[activePort];
+    const { activePort, openSeriesAddition } = this.props;
+    const { imageAnnotations } = openSeriesAddition[activePort];
     let totalNumShapes = 1;
     if (imageAnnotations) {
       Object.values(imageAnnotations).map((shapesOnImage) => {
@@ -1403,6 +1403,7 @@ class AimEditor extends Component {
 const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
+    openSeriesAddition: state.annotationsListReducer.openSeriesAddition,
     activePort: state.annotationsListReducer.activePort,
     templates: state.annotationsListReducer.templates,
     projectMap: state.annotationsListReducer.projectMap,
