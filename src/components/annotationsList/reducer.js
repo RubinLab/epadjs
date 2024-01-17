@@ -179,30 +179,38 @@ const asyncReducer = (state = initialState, action) => {
         seriesAddition[state.activePort].multiFrameIndex = multiframeIndex;
         seriesAddition[state.activePort].multiFrameMap = multiFrameMap;
         const newState = { ...state };
+
         let newSeriesDataMulti = _.cloneDeep(state.seriesData);
         const multiPIDExists = newSeriesDataMulti[multiPID];
         const multiPatIDExists = multiPIDExists && newSeriesDataMulti[multiPID][multiPatID];
         const existingSeries = multiPIDExists && multiPatIDExists && newSeriesDataMulti[multiPID][multiPatID][multiStudyUID];
+        console.log(" ===> existingSeries", existingSeries);
         let mfLookUpMap = {};
+        console.log(" ====> state.openSeriesAddition[state.activePort].multiFrameMap", state.openSeriesAddition[state.activePort].multiFrameMap);
         if (!state.openSeriesAddition[state.activePort].multiFrameMap) {
           if (existingSeries) {
+            // find the correct series to get description from
             const seriesToCopyFm = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].find((element) => element.seriesUID === seriesDataMulti[0].seriesUID);
+
+            //prevent duplicate multiframe series to be added 
             mfLookUpMap = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].reduce((all, item, index) => {
               if (item.multiFrameImage) {
                 const { projectID, patientID, studyUID, seriesUID, imageUID } = item;
                 const key = `${projectID}-${patientID}-${studyUID}-${seriesUID}-${imageUID}`;
                 all[key] = true;
-                return all;
               }
+              return all;
             }, {})
             seriesDataMulti = seriesDataMulti.map((el) => {
               el.seriesDescription = seriesToCopyFm.seriesDescription;
               el.seriesNo = seriesToCopyFm.seriesNo;
               return el;
             })
+            console.log(" ]]]]]]] seriesDataMulti", seriesDataMulti);
             console.log(" +++> map, mfLookUpMap", mfLookUpMap);
             console.log(" ----> newSeriesDataMulti[multiPID][multiPatID][multiStudyUID]", newSeriesDataMulti[multiPID][multiPatID][multiStudyUID]);
             console.log(" ---> seriesDataMulti", seriesDataMulti);
+
             seriesDataMulti.forEach((el) => {
               const { projectID, patientID, studyUID, seriesUID, imageUID } = el;
               const key = `${projectID}-${patientID}-${studyUID}-${seriesUID}-${imageUID}`;
