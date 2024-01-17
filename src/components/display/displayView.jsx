@@ -722,7 +722,7 @@ class DisplayView extends Component {
       const newData = [...this.state.data];
       newData[viewportId] = res[0];
       newData[viewportId].stack.currentImageIdIndex = 0; 
-      this.setState({ data: newData });
+      this.setState({ data: newData, isLoading: false });
     });
   };
 
@@ -1005,9 +1005,11 @@ class DisplayView extends Component {
       }
     }
 
-    this.props.dispatch(
-      updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData)
-    );
+    if (Object.entries(multiFrameMap).length > 0) {
+      this.props.dispatch(
+        updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData)
+      );
+    }
     
     // DELETE_1
     // const { imageIds } = this.state;
