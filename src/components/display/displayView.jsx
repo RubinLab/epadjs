@@ -299,6 +299,10 @@ class DisplayView extends Component {
       newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved;
 
     // TODO: check if loading/true-false control is required for the first condition
+    console.log(' ====> multiFrameAimJumpData', multiFrameAimJumpData);
+    console.log(' ===> prevProps.multiFrameAimJumpData', prevProps.multiFrameAimJumpData);
+    console.log(' =====> this.state.multiFrameAimJumped', this.state.multiFrameAimJumped);
+    console.log(" ==> series[activePort].aimID", series[activePort].aimID);
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
       multiFrameAimJumpData &&
