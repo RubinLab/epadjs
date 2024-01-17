@@ -217,8 +217,7 @@ class DisplayView extends Component {
     // }
     this.props.dispatch(clearSelection());
     this.getViewports();
-    console.log(" $$$$$ in component did mount before getdata - no args")
-    this.getData(undefined, undefined, "^^^^ componentDidMount");
+    this.getData(undefined, undefined, "componentDidMount");
     this.formInvertMap();
     if (series.length > 0) {
       this.setSubComponentHeights();
@@ -300,10 +299,6 @@ class DisplayView extends Component {
       newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved;
 
     // TODO: check if loading/true-false control is required for the first condition
-    console.log(' ====> multiFrameAimJumpData', multiFrameAimJumpData);
-    console.log(' ===> prevProps.multiFrameAimJumpData', prevProps.multiFrameAimJumpData);
-    console.log(' =====> this.state.multiFrameAimJumped', this.state.multiFrameAimJumped);
-    console.log(" ==> series[activePort].aimID", series[activePort].aimID);
 
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
@@ -312,10 +307,9 @@ class DisplayView extends Component {
       `${series[activePort].aimID}-${multiFrameAimJumpData[0]}-${multiFrameAimJumpData[1]}` !==
         this.state.multiFrameAimJumped
     ) {
-      console.log(" %%%%%%%%%%% passes in if get data ", multiFrameAimJumpData[0], multiFrameAimJumpData[1]);
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1], " ^^^^^ didupdate 1");
+      this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1], "didupdate 1");
       this.formInvertMap();
       // } else if (
       //   (prevProps.series !== this.props.series &&
@@ -325,18 +319,15 @@ class DisplayView extends Component {
       //     this.props.loading === false)
       // ) {
     } else if (prevProps.series.length !== series.length) {
-      console.log(" ########### in else if ")
       await this.setState({ isLoading: true });
       this.getViewports();
-      console.log("$$$$$$$$ - call getData line330 - no args")
-      this.getData(undefined, undefined, " ^^^^^ didupdated 2");
+      this.getData(undefined, undefined, "didupdated 2");
       this.formInvertMap();
     }
     // This is to handle late loading of aimsList from store but it also calls get Data
     // each time visibility of aims change
     // else if (rerenderAims) {
       else if (rerenderAims) {
-      console.log('$$$$$  renderAims ???');  
       this.renderAims(false, rerenderAims);
       //TODO: check if filling aimsList process changes openseries
       // if chanes sever that data from openseries
@@ -629,7 +620,6 @@ class DisplayView extends Component {
   getData(multiFrameIndex, frameNo, fm) {
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
-      console.log(" ======> this.state.multiFrameAimJumped in getData", this.state.multiFrameAimJumped);
       const { series, activePort } = this.props;
       const { dataIndexMap, data } = this.state;
       var promises = [];
@@ -645,16 +635,8 @@ class DisplayView extends Component {
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
         // indexKey = multiFrameIndex ? `${indexKey}-${multiFrameIndex}` : indexKey;
 
-        // console.log(" ---> indexkey", indexKey);
-        // console.log(" ---> frameNo", frameNo);
-        // console.log(" ---> multiFrameIndex", multiFrameIndex);
-
         // if (typeof dataIndexMap[indexKey] !== "number") {
         if (!(dataIndexMap[indexKey] >= 0) || multiFrameIndex) {
-          // console.log(' ---> !(dataIndexMap[indexKey] >= 0', !(dataIndexMap[indexKey] >= 0));
-          // console.log(" ---> multiFrameIndex", multiFrameIndex);
-          // console.log(" ====> series[activePort].aimID", series[activePort].aimID);
-
           const promise = this.getImageStack(
             series[i],
             i,
@@ -677,12 +659,7 @@ class DisplayView extends Component {
           multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
           ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
           : null;
-          console.log(" ////// key definers:")
-          console.log(' == multiFrameIndex', multiFrameIndex);
-          console.log(' == frameNo', frameNo);
-          console.log(' == series[activePort].aimID', series[activePort].aimID);
-          console.log(" ////// key definers ///// fm ^^", fm);
-          console.log(' +++++  promises resolve ---> key', key);
+          console.log(" getData fm ^^", fm);
 
           // if (mode === 'teaching') {
           //   getSeries(series[activePort].projectID, series[activePort].patientID, series[activePort].studyUID).then((res) => {
@@ -734,13 +711,12 @@ class DisplayView extends Component {
     const { series } = this.props;
     var promises = [];
     const { viewportId, id, multiFrameIndex } = e.detail;
-    console.log(" $$$$$$$$$ handleSerieReplace");
     const promise = this.getImageStack(
       series[viewportId],
       viewportId,
       multiFrameIndex,
       undefined,
-      " ^^^^ handleSerieReplace"
+      "handleSerieReplace"
     );
     promises.push(promise);
     Promise.all(promises).then((res) => {
@@ -857,7 +833,6 @@ class DisplayView extends Component {
   };
 
   getImageStack = async (serie, index, multiFrameIndex, frameNo, fm) => {
-    console.log(" $$$$$$$$ fm", fm);
     const wadoUrl = sessionStorage.getItem("wadoUrl");
     if (wadoUrl.includes("wadors"))
       return this.getImageStackWithWadors(
@@ -942,7 +917,6 @@ class DisplayView extends Component {
     let middleImage = null;
 
     if (!useSeriesData) {
-      console.log(" --- useSeriesData is false in 1");
       const result = await getImageMetadata(
         wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage
       );
@@ -981,7 +955,6 @@ class DisplayView extends Component {
       let distance = null;
       try {
         if (!useSeriesData) {
-          console.log(" --- useSeriesData is false in 2");
           const result = await getImageMetadata(baseUrl);
           const data = result.data;
           imgData = data[0];
@@ -2287,8 +2260,6 @@ class DisplayView extends Component {
     // if there are multiframe data call get image stack and pass frame data etc
     const { seriesAddition, series, activePort } = this.props;
     const { aimId, index, imageID, frameNo } = event.detail;
-    console.log(" &&&&&&&& jumpToAimImage", aimId, index, imageID, frameNo);
-
     const imageIndex = this.getImageIndex(
       seriesAddition[index],
       this.state.data[index].stack.imageIds,
@@ -2305,12 +2276,10 @@ class DisplayView extends Component {
       !seriesAddition[activePort].multiFrameMap[imageID]
     ) {
       this.setState({ isLoading: true });
-      console.log(" |||| before null null")
-      this.getData(null, null, " ^^^ jumpToAimImage 1");
+      this.getData(null, null, "jumpToAimImage 1");
     } else {
       const multiFrameIndex = seriesAddition[activePort].multiFrameMap[imageID];
-      console.log(" ||||| in else multiFrameIndex, frameNo", multiFrameIndex, frameNo);
-      this.getData(multiFrameIndex, frameNo, " ^^^^ jumpToAimImage 2");
+      this.getData(multiFrameIndex, frameNo, "jumpToAimImage 2");
     }
   };
 
@@ -2323,7 +2292,6 @@ class DisplayView extends Component {
       10
     );
     this.setState({ data: newData });
-    console.log(" &&&&&&&&&&&&&&&&&&&&& this one is called");
     // this.props.dispatch(clearMultiFrameAimJumpFlags());
   };
 
