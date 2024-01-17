@@ -184,10 +184,16 @@ const asyncReducer = (state = initialState, action) => {
         const multiPIDExists = newSeriesDataMulti[multiPID];
         const multiPatIDExists = multiPIDExists && newSeriesDataMulti[multiPID][multiPatID];
         const existingSeries = multiPIDExists && multiPatIDExists && newSeriesDataMulti[multiPID][multiPatID][multiStudyUID];
+        console.log('multiPID:', multiPID, ' - multiPatID:', multiPatID, ' - multiStudyUID:', multiStudyUID);
+        console.log(" ====++++> newSeriesDataMulti", newSeriesDataMulti);
         console.log(" ===> existingSeries", existingSeries);
+        console.log(' +++> multiPIDExists', multiPIDExists);
+        console.log(' +++> multiPatIDExists', multiPatIDExists);
+
         let mfLookUpMap = {};
         console.log(" ====> state.openSeriesAddition[state.activePort].multiFrameMap", state.openSeriesAddition[state.activePort].multiFrameMap);
         if (!state.openSeriesAddition[state.activePort].multiFrameMap) {
+          console.log(" ---> map failed")
           if (existingSeries) {
             // find the correct series to get description from
             const seriesToCopyFm = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].find((element) => element.seriesUID === seriesDataMulti[0].seriesUID);
@@ -219,11 +225,15 @@ const asyncReducer = (state = initialState, action) => {
               }
             });
           } else {
+            console.log(" in else ---> ")
             if (multiPatIDExists) {
+              console.log("multiPatIDExists");
               newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = seriesDataMulti;
             } else if (multiPIDExists) {
+              console.log("multiPIDExists");
               newSeriesDataMulti[multiPID][multiPatID] = { [multiStudyUID]: seriesDataMulti };
             } else {
+              console.log("else");
               newSeriesDataMulti[multiPID] = { [multiPatID]: { [multiStudyUID]: seriesDataMulti } };
             }
           }
