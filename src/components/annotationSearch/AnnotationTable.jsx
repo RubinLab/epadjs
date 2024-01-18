@@ -496,11 +496,12 @@ function AnnotationTable(props) {
       else if (existingData && existingData.length <= maxPort) {
         seriesArr = existingData;
       } else if (existingData && existingData.length > maxPort) {
-        seriesArr = existingData;
-        setSelected(seriesArr);
-        setShowSelectSeriesModal(true);
+        seriesArr = existingData.slice(0,maxPort);
+        // setSelected(seriesArr);
+        // setShowSelectSeriesModal(true);
       } else {
         seriesArr = await getSeriesData(selected, true);
+        seriesArr = seriesArr.slice(0,maxPort);
       }
     } else {
       seriesArr = await getSeriesData(selected);
