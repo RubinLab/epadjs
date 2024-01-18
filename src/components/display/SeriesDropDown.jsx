@@ -60,17 +60,13 @@ const SeriesDropDown = (props) => {
   }, [props.seriesData]);
 
   const handleSelect = (e) => {
-    console.log(" ----> selected key");
-    console.log(e);
     const UIDArr = e.split("_");
     const seriesUIDFmEvent = UIDArr[0];
     const multiFrameIndex = UIDArr[1];
     const { seriesUID } = props.openSeries[props.activePort];
 
     if (multiFrameIndex === undefined) {
-      console.log(" _____> not a mul;tiframe");
       const serie = seriesList.find((element) => element.seriesUID == e);
-      console.log("serie ---> ", serie);
       if (props.isAimEditorShowing) {
         // if (!props.onCloseAimEditor(true))
         //     return;
@@ -89,7 +85,6 @@ const SeriesDropDown = (props) => {
         })
       );
     } else {
-      console.log(" ----> it should be here if multiframe");
       props.onSelect(0, props.activePort, e);
       window.dispatchEvent(
         new CustomEvent("serieReplaced", {
@@ -122,7 +117,6 @@ const SeriesDropDown = (props) => {
         {seriesList &&
           seriesList.length > 0 &&
           seriesList.map((series, i) => {
-            console.log("series ---> ", series);
             const {
               seriesDescription,
               numberOfAnnotations,
@@ -136,9 +130,6 @@ const SeriesDropDown = (props) => {
             const openSeriesMultiFrameIndex =
               props.openSeriesAddition[props.activePort].multiFrameIndex;
             const uniqueKey = multiFrameImage ? `${seriesUID}_${i}` : seriesUID;
-            // console.log(' ===> series, multiFrameImage');
-            // console.log(multiFrameImage);
-            // console.log(uniqueKey)
             let isCurrent;
             if (!multiFrameImage) {
               isCurrent =

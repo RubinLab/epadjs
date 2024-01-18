@@ -159,9 +159,7 @@ const asyncReducer = (state = initialState, action) => {
       case CHECK_MULTIFRAME:
         // const series = _.cloneDeep(state.openSeries);
         const seriesAddition = _.cloneDeep(state.openSeriesAddition);
-        // console.log(' ----> seriesAddition', seriesAddition);
         const { hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData } = action.payload;
-        // console.log(' ---> multiframeSeriesData', multiframeSeriesData);
         let seriesDataMulti = Object.values(multiframeSeriesData);
         const {
           projectID: multiPID,
@@ -185,20 +183,11 @@ const asyncReducer = (state = initialState, action) => {
         const multiPIDExists = newSeriesDataMulti[multiPID];
         const multiPatIDExists = multiPIDExists && newSeriesDataMulti[multiPID][multiPatID];
         const existingSeries = multiPIDExists && multiPatIDExists && newSeriesDataMulti[multiPID][multiPatID][multiStudyUID];
-        // console.log('multiPID:', multiPID, ' - multiPatID:', multiPatID, ' - multiStudyUID:', multiStudyUID);
-        // console.log(" ====++++> newSeriesDataMulti", newSeriesDataMulti);
-        // console.log(" ===> existingSeries", existingSeries);
-        // console.log(' +++> multiPIDExists', multiPIDExists);
-        // console.log(' +++> multiPatIDExists', multiPatIDExists);
-
         let mfLookUpMap = {};
-        // console.log(" ====> state.openSeriesAddition[state.activePort].multiFrameMap", state.openSeriesAddition[state.activePort].multiFrameMap);
         if (!state.openSeriesAddition[state.activePort].multiFrameMap) {
-          // console.log(" ---> map failed")
           if (existingSeries) {
             // find the correct series to get description from
             const seriesToCopyFm = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].find((element) => element.seriesUID === seriesDataMulti[0].seriesUID);
-
             //prevent duplicate multiframe series to be added 
             mfLookUpMap = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].reduce((all, item, index) => {
               if (item.multiFrameImage) {
@@ -213,11 +202,6 @@ const asyncReducer = (state = initialState, action) => {
               el.seriesNo = seriesToCopyFm.seriesNo;
               return el;
             })
-            // console.log(" ]]]]]]] seriesDataMulti", seriesDataMulti);
-            // console.log(" +++> map, mfLookUpMap", mfLookUpMap);
-            // console.log(" ----> newSeriesDataMulti[multiPID][multiPatID][multiStudyUID]", newSeriesDataMulti[multiPID][multiPatID][multiStudyUID]);
-            // console.log(" ---> seriesDataMulti", seriesDataMulti);
-
             seriesDataMulti.forEach((el) => {
               const { projectID, patientID, studyUID, seriesUID, imageUID } = el;
               const key = `${projectID}-${patientID}-${studyUID}-${seriesUID}-${imageUID}`;
@@ -226,7 +210,6 @@ const asyncReducer = (state = initialState, action) => {
               }
             });
           } else {
-            // console.log(" in else ---> ")
             const desc = state.openSeriesAddition[state.activePort].seriesDescription;
             seriesDataMulti = seriesDataMulti.map((el) => {
               el.seriesDescription = desc ? desc : '';
@@ -234,23 +217,18 @@ const asyncReducer = (state = initialState, action) => {
             });
 
             if (multiPatIDExists) {
-              // console.log("multiPatIDExists");
               newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = [state.openSeriesAddition[state.activePort], ...seriesDataMulti];
             } else if (multiPIDExists) {
-              // console.log("multiPIDExists");
               newSeriesDataMulti[multiPID][multiPatID] = { [multiStudyUID]: [state.openSeriesAddition[state.activePort], ...seriesDataMulti] };
             } else {
-              // console.log("else");
               newSeriesDataMulti[multiPID] = { [multiPatID]: { [multiStudyUID]: [state.openSeriesAddition[state.activePort], ...seriesDataMulti] } };
             }
           }
         }
-        // console.log(' ----> newSeriesDataMulti', newSeriesDataMulti);
         newState.seriesData = newSeriesDataMulti;
         // newState.openSeries= series;
         newState.openSeriesAddition = seriesAddition;
         newState.multiFrameAimJumpData = jumpArr;
-        // console.log(" =====> newstate", newState);
         return newState;
       case AIM_SAVE: //tested
         const { seriesList, aimRefs } = action.payload;
