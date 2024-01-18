@@ -178,26 +178,52 @@ const asyncReducer = (state = initialState, action) => {
         seriesAddition[state.activePort].multiFrameIndex = multiframeIndex;
         seriesAddition[state.activePort].multiFrameMap = multiFrameMap;
         const newState = { ...state };
+
         let newSeriesDataMulti = _.cloneDeep(state.seriesData);
         const multiPIDExists = newSeriesDataMulti[multiPID];
         const multiPatIDExists = multiPIDExists && newSeriesDataMulti[multiPID][multiPatID];
-        const seriesExists = multiPIDExists && multiPatIDExists && newSeriesDataMulti[multiPID][multiPatID][multiStudyUID];
+        const existingSeries = multiPIDExists && multiPatIDExists && newSeriesDataMulti[multiPID][multiPatID][multiStudyUID];
+        let mfLookUpMap = {};
         if (!state.openSeriesAddition[state.activePort].multiFrameMap) {
-          if (seriesExists) {
+          if (existingSeries) {
+            // find the correct series to get description from
             const seriesToCopyFm = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].find((element) => element.seriesUID === seriesDataMulti[0].seriesUID);
+            //prevent duplicate multiframe series to be added 
+            mfLookUpMap = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].reduce((all, item, index) => {
+              if (item.multiFrameImage) {
+                const { projectID, patientID, studyUID, seriesUID, imageUID } = item;
+                const key = `${projectID}-${patientID}-${studyUID}-${seriesUID}-${imageUID}`;
+                all[key] = true;
+              }
+              return all;
+            }, {})
             seriesDataMulti = seriesDataMulti.map((el) => {
               el.seriesDescription = seriesToCopyFm.seriesDescription;
               el.seriesNo = seriesToCopyFm.seriesNo;
               return el;
             })
-            newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = [...newSeriesDataMulti[multiPID][multiPatID][multiStudyUID], ...seriesDataMulti];
+            seriesDataMulti.forEach((el) => {
+              const { projectID, patientID, studyUID, seriesUID, imageUID } = el;
+              const key = `${projectID}-${patientID}-${studyUID}-${seriesUID}-${imageUID}`;
+              if (!mfLookUpMap[key]) {
+                newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].push(el);
+              }
+            });
           } else {
+            const desc = state.openSeriesAddition[state.activePort].seriesDescription;
+            const srNo = state.openSeriesAddition[state.activePort].seriesNo;
+            seriesDataMulti = seriesDataMulti.map((el) => {
+              el.seriesDescription = desc ? desc : '';
+              el.seriesNo = srNo ? srNo : null;
+              return el;
+            });
+
             if (multiPatIDExists) {
-              newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = seriesDataMulti;
+              newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = [state.openSeriesAddition[state.activePort], ...seriesDataMulti];
             } else if (multiPIDExists) {
-              newSeriesDataMulti[multiPID][multiPatID] = { [multiStudyUID]: seriesDataMulti };
+              newSeriesDataMulti[multiPID][multiPatID] = { [multiStudyUID]: [state.openSeriesAddition[state.activePort], ...seriesDataMulti] };
             } else {
-              newSeriesDataMulti[multiPID] = { [multiPatID]: { [multiStudyUID]: seriesDataMulti } };
+              newSeriesDataMulti[multiPID] = { [multiPatID]: { [multiStudyUID]: [state.openSeriesAddition[state.activePort], ...seriesDataMulti] } };
             }
           }
         }
