@@ -211,8 +211,10 @@ const asyncReducer = (state = initialState, action) => {
             });
           } else {
             const desc = state.openSeriesAddition[state.activePort].seriesDescription;
+            const srNo = state.openSeriesAddition[state.activePort].seriesNo;
             seriesDataMulti = seriesDataMulti.map((el) => {
               el.seriesDescription = desc ? desc : '';
+              el.seriesNo = srNo ? srNo : null;
               return el;
             });
 
