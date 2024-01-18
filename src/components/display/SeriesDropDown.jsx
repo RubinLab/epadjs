@@ -122,6 +122,7 @@ const SeriesDropDown = (props) => {
         {seriesList &&
           seriesList.length > 0 &&
           seriesList.map((series, i) => {
+            console.log("series ---> ", series);
             const {
               seriesDescription,
               numberOfAnnotations,
@@ -149,6 +150,7 @@ const SeriesDropDown = (props) => {
             let counts = numberOfAnnotations
               ? `${numberOfAnnotations} Ann -`
               : "";
+            let serNo = seriesNo ? seriesNo : multiFrameImage && seriesList[0].seriesNo ? seriesList[0].seriesNo : "#NA";  
             return (
                 <Dropdown.Item
                   key={uniqueKey}
@@ -156,7 +158,7 @@ const SeriesDropDown = (props) => {
                   onSelect={handleSelect}
                   style={{ textAlign: "left !important" }}
                   >
-                  {seriesNo ? seriesNo : "#NA"} {" - "} {counts}{" "}
+                  {serNo} {" - "} {counts}{" "}
                   {seriesDescription?.length
                     ? seriesDescription
                     : "No Description"}{" "}
