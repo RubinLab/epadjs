@@ -372,11 +372,15 @@ const asyncReducer = (state = initialState, action) => {
       case LOAD_SERIE_SUCCESS:
         let imageAddedSeries = _.cloneDeep(state.openSeriesAddition);
         let annCalc = Object.keys(action.payload.imageData);
-        const latestOtherSeriesAimsList = { ...state.otherSeriesAimsList, ...action.payload.otherSeriesAimsData };
+        const { projectID: pidFromRef, studyUID: stUIDFromRef } = action.payload.ref;
+        let latestOtherSeriesAimsList = { ...state.otherSeriesAimsList };
+        if (latestOtherSeriesAimsList[pidFromRef])
+          latestOtherSeriesAimsList[pidFromRef][stUIDFromRef] = action.payload.otherSeriesAimsData[pidFromRef][stUIDFromRef];
+        else latestOtherSeriesAimsList[pidFromRef] = action.payload.otherSeriesAimsData[pidFromRef];
+
         let numberOfimageAnnotationsMap = {};
-        const pidFromRef = action.payload.ref.projectID;
-        if (pidFromRef && latestOtherSeriesAimsList[pidFromRef] && latestOtherSeriesAimsList[pidFromRef][action.payload.ref.studyUID]) {
-          numberOfimageAnnotationsMap = latestOtherSeriesAimsList[pidFromRef][action.payload.ref.studyUID]
+        if (pidFromRef && latestOtherSeriesAimsList[pidFromRef] && latestOtherSeriesAimsList[pidFromRef][stUIDFromRef]) {
+          numberOfimageAnnotationsMap = latestOtherSeriesAimsList[pidFromRef][stUIDFromRef]
             .reduce((all, item, index) => {
               all[item[0]] = item[2].length;
               return all;
