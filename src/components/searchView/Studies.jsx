@@ -203,7 +203,7 @@ function Studies(props) {
           studyUID
         );
         props.dispatch(loadCompleted());
-        this.props.dispatch(
+        props.dispatch(
           setSeriesData(projectID, patientID, studyUID, series, true)
         );
         return series;
