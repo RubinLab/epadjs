@@ -57,6 +57,7 @@ import Interpolation from "./Interpolation";
 
 let mode;
 let wadoUrl;
+let maxPort;
 
 const mapStateToProps = (state) => {
   return {
@@ -117,6 +118,7 @@ class ToolMenu extends Component {
     super(props);
     mode = sessionStorage.getItem("mode");
     wadoUrl = sessionStorage.getItem("wadoUrl");
+    maxPort = sessionStorage.getItem("maxPort");
     this.tools = tools;
     this.invert = this.invert.bind(this);
 
@@ -393,6 +395,9 @@ class ToolMenu extends Component {
     } else if (tool === "ClearGrid") {
       this.props.dispatch(clearGrid());
       sessionStorage.removeItem("wwwc");
+      const max = parseInt(maxPort);
+      const imgStatus = new Array(max);
+      sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
       if (mode !== "teaching") this.props.onSwitchView("search");
       else this.props.onSwitchView("annotations");
       return;
