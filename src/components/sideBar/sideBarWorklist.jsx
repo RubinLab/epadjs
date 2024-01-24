@@ -204,7 +204,7 @@ class WorkList extends React.Component {
     try {
       if (!dataExists) {
         ({ data: series } = await getSeries(projectID, subjectID, studyUID));
-        this.dispatch(setSeriesData(projectID, subjectID, studyUID, series, true));
+        this.props.dispatch(setSeriesData(projectID, subjectID, studyUID, series, true));
       } else series = seriesData[projectID][subjectID][studyUID];
       const maxPort = parseInt(sessionStorage.getItem("maxPort"));
       const { openSeries } = this.props;
