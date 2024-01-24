@@ -507,12 +507,30 @@ class DisplayView extends Component {
     }
   };
 
+  checkSegmentation = (aimID) => {
+    const { activePort, seriesAddition } = this.props;
+    const imageID = seriesAddition[activePort].frameData[aimID][0];
+    const aims = seriesAddition[activePort].imageAnnotations[imageID];
+    let isSegmentation = false;
+    if (aims) {
+      for (let i = 0; i < aims.length; i++) {
+        if (aims[i].aimUid === aimID && aims[i].markupType === 'DicomSegmentationEntity') {
+          isSegmentation = true;
+          break;
+        }
+      }
+    } 
+    return isSegmentation;
+  }
+
   toggleAnnotations = (event) => {
     const { aimID, isVisible } = event.detail;
     const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
 
-    this.setVisibilityOfSegmentations(aimID, element, isVisible);
+    let isSegmentation = this.checkSegmentation(aimID);
+
+    if (isSegmentation) this.setVisibilityOfSegmentations(aimID, element, isVisible);
     this.setVisibilityOfShapes(isVisible, aimID);
 
     cornerstone.updateImage(element);
