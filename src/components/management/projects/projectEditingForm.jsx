@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import "../menuStyle.css";
 
+let mode;
 const projectEditingForm = ({
   onCancel,
   onSubmit,
@@ -14,7 +15,7 @@ const projectEditingForm = ({
   defaultTemplate,
   templates,
 }) => {
-  const mode = sessionStorage.getItem('mode');
+  mode = sessionStorage.getItem('mode');
 
   const firstOption = (
     <option value={null} key="selectOpt">
