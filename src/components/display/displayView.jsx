@@ -318,7 +318,7 @@ class DisplayView extends Component {
       //   (prevProps.series.length !== this.props.series.length &&
       //     this.props.loading === false)
       // ) {
-    } else if (prevProps.series.length !== series.length) {
+    } else if (prevProps.series.length !== series.length || prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData(undefined, undefined, "didupdated 2");
