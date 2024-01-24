@@ -446,10 +446,10 @@ function Series(props) {
     const { seriesData } = props;
     const dataExists =
       seriesData[projectID] &&
-      seriesData[projectID][patientID] &&
-      seriesData[projectID][patientID][studyUID];
+      seriesData[projectID][subjectID] &&
+      seriesData[projectID][subjectID][studyUID];
 
-    if (dataExists) return seriesData[projectID][patientID][studyUID];
+    if (dataExists) return seriesData[projectID][subjectID][studyUID];
     else {
       const treeData = JSON.parse(localStorage.getItem("treeData"));
       const project = treeData[projectID];
