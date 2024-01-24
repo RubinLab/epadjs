@@ -14,6 +14,8 @@ const projectEditingForm = ({
   defaultTemplate,
   templates,
 }) => {
+  const mode = sessionStorage.getItem('mode');
+
   const firstOption = (
     <option value={null} key="selectOpt">
       none
@@ -61,20 +63,25 @@ const projectEditingForm = ({
             onChange={onType}
             defaultValue={defaultTemplate}
             onMouseDown={e => e.stopPropagation()}
+            style={{ marginBottom: mode === 'teaching' ? "1rem" : ""} }
           >
             {options}
           </select>
-          <h5 className="edit-project__modal--label">Type</h5>
-          <select
-            name="type"
-            className="edit-project__modal--select"
-            onChange={onType}
-            defaultValue={type}
-            onMouseDown={e => e.stopPropagation()}
-          >
-            <option value="Private">Private</option>
-            <option value="Public">Public</option>
-          </select>
+          { mode !== 'teaching' && (
+            <>
+              <h5 className="edit-project__modal--label">Type</h5>
+              <select
+                name="type"
+                className="edit-project__modal--select"
+                onChange={onType}
+                defaultValue={type}
+                onMouseDown={e => e.stopPropagation()}
+                >
+                <option value="Private">Private</option>
+                <option value="Public">Public</option>
+              </select>
+            </>
+            )}
           {error && (
             <div className="err-message project-edit__error">{error}</div>
           )}
