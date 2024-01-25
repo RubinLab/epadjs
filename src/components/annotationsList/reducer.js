@@ -846,7 +846,7 @@ const asyncReducer = (state = initialState, action) => {
             return all;
           }, []);
 
-          if (reformedOtherSeries[serieToUpdateIndex][2].length === 0) {
+          if (reformedOtherSeries[serieToUpdateIndex] && reformedOtherSeries[serieToUpdateIndex][2].length === 0) {
             updatedSerie.numberOfAnnotations = 0;
             if (deepOther[projectID][studyUID].length === 1) {
               delete deepOther[projectID][studyUID];
