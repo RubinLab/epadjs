@@ -284,7 +284,7 @@ class DisplayView extends Component {
       return;
     }
 
-    const { projectID, studyUID } = series[activePort];
+    const { projectID, studyUID, seriesUID } = series[activePort];
 
     const oldOtherAimsLength = prevOther[projectID][studyUID].reduce((all, item) => {
       all = all + item[2].length;
@@ -295,8 +295,8 @@ class DisplayView extends Component {
       return all;
     }, 0);
     const studyAimsLengthChanged = oldOtherAimsLength !== newOtherAimsLength;
-    const newAimsListLen = Object.keys(aimList).length;
-    const oldAimsListLen = Object.keys(prevAimList).length;
+    const newAimsListLen = Object.keys(aimList[seriesUID]).length;
+    const oldAimsListLen = Object.keys(prevAimList[seriesUID]).length;
     let aimsDeletedOrSaved;
     let currentAimsCalc;
     let prevAimsCalc;
