@@ -157,6 +157,7 @@ const mapStateToProps = (state) => {
     aimSegLabelMaps: state.annotationsListReducer.aimSegLabelMaps,
     subpath: state.annotationsListReducer.subpath,
     multiFrameAimJumpData: state.annotationsListReducer.multiFrameAimJumpData,
+    otherSeriesAimsList: state.annotationsListReducer.otherSeriesAimsList,
   };
 };
 
@@ -265,13 +266,15 @@ class DisplayView extends Component {
       aimList,
       multiFrameAimJumpData,
       seriesAddition,
-      loading
+      loading,
+      otherSeriesAimsList
     } = this.props;
     const {
       series: prevSeries,
       activePort: prevActivePort,
       aimList: prevAimList,
       loading: prevLoading,
+      otherSeriesAimsList: prevOther
     } = prevProps;
 
     if (this.props.series.length < 1) {
@@ -281,6 +284,17 @@ class DisplayView extends Component {
       return;
     }
 
+    const { projectID, studyUID } = series[activePort];
+
+    const oldOtherAimsLength = prevOther[projectID][studyUID].reduce((all, item) => {
+      all = all + item[2].length;
+      return all;
+    }, 0);
+    const newOtherAimsLength = otherSeriesAimsList[projectID][studyUID].reduce((all, item) => {
+      all = all + item[2].length;
+      return all;
+    }, 0);
+    const studyAimsLengthChanged = oldOtherAimsLength !== newOtherAimsLength;
     const newAimsListLen = Object.keys(aimList).length;
     const oldAimsListLen = Object.keys(prevAimList).length;
     let aimsDeletedOrSaved;
@@ -296,7 +310,18 @@ class DisplayView extends Component {
     aimsDeletedOrSaved = currentAimsCalc !== prevAimsCalc;
     const aimEditSaved = this.state.aimEdited && prevLoading && !loading;
     const rerenderAims =
-      newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved;
+      newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved || studyAimsLengthChanged;
+
+    console.log(" ====================================================")
+    console.log(' ===> rerenderAims', rerenderAims);
+    console.log(' ===> newAimsListLen', newAimsListLen);
+    console.log(' ===> oldAimsListLen', oldAimsListLen);
+    console.log(' ===> aimsDeletedOrSaved', aimsDeletedOrSaved);
+    console.log(' ===> aimEditSaved', aimEditSaved);
+    console.log(' ===> oldOtherAimsLength', oldOtherAimsLength);
+    console.log(' ===> newOtherAimsLength', newOtherAimsLength);
+    console.log(" ====================================================")
+
 
     // TODO: check if loading/true-false control is required for the first condition
 
@@ -764,6 +789,7 @@ class DisplayView extends Component {
   };
 
   renderAims = (notShowAimEditor = false) => {
+    console.log(" === rerendering...")
     const { seriesAddition } = this.props;
     this.setState({
       activeLabelMapIndex: 0,
