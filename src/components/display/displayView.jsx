@@ -640,6 +640,7 @@ class DisplayView extends Component {
   getData(multiFrameIndex, frameNo, fm) {
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
+      console.log(" ++++> getdata 1", multiFrameIndex, frameNo);
       const { series, activePort } = this.props;
       const { dataIndexMap, data } = this.state;
       var promises = [];
@@ -723,6 +724,7 @@ class DisplayView extends Component {
       }
 
     } catch (error) {
+      console.log(" =====> error <===")
       console.error(error);
     }
   }
@@ -886,7 +888,10 @@ class DisplayView extends Component {
     const multiframeSeriesData = {};
     let metadata2D = [];
     const multiFrameMap = {};
-    console.log(" ---> getImageStackWithWadors true")
+    console.log(" ---> getImageStackWithWadors true");
+    console.log(" ---> serie, index, multiFrameIndex, frameNo");
+    console.log(serie, index, multiFrameIndex, frameNo);
+
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
     if (imageUrls.length > 1) {
@@ -908,6 +913,7 @@ class DisplayView extends Component {
       wadoUrlNoWadors +
       imageUrls[firstSeriesIndex][0].lossyImage.split("/instances/")[0];
 
+    console.log(" --> check 1");
     try {
       seriesMetadata = await getMetadata(seriesURL);
       seriesMetadata = seriesMetadata.data;
@@ -918,6 +924,8 @@ class DisplayView extends Component {
       console.log("Can not get series metadata");
       console.error(err);
     }
+
+    console.log(" --> check 2");
 
     // get the length of array off arrays
     // divide the metadata array to mirror the image urls’ array
@@ -936,6 +944,7 @@ class DisplayView extends Component {
     const middleIndex = imageUrls[firstSeriesIndex][0].multiFrameImage ? 0 : Math.floor(imgURLsLen / 2);
     let firstImage = null;
     let middleImage = null;
+    console.log(" --> check 3");
 
     if (!useSeriesData) {
       const result = await getImageMetadata(
@@ -957,6 +966,7 @@ class DisplayView extends Component {
 
     const distanceDatasetPairs = [];
 
+    console.log(" --> check 4");
     // get position from the first image but orientation from the middle
     const sortByGeo = !!firstImage["00200032"] && !!middleImage["00200037"];
     if (sortByGeo) {
@@ -987,6 +997,7 @@ class DisplayView extends Component {
         console.error(err);
       }
 
+      console.log(" --> check 5");
       if (sortByGeo) {
         const position = imgData["00200032"].Value.slice();
         const positionVector = dcmjs.normalizers.ImageNormalizer.vec3Subtract(
@@ -1028,6 +1039,7 @@ class DisplayView extends Component {
       }
     }
 
+    console.log(" --> check 6");
     if (Object.entries(multiFrameMap).length > 0) {
       this.props.dispatch(
         updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData)
@@ -1064,6 +1076,7 @@ class DisplayView extends Component {
         cornerstoneImageIds
       );
 
+    console.log(" --> check 7"); 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
     // form split series data
