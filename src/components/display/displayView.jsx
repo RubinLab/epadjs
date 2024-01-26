@@ -312,17 +312,6 @@ class DisplayView extends Component {
     const rerenderAims =
       newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved || studyAimsLengthChanged;
 
-    console.log(" ====================================================")
-    console.log(' ===> rerenderAims', rerenderAims);
-    console.log(' ===> newAimsListLen', newAimsListLen);
-    console.log(' ===> oldAimsListLen', oldAimsListLen);
-    console.log(' ===> aimsDeletedOrSaved', aimsDeletedOrSaved);
-    console.log(' ===> aimEditSaved', aimEditSaved);
-    console.log(' ===> oldOtherAimsLength', oldOtherAimsLength);
-    console.log(' ===> newOtherAimsLength', newOtherAimsLength);
-    console.log(" ====================================================")
-
-
     // TODO: check if loading/true-false control is required for the first condition
 
     if (
@@ -789,7 +778,6 @@ class DisplayView extends Component {
   };
 
   renderAims = (notShowAimEditor = false) => {
-    console.log(" === rerendering...")
     const { seriesAddition } = this.props;
     this.setState({
       activeLabelMapIndex: 0,
