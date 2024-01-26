@@ -705,8 +705,8 @@ class DisplayView extends Component {
           const isStudyAim = series[activePort].aimID && aimList[seriesUID] && aimList[seriesUID][aimID] && aimList[seriesUID][aimID].type === 'study';
           console.log(mode === 'teaching');
           console.log(series[activePort].aimID);
-          console.log(" ===>  aimList[seriesUID][aimID]",  aimList[seriesUID][aimID])
-          console.log(" study check", aimList[seriesUID][aimID].type === 'study');
+          if (aimList[seriesUID]) console.log(" ===>  aimList[seriesUID][aimID]",  aimList[seriesUID][aimID]);
+          if (aimList[seriesUID] && aimList[seriesUID][aimID]) console.log(" study check", aimList[seriesUID][aimID].type === 'study');
 
           if (mode === 'teaching' && isStudyAim) {
             getSeries(projectID, patientID, studyUID).then((res) => {
