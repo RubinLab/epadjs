@@ -31,6 +31,7 @@ import {
   clearSelection,
   updateGridWithMultiFrameInfo,
   clearMultiFrameAimJumpFlags,
+  setSeriesData
   // fillSeriesDescfullData
 } from "../annotationsList/action";
 import { deleteAnnotation } from "../../services/annotationServices";
@@ -638,7 +639,7 @@ class DisplayView extends Component {
   getData(multiFrameIndex, frameNo, fm) {
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
-      const { series, activePort } = this.props;
+      const { series, activePort, aimList } = this.props;
       const { dataIndexMap, data } = this.state;
       var promises = [];
       const indexKeys = {};
@@ -678,14 +679,6 @@ class DisplayView extends Component {
           : null;
           console.log(" getData fm ^^", fm);
 
-          // if (mode === 'teaching') {
-          //   getSeries(series[activePort].projectID, series[activePort].patientID, series[activePort].studyUID).then((res) => {
-          //     this.props.dispatch(fillSeriesDescfullData(res.data));
-          //   }).catch(err => console.error(err));
-          // }
-
-          // TODO: how this logic works if it is not a multiframe img/series like patient7
-          // should i add a isMultiFrame constol before checking key
           res.forEach((el, inx) => {
             newData[indexOrder[inx]] = el;
           });
@@ -707,6 +700,20 @@ class DisplayView extends Component {
             }
           );
         });
+        // if teaching and aim is a study aim
+          const { seriesUID, aimID, projectID, patientID, studyUID } = series[activePort];
+          const isStudyAim = series[activePort].aimID && aimList[seriesUID] && aimList[seriesUID][aimID] && aimList[seriesUID][aimID].type === 'study';
+          console.log(mode === 'teaching');
+          console.log(series[activePort].aimID);
+          console.log(" ===>  aimList[seriesUID][aimID]",  aimList[seriesUID][aimID])
+          console.log(" study check", aimList[seriesUID][aimID].type === 'study');
+
+          if (mode === 'teaching' && isStudyAim) {
+            getSeries(projectID, patientID, studyUID).then((res) => {
+              console.log(res.data);
+              this.props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
+            }).catch(err => console.error(err));
+          }
       } else {
         this.setState(
           {
