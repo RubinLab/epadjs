@@ -699,21 +699,16 @@ class DisplayView extends Component {
               this.renderAims();
             }
           );
+          // if teaching and aim is a study aim
+            const { seriesUID, aimID, projectID, patientID, studyUID } = series[activePort];
+            const isStudyAim = series[activePort].aimID && aimList[seriesUID] && aimList[seriesUID][aimID] && aimList[seriesUID][aimID].type === 'study';
+  
+            if (mode === 'teaching' && isStudyAim) {
+              getSeries(projectID, patientID, studyUID).then((res) => {
+                this.props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
+              }).catch(err => console.error(err));
+            }
         });
-        // if teaching and aim is a study aim
-          const { seriesUID, aimID, projectID, patientID, studyUID } = series[activePort];
-          const isStudyAim = series[activePort].aimID && aimList[seriesUID] && aimList[seriesUID][aimID] && aimList[seriesUID][aimID].type === 'study';
-          console.log(mode === 'teaching');
-          console.log(series[activePort].aimID);
-          if (aimList[seriesUID]) console.log(" ===>  aimList[seriesUID][aimID]",  aimList[seriesUID][aimID]);
-          if (aimList[seriesUID] && aimList[seriesUID][aimID]) console.log(" study check", aimList[seriesUID][aimID].type === 'study');
-
-          if (mode === 'teaching' && isStudyAim) {
-            getSeries(projectID, patientID, studyUID).then((res) => {
-              console.log(res.data);
-              this.props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
-            }).catch(err => console.error(err));
-          }
       } else {
         this.setState(
           {
