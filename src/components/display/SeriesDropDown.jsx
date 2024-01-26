@@ -17,7 +17,7 @@ import "./SeriesDropDown.css";
 
 const SeriesDropDown = (props) => {
   const [seriesList, setSeriesList] = useState([]);
-  const [aimCounts, setAimCounts] = useState({});
+  const [mfIndex, setMfIndex] = useState({});
   const [loading, setLoading] = useState(false);
 
 
@@ -99,6 +99,14 @@ const SeriesDropDown = (props) => {
     window.dispatchEvent(new CustomEvent("deleteViewportWL"));
   };
 
+  formUniqueMFKey = (seriesUID) => {
+    const newMFMap = { ...mfIndex };
+    const currentIndex = newMFMap[seriesUID] ? newMFMap[seriesUID]++ : 1;
+    newMFMap[seriesUID] = currentIndex;
+    setMfIndex(newMFMap);
+    return `${seriesUID}_${currentIndex}`;
+  }
+
   return (
     <div>
       <DropdownButton
@@ -129,7 +137,12 @@ const SeriesDropDown = (props) => {
               props.openSeries[props.activePort].seriesUID;
             const openSeriesMultiFrameIndex =
               props.openSeriesAddition[props.activePort].multiFrameIndex;
-            const uniqueKey = multiFrameImage ? `${seriesUID}_${i}` : seriesUID;
+            const uniqueKey = multiFrameImage ? formUniqueMFKey(seriesUID) : seriesUID;
+
+            console.log(" ++++++++++++++++++++++++++++++++++")
+            console.log(' ====> uniqueKey', uniqueKey);
+            console.log(' ====> seriesDescription', seriesDescription);
+
             let isCurrent;
             if (!multiFrameImage) {
               isCurrent =
