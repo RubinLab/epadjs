@@ -3,6 +3,7 @@ import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 
 // we need the keycloak object to be able to use update token
 let keycloak = null;
+let mode;
 
 export function refreshToken(keycloak, minValidity) {
   return new Promise((resolve, reject) => {
@@ -60,8 +61,10 @@ export async function getAuthHeader() {
       return header;
     }
   } else if (this.keycloak) {
+    mode = sessionStorage.getItem('mode');
+    const expireTime = mode === 'teaching' ? 120 : 300;
     try {
-      await refreshToken(this.keycloak, 300);
+      await refreshToken(this.keycloak, expireTime);
       const header = `Bearer ${this.keycloak.token}`;
       if (header) {
         cornerstoneWADOImageLoader.configure({
