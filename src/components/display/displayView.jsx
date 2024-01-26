@@ -307,6 +307,7 @@ class DisplayView extends Component {
       `${series[activePort].aimID}-${multiFrameAimJumpData[0]}-${multiFrameAimJumpData[1]}` !==
         this.state.multiFrameAimJumped
     ) {
+      console.log(" ----> didupdate in 1st")
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1], "didupdate 1");
@@ -319,6 +320,7 @@ class DisplayView extends Component {
       //     this.props.loading === false)
       // ) {
     } else if (prevProps.series.length !== series.length || prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) {
+      console.log(" ----> didupdate in 2nd")
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData(undefined, undefined, "didupdated 2");
@@ -695,7 +697,7 @@ class DisplayView extends Component {
           } else {
             this.setState({ data: newData });
           }
-
+          console.log(" ----> promise resolved before false");
           this.setState(
             {
               isLoading: false,
@@ -708,6 +710,7 @@ class DisplayView extends Component {
           );
         });
       } else {
+        console.log(" ----> no promise before false");
         this.setState(
           {
             isLoading: false,
@@ -740,6 +743,7 @@ class DisplayView extends Component {
       const newData = [...this.state.data];
       newData[viewportId] = res[0];
       newData[viewportId].stack.currentImageIdIndex = 0; 
+      console.log(" ===> handleSerieReplace before false")
       this.setState({ data: newData, isLoading: false });
     });
   };
@@ -882,6 +886,7 @@ class DisplayView extends Component {
     const multiframeSeriesData = {};
     let metadata2D = [];
     const multiFrameMap = {};
+    console.log(" ---> getImageStackWithWadors true")
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
     if (imageUrls.length > 1) {
@@ -2293,6 +2298,7 @@ class DisplayView extends Component {
       hasMultiframe &&
       !seriesAddition[activePort].multiFrameMap[imageID]
     ) {
+      console.log(" ----> jumpToAimImage true")
       this.setState({ isLoading: true });
       this.getData(null, null, "jumpToAimImage 1");
     } else {
