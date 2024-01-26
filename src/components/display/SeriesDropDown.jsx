@@ -99,7 +99,7 @@ const SeriesDropDown = (props) => {
     window.dispatchEvent(new CustomEvent("deleteViewportWL"));
   };
 
-  formUniqueMFKey = (seriesUID) => {
+  const formUniqueMFKey = (seriesUID) => {
     const newMFMap = { ...mfIndex };
     const currentIndex = newMFMap[seriesUID] ? newMFMap[seriesUID]++ : 1;
     newMFMap[seriesUID] = currentIndex;
