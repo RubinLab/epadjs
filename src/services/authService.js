@@ -61,10 +61,8 @@ export async function getAuthHeader() {
       return header;
     }
   } else if (this.keycloak) {
-    mode = sessionStorage.getItem('mode');
-    const expireTime = mode === 'teaching' ? 120 : 300;
     try {
-      await refreshToken(this.keycloak, expireTime);
+      await refreshToken(this.keycloak, 120);
       const header = `Bearer ${this.keycloak.token}`;
       if (header) {
         cornerstoneWADOImageLoader.configure({
