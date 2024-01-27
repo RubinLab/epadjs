@@ -203,8 +203,8 @@ function Studies(props) {
           studyUID
         );
         props.dispatch(loadCompleted());
-        this.props.dispatch(
-          setSeriesData(projectID, patientID, studyUID, series)
+        props.dispatch(
+          setSeriesData(projectID, patientID, studyUID, series, true)
         );
         return series;
       } else return seriesData[projectID][patientID][studyUID];

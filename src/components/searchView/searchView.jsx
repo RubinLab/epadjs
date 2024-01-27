@@ -775,7 +775,7 @@ class SearchView extends Component {
           studyUID
         );
         this.props.dispatch(
-          setSeriesData(projectID, patientID, studyUID, series)
+          setSeriesData(projectID, patientID, studyUID, series, true)
         );
         return series;
       } else return seriesData[projectID][patientID][studyUID];

@@ -41,6 +41,7 @@ const messages = {
 //TODO add project names to delete project and user roles editing pop ups
 //TODO Add tool tip for icons/button
 
+let mode;
 class Projects extends React.Component {
   state = {
     user: "",
@@ -69,7 +70,7 @@ class Projects extends React.Component {
   };
 
   componentDidMount = () => {
-    const mode = sessionStorage.getItem("mode");
+    mode = sessionStorage.getItem("mode");
     this.getProjectData();
     this.getTemplateData();
     this.getUserData();
@@ -274,6 +275,7 @@ class Projects extends React.Component {
   }
 
   handleCancel = () => {
+    const defTemp = mode === 'teaching' ? teachingFileTempCode : null;
     this.setState({
       hasDeleteSingleClicked: false,
       id: "",
@@ -288,7 +290,7 @@ class Projects extends React.Component {
       hasUserRolesClicked: false,
       errorMessage: null,
       projectIndex: null,
-      defaulttemplate: null,
+      defaulttemplate: defTemp,
       isDeleting: false,
     });
   };

@@ -403,22 +403,27 @@ function AnnotationTable(props) {
     return { isOpen, index };
   };
 
+  const getExistingData = (selected) => {
+    const { seriesData } = props;
+    const { subjectID: patientID, studyUID, aimID, projectID, template } = selected;
+    const dataExists =
+    seriesData[projectID] &&
+    seriesData[projectID][patientID] &&
+    seriesData[projectID][patientID][studyUID];
+
+    let existingData = dataExists
+    ? seriesData[projectID][patientID][studyUID]
+    : null;
+    return existingData;
+  }
+
   // CHECK
   const openAnnotation = async (selected) => {
     try {
-      const { studyUID, seriesUID, aimID, patientName, name } = selected;
-      const patientID = selected.subjectID;
-      const projectID = selected.projectID ? selected.projectID : "lite";
+      const { seriesUID, aimID } = selected;
       const { openSeries, seriesData } = props;
 
-      const dataExists =
-      seriesData[projectID] &&
-      seriesData[projectID][patientID] &&
-      seriesData[projectID][patientID][studyUID];
-
-      const existingData = dataExists
-      ? seriesData[projectID][patientID][studyUID]
-      : null;
+      const existingData = getExistingData(selected);
 
       setSelected(selected);
       // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
@@ -478,19 +483,11 @@ function AnnotationTable(props) {
 
   // CHECK
   const displaySeries = async (selected) => {
-    const { seriesData } = props;
     const { subjectID: patientID, studyUID, aimID, projectID, template } = selected;
     let isTeachingFile = teachingFileTempCode === template;
     let seriesArr;
 
-    const dataExists =
-    seriesData[projectID] &&
-    seriesData[projectID][patientID] &&
-    seriesData[projectID][patientID][studyUID];
-
-    let existingData = dataExists
-    ? seriesData[projectID][patientID][studyUID]
-    : null;
+    let existingData = getExistingData(selected);
 
     if (isTeachingFile) {
       seriesArr =  await getSignificantSeriesData(selected);
@@ -499,11 +496,12 @@ function AnnotationTable(props) {
       else if (existingData && existingData.length <= maxPort) {
         seriesArr = existingData;
       } else if (existingData && existingData.length > maxPort) {
-        seriesArr = existingData;
-        setSelected(seriesArr);
-        setShowSelectSeriesModal(true);
+        seriesArr = existingData.slice(0,maxPort);
+        // setSelected(seriesArr);
+        // setShowSelectSeriesModal(true);
       } else {
         seriesArr = await getSeriesData(selected, true);
+        seriesArr = seriesArr.slice(0,maxPort);
       }
     } else {
       seriesArr = await getSeriesData(selected);
@@ -530,6 +528,7 @@ function AnnotationTable(props) {
       //add serie to the grid
       const promiseArr = [];
 
+      existingData = getExistingData(selected);
       for (let i = 0; i < seriesArr.length; i++) {
         props.dispatch(addToGrid(seriesArr[i], aimID));
         promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i], aimID, null, existingData)));
