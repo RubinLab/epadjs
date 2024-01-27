@@ -881,7 +881,6 @@ class DisplayView extends Component {
     const multiframeSeriesData = {};
     let metadata2D = [];
     const multiFrameMap = {};
-
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
     if (imageUrls.length > 1) {
@@ -892,7 +891,6 @@ class DisplayView extends Component {
         }
       }
     }
-
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage
       .getItem("wadoUrl")
@@ -900,7 +898,6 @@ class DisplayView extends Component {
     const firstSeriesIndex = multiFrameIndex
       ? multiFrameIndex
       : this.findFirstSeriesIndex(imageUrls);
-
     const seriesURL =
       wadoUrlNoWadors +
       imageUrls[firstSeriesIndex][0].lossyImage.split("/instances/")[0];
@@ -915,8 +912,6 @@ class DisplayView extends Component {
       console.log("Can not get series metadata");
       console.error(err);
     }
-
-    console.log(" --> check 2");
 
     // get the length of array off arrays
     // divide the metadata array to mirror the image urls’ array
@@ -2297,7 +2292,6 @@ class DisplayView extends Component {
       hasMultiframe &&
       !seriesAddition[activePort].multiFrameMap[imageID]
     ) {
-      console.log(" ----> jumpToAimImage true")
       this.setState({ isLoading: true });
       this.getData(null, null, "jumpToAimImage 1");
     } else {
