@@ -307,7 +307,6 @@ class DisplayView extends Component {
       `${series[activePort].aimID}-${multiFrameAimJumpData[0]}-${multiFrameAimJumpData[1]}` !==
         this.state.multiFrameAimJumped
     ) {
-      console.log(" ----> didupdate in 1st")
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1], "didupdate 1");
@@ -320,7 +319,6 @@ class DisplayView extends Component {
       //     this.props.loading === false)
       // ) {
     } else if (prevProps.series.length !== series.length || prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) {
-      console.log(" ----> didupdate in 2nd")
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData(undefined, undefined, "didupdated 2");
@@ -640,7 +638,6 @@ class DisplayView extends Component {
   getData(multiFrameIndex, frameNo, fm) {
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
-      console.log(" ++++> getdata 1", multiFrameIndex, frameNo);
       const { series, activePort } = this.props;
       const { dataIndexMap, data } = this.state;
       var promises = [];
@@ -698,7 +695,6 @@ class DisplayView extends Component {
           } else {
             this.setState({ data: newData });
           }
-          console.log(" ----> promise resolved before false");
           this.setState(
             {
               isLoading: false,
@@ -711,7 +707,6 @@ class DisplayView extends Component {
           );
         });
       } else {
-        console.log(" ----> no promise before false");
         this.setState(
           {
             isLoading: false,
@@ -724,7 +719,6 @@ class DisplayView extends Component {
       }
 
     } catch (error) {
-      console.log(" =====> error <===")
       console.error(error);
     }
   }
@@ -745,7 +739,6 @@ class DisplayView extends Component {
       const newData = [...this.state.data];
       newData[viewportId] = res[0];
       newData[viewportId].stack.currentImageIdIndex = 0; 
-      console.log(" ===> handleSerieReplace before false")
       this.setState({ data: newData, isLoading: false });
     });
   };
@@ -888,14 +881,9 @@ class DisplayView extends Component {
     const multiframeSeriesData = {};
     let metadata2D = [];
     const multiFrameMap = {};
-    console.log(" ---> getImageStackWithWadors true");
-    console.log(" ---> serie, index, multiFrameIndex, frameNo");
-    console.log(serie, index, multiFrameIndex, frameNo);
 
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
-    console.log(' +++> imageUrls');
-    console.log(imageUrls);
     if (imageUrls.length > 1) {
       for (let i = 0; i < imageUrls.length; i++) {
         if (imageUrls[i][0].multiFrameImage) {
@@ -904,8 +892,6 @@ class DisplayView extends Component {
         }
       }
     }
-    console.log(' ++++> passed the loop = multiframeSeriesData');
-    console.log(multiframeSeriesData);
 
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage
@@ -914,13 +900,11 @@ class DisplayView extends Component {
     const firstSeriesIndex = multiFrameIndex
       ? multiFrameIndex
       : this.findFirstSeriesIndex(imageUrls);
-    console.log(" ---> firstSeriesIndex", firstSeriesIndex);
 
     const seriesURL =
       wadoUrlNoWadors +
       imageUrls[firstSeriesIndex][0].lossyImage.split("/instances/")[0];
 
-    console.log(" --> check 1");
     try {
       seriesMetadata = await getMetadata(seriesURL);
       seriesMetadata = seriesMetadata.data;
@@ -951,7 +935,6 @@ class DisplayView extends Component {
     const middleIndex = imageUrls[firstSeriesIndex][0].multiFrameImage ? 0 : Math.floor(imgURLsLen / 2);
     let firstImage = null;
     let middleImage = null;
-    console.log(" --> check 3");
 
     if (!useSeriesData) {
       const result = await getImageMetadata(
@@ -973,7 +956,6 @@ class DisplayView extends Component {
 
     const distanceDatasetPairs = [];
 
-    console.log(" --> check 4");
     // get position from the first image but orientation from the middle
     const sortByGeo = !!firstImage["00200032"] && !!middleImage["00200037"];
     if (sortByGeo) {
@@ -1004,7 +986,6 @@ class DisplayView extends Component {
         console.error(err);
       }
 
-      console.log(" --> check 5");
       if (sortByGeo) {
         const position = imgData["00200032"].Value.slice();
         const positionVector = dcmjs.normalizers.ImageNormalizer.vec3Subtract(
@@ -1046,7 +1027,6 @@ class DisplayView extends Component {
       }
     }
 
-    console.log(" --> check 6");
     if (Object.entries(multiFrameMap).length > 0) {
       this.props.dispatch(
         updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData)
@@ -1083,7 +1063,6 @@ class DisplayView extends Component {
         cornerstoneImageIds
       );
 
-    console.log(" --> check 7"); 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
     // form split series data
