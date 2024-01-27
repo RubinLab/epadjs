@@ -71,6 +71,7 @@ class selectSerieModal extends React.Component {
     // teaching file save related
     const { isTeachingFile } = this.props;
     if (isTeachingFile) {
+      console.log(" ===> isTeachingFile in modal", props.loading, showSpinner)
       const element = document.getElementById("questionaire");
       const speciality = document.getElementById("speciality");
       const anatomy = document.getElementById("anatomy");

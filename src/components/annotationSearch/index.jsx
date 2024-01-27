@@ -275,12 +275,15 @@ const AnnotationSearch = (props) => {
       seriesArray = seriesArray.filter(isSupportedModality);
     }
 
+    console.log(" ===> in handleteaching 1", props.loading, showSpinner)
     let seriesList = [seriesArray];
     setShowSelectSeries(seriesArray.length > 0);
     setShowWarning(seriesArray.length === 0);
     setSeriesList(seriesList);
+    console.log(" ===> in handleteaching 2", props.loading, showSpinner)
     setEncArgs(args);
     setDecrArgs(packedData);
+    console.log(" ===> in handleteaching 3", props.loading, showSpinner)
   };
 
   useEffect(() => {
