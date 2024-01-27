@@ -1255,6 +1255,9 @@ const AnnotationSearch = (props) => {
     clearAllTeachingFilers();
   };
 
+  console.log(" ++++> props.loading", props.loading);
+  console.log(" ++++> showSpinner", showSpinner);
+
   return (
     <>
       <div
