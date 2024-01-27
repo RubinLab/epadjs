@@ -71,7 +71,7 @@ function wadoRsMetaDataProvider(type, imageId) {
 cornerstone.metaData.addProvider(wadoRsMetaDataProvider);
 
 function wadoUriMetaDataProvider(type, imageId) {
-  console.log('wadouri metadata provider in components/Viewport', type, imageId);
+  // console.log('wadouri metadata provider in components/Viewport', type, imageId);
   const {
     parseImageId,
     dataSetCacheManager

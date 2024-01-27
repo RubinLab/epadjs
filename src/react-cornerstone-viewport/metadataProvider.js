@@ -5,7 +5,7 @@ import dicomParser from "dicom-parser";
 const { getNumberValue, getValue } = cornerstoneWADOImageLoader.wadors.metaData;
 
 function wadoRsMetaDataProvider(type, imageId) {
-  console.log('wadors metadata provider in react-cornerstine-viewport', type, imageId);
+  // console.log('wadors metadata provider in react-cornerstine-viewport', type, imageId);
   const metaData = cornerstoneWADOImageLoader.wadors.metaDataManager.get(
     imageId
   );
