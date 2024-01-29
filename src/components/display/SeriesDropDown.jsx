@@ -17,9 +17,8 @@ import "./SeriesDropDown.css";
 
 const SeriesDropDown = (props) => {
   const [seriesList, setSeriesList] = useState([]);
-  const [aimCounts, setAimCounts] = useState({});
   const [loading, setLoading] = useState(false);
-
+  let mfIndex = {};
 
   useEffect(() => {
     let studyUID;
@@ -125,11 +124,19 @@ const SeriesDropDown = (props) => {
               multiFrameImage,
               numberOfFrames,
             } = series;
+
+            let uniqueKey = seriesUID;
+            
             const openSeriesSeriesUID =
               props.openSeries[props.activePort].seriesUID;
             const openSeriesMultiFrameIndex =
               props.openSeriesAddition[props.activePort].multiFrameIndex;
-            const uniqueKey = multiFrameImage ? `${seriesUID}_${i}` : seriesUID;
+            if (multiFrameImage) {
+              const currentIndex = mfIndex[seriesUID] ? mfIndex[seriesUID] + 1  : 1;
+              mfIndex[seriesUID] = currentIndex;
+              uniqueKey = `${seriesUID}_${currentIndex}`;
+            }  
+
             let isCurrent;
             if (!multiFrameImage) {
               isCurrent =

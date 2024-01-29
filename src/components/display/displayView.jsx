@@ -695,7 +695,7 @@ class DisplayView extends Component {
           } else {
             this.setState({ data: newData });
           }
-
+          
           this.setState(
             {
               isLoading: false,
