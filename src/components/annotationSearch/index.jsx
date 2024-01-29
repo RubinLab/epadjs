@@ -1266,6 +1266,7 @@ const AnnotationSearch = (props) => {
 
   console.log(" ++++> props.loading", props.loading);
   console.log(" ++++> showSpinner", showSpinner);
+  console.log(" ++++> teachingLoading", props.teachingLoading)
 
   return (
     <>
@@ -1840,8 +1841,8 @@ const AnnotationSearch = (props) => {
         </thead>
           <PropagateLoader
             color={"#7A8288"}
-            // loading={props.loading || showSpinner}
-            loading={props.loading}
+            loading={props.loading || showSpinner | props.teachingLoading}
+            // loading={props.loading}
             margin={"8"}
           />
         <tbody>
