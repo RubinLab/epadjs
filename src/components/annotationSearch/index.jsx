@@ -276,14 +276,20 @@ const AnnotationSearch = (props) => {
     }
 
     console.log(" ===> in handleteaching 1", props.loading, showSpinner)
+    console.log(" ===> in handleteaching, encArgs", event.detail)
+    // console.log(" ===> in handleteaching, decArgs", decrArgs);
     let seriesList = [seriesArray];
     setShowSelectSeries(seriesArray.length > 0);
     setShowWarning(seriesArray.length === 0);
     setSeriesList(seriesList);
     console.log(" ===> in handleteaching 2", props.loading, showSpinner)
+    console.log(" ===> in handleteaching, encArgs", event.detail)
+    // console.log(" ===> in handleteaching, decArgs", decrArgs);
     setEncArgs(args);
     setDecrArgs(packedData);
     console.log(" ===> in handleteaching 3", props.loading, showSpinner)
+    console.log(" ===> in handleteaching, encArgs", event.detail)
+    // console.log(" ===> in handleteaching, decArgs", decrArgs);
   };
 
   useEffect(() => {
@@ -1834,7 +1840,8 @@ const AnnotationSearch = (props) => {
         </thead>
           <PropagateLoader
             color={"#7A8288"}
-            loading={props.loading || showSpinner}
+            // loading={props.loading || showSpinner}
+            loading={props.loading}
             margin={"8"}
           />
         <tbody>
