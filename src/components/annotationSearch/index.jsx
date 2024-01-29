@@ -1275,7 +1275,7 @@ const AnnotationSearch = (props) => {
         style={{
           zIndex: 6,
           position: "sticky",
-          top: 0,
+          top: 0
         }}
       >
         {/* search / filters */}
@@ -1860,6 +1860,7 @@ const AnnotationSearch = (props) => {
               handleSort={handleSort}
               handleFilter={handleFilter}
               filters={filters}
+              teachingLoading={props.teachingLoading}
             />
           )}
         </tbody>
