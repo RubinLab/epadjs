@@ -971,11 +971,15 @@ const getStudyAimsDataSorted = (arr, projectID, patientID) => {
 
 
 const getSeriesAdditionalData = (arr, uid) => {
+  let result = {};
   if (arr) {
     const data = arr.filter((el) => el.seriesUID === uid);
-    const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo } = data[0];
-    return { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo };
-  } else return {};
+    if (data && data[0]) {
+      const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo } = data[0];
+      result = { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo };
+    }
+  }
+  return result;
 }
 
 // if (!seriesData) promises.push(getSeries(projectID, patientID, studyUID, true));
@@ -1009,6 +1013,8 @@ const getSingleSerieData = (serie, annotation, wadoUrl, seriesData) => {
 
     Promise.all(promises)
       .then(async (result) => {
+        console.log(" ----> result[0]");
+        console.log(result[0]);
         const { studyAims, serieAims, otherSeriesAims } = extractNonMarkupAims(
           result[0].data.rows,
           seriesUID
