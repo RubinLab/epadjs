@@ -888,6 +888,7 @@ class App extends Component {
         console.log(" ====>  data doesn't exist", this.state.teachingLoading);
         const { data: series } = await getSeries(projectID, patientID, studyUID);
         this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series, true));
+        this.setState({ teachingLoading: false });
         return series;
       } else return seriesData[projectID][patientID][studyUID];
     } catch (err) {
@@ -1505,6 +1506,7 @@ class App extends Component {
                       }
                       completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
                       loading={this.state.loading}
+                      teachingLoading={this.state.teachingLoading}
                       forceUpdatePage={() => this.setState(state => ({ update: state.update + 1 }))}
                       getPidUpdate={this.getPidUpdate}
                     />
