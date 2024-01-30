@@ -830,7 +830,7 @@ class DisplayView extends Component {
     const firstSeriesIndex = this.findFirstSeriesIndex(urls);
     console.log(' ----> firstSeriesIndex', firstSeriesIndex);
     console.log(urls[firstSeriesIndex]);
-    if (urls[firstSeriesIndex].length > 0) {
+    if (urls[firstSeriesIndex] && urls[firstSeriesIndex].length > 0) {
       const arr = urls[firstSeriesIndex][0].lossyImage.split("/");
       this.props.dispatch(updateSubpath(arr[1], i));
     }
