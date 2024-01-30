@@ -757,10 +757,8 @@ class App extends Component {
 
   handleArgs = async (args) => {
     this.setState({ loading: true, freeze: 'none', teachingLoading: true });
-    console.log(" ---> before start");
     const { data } = await decryptAndGrantAccess(args);
     const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
-    console.log(" ----> after resolve seriesArray", seriesArray);
     const { openSeries } = this.props;
 
     this.setState({ pid: projectID })
@@ -777,7 +775,6 @@ class App extends Component {
     await this.completeAutorization();
 
     if (seriesArray) {
-      console.log(" ====> in if")
       this.setState({ loading: true, freeze: 'none' })
       const parsedSeriesArray = JSON.parse(seriesArray);
       parsedSeriesArray.forEach(
@@ -803,7 +800,6 @@ class App extends Component {
         })
         .catch((err) => console.error(err));
     } else if (patientID && studyUID && projectID) {
-      console.log(" ====> in else if")
       // This should be teaching files
       this.setState({ loading: true, freeze: 'none' })
       const packedData = {
@@ -885,7 +881,6 @@ class App extends Component {
     try {
       const dataExists = seriesData[projectID] && seriesData[projectID][patientID] && seriesData[projectID][patientID][studyUID];
       if (!dataExists) {
-        console.log(" ====>  data doesn't exist", this.state.teachingLoading);
         const { data: series } = await getSeries(projectID, patientID, studyUID);
         this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series, true));
         this.setState({ teachingLoading: false });

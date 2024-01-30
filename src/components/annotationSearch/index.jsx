@@ -275,21 +275,12 @@ const AnnotationSearch = (props) => {
       seriesArray = seriesArray.filter(isSupportedModality);
     }
 
-    console.log(" ===> in handleteaching 1", props.loading, showSpinner)
-    console.log(" ===> in handleteaching, encArgs", event.detail)
-    // console.log(" ===> in handleteaching, decArgs", decrArgs);
     let seriesList = [seriesArray];
     setShowSelectSeries(seriesArray.length > 0);
     setShowWarning(seriesArray.length === 0);
     setSeriesList(seriesList);
-    console.log(" ===> in handleteaching 2", props.loading, showSpinner)
-    console.log(" ===> in handleteaching, encArgs", event.detail)
-    // console.log(" ===> in handleteaching, decArgs", decrArgs);
     setEncArgs(args);
     setDecrArgs(packedData);
-    console.log(" ===> in handleteaching 3", props.loading, showSpinner)
-    console.log(" ===> in handleteaching, encArgs", event.detail)
-    // console.log(" ===> in handleteaching, decArgs", decrArgs);
   };
 
   useEffect(() => {
@@ -1264,10 +1255,6 @@ const AnnotationSearch = (props) => {
     clearAllTeachingFilers();
   };
 
-  console.log(" ++++> props.loading", props.loading);
-  console.log(" ++++> showSpinner", showSpinner);
-  console.log(" ++++> teachingLoading", props.teachingLoading)
-
   return (
     <>
       <div
@@ -1275,7 +1262,7 @@ const AnnotationSearch = (props) => {
         style={{
           zIndex: 6,
           position: "sticky",
-          top: 0
+          top: 0,
         }}
       >
         {/* search / filters */}
@@ -1841,7 +1828,7 @@ const AnnotationSearch = (props) => {
         </thead>
           <PropagateLoader
             color={"#7A8288"}
-            loading={props.loading || showSpinner | props.teachingLoading}
+            loading={props.loading || showSpinner || props.teachingLoading}
             // loading={props.loading}
             margin={"8"}
           />
