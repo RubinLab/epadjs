@@ -1828,7 +1828,8 @@ const AnnotationSearch = (props) => {
         </thead>
           <PropagateLoader
             color={"#7A8288"}
-            loading={props.loading || showSpinner}
+            loading={props.loading || showSpinner || props.teachingLoading}
+            // loading={props.loading}
             margin={"8"}
           />
         <tbody>
@@ -1846,6 +1847,7 @@ const AnnotationSearch = (props) => {
               handleSort={handleSort}
               handleFilter={handleFilter}
               filters={filters}
+              teachingLoading={props.teachingLoading}
             />
           )}
         </tbody>

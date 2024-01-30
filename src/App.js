@@ -120,6 +120,7 @@ class App extends Component {
       savedData: {},
       loading: true,
       freeze: "auto",
+      teachingLoading: false
     };
   }
 
@@ -755,7 +756,7 @@ class App extends Component {
   };
 
   handleArgs = async (args) => {
-    this.setState({ loading: true, freeze: 'none' });
+    this.setState({ loading: true, freeze: 'none', teachingLoading: true });
     const { data } = await decryptAndGrantAccess(args);
     const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
     const { openSeries } = this.props;
@@ -880,6 +881,7 @@ class App extends Component {
       if (!dataExists) {
         const { data: series } = await getSeries(projectID, patientID, studyUID);
         this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series, true));
+        this.setState({ teachingLoading: false });
         return series;
       } else return seriesData[projectID][patientID][studyUID];
     } catch (err) {
@@ -1497,6 +1499,7 @@ class App extends Component {
                       }
                       completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
                       loading={this.state.loading}
+                      teachingLoading={this.state.teachingLoading}
                       forceUpdatePage={() => this.setState(state => ({ update: state.update + 1 }))}
                       getPidUpdate={this.getPidUpdate}
                     />
