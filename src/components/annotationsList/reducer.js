@@ -308,6 +308,8 @@ const asyncReducer = (state = initialState, action) => {
       case CLOSE_SERIE: // tested
         let delSeriesUID = state.openSeries[state.activePort].seriesUID;
         let delStudyUID = state.openSeries[state.activePort].studyUID;
+        let delPID = state.openSeries[state.activePort].projectID;
+        let delPatientID = state.openSeries[state.activePort].patientID || state.openSeries[state.activePort].subjectID;
         let delOpenStudiesAddition = _.cloneDeep(state.openSeriesAddition);
         delOpenStudiesAddition.splice(state.activePort, 1);
         const delAims = { ...state.aimsList };
@@ -325,8 +327,8 @@ const asyncReducer = (state = initialState, action) => {
         }
 
         let delActivePort;
-        let delOtherSeriesAimsList;
-        let delSeriesData;
+        let delOtherSeriesAimsList = _.cloneDeep(state.otherSeriesAimsList);;
+        let delSeriesData = _.cloneDeep(state.seriesData);
         if (delGrid.length === 0) {
           delActivePort = null;
           delOtherSeriesAimsList = {};
@@ -336,7 +338,10 @@ const asyncReducer = (state = initialState, action) => {
         }
 
         if (!shouldStudyExist) {
-          delete delOpenStudies[delStudyUID];
+          if (delGrid.length > 0) {
+            delete delOtherSeriesAimsList[delPID][delStudyUID];
+            delete delSeriesData[delPID][delPatientID][delStudyUID];
+          }
           return {
             ...state,
             openSeries: delGrid,
@@ -846,7 +851,7 @@ const asyncReducer = (state = initialState, action) => {
             return all;
           }, []);
 
-          if (reformedOtherSeries[serieToUpdateIndex][2].length === 0) {
+          if (reformedOtherSeries[serieToUpdateIndex] && reformedOtherSeries[serieToUpdateIndex][2] && reformedOtherSeries[serieToUpdateIndex][2].length === 0) {
             updatedSerie.numberOfAnnotations = 0;
             if (deepOther[projectID][studyUID].length === 1) {
               delete deepOther[projectID][studyUID];
