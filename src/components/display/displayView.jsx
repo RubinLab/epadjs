@@ -719,6 +719,7 @@ class DisplayView extends Component {
   
             if (mode === 'teaching' && isStudyAim) {
               getSeries(projectID, patientID, studyUID).then((res) => {
+                console.log("resdata", res.data);
                 this.props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
               }).catch(err => console.error(err));
             }

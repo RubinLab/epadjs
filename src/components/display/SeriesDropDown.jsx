@@ -39,9 +39,10 @@ const SeriesDropDown = (props) => {
     const list = studyExist ? data[projectID][patientID][studyUID] : null
     const isString = (currentValue) => currentValue.seriesDescription === '' || typeof currentValue.seriesDescription === 'string';
     const hasDescription = list ? list.every(isString) : false;
-
+    console.log(" studyExist && hasDescription", studyExist, hasDescription)
     if (studyExist && hasDescription) {
       let series = data[projectID][patientID][studyUID];
+      console.log(" +++++ series", series);
       series = series?.filter(isSupportedModality);
       setSeriesList(series);
     } else {
@@ -51,6 +52,7 @@ const SeriesDropDown = (props) => {
         props.dispatch(getSeriesAdditional({studyUID, projectID, patientID}))
       } else {
         getSeries(projectID, patientID, studyUID).then(res => {
+          console.log(' --->  dropdown fresh data', res.data);
           props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
           setLoading(false);
         }).catch((err) => console.error(err));
