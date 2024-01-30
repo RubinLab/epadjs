@@ -1,5 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
+import PropagateLoader from "react-spinners/PropagateLoader";
 import ReactTable from "react-table-v6";
 import treeTableHOC from "react-table-v6/lib/hoc/treeTable";
 import _ from "lodash";
@@ -37,6 +38,7 @@ class FlexView extends React.Component {
     seriesTableOpen: false,
     series: [],
     showWarning: false,
+    loading: false
   };
 
   studyColumns = [
@@ -105,7 +107,9 @@ class FlexView extends React.Component {
 
     try {
       if (!dataExists) {
+        this.setState({ loading: true });
         ({ data: series } = await getSeries(projectID, patientID, studyUID));
+        this.setState({ loading: false });
         this.props.dispatch(
           setSeriesData(projectID, patientID, studyUID, series, true)
         );
@@ -266,6 +270,13 @@ class FlexView extends React.Component {
             studyColumns={this.studyColumns}
             onClose={this.selectDropdown}
           />
+          { this.state.loading && ( <div style={{height: "20px", marginLeft: "20px", width:"100px"}}>
+            <PropagateLoader
+              color={"#7A8288"}
+              loading={this.state.loading}
+              margin={"20"}
+              />
+          </div>)}
           {this.state.data && (
             <StudyTable
               data={data}
