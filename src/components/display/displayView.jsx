@@ -1039,6 +1039,12 @@ class DisplayView extends Component {
       }
     }
 
+    // Here add multiframe series to seriesData
+    // rename updateGridWithMultiFrameInfo as updateStoreWithMultiFrameInfo - make sure there wont be duplicates
+    console.log(" ++++> multiFrameIndex", multiFrameIndex);
+    console.log(" ++++> multiFrameMap", multiFrameMap);
+    console.log(" ++++> multiframeSeriesData", multiframeSeriesData);
+    
     if (Object.entries(multiFrameMap).length > 0) {
       this.props.dispatch(
         updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData)
