@@ -3,7 +3,6 @@ import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 
 // we need the keycloak object to be able to use update token
 let keycloak = null;
-let mode;
 
 export function refreshToken(keycloak, minValidity) {
   return new Promise((resolve, reject) => {
