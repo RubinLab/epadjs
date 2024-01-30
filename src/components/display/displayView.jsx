@@ -287,17 +287,23 @@ class DisplayView extends Component {
 
     const { projectID, studyUID, seriesUID } = series[activePort];
 
-    const oldOtherAimsLength = prevOther[projectID][studyUID].reduce((all, item) => {
+    const oldAimsExist = prevOther[projectID] && prevOther[projectID][studyUID];
+    const newAimsExist = otherSeriesAimsList[projectID] && otherSeriesAimsList[projectID][studyUID];
+
+    const oldOtherAimsLength = oldAimsExist ? prevOther[projectID][studyUID].reduce((all, item) => {
       all = all + item[2].length;
       return all;
-    }, 0);
-    const newOtherAimsLength = otherSeriesAimsList[projectID][studyUID].reduce((all, item) => {
+    }, 0) : 0;
+
+    const newOtherAimsLength = newAimsExist ? otherSeriesAimsList[projectID][studyUID].reduce((all, item) => {
       all = all + item[2].length;
       return all;
-    }, 0);
+    }, 0) : 0;
+
     const studyAimsLengthChanged = oldOtherAimsLength !== newOtherAimsLength;
-    const newAimsListLen = Object.keys(aimList[seriesUID]).length;
-    const oldAimsListLen = Object.keys(prevAimList[seriesUID]).length;
+    const newAimsListLen = aimList[seriesUID] ? Object.keys(aimList[seriesUID]).length : 0;
+    const oldAimsListLen = prevAimList[seriesUID] ? Object.keys(prevAimList[seriesUID]).length : 0;
+
     let aimsDeletedOrSaved;
     let currentAimsCalc;
     let prevAimsCalc;
