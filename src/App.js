@@ -811,10 +811,8 @@ class App extends Component {
       // If study has teaching file it's already added so no need to add
       const { data: TF } = await this.hasTeachingFiles(studyUID);
       if (TF.total_rows) {
-        console.log(" =====> total_rows", total_rows);
         this.displaySeries(packedData);
       } else {
-        console.log(" =====> last option getting seriesData")
         const seriesArray = await this.getSeriesData(packedData);
         window.dispatchEvent(
           new CustomEvent("openTeachingFilesModal", {
