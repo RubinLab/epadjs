@@ -587,7 +587,7 @@ function AnnotationTable(props) {
                     openAnnotation(row.original);
                   }
                 }}
-                style={{ textDecoration: "underline", cursor: props.teachingLoading ? "wait" : "pointer" }}
+                style={{ textDecoration: "underline", cursor: "pointer" }}
               >
                 {clearCarets(row.original.patientName)}
               </div>
