@@ -823,10 +823,13 @@ class DisplayView extends Component {
 
   async getImages(serie, i) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
+    console.log(" ----> getImages urls", urls);
     if (urls.length > 1) {
       this.formMultiframeImgData(urls);
     }
     const firstSeriesIndex = this.findFirstSeriesIndex(urls);
+    console.log(' ----> firstSeriesIndex', firstSeriesIndex);
+    console.log(urls[firstSeriesIndex]);
     if (urls[firstSeriesIndex].length > 0) {
       const arr = urls[firstSeriesIndex][0].lossyImage.split("/");
       this.props.dispatch(updateSubpath(arr[1], i));
@@ -884,6 +887,7 @@ class DisplayView extends Component {
     const multiFrameMap = {};
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
+    console.log(" ---> imageUrls in withwadors", imageUrls);
     if (imageUrls.length > 1) {
       for (let i = 0; i < imageUrls.length; i++) {
         if (imageUrls[i][0].multiFrameImage) {
@@ -921,12 +925,14 @@ class DisplayView extends Component {
       return all + item.length;
     }, 0);
 
+    console.log(" ===> seriesMetadata");
     const seriesMetadataExists = Array.isArray(seriesMetadata);
 
     const useSeriesData =
       seriesMetadataExists &&
       seriesMetadata.length > 0 &&
       seriesMetadata.length === imgURLsLen;
+      console.log(" +++> useSeriesData", useSeriesData);
     // get the first and the middle image
     const middleIndex = imageUrls[firstSeriesIndex][0].multiFrameImage ? 0 : Math.floor(imgURLsLen / 2);
     let firstImage = null;
@@ -964,6 +970,7 @@ class DisplayView extends Component {
       );
     }
 
+    console.log(" ++++> imageUrls[firstSeriesIndex].length", imageUrls[firstSeriesIndex].length);
     const len = imageUrls[firstSeriesIndex].length;
     for (let k = 0; k < len; k++) {
       baseUrl = wadoUrlNoWadors + imageUrls[firstSeriesIndex][k].lossyImage;

@@ -1014,7 +1014,7 @@ const getSingleSerieData = (serie, annotation, wadoUrl, seriesData) => {
     Promise.all(promises)
       .then(async (result) => {
         console.log(" ----> result[0]");
-        console.log(result[0]);
+        console.log(result[0].data.rows);
         const { studyAims, serieAims, otherSeriesAims } = extractNonMarkupAims(
           result[0].data.rows,
           seriesUID
