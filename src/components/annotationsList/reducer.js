@@ -378,7 +378,7 @@ const asyncReducer = (state = initialState, action) => {
         let imageAddedSeries = _.cloneDeep(state.openSeriesAddition);
         let annCalc = Object.keys(action.payload.imageData);
         const { projectID: pidFromRef, studyUID: stUIDFromRef } = action.payload.ref;
-        let latestOtherSeriesAimsList = { ...state.otherSeriesAimsList };
+        let latestOtherSeriesAimsList = _.cloneDeep(state.otherSeriesAimsList);
         if (latestOtherSeriesAimsList[pidFromRef])
           latestOtherSeriesAimsList[pidFromRef][stUIDFromRef] = action.payload.otherSeriesAimsData[pidFromRef][stUIDFromRef];
         else latestOtherSeriesAimsList[pidFromRef] = action.payload.otherSeriesAimsData[pidFromRef];
