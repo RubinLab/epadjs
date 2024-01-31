@@ -36,11 +36,20 @@ const SeriesDropDown = (props) => {
       data[projectID][patientID] &&
       data[projectID][patientID][studyUID];
 
-    const list = studyExist ? data[projectID][patientID][studyUID] : null
+    const list = studyExist ? data[projectID][patientID][studyUID].list : null
     const isString = (currentValue) => currentValue.seriesDescription === '' || typeof currentValue.seriesDescription === 'string';
-    const isFilled= (currentValue) => currentValue.filled;
+    const isFilled= (currentValue) => currentValue.filled || currentValue.multiFrameImage;
     const hasDescription = list ? list.every(isFilled) : false;
-    console.log(" studyExist && hasDescription with filled", studyExist, hasDescription)
+    console.log(" studyExist && hasDescription with filled", studyExist, hasDescription);
+    // if the currrent series is multiframe 
+      // in the series annotation get aimID - lookup in framedata
+      // get index 0 from the array
+      // split it by /frames/
+      // first part is the imageid look up in multiframemap if it has value it means it is amultiframe
+    // check if all the seriesUID's are same
+    // if same get series all series from scratch
+    // if there are different series 
+
     if (studyExist && hasDescription) {
       let series = data[projectID][patientID][studyUID];
       console.log(" +++++ series", series);
@@ -48,7 +57,7 @@ const SeriesDropDown = (props) => {
       setSeriesList(series);
     } else {
       setLoading(true);
-      const shouldFill = props.index === 0 ? true : !otherSeriesOpened(props.openSeries, props.index);
+      const shouldFill = props.index === 0 || !hasDescription ? true : !otherSeriesOpened(props.openSeries, props.index);
       if (studyExist && shouldFill && studyUID && projectID && patientID) {
         props.dispatch(getSeriesAdditional({studyUID, projectID, patientID}))
       } else {

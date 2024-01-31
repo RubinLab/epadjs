@@ -134,21 +134,23 @@ const asyncReducer = (state = initialState, action) => {
         return { ...state, seriesData: descFilledSeriesData, openSeriesAddition: descFilledOpenSeriesAddition };
       case SET_SERIES_DATA:
         const newSeriesData = _.cloneDeep(state.seriesData);
-        const { projectID, patientID, studyUID, data } = action.payload;
+        const { projectID, patientID, studyUID, data, map } = action.payload;
         const projectExists = newSeriesData[projectID];
         const patientExists = projectExists && projectExists[patientID] ? projectExists[patientID] : false;
         const studyExists = patientExists && patientExists[studyUID] ? patientExists[studyUID] : false;
-
+        let newMap = {};
         if (studyExists) {
           let newArr = newSeriesData[projectID][patientID][studyUID].reduce((all, item) => {
             if (item.multiFrameImage === true) all.push(item);
             return all;
           }, []);
           newArr = [...newArr, ...data];
-          newSeriesData[projectID][patientID][studyUID] = newArr;
-        } else if (patientExists) newSeriesData[projectID][patientID][studyUID] = data;
-        else if (projectExists) newSeriesData[projectID][patientID] = { [studyUID]: data };
-        else newSeriesData[projectID] = { [patientID]: { [studyUID]: data } };
+          newMap = { ...newSeriesData[projectID][patientID][studyUID].map };
+          newSeriesData[projectID][patientID][studyUID].list = newArr;
+        } else if (patientExists) newSeriesData[projectID][patientID][studyUID].list = data;
+        else if (projectExists) newSeriesData[projectID][patientID] = { [studyUID]: { 'list': data } };
+        else newSeriesData[projectID] = { [patientID]: { [studyUID]: { 'list': data } } };
+        newSeriesData[projectID][patientID][studyUID].map = { ...newMap, ...map };
         return { ...state, seriesData: newSeriesData };
       case CLEAR_MULTIFRAME_AIM_JUMP:
         const aimClearedSeries = _.cloneDeep(state.openSeries);

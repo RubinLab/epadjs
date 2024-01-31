@@ -207,7 +207,7 @@ function Studies(props) {
           setSeriesData(projectID, patientID, studyUID, series, true)
         );
         return series;
-      } else return seriesData[projectID][patientID][studyUID];
+      } else return seriesData[projectID][patientID][studyUID].list;
     } catch (err) {
       props.dispatch(annotationsLoadingError(err));
     }

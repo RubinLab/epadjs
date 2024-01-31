@@ -368,7 +368,7 @@ function AnnotationTable(props) {
         props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
         props.dispatch(loadCompleted());
         return series;
-      } else return seriesData[projectID][patientID][studyUID];
+      } else return seriesData[projectID][patientID][studyUID].list;
     } catch (err) {
       props.dispatch(annotationsLoadingError(err));
     }
@@ -413,7 +413,7 @@ function AnnotationTable(props) {
     seriesData[projectID][patientID][studyUID];
 
     let existingData = dataExists
-    ? seriesData[projectID][patientID][studyUID]
+    ? seriesData[projectID][patientID][studyUID].list
     : null;
     return existingData;
   }

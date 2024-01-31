@@ -122,7 +122,7 @@ class selectSerieModal extends React.Component {
           setSeriesData(projectID, patientID, studyUID, series, true)
         );
         return series;
-      } else return seriesData[projectID][patientID][studyUID];
+      } else return seriesData[projectID][patientID][studyUID].list;
     } catch (err) {
       console.error(err);
     }
@@ -194,7 +194,7 @@ class selectSerieModal extends React.Component {
         seriesData[projectID][patientID][studyUID];
 
     const existingData = dataExists
-      ? seriesData[projectID][patientID][studyUID]
+      ? seriesData[projectID][patientID][studyUID].list
       : null;
     return existingData;
   }

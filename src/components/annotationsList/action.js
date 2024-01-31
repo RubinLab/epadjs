@@ -79,7 +79,13 @@ export const setSeriesData = (projectID, patientID, studyUID, seriesData, filled
     el.filled = filled;
     return el;
   });
-  return { type: SET_SERIES_DATA, payload: { projectID, patientID, studyUID, data } };
+
+  const map = data.reduce((all, item) => {
+    all[item.seriesUID] = true;
+    return all;
+  }, {});
+
+  return { type: SET_SERIES_DATA, payload: { projectID, patientID, studyUID, data, map } };
 }
 
 export const clearMultiFrameAimJumpFlags = () => {

@@ -102,7 +102,7 @@ class FlexView extends React.Component {
       seriesData[projectID][patientID][studyUID];
 
     const existingData = dataExists
-      ? seriesData[projectID][patientID][studyUID]
+      ? seriesData[projectID][patientID][studyUID].list
       : null;
 
     try {
@@ -113,7 +113,7 @@ class FlexView extends React.Component {
         this.props.dispatch(
           setSeriesData(projectID, patientID, studyUID, series, true)
         );
-      } else series = seriesData[projectID][patientID][studyUID];
+      } else series = seriesData[projectID][patientID][studyUID].list;
     } catch (err) {
       console.log("Error getting series of the study", err);
     }

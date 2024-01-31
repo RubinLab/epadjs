@@ -778,7 +778,7 @@ class SearchView extends Component {
           setSeriesData(projectID, patientID, studyUID, series, true)
         );
         return series;
-      } else return seriesData[projectID][patientID][studyUID];
+      } else return seriesData[projectID][patientID][studyUID].list;
     } catch (err) {
       this.props.dispatch(annotationsLoadingError(err));
     }

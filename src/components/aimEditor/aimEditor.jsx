@@ -1323,7 +1323,7 @@ class AimEditor extends Component {
       seriesData[projectID][patientID] &&
       seriesData[projectID][patientID][studyUID];
     const existingData = dataExists
-      ? seriesData[projectID][patientID][studyUID]
+      ? seriesData[projectID][patientID][studyUID].list
       : null;
     toast.success('Aim succesfully saved.', {
       position: 'top-right',

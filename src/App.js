@@ -883,7 +883,7 @@ class App extends Component {
         this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series, true));
         this.setState({ teachingLoading: false });
         return series;
-      } else return seriesData[projectID][patientID][studyUID];
+      } else return seriesData[projectID][patientID][studyUID].list;
     } catch (err) {
       console.error(err);
       this.props.dispatch(annotationsLoadingError(err));
