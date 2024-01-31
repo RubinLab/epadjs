@@ -186,10 +186,16 @@ const SeriesDropDown = (props) => {
 
             let isCurrent;
             if (!multiFrameImage) {
+              console.log(" ++++++++ multiFrameImage")
+              console.log(" ---> openSeriesSeriesUID", openSeriesSeriesUID);
+              console.log(" ===> uniqueKey", uniqueKey);
+              console.log(" ===> openSeriesMultiFrameIndex", openSeriesMultiFrameIndex);
               isCurrent =
                 openSeriesSeriesUID === uniqueKey && !openSeriesMultiFrameIndex;
             } else {
               const compound = `${openSeriesSeriesUID}_${openSeriesMultiFrameIndex}`;
+              console.log(" ===> uniqueKey", uniqueKey);
+              console.log(" ===> compound", compound);
               isCurrent = compound === uniqueKey;
             }
             let counts = numberOfAnnotations
