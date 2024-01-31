@@ -122,10 +122,10 @@ const asyncReducer = (state = initialState, action) => {
           }
           const stExists = descFilledSeriesData[fillPID] && descFilledSeriesData[fillPID][fillPatID] && descFilledSeriesData[fillPID][fillPatID][fillStUID];
           if (stExists) {
-            for (let k = 0; k < descFilledSeriesData[fillPID][fillPatID][fillStUID].length; k++) {
-              if (descFilledSeriesData[fillPID][fillPatID][fillStUID][k].seriesUID === action.data[i].seriesUID) {
+            for (let k = 0; k < descFilledSeriesData[fillPID][fillPatID][fillStUID].list.length; k++) {
+              if (descFilledSeriesData[fillPID][fillPatID][fillStUID].list[k].seriesUID === action.data[i].seriesUID) {
                 // descFilledSeriesData[fillPID][fillPatID][fillStUID][k].seriesDescription = action.data[i].seriesDescription;
-                descFilledSeriesData[fillPID][fillPatID][fillStUID][k] = { ...descFilledSeriesData[fillPID][fillPatID][fillStUID][k], ...action.data[i] };
+                descFilledSeriesData[fillPID][fillPatID][fillStUID].list[k] = { ...descFilledSeriesData[fillPID][fillPatID][fillStUID].list[k], ...action.data[i] };
                 break;
               }
             }
@@ -140,7 +140,7 @@ const asyncReducer = (state = initialState, action) => {
         const studyExists = patientExists && patientExists[studyUID] ? patientExists[studyUID] : false;
         let newMap = {};
         if (studyExists) {
-          let newArr = newSeriesData[projectID][patientID][studyUID].reduce((all, item) => {
+          let newArr = newSeriesData[projectID][patientID][studyUID].list.reduce((all, item) => {
             if (item.multiFrameImage === true) all.push(item);
             return all;
           }, []);
@@ -189,9 +189,9 @@ const asyncReducer = (state = initialState, action) => {
         if (!state.openSeriesAddition[state.activePort].multiFrameMap) {
           if (existingSeries) {
             // find the correct series to get description from
-            const seriesToCopyFm = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].find((element) => element.seriesUID === seriesDataMulti[0].seriesUID);
+            const seriesToCopyFm = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].list.find((element) => element.seriesUID === seriesDataMulti[0].seriesUID);
             //prevent duplicate multiframe series to be added 
-            mfLookUpMap = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].reduce((all, item, index) => {
+            mfLookUpMap = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].list.reduce((all, item, index) => {
               if (item.multiFrameImage) {
                 const { projectID, patientID, studyUID, seriesUID, imageUID } = item;
                 const key = `${projectID}-${patientID}-${studyUID}-${seriesUID}-${imageUID}`;
@@ -208,7 +208,7 @@ const asyncReducer = (state = initialState, action) => {
               const { projectID, patientID, studyUID, seriesUID, imageUID } = el;
               const key = `${projectID}-${patientID}-${studyUID}-${seriesUID}-${imageUID}`;
               if (!mfLookUpMap[key]) {
-                newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].push(el);
+                newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].list.push(el);
               }
             });
           } else {
@@ -219,13 +219,17 @@ const asyncReducer = (state = initialState, action) => {
               el.seriesNo = srNo ? srNo : null;
               return el;
             });
-
+            const list = [state.openSeriesAddition[state.activePort], ...seriesDataMulti];
+            const map = list.reduce((all, item) => {
+              all[item.seriesUID] = true;
+              return all;
+            }, {});
             if (multiPatIDExists) {
-              newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = [state.openSeriesAddition[state.activePort], ...seriesDataMulti];
+              newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = { list, map };
             } else if (multiPIDExists) {
-              newSeriesDataMulti[multiPID][multiPatID] = { [multiStudyUID]: [state.openSeriesAddition[state.activePort], ...seriesDataMulti] };
+              newSeriesDataMulti[multiPID][multiPatID] = { [multiStudyUID]: { list, map } };
             } else {
-              newSeriesDataMulti[multiPID] = { [multiPatID]: { [multiStudyUID]: [state.openSeriesAddition[state.activePort], ...seriesDataMulti] } };
+              newSeriesDataMulti[multiPID] = { [multiPatID]: { [multiStudyUID]: { list, map } } };
             }
           }
         }
@@ -441,7 +445,7 @@ const asyncReducer = (state = initialState, action) => {
         if (order && tempCode === teachingFileTempCode) {
           const seriesDataForTFProject = state.seriesData[pidFromRef]
           const seriesDataForTFPatient = seriesDataForTFProject && state.seriesData[pidFromRef][action.payload.ref.patientID]
-          const seriesDataForTFStudy = seriesDataForTFPatient && state.seriesData[pidFromRef][action.payload.ref.studyUID];
+          const seriesDataForTFStudy = seriesDataForTFPatient && state.seriesData[pidFromRef][action.payload.ref.patientID][action.payload.ref.studyUID];
           if (!seriesDataForTFStudy) {
             if (seriesDataForTFPatient)
               seriesDataForTeaching[pidFromRef][action.payload.ref.patientID] = { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] };

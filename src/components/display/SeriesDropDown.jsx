@@ -51,7 +51,7 @@ const SeriesDropDown = (props) => {
     // if there are different series 
 
     if (studyExist && hasDescription) {
-      let series = data[projectID][patientID][studyUID];
+      let series = data[projectID][patientID][studyUID].list;
       console.log(" +++++ series", series);
       series = series?.filter(isSupportedModality);
       setSeriesList(series);
