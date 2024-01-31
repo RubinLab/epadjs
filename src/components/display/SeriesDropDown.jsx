@@ -25,7 +25,7 @@ const SeriesDropDown = (props) => {
     // if the currrent series is multiframe 
     const multiFrameFlag = openSeries[activePort].multiFrameImage;
     // in the series annotation get aimID - lookup in framedata
-    let imageID =  openSeriesAddition[activePort].frameData[openSeries[activePort].aimID];
+    let imageID =  openSeriesAddition[activePort].frameData && openSeriesAddition[activePort].frameData[openSeries[activePort].aimID];
     // get index 0 from the array and split it by /frames/
     imageID = imageID ? imageID[0].split('/frames/')[0] : '';
     // first part is the imageid look up in multiframemap if it has value it means it is amultiframe
