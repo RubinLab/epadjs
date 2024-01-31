@@ -38,8 +38,9 @@ const SeriesDropDown = (props) => {
 
     const list = studyExist ? data[projectID][patientID][studyUID] : null
     const isString = (currentValue) => currentValue.seriesDescription === '' || typeof currentValue.seriesDescription === 'string';
-    const hasDescription = list ? list.every(isString) : false;
-    console.log(" studyExist && hasDescription", studyExist, hasDescription)
+    const isFilled= (currentValue) => currentValue.filled;
+    const hasDescription = list ? list.every(isFilled) : false;
+    console.log(" studyExist && hasDescription with filled", studyExist, hasDescription)
     if (studyExist && hasDescription) {
       let series = data[projectID][patientID][studyUID];
       console.log(" +++++ series", series);
