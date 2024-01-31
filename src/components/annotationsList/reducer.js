@@ -157,9 +157,12 @@ const asyncReducer = (state = initialState, action) => {
         } else if (patientExists) newSeriesData[projectID][patientID][studyUID].list = data;
         else if (projectExists) newSeriesData[projectID][patientID] = { [studyUID]: { 'list': data } };
         else newSeriesData[projectID] = { [patientID]: { [studyUID]: { 'list': data } } };
-        newSeriesData[projectID][patientID][studyUID].map = newSeriesData[projectID][patientID][studyUID].list.reduce((all, item) => {
-          all[item.seriesUID] = true;
-          if (item.multiFrameImage) all[item.imageUID] = true;
+        newSeriesData[projectID][patientID][studyUID].map = newSeriesData[projectID][patientID][studyUID].list.reduce((all, item, index) => {
+          all[item.seriesUID] = item.seriesDescription || index + 1;
+          if (item.multiFrameImage) {
+            all[item.imageUID] = index + 1;
+            newSeriesData[projectID][patientID][studyUID].list[index].seriesDescription = all[item.seriesUID] && typeof all[item.seriesUID] === 'string' ? all[item.seriesUID] : '';
+          }
           return all;
         }, {});
         newSeriesData[projectID][patientID][studyUID].mfMerged = mfMerged;
@@ -234,9 +237,12 @@ const asyncReducer = (state = initialState, action) => {
               return el;
             });
             const list = [state.openSeriesAddition[state.activePort], ...seriesDataMulti];
-            const map = list.reduce((all, item) => {
-              all[item.seriesUID] = true;
-              if (item.multiFrameImage) all[item.imageUID] = true;
+            const map = list.reduce((all, item, index) => {
+              all[item.seriesUID] = item.seriesDescription || index + 1;
+              if (item.multiFrameImage) {
+                all[item.imageUID] = index + 1;
+                item.seriesDescription = all[item.seriesUID] && typeof all[item.seriesUID] === 'string' ? all[item.seriesUID] : '';
+              }
               return all;
             }, {});
             if (multiPatIDExists) {
