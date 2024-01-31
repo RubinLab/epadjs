@@ -20,6 +20,43 @@ const SeriesDropDown = (props) => {
   const [loading, setLoading] = useState(false);
   let mfIndex = {};
 
+  const checkMultiframe = () => {
+    const { openSeries, activePort, openSeriesAddition } = props;
+    // if the currrent series is multiframe 
+    const multiFrameFlag = openSeries[activePort].multiFrameImage;
+    // in the series annotation get aimID - lookup in framedata
+    let imageID =  openSeriesAddition[activePort].frameData[openSeries[activePort].aimID];
+    // get index 0 from the array and split it by /frames/
+    imageID = imageID ? imageID[0].split('/frames/')[0] : '';
+    // first part is the imageid look up in multiframemap if it has value it means it is amultiframe
+    const isMultiFrameAim = imageID ? openSeriesAddition[activePort].multiFrameMap[imageID] > 0: false;
+    return multiFrameFlag || isMultiFrameAim;
+
+  }
+
+  const checkAllSameSeries = (list) => {
+    const seriesUID = list[0].seriesUID
+    for (let i = 1; i < list.length; i++) {
+      if (list[i].seriesUID !== seriesUID) return false;
+    }
+    return true;
+    // // if same get series all series from scratch
+    // // if there are different series merge them
+
+  }
+
+  const mergeLists = (existingData, newList) => {
+    const { list, map } = existingData;
+    // console.log(map);
+    const result = [ ...list ];
+    newList.forEach(el => {
+      // console.log(el.seriesUID);
+      if (!map[el.seriesUID]) result.push(el);
+    })
+    // console.log(' ---> ', result);
+    return result;
+  }
+
   useEffect(() => {
     let studyUID;
     let projectID;
@@ -40,17 +77,15 @@ const SeriesDropDown = (props) => {
     const isString = (currentValue) => currentValue.seriesDescription === '' || typeof currentValue.seriesDescription === 'string';
     const isFilled= (currentValue) => currentValue.filled || currentValue.multiFrameImage;
     const hasDescription = list ? list.every(isFilled) : false;
-    console.log(" studyExist && hasDescription with filled", studyExist, hasDescription);
-    // if the currrent series is multiframe 
-      // in the series annotation get aimID - lookup in framedata
-      // get index 0 from the array
-      // split it by /frames/
-      // first part is the imageid look up in multiframemap if it has value it means it is amultiframe
-    // check if all the seriesUID's are same
-    // if same get series all series from scratch
-    // if there are different series 
 
-    if (studyExist && hasDescription) {
+    if (checkMultiframe() && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
+      getSeries(projectID, patientID, studyUID).then(res => {
+        console.log(' --->  dropdown fresh data', res.data);
+        const newList = mergeLists(data[projectID][patientID][studyUID], res.data);
+        props.dispatch(setSeriesData(projectID, patientID, studyUID, newList, true, true));
+        setLoading(false);
+      }).catch((err) => console.error(err));
+    } if (studyExist && hasDescription) {
       let series = data[projectID][patientID][studyUID].list;
       console.log(" +++++ series", series);
       series = series?.filter(isSupportedModality);

@@ -134,23 +134,35 @@ const asyncReducer = (state = initialState, action) => {
         return { ...state, seriesData: descFilledSeriesData, openSeriesAddition: descFilledOpenSeriesAddition };
       case SET_SERIES_DATA:
         const newSeriesData = _.cloneDeep(state.seriesData);
-        const { projectID, patientID, studyUID, data, map } = action.payload;
+        const { projectID, patientID, studyUID, data, mfMerged } = action.payload;
         const projectExists = newSeriesData[projectID];
         const patientExists = projectExists && projectExists[patientID] ? projectExists[patientID] : false;
         const studyExists = patientExists && patientExists[studyUID] ? patientExists[studyUID] : false;
-        let newMap = {};
         if (studyExists) {
-          let newArr = newSeriesData[projectID][patientID][studyUID].list.reduce((all, item) => {
-            if (item.multiFrameImage === true) all.push(item);
-            return all;
-          }, []);
-          newArr = [...newArr, ...data];
-          newMap = { ...newSeriesData[projectID][patientID][studyUID].map };
+          console.log(" ++++++++++++ here")
+          // 
+          const existingMap = newSeriesData[projectID][patientID][studyUID].map;
+          console.log(" +++> existingMap", existingMap);
+          console.log(" +++> existinglist", newSeriesData[projectID][patientID][studyUID].list);
+
+          let newArr = [...newSeriesData[projectID][patientID][studyUID].list];
+          data.forEach(el => {
+            const newSer = !existingMap[el.seriesUID];
+            const newMF = el.multiFrameImage && !existingMap[el.imageUID];
+            console.log(el);
+            console.log(" ===> newSer || newMF", newSer, newMF)
+            if (newSer || newMF) newArr.push(el);
+          });
           newSeriesData[projectID][patientID][studyUID].list = newArr;
         } else if (patientExists) newSeriesData[projectID][patientID][studyUID].list = data;
         else if (projectExists) newSeriesData[projectID][patientID] = { [studyUID]: { 'list': data } };
         else newSeriesData[projectID] = { [patientID]: { [studyUID]: { 'list': data } } };
-        newSeriesData[projectID][patientID][studyUID].map = { ...newMap, ...map };
+        newSeriesData[projectID][patientID][studyUID].map = newSeriesData[projectID][patientID][studyUID].list.reduce((all, item) => {
+          all[item.seriesUID] = true;
+          if (item.multiFrameImage) all[item.imageUID] = true;
+          return all;
+        }, {});
+        newSeriesData[projectID][patientID][studyUID].mfMerged = mfMerged;
         return { ...state, seriesData: newSeriesData };
       case CLEAR_MULTIFRAME_AIM_JUMP:
         const aimClearedSeries = _.cloneDeep(state.openSeries);
@@ -159,6 +171,7 @@ const asyncReducer = (state = initialState, action) => {
         aimClearedSeriesAddition[state.activePort].aimID = null;
         return { ...state, openSeries: aimClearedSeries, multiFrameAimJumpData: null, openSeriesAddition: aimClearedSeriesAddition };
       case CHECK_MULTIFRAME:
+        console.log(" ||||||||||||||||||||||||||||||||||||")
         // const series = _.cloneDeep(state.openSeries);
         const seriesAddition = _.cloneDeep(state.openSeriesAddition);
         const { hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData } = action.payload;
@@ -191,6 +204,7 @@ const asyncReducer = (state = initialState, action) => {
             // find the correct series to get description from
             const seriesToCopyFm = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].list.find((element) => element.seriesUID === seriesDataMulti[0].seriesUID);
             //prevent duplicate multiframe series to be added 
+            console.log(seriesToCopyFm);
             mfLookUpMap = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].list.reduce((all, item, index) => {
               if (item.multiFrameImage) {
                 const { projectID, patientID, studyUID, seriesUID, imageUID } = item;
@@ -222,6 +236,7 @@ const asyncReducer = (state = initialState, action) => {
             const list = [state.openSeriesAddition[state.activePort], ...seriesDataMulti];
             const map = list.reduce((all, item) => {
               all[item.seriesUID] = true;
+              if (item.multiFrameImage) all[item.imageUID] = true;
               return all;
             }, {});
             if (multiPatIDExists) {
@@ -233,6 +248,7 @@ const asyncReducer = (state = initialState, action) => {
             }
           }
         }
+        console.log(" || newSeriesDataMulti", newSeriesDataMulti);
         newState.seriesData = newSeriesDataMulti;
         // newState.openSeries= series;
         newState.openSeriesAddition = seriesAddition;
@@ -452,6 +468,8 @@ const asyncReducer = (state = initialState, action) => {
             else seriesDataForTeaching[pidFromRef] = { [action.payload.ref.patientID]: { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] } };
           }
         }
+
+        console.log(" ++++++++++++ seriesDataForTeaching ", seriesDataForTeaching);
 
         const result = Object.assign({}, state, {
           loading: false,
