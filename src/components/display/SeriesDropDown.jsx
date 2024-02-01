@@ -47,13 +47,10 @@ const SeriesDropDown = (props) => {
 
   const mergeLists = (existingData, newList) => {
     const { list, map } = existingData;
-    // console.log(map);
     const result = [ ...list ];
     newList.forEach(el => {
-      // console.log(el.seriesUID);
       if (!map[el.seriesUID]) result.push(el);
     })
-    // console.log(' ---> ', result);
     return result;
   }
 
@@ -80,14 +77,12 @@ const SeriesDropDown = (props) => {
 
     if (checkMultiframe() && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
       getSeries(projectID, patientID, studyUID).then(res => {
-        console.log(' --->  dropdown fresh data', res.data);
         const newList = mergeLists(data[projectID][patientID][studyUID], res.data);
         props.dispatch(setSeriesData(projectID, patientID, studyUID, newList, true, true));
         setLoading(false);
       }).catch((err) => console.error(err));
     } if (studyExist && hasDescription) {
       let series = data[projectID][patientID][studyUID].list;
-      console.log(" +++++ series", series);
       series = series?.filter(isSupportedModality);
       setSeriesList(series);
     } else {
@@ -97,7 +92,6 @@ const SeriesDropDown = (props) => {
         props.dispatch(getSeriesAdditional({studyUID, projectID, patientID}))
       } else {
         getSeries(projectID, patientID, studyUID).then(res => {
-          console.log(' --->  dropdown fresh data', res.data);
           props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
           setLoading(false);
         }).catch((err) => console.error(err));
@@ -107,7 +101,6 @@ const SeriesDropDown = (props) => {
 
   const handleSelect = (e) => {
     const UIDArr = e.split("_");
-    console.log(" ----> handleSelect", UIDArr);
     const seriesUIDFmEvent = UIDArr[0];
     const multiFrameIndex = UIDArr[1];
     const { seriesUID } = props.openSeries[props.activePort];
@@ -185,23 +178,14 @@ const SeriesDropDown = (props) => {
               uniqueKey = `${seriesUID}_${currentIndex}`;
             }  
 
-            console.log(props.openSeriesAddition);
-
             let isCurrent;
             if (!multiFrameImage) {
               isCurrent =
               // openSeriesSeriesUID === uniqueKey && !openSeriesMultiFrameIndex;
               openSeriesSeriesUID === uniqueKey;
-              console.log(" ------------------- ")
-              console.log(" ++++++++ not multiFrameImage")
-              console.log(" ---> openSeriesSeriesUID", openSeriesSeriesUID, uniqueKey, openSeriesMultiFrameIndex, isCurrent);
-              console.log(" ------------------- ")
             } else {
-              console.log(" ------------------- ")
               const compound = `${openSeriesSeriesUID}_${openSeriesMultiFrameIndex}`;
               isCurrent = compound === uniqueKey;
-              console.log(" ===> multiframe image ", compound, uniqueKey, isCurrent);
-              console.log(" ------------------- ")
             }
             let counts = numberOfAnnotations
               ? `${numberOfAnnotations} Ann -`

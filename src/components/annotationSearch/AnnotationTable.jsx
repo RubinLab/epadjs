@@ -364,7 +364,6 @@ function AnnotationTable(props) {
           studyUID, 
           force
           );
-        console.log(' ---> series in annotation table', series);  
         props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
         props.dispatch(loadCompleted());
         return series;
