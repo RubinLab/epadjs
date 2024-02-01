@@ -909,7 +909,9 @@ class DisplayView extends Component {
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
     console.log(" ---> check 1");
+    console.log(" ====> imageUrls", imageUrls);
     if (imageUrls.length > 1) {
+      console.log(" passed if", imageUrls.length);
       for (let i = 0; i < imageUrls.length; i++) {
         if (imageUrls[i] && Array.isArray(imageUrls[i]) && imageUrls[i][0].multiFrameImage) {
           multiFrameMap[imageUrls[i][0].imageUID] = i;
@@ -918,6 +920,7 @@ class DisplayView extends Component {
       }
     }
     console.log(" ---> check 2");
+    console.log(" ---> multiFrameMap", multiFrameMap);
 
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage
@@ -1063,7 +1066,7 @@ class DisplayView extends Component {
     }
 
     console.log(" ---> check 9");
-
+    console.log(' ---->multiFrameMap', multiFrameMap);
     if (Object.entries(multiFrameMap).length > 0) {
       this.props.dispatch(
         updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData)
