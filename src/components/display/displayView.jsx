@@ -748,6 +748,7 @@ class DisplayView extends Component {
   }
 
   handleSerieReplace = (e) => {
+    console.log(" ___> handle replace e", e);
     const { series } = this.props;
     var promises = [];
     const { viewportId, id, multiFrameIndex } = e.detail;

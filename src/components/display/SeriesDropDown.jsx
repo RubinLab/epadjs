@@ -107,6 +107,7 @@ const SeriesDropDown = (props) => {
 
   const handleSelect = (e) => {
     const UIDArr = e.split("_");
+    console.log(" ----> handleSelect", UIDArr);
     const seriesUIDFmEvent = UIDArr[0];
     const multiFrameIndex = UIDArr[1];
     const { seriesUID } = props.openSeries[props.activePort];
@@ -186,17 +187,18 @@ const SeriesDropDown = (props) => {
 
             let isCurrent;
             if (!multiFrameImage) {
-              console.log(" ++++++++ multiFrameImage")
-              console.log(" ---> openSeriesSeriesUID", openSeriesSeriesUID);
-              console.log(" ===> uniqueKey", uniqueKey);
-              console.log(" ===> openSeriesMultiFrameIndex", openSeriesMultiFrameIndex);
               isCurrent =
-                openSeriesSeriesUID === uniqueKey && !openSeriesMultiFrameIndex;
+              openSeriesSeriesUID === uniqueKey && !openSeriesMultiFrameIndex;
+              console.log(" ------------------- ")
+              console.log(" ++++++++ not multiFrameImage")
+              console.log(" ---> openSeriesSeriesUID", openSeriesSeriesUID, uniqueKey, openSeriesMultiFrameIndex, isCurrent);
+              console.log(" ------------------- ")
             } else {
+              console.log(" ------------------- ")
               const compound = `${openSeriesSeriesUID}_${openSeriesMultiFrameIndex}`;
-              console.log(" ===> uniqueKey", uniqueKey);
-              console.log(" ===> compound", compound);
               isCurrent = compound === uniqueKey;
+              console.log(" ===> multiframe image ", compound, uniqueKey, isCurrent);
+              console.log(" ------------------- ")
             }
             let counts = numberOfAnnotations
               ? `${numberOfAnnotations} Ann -`
