@@ -908,14 +908,17 @@ class DisplayView extends Component {
     const multiFrameMap = {};
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
+    console.log(" ---> check 1");
     if (imageUrls.length > 1) {
       for (let i = 0; i < imageUrls.length; i++) {
-        if (imageUrls[i][0].multiFrameImage) {
+        if (imageUrls[i] && Array.isArray(imageUrls[i]) && imageUrls[i][0].multiFrameImage) {
           multiFrameMap[imageUrls[i][0].imageUID] = i;
           multiframeSeriesData[`${imageUrls[i][0].seriesUID}_${i}`] = imageUrls[i][0];
         }
       }
     }
+    console.log(" ---> check 2");
+
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage
       .getItem("wadoUrl")
@@ -923,10 +926,13 @@ class DisplayView extends Component {
     const firstSeriesIndex = multiFrameIndex
       ? multiFrameIndex
       : this.findFirstSeriesIndex(imageUrls);
+      
+    // console.log(" ----> imageUrls[firstSeriesIndex]", imageUrls[firstSeriesIndex]);  
     const seriesURL =
       wadoUrlNoWadors +
       imageUrls[firstSeriesIndex][0].lossyImage.split("/instances/")[0];
 
+    console.log(" ---> check 3");
     try {
       seriesMetadata = await getMetadata(seriesURL);
       seriesMetadata = seriesMetadata.data;
@@ -938,6 +944,7 @@ class DisplayView extends Component {
       console.error(err);
     }
 
+    console.log(" ---> check 4");
     // get the length of array off arrays
     // divide the metadata array to mirror the image urls’ array
 
@@ -956,6 +963,8 @@ class DisplayView extends Component {
     let firstImage = null;
     let middleImage = null;
 
+    console.log(" ---> check 5");
+
     if (!useSeriesData) {
       const result = await getImageMetadata(
         wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage
@@ -968,6 +977,8 @@ class DisplayView extends Component {
       middleImage =
         seriesMetadataMap[imageUrls[firstSeriesIndex][middleIndex].imageUID];
     }
+
+    console.log(" ---> check 6");
 
     let referencePosition = null;
     let rowVector = null;
@@ -988,6 +999,8 @@ class DisplayView extends Component {
       );
     }
 
+    console.log(" ---> check 7");
+
     const len = imageUrls[firstSeriesIndex].length;
     for (let k = 0; k < len; k++) {
       baseUrl = wadoUrlNoWadors + imageUrls[firstSeriesIndex][k].lossyImage;
@@ -1005,6 +1018,8 @@ class DisplayView extends Component {
         console.log(" error in getting image metadata");
         console.error(err);
       }
+
+      console.log(" ---> check 8");
 
       if (sortByGeo) {
         const position = imgData["00200032"].Value.slice();
@@ -1046,6 +1061,8 @@ class DisplayView extends Component {
         );
       }
     }
+
+    console.log(" ---> check 9");
 
     if (Object.entries(multiFrameMap).length > 0) {
       this.props.dispatch(
@@ -1090,6 +1107,7 @@ class DisplayView extends Component {
     if (imageUrls.length > 0) {
       // this.formSplitSeriesData(imageUrls, baseUrl);
     }
+    console.log(" ---> check 10");
     return { stack };
   };
 

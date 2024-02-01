@@ -185,10 +185,13 @@ const SeriesDropDown = (props) => {
               uniqueKey = `${seriesUID}_${currentIndex}`;
             }  
 
+            console.log(props.openSeriesAddition);
+
             let isCurrent;
             if (!multiFrameImage) {
               isCurrent =
-              openSeriesSeriesUID === uniqueKey && !openSeriesMultiFrameIndex;
+              // openSeriesSeriesUID === uniqueKey && !openSeriesMultiFrameIndex;
+              openSeriesSeriesUID === uniqueKey;
               console.log(" ------------------- ")
               console.log(" ++++++++ not multiFrameImage")
               console.log(" ---> openSeriesSeriesUID", openSeriesSeriesUID, uniqueKey, openSeriesMultiFrameIndex, isCurrent);
