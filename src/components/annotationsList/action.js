@@ -75,17 +75,10 @@ export const fillSeriesDescfullData = (data) => {
 }
 
 export const setSeriesData = (projectID, patientID, studyUID, seriesData, filled, mfMerged) => {
-  console.log(" ++++ seriesData", seriesData);
   const data = seriesData.map(el => {
     el.filled = filled;
     return el;
   });
-
-  // const map = data.reduce((all, item) => {
-  //   all[item.seriesUID] = true;
-  //   if (item.multiFrameImage) all[item.imageUID] = true;
-  //   return all;
-  // }, {});
 
   return { type: SET_SERIES_DATA, payload: { projectID, patientID, studyUID, data, mfMerged } };
 }
