@@ -1,7 +1,10 @@
 const getVPDimensions = (numSeries) => {
-  const navbar = document.getElementsByClassName("navbar")[0].clientHeight;
-  let toolbarHeight =
-    document.getElementsByClassName("toolbar")[0]?.clientHeight || 0;
+  const navbarEls = document.getElementsByClassName("navbar");
+  const toolbarEls = document.getElementsByClassName("toolbar");
+
+  const navbar = navbarEls && navbarEls.length > 0 ? navbarEls[0].clientHeight : 0;
+  let toolbarHeight = toolbarEls && toolbarEls.length > 0 ? toolbarEls[0].clientHeight : 0;
+
   const windowInner = window.innerHeight;
   const containerHeight = windowInner - toolbarHeight - navbar - 10;
 

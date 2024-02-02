@@ -219,7 +219,7 @@ class DisplayView extends Component {
     // }
     this.props.dispatch(clearSelection());
     this.getViewports();
-    this.getData(undefined, undefined, "componentDidMount");
+    this.getData(null, null, "componentDidMount");
     this.formInvertMap();
     if (series.length > 0) {
       this.setSubComponentHeights();
@@ -272,6 +272,7 @@ class DisplayView extends Component {
     } = this.props;
     const {
       series: prevSeries,
+      seriesAddition: prevSeriesAddition,
       activePort: prevActivePort,
       aimList: prevAimList,
       loading: prevLoading,
@@ -320,6 +321,12 @@ class DisplayView extends Component {
       newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved || studyAimsLengthChanged;
 
     // TODO: check if loading/true-false control is required for the first condition
+    // console.log(" -------");
+    // console.log(" ---> prevSeriesAddition[activePort].multiFrameIndex", prevSeriesAddition[activePort].multiFrameIndex);
+    // console.log(" ---> now", seriesAddition[activePort].multiFrameIndex);
+    // console.log(" -------");
+
+    // if aimID changed - seriesUID is same - 
 
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
@@ -339,10 +346,11 @@ class DisplayView extends Component {
       //   (prevProps.series.length !== this.props.series.length &&
       //     this.props.loading === false)
       // ) {
-    } else if (prevProps.series.length !== series.length || prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) {
+    } else if (prevProps.series.length !== series.length 
+      || prevSeriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID ) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData(undefined, undefined, "didupdated 2");
+      this.getData(null, null, "didupdated 2", refreshInPlaceMF);
       this.formInvertMap();
     }
     // This is to handle late loading of aimsList from store but it also calls get Data
@@ -449,9 +457,11 @@ class DisplayView extends Component {
   setSubComponentHeights = (e) => {
     try {
       if (e && e.detail) var { isMaximize } = e.detail;
-      const navbar = document.getElementsByClassName("navbar")[0].clientHeight;
-      let toolbarHeight =
-        document.getElementsByClassName("toolbar")[0].clientHeight;
+      const navbarEls = document.getElementsByClassName("navbar");
+      const toolbarEls = document.getElementsByClassName("toolbar");
+
+      const navbar = navbarEls && navbarEls.length > 0 ? navbarEls[0].clientHeight : 0;
+      let toolbarHeight = toolbarEls && toolbarEls.length > 0 ? toolbarEls[0].clientHeight : 0;
       const windowInner = window.innerHeight;
       const containerHeight = windowInner - toolbarHeight - navbar - 10;
       this.setState({ containerHeight });
@@ -656,15 +666,18 @@ class DisplayView extends Component {
     return segAims;
   };
 
-  getData(multiFrameIndex, frameNo, fm) {
+  getData(multiFrameIndex, frameNo, fm, inPlace) {
+    console.log("+++++> comes here", inPlace);
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
-      const { series, activePort, aimList } = this.props;
+      const { series, activePort, aimList, seriesAddition } = this.props;
       const { dataIndexMap, data } = this.state;
       var promises = [];
       const indexKeys = {};
       const newData = new Array(series.length);
       const indexOrder = [];
+      const newDataIndexMap = { ...this.state.dataIndexMap };
+
       for (let i = 0; i < series.length; i++) {
         // DONE/TODO: in order to not to get same stack again and again
         // add seriesUID-PrID etc info and look it up if we need to get it
@@ -672,6 +685,15 @@ class DisplayView extends Component {
 
         const { projectID, patientID, studyUID, seriesUID } = series[i];
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
+        indexKey = multiFrameIndex ? `${indexKey}-${multiFrameIndex}` : indexKey;
+
+        // 
+
+        console.log(' ++ dataIndexMap');
+        console.log(dataIndexMap);
+        console.log(indexKey);
+
+
 
         // if (typeof dataIndexMap[indexKey] !== "number") {
         if (!(dataIndexMap[indexKey] >= 0) || multiFrameIndex) {
