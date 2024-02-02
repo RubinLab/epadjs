@@ -187,10 +187,13 @@ const asyncReducer = (state = initialState, action) => {
         // check if framedata exists
         console.log(" ||||||||     control 1    |||||||||||")
         const fmData = seriesAddition[state.activePort].frameData;
-        const aimSelected = state.openSeries[state.activePort].aimID || seriesAddition[state.activePort].aimID;
-        if (aimSelected && hasMultiframe && fmData[aimSelected]) {
+        const aimSelected = (state.openSeries[state.activePort] && state.openSeries[state.activePort].aimID) || (seriesAddition[state.activePort] && seriesAddition[state.activePort].aimID);
+        if (aimSelected && hasMultiframe && (fmData && fmData[aimSelected])) {
+          console.log(" in if");
           const imgArr = fmData[aimSelected][0].split('/frames/');
-          jumpArr = [multiFrameMap[imgArr[0]], parseInt(imgArr[1] - 1)];
+          const mfIndex = multiFrameMap && multiFrameMap[imgArr[0]];
+          const frameNo = parseInt(imgArr[1]);
+          if (mfIndex && typeof frameNo === 'number' && !isNaN(frameNo)) jumpArr = [mfIndex, frameNo - 1];
         }
 
         console.log(" ||||||||     control 2    |||||||||||")
