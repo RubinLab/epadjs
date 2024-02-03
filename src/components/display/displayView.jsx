@@ -260,13 +260,10 @@ class DisplayView extends Component {
   }
 
   forceRefreshForMF = () => {
-    console.log(" ----> forceRefreshForMF")
     const { seriesAddition, activePort } = this.props;
     const { aimID } = seriesAddition[activePort];
     const { frameData } = seriesAddition[activePort];
     let image = frameData && frameData[aimID] ? frameData[aimID][0] : null;
-    console.log(" ---> aimID", aimID);
-    console.log(' ---> image', image);
     if (!image) return false;
     const imageArr = image.split("/frames/");
     const mfIndex =  seriesAddition[activePort].multiFrameMap[imageArr[0]];
@@ -340,11 +337,6 @@ class DisplayView extends Component {
     const aimIDChanged = seriesAddition[activePort].aimID !== prevSeriesAddition[activePort].aimID;
     const sameSeries = seriesAddition[activePort].seriesUID === prevSeriesAddition[activePort].seriesUID;
     const refreshPage = sameSeries && aimIDChanged ? this.forceRefreshForMF() : false;
-
-    console.log(" ---> refreshPage", refreshPage);
-    console.log(prevProps.multiFrameAimJumpData)
-    console.log(multiFrameAimJumpData)
-    console.log(" +++> this.state.multiFrameAimJumped", this.state.multiFrameAimJumped)
 
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
@@ -687,7 +679,6 @@ class DisplayView extends Component {
     try {
       const { series, activePort, aimList } = this.props;
       const { dataIndexMap, data } = this.state;
-      console.log(" ---> dataIndexMap", dataIndexMap);
       var promises = [];
       const indexKeys = {};
       const newData = new Array(series.length);

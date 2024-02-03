@@ -68,7 +68,6 @@ const annotationsLink = (props) => {
     const { isOpen, index } = checkIfSerieOpen(selected.seriesUID);
 
     if (isOpen && !openSeriesAddition[activePort].multiFrameMap) {
-      console.log(" should not be here")
       const imageUID = Object.keys(selected.imgIDs);
       const imgIDArr = imageUID[0].split("/frames/");
       props.dispatch(changeActivePort(index));
@@ -79,7 +78,6 @@ const annotationsLink = (props) => {
       props.dispatch(clearSelection());
     } else {
       if (isGridFull || openSeriesAddition[activePort].multiFrameMap) {
-        console.log(" should see this");
         props.dispatch(addToGrid(selected, selected.aimID, props.activePort));
       } else {
         props.dispatch(addToGrid(selected, selected.aimID));

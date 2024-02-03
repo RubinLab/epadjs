@@ -109,7 +109,6 @@ const asyncReducer = (state = initialState, action) => {
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
       case FILL_DESC:
-        console.log("FILL_DESC")
         const descFilledOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
         const descFilledSeriesData = _.cloneDeep(state.seriesData);
         for (let i = 0; i < action.data.length; i++) {
@@ -134,7 +133,6 @@ const asyncReducer = (state = initialState, action) => {
         }
         return { ...state, seriesData: descFilledSeriesData, openSeriesAddition: descFilledOpenSeriesAddition };
       case SET_SERIES_DATA:
-        console.log(" SET_SERIES_DATA")
         const newSeriesData = _.cloneDeep(state.seriesData);
         const { projectID, patientID, studyUID, data } = action.payload;
         const projectExists = newSeriesData[projectID];
@@ -159,7 +157,6 @@ const asyncReducer = (state = initialState, action) => {
         aimClearedSeriesAddition[state.activePort].aimID = null;
         return { ...state, openSeries: aimClearedSeries, multiFrameAimJumpData: null, openSeriesAddition: aimClearedSeriesAddition };
       case CHECK_MULTIFRAME:
-        console.log("CHECK_MULTIFRAME")
         // const series = _.cloneDeep(state.openSeries);
         const seriesAddition = _.cloneDeep(state.openSeriesAddition);
         const { hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData } = action.payload;
@@ -289,7 +286,6 @@ const asyncReducer = (state = initialState, action) => {
       //   ].annotations[aimRefs.aimID] = { ...aimRefs };
       //   return { ...state, patient: patientAimSave };
       case CLEAR_AIMID:
-        console.log('CLEAR_AIMID');
         let aimIDClearedOpenSeries = _.cloneDeep(state.openSeries);
         let aimIDClearedOpenSeriesAddition = state.openSeriesAddition.map((serie) => {
           const newSerie = _.cloneDeep(serie);
@@ -310,7 +306,6 @@ const asyncReducer = (state = initialState, action) => {
         openSeriesToUpdate[port].imageID = action.imageID;
         return { ...state, openSeries: openSeriesToUpdate };
       case CLOSE_SERIE: // tested
-        console.log('CLOSE_SERIE')
         let delSeriesUID = state.openSeries[state.activePort].seriesUID;
         let delStudyUID = state.openSeries[state.activePort].studyUID;
         let delPID = state.openSeries[state.activePort].projectID;
@@ -380,8 +375,6 @@ const asyncReducer = (state = initialState, action) => {
         const viewPortStatus = !state.showGridFullAlert;
         return { ...state, showGridFullAlert: viewPortStatus };
       case LOAD_SERIE_SUCCESS:
-        console.log(" LOAD_SERIE_SUCCESS")
-        console.log(action.payload.ann);
         let imageAddedSeries = _.cloneDeep(state.openSeriesAddition);
         let annCalc = Object.keys(action.payload.imageData);
         const { projectID: pidFromRef, studyUID: stUIDFromRef } = action.payload.ref;
@@ -419,8 +412,6 @@ const asyncReducer = (state = initialState, action) => {
         let jumpArr1 = []
         // coming from the right sidebar hasMultiframe flag is overridden by the new data
         // if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
-        console.log('+++++++++++> imageAddedSeries.aimID', imageAddedSeries[state.activePort].aimID)
-        console.log('+++++++++++> imageAddedSeries.multiframemap', imageAddedSeries[state.activePort])
         if (imageAddedSeries[state.activePort].aimID && imageAddedSeries[state.activePort].multiFrameMap && imageAddedSeries[state.activePort].frameData) {
           const imgs = imageAddedSeries[state.activePort].frameData[action.payload.ann];
           const imgArr = imgs[0].split('/frames/');
@@ -444,8 +435,6 @@ const asyncReducer = (state = initialState, action) => {
               colors
             );
 
-        console.log(" ++++++++++++++++++>")
-        console.log(imageAddedSeries)
         // check if openSeries[activeport] is significant and teaching file 
         // if so check if seriesData is filled  // if not fill the data
         const { significanceOrder: order, template: tempCode } = state.openSeries[state.activePort];
@@ -496,7 +485,6 @@ const asyncReducer = (state = initialState, action) => {
 
       case CHANGE_ACTIVE_PORT:
         //get openseries iterate over the
-        console.log('CHANGE_ACTIVE_PORT');
         const changedPortSeriesAddition = state.openSeriesAddition.map((serie) => {
           const newSerie = _.cloneDeep(serie);
           newSerie.aimID = null;
@@ -566,7 +554,6 @@ const asyncReducer = (state = initialState, action) => {
         }
         return Object.assign({}, state, { aimsList: singleLabelToggled });
       case CLEAR_GRID:
-        console.log("CLEAR_GRID")
         const clearedPatients = {};
         let selectionObj = [];
         if (Object.keys(state.selectedStudies).length > 0) {
@@ -693,7 +680,6 @@ const asyncReducer = (state = initialState, action) => {
       //     patientLoadingError: false
       //   };
       case ADD_TO_GRID:
-        console.log("ADD_TO_GRID")
         const seriesInfo = { ...action.reference };
         const { projectMap } = state;
         if (projectMap[seriesInfo.projectID]) {
@@ -737,7 +723,6 @@ const asyncReducer = (state = initialState, action) => {
         };
 
       case REPLACE_IN_GRID:
-        console.log('REPLACE_IN_GRID')
         const replacedOpenSeries = [...state.openSeries];
         const newAimsList = { ...state.aimsList };
         delete newAimsList[replacedOpenSeries[state.activePort].seriesUID];
@@ -778,7 +763,6 @@ const asyncReducer = (state = initialState, action) => {
       //   updatedPtPatients[action.payload.patient] = updatedPt;
       //   return { ...state, patients: updatedPtPatients };
       case JUMP_TO_AIM:
-        console.log(' JUMP_TO_AIM')
         let { aimID, index } = action.payload;
         let serUID = action.payload.seriesUID;
         let updatedGrid = _.cloneDeep(state.openSeries)
@@ -836,7 +820,6 @@ const asyncReducer = (state = initialState, action) => {
         });
       }
       case AIM_DELETE: { //tested
-        console.log(" AIM_DELETE")
         const { aimRefs } = action.payload;
         const { seriesUID, studyUID, projectID, aimID } = aimRefs;
         const deepOther = _.cloneDeep(state.otherSeriesAimsList);
