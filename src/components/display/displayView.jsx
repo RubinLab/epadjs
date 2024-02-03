@@ -259,6 +259,21 @@ class DisplayView extends Component {
     // check if the state 
   }
 
+  forceRefreshForMF = () => {
+    console.log(" ----> forceRefreshForMF")
+    const { seriesAddition, activePort } = this.props;
+    const { aimID } = seriesAddition[activePort];
+    const { frameData } = seriesAddition[activePort];
+    let image = frameData && frameData[aimID] ? frameData[aimID][0] : null;
+    console.log(" ---> aimID", aimID);
+    console.log(' ---> image', image);
+    if (!image) return false;
+    const imageArr = image.split("/frames/");
+    const mfIndex =  seriesAddition[activePort].multiFrameMap[imageArr[0]];
+    if (mfIndex && mfIndex > 0) return false;
+    else return true;
+  }
+
   async componentDidUpdate(prevProps, prevState) {
     const {
       pid,
@@ -272,6 +287,7 @@ class DisplayView extends Component {
     } = this.props;
     const {
       series: prevSeries,
+      seriesAddition: prevSeriesAddition,
       activePort: prevActivePort,
       aimList: prevAimList,
       loading: prevLoading,
@@ -321,6 +337,15 @@ class DisplayView extends Component {
 
     // TODO: check if loading/true-false control is required for the first condition
 
+    const aimIDChanged = seriesAddition[activePort].aimID !== prevSeriesAddition[activePort].aimID;
+    const sameSeries = seriesAddition[activePort].seriesUID === prevSeriesAddition[activePort].seriesUID;
+    const refreshPage = sameSeries && aimIDChanged ? this.forceRefreshForMF() : false;
+
+    console.log(" ---> refreshPage", refreshPage);
+    console.log(prevProps.multiFrameAimJumpData)
+    console.log(multiFrameAimJumpData)
+    console.log(" +++> this.state.multiFrameAimJumped", this.state.multiFrameAimJumped)
+
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
       multiFrameAimJumpData &&
@@ -332,6 +357,7 @@ class DisplayView extends Component {
       this.getViewports();
       this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1], "didupdate 1");
       this.formInvertMap();
+      this.setState({ multiFrameAimJumped: null });
       // } else if (
       //   (prevProps.series !== this.props.series &&
       //     prevProps.loading === true &&
@@ -339,10 +365,10 @@ class DisplayView extends Component {
       //   (prevProps.series.length !== this.props.series.length &&
       //     this.props.loading === false)
       // ) {
-    } else if (prevProps.series.length !== series.length || prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) {
+    } else if (prevProps.series.length !== series.length || refreshPage || prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData(undefined, undefined, "didupdated 2");
+      this.getData(undefined, undefined, "didupdated 2", refreshPage);
       this.formInvertMap();
     }
     // This is to handle late loading of aimsList from store but it also calls get Data
@@ -656,11 +682,12 @@ class DisplayView extends Component {
     return segAims;
   };
 
-  getData(multiFrameIndex, frameNo, fm) {
+  getData(multiFrameIndex, frameNo, fm, force) {
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
       const { series, activePort, aimList } = this.props;
       const { dataIndexMap, data } = this.state;
+      console.log(" ---> dataIndexMap", dataIndexMap);
       var promises = [];
       const indexKeys = {};
       const newData = new Array(series.length);
@@ -674,7 +701,7 @@ class DisplayView extends Component {
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
 
         // if (typeof dataIndexMap[indexKey] !== "number") {
-        if (!(dataIndexMap[indexKey] >= 0) || multiFrameIndex) {
+        if (!(dataIndexMap[indexKey] >= 0) || multiFrameIndex || force) {
           const promise = this.getImageStack(
             series[i],
             i,
