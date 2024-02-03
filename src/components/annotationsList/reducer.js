@@ -381,6 +381,7 @@ const asyncReducer = (state = initialState, action) => {
         return { ...state, showGridFullAlert: viewPortStatus };
       case LOAD_SERIE_SUCCESS:
         console.log(" LOAD_SERIE_SUCCESS")
+        console.log(action.payload.ann);
         let imageAddedSeries = _.cloneDeep(state.openSeriesAddition);
         let annCalc = Object.keys(action.payload.imageData);
         const { projectID: pidFromRef, studyUID: stUIDFromRef } = action.payload.ref;
@@ -397,8 +398,6 @@ const asyncReducer = (state = initialState, action) => {
               return all;
             }, {})
         }
-        console.log(' ---> before ', imageAddedSeries[0].multiFrameMap)
-
         if (annCalc.length > 0) {
           for (let i = 0; i < imageAddedSeries.length; i++) {
             if (imageAddedSeries[i].seriesUID === action.payload.serID) {
@@ -411,7 +410,6 @@ const asyncReducer = (state = initialState, action) => {
             }
           }
         }
-        console.log(' ---> afterfor ', imageAddedSeries[0].multiFrameMap)
         for (let serie of imageAddedSeries) {
           if (serie.seriesUID !== action.payload.serID) {
             // serie.aimID = null;
@@ -419,9 +417,14 @@ const asyncReducer = (state = initialState, action) => {
         }
 
         let jumpArr1 = []
-        if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
-          const imgArr = imageAddedSeries.frameData[state.openSeries.aimID].split('/frames/');
-          jumpArr = [imageAddedSeries.multiFrameMap[imgArr[0]], parseInt(imgArr[1] - 1)];
+        // coming from the right sidebar hasMultiframe flag is overridden by the new data
+        // if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
+        console.log('+++++++++++> imageAddedSeries.aimID', imageAddedSeries[state.activePort].aimID)
+        console.log('+++++++++++> imageAddedSeries.multiframemap', imageAddedSeries[state.activePort])
+        if (imageAddedSeries[state.activePort].aimID && imageAddedSeries[state.activePort].multiFrameMap && imageAddedSeries[state.activePort].frameData) {
+          const imgs = imageAddedSeries[state.activePort].frameData[action.payload.ann];
+          const imgArr = imgs[0].split('/frames/');
+          jumpArr1 = [imageAddedSeries[state.activePort].multiFrameMap[imgArr[0]], parseInt(imgArr[1]) - 1];
         }
         const newDataKeys = Object.keys(action.payload.aimsData);
         const stateKeys = state.aimsList[action.payload.serID]
@@ -441,6 +444,8 @@ const asyncReducer = (state = initialState, action) => {
               colors
             );
 
+        console.log(" ++++++++++++++++++>")
+        console.log(imageAddedSeries)
         // check if openSeries[activeport] is significant and teaching file 
         // if so check if seriesData is filled  // if not fill the data
         const { significanceOrder: order, template: tempCode } = state.openSeries[state.activePort];
@@ -456,7 +461,6 @@ const asyncReducer = (state = initialState, action) => {
           }
         }
 
-        console.log(imageAddedSeries);
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
@@ -708,15 +712,16 @@ const asyncReducer = (state = initialState, action) => {
         const newUID = seriesInfo.seriesUID;
         const sameSeries = existingUID && existingUID === newUID;
 
-        console.log(" +++ seriesInfo", seriesInfo);
-        console.log(sameSeries);
         if (arePortsOccupied) {
           newOpenSeries[action.port] = seriesInfo;
           if (sameSeries) {
             const copyMFMap = newOpenSeriesAddtition[action.port].multiFrameMap;
-            console.log(' ===? copyMFMap', copyMFMap);
+            const copyFmData = newOpenSeriesAddtition[action.port].frameData;
+            const copyImageAnnotations = newOpenSeriesAddtition[action.port].imageAnnotations;
             newOpenSeriesAddtition[action.port] = seriesInfo;
             if (copyMFMap) newOpenSeriesAddtition[action.port].multiFrameMap = copyMFMap;
+            if (copyFmData) newOpenSeriesAddtition[action.port].frameData = copyFmData;
+            if (copyImageAnnotations) newOpenSeriesAddtition[action.port].imageAnnotations = copyImageAnnotations;
           } else newOpenSeriesAddtition[action.port] = seriesInfo;
         } else {
           newOpenSeries = newOpenSeries.concat([seriesInfo]);
