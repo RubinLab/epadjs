@@ -180,7 +180,6 @@ const asyncReducer = (state = initialState, action) => {
         const fmData = seriesAddition[state.activePort].frameData;
         const aimSelected = (state.openSeries[state.activePort] && state.openSeries[state.activePort].aimID) || (seriesAddition[state.activePort] && seriesAddition[state.activePort].aimID);
         if (aimSelected && hasMultiframe && (fmData && fmData[aimSelected])) {
-          console.log(" in if");
           const imgArr = fmData[aimSelected][0].split('/frames/');
           const mfIndex = multiFrameMap && multiFrameMap[imgArr[0]];
           const frameNo = parseInt(imgArr[1]);
@@ -204,7 +203,6 @@ const asyncReducer = (state = initialState, action) => {
             // find the correct series to get description from
             const seriesToCopyFm = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].list.find((element) => element.seriesUID === seriesDataMulti[0].seriesUID);
             //prevent duplicate multiframe series to be added 
-            console.log(seriesToCopyFm);
             mfLookUpMap = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].list.reduce((all, item, index) => {
               if (item.multiFrameImage) {
                 const { projectID, patientID, studyUID, seriesUID, imageUID } = item;
@@ -235,7 +233,10 @@ const asyncReducer = (state = initialState, action) => {
               return el;
             });
 
+            console.log(" +++++> state.openSeriesAddition[state.activePort]", state.openSeriesAddition[state.activePort]);
+            console.log(" ++++> ...seriesDataMulti", seriesDataMulti)
             const list = [state.openSeriesAddition[state.activePort], ...seriesDataMulti];
+            console.log(" ++++> after merging two", list);
             const map = list.reduce((all, item, index) => {
               if (item.multiFrameImage) {
                 all[item.imageUID] = index + 1;
@@ -244,6 +245,7 @@ const asyncReducer = (state = initialState, action) => {
               return all;
             }, {});
 
+            console.log(" ++++> map", map);
             if (multiPatIDExists) {
               newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = { list, map };
             } else if (multiPIDExists) {
