@@ -41,9 +41,6 @@ const SeriesDropDown = (props) => {
       if (list[i].seriesUID !== seriesUID) return false;
     }
     return true;
-    // // if same get series all series from scratch
-    // // if there are different series merge them
-
   }
 
   const mergeLists = (existingData, newList) => {

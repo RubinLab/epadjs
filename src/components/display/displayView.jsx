@@ -725,7 +725,6 @@ class DisplayView extends Component {
   
             if (mode === 'teaching' && isStudyAim) {
               getSeries(projectID, patientID, studyUID).then((res) => {
-                console.log("resdata", res.data);
                 this.props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
               }).catch(err => console.error(err));
             }
@@ -907,7 +906,6 @@ class DisplayView extends Component {
     const multiFrameMap = {};
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
-    console.log(" ====> imageUrls", imageUrls);
     if (imageUrls.length > 1) {
       console.log(" passed if", imageUrls.length);
       for (let i = 0; i < imageUrls.length; i++) {
