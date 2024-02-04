@@ -476,8 +476,6 @@ const asyncReducer = (state = initialState, action) => {
           }
         }
 
-        console.log(" ++++++++++++ seriesDataForTeaching ", seriesDataForTeaching);
-
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
