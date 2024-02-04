@@ -73,7 +73,8 @@ const SeriesDropDown = (props) => {
     const isFilled= (currentValue) => currentValue.filled || currentValue.multiFrameImage;
     const hasDescription = list ? list.every(isFilled) : false;
 
-    if (checkMultiframe() && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
+    // if (checkMultiframe() && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
+    if (props.openSeriesAddition[props.activePort].hasMultiframe && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
       getSeries(projectID, patientID, studyUID).then(res => {
         const newList = mergeLists(data[projectID][patientID][studyUID], res.data);
         props.dispatch(setSeriesData(projectID, patientID, studyUID, newList, true, true));
