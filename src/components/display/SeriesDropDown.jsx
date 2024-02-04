@@ -30,7 +30,8 @@ const SeriesDropDown = (props) => {
     imageID = imageID ? imageID[0].split('/frames/')[0] : '';
     // first part is the imageid look up in multiframemap if it has value it means it is amultiframe
     const isMultiFrameAim = imageID ? openSeriesAddition[activePort].multiFrameMap[imageID] > 0: false;
-    return multiFrameFlag || isMultiFrameAim;
+    const multiframeDataExists = openSeriesAddition[activePort].hasMultiframe || openSeriesAddition[activePort].multiFrameIndex;
+    return multiFrameFlag || isMultiFrameAim || multiframeDataExists;
 
   }
 
