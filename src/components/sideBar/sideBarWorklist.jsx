@@ -200,7 +200,9 @@ class WorkList extends React.Component {
     const dataExists =
       seriesData[projectID] &&
       seriesData[projectID][subjectID] &&
-      seriesData[projectID][subjectID][studyUID];
+      seriesData[projectID][subjectID][studyUID] &&
+      seriesData[projectID][subjectID][studyUID].list;
+
     try {
       if (!dataExists) {
         ({ data: series } = await getSeries(projectID, subjectID, studyUID));
@@ -650,7 +652,8 @@ class WorkList extends React.Component {
     const dataExists =
         seriesData[projectID] &&
         seriesData[projectID][patientID] &&
-        seriesData[projectID][patientID][studyUID];
+        seriesData[projectID][patientID][studyUID] &&
+        seriesData[projectID][patientID][studyUID].list;
 
     const existingData = dataExists
       ? seriesData[projectID][patientID][studyUID].list

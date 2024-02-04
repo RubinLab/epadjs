@@ -877,7 +877,10 @@ class App extends Component {
     const { projectID, patientID, studyUID } = studyData;
     const { seriesData } = this.props;
     try {
-      const dataExists = seriesData[projectID] && seriesData[projectID][patientID] && seriesData[projectID][patientID][studyUID];
+      const dataExists = seriesData[projectID] &&
+        seriesData[projectID][patientID] &&
+        seriesData[projectID][patientID][studyUID] &&
+        seriesData[projectID][patientID][studyUID].list;
       if (!dataExists) {
         const { data: series } = await getSeries(projectID, patientID, studyUID);
         this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series, true));
