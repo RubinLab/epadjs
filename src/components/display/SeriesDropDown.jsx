@@ -73,8 +73,9 @@ const SeriesDropDown = (props) => {
     const isFilled= (currentValue) => currentValue.filled || currentValue.multiFrameImage;
     const hasDescription = list ? list.every(isFilled) : false;
 
-    // if (checkMultiframe() && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
-    if (props.openSeriesAddition[props.activePort].hasMultiframe && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
+    console.log(" +++> checkmultiframe", checkMultiframe());
+
+    if (checkMultiframe() && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
       getSeries(projectID, patientID, studyUID).then(res => {
         const newList = mergeLists(data[projectID][patientID][studyUID], res.data);
         props.dispatch(setSeriesData(projectID, patientID, studyUID, newList, true, true));
@@ -190,8 +191,8 @@ const SeriesDropDown = (props) => {
             } else {
               console.log(' ---> seriesDescription', seriesDescription);
               isCurrent =
-              // openSeriesSeriesUID === uniqueKey && !openSeriesMultiFrameIndex;
-              openSeriesSeriesUID === uniqueKey;
+              openSeriesSeriesUID === uniqueKey && !openSeriesMultiFrameIndex;
+              // openSeriesSeriesUID === uniqueKey;
             }
             let counts = numberOfAnnotations
               ? `${numberOfAnnotations} Ann -`
