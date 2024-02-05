@@ -906,6 +906,7 @@ class DisplayView extends Component {
     const multiFrameMap = {};
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
+    console.log(" +++++> check 1");
     if (imageUrls.length > 1) {
       console.log(" passed if", imageUrls.length);
       for (let i = 0; i < imageUrls.length; i++) {
@@ -922,11 +923,12 @@ class DisplayView extends Component {
     const firstSeriesIndex = multiFrameIndex
       ? multiFrameIndex
       : this.findFirstSeriesIndex(imageUrls);
-      
+    
+      console.log(" +++++> check 2");  
     const seriesURL =
       wadoUrlNoWadors +
       imageUrls[firstSeriesIndex][0].lossyImage.split("/instances/")[0];
-
+      console.log(" +++++> check 3");  
     try {
       seriesMetadata = await getMetadata(seriesURL);
       seriesMetadata = seriesMetadata.data;

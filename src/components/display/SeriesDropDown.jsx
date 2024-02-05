@@ -101,6 +101,7 @@ const SeriesDropDown = (props) => {
 
   const handleSelect = (e) => {
     const UIDArr = e.split("_");
+    console.log(" +++++> handleSelect", UIDArr);
     const seriesUIDFmEvent = UIDArr[0];
     const multiFrameIndex = UIDArr[1];
     const { seriesUID } = props.openSeries[props.activePort];
@@ -179,24 +180,23 @@ const SeriesDropDown = (props) => {
               uniqueKey = `${seriesUID}_${currentIndex}`;
             }  
 
-            console.log(' ++++ openSeriesSeriesUID', openSeriesSeriesUID);
-            console.log(' ++++ uniqueKey', uniqueKey);
-            console.log(' ++++ openSeriesMultiFrameIndex', openSeriesMultiFrameIndex);
-
             let isCurrent;
             if (multiFrameImage || multiFrameIndex) {
-              console.log(' ---> multiframe seriesDescription', seriesDescription);
               const compound = `${openSeriesSeriesUID}_${openSeriesMultiFrameIndex}`;
+              console.log(' ---> multiframe seriesDescription', seriesDescription, compound, uniqueKey);
               isCurrent = compound === uniqueKey;
             } else {
               console.log(' ---> seriesDescription', seriesDescription);
               isCurrent =
               openSeriesSeriesUID === uniqueKey && !openSeriesMultiFrameIndex;
+              console.log(" ++++> is current", openSeriesSeriesUID, uniqueKey, !openSeriesMultiFrameIndex);
               // openSeriesSeriesUID === uniqueKey;
             }
+            
             let counts = numberOfAnnotations
               ? `${numberOfAnnotations} Ann -`
               : "";
+
             return (
                 <Dropdown.Item
                   key={uniqueKey}
