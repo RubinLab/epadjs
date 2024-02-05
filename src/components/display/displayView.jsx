@@ -759,6 +759,8 @@ class DisplayView extends Component {
     );
     promises.push(promise);
     Promise.all(promises).then((res) => {
+      console.log(" ====-> handleSerieReplace resolved");
+      console.log(res);
       const newData = [...this.state.data];
       newData[viewportId] = res[0];
       newData[viewportId].stack.currentImageIdIndex = 0; 
@@ -925,12 +927,13 @@ class DisplayView extends Component {
       : this.findFirstSeriesIndex(imageUrls);
     
       console.log(" +++++> check 2");  
-    const seriesURL =
-      wadoUrlNoWadors +
-      imageUrls[firstSeriesIndex][0].lossyImage.split("/instances/")[0];
-      console.log(" +++++> check 3");  
+    const urlsExist = imageUrls[firstSeriesIndex] && imageUrls[firstSeriesIndex][0];
     try {
-      seriesMetadata = await getMetadata(seriesURL);
+      if (urlsExist) {
+        const seriesURL = wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage.split("/instances/")[0];
+        console.log(" +++++> check 3");  
+        seriesMetadata = await getMetadata(seriesURL); 
+      }
       seriesMetadata = seriesMetadata.data;
       seriesMetadata.forEach(
         (item) => (seriesMetadataMap[item["00080018"].Value[0]] = item)

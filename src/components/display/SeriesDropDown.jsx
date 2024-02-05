@@ -107,7 +107,9 @@ const SeriesDropDown = (props) => {
     const { seriesUID } = props.openSeries[props.activePort];
 
     if (multiFrameIndex === undefined) {
+      console.log(" +++++ serieslist", seriesList);
       const serie = seriesList.find((element) => element.seriesUID == e);
+      console.log(" +++++> serie", serie)
       if (props.isAimEditorShowing) {
         // if (!props.onCloseAimEditor(true))
         //     return;
@@ -126,7 +128,8 @@ const SeriesDropDown = (props) => {
         })
       );
     } else {
-      props.onSelect(0, props.activePort, e);
+      console.log(" +++> in else");
+      // props.onSelect(0, props.activePort, e);
       window.dispatchEvent(
         new CustomEvent("serieReplaced", {
           detail: {
@@ -180,6 +183,9 @@ const SeriesDropDown = (props) => {
               uniqueKey = `${seriesUID}_${currentIndex}`;
             }  
 
+            console.log(" ------------------------------------------------")
+            console.log(series)
+            console.log(" ************ open one",  props.openSeries[props.activePort]);
             let isCurrent;
             if (multiFrameImage || multiFrameIndex) {
               const compound = `${openSeriesSeriesUID}_${openSeriesMultiFrameIndex}`;
@@ -192,7 +198,9 @@ const SeriesDropDown = (props) => {
               console.log(" ++++> is current", openSeriesSeriesUID, uniqueKey, !openSeriesMultiFrameIndex);
               // openSeriesSeriesUID === uniqueKey;
             }
-            
+            console.log(" ------------------------------------------------")
+
+
             let counts = numberOfAnnotations
               ? `${numberOfAnnotations} Ann -`
               : "";
