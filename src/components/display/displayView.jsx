@@ -334,8 +334,10 @@ class DisplayView extends Component {
 
     // TODO: check if loading/true-false control is required for the first condition
 
-    const aimIDChanged = seriesAddition[activePort].aimID !== prevSeriesAddition[activePort].aimID;
-    const sameSeries = seriesAddition[activePort].seriesUID === prevSeriesAddition[activePort].seriesUID;
+    const active = seriesAddition[activePort];
+    const prevActive = prevSeriesAddition[activePort];
+    const aimIDChanged = active && prevActive ? seriesAddition[activePort].aimID !== prevSeriesAddition[activePort].aimID : false;
+    const sameSeries = active && prevActive ? seriesAddition[activePort].seriesUID === prevSeriesAddition[activePort].seriesUID : false;
     const refreshPage = sameSeries && aimIDChanged ? this.forceRefreshForMF() : false;
 
     if (
@@ -1730,7 +1732,7 @@ class DisplayView extends Component {
     const { serieIndex } = seriesSegmentations[0];
 
     try {
-      const { imageIds } = this.state.data[serieIndex].stack;
+      const imageIds = this.state.data[serieIndex] && this.state.data[serieIndex].stack ? this.state.data[serieIndex].stack.imageIds : [];
 
       var imagePromises = imageIds.map((imageId) => {
         return cornerstone.loadAndCacheImage(imageId);
@@ -1782,7 +1784,9 @@ class DisplayView extends Component {
     if (!seriesLabelMaps[activePort]) {
       return;
     } //The default activeLabelMap will be 0 automatically
-    const { imageIds } = this.state.data[activePort].stack;
+
+    // const { imageIds } = this.state.data[activePort].stack;
+    const imageIds = this.state.data[activePort] && this.state.data[activePort].stack ? this.state.data[activePort].stack.imageIds : [];
 
     var imagePromises = imageIds.map((imageId) => {
       return cornerstone.loadAndCacheImage(imageId);
@@ -1856,7 +1860,10 @@ class DisplayView extends Component {
 
     // const { labelMaps } = this.state.seriesLabelMaps[serieIndex];
     // const labelMapIndex = labelMaps[aimId];
-    const { imageIds } = this.state.data[serieIndex].stack;
+
+    // const { imageIds } = this.state.data[serieIndex].stack;
+    const imageIds = this.state.data[serieIndex] && this.state.data[serieIndex].stack ? this.state.data[serieIndex].stack.imageIds : [];
+
     try {
       // var imagePromises = imageIds.map((imageId) => {
       //   return cornerstone.loadAndCacheImage(imageId);
@@ -1868,58 +1875,60 @@ class DisplayView extends Component {
       const provider = wadoUrl.includes("wadors")
         ? cornerstoneWADOImageLoader.wadors.metaDataManager
         : cornerstone.metaData;
-      const {
-        labelmapBufferArray,
-        segMetadata,
-        segmentsOnFrame,
-        segmentsOnFrameArray,
-      } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
-        imageIds,
-        arrayBuffer,
-        provider
-      );
+      if (imageIds.length > 0) {
+        const {
+          labelmapBufferArray,
+          segMetadata,
+          segmentsOnFrame,
+          segmentsOnFrameArray,
+        } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
+          imageIds,
+          arrayBuffer,
+          provider
+        );
 
-      const { setters, getters } = cornerstoneTools.getModule("segmentation");
+        const { setters, getters } = cornerstoneTools.getModule("segmentation");
 
-      setters.labelmap3DByFirstImageId(
-        imageIds[0],
-        labelmapBufferArray,
-        labelMapIndex,
-        segMetadata.data,
-        imageIds.length,
-        segmentsOnFrame
-      );
-      // console.log(
-      //   "I have rendered ",
-      //   aimId,
-      //   "with labelMapIndex :",
-      //   activeLabelMapIndex
-      // );
+        setters.labelmap3DByFirstImageId(
+          imageIds[0],
+          labelmapBufferArray,
+          labelMapIndex,
+          segMetadata.data,
+          imageIds.length,
+          segmentsOnFrame
+        );
+        // console.log(
+        //   "I have rendered ",
+        //   aimId,
+        //   "with labelMapIndex :",
+        //   activeLabelMapIndex
+        // );
 
-      const { element } = cornerstone.getEnabledElements()[serieIndex];
-      cornerstone.updateImage(element);
-      // const length = Object.entries(labelMaps).length;
-      // setters.activeLabelmapIndex(element, length);
-      // if (this.state.selectedAim) {
-      //   //if an aim is selected find its label map index, 0 if no segmentation in aim
-      //   //an aim is being edited don't set the label map index because aim's segs should be brushed
-      //   this.setActiveLabelMapOfAim(this.state.selectedAim, element);
-      // } else {
-      //   this.setActiveLabelMapIndex(
-      //     this.state.activeLabelMapIndex + 1,
-      //     element
-      //   );
-      // }
+        const { element } = cornerstone.getEnabledElements()[serieIndex];
+        cornerstone.updateImage(element);
+        // const length = Object.entries(labelMaps).length;
+        // setters.activeLabelmapIndex(element, length);
+        // if (this.state.selectedAim) {
+        //   //if an aim is selected find its label map index, 0 if no segmentation in aim
+        //   //an aim is being edited don't set the label map index because aim's segs should be brushed
+        //   this.setActiveLabelMapOfAim(this.state.selectedAim, element);
+        // } else {
+        //   this.setActiveLabelMapIndex(
+        //     this.state.activeLabelMapIndex + 1,
+        //     element
+        //   );
+        // }
 
-      // console.log(
-      //   "New activeLabelMap Index is ",
-      //   getters.activeLabelmapIndex(element)
-      // );
+        // console.log(
+        //   "New activeLabelMap Index is ",
+        //   getters.activeLabelmapIndex(element)
+        // );
 
-      this.props.dispatch(setSegLabelMapIndex(aimId, labelMapIndex));
+        this.props.dispatch(setSegLabelMapIndex(aimId, labelMapIndex));
 
-      // this.refreshAllViewports();
-      // });
+        // this.refreshAllViewports();
+        // });
+      }
     } catch (error) {
       console.error(error);
     }
