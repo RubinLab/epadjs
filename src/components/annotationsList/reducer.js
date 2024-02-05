@@ -404,6 +404,7 @@ const asyncReducer = (state = initialState, action) => {
         const viewPortStatus = !state.showGridFullAlert;
         return { ...state, showGridFullAlert: viewPortStatus };
       case LOAD_SERIE_SUCCESS:
+        console.log(" +++> LOAD_SERIE_SUCCESS 1")
         let imageAddedSeries = _.cloneDeep(state.openSeriesAddition);
         let annCalc = Object.keys(action.payload.imageData);
         const { projectID: pidFromRef, studyUID: stUIDFromRef } = action.payload.ref;
@@ -412,6 +413,7 @@ const asyncReducer = (state = initialState, action) => {
           latestOtherSeriesAimsList[pidFromRef][stUIDFromRef] = action.payload.otherSeriesAimsData[pidFromRef][stUIDFromRef];
         else latestOtherSeriesAimsList[pidFromRef] = action.payload.otherSeriesAimsData[pidFromRef];
 
+        console.log(" +++> LOAD_SERIE_SUCCESS 2")
         let numberOfimageAnnotationsMap = {};
         if (pidFromRef && latestOtherSeriesAimsList[pidFromRef] && latestOtherSeriesAimsList[pidFromRef][stUIDFromRef]) {
           numberOfimageAnnotationsMap = latestOtherSeriesAimsList[pidFromRef][stUIDFromRef]
@@ -420,6 +422,9 @@ const asyncReducer = (state = initialState, action) => {
               return all;
             }, {})
         }
+
+        console.log(" +++> LOAD_SERIE_SUCCESS 3")
+
         if (annCalc.length > 0) {
           for (let i = 0; i < imageAddedSeries.length; i++) {
             if (imageAddedSeries[i].seriesUID === action.payload.serID) {
@@ -437,7 +442,7 @@ const asyncReducer = (state = initialState, action) => {
             // serie.aimID = null;
           }
         }
-
+        console.log(" +++> LOAD_SERIE_SUCCESS 4")
         let jumpArr1 = []
         // coming from the right sidebar hasMultiframe flag is overridden by the new data
         // if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
@@ -464,6 +469,7 @@ const asyncReducer = (state = initialState, action) => {
               colors
             );
 
+        console.log(" +++> LOAD_SERIE_SUCCESS 5")
         // check if openSeries[activeport] is significant and teaching file 
         // if so check if seriesData is filled  // if not fill the data
         const { significanceOrder: order, template: tempCode } = state.openSeries[state.activePort];
@@ -479,6 +485,7 @@ const asyncReducer = (state = initialState, action) => {
           }
         }
 
+        console.log(" +++> LOAD_SERIE_SUCCESS 6")
         const result = Object.assign({}, state, {
           loading: false,
           error: false,

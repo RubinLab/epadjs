@@ -185,7 +185,8 @@ const SeriesDropDown = (props) => {
 
             console.log(" ------------------------------------------------")
             console.log(series)
-            console.log(" ************ open one",  props.openSeries[props.activePort]);
+            console.log(" ************ openSeries - open one",  props.openSeries[props.activePort]);
+            console.log(" ************ addition - open one",  props.openSeriesAddition[props.activePort]);
             let isCurrent;
             if (multiFrameImage || multiFrameIndex) {
               const compound = `${openSeriesSeriesUID}_${openSeriesMultiFrameIndex}`;
