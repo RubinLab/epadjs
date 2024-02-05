@@ -62,12 +62,13 @@ const annotationsLink = (props) => {
   }
 
   const displayAnnotations = (e, selected) => {
+    const { openSeriesAddition, activePort } = props;
     const maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
     let isGridFull = openSeries.length === maxPort;
     const { isOpen, index } = checkIfSerieOpen(selected.seriesUID);
 
-    if (isOpen) {
+    if (isOpen && !openSeriesAddition[activePort].multiFrameMap) {
       const imageUID = Object.keys(selected.imgIDs);
       const imgIDArr = imageUID[0].split("/frames/");
       props.dispatch(changeActivePort(index));
@@ -77,7 +78,7 @@ const annotationsLink = (props) => {
       handleJumpToAim(selected.aimID, index, imgIDArr[0], imgIDArr[1]);
       props.dispatch(clearSelection());
     } else {
-      if (isGridFull) {
+      if (isGridFull || openSeriesAddition[activePort].multiFrameMap) {
         props.dispatch(addToGrid(selected, selected.aimID, props.activePort));
       } else {
         props.dispatch(addToGrid(selected, selected.aimID));
@@ -183,6 +184,7 @@ const annotationsLink = (props) => {
 const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
+    openSeriesAddition: state.annotationsListReducer.openSeriesAddition,
     activePort: state.annotationsListReducer.activePort,
     aimsList: state.annotationsListReducer.aimsList,
     otherSeriesAimsList: state.annotationsListReducer.otherSeriesAimsList,

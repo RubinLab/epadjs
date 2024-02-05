@@ -439,9 +439,12 @@ const asyncReducer = (state = initialState, action) => {
         }
 
         let jumpArr1 = []
-        if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
-          const imgArr = imageAddedSeries.frameData[state.openSeries.aimID].split('/frames/');
-          jumpArr = [imageAddedSeries.multiFrameMap[imgArr[0]], parseInt(imgArr[1] - 1)];
+        // coming from the right sidebar hasMultiframe flag is overridden by the new data
+        // if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
+        if (imageAddedSeries[state.activePort].aimID && imageAddedSeries[state.activePort].multiFrameMap && imageAddedSeries[state.activePort].frameData) {
+          const imgs = imageAddedSeries[state.activePort].frameData[action.payload.ann];
+          const imgArr = imgs[0].split('/frames/');
+          jumpArr1 = [imageAddedSeries[state.activePort].multiFrameMap[imgArr[0]], parseInt(imgArr[1]) - 1];
         }
         const newDataKeys = Object.keys(action.payload.aimsData);
         const stateKeys = state.aimsList[action.payload.serID]
@@ -720,9 +723,21 @@ const asyncReducer = (state = initialState, action) => {
         let newOpenSeries = [...state.openSeries];
         let newOpenSeriesAddtition = _.cloneDeep(state.openSeriesAddition);
 
+        const existingUID = newOpenSeriesAddtition[action.port] ? newOpenSeriesAddtition[action.port].seriesUID : ''
+        const newUID = seriesInfo.seriesUID;
+        const sameSeries = existingUID && existingUID === newUID;
+
         if (arePortsOccupied) {
           newOpenSeries[action.port] = seriesInfo;
-          newOpenSeriesAddtition[action.port] = seriesInfo;
+          if (sameSeries) {
+            const copyMFMap = newOpenSeriesAddtition[action.port].multiFrameMap;
+            const copyFmData = newOpenSeriesAddtition[action.port].frameData;
+            const copyImageAnnotations = newOpenSeriesAddtition[action.port].imageAnnotations;
+            newOpenSeriesAddtition[action.port] = seriesInfo;
+            if (copyMFMap) newOpenSeriesAddtition[action.port].multiFrameMap = copyMFMap;
+            if (copyFmData) newOpenSeriesAddtition[action.port].frameData = copyFmData;
+            if (copyImageAnnotations) newOpenSeriesAddtition[action.port].imageAnnotations = copyImageAnnotations;
+          } else newOpenSeriesAddtition[action.port] = seriesInfo;
         } else {
           newOpenSeries = newOpenSeries.concat([seriesInfo]);
           newOpenSeriesAddtition = newOpenSeriesAddtition.concat([seriesInfo]);
