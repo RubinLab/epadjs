@@ -111,7 +111,8 @@ class selectSerieModal extends React.Component {
       const dataExists =
         seriesData[projectID] &&
         seriesData[projectID][patientID] &&
-        seriesData[projectID][patientID][studyUID];
+        seriesData[projectID][patientID][studyUID] &&
+        seriesData[projectID][patientID][studyUID].list;
       if (!dataExists) {
         const { data: series } = await getSeries(
           projectID,
@@ -122,7 +123,7 @@ class selectSerieModal extends React.Component {
           setSeriesData(projectID, patientID, studyUID, series, true)
         );
         return series;
-      } else return seriesData[projectID][patientID][studyUID];
+      } else return seriesData[projectID][patientID][studyUID].list;
     } catch (err) {
       console.error(err);
     }
@@ -191,10 +192,11 @@ class selectSerieModal extends React.Component {
     const dataExists =
         seriesData[projectID] &&
         seriesData[projectID][patientID] &&
-        seriesData[projectID][patientID][studyUID];
+        seriesData[projectID][patientID][studyUID] &&
+        seriesData[projectID][patientID][studyUID].list;
 
     const existingData = dataExists
-      ? seriesData[projectID][patientID][studyUID]
+      ? seriesData[projectID][patientID][studyUID].list
       : null;
     return existingData;
   }

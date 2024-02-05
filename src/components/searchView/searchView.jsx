@@ -766,7 +766,9 @@ class SearchView extends Component {
     const dataExists =
       seriesData[projectID] &&
       seriesData[projectID][patientID] &&
-      seriesData[projectID][patientID][studyUID];
+      seriesData[projectID][patientID][studyUID] && 
+      seriesData[projectID][patientID][studyUID].list;
+
     try {
       if (!dataExists) {
         const { data: series } = await getSeries(
@@ -778,7 +780,7 @@ class SearchView extends Component {
           setSeriesData(projectID, patientID, studyUID, series, true)
         );
         return series;
-      } else return seriesData[projectID][patientID][studyUID];
+      } else return seriesData[projectID][patientID][studyUID].list;
     } catch (err) {
       this.props.dispatch(annotationsLoadingError(err));
     }

@@ -8,7 +8,7 @@ export default function formatPN(name) {
 
   // Convert the first ^ to a ', '. String.replace() only affects
   // the first appearance of the character.
-  const commaBetweenFirstAndLast = name.Alphabetic? name.Alphabetic.replace('^', ', ') : name.replace('^', ', ');
+  const commaBetweenFirstAndLast = name.Alphabetic ? name.Alphabetic.replace('^', ', ') : name.replace('^', ', ');
 
   // Replace any remaining '^' characters with spaces
   const cleaned = commaBetweenFirstAndLast.replace(/\^/g, ' ');

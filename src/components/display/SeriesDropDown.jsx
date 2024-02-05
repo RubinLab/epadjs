@@ -20,6 +20,38 @@ const SeriesDropDown = (props) => {
   const [loading, setLoading] = useState(false);
   let mfIndex = {};
 
+  const checkMultiframe = () => {
+    const { openSeries, activePort, openSeriesAddition } = props;
+    // if the currrent series is multiframe 
+    const multiFrameFlag = openSeries[activePort].multiFrameImage;
+    // in the series annotation get aimID - lookup in framedata
+    let imageID =  openSeriesAddition[activePort].frameData && openSeriesAddition[activePort].frameData[openSeries[activePort].aimID];
+    // get index 0 from the array and split it by /frames/
+    imageID = imageID ? imageID[0].split('/frames/')[0] : '';
+    // first part is the imageid look up in multiframemap if it has value it means it is amultiframe
+    const isMultiFrameAim = imageID ? openSeriesAddition[activePort].multiFrameMap[imageID] > 0: false;
+    const multiframeDataExists = openSeriesAddition[activePort].hasMultiframe || openSeriesAddition[activePort].multiFrameIndex;
+    return multiFrameFlag || isMultiFrameAim || multiframeDataExists;
+
+  }
+
+  const checkAllSameSeries = (list) => {
+    const seriesUID = list[0].seriesUID
+    for (let i = 1; i < list.length; i++) {
+      if (list[i].seriesUID !== seriesUID) return false;
+    }
+    return true;
+  }
+
+  const mergeLists = (existingData, newList) => {
+    const { list, map } = existingData;
+    const result = [ ...list ];
+    newList.forEach(el => {
+      if (!map[el.seriesUID]) result.push(el);
+    })
+    return result;
+  }
+
   useEffect(() => {
     let studyUID;
     let projectID;
@@ -36,17 +68,26 @@ const SeriesDropDown = (props) => {
       data[projectID][patientID] &&
       data[projectID][patientID][studyUID];
 
-    const list = studyExist ? data[projectID][patientID][studyUID] : null
+    const list = studyExist ? data[projectID][patientID][studyUID].list : null
     const isString = (currentValue) => currentValue.seriesDescription === '' || typeof currentValue.seriesDescription === 'string';
-    const hasDescription = list ? list.every(isString) : false;
+    const isFilled= (currentValue) => currentValue.filled || currentValue.multiFrameImage;
+    const hasDescription = list ? list.every(isFilled) : false;
 
-    if (studyExist && hasDescription) {
-      let series = data[projectID][patientID][studyUID];
+    console.log(" +++> checkmultiframe", checkMultiframe());
+
+    if (checkMultiframe() && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
+      getSeries(projectID, patientID, studyUID).then(res => {
+        const newList = mergeLists(data[projectID][patientID][studyUID], res.data);
+        props.dispatch(setSeriesData(projectID, patientID, studyUID, newList, true, true));
+        setLoading(false);
+      }).catch((err) => console.error(err));
+    } if (studyExist && hasDescription) {
+      let series = data[projectID][patientID][studyUID].list;
       series = series?.filter(isSupportedModality);
       setSeriesList(series);
     } else {
       setLoading(true);
-      const shouldFill = props.index === 0 ? true : !otherSeriesOpened(props.openSeries, props.index);
+      const shouldFill = props.index === 0 || !hasDescription ? true : !otherSeriesOpened(props.openSeries, props.index);
       if (studyExist && shouldFill && studyUID && projectID && patientID) {
         props.dispatch(getSeriesAdditional({studyUID, projectID, patientID}))
       } else {
@@ -60,12 +101,15 @@ const SeriesDropDown = (props) => {
 
   const handleSelect = (e) => {
     const UIDArr = e.split("_");
+    console.log(" +++++> handleSelect", UIDArr);
     const seriesUIDFmEvent = UIDArr[0];
     const multiFrameIndex = UIDArr[1];
     const { seriesUID } = props.openSeries[props.activePort];
 
     if (multiFrameIndex === undefined) {
+      console.log(" +++++ serieslist", seriesList);
       const serie = seriesList.find((element) => element.seriesUID == e);
+      console.log(" +++++> serie", serie)
       if (props.isAimEditorShowing) {
         // if (!props.onCloseAimEditor(true))
         //     return;
@@ -84,7 +128,8 @@ const SeriesDropDown = (props) => {
         })
       );
     } else {
-      props.onSelect(0, props.activePort, e);
+      console.log(" +++> in else");
+      // props.onSelect(0, props.activePort, e);
       window.dispatchEvent(
         new CustomEvent("serieReplaced", {
           detail: {
@@ -123,6 +168,7 @@ const SeriesDropDown = (props) => {
               seriesNo,
               multiFrameImage,
               numberOfFrames,
+              multiFrameIndex
             } = series;
 
             let uniqueKey = seriesUID;
@@ -131,23 +177,34 @@ const SeriesDropDown = (props) => {
               props.openSeries[props.activePort].seriesUID;
             const openSeriesMultiFrameIndex =
               props.openSeriesAddition[props.activePort].multiFrameIndex;
-            if (multiFrameImage) {
+            if (multiFrameImage || multiFrameIndex) {
               const currentIndex = mfIndex[seriesUID] ? mfIndex[seriesUID] + 1  : 1;
               mfIndex[seriesUID] = currentIndex;
               uniqueKey = `${seriesUID}_${currentIndex}`;
             }  
 
+            console.log(" ------------------------------------------------")
+            console.log(series)
+            console.log(" ************ open one",  props.openSeries[props.activePort]);
             let isCurrent;
-            if (!multiFrameImage) {
-              isCurrent =
-                openSeriesSeriesUID === uniqueKey && !openSeriesMultiFrameIndex;
-            } else {
+            if (multiFrameImage || multiFrameIndex) {
               const compound = `${openSeriesSeriesUID}_${openSeriesMultiFrameIndex}`;
+              console.log(' ---> multiframe seriesDescription', seriesDescription, compound, uniqueKey);
               isCurrent = compound === uniqueKey;
+            } else {
+              console.log(' ---> seriesDescription', seriesDescription);
+              isCurrent =
+              openSeriesSeriesUID === uniqueKey && !openSeriesMultiFrameIndex;
+              console.log(" ++++> is current", openSeriesSeriesUID, uniqueKey, !openSeriesMultiFrameIndex);
+              // openSeriesSeriesUID === uniqueKey;
             }
+            console.log(" ------------------------------------------------")
+
+
             let counts = numberOfAnnotations
               ? `${numberOfAnnotations} Ann -`
               : "";
+
             return (
                 <Dropdown.Item
                   key={uniqueKey}

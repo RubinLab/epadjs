@@ -170,10 +170,11 @@ function Series(props) {
     const dataExists =
     seriesData[projectID] &&
     seriesData[projectID][patientID] &&
-    seriesData[projectID][patientID][studyUID];
+    seriesData[projectID][patientID][studyUID] &&
+    seriesData[projectID][patientID][studyUID].list;
 
     const existingData = dataExists
-      ? seriesData[projectID][patientID][studyUID]
+      ? seriesData[projectID][patientID][studyUID].list
       : null;
 
     let isSerieOpen = false;
@@ -447,9 +448,10 @@ function Series(props) {
     const dataExists =
       seriesData[projectID] &&
       seriesData[projectID][subjectID] &&
-      seriesData[projectID][subjectID][studyUID];
+      seriesData[projectID][subjectID][studyUID] &&
+      seriesData[projectID][subjectID][studyUID].list;
 
-    if (dataExists) return seriesData[projectID][subjectID][studyUID];
+    if (dataExists) return seriesData[projectID][subjectID][studyUID].list;
     else {
       const treeData = JSON.parse(localStorage.getItem("treeData"));
       const project = treeData[projectID];

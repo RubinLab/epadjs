@@ -52,10 +52,11 @@ const annotationsLink = (props) => {
     const dataExists =
         seriesData[projectID] &&
         seriesData[projectID][patientID] &&
-        seriesData[projectID][patientID][studyUID];
+        seriesData[projectID][patientID][studyUID] &&
+        seriesData[projectID][patientID][studyUID].list;
 
     const existingData = dataExists
-      ? seriesData[projectID][patientID][studyUID]
+      ? seriesData[projectID][patientID][studyUID].list
       : null;
     return existingData;
   }
@@ -97,7 +98,7 @@ const annotationsLink = (props) => {
     const studyExists = patientExists && props.seriesData[projectID][patientID][studyUID];
     let no = null;
     if (studyExists) {
-      props.seriesData[projectID][patientID][studyUID].forEach(el => {
+      props.seriesData[projectID][patientID][studyUID].list.forEach(el => {
         if (el.seriesUID === seriesUID) no = el.seriesNo;
       })
     }

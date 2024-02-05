@@ -759,6 +759,8 @@ class DisplayView extends Component {
     );
     promises.push(promise);
     Promise.all(promises).then((res) => {
+      console.log(" ====-> handleSerieReplace resolved");
+      console.log(res);
       const newData = [...this.state.data];
       newData[viewportId] = res[0];
       newData[viewportId].stack.currentImageIdIndex = 0; 
@@ -906,9 +908,11 @@ class DisplayView extends Component {
     const multiFrameMap = {};
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
+    console.log(" +++++> check 1");
     if (imageUrls.length > 1) {
+      console.log(" passed if", imageUrls.length);
       for (let i = 0; i < imageUrls.length; i++) {
-        if (imageUrls[i][0].multiFrameImage) {
+        if (imageUrls[i] && Array.isArray(imageUrls[i]) && imageUrls[i][0].multiFrameImage) {
           multiFrameMap[imageUrls[i][0].imageUID] = i;
           multiframeSeriesData[`${imageUrls[i][0].seriesUID}_${i}`] = imageUrls[i][0];
         }
@@ -921,12 +925,15 @@ class DisplayView extends Component {
     const firstSeriesIndex = multiFrameIndex
       ? multiFrameIndex
       : this.findFirstSeriesIndex(imageUrls);
-    const seriesURL =
-      wadoUrlNoWadors +
-      imageUrls[firstSeriesIndex][0].lossyImage.split("/instances/")[0];
-
+    
+      console.log(" +++++> check 2");  
+    const urlsExist = imageUrls[firstSeriesIndex] && imageUrls[firstSeriesIndex][0];
     try {
-      seriesMetadata = await getMetadata(seriesURL);
+      if (urlsExist) {
+        const seriesURL = wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage.split("/instances/")[0];
+        console.log(" +++++> check 3");  
+        seriesMetadata = await getMetadata(seriesURL); 
+      }
       seriesMetadata = seriesMetadata.data;
       seriesMetadata.forEach(
         (item) => (seriesMetadataMap[item["00080018"].Value[0]] = item)
@@ -986,6 +993,7 @@ class DisplayView extends Component {
       );
     }
 
+
     const len = imageUrls[firstSeriesIndex].length;
     for (let k = 0; k < len; k++) {
       baseUrl = wadoUrlNoWadors + imageUrls[firstSeriesIndex][k].lossyImage;
@@ -1003,6 +1011,8 @@ class DisplayView extends Component {
         console.log(" error in getting image metadata");
         console.error(err);
       }
+
+
 
       if (sortByGeo) {
         const position = imgData["00200032"].Value.slice();
