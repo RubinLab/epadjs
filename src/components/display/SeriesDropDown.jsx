@@ -114,7 +114,7 @@ const SeriesDropDown = (props) => {
         // if (!props.onCloseAimEditor(true))
         //     return;
       }
-      // props.onSelect(0, props.activePort, true);
+      props.onSelect(0, props.activePort, true);
       props.dispatch(replaceInGrid(serie));
       const list = seriesList.length > 0 ? seriesList : null;
       props.dispatch(getSingleSerie(serie, null, null, list));

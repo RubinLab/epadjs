@@ -732,6 +732,7 @@ const asyncReducer = (state = initialState, action) => {
 
         const existingUID = newOpenSeriesAddtition[action.port] ? newOpenSeriesAddtition[action.port].seriesUID : ''
         const newUID = seriesInfo.seriesUID;
+        console.log(" ---> seriesInfo", seriesInfo, existingUID);
         const sameSeries = existingUID && existingUID === newUID;
 
         if (arePortsOccupied) {
