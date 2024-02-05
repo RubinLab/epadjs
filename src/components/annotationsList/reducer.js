@@ -448,8 +448,8 @@ const asyncReducer = (state = initialState, action) => {
         // if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
         if (imageAddedSeries[state.activePort].aimID && imageAddedSeries[state.activePort].multiFrameMap && imageAddedSeries[state.activePort].frameData) {
           const imgs = imageAddedSeries[state.activePort].frameData[action.payload.ann];
-          const imgArr = imgs[0].split('/frames/');
-          jumpArr1 = [imageAddedSeries[state.activePort].multiFrameMap[imgArr[0]], parseInt(imgArr[1]) - 1];
+          const imgArr = imgs ? imgs[0].split('/frames/') : [];
+          jumpArr1 = imgArr.length > 0 ? [imageAddedSeries[state.activePort].multiFrameMap[imgArr[0]], parseInt(imgArr[1]) - 1] : [];
         }
         const newDataKeys = Object.keys(action.payload.aimsData);
         const stateKeys = state.aimsList[action.payload.serID]
