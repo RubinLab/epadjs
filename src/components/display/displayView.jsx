@@ -929,7 +929,7 @@ class DisplayView extends Component {
         if (imageUrls[i][0].multiFrameImage) {
           multiFrameMap[imageUrls[i][0].imageUID] = i;
           multiframeSeriesData[`${imageUrls[i][0].seriesUID}_${i}`] = imageUrls[i][0];
-        } else multiFrameMap[imageUrls[i][0].seriesUID] = i;
+        } else multiFrameMap[imageUrls[i][0].seriesUID] = true;
       }
     }
     let baseUrl;
