@@ -928,7 +928,6 @@ class DisplayView extends Component {
     const multiFrameMap = {};
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
-    console.log(" +++++> check 1");
     if (imageUrls.length > 1) {
       console.log(" passed if", imageUrls.length);
       for (let i = 0; i < imageUrls.length; i++) {
@@ -946,12 +945,10 @@ class DisplayView extends Component {
       ? multiFrameIndex
       : this.findFirstSeriesIndex(imageUrls);
     
-      console.log(" +++++> check 2");  
     const urlsExist = imageUrls[firstSeriesIndex] && imageUrls[firstSeriesIndex][0];
     try {
       if (urlsExist) {
         const seriesURL = wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage.split("/instances/")[0];
-        console.log(" +++++> check 3");  
         seriesMetadata = await getMetadata(seriesURL); 
       }
       seriesMetadata = seriesMetadata.data;
@@ -1751,7 +1748,7 @@ class DisplayView extends Component {
             segLabelMaps[aimUid] = i;
           }
         );
-        const { aimID } = this.props.series[serieIndex];
+        const aimID = this.props.series[serieIndex] ? this.props.series[serieIndex].aimID : null;
         const { seriesLabelMaps } = this.state;
         // If an aim is selected and it has segmentatio set the activeLabelMap of serie as selected
         // aim's labelMap. Else set it as the next available labelMap to brush new segs
@@ -1826,17 +1823,20 @@ class DisplayView extends Component {
   ) => {
     const { aimList } = this.props;
 
-    const segmentationEntity =
-      aimList[seriesUID][aimId].json.segmentationEntityCollection
-        .SegmentationEntity[0];
+    const aimExists = aimList[seriesUID] && aimList[seriesUID][aimId];
+    if (aimExists) {
+      const segmentationEntity = aimList[seriesUID] &&
+        aimList[seriesUID][aimId].json.segmentationEntityCollection
+          .SegmentationEntity[0];
 
-    const { seriesInstanceUid, sopInstanceUid } = segmentationEntity;
+      const { seriesInstanceUid, sopInstanceUid } = segmentationEntity;
 
-    const pathVariables = { studyUID, seriesUID: seriesInstanceUid.root };
+      const pathVariables = { studyUID, seriesUID: seriesInstanceUid.root };
 
-    getSegmentation(pathVariables, sopInstanceUid.root).then(({ data }) => {
-      this.renderSegmentation(data, aimId, serieIndex, labelMapIndex);
-    });
+      getSegmentation(pathVariables, sopInstanceUid.root).then(({ data }) => {
+        this.renderSegmentation(data, aimId, serieIndex, labelMapIndex);
+      }); 
+    }
   };
 
   clearFrameNumber = (arrayBuffer) => {
