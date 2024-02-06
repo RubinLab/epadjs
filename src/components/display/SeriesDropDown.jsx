@@ -29,7 +29,7 @@ const SeriesDropDown = (props) => {
     // get index 0 from the array and split it by /frames/
     imageID = imageID ? imageID[0].split('/frames/')[0] : '';
     // first part is the imageid look up in multiframemap if it has value it means it is amultiframe
-    const isMultiFrameAim = imageID ? openSeriesAddition[activePort].multiFrameMap[imageID] > 0: false;
+    const isMultiFrameAim = imageID && openSeriesAddition[activePort].multiFrameMap ? openSeriesAddition[activePort].multiFrameMap[imageID] > 0: false;
     const multiframeDataExists = openSeriesAddition[activePort].hasMultiframe || openSeriesAddition[activePort].multiFrameIndex;
     return multiFrameFlag || isMultiFrameAim || multiframeDataExists;
 
@@ -73,8 +73,6 @@ const SeriesDropDown = (props) => {
     const isFilled= (currentValue) => currentValue.filled || currentValue.multiFrameImage;
     const hasDescription = list ? list.every(isFilled) : false;
 
-    console.log(" +++> checkmultiframe", checkMultiframe());
-
     if (checkMultiframe() && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
       getSeries(projectID, patientID, studyUID).then(res => {
         const newList = mergeLists(data[projectID][patientID][studyUID], res.data);
@@ -101,20 +99,18 @@ const SeriesDropDown = (props) => {
 
   const handleSelect = (e) => {
     const UIDArr = e.split("_");
-    console.log(" +++++> handleSelect", UIDArr);
     const seriesUIDFmEvent = UIDArr[0];
     const multiFrameIndex = UIDArr[1];
     const { seriesUID } = props.openSeries[props.activePort];
 
     if (multiFrameIndex === undefined) {
-      console.log(" +++++ serieslist", seriesList);
       const serie = seriesList.find((element) => element.seriesUID == e);
-      console.log(" +++++> serie", serie)
+
       if (props.isAimEditorShowing) {
         // if (!props.onCloseAimEditor(true))
         //     return;
       }
-      // props.onSelect(0, props.activePort, true);
+      props.onSelect(0, props.activePort, true);
       props.dispatch(replaceInGrid(serie));
       const list = seriesList.length > 0 ? seriesList : null;
       props.dispatch(getSingleSerie(serie, null, null, list));
@@ -128,7 +124,6 @@ const SeriesDropDown = (props) => {
         })
       );
     } else {
-      console.log(" +++> in else");
       // props.onSelect(0, props.activePort, e);
       window.dispatchEvent(
         new CustomEvent("serieReplaced", {
@@ -183,23 +178,15 @@ const SeriesDropDown = (props) => {
               uniqueKey = `${seriesUID}_${currentIndex}`;
             }  
 
-            console.log(" ------------------------------------------------")
-            console.log(series)
-            console.log(" ************ open one",  props.openSeries[props.activePort]);
             let isCurrent;
             if (multiFrameImage || multiFrameIndex) {
               const compound = `${openSeriesSeriesUID}_${openSeriesMultiFrameIndex}`;
-              console.log(' ---> multiframe seriesDescription', seriesDescription, compound, uniqueKey);
               isCurrent = compound === uniqueKey;
             } else {
-              console.log(' ---> seriesDescription', seriesDescription);
               isCurrent =
               openSeriesSeriesUID === uniqueKey && !openSeriesMultiFrameIndex;
-              console.log(" ++++> is current", openSeriesSeriesUID, uniqueKey, !openSeriesMultiFrameIndex);
               // openSeriesSeriesUID === uniqueKey;
             }
-            console.log(" ------------------------------------------------")
-
 
             let counts = numberOfAnnotations
               ? `${numberOfAnnotations} Ann -`

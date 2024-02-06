@@ -408,7 +408,7 @@ const asyncReducer = (state = initialState, action) => {
         let annCalc = Object.keys(action.payload.imageData);
         const { projectID: pidFromRef, studyUID: stUIDFromRef } = action.payload.ref;
         let latestOtherSeriesAimsList = _.cloneDeep(state.otherSeriesAimsList);
-        if (latestOtherSeriesAimsList[pidFromRef])
+        if (latestOtherSeriesAimsList[pidFromRef] && action.payload.otherSeriesAimsData[pidFromRef])
           latestOtherSeriesAimsList[pidFromRef][stUIDFromRef] = action.payload.otherSeriesAimsData[pidFromRef][stUIDFromRef];
         else latestOtherSeriesAimsList[pidFromRef] = action.payload.otherSeriesAimsData[pidFromRef];
 
@@ -420,6 +420,8 @@ const asyncReducer = (state = initialState, action) => {
               return all;
             }, {})
         }
+
+
         if (annCalc.length > 0) {
           for (let i = 0; i < imageAddedSeries.length; i++) {
             if (imageAddedSeries[i].seriesUID === action.payload.serID) {
@@ -437,14 +439,13 @@ const asyncReducer = (state = initialState, action) => {
             // serie.aimID = null;
           }
         }
-
         let jumpArr1 = []
         // coming from the right sidebar hasMultiframe flag is overridden by the new data
         // if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
         if (imageAddedSeries[state.activePort].aimID && imageAddedSeries[state.activePort].multiFrameMap && imageAddedSeries[state.activePort].frameData) {
           const imgs = imageAddedSeries[state.activePort].frameData[action.payload.ann];
-          const imgArr = imgs[0].split('/frames/');
-          jumpArr1 = [imageAddedSeries[state.activePort].multiFrameMap[imgArr[0]], parseInt(imgArr[1]) - 1];
+          const imgArr = imgs ? imgs[0].split('/frames/') : [];
+          jumpArr1 = imgArr.length > 0 ? [imageAddedSeries[state.activePort].multiFrameMap[imgArr[0]], parseInt(imgArr[1]) - 1] : [];
         }
         const newDataKeys = Object.keys(action.payload.aimsData);
         const stateKeys = state.aimsList[action.payload.serID]

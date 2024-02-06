@@ -334,8 +334,10 @@ class DisplayView extends Component {
 
     // TODO: check if loading/true-false control is required for the first condition
 
-    const aimIDChanged = seriesAddition[activePort].aimID !== prevSeriesAddition[activePort].aimID;
-    const sameSeries = seriesAddition[activePort].seriesUID === prevSeriesAddition[activePort].seriesUID;
+    const active = seriesAddition[activePort];
+    const prevActive = prevSeriesAddition[activePort];
+    const aimIDChanged = active && prevActive ? seriesAddition[activePort].aimID !== prevSeriesAddition[activePort].aimID : false;
+    const sameSeries = active && prevActive ? seriesAddition[activePort].seriesUID === prevSeriesAddition[activePort].seriesUID : false;
     const refreshPage = sameSeries && aimIDChanged ? this.forceRefreshForMF() : false;
 
     if (
@@ -926,7 +928,6 @@ class DisplayView extends Component {
     const multiFrameMap = {};
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
-    console.log(" +++++> check 1");
     if (imageUrls.length > 1) {
       console.log(" passed if", imageUrls.length);
       for (let i = 0; i < imageUrls.length; i++) {
@@ -944,12 +945,10 @@ class DisplayView extends Component {
       ? multiFrameIndex
       : this.findFirstSeriesIndex(imageUrls);
     
-      console.log(" +++++> check 2");  
     const urlsExist = imageUrls[firstSeriesIndex] && imageUrls[firstSeriesIndex][0];
     try {
       if (urlsExist) {
         const seriesURL = wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage.split("/instances/")[0];
-        console.log(" +++++> check 3");  
         seriesMetadata = await getMetadata(seriesURL); 
       }
       seriesMetadata = seriesMetadata.data;
@@ -1730,7 +1729,7 @@ class DisplayView extends Component {
     const { serieIndex } = seriesSegmentations[0];
 
     try {
-      const { imageIds } = this.state.data[serieIndex].stack;
+      const imageIds = this.state.data[serieIndex] && this.state.data[serieIndex].stack ? this.state.data[serieIndex].stack.imageIds : [];
 
       var imagePromises = imageIds.map((imageId) => {
         return cornerstone.loadAndCacheImage(imageId);
@@ -1749,7 +1748,7 @@ class DisplayView extends Component {
             segLabelMaps[aimUid] = i;
           }
         );
-        const { aimID } = this.props.series[serieIndex];
+        const aimID = this.props.series[serieIndex] ? this.props.series[serieIndex].aimID : null;
         const { seriesLabelMaps } = this.state;
         // If an aim is selected and it has segmentatio set the activeLabelMap of serie as selected
         // aim's labelMap. Else set it as the next available labelMap to brush new segs
@@ -1782,7 +1781,9 @@ class DisplayView extends Component {
     if (!seriesLabelMaps[activePort]) {
       return;
     } //The default activeLabelMap will be 0 automatically
-    const { imageIds } = this.state.data[activePort].stack;
+
+    // const { imageIds } = this.state.data[activePort].stack;
+    const imageIds = this.state.data[activePort] && this.state.data[activePort].stack ? this.state.data[activePort].stack.imageIds : [];
 
     var imagePromises = imageIds.map((imageId) => {
       return cornerstone.loadAndCacheImage(imageId);
@@ -1822,17 +1823,20 @@ class DisplayView extends Component {
   ) => {
     const { aimList } = this.props;
 
-    const segmentationEntity =
-      aimList[seriesUID][aimId].json.segmentationEntityCollection
-        .SegmentationEntity[0];
+    const aimExists = aimList[seriesUID] && aimList[seriesUID][aimId];
+    if (aimExists) {
+      const segmentationEntity = aimList[seriesUID] &&
+        aimList[seriesUID][aimId].json.segmentationEntityCollection
+          .SegmentationEntity[0];
 
-    const { seriesInstanceUid, sopInstanceUid } = segmentationEntity;
+      const { seriesInstanceUid, sopInstanceUid } = segmentationEntity;
 
-    const pathVariables = { studyUID, seriesUID: seriesInstanceUid.root };
+      const pathVariables = { studyUID, seriesUID: seriesInstanceUid.root };
 
-    getSegmentation(pathVariables, sopInstanceUid.root).then(({ data }) => {
-      this.renderSegmentation(data, aimId, serieIndex, labelMapIndex);
-    });
+      getSegmentation(pathVariables, sopInstanceUid.root).then(({ data }) => {
+        this.renderSegmentation(data, aimId, serieIndex, labelMapIndex);
+      }); 
+    }
   };
 
   clearFrameNumber = (arrayBuffer) => {
@@ -1856,7 +1860,10 @@ class DisplayView extends Component {
 
     // const { labelMaps } = this.state.seriesLabelMaps[serieIndex];
     // const labelMapIndex = labelMaps[aimId];
-    const { imageIds } = this.state.data[serieIndex].stack;
+
+    // const { imageIds } = this.state.data[serieIndex].stack;
+    const imageIds = this.state.data[serieIndex] && this.state.data[serieIndex].stack ? this.state.data[serieIndex].stack.imageIds : [];
+
     try {
       // var imagePromises = imageIds.map((imageId) => {
       //   return cornerstone.loadAndCacheImage(imageId);
@@ -1868,58 +1875,60 @@ class DisplayView extends Component {
       const provider = wadoUrl.includes("wadors")
         ? cornerstoneWADOImageLoader.wadors.metaDataManager
         : cornerstone.metaData;
-      const {
-        labelmapBufferArray,
-        segMetadata,
-        segmentsOnFrame,
-        segmentsOnFrameArray,
-      } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
-        imageIds,
-        arrayBuffer,
-        provider
-      );
+      if (imageIds.length > 0) {
+        const {
+          labelmapBufferArray,
+          segMetadata,
+          segmentsOnFrame,
+          segmentsOnFrameArray,
+        } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
+          imageIds,
+          arrayBuffer,
+          provider
+        );
 
-      const { setters, getters } = cornerstoneTools.getModule("segmentation");
+        const { setters, getters } = cornerstoneTools.getModule("segmentation");
 
-      setters.labelmap3DByFirstImageId(
-        imageIds[0],
-        labelmapBufferArray,
-        labelMapIndex,
-        segMetadata.data,
-        imageIds.length,
-        segmentsOnFrame
-      );
-      // console.log(
-      //   "I have rendered ",
-      //   aimId,
-      //   "with labelMapIndex :",
-      //   activeLabelMapIndex
-      // );
+        setters.labelmap3DByFirstImageId(
+          imageIds[0],
+          labelmapBufferArray,
+          labelMapIndex,
+          segMetadata.data,
+          imageIds.length,
+          segmentsOnFrame
+        );
+        // console.log(
+        //   "I have rendered ",
+        //   aimId,
+        //   "with labelMapIndex :",
+        //   activeLabelMapIndex
+        // );
 
-      const { element } = cornerstone.getEnabledElements()[serieIndex];
-      cornerstone.updateImage(element);
-      // const length = Object.entries(labelMaps).length;
-      // setters.activeLabelmapIndex(element, length);
-      // if (this.state.selectedAim) {
-      //   //if an aim is selected find its label map index, 0 if no segmentation in aim
-      //   //an aim is being edited don't set the label map index because aim's segs should be brushed
-      //   this.setActiveLabelMapOfAim(this.state.selectedAim, element);
-      // } else {
-      //   this.setActiveLabelMapIndex(
-      //     this.state.activeLabelMapIndex + 1,
-      //     element
-      //   );
-      // }
+        const { element } = cornerstone.getEnabledElements()[serieIndex];
+        cornerstone.updateImage(element);
+        // const length = Object.entries(labelMaps).length;
+        // setters.activeLabelmapIndex(element, length);
+        // if (this.state.selectedAim) {
+        //   //if an aim is selected find its label map index, 0 if no segmentation in aim
+        //   //an aim is being edited don't set the label map index because aim's segs should be brushed
+        //   this.setActiveLabelMapOfAim(this.state.selectedAim, element);
+        // } else {
+        //   this.setActiveLabelMapIndex(
+        //     this.state.activeLabelMapIndex + 1,
+        //     element
+        //   );
+        // }
 
-      // console.log(
-      //   "New activeLabelMap Index is ",
-      //   getters.activeLabelmapIndex(element)
-      // );
+        // console.log(
+        //   "New activeLabelMap Index is ",
+        //   getters.activeLabelmapIndex(element)
+        // );
 
-      this.props.dispatch(setSegLabelMapIndex(aimId, labelMapIndex));
+        this.props.dispatch(setSegLabelMapIndex(aimId, labelMapIndex));
 
-      // this.refreshAllViewports();
-      // });
+        // this.refreshAllViewports();
+        // });
+      }
     } catch (error) {
       console.error(error);
     }
