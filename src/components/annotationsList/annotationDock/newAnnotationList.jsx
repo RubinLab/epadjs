@@ -224,8 +224,6 @@ class AnnotationsList extends React.Component {
       }
     }
     preparing = false;  
-    console.log(" ++++> preparing", preparing);
-    console.log(" ++++> this.props.loading ", this.props.loading);
     const calculations = this.getLabelArray();
     let annList = [];
     const imageAims = { ...annotations };
