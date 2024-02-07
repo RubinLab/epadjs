@@ -261,6 +261,7 @@ function AnnotationTable(props) {
   // const [listOfSelecteds, setListOfSelecteds] = useState({});
   const [showNarrative, setShowNarrative] = useState(false);
   const [narrative, setNarrative] = useState("");
+  const [showSpinner, setShowSpinner] = useState(false);
   // const [aimMap, setAimMap] = useState({})
 
   const handlePageIndex = (act) => {
@@ -356,7 +357,8 @@ function AnnotationTable(props) {
       const dataExists =
       seriesData[projectID] &&
       seriesData[projectID][patientID] &&
-      seriesData[projectID][patientID][studyUID];
+      seriesData[projectID][patientID][studyUID] &&
+      seriesData[projectID][patientID][studyUID].list;
       if (!dataExists) {
         const { data: series } = await getSeries(
           projectID,
@@ -367,7 +369,7 @@ function AnnotationTable(props) {
         props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
         props.dispatch(loadCompleted());
         return series;
-      } else return seriesData[projectID][patientID][studyUID];
+      } else return seriesData[projectID][patientID][studyUID].list;
     } catch (err) {
       props.dispatch(annotationsLoadingError(err));
     }
@@ -409,10 +411,11 @@ function AnnotationTable(props) {
     const dataExists =
     seriesData[projectID] &&
     seriesData[projectID][patientID] &&
-    seriesData[projectID][patientID][studyUID];
+    seriesData[projectID][patientID][studyUID] &&
+    seriesData[projectID][patientID][studyUID].list;
 
     let existingData = dataExists
-    ? seriesData[projectID][patientID][studyUID]
+    ? seriesData[projectID][patientID][studyUID].list
     : null;
     return existingData;
   }
@@ -575,7 +578,8 @@ function AnnotationTable(props) {
           Cell: ({ row }) => {
             return (
               <div
-                onClick={() => {
+              onClick={() => {
+                  setShowSpinner(true);
                   if (
                     row.original.seriesUID === "noseries" ||
                     !row.original.seriesUID
@@ -745,7 +749,8 @@ function AnnotationTable(props) {
           Cell: ({ row }) => {
             return (
               <div
-                onClick={() => {
+              onClick={() => {
+                  setShowSpinner(true);
                   if (
                     row.original.seriesUID === "noseries" ||
                     !row.original.seriesUID
@@ -846,8 +851,32 @@ function AnnotationTable(props) {
     [props.bookmark, props.searchTableIndex]
   );
 
+  const formSpinner = () => {
+    return {
+      background: '#000',
+      opacity: '0.5',
+      color: '#666666',
+      position: 'fixed',
+      height: '100%',
+      width: '100%',
+      zIndex: 5000,
+      top: 0,
+      left: 0,
+      float: 'left',
+      textAlign: 'center',
+      paddingTop: '25%',
+      opacity: '.80',
+    }
+   
+  }
+
   return (
     <>
+      { showSpinner && 
+      (<div id="overlay" style={{...formSpinner() }}>
+        <div class="spinner-border" role="status" style={{'height': '35px', 'width': '35px', 'fontSize': '15px', 'background': '#000'}} />
+      </div>) 
+      }
       <Table
         columns={columns}
         data={data}

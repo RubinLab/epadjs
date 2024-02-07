@@ -74,12 +74,13 @@ export const fillSeriesDescfullData = (data) => {
   return { type: FILL_DESC, data };
 }
 
-export const setSeriesData = (projectID, patientID, studyUID, seriesData, filled) => {
+export const setSeriesData = (projectID, patientID, studyUID, seriesData, filled, mfMerged) => {
   const data = seriesData.map(el => {
     el.filled = filled;
     return el;
   });
-  return { type: SET_SERIES_DATA, payload: { projectID, patientID, studyUID, data } };
+
+  return { type: SET_SERIES_DATA, payload: { projectID, patientID, studyUID, data, mfMerged } };
 }
 
 export const clearMultiFrameAimJumpFlags = () => {
@@ -1054,7 +1055,12 @@ const getSingleSerieData = (serie, annotation, wadoUrl, seriesData) => {
         const otherSeriesAimsData = allAims.length === 0 ? {} : getStudyAimsDataSorted(allAims, projectID, patientID);
         const seriesExtendedData = insertAdditionalData(serData, serieRef, seriesUID);
 
-        const seriesOfStudy = { [studyUID]: seriesExtendedData }
+        const map = seriesExtendedData.reduce((all, item) => {
+          all[item.seriesUID] = true;
+          return all;
+        }, {});
+
+        const seriesOfStudy = { [studyUID]: { 'list': seriesExtendedData, map } }
         resolve({ aimsData, imageData, otherSeriesAimsData, seriesOfStudy, serieRef, frameData });
       })
       .catch((err) => {

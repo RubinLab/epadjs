@@ -194,7 +194,9 @@ function Studies(props) {
     const dataExists =
       seriesData[projectID] &&
       seriesData[projectID][patientID] &&
-      seriesData[projectID][patientID][studyUID];
+      seriesData[projectID][patientID][studyUID] &&
+      seriesData[projectID][patientID][studyUID].list;
+
     try {
       if (!dataExists) {
         const { data: series } = await getSeries(
@@ -207,7 +209,7 @@ function Studies(props) {
           setSeriesData(projectID, patientID, studyUID, series, true)
         );
         return series;
-      } else return seriesData[projectID][patientID][studyUID];
+      } else return seriesData[projectID][patientID][studyUID].list;
     } catch (err) {
       props.dispatch(annotationsLoadingError(err));
     }
