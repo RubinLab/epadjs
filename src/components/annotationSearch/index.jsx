@@ -293,13 +293,6 @@ const AnnotationSearch = (props) => {
     };
   }, [handleTeachingFilesModal]);
 
-  useEffect(() => {
-    window.addEventListener('openTeachingFilesModal', handleTeachingFilesModal);
-    return () => {
-      window.removeEventListener('openTeachingFilesModal', handleTeachingFilesModal);
-    };
-  }, [handleTeachingFilesModal]);
-
   const useDebouncedEffect = (effect, deps, delay) => {
     useEffect(() => {
       const handler = setTimeout(() => effect(), delay);
