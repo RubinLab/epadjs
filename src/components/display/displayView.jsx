@@ -676,6 +676,26 @@ class DisplayView extends Component {
     return segAims;
   };
 
+  mergeMaps = (keys) => {
+    const { dataIndexMap } = this.state;
+    const reversedMap = {}
+    const reversedKeys = {};
+
+    for (let key in dataIndexMap ) 
+      reversedMap[dataIndexMap[key]] = key
+    
+    for (let key in keys ) 
+      reversedKeys[keys[key]] = key;
+
+    for (let key in reversedKeys) 
+      if (reversedKeys[key]) reversedMap[key] =  reversedKeys[key]; 
+
+    const mergedArr = Object.entries(reversedMap).map(([key, value]) => [value, key]);
+    const mergedMap = Object.fromEntries(mergedArr);  
+
+    return mergedMap;
+  }
+
   getData(multiFrameIndex, frameNo, fm, force) {
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
@@ -706,8 +726,8 @@ class DisplayView extends Component {
           indexKeys[indexKey] = i;
           indexOrder.push(i);
         } else {
-          const index = dataIndexMap[indexKey];
-          newData[index] = this.state.data[index];
+          const index = parseInt(dataIndexMap[indexKey]);
+          newData[i] = { ...this.state.data[index] };
         }
       }
 
@@ -729,10 +749,11 @@ class DisplayView extends Component {
             this.setState({ data: newData });
           }
           
+          const mergedMaps = this.mergeMaps(indexKeys);
           this.setState(
             {
               isLoading: false,
-              dataIndexMap: { ...this.state.dataIndexMap, ...indexKeys },
+              dataIndexMap: mergedMaps,
             },
             () => {
               this.jumpToAims();
@@ -750,9 +771,13 @@ class DisplayView extends Component {
             }
         });
       } else {
+        for (let i = 0; i < newData.length; i++) 
+          if (!newData[i]) newData[i] = this.state.data[i];
+
         this.setState(
           {
             isLoading: false,
+            data: newData
           },
           () => {
             this.jumpToAims();
@@ -770,22 +795,27 @@ class DisplayView extends Component {
     const { series } = this.props;
     var promises = [];
     const { viewportId, id, multiFrameIndex } = e.detail;
-    const promise = this.getImageStack(
-      series[viewportId],
-      viewportId,
+    // const promise = this.getImageStack(
+    //   series[viewportId],
+    //   viewportId,
+    //   multiFrameIndex,
+    //   undefined,
+    //   "handleSerieReplace"
+    // );
+    this.getData(
       multiFrameIndex,
       undefined,
       "handleSerieReplace"
     );
-    promises.push(promise);
-    Promise.all(promises).then((res) => {
-      console.log(" ====-> handleSerieReplace resolved");
-      console.log(res);
-      const newData = [...this.state.data];
-      newData[viewportId] = res[0];
-      newData[viewportId].stack.currentImageIdIndex = 0; 
-      this.setState({ data: newData, isLoading: false });
-    });
+    // promises.push(promise);
+    // Promise.all(promises).then((res) => {
+    //   console.log(" ====-> handleSerieReplace resolved", viewportId);
+    //   console.log(res);
+    //   const newData = [...this.state.data];
+    //   newData[viewportId] = res[0];
+    //   newData[viewportId].stack.currentImageIdIndex = 0; 
+    //   this.setState({ data: newData, isLoading: false });
+    // });
   };
 
   // Remove this function to disable openning aim editor by default
@@ -2499,8 +2529,8 @@ class DisplayView extends Component {
                             <Form.Control
                               type="number"
                               min="1"
-                              value={
-                                parseInt(data?.stack?.currentImageIdIndex) + 1
+                              value={ data && data.stack && data.stack.currentImageIdIndex ?  
+                                  parseInt(data.stack.currentImageIdIndex) + 1 : 1
                               }
                               className={"slice-field"}
                               onChange={(event) =>
@@ -2542,8 +2572,8 @@ class DisplayView extends Component {
                   </div>
                   <CornerstoneViewport
                     key={i}
-                    imageIds={data.stack.imageIds}
-                    imageIdIndex={parseInt(data.stack.currentImageIdIndex)}
+                    imageIds={data.stack?.imageIds}
+                    imageIdIndex={parseInt(data.stack?.currentImageIdIndex)}
                     viewportIndex={i}
                     tools={tools}
                     shouldInvert={this.state.invertMap[i]}

@@ -147,7 +147,7 @@ const asyncReducer = (state = initialState, action) => {
             if (newSer || newMF) newArr.push(el);
           });
           newSeriesData[projectID][patientID][studyUID].list = newArr;
-        } else if (patientExists) newSeriesData[projectID][patientID][studyUID].list = data;
+        } else if (patientExists) newSeriesData[projectID][patientID] = { ...newSeriesData[projectID][patientID], [studyUID]: { 'list': data } };
         else if (projectExists) newSeriesData[projectID][patientID] = { [studyUID]: { 'list': data } };
         else newSeriesData[projectID] = { [patientID]: { [studyUID]: { 'list': data } } };
         newSeriesData[projectID][patientID][studyUID].map = newSeriesData[projectID][patientID][studyUID].list.reduce((all, item, index) => {
