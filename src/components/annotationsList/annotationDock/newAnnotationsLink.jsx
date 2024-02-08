@@ -125,7 +125,7 @@ const annotationsLink = (props) => {
             let imgMatches = false;
 
             imgIDs.forEach((el) => {
-              if (presentImgID && presentImgID.includes(el)) imgMatches = true;
+              if (presentImgID && el === presentImgID) imgMatches = true;
             });
             const color =
               imgMatches &&
