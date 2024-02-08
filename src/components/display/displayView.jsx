@@ -712,6 +712,7 @@ class DisplayView extends Component {
 
         const { projectID, patientID, studyUID, seriesUID } = series[i];
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
+        if (multiFrameIndex && !isNaN(multiFrameIndex)) indexKey = `${indexKey}-${multiFrameIndex}`
 
         // if (typeof dataIndexMap[indexKey] !== "number") {
         if (!(dataIndexMap[indexKey] >= 0) || multiFrameIndex || force) {
@@ -959,7 +960,6 @@ class DisplayView extends Component {
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
     if (imageUrls.length > 1) {
-      console.log(" passed if", imageUrls.length);
       for (let i = 0; i < imageUrls.length; i++) {
         if (imageUrls[i] && Array.isArray(imageUrls[i]) && imageUrls[i][0].multiFrameImage) {
           multiFrameMap[imageUrls[i][0].imageUID] = i;
