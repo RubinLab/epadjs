@@ -872,7 +872,7 @@ function AnnotationTable(props) {
 
   return (
     <>
-      { showSpinner && 
+      { showSpinner && !showSelectSeriesModal &&
       (<div id="overlay" style={{...formSpinner() }}>
         <div class="spinner-border" role="status" style={{'height': '35px', 'width': '35px', 'fontSize': '15px', 'background': '#000'}} />
       </div>) 
