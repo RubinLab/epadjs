@@ -896,6 +896,7 @@ function AnnotationTable(props) {
           seriesPassed={Array.isArray(selected) ? [selected] : [[selected]]}
           onCancel={() => {
             setShowSelectSeriesModal(false);
+            setShowSpinner(false);
             setSelected({});
           }}
           // studyName={serie.studyDescription}
