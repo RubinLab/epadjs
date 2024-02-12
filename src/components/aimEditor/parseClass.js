@@ -310,7 +310,12 @@ export var AimEditor = function (
         } else {
           self.templateType = "Image";
         }
-
+        const tempType = self.templateType;
+        window.dispatchEvent(
+          new CustomEvent("saveTemplateType", {
+            detail: tempType,
+          })
+        );
         self.extractTemplate(self.jsonTemplateCopy);
       }
     };
@@ -419,7 +424,7 @@ export var AimEditor = function (
     textareaDomObject.style.width = "100%";
 
     commentDiv.appendChild(textareaDomObject);
-    
+
     textareaDomObject.onkeyup = function () {
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
@@ -432,13 +437,13 @@ export var AimEditor = function (
         code: json.TemplateContainer.Template[0].codeValue,
         codeSystemName:
           json.TemplateContainer.Template[0].codingSchemeDesignator,
-          "iso:displayName": {
+        "iso:displayName": {
           "xmlns:iso": "uri:iso.org:21090",
           value: json.TemplateContainer.Template[0].codeMeaning,
         },
       },
     ];
-        
+
     document.getElementById("accordion1").appendChild(annotationNameLabelDiv);
     document.getElementById("accordion1").appendChild(annotationNameDiv);
     //end adding comment textarea for the template

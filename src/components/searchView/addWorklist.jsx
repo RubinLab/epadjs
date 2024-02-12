@@ -11,6 +11,8 @@ import {
   addAimsToWorklist
 } from "../../services/worklistServices";
 import { clearSelection } from "../annotationsList/action";
+import { findSelectedCheckboxes, resetSelectAllCheckbox } from '../../Utils/aid.js';
+
 
 const AddToWorklist = (props) => {
   const mode = sessionStorage.getItem('mode');
@@ -62,7 +64,7 @@ const AddToWorklist = (props) => {
   }, [props.selectedPatients, props.selectedStudies])
 
   const addAnnotationsToWorklist = async (annotations, worklist) => {
-    const aimIDs = Object.keys(annotations);
+    const aimIDs = Array.isArray(annotations) ? annotations : Object.keys(annotations);
     try {
       await addAimsToWorklist(worklist, aimIDs);
       toast.success("Annotation(s) succesfully added to worklist.", {
@@ -73,6 +75,7 @@ const AddToWorklist = (props) => {
         pauseOnHover: true,
         draggable: false,
       });
+      resetSelectAllCheckbox(false);
       // props.deselect();
       props.dispatch(clearSelection());
       if (mode !== 'teaching' && props.refresh) props.refresh();
@@ -87,6 +90,7 @@ const AddToWorklist = (props) => {
         draggable: false,
       });
       console.error(e);
+      resetSelectAllCheckbox(false);
     }
   }
 
@@ -153,12 +157,14 @@ const AddToWorklist = (props) => {
 
   const onSelect = (workListID) => {
     const { selectedStudies, selectedPatients, selectedAnnotations } = props;
+    const storedAims = Object.keys(selectedAnnotations);
+    const selectedAims = storedAims.length > 0 ? storedAims : findSelectedCheckboxes();
     if (Object.values(selectedStudies).length > 0) {
       addSelectedStudiesToWorklist(workListID, selectedData);
     } else if (Object.values(selectedPatients).length > 0) {
       addSelectedSubjectsToWorklist(workListID, selectedData);
-    } else if (Object.values(selectedAnnotations).length > 0) {
-      addAnnotationsToWorklist(selectedAnnotations, workListID);
+    } else if (selectedAims.length > 0) {
+      addAnnotationsToWorklist(selectedAims, workListID);
     }
   };
 
@@ -225,7 +231,7 @@ const AddToWorklist = (props) => {
         Add To Worklist
       </Dropdown.Toggle>
 
-      <Dropdown.Menu as={WorklistMenu} className="dropdown-menu p-2 dropdown-menu-dark" style={{ maxHeight: '20rem', overflow: 'overlay', backgroundColor: '#333', borderColor: 'white', minWidth: '15rem', fontSize: '11px' }} >
+      <Dropdown.Menu as={WorklistMenu} className="dropdown-menu p-2 dropdown-menu-dark" style={{ maxHeight: '20rem', overflow: 'auto', backgroundColor: '#333', borderColor: 'white', minWidth: '15rem', fontSize: '11px' }} >
         {worklists?.map(({ name, workListID }, y) => {
           return (
             <Dropdown.Item key={y} id={workListID} onSelect={() => onSelect(workListID)}>{name}</Dropdown.Item>

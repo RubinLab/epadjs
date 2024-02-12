@@ -74,8 +74,8 @@ function basicLevelingStrategy(evt) {
   }
 
   window.dispatchEvent(
-    new CustomEvent("updateWL", { detail: { wc: eventData.viewport.voi.windowCenter, ww: eventData.viewport.voi.windowWidth } })
-
+    // new CustomEvent("updateWL", { detail: { wc: eventData.viewport.voi.windowCenter, ww: eventData.viewport.voi.windowWidth } })
+    new CustomEvent("updateImageStatus", { detail: { type: 'wwwc', value: { wc: eventData.viewport.voi.windowCenter, ww: eventData.viewport.voi.windowWidth} } })
   );
 
 }

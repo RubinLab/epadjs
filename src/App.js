@@ -39,6 +39,7 @@ import {
   getTemplates,
   segUploadCompleted,
   annotationsLoadingError,
+  setSeriesData
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
@@ -117,8 +118,9 @@ class App extends Component {
       leftMenuState: "open",
       update: 0,
       savedData: {},
-      loading: false,
+      loading: true,
       freeze: "auto",
+      teachingLoading: false
     };
   }
 
@@ -754,6 +756,7 @@ class App extends Component {
   };
 
   handleArgs = async (args) => {
+    this.setState({ loading: true, freeze: 'none', teachingLoading: true });
     const { data } = await decryptAndGrantAccess(args);
     const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
     const { openSeries } = this.props;
@@ -872,9 +875,18 @@ class App extends Component {
 
   getSeriesData = async (studyData) => {
     const { projectID, patientID, studyUID } = studyData;
+    const { seriesData } = this.props;
     try {
-      const { data: series } = await getSeries(projectID, patientID, studyUID);
-      return series;
+      const dataExists = seriesData[projectID] &&
+        seriesData[projectID][patientID] &&
+        seriesData[projectID][patientID][studyUID] &&
+        seriesData[projectID][patientID][studyUID].list;
+      if (!dataExists) {
+        const { data: series } = await getSeries(projectID, patientID, studyUID);
+        this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series, true));
+        this.setState({ teachingLoading: false });
+        return series;
+      } else return seriesData[projectID][patientID][studyUID].list;
     } catch (err) {
       console.error(err);
       this.props.dispatch(annotationsLoadingError(err));
@@ -1490,6 +1502,7 @@ class App extends Component {
                       }
                       completeLoading={() => this.setState({ loading: false, freeze: 'auto' })}
                       loading={this.state.loading}
+                      teachingLoading={this.state.teachingLoading}
                       forceUpdatePage={() => this.setState(state => ({ update: state.update + 1 }))}
                       getPidUpdate={this.getPidUpdate}
                     />
@@ -1672,6 +1685,7 @@ const mapStateToProps = (state) => {
     lastEventId,
     notificationAction,
     isSegUploaded,
+    seriesData
   } = state.annotationsListReducer;
   return {
     showGridFullAlert,
@@ -1686,6 +1700,7 @@ const mapStateToProps = (state) => {
     lastEventId,
     notificationAction,
     isSegUploaded,
+    seriesData,
     selection: state.managementReducer.selection,
   };
 };

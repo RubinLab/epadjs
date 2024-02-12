@@ -6,6 +6,24 @@ import { DISP_MODALITIES } from "../constants";
  * https://github.com/dcmjs-org/dcmjs/blob/master/src/DicomMetaDictionary.js#L5
  */
 
+export const findSelectedCheckboxes = () => {
+  let checkboxes = document.getElementsByClassName('__search-checkbox');
+  checkboxes = Array.from(checkboxes);
+  const selected = checkboxes.filter(el => el.checked).map(el => el.id);
+  return selected;
+}
+
+export const handleSelectDeselectAll = (checked) => {
+  let checkboxes = document.getElementsByClassName('__search-checkbox');
+  checkboxes = Array.from(checkboxes);
+  checkboxes.forEach(el => el.checked = checked);
+}
+
+export const resetSelectAllCheckbox = state => {
+  const selectAllCheckboxId = document.getElementById('search-select_all');
+  if (selectAllCheckboxId) selectAllCheckboxId.checked = state;
+}
+
 export function styleEightDigitDate(rawDate) {
   if (rawDate.length !== 8) {
     return rawDate;
@@ -114,6 +132,7 @@ export const clearCarets = (string) => {
     return string;
   }
 };
+
 
 export const extractTreeData = (datasets, requirements) => {
   const result = {};
@@ -400,19 +419,33 @@ export const isSupportedModality = (serie) => {
 };
 
 export const getAllowedTermsOfTemplateComponent = (template, componentLabel) => {
-  const {Component:components} = template[0];
+  const { Component: components } = template[0];
   let allowedTerms;
   let termMeanings = [];
-  for(let i=0; i<components.length; i++){
-    if(components[i].label === componentLabel){
+  for (let i = 0; i < components.length; i++) {
+    if (components[i].label === componentLabel) {
       allowedTerms = components[i].AllowedTerm;
       break;
-    } 
+    }
   }
-  if(!allowedTerms)
+  if (!allowedTerms)
     return [];
   allowedTerms.forEach(term => {
     termMeanings.push(term.codeMeaning);
   })
   return termMeanings;
+}
+
+export const otherSeriesOpened = (seriesList, index) => {
+  const map = {};
+  let count = 0;
+  while (count < index) {
+    let pid, patID, stUID;
+    ({ projectID: pid, patientID: patID, studyUID: stUID } = seriesList[count]);
+    map[`${pid}-${patID}-${stUID}`] = true;
+    count++;
+  }
+  const { projectID, patientID, studyUID } = seriesList[index];
+  const key = `${projectID}-${patientID}-${studyUID}`;
+  return map[key];
 }

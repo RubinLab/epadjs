@@ -12,13 +12,13 @@ import {
   GrDocumentPerformance,
   GrTrash,
   GrCalculator,
-  GrManual
+  GrManual,
 } from "react-icons/gr";
 import { GoGraph, GoCheck } from "react-icons/go";
 import {
   getStudiesOfWorklist,
   deleteStudyFromWorklist,
-  updateWorklistProgressManually
+  updateWorklistProgressManually,
 } from "../../services/worklistServices";
 import { getSeries } from "../../services/seriesServices";
 import DeleteAlert from "../management/common/alertDeletionModal";
@@ -31,7 +31,8 @@ import {
   updatePatient,
   clearSelection,
   changeActivePort,
-  selectPatient
+  selectPatient,
+  setSeriesData,
 } from "../annotationsList/action";
 
 let mode;
@@ -41,7 +42,7 @@ const messages = {
   deleteSelected:
     "Delete selected studies from the worklist? This cannot be undone.",
   notAuthorizedProjects:
-    "You do not have access to all of the projects of the worklist. Please contact to your admin about projects:"
+    "You do not have access to all of the projects of the worklist. Please contact to your admin about projects:",
 };
 
 class WorkList extends React.Component {
@@ -58,7 +59,7 @@ class WorkList extends React.Component {
     selectedSeries: {},
     error: null,
     patientsProjectMap: {},
-    studyName: ""
+    studyName: "",
   };
 
   componentDidMount = async () => {
@@ -66,7 +67,7 @@ class WorkList extends React.Component {
     this.getWorkListData(true);
   };
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps) => {
     if (prevProps.match.params.wid !== this.props.match.params.wid) {
       this.getWorkListData(true);
       this.setState({ patientsProjectMap: {} });
@@ -77,7 +78,7 @@ class WorkList extends React.Component {
     }
   };
 
-  filterProjects = worklists => {
+  filterProjects = (worklists) => {
     const filteredWorklists = [];
     const notAuthorized = [];
     const { projectMap } = this.props;
@@ -88,7 +89,7 @@ class WorkList extends React.Component {
     return { notAuthorized, filteredWorklists };
   };
 
-  getWorkListData = async showError => {
+  getWorkListData = async (showError) => {
     const { data: worklists } = await getStudiesOfWorklist(
       sessionStorage.getItem("username"),
       this.props.match.params.wid
@@ -106,7 +107,7 @@ class WorkList extends React.Component {
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
-        draggable: true
+        draggable: true,
       });
     }
   };
@@ -115,29 +116,25 @@ class WorkList extends React.Component {
     this.setState({
       hasAddClicked: false,
       error: "",
-      deleteSingleClicked: false
+      deleteSingleClicked: false,
     });
   };
 
   deleteStudyfromWorklist = async () => {
-    const {
-      worklist,
-      projectID,
-      subjectID,
-      studyUID
-    } = this.state.singleDeleteData;
+    const { worklist, projectID, subjectID, studyUID } =
+      this.state.singleDeleteData;
     const body = [{ projectID, subjectID, studyUID }];
     deleteStudyFromWorklist(worklist, body)
       .then(() => {
         this.setState({ deleteSingleClicked: false, singleDeleteData: {} });
         this.getWorkListData();
       })
-      .catch(err => {
+      .catch((err) => {
         this.setState({ errorMessage: err.response.data.message });
       });
   };
 
-  clearCarets = string => {
+  clearCarets = (string) => {
     if (string) {
       for (let i = 0; i < string.length; i++) {
         string = string.replace("^", " ");
@@ -149,7 +146,7 @@ class WorkList extends React.Component {
   handleSingleDelete = (worklist, projectID, subjectID, studyUID) => {
     this.setState({
       deleteSingleClicked: true,
-      singleDeleteData: { worklist, projectID, subjectID, studyUID }
+      singleDeleteData: { worklist, projectID, subjectID, studyUID },
     });
   };
 
@@ -164,13 +161,13 @@ class WorkList extends React.Component {
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0
+          selectAll: 0,
         });
       }
     } else {
       newSelected[study] = { worklist, project, subject, study };
       await this.setState({
-        selectAll: 2
+        selectAll: 2,
       });
     }
     this.setState({ selected: newSelected });
@@ -179,45 +176,59 @@ class WorkList extends React.Component {
   toggleSelectAll() {
     let newSelected = {};
     if (this.state.selectAll === 0) {
-      this.state.worklists.forEach(worklist => {
+      this.state.worklists.forEach((worklist) => {
         const { workListID, projectID, subjectID, studyUID } = worklist;
         newSelected[worklist.studyUID] = {
           workListID,
           projectID,
           subjectID,
-          studyUID
+          studyUID,
         };
       });
     }
 
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
+      selectAll: this.state.selectAll === 0 ? 1 : 0,
     });
   }
 
-  handleOpenClick = async study => {
+  handleOpenClick = async (study) => {
+    const { seriesData } = this.props;
     const { projectID, subjectID, studyUID, studyDescription } = study;
-    const { data: series } = await getSeries(projectID, subjectID, studyUID);
-    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
-    const { openSeries } = this.props;
-    if (series.length + openSeries.length <= maxPort) {
-      this.setState({ selectedSeries: series }, () => this.viewSelection());
-    }
-    else {
-      this.setState(state => ({
-        showSeries: !state.showSeries,
-        series,
-        studyName: studyDescription
-      }));
+    let series;
+    const dataExists =
+      seriesData[projectID] &&
+      seriesData[projectID][subjectID] &&
+      seriesData[projectID][subjectID][studyUID] &&
+      seriesData[projectID][subjectID][studyUID].list;
+
+    try {
+      if (!dataExists) {
+        ({ data: series } = await getSeries(projectID, subjectID, studyUID));
+        this.props.dispatch(setSeriesData(projectID, subjectID, studyUID, series, true));
+      } else series = seriesData[projectID][subjectID][studyUID].list;
+      const maxPort = parseInt(sessionStorage.getItem("maxPort"));
+      const { openSeries } = this.props;
+      if (series.length + openSeries.length <= maxPort) {
+        this.setState({ selectedSeries: series }, () => this.viewSelection());
+      } else {
+        this.setState((state) => ({
+          showSeries: !state.showSeries,
+          series,
+          studyName: studyDescription,
+        }));
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
   handleCancelOpenSeries = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       showSeries: !state.showSeries,
       series: [],
-      error: null
+      error: null,
     }));
   };
 
@@ -244,13 +255,15 @@ class WorkList extends React.Component {
           pauseOnHover: true,
           draggable: true,
         });
-        this.getWorkListData()
+        this.getWorkListData();
       })
-      .catch(err => console.error(err));
+      .catch((err) => console.error(err));
   };
 
   checkPairExist = (subjectID, projectID) => {
-    return this.state.patientsProjectMap[`${subjectID}-${projectID}`] ? true : false;
+    return this.state.patientsProjectMap[`${subjectID}-${projectID}`]
+      ? true
+      : false;
   };
 
   defineColumns = () => {
@@ -260,25 +273,24 @@ class WorkList extends React.Component {
         Header: "Open",
         width: 50,
         resizable: true,
-        Cell: row => {
+        Cell: (row) => {
           return (
             <div onClick={() => this.handleOpenClick(row.original)}>
               <FaRegEye className="menu-clickable" />
             </div>
           );
-        }
+        },
       },
       {
         // Header: "%",
         width: 25,
         resizable: false,
         // style={{ 'fontSize': '0.9rem', 'filter': 'invert(100%) sepia(0%) saturate(7472%) hue-rotate(280deg) brightness(83%) contrast(91%)' }}
-        // style={{ 'fontSize': '0.9rem', 'filter': 'invert(100%) sepia(0%) saturate(7472%) hue-rotate(280deg) brightness(83%) contrast(91%)' }} 
-        Cell: original => {
+        // style={{ 'fontSize': '0.9rem', 'filter': 'invert(100%) sepia(0%) saturate(7472%) hue-rotate(280deg) brightness(83%) contrast(91%)' }}
+        Cell: (original) => {
           const isAuto = original.row._original.progressType === "AUTO";
           const variant = isAuto ? "light" : "info";
-          const text = isAuto ? <GrCalculator /> :
-            <GrManual />;
+          const text = isAuto ? <GrCalculator /> : <GrManual />;
           const tooltipText = isAuto
             ? "Progress by annotations"
             : "Progress manually";
@@ -287,7 +299,11 @@ class WorkList extends React.Component {
               <Button
                 data-tip
                 data-for={`progressType-badge${original.index}`}
-                style={{ padding: "0.03rem", fontSize: "1.1rem", cursor: 'default' }}
+                style={{
+                  padding: "0.03rem",
+                  fontSize: "1.1rem",
+                  cursor: "default",
+                }}
                 variant={variant}
               >
                 {text}
@@ -302,7 +318,7 @@ class WorkList extends React.Component {
               </ReactTooltip>
             </div>
           );
-        }
+        },
       },
       {
         // Header: "%",
@@ -311,7 +327,7 @@ class WorkList extends React.Component {
         sortable: true,
         accessor: "completeness",
         sortMethod: (a, b) => a - b,
-        Cell: original => {
+        Cell: (original) => {
           const { completeness } = original.row._original;
           let variant;
           let text;
@@ -320,13 +336,12 @@ class WorkList extends React.Component {
           if (completeness === 0) {
             variant = "danger";
             text = <GrDocumentMissing />;
-            // style={{ 'filter': 'invert(35%) sepia(85%) saturate(2139%) hue-rotate(330deg) brightness(85%) contrast(104%)' }} 
+            // style={{ 'filter': 'invert(35%) sepia(85%) saturate(2139%) hue-rotate(330deg) brightness(85%) contrast(104%)' }}
             tooltipText = "Not started";
-
           } else if (completeness === 100) {
             variant = "success";
             text = <GrDocumentVerified />;
-            // style={{ 'filter':  'invert(43%) sepia(37%) saturate(820%) hue-rotate(100deg) brightness(90%) contrast(92%)' }} 
+            // style={{ 'filter':  'invert(43%) sepia(37%) saturate(820%) hue-rotate(100deg) brightness(90%) contrast(92%)' }}
             tooltipText = "Completed";
             // filter = "invert(43%) sepia(37%) saturate(820%) hue-rotate(100deg) brightness(90%) contrast(92%)";
           } else {
@@ -341,7 +356,11 @@ class WorkList extends React.Component {
                 data-tip
                 data-for={`progress-badge${original.index}`}
                 variant={variant}
-                style={{ padding: "0.03rem", fontSize: "1.1rem", cursor: 'default' }}
+                style={{
+                  padding: "0.03rem",
+                  fontSize: "1.1rem",
+                  cursor: "default",
+                }}
               >
                 {text}
               </Button>
@@ -355,7 +374,7 @@ class WorkList extends React.Component {
               </ReactTooltip>
             </div>
           );
-        }
+        },
       },
       {
         id: "desc",
@@ -363,13 +382,13 @@ class WorkList extends React.Component {
         width: 240,
         sortable: true,
         resizable: true,
-        Cell: original => {
+        Cell: (original) => {
           let studyDesc = this.clearCarets(
             original.row._original.studyDescription
           );
           studyDesc = studyDesc ? studyDesc : "Unnamed Study";
           return <div>{studyDesc}</div>;
-        }
+        },
       },
       {
         id: "graph",
@@ -377,7 +396,7 @@ class WorkList extends React.Component {
         width: 55,
         sortable: false,
         resizable: false,
-        Cell: original => {
+        Cell: (original) => {
           const { subjectID, projectID } = original.row._original;
           const pairExists = this.checkPairExist(subjectID, projectID);
           const newMap = { ...this.state.patientsProjectMap };
@@ -387,19 +406,16 @@ class WorkList extends React.Component {
               className="checkbox-cell"
               checked={pairExists}
               onChange={() => {
-                if (pairExists)
-                  delete newMap[`${subjectID}-${projectID}`]
-                else
-                  newMap[`${subjectID}-${projectID}`] = true;
+                if (pairExists) delete newMap[`${subjectID}-${projectID}`];
+                else newMap[`${subjectID}-${projectID}`] = true;
                 this.setState({ patientsProjectMap: newMap });
                 this.props.getWorklistPatient(newMap);
                 this.props.dispatch(selectPatient(original.row._original));
-              }
-              }
+              }}
               id={original.id}
             />
           );
-        }
+        },
       },
 
       {
@@ -409,13 +425,13 @@ class WorkList extends React.Component {
         sortable: true,
         resizable: true,
 
-        Cell: original => {
+        Cell: (original) => {
           let subjectName = this.clearCarets(
             original.row._original.subjectName
           );
           subjectName = subjectName ? subjectName : "Unnamed Subject";
           return <div>{subjectName}</div>;
-        }
+        },
       },
       {
         id: "pr_name",
@@ -425,18 +441,17 @@ class WorkList extends React.Component {
         sortable: true,
         resizable: true,
         show: mode === "thick",
-        Cell: original => {
+        Cell: (original) => {
           const { projectMap } = this.props;
           const { projectID } = original.row._original;
           if (!projectMap[projectID]) {
             return null;
           } else {
-            let { projectName } = this.props.projectMap[
-              original.row._original.projectID
-            ];
+            let { projectName } =
+              this.props.projectMap[original.row._original.projectID];
             return <div>{projectName}</div>;
           }
-        }
+        },
       },
       {
         id: "study_date",
@@ -444,7 +459,7 @@ class WorkList extends React.Component {
         Header: "Study Date",
         sortable: true,
         resizable: true,
-        accessor: "studyDate"
+        accessor: "studyDate",
       },
       {
         id: "due",
@@ -452,7 +467,7 @@ class WorkList extends React.Component {
         Header: "Due Date",
         sortable: true,
         resizable: true,
-        accessor: "worklistDuedate"
+        accessor: "worklistDuedate",
       },
       {
         id: "studyUID",
@@ -460,17 +475,13 @@ class WorkList extends React.Component {
         Header: "StudyUID",
         sortable: true,
         resizable: true,
-        accessor: "studyUID"
+        accessor: "studyUID",
       },
       {
         width: 30,
-        Cell: original => {
-          const {
-            workListID,
-            projectID,
-            subjectID,
-            studyUID
-          } = original.row._original;
+        Cell: (original) => {
+          const { workListID, projectID, subjectID, studyUID } =
+            original.row._original;
 
           return (
             <div>
@@ -501,17 +512,13 @@ class WorkList extends React.Component {
               </ReactTooltip>
             </div>
           );
-        }
+        },
       },
       {
         width: 30,
-        Cell: original => {
-          const {
-            workListID,
-            projectID,
-            subjectID,
-            studyUID
-          } = original.row._original;
+        Cell: (original) => {
+          const { workListID, projectID, subjectID, studyUID } =
+            original.row._original;
           return (
             <div>
               <Button
@@ -541,17 +548,13 @@ class WorkList extends React.Component {
               </Button>
             </div>
           );
-        }
+        },
       },
       {
         width: 30,
-        Cell: original => {
-          const {
-            workListID,
-            projectID,
-            subjectID,
-            studyUID
-          } = original.row._original;
+        Cell: (original) => {
+          const { workListID, projectID, subjectID, studyUID } =
+            original.row._original;
           return (
             <div>
               <Button
@@ -581,18 +584,13 @@ class WorkList extends React.Component {
               </Button>
             </div>
           );
-        }
+        },
       },
       {
         width: 30,
-        Cell: original => {
-          const {
-            workListID,
-            projectID,
-            subjectID,
-            studyUID,
-            progressType
-          } = original.row._original;
+        Cell: (original) => {
+          const { workListID, projectID, subjectID, studyUID, progressType } =
+            original.row._original;
           return (
             <div>
               <Button
@@ -623,12 +621,12 @@ class WorkList extends React.Component {
               </Button>
             </div>
           );
-        }
-      }
+        },
+      },
     ];
   };
 
-  selectSeries = series => {
+  selectSeries = (series) => {
     const { selectedSeries } = this.state;
     selectedSeries[series.seriesUID]
       ? delete selectedSeries[series.seriesUID]
@@ -636,7 +634,7 @@ class WorkList extends React.Component {
     this.setState({ selectedSeries });
   };
 
-  checkIfSerieOpen = selectedSerie => {
+  checkIfSerieOpen = (selectedSerie) => {
     let isOpen = false;
     let index;
     this.props.openSeries.forEach((serie, i) => {
@@ -648,7 +646,23 @@ class WorkList extends React.Component {
     return { isOpen, index };
   };
 
+  getExistingSeriesData = (serie) => {
+    const { projectID, patientID, studyUID } = serie;
+    const { seriesData } = this.props;
+    const dataExists =
+        seriesData[projectID] &&
+        seriesData[projectID][patientID] &&
+        seriesData[projectID][patientID][studyUID] &&
+        seriesData[projectID][patientID][studyUID].list;
+
+    const existingData = dataExists
+      ? seriesData[projectID][patientID][studyUID].list
+      : null;
+    return existingData;
+  }
+
   viewSelection = async () => {
+    const { seriesData } = this.props;
     const maxPort = parseInt(sessionStorage.getItem("maxPort"));
     const notOpenSeries = [];
     const selectedSeries = Object.values(this.state.selectedSeries);
@@ -677,13 +691,14 @@ class WorkList extends React.Component {
             // alert user about the num of open series a the moment and told only maxPort is allowed
             const openPorts = this.props.openSeries.length;
             this.setState({
-              error: `Already ${openPorts} viewers open. You can open ${maxPort} at a time`
+              error: `Already ${openPorts} viewers open. You can open ${maxPort} at a time`,
             });
           } else {
             //else get data for each serie for display
-            selectedSeries.forEach(serie => {
+            selectedSeries.forEach((serie) => {
+              const list = this.getExistingSeriesData(serie);
               this.props.dispatch(addToGrid(serie));
-              this.props.dispatch(getSingleSerie(serie));
+              this.props.dispatch(getSingleSerie(serie, null, null, list));
             });
             // -----> Delete after v1.0 <-----
             // for (let series of selectedSeries) {
@@ -712,7 +727,7 @@ class WorkList extends React.Component {
 
   render = () => {
     const selected = this.state.selectAll < 2;
-    const openSeriesUIDs = this.props.openSeries.map(el => el.seriesUID);
+    const openSeriesUIDs = this.props.openSeries.map((el) => el.seriesUID);
 
     return (
       <div className="worklist-page">
@@ -744,11 +759,12 @@ class WorkList extends React.Component {
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
-    projectMap: state.annotationsListReducer.projectMap
+    projectMap: state.annotationsListReducer.projectMap,
+    seriesData: state.annotationsListReducer.seriesData,
   };
 };
 export default connect(mapStateToProps)(WorkList);

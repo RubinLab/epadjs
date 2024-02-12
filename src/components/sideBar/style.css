@@ -47,27 +47,32 @@ body {
 }
 
 #myTab {
-  padding-top: 0rem;
+  /* padding-top: 0rem;
   height: 24px;
   position: relative;
-  bottom: 5px;
+  bottom: 5px; */
+  transform: rotate(270deg);
+  padding-top: 0rem;
+  /* width: 300px;
+  margin: 3em -11rem; */
 }
 
 #projects-tab__cont,
 #worklists-tab__cont,
 #progress-tab__cont {
-  transform: rotate(270deg);
-  margin-right: 4rem;
+  /* width: 7.5rem; */
 }
 
 #projects-tab,
 #worklists-tab,
 #progress-tab {
-  padding: 1rem 0.3rem;
-  height: 6rem;
-  position: relative;
+  padding: 1rem 0.25rem;
+  margin: 0.5rem 0rem 0.5rem 0rem;
+  border-radius: 0px 5px 5px 0px;
+  /* height: 2.2rem;
+  width: 7rem;
   left: 25px;
-  top: 30px;
+  top: 30px; */
 }
 
 .left-editor-display {
@@ -259,8 +264,8 @@ body {
   color: #fff;
   text-shadow: 1px 2px 0px rgb(0 0 0 / 25%);
   position: fixed;
-  left: -3px;
-  width: 25px;
+  left: 10px;
+  width: 0px; 
   margin-top: 0em;
   writing-mode: vertical-lr !important;
   transform: rotate(90deg) !important;

@@ -1,15 +1,15 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useTable, useExpanded } from 'react-table';
-import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
-import ReactTooltip from 'react-tooltip';
-import PropagateLoader from 'react-spinners/PropagateLoader';
-import SelectSeriesModal from '../annotationsList/selectSerieModal';
-import { getStudies } from '../../services/studyServices';
-import Series from './Series';
-import { formatDate } from '../flexView/helperMethods';
-import { getSeries } from '../../services/seriesServices';
-import { clearCarets, isSupportedModality } from '../../Utils/aid.js';
+import React, { useEffect, useState, useCallback } from "react";
+import { useTable, useExpanded } from "react-table";
+import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
+import ReactTooltip from "react-tooltip";
+import PropagateLoader from "react-spinners/PropagateLoader";
+import SelectSeriesModal from "../annotationsList/selectSerieModal";
+import { getStudies } from "../../services/studyServices";
+import Series from "./Series";
+import { formatDate } from "../flexView/helperMethods";
+import { getSeries } from "../../services/seriesServices";
+import { clearCarets, isSupportedModality } from "../../Utils/aid.js";
 import {
   getSingleSerie,
   selectStudy,
@@ -22,8 +22,9 @@ import {
   alertViewPortFull,
   updatePatient,
   selectSerie,
-  selectAnnotation
-} from '../annotationsList/action';
+  selectAnnotation,
+  setSeriesData,
+} from "../annotationsList/action";
 
 function Table({
   columns,
@@ -34,17 +35,17 @@ function Table({
   getTreeExpandAll,
   getTreeExpandSingle,
   treeExpand,
-  update
+  update,
 }) {
   const {
     rows,
     prepareRow,
     toggleAllRowsExpanded,
-    state: { expanded }
+    state: { expanded },
   } = useTable(
     {
       columns,
-      data
+      data,
     },
     useExpanded // Use the useExpanded plugin hook
   );
@@ -71,7 +72,7 @@ function Table({
               ? treeExpand[patientIndex][row.index]
               : false;
             const expandRow = row.isExpanded || isExpandedFromToolbar;
-            const style = { height: '2.5rem', background: '#272b30' };
+            const style = { height: "2.5rem", background: "#272b30" };
             return (
               <>
                 <tr {...row.getRowProps()} key={`study-row${i}`} style={style}>
@@ -80,10 +81,10 @@ function Table({
                       <td
                         key={`study-d${k}`}
                         {...cell.getCellProps({
-                          className: cell.column.className
+                          className: cell.column.className,
                         })}
                       >
-                        {cell.render('Cell')}
+                        {cell.render("Cell")}
                       </td>
                     );
                   })}
@@ -122,7 +123,7 @@ function Studies(props) {
   const [selectedCount, setSelectedCount] = useState(false);
   const [isSerieSelectionOpen, setIsSerieSelectionOpen] = useState(false);
   const [selectedStudy, setSelectedStudy] = useState([]);
-  const [studyName, setStudyName] = useState('');
+  const [studyName, setStudyName] = useState("");
   const [update, setUpdate] = useState(0);
 
   useEffect(() => {
@@ -132,36 +133,36 @@ function Studies(props) {
     const annotations = Object.values(selectedAnnotations);
 
     if (patients.length) {
-      setSelectedLevel('patients');
+      setSelectedLevel("patients");
       setSelectedCount(patients.length);
     } else if (series.length) {
-      setSelectedLevel('series');
+      setSelectedLevel("series");
       setSelectedCount(series.length);
     } else if (annotations.length) {
-      setSelectedLevel('annotations');
+      setSelectedLevel("annotations");
       setSelectedCount(annotations.length);
     } else {
-      setSelectedLevel('');
+      setSelectedLevel("");
     }
   }, [props.selectedStudies, props.selectedSeries, props.selectedAnnotations]);
 
   const deselectChildLevels = (patientID, studyUID) => {
-    if (selectedLevel === 'series') {
+    if (selectedLevel === "series") {
       const series = Object.values(props.selectedSeries);
       const seriesToDeselect = series.reduce((all, item, i) => {
         if (item.patientID === patientID && item.studyUID === studyUID)
           all.push(item);
         return all;
       }, []);
-      seriesToDeselect.forEach(el => props.dispatch(selectSerie(el)));
-    } else if (selectedLevel === 'annotations') {
+      seriesToDeselect.forEach((el) => props.dispatch(selectSerie(el)));
+    } else if (selectedLevel === "annotations") {
       const annotations = Object.values(props.selectedAnnotations);
       const annotationsToDeselect = annotations.reduce((all, item, i) => {
         if (item.patientID === patientID && item.studyUID === studyUID)
           all.push(item);
         return all;
       }, []);
-      annotationsToDeselect.forEach(el =>
+      annotationsToDeselect.forEach((el) =>
         props.dispatch(
           selectAnnotation(el, el.studyDescription, el.seriesDescription)
         )
@@ -169,7 +170,7 @@ function Studies(props) {
     }
   };
 
-  const excludeOpenSeries = allSeriesArr => {
+  const excludeOpenSeries = (allSeriesArr) => {
     const result = [];
     //get all series number in an array
     const idArr = props.openSeries.reduce((all, item, index) => {
@@ -177,7 +178,7 @@ function Studies(props) {
       return all;
     }, []);
     //if array doesnot include that serie number
-    allSeriesArr.forEach(serie => {
+    allSeriesArr.forEach((serie) => {
       if (!idArr.includes(serie.seriesUID)) {
         //push that serie in the result arr
         result.push(serie);
@@ -186,22 +187,39 @@ function Studies(props) {
     return result;
   };
 
-  const getSeriesData = async selected => {
+  const getSeriesData = async (selected) => {
+    const { seriesData } = props;
     props.dispatch(startLoading());
     const { projectID, patientID, studyUID } = selected;
+    const dataExists =
+      seriesData[projectID] &&
+      seriesData[projectID][patientID] &&
+      seriesData[projectID][patientID][studyUID] &&
+      seriesData[projectID][patientID][studyUID].list;
+
     try {
-      const { data: series } = await getSeries(projectID, patientID, studyUID);
-      props.dispatch(loadCompleted());
-      return series;
+      if (!dataExists) {
+        const { data: series } = await getSeries(
+          projectID,
+          patientID,
+          studyUID
+        );
+        props.dispatch(loadCompleted());
+        props.dispatch(
+          setSeriesData(projectID, patientID, studyUID, series, true)
+        );
+        return series;
+      } else return seriesData[projectID][patientID][studyUID].list;
     } catch (err) {
       props.dispatch(annotationsLoadingError(err));
     }
   };
 
-  const displaySeries = async selected => {
-    const maxPort = parseInt(sessionStorage.getItem('maxPort'));
+  const displaySeries = async (selected) => {
+    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
     const { patientID, studyUID } = selected;
     let seriesArr = await getSeriesData(selected);
+    const list = seriesArr.length > 0 ? seriesArr : null;
     //check if the patient is there (create a patient exist flag)
     // const patientExists = props.patients[patientID];
     //if there is patient iterate over the series object of the study (form an array of series)
@@ -234,12 +252,12 @@ function Studies(props) {
       const promiseArr = [];
       for (let serie of seriesArr) {
         props.dispatch(addToGrid(serie));
-        promiseArr.push(props.dispatch(getSingleSerie(serie)));
+        promiseArr.push(props.dispatch(getSingleSerie(serie, null, null, list)));
       }
       //getsingleSerie
       Promise.all(promiseArr)
-        .then(() => { })
-        .catch(err => console.error(err));
+        .then(() => {})
+        .catch((err) => console.error(err));
 
       //if patient doesnot exist get patient
       // -----> Delete after v1.0 <-----
@@ -250,7 +268,7 @@ function Studies(props) {
       //   //check if study exist
       //   props.dispatch(updatePatient('study', true, patientID, studyUID));
       // }
-      props.history.push('/display');
+      props.history.push("/display");
     }
     props.dispatch(clearSelection());
   };
@@ -258,13 +276,13 @@ function Studies(props) {
   const columns = React.useMemo(
     () => [
       {
-        id: 'studies-expander', // Make sure it has an ID
+        id: "studies-expander", // Make sure it has an ID
         width: 35,
         Cell: ({ row, toggleRowExpanded }) => {
           const style = {
-            display: 'flex',
-            width: 'fit-content',
-            paddingLeft: '10px'
+            display: "flex",
+            width: "fit-content",
+            paddingLeft: "10px",
           };
 
           return (
@@ -272,10 +290,10 @@ function Studies(props) {
               <div>
                 <input
                   type="checkbox"
-                  style={{ marginRight: '5px' }}
+                  style={{ marginRight: "5px" }}
                   disabled={selectedLevel}
                   onClick={() => {
-                    props.dispatch(clearSelection('study'));
+                    props.dispatch(clearSelection("study"));
                     props.dispatch(selectStudy(row.original));
                   }}
                 />
@@ -283,19 +301,19 @@ function Studies(props) {
               <span
                 {...row.getToggleRowExpandedProps({
                   style: {
-                    cursor: 'pointer',
+                    cursor: "pointer",
                     fontSize: 10,
-                    textAlign: 'center',
-                    userSelect: 'none',
-                    color: '#fafafa',
-                    verticalAlign: 'middle'
-                  }
+                    textAlign: "center",
+                    userSelect: "none",
+                    color: "#fafafa",
+                    verticalAlign: "middle",
+                  },
                 })}
                 onClick={() => {
                   const expandStatus = row.isExpanded ? false : true;
                   const obj = {
                     patient: props.patientIndex,
-                    study: { [row.index]: expandStatus ? {} : false }
+                    study: { [row.index]: expandStatus ? {} : false },
                   };
                   toggleRowExpanded(row.id, expandStatus);
                   props.getTreeExpandSingle(obj);
@@ -308,7 +326,9 @@ function Studies(props) {
                 }}
               >
                 {row.isExpanded ||
-                  (props.treeExpand && props.treeExpand[props.patientIndex] && props.treeExpand[props.patientIndex][row.index]) ? (
+                (props.treeExpand &&
+                  props.treeExpand[props.patientIndex] &&
+                  props.treeExpand[props.patientIndex][row.index]) ? (
                   <span>&#x25BC;</span>
                 ) : (
                   <span>&#x25B6;</span>
@@ -316,15 +336,15 @@ function Studies(props) {
               </span>
             </div>
           );
-        }
+        },
       },
       {
         width: widthUnit * 12,
-        id: 'study-desc',
+        id: "study-desc",
         Cell: ({ row }) => {
           let desc = clearCarets(row.original.studyDescription);
-          desc = desc || 'Unnamed Study';
-          const id = 'desc' + row.original.studyUID;
+          desc = desc || "Unnamed Study";
+          const id = "desc" + row.original.studyUID;
           return (
             <>
               <span
@@ -332,7 +352,7 @@ function Studies(props) {
                 data-for={id}
                 // className="searchView-row__desc"
                 className="searchView-table__cell"
-                style={{ paddingLeft: '10px' }}
+                style={{ paddingLeft: "10px" }}
                 onDoubleClick={() => displaySeries(row.original)}
               >
                 {desc}
@@ -348,15 +368,15 @@ function Studies(props) {
               </ReactTooltip>
             </>
           );
-        }
+        },
       },
       {
         width: widthUnit * 2,
-        id: 'numberOfAnnotations',
+        id: "numberOfAnnotations",
         Cell: ({ row }) => (
           <div className="searchView-table__cell">
             {row.original.numberOfAnnotations === 0 ? (
-              ''
+              ""
             ) : (
               <span
                 // className="badge badge-secondary"
@@ -366,16 +386,16 @@ function Studies(props) {
               </span>
             )}
           </div>
-        )
+        ),
       },
       {
         width: widthUnit * 3,
-        id: 'numberOfSeries',
-        className: 'searchView-table__cell',
+        id: "numberOfSeries",
+        className: "searchView-table__cell",
         Cell: ({ row }) => (
           <div className="searchView-table__cell">
             {row.original.numberOfSeries === 0 ? (
-              ''
+              ""
             ) : (
               <span
                 // className="badge badge-secondary"
@@ -385,48 +405,48 @@ function Studies(props) {
               </span>
             )}
           </div>
-        )
+        ),
       },
       {
         width: widthUnit * 3,
-        accessor: 'numberOfImages' || '',
-        className: 'searchView-table__cell'
+        accessor: "numberOfImages" || "",
+        className: "searchView-table__cell",
       },
       {
         width: widthUnit * 5,
-        id: 'study-examtype',
-        className: 'searchView-table__cell',
+        id: "study-examtype",
+        className: "searchView-table__cell",
         Cell: ({ row }) => (
           <span className="searchView-table__cell">
-            {row.original.examTypes.join('/')}
+            {row.original.examTypes.join("/")}
           </span>
-        )
+        ),
       },
       {
         width: widthUnit * 7,
-        id: 'study-insert-time',
-        className: 'searchView-table__cell',
+        id: "study-insert-time",
+        className: "searchView-table__cell",
         Cell: ({ row }) => (
           <span className="searchView-table__cell">
             {formatDate(row.original.insertDate)}
           </span>
-        )
+        ),
       },
       {
         width: widthUnit * 7,
-        id: 'study-created-time',
-        className: 'searchView-table__cell',
+        id: "study-created-time",
+        className: "searchView-table__cell",
 
         Cell: ({ row }) => (
           <span className="searchView-table__cell">
             {formatDate(row.original.createdTime)}
           </span>
-        )
+        ),
       },
       {
         width: widthUnit * 6,
-        id: 'studyAccessionNumber',
-        className: 'searchView-table__cell',
+        id: "studyAccessionNumber",
+        className: "searchView-table__cell",
         Cell: ({ row }) => (
           <>
             <span
@@ -434,7 +454,7 @@ function Studies(props) {
               data-tip
               data-for={row.original.studyAccessionNumber}
             >
-              {row.original.studyAccessionNumber || ''}
+              {row.original.studyAccessionNumber || ""}
             </span>
             <ReactTooltip
               id={row.original.studyAccessionNumber}
@@ -446,16 +466,16 @@ function Studies(props) {
               <span>{row.original.studyAccessionNumber}</span>
             </ReactTooltip>
           </>
-        )
+        ),
       },
       {
-        id: 'studyUID',
-        className: 'searchView-table__cell',
+        id: "studyUID",
+        className: "searchView-table__cell",
         Cell: ({ row }) => (
           <>
             <span data-tip data-for={row.original.studyUID}>
               {row.original.studyUID}
-            </span>{' '}
+            </span>{" "}
             <ReactTooltip
               id={row.original.studyUID}
               place="top"
@@ -466,19 +486,19 @@ function Studies(props) {
               <span>{row.original.studyUID}</span>
             </ReactTooltip>
           </>
-        )
-      }
+        ),
+      },
     ],
     [selectedLevel, selectedCount, props.update, isSerieSelectionOpen]
   );
 
   const getDataFromStorage = (projectID, subjectID) => {
-    const treeData = JSON.parse(localStorage.getItem('treeData'));
+    const treeData = JSON.parse(localStorage.getItem("treeData"));
     const studiesArray =
       treeData[projectID] && treeData[projectID][subjectID]
         ? Object.values(treeData[projectID][subjectID].studies).map(
-          el => el.data
-        )
+            (el) => el.data
+          )
         : [];
 
     return studiesArray;
@@ -488,19 +508,19 @@ function Studies(props) {
     const { pid, subjectID, getTreeData } = props;
     const dataFromStorage = getDataFromStorage(pid, subjectID);
     let data = [];
-    if (pid && pid !== 'null' && subjectID) {
+    if (pid && pid !== "null" && subjectID) {
       if (dataFromStorage?.length > 0) {
         data = dataFromStorage;
         setData(data);
       } else {
         setLoading(true);
         getStudies(pid, subjectID)
-          .then(res => {
+          .then((res) => {
             setLoading(false);
-            getTreeData(pid, 'studies', res.data);
+            getTreeData(pid, "studies", res.data);
             setData(res.data);
           })
-          .catch(err => {
+          .catch((err) => {
             console.error(err);
           });
       }
@@ -514,8 +534,8 @@ function Studies(props) {
   return (
     <>
       {loading && (
-        <tr style={{ width: 'fit-content', margin: 'auto', marginTop: '10%' }}>
-          <PropagateLoader color={'#7A8288'} loading={loading} margin={8} />
+        <tr style={{ width: "fit-content", margin: "auto", marginTop: "10%" }}>
+          <PropagateLoader color={"#7A8288"} loading={loading} margin={8} />
         </tr>
       )}
       <Table
@@ -540,14 +560,15 @@ function Studies(props) {
   );
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
     selectedSeries: state.annotationsListReducer.selectedSeries,
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
     openSeries: state.annotationsListReducer.openSeries,
-    patients: state.annotationsListReducer.patients
+    patients: state.annotationsListReducer.patients,
+    seriesData: state.annotationsListReducer.seriesData,
   };
 };
 

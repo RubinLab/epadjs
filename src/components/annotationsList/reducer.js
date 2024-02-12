@@ -33,7 +33,6 @@ import {
   UPDATE_PATIENT_AIM_SAVE,
   UPDATE_PATIENT_AIM_DELETE,
   GET_NOTIFICATIONS,
-  CLEAR_ACTIVE_AIMID,
   // UPDATE_IMAGE_INDEX,
   GET_PROJECT_MAP,
   SET_SEG_LABEL_MAP_INDEX,
@@ -49,6 +48,10 @@ import {
   REFRESH_MAP,
   AIM_SAVE,
   SUBPATH,
+  CHECK_MULTIFRAME,
+  CLEAR_MULTIFRAME_AIM_JUMP,
+  SET_SERIES_DATA,
+  FILL_DESC,
   colors,
   commonLabels,
 } from "./types";
@@ -56,9 +59,10 @@ import {
   persistColorInSaveAim,
   persistColorInDeleteAim,
 } from "../../Utils/aid";
-import { MdSatellite } from "react-icons/md";
+import { teachingFileTempCode } from "../../constants";
 const initialState = {
   openSeries: [],
+  openSeriesAddition: [],
   aimsList: {},
   activePort: null,
   loading: false,
@@ -82,16 +86,16 @@ const initialState = {
   reports: [],
   isSegUploaded: {},
   patientFilter: {},
-  openStudies: {},
   searchTableIndex: 0,
   otherSeriesAimsList: {},
   refreshMap: {},
-  subpath: []
+  subpath: [],
+  multiFrameAimJumpData: null,
+  seriesData: {}
 };
 
 const asyncReducer = (state = initialState, action) => {
   try {
-    let aimIDClearedOPenSeries = [];
     let aimRefs = {};
     switch (action.type) {
       // case UPDATE_IMAGE_INDEX:
@@ -104,7 +108,160 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
-      case AIM_SAVE:
+      case FILL_DESC:
+        const descFilledOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
+        const descFilledSeriesData = _.cloneDeep(state.seriesData);
+        for (let i = 0; i < action.data.length; i++) {
+          const { projectID: fillPID, patientID: fillPatID, studyUID: fillStUID } = action.data[i];
+          for (let k = 0; k < descFilledOpenSeriesAddition.length; k++) {
+            if (descFilledOpenSeriesAddition[k].seriesUID === action.data[i].seriesUID) {
+              // descFilledOpenSeriesAddition[k].seriesDescription = action.data[i].seriesDescription;
+              descFilledOpenSeriesAddition[k] = { ...descFilledOpenSeriesAddition[k], ...action.data[i] };
+              break;
+            }
+          }
+          const stExists = descFilledSeriesData[fillPID] && descFilledSeriesData[fillPID][fillPatID] && descFilledSeriesData[fillPID][fillPatID][fillStUID];
+          if (stExists) {
+            for (let k = 0; k < descFilledSeriesData[fillPID][fillPatID][fillStUID].list.length; k++) {
+              if (descFilledSeriesData[fillPID][fillPatID][fillStUID].list[k].seriesUID === action.data[i].seriesUID) {
+                // descFilledSeriesData[fillPID][fillPatID][fillStUID][k].seriesDescription = action.data[i].seriesDescription;
+                descFilledSeriesData[fillPID][fillPatID][fillStUID].list[k] = { ...descFilledSeriesData[fillPID][fillPatID][fillStUID].list[k], ...action.data[i] };
+                break;
+              }
+            }
+          }
+        }
+        return { ...state, seriesData: descFilledSeriesData, openSeriesAddition: descFilledOpenSeriesAddition };
+      case SET_SERIES_DATA:
+        const newSeriesData = _.cloneDeep(state.seriesData);
+        const { projectID, patientID, studyUID, data, mfMerged } = action.payload;
+        const projectExists = newSeriesData[projectID];
+        const patientExists = projectExists && projectExists[patientID] ? projectExists[patientID] : false;
+        const studyExists = patientExists && patientExists[studyUID] ? patientExists[studyUID] : false;
+        if (studyExists) {
+          const existingMap = newSeriesData[projectID][patientID][studyUID].map;
+          let newArr = [...newSeriesData[projectID][patientID][studyUID].list];
+          data.forEach(el => {
+            const newSer = !existingMap[el.seriesUID];
+            const newMF = el.multiFrameImage && !existingMap[el.imageUID];
+            if (newSer || newMF) newArr.push(el);
+          });
+          newSeriesData[projectID][patientID][studyUID].list = newArr;
+        } else if (patientExists) newSeriesData[projectID][patientID] = { ...newSeriesData[projectID][patientID], [studyUID]: { 'list': data } };
+        else if (projectExists) newSeriesData[projectID][patientID] = { [studyUID]: { 'list': data } };
+        else newSeriesData[projectID] = { [patientID]: { [studyUID]: { 'list': data } } };
+        newSeriesData[projectID][patientID][studyUID].map = newSeriesData[projectID][patientID][studyUID].list.reduce((all, item, index) => {
+          if (item.multiFrameImage) {
+            all[item.imageUID] = index + 1;
+            newSeriesData[projectID][patientID][studyUID].list[index].seriesDescription = all[item.seriesUID] && typeof all[item.seriesUID] === 'string' ? all[item.seriesUID] : '';
+          } else all[item.seriesUID] = item.seriesDescription || index + 1;
+          return all;
+        }, {});
+        newSeriesData[projectID][patientID][studyUID].mfMerged = mfMerged;
+        return { ...state, seriesData: newSeriesData };
+      case CLEAR_MULTIFRAME_AIM_JUMP:
+        const aimClearedSeries = _.cloneDeep(state.openSeries);
+        const aimClearedSeriesAddition = _.cloneDeep(state.openSeriesAddition);
+        aimClearedSeries[state.activePort].aimID = null;
+        aimClearedSeriesAddition[state.activePort].aimID = null;
+        return { ...state, openSeries: aimClearedSeries, multiFrameAimJumpData: null, openSeriesAddition: aimClearedSeriesAddition };
+      case CHECK_MULTIFRAME:
+        // const series = _.cloneDeep(state.openSeries);
+        const seriesAddition = _.cloneDeep(state.openSeriesAddition);
+        const { hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData } = action.payload;
+        let seriesDataMulti = Object.values(multiframeSeriesData);
+        const {
+          projectID: multiPID,
+          patientID: multiPatID,
+          studyUID: multiStudyUID
+        } = seriesDataMulti[0];
+        let jumpArr = null;
+        // check if framedata exists
+        const fmData = seriesAddition[state.activePort].frameData;
+        const aimSelected = (state.openSeries[state.activePort] && state.openSeries[state.activePort].aimID) || (seriesAddition[state.activePort] && seriesAddition[state.activePort].aimID);
+        if (aimSelected && hasMultiframe && (fmData && fmData[aimSelected])) {
+          const imgArr = fmData[aimSelected][0].split('/frames/');
+          const mfIndex = multiFrameMap && multiFrameMap[imgArr[0]];
+          const frameNo = parseInt(imgArr[1]);
+          if (mfIndex && typeof frameNo === 'number' && !isNaN(frameNo)) jumpArr = [mfIndex, frameNo - 1];
+        }
+
+        seriesAddition[state.activePort].hasMultiframe = hasMultiframe;
+        seriesAddition[state.activePort].multiFrameIndex = multiframeIndex;
+        seriesAddition[state.activePort].multiFrameMap = multiFrameMap;
+        const newState = { ...state };
+
+        let newSeriesDataMulti = _.cloneDeep(state.seriesData);
+        const multiPIDExists = newSeriesDataMulti[multiPID];
+        const multiPatIDExists = multiPIDExists && newSeriesDataMulti[multiPID][multiPatID];
+        const existingSeries = multiPIDExists && multiPatIDExists && newSeriesDataMulti[multiPID][multiPatID][multiStudyUID];
+        let mfLookUpMap = {};
+
+
+        if (!state.openSeriesAddition[state.activePort].multiFrameMap) {
+          if (existingSeries) {
+            // find the correct series to get description from
+            const seriesToCopyFm = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].list.find((element) => element.seriesUID === seriesDataMulti[0].seriesUID);
+            //prevent duplicate multiframe series to be added 
+            mfLookUpMap = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].list.reduce((all, item, index) => {
+              if (item.multiFrameImage) {
+                const { projectID, patientID, studyUID, seriesUID, imageUID } = item;
+                const key = `${projectID}-${patientID}-${studyUID}-${seriesUID}-${imageUID}`;
+                all[key] = true;
+              }
+              return all;
+            }, {})
+            seriesDataMulti = seriesDataMulti.map((el) => {
+              el.seriesDescription = seriesToCopyFm.seriesDescription;
+              el.seriesNo = seriesToCopyFm.seriesNo;
+              return el;
+            })
+
+            seriesDataMulti.forEach((el) => {
+              const { projectID, patientID, studyUID, seriesUID, imageUID } = el;
+              const key = `${projectID}-${patientID}-${studyUID}-${seriesUID}-${imageUID}`;
+              if (!mfLookUpMap[key]) {
+                newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].list.push(el);
+              }
+            });
+          } else {
+            const desc = state.openSeriesAddition[state.activePort].seriesDescription;
+            const srNo = state.openSeriesAddition[state.activePort].seriesNo;
+            seriesDataMulti = seriesDataMulti.map((el) => {
+              el.seriesDescription = desc ? desc : '';
+              el.seriesNo = srNo ? srNo : null;
+              return el;
+            });
+
+            console.log(" +++++> state.openSeriesAddition[state.activePort]", state.openSeriesAddition[state.activePort]);
+            console.log(" ++++> ...seriesDataMulti", seriesDataMulti)
+            const list = [state.openSeriesAddition[state.activePort], ...seriesDataMulti];
+            console.log(" ++++> after merging two", list);
+            const map = list.reduce((all, item, index) => {
+              if (item.multiFrameImage) {
+                all[item.imageUID] = index + 1;
+                item.seriesDescription = all[item.seriesUID] && typeof all[item.seriesUID] === 'string' ? all[item.seriesUID] : '';
+              } else all[item.seriesUID] = item.seriesDescription || index + 1;
+              return all;
+            }, {});
+
+            console.log(" ++++> map", map);
+            if (multiPatIDExists) {
+              newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = { list, map };
+            } else if (multiPIDExists) {
+              newSeriesDataMulti[multiPID][multiPatID] = { [multiStudyUID]: { list, map } };
+            } else {
+              newSeriesDataMulti[multiPID] = { [multiPatID]: { [multiStudyUID]: { list, map } } };
+            }
+          }
+        }
+
+        newState.seriesData = newSeriesDataMulti;
+        // newState.openSeries= series;
+        newState.openSeriesAddition = seriesAddition;
+        newState.multiFrameAimJumpData = jumpArr;
+        return newState;
+      case AIM_SAVE: //tested
         const { seriesList, aimRefs } = action.payload;
         const clonedOtherAims = _.cloneDeep(state.otherSeriesAimsList);
         // to cover falsy isStudyAim value
@@ -114,9 +271,9 @@ const asyncReducer = (state = initialState, action) => {
             clonedOtherAims[el.seriesUID][aimRefs.aimID] = aimRefs;
           }
         })
-        return {...state, otherSeriesAimsList: clonedOtherAims };
+        return { ...state, otherSeriesAimsList: clonedOtherAims };
       case SUBPATH:
-        const {subpath, portIndex} = action.payload;
+        const { subpath, portIndex } = action.payload;
         const newSubpath = [...state.subpath];
         newSubpath[portIndex] = subpath;
         return { ...state, subpath: newSubpath };
@@ -158,53 +315,38 @@ const asyncReducer = (state = initialState, action) => {
       //   ].annotations[aimRefs.aimID] = { ...aimRefs };
       //   return { ...state, patient: patientAimSave };
       case CLEAR_AIMID:
-        aimIDClearedOPenSeries = state.openSeries.map((serie) => {
-          const newSerie = { ...serie };
+        let aimIDClearedOpenSeries = _.cloneDeep(state.openSeries);
+        let aimIDClearedOpenSeriesAddition = state.openSeriesAddition.map((serie) => {
+          const newSerie = _.cloneDeep(serie);
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
           }
+          newSerie.aimID = null;
           return newSerie;
         });
-        for (let serie of aimIDClearedOPenSeries) {
+
+        for (let serie of aimIDClearedOpenSeries) {
           serie.aimID = null;
         }
-
-        return { ...state, openSeries: aimIDClearedOPenSeries };
-      case CLEAR_ACTIVE_AIMID:
-        aimIDClearedOPenSeries = state.openSeries.map((serie) => {
-          const newSerie = { ...serie };
-          if (serie.imageAnnotations) {
-            newSerie.imageAnnotations = { ...serie.imageAnnotations };
-          }
-          return newSerie;
-        });
-        aimIDClearedOPenSeries[state.activePort].aimID = null;
-
-        return { ...state, openSeries: aimIDClearedOPenSeries };
+        return { ...state, openSeries: aimIDClearedOpenSeries, openSeriesAddition: aimIDClearedOpenSeriesAddition };
       case UPDATE_IMAGEID:
-        const openSeriesToUpdate = state.openSeries.map((serie) => {
-          const newSerie = { ...serie };
-          if (serie.imageAnnotations) {
-            newSerie.imageAnnotations = { ...serie.imageAnnotations };
-          }
-          return newSerie;
-        });
+        let openSeriesToUpdate = _.cloneDeep(state.openSeries);
         const port = action.port || state.activePort;
         openSeriesToUpdate[port].imageID = action.imageID;
-
         return { ...state, openSeries: openSeriesToUpdate };
-      case CLOSE_SERIE:
+      case CLOSE_SERIE: // tested
         let delSeriesUID = state.openSeries[state.activePort].seriesUID;
         let delStudyUID = state.openSeries[state.activePort].studyUID;
-        let delOpenStudies = { ...state.openStudies };
+        let delPID = state.openSeries[state.activePort].projectID;
+        let delPatientID = state.openSeries[state.activePort].patientID || state.openSeries[state.activePort].subjectID;
+        let delOpenStudiesAddition = _.cloneDeep(state.openSeriesAddition);
+        delOpenStudiesAddition.splice(state.activePort, 1);
         const delAims = { ...state.aimsList };
-        const delOtherAims = { ...state.otherSeriesAimsList };
         delete delAims[delSeriesUID];
-        delete delOtherAims[delSeriesUID];
         let delGrid = state.openSeries.slice(0, state.activePort);
         let delSubpath = state.openSeries.slice(0, state.activePort);
         delGrid = delGrid.concat(state.openSeries.slice(state.activePort + 1));
-        delSubpath= delSubpath.concat(state.subpath.slice(state.activePort + 1));
+        delSubpath = delSubpath.concat(state.subpath.slice(state.activePort + 1));
         let shouldStudyExist = false;
         for (let item of delGrid) {
           if (item.studyUID === delStudyUID) {
@@ -214,21 +356,29 @@ const asyncReducer = (state = initialState, action) => {
         }
 
         let delActivePort;
+        let delOtherSeriesAimsList = _.cloneDeep(state.otherSeriesAimsList);;
+        let delSeriesData = _.cloneDeep(state.seriesData);
         if (delGrid.length === 0) {
           delActivePort = null;
+          delOtherSeriesAimsList = {};
+          delSeriesData = {};
         } else {
           delActivePort = delGrid.length - 1;
         }
 
         if (!shouldStudyExist) {
-          delete delOpenStudies[delStudyUID];
+          if (delGrid.length > 0) {
+            delete delOtherSeriesAimsList[delPID][delStudyUID];
+            delete delSeriesData[delPID][delPatientID][delStudyUID];
+          }
           return {
             ...state,
             openSeries: delGrid,
             aimsList: delAims,
-            openStudies: delOpenStudies,
             activePort: delActivePort,
-            otherSeriesAimsList: delOtherAims
+            otherSeriesAimsList: delOtherSeriesAimsList,
+            seriesData: delSeriesData,
+            openSeriesAddition: delOpenStudiesAddition
           };
         }
 
@@ -238,8 +388,9 @@ const asyncReducer = (state = initialState, action) => {
           aimsList: delAims,
           // patients: delPatients,
           activePort: delActivePort,
-          otherSeriesAimsList: delOtherAims,
-          subpath: delSubpath
+          // otherSeriesAimsList: delOtherAims,
+          subpath: delSubpath,
+          openSeriesAddition: delOpenStudiesAddition
         };
       case LOAD_ANNOTATIONS:
         return Object.assign({}, state, {
@@ -253,18 +404,33 @@ const asyncReducer = (state = initialState, action) => {
         const viewPortStatus = !state.showGridFullAlert;
         return { ...state, showGridFullAlert: viewPortStatus };
       case LOAD_SERIE_SUCCESS:
-        let imageAddedSeries = state.openSeries.map((serie) => {
-          const newSerie = { ...serie };
-          if (serie.imageAnnotations) {
-            newSerie.imageAnnotations = { ...serie.imageAnnotations };
-          }
-          return newSerie;
-        });
+        let imageAddedSeries = _.cloneDeep(state.openSeriesAddition);
         let annCalc = Object.keys(action.payload.imageData);
+        const { projectID: pidFromRef, studyUID: stUIDFromRef } = action.payload.ref;
+        let latestOtherSeriesAimsList = _.cloneDeep(state.otherSeriesAimsList);
+        if (latestOtherSeriesAimsList[pidFromRef] && action.payload.otherSeriesAimsData[pidFromRef])
+          latestOtherSeriesAimsList[pidFromRef][stUIDFromRef] = action.payload.otherSeriesAimsData[pidFromRef][stUIDFromRef];
+        else latestOtherSeriesAimsList[pidFromRef] = action.payload.otherSeriesAimsData[pidFromRef];
+
+        let numberOfimageAnnotationsMap = {};
+        if (pidFromRef && latestOtherSeriesAimsList[pidFromRef] && latestOtherSeriesAimsList[pidFromRef][stUIDFromRef]) {
+          numberOfimageAnnotationsMap = latestOtherSeriesAimsList[pidFromRef][stUIDFromRef]
+            .reduce((all, item, index) => {
+              all[item[0]] = item[2].length;
+              return all;
+            }, {})
+        }
+
+
         if (annCalc.length > 0) {
           for (let i = 0; i < imageAddedSeries.length; i++) {
             if (imageAddedSeries[i].seriesUID === action.payload.serID) {
               imageAddedSeries[i].imageAnnotations = action.payload.imageData;
+              imageAddedSeries[i].frameData = action.payload.frameData;
+              imageAddedSeries[i].numberOfAnnotations = numberOfimageAnnotationsMap[action.payload.ref.seriesUID] ? numberOfimageAnnotationsMap[action.payload.ref.seriesUID] : 0;
+              if (!imageAddedSeries[i].numberOfImages) imageAddedSeries[i].numberOfImages = action.payload.ref.numberOfImages;
+              if (!imageAddedSeries[i].seriesDescription) imageAddedSeries[i].seriesDescription = action.payload.ref.seriesDescription;
+              if (!imageAddedSeries[i].seriesNo) imageAddedSeries[i].seriesNo = action.payload.ref.seriesNo;
             }
           }
         }
@@ -273,7 +439,14 @@ const asyncReducer = (state = initialState, action) => {
             // serie.aimID = null;
           }
         }
-
+        let jumpArr1 = []
+        // coming from the right sidebar hasMultiframe flag is overridden by the new data
+        // if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
+        if (imageAddedSeries[state.activePort].aimID && imageAddedSeries[state.activePort].multiFrameMap && imageAddedSeries[state.activePort].frameData) {
+          const imgs = imageAddedSeries[state.activePort].frameData[action.payload.ann];
+          const imgArr = imgs ? imgs[0].split('/frames/') : [];
+          jumpArr1 = imgArr.length > 0 ? [imageAddedSeries[state.activePort].multiFrameMap[imgArr[0]], parseInt(imgArr[1]) - 1] : [];
+        }
         const newDataKeys = Object.keys(action.payload.aimsData);
         const stateKeys = state.aimsList[action.payload.serID]
           ? Object.keys(state.aimsList[action.payload.serID])
@@ -292,6 +465,21 @@ const asyncReducer = (state = initialState, action) => {
               colors
             );
 
+        // check if openSeries[activeport] is significant and teaching file 
+        // if so check if seriesData is filled  // if not fill the data
+        const { significanceOrder: order, template: tempCode } = state.openSeries[state.activePort];
+        const seriesDataForTeaching = _.cloneDeep(state.seriesData);
+        if (order && tempCode === teachingFileTempCode) {
+          const seriesDataForTFProject = state.seriesData[pidFromRef]
+          const seriesDataForTFPatient = seriesDataForTFProject && state.seriesData[pidFromRef][action.payload.ref.patientID]
+          const seriesDataForTFStudy = seriesDataForTFPatient && state.seriesData[pidFromRef][action.payload.ref.patientID][action.payload.ref.studyUID];
+          if (!seriesDataForTFStudy) {
+            if (seriesDataForTFPatient)
+              seriesDataForTeaching[pidFromRef][action.payload.ref.patientID] = { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] };
+            else seriesDataForTeaching[pidFromRef] = { [action.payload.ref.patientID]: { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] } };
+          }
+        }
+
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
@@ -299,11 +487,10 @@ const asyncReducer = (state = initialState, action) => {
             ...state.aimsList,
             [action.payload.ref.seriesUID]: colorAimsList,
           },
-          otherSeriesAimsList: {
-            ...state.otherSeriesAimsList,
-            [action.payload.ref.seriesUID]: action.payload.otherSeriesAimsData
-          },
-          openSeries: imageAddedSeries,
+          otherSeriesAimsList: latestOtherSeriesAimsList,
+          openSeriesAddition: imageAddedSeries,
+          multiFrameAimJumpData: jumpArr1,
+          seriesData: seriesDataForTeaching
         });
         return result;
       case LOAD_ANNOTATIONS_ERROR:
@@ -328,13 +515,13 @@ const asyncReducer = (state = initialState, action) => {
 
       case CHANGE_ACTIVE_PORT:
         //get openseries iterate over the
-        const changedPortSeries = state.openSeries.map((serie) => {
-          const newSerie = { ...serie };
-          if (serie.imageAnnotations) {
-            newSerie.imageAnnotations = { ...serie.imageAnnotations };
-          }
+        const changedPortSeriesAddition = state.openSeriesAddition.map((serie) => {
+          const newSerie = _.cloneDeep(serie);
+          newSerie.aimID = null;
           return newSerie;
         });
+
+        const changedPortSeries = _.cloneDeep(state.openSeries);
         for (let i = 0; i < changedPortSeries.length; i++) {
           if (i !== action.portIndex) {
             changedPortSeries[i].aimID = null;
@@ -343,7 +530,8 @@ const asyncReducer = (state = initialState, action) => {
 
         return Object.assign({}, state, {
           activePort: action.portIndex,
-          openSeries: changedPortSeries,
+          openSeriesAddition: changedPortSeriesAddition,
+          openSeries: changedPortSeries
         });
 
       case TOGGLE_ALL_ANNOTATIONS:
@@ -432,7 +620,8 @@ const asyncReducer = (state = initialState, action) => {
           openSeries: [],
           aimsList: {},
           activePort: 0,
-          openStudies: {}
+          seriesData: {},
+          openSeriesAddition: []
         };
       case CLEAR_SELECTION:
         let selectionState = { ...state };
@@ -533,36 +722,52 @@ const asyncReducer = (state = initialState, action) => {
         }
         const arePortsOccupied = action.port !== undefined && typeof action.port === 'number';
         let newOpenSeries = [...state.openSeries];
+        let newOpenSeriesAddtition = _.cloneDeep(state.openSeriesAddition);
 
-        if (arePortsOccupied) newOpenSeries[action.port] = seriesInfo;
-        else newOpenSeries = newOpenSeries.concat([seriesInfo]);
+        const existingUID = newOpenSeriesAddtition[action.port] ? newOpenSeriesAddtition[action.port].seriesUID : ''
+        const newUID = seriesInfo.seriesUID;
+        const sameSeries = existingUID && existingUID === newUID;
+
+        if (arePortsOccupied) {
+          newOpenSeries[action.port] = seriesInfo;
+          if (sameSeries) {
+            const copyMFMap = newOpenSeriesAddtition[action.port].multiFrameMap;
+            const copyFmData = newOpenSeriesAddtition[action.port].frameData;
+            const copyImageAnnotations = newOpenSeriesAddtition[action.port].imageAnnotations;
+            newOpenSeriesAddtition[action.port] = seriesInfo;
+            if (copyMFMap) newOpenSeriesAddtition[action.port].multiFrameMap = copyMFMap;
+            if (copyFmData) newOpenSeriesAddtition[action.port].frameData = copyFmData;
+            if (copyImageAnnotations) newOpenSeriesAddtition[action.port].imageAnnotations = copyImageAnnotations;
+          } else newOpenSeriesAddtition[action.port] = seriesInfo;
+        } else {
+          newOpenSeries = newOpenSeries.concat([seriesInfo]);
+          newOpenSeriesAddtition = newOpenSeriesAddtition.concat([seriesInfo]);
+        }
 
         const newActivePort = arePortsOccupied ? state.activePort : newOpenSeries.length - 1;
         return {
           ...state,
           openSeries: newOpenSeries,
-          activePort: newActivePort
+          activePort: newActivePort,
+          openSeriesAddition: newOpenSeriesAddtition
         };
 
       case REPLACE_IN_GRID:
         const replacedOpenSeries = [...state.openSeries];
         const newAimsList = { ...state.aimsList };
         delete newAimsList[replacedOpenSeries[state.activePort].seriesUID];
-        replacedOpenSeries[state.activePort].seriesUID = action.seriesUID;
-
+        replacedOpenSeries[state.activePort].seriesUID = action.payload.seriesUID;
+        replacedOpenSeries[state.activePort].examType = action.payload.examType;
+        const replacedOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
+        replacedOpenSeriesAddition[state.activePort].seriesUID = action.payload.seriesUID;
+        replacedOpenSeriesAddition[state.activePort].examType = action.payload.examType;
         return {
           ...state,
           openSeries: replacedOpenSeries,
-          aimsList: newAimsList
+          aimsList: newAimsList,
+          openSeriesAddition: replacedOpenSeriesAddition
         };
 
-      case ADD_STUDY_TO_GRID:
-        const newStudy = { ...action.seriesOfStudy };
-        let newOpenStudies = { ...state.openStudies, ...newStudy };
-        return {
-          ...state,
-          openStudies: newOpenStudies
-        };
       // -----> Delete after v1.0 <-----
       // case UPDATE_PATIENT:
       //   let updatedPt = { ...state.patients[action.payload.patient] };
@@ -590,19 +795,16 @@ const asyncReducer = (state = initialState, action) => {
       case JUMP_TO_AIM:
         let { aimID, index } = action.payload;
         let serUID = action.payload.seriesUID;
-        let updatedGrid = state.openSeries.map((serie) => {
-          const newSerie = { ...serie };
-          if (serie.imageAnnotations) {
-            newSerie.imageAnnotations = { ...serie.imageAnnotations };
-          }
-          return newSerie;
-        });
+        let updatedGrid = _.cloneDeep(state.openSeries)
+        let updatedOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
         updatedGrid[index].aimID = aimID;
+        updatedOpenSeriesAddition[index].aimID = aimID;
 
         // return { ...state, openSeries: updatedGrid, aimsList: {...state.aimsList} };
         return Object.assign({}, state, {
           activePort: index,
           openSeries: updatedGrid,
+          openSeriesAddition: updatedOpenSeriesAddition,
           aimsList: {
             ...state.aimsList,
             [serUID]: {
@@ -647,15 +849,15 @@ const asyncReducer = (state = initialState, action) => {
           isSegUploaded: { ...theRest },
         });
       }
-      case AIM_DELETE: {
+      case AIM_DELETE: { //tested
         const { aimRefs } = action.payload;
-        const { seriesUID } = aimRefs;
+        const { seriesUID, studyUID, projectID, aimID } = aimRefs;
         const deepOther = _.cloneDeep(state.otherSeriesAimsList);
-        const deepOtherArrKeys = Object.keys(deepOther);
-        const deepOtherArrValues = Object.values(deepOther);
+        const projectAims = deepOther[projectID];
+        const deepOtherArrValues = projectAims ? Object.values(projectAims[studyUID]) : null;
         let serieToUpdateIndex;
-        const newOpenSeries = [...state.openSeries];
-        const serieToUpdate = newOpenSeries.find((serie, index) => {
+        const newOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
+        const serieToUpdate = newOpenSeriesAddition.find((serie, index) => {
           if (serie.seriesUID === seriesUID) {
             serieToUpdateIndex = index;
             return serie.seriesUID;
@@ -672,17 +874,42 @@ const asyncReducer = (state = initialState, action) => {
           }
         });
 
-        deepOtherArrValues.forEach((el => {
-          if (el[aimRefs.aimID]) delete el[aimRefs.aimID];
-        }))
+        if (deepOtherArrValues) {
+          deepOtherArrValues.forEach((el => {
+            if (el[aimRefs.aimID]) delete el[aimRefs.aimID];
+          }))
 
-        const reformedOtherSeries = deepOtherArrKeys.reduce((all, item, index) => {
-          all[item] = deepOtherArrValues[index];
-          return all;
-        }, {});
+          let reformedOtherSeries = deepOtherArrValues.reduce((all, item, index) => {
+            if (item[0] === seriesUID) {
+              let aimIndex = -1;
+              for (let i = 0; i < item[2].length; i++) {
+                if (item[2][i].aimID === aimID) {
+                  aimIndex = i;
+                  break;
+                }
+              }
+              if (aimIndex > -1) {
+                item[2].splice(aimIndex, 1);
+              }
+            }
+            all[index] = item;
+            return all;
+          }, []);
 
-        newOpenSeries[serieToUpdateIndex] = updatedSerie;
-        return { ...state, openSeries: [...newOpenSeries], otherSeriesAimsList: reformedOtherSeries };
+          if (reformedOtherSeries[serieToUpdateIndex] && reformedOtherSeries[serieToUpdateIndex][2] && reformedOtherSeries[serieToUpdateIndex][2].length === 0) {
+            updatedSerie.numberOfAnnotations = 0;
+            if (deepOther[projectID][studyUID].length === 1) {
+              delete deepOther[projectID][studyUID];
+            } else {
+              const arr1 = deepOther[projectID][studyUID].slice(0, serieToUpdateIndex + 1);
+              const arr2 = deepOther[projectID][studyUID].slice(serieToUpdateIndex + 1);
+              reformedOtherSeries = arr1.concat(arr2);
+              deepOther[projectID][studyUID] = reformedOtherSeries;
+            }
+          }
+          newOpenSeriesAddition[serieToUpdateIndex] = updatedSerie;
+        }
+        return { ...state, openSeriesAddition: newOpenSeriesAddition, otherSeriesAimsList: deepOther };
       }
       default:
         return state;

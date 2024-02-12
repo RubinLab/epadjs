@@ -1,7 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
+import PropagateLoader from "react-spinners/PropagateLoader";
 import Annotation from "./annotation";
-import AnnotationsLink from "./annotationsLink";
+import AnnotationsLink from "./newAnnotationsLink";
 import {
   updateAnnotationDisplay,
   toggleAllLabels,
@@ -32,21 +33,14 @@ class AnnotationsList extends React.Component {
           prevProps.loading &&
           series.length === this.props.openSeries.length)
       ) {
-        const seriesUID =
-          this.props.openSeries[this.props.activePort].seriesUID;
+        const { seriesUID } = this.props.openSeries[this.props.activePort];
         let annotations = Object.values(this.props.aimsList[seriesUID]);
         let labelDisplayAll = true;
         let annsDisplayAll = true;
-        for (let ann of annotations) {
-          if (ann.isDisplayed) {
-            annsDisplayAll = true;
-          }
-        }
-        for (let ann of annotations) {
-          if (ann.showLabel) {
-            labelDisplayAll = true;
-          }
-        }
+
+        annsDisplayAll = annotations[0]?.isDisplayed;
+        labelDisplayAll = annotations[0]?.showLabel;
+
         this.setState({ labelDisplayAll, annsDisplayAll });
       }
     } catch (err) {
@@ -136,11 +130,11 @@ class AnnotationsList extends React.Component {
     const calculations = {};
     const wadors = this.wadoUrl.includes("wadors");
     try {
-      const { openSeries, activePort } = this.props;
+      const { openSeries, activePort, openSeriesAddition } = this.props;
       const { imageID } = openSeries[activePort];
       let imageAnnotations;
-      if (openSeries[activePort].imageAnnotations) {
-        const annotations = openSeries[activePort].imageAnnotations;
+      if (openSeriesAddition[activePort].imageAnnotations) {
+        const annotations = openSeriesAddition[activePort].imageAnnotations;
         imageAnnotations = annotations[imageID];
         // TODO: check frame number ??
         if (!imageAnnotations) {
@@ -175,7 +169,8 @@ class AnnotationsList extends React.Component {
 
   render = () => {
     // try {
-    const { openSeries, aimsList } = this.props;
+    let preparing = true;  
+    const { openSeries, openSeriesAddition, aimsList } = this.props;
     let { activePort } = this.props;
     activePort = activePort || activePort === 0 ? activePort : 0;
     const { imageID } = openSeries[activePort];
@@ -190,10 +185,9 @@ class AnnotationsList extends React.Component {
           : (annotations[id] = [aims[aim]]);
       }
     }
-
     const wadors = this.wadoUrl.includes("wadors");
 
-    const aimList = openSeries[activePort].imageAnnotations;
+    const aimList = openSeriesAddition[activePort].imageAnnotations;
     if (aimList) {
       let imageAnnotations;
 
@@ -229,20 +223,8 @@ class AnnotationsList extends React.Component {
         } catch (e) {}
       }
     }
+    preparing = false;  
     const calculations = this.getLabelArray();
-    // annotations.sort(function(a, b) {
-    //   let nameA = a.name.toUpperCase();
-    //   let nameB = b.name.toUpperCase();
-    //   if (nameA < nameB) {
-    //     return -1;
-    //   }
-    //   if (nameA > nameB) {
-    //     return 1;
-    //   }
-    //   return 0;
-    // });
-
-    // let annotations = [];
     let annList = [];
     const imageAims = { ...annotations };
     annotations = Object.values(annotations);
@@ -274,68 +256,76 @@ class AnnotationsList extends React.Component {
     //   console.log("Error: ", e);
     // }
     return (
-      <React.Fragment>
-        <div className="annotationList-container" style={{ paddingTop: "5px" }}>
-          <div className="checkbox-row">
-            <div className="label-toggle">
-              <div className="form-check form-switch form-check-inline">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  role="switch"
-                  id="showAnnotations"
-                  onChange={this.handleCalculations}
-                  checked={this.state.showCalculations}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="flexSwitchCheckDefault"
-                >
-                  Show Calculations
-                </label>
-              </div>
-            </div>
-            <div className="label-toggle">
-              <div className="form-check form-switch form-check-inline">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  role="switch"
-                  id="showAnnotations"
-                  onChange={this.handleToggleAllLabels}
-                  checked={this.state.labelDisplayAll}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="flexSwitchCheckDefault"
-                >
-                  Show Details
-                </label>
-              </div>
-            </div>
-            <div className="label-toggle">
-              <div className="form-check form-switch form-check-inline">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  role="switch"
-                  id="showAnnotations"
-                  onChange={this.handleToggleAllAnnotations}
-                  checked={this.state.annsDisplayAll}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="flexSwitchCheckDefault"
-                >
-                  Show Markups
-                </label>
-              </div>
-            </div>
+      <>
+        {(this.props.loading || preparing) && (
+          <div style={{ marginTop: "10%", marginLeft: "30%" }}>
+            <PropagateLoader
+              color={"#ccc"}
+              loading={this.props.loading || preparing}
+              margin={8}
+            />
           </div>
-        </div>
-        <div>{annList}</div>
-        <AnnotationsLink imageAims={imageAims} />
-      </React.Fragment>
+        )}
+        {!this.props.loading && (
+          <React.Fragment>
+            <div
+              className="annotationList-container"
+              style={{ paddingTop: "5px" }}
+            >
+              <div className="checkbox-row">
+                <div className="form-check form-check-inline">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    id="showAnnotations"
+                    onChange={this.handleCalculations}
+                    checked={this.state.showCalculations}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor="flexSwitchCheckDefault"
+                  >
+                    Show Calculations
+                  </label>
+                </div>
+                <div className="form-check form-check-inline">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    id="showAnnotations"
+                    onChange={this.handleToggleAllLabels}
+                    checked={this.state.labelDisplayAll}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor="flexSwitchCheckDefault"
+                  >
+                    Show Details
+                  </label>
+                </div>
+                <div className="form-check form-check-inline">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    id="showAnnotations"
+                    onChange={this.handleToggleAllAnnotations}
+                    checked={this.state.annsDisplayAll}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor="flexSwitchCheckDefault"
+                  >
+                    Show Markups
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div>{annList}</div>
+            <AnnotationsLink imageAims={imageAims} />
+          </React.Fragment>
+        )}
+      </>
     );
   };
 }
@@ -343,6 +333,7 @@ class AnnotationsList extends React.Component {
 const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
+    openSeriesAddition: state.annotationsListReducer.openSeriesAddition,
     activePort: state.annotationsListReducer.activePort,
     aimsList: state.annotationsListReducer.aimsList,
     imageID: state.annotationsListReducer.imageID,

@@ -1,10 +1,11 @@
 import React from "react";
 import { connect } from "react-redux";
+import PropagateLoader from "react-spinners/PropagateLoader";
 import ReactTable from "react-table-v6";
 import treeTableHOC from "react-table-v6/lib/hoc/treeTable";
 import _ from "lodash";
 import { Button } from "react-bootstrap";
-import WarningModal from '../common/warningModal';
+import WarningModal from "../common/warningModal";
 import { getSeries } from "../../services/seriesServices";
 import { getStudies } from "../../services/projectServices";
 import ColumnSelect from "./ColumnSelect.jsx";
@@ -12,8 +13,13 @@ import StudyTable from "./StudyTable";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
 import SeriesTable from "./SeriesTable";
 import { isSupportedModality } from "../../Utils/aid.js";
-import { addToGrid, getSingleSerie, clearSelection } from '../annotationsList/action';
-import 'react-table-v6/react-table.css';
+import {
+  addToGrid,
+  getSingleSerie,
+  clearSelection,
+  setSeriesData,
+} from "../annotationsList/action";
+import "react-table-v6/react-table.css";
 // import "../annotationSearch/annotationSearch.css";
 // import "./flexView.css";
 
@@ -22,15 +28,17 @@ let mode;
 let maxPort;
 
 class FlexView extends React.Component {
-  mode = sessionStorage.getItem('mode');
-  maxPort = sessionStorage.getItem('maxPort');
+  mode = sessionStorage.getItem("mode");
+  maxPort = sessionStorage.getItem("maxPort");
   state = {
     columns: [],
-    order: mode === 'teaching' ? [1, 8, 16, 4, 6, 9, 13, 3] : [1, 4, 0, 10, 11, 6],
+    order:
+      mode === "teaching" ? [1, 8, 16, 4, 6, 9, 13, 3] : [1, 4, 0, 10, 11, 6],
     expanded: {},
     seriesTableOpen: false,
     series: [],
-    showWarning: false
+    showWarning: false,
+    loading: false
   };
 
   studyColumns = [
@@ -86,9 +94,27 @@ class FlexView extends React.Component {
   };
 
   displaySeries = async (projectID, patientID, studyUID) => {
+    const { seriesData } = this.props;
     let series;
+    const dataExists =
+      seriesData[projectID] &&
+      seriesData[projectID][patientID] &&
+      seriesData[projectID][patientID][studyUID] &&
+      seriesData[projectID][patientID][studyUID].list;
+
+    const existingData = dataExists
+      ? seriesData[projectID][patientID][studyUID].list
+      : null;
+
     try {
-      ({ data: series } = await getSeries(projectID, patientID, studyUID));
+      if (!dataExists) {
+        this.setState({ loading: true });
+        ({ data: series } = await getSeries(projectID, patientID, studyUID));
+        this.setState({ loading: false });
+        this.props.dispatch(
+          setSeriesData(projectID, patientID, studyUID, series, true)
+        );
+      } else series = seriesData[projectID][patientID][studyUID].list;
     } catch (err) {
       console.log("Error getting series of the study", err);
     }
@@ -114,17 +140,19 @@ class FlexView extends React.Component {
         const promiseArr = [];
         for (let i = 0; i < series.length; i++) {
           this.props.dispatch(addToGrid(series[i]));
-          promiseArr.push(this.props.dispatch(getSingleSerie(series[i])));
+          promiseArr.push(this.props.dispatch(getSingleSerie(series[i], null, null, existingData)));
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => { this.props.history.push('/display') })
-          .catch(err => console.error(err));
+          .then(() => {
+            this.props.history.push("/display");
+          })
+          .catch((err) => console.error(err));
       }
     }
   };
 
-  excludeOpenSeries = allSeriesArr => {
+  excludeOpenSeries = (allSeriesArr) => {
     const result = [];
     //get all series number in an array
     const idArr = this.props.openSeries.reduce((all, item, index) => {
@@ -132,7 +160,7 @@ class FlexView extends React.Component {
       return all;
     }, []);
     //if array doesnot include that serie number
-    allSeriesArr.forEach(serie => {
+    allSeriesArr.forEach((serie) => {
       if (!idArr.includes(serie.seriesUID)) {
         //push that serie in the result arr
         result.push(serie);
@@ -146,10 +174,9 @@ class FlexView extends React.Component {
   };
 
   componentDidMount = async () => {
-    const order = JSON.parse(sessionStorage.getItem('studyListColumns'));
+    const order = JSON.parse(sessionStorage.getItem("studyListColumns"));
     this.props.dispatch(clearSelection());
-    if (order && order.length)
-      this.setState({ order });
+    if (order && order.length) this.setState({ order });
     try {
       if (this.props.pid) {
         await this.getData(this.props.pid);
@@ -174,7 +201,6 @@ class FlexView extends React.Component {
         await this.getData(this.props.pid);
         await this.defineColumns();
       }
-
     } catch (err) {
       console.log(err);
     }
@@ -185,7 +211,10 @@ class FlexView extends React.Component {
   };
 
   componentWillUnmount = () => {
-    sessionStorage.setItem('studyListColumns', JSON.stringify(this.state.order));
+    sessionStorage.setItem(
+      "studyListColumns",
+      JSON.stringify(this.state.order)
+    );
   };
 
   defineColumns = () => {
@@ -225,18 +254,16 @@ class FlexView extends React.Component {
     this.setState({ expanded: newExpanded });
   };
   render = () => {
-    const {
-      order,
-      data,
-      series,
-      showSeriesTable,
-    } = this.state;
+    const { order, data, series, showSeriesTable } = this.state;
     return (
       <>
-        <div className="flexView" style={{ fontSize: '12px' }}>
+        <div className="flexView" style={{ fontSize: "12px" }}>
           {showSeriesTable && (
             // <SeriesTable series={series} onClose={this.closeSeriesTable} />
-            <SelectSerieModal seriesPassed={[series]} onCancel={this.closeSeriesTable} />
+            <SelectSerieModal
+              seriesPassed={[series]}
+              onCancel={this.closeSeriesTable}
+            />
           )}
           <ColumnSelect
             order={order}
@@ -244,6 +271,13 @@ class FlexView extends React.Component {
             studyColumns={this.studyColumns}
             onClose={this.selectDropdown}
           />
+          { this.state.loading && ( <div style={{height: "20px", marginLeft: "20px", width:"100px"}}>
+            <PropagateLoader
+              color={"#7A8288"}
+              loading={this.state.loading}
+              margin={"20"}
+              />
+          </div>)}
           {this.state.data && (
             <StudyTable
               data={data}
@@ -255,8 +289,8 @@ class FlexView extends React.Component {
         {this.state.showWarning && (
           <WarningModal
             onOK={() => this.setState({ showWarning: false })}
-            title={'No series to display'}
-            message={'There is no Series to display in the Study'}
+            title={"No series to display"}
+            message={"There is no Series to display in the Study"}
           />
         )}
       </>
@@ -268,8 +302,9 @@ const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     lastEventId: state.annotationsListReducer.lastEventId,
-    refresh: state.annotationsListReducer.refresh
+    refresh: state.annotationsListReducer.refresh,
+    seriesData: state.annotationsListReducer.seriesData,
   };
 };
 
-export default (connect(mapStateToProps)(FlexView));
+export default connect(mapStateToProps)(FlexView);

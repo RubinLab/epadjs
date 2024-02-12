@@ -61,7 +61,7 @@ export async function getAuthHeader() {
     }
   } else if (this.keycloak) {
     try {
-      await refreshToken(this.keycloak, 5);
+      await refreshToken(this.keycloak, 120);
       const header = `Bearer ${this.keycloak.token}`;
       if (header) {
         cornerstoneWADOImageLoader.configure({

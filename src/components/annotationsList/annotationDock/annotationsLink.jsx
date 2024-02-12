@@ -21,6 +21,7 @@ const handleJumpToAim = (aimId, index) => {
 };
 
 const annotationsLink = (props) => {
+  console.log(props);  
   const { openSeries, activePort, aimsList, otherSeriesAimsList } = props;
   const { seriesUID } = openSeries[activePort];
   let list = [];

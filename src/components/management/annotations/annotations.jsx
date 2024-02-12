@@ -1,22 +1,22 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
-import ReactTable from 'react-table-v6';
-import ReactTooltip from 'react-tooltip';
-import { toast } from 'react-toastify';
-import ToolBar from './toolbar';
-import { FaRegEye, FaEyeSlash, FaCommentsDollar } from 'react-icons/fa';
+import React from "react";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
+import ReactTable from "react-table-v6";
+import ReactTooltip from "react-tooltip";
+import { toast } from "react-toastify";
+import ToolBar from "./toolbar";
+import { FaRegEye, FaEyeSlash, FaCommentsDollar } from "react-icons/fa";
 import {
   getSummaryAnnotations,
   downloadProjectAnnotation,
   getAllAnnotations,
-  deleteAnnotationsList
-} from '../../../services/annotationServices';
-import { getProjects } from '../../../services/projectServices';
-import matchSorter from 'match-sorter';
-import DeleteAlert from '../common/alertDeletionModal';
-import UploadModal from '../../searchView/uploadModal';
-import DownloadModal from '../../searchView/annotationDownloadModal';
+  deleteAnnotationsList,
+} from "../../../services/annotationServices";
+import { getProjects } from "../../../services/projectServices";
+import matchSorter from "match-sorter";
+import DeleteAlert from "../common/alertDeletionModal";
+import UploadModal from "../../searchView/uploadModal";
+import DownloadModal from "../../searchView/annotationDownloadModal";
 import {
   changeActivePort,
   jumpToAim,
@@ -27,32 +27,33 @@ import {
   updatePatient,
   startLoading,
   loadCompleted,
-  annotationsLoadingError
-} from '../../annotationsList/action';
-import WarningModal from '../../common/warningModal';
-import '../menuStyle.css';
-import { getSeries } from '../../../services/seriesServices';
-import SelectSeriesModal from '../../annotationsList/selectSerieModal';
+  annotationsLoadingError,
+  setSeriesData,
+} from "../../annotationsList/action";
+import WarningModal from "../../common/warningModal";
+import "../menuStyle.css";
+import { getSeries } from "../../../services/seriesServices";
+import SelectSeriesModal from "../../annotationsList/selectSerieModal";
 
 let mode;
 const maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
 const messages = {
-  deleteSelected: 'Delete selected annotations? This cannot be undone.',
-  fillRequiredFields: 'Please fill the required fields',
-  dateFormat: 'Date format should be M/d/yy.',
-  title: 'Item is open in display',
+  deleteSelected: "Delete selected annotations? This cannot be undone.",
+  fillRequiredFields: "Please fill the required fields",
+  dateFormat: "Date format should be M/d/yy.",
+  title: "Item is open in display",
   itemOpen: {
-    title: 'Series is open in display',
+    title: "Series is open in display",
     openSeries:
-      'could not be deleted because the series is open. Please close it before deleting'
+      "could not be deleted because the series is open. Please close it before deleting",
   },
   downloadProject:
-    'Preparing project for download. The link to the files will be sent with a notification after completion!'
+    "Preparing project for download. The link to the files will be sent with a notification after completion!",
 };
 
 class Annotations extends React.Component {
-  mode = sessionStorage.getItem('mode');
+  mode = sessionStorage.getItem("mode");
   state = {
     annotations: [],
     projectList: [],
@@ -63,11 +64,11 @@ class Annotations extends React.Component {
     filteredData: [],
     uploadClicked: false,
     downloadClicked: false,
-    projectID: '',
+    projectID: "",
     allAims: [],
     seriesAlreadyOpen: {},
     total: 0,
-    bookmark: '',
+    bookmark: "",
     pages: null,
     defaultPageSize: 10,
     pageSize: 10,
@@ -78,32 +79,32 @@ class Annotations extends React.Component {
     data: [],
     isSerieSelectionOpen: false,
     selectedStudy: [],
-    studyName: '',
-    change: ''
+    studyName: "",
+    change: "",
   };
 
   downloadProjectAim = () => {
     const pid = this.state.projectID || this.props.pid;
-    if (pid === 'all_aims') return;
+    if (pid === "all_aims") return;
     downloadProjectAnnotation(pid)
-      .then(result => {
-        if (result.data.type === 'application/octet-stream') {
-          let blob = new Blob([result.data], { type: 'application/zip' });
+      .then((result) => {
+        if (result.data.type === "application/octet-stream") {
+          let blob = new Blob([result.data], { type: "application/zip" });
           this.triggerBrowserDownload(blob, `Project ${pid}`);
         } else
           toast.success(messages.downloadProject, {
             autoClose: false,
-            position: 'bottom-left'
+            position: "bottom-left",
           });
       })
-      .catch(err => console.error(err));
+      .catch((err) => console.error(err));
   };
 
   triggerBrowserDownload = (blob, fileName) => {
     const url = window.URL.createObjectURL(new Blob([blob]));
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     document.body.appendChild(link);
-    link.style = 'display: none';
+    link.style = "display: none";
     link.href = url;
     link.download = `${fileName}.zip`;
     link.click();
@@ -111,15 +112,15 @@ class Annotations extends React.Component {
   };
 
   componentDidMount = async () => {
-    if (mode !== 'lite') {
+    if (mode !== "lite") {
       const { data: projectList } = await getProjects();
       for (let i = 0; i < projectList.length; i++) {
-        if (projectList[i].id === 'all') {
+        if (projectList[i].id === "all") {
           projectList.splice(i, 1);
           i = i - 1;
           continue;
         }
-        if (projectList[i].id === 'nonassigned') {
+        if (projectList[i].id === "nonassigned") {
           projectList.splice(i, 1);
           i = i - 1;
           continue;
@@ -139,7 +140,7 @@ class Annotations extends React.Component {
     }
   };
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps) => {
     try {
       const { projectID, refresh, lastEventId } = this.props;
       let pid = this.state.projectID || projectID;
@@ -160,10 +161,10 @@ class Annotations extends React.Component {
       const p = page >= 0 ? page : this.state.page;
       let startIndex;
       let endIndex;
-      if (change === 'page') {
+      if (change === "page") {
         startIndex = size * p;
         endIndex = size * (p + 1);
-      } else if (change === 'pageSize') {
+      } else if (change === "pageSize") {
         if (oldPageSize * p < size) {
           // strt indx should be calculted from old page start index to new number
           const adjustedPage = p - 1 >= 0 ? p - 1 : 0;
@@ -190,9 +191,9 @@ class Annotations extends React.Component {
   getAnnotationsData = async (projectID, bookmarkPassed, pageSize) => {
     try {
       const {
-        data: { rows, total_rows, bookmark }
+        data: { rows, total_rows, bookmark },
       } =
-        projectID && projectID !== 'all_aims'
+        projectID && projectID !== "all_aims"
           ? await getSummaryAnnotations(projectID, bookmarkPassed)
           : await getAllAnnotations(bookmarkPassed);
 
@@ -203,7 +204,7 @@ class Annotations extends React.Component {
           annotations: combinedRows,
           total: total_rows,
           bookmark,
-          pages
+          pages,
         });
         return combinedRows;
       } else {
@@ -214,7 +215,7 @@ class Annotations extends React.Component {
           total: total_rows,
           bookmark,
           pages,
-          data
+          data,
         });
       }
     } catch (err) {
@@ -222,10 +223,10 @@ class Annotations extends React.Component {
     }
   };
 
-  handleProjectSelect = e => {
+  handleProjectSelect = (e) => {
     this.setState({ projectID: e.target.value, page: 0 });
 
-    if (e.target.value === 'all_aims') {
+    if (e.target.value === "all_aims") {
       this.getAnnotationsData();
       this.setState({ isAllAims: true });
     } else {
@@ -235,26 +236,26 @@ class Annotations extends React.Component {
     this.setState({ filteredData: [] });
   };
 
-  handleFilterInput = e => {
+  handleFilterInput = (e) => {
     const { name, value } = e.target;
     this.setState({ [name]: value });
   };
 
   toggleRow = async (id, projectID, seriesUID) => {
-    projectID = projectID ? projectID : 'lite';
+    projectID = projectID ? projectID : "lite";
     let newSelected = Object.assign({}, this.state.selected);
     if (newSelected[id]) {
       delete newSelected[id];
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0
+          selectAll: 0,
         });
       }
     } else {
       newSelected[id] = { projectID, seriesUID };
       await this.setState({
-        selectAll: 2
+        selectAll: 2,
       });
     }
     this.setState({ selected: newSelected });
@@ -265,29 +266,29 @@ class Annotations extends React.Component {
     const { filteredData, annotations } = this.state;
     const selectedAims = filteredData?.length ? filteredData : annotations;
     if (this.state.selectAll === 0) {
-      selectedAims.forEach(annotation => {
-        const projectID = annotation.projectID ? annotation.projectID : 'lite';
+      selectedAims.forEach((annotation) => {
+        const projectID = annotation.projectID ? annotation.projectID : "lite";
         const { seriesUID } = annotation;
         newSelected[annotation.aimID] = { projectID, seriesUID };
       });
     }
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
+      selectAll: this.state.selectAll === 0 ? 1 : 0,
     });
   }
 
   handleCancel = () => {
     this.setState({
       hasAddClicked: false,
-      name: '',
-      id: '',
-      user: '',
-      description: '',
-      error: '',
+      name: "",
+      id: "",
+      user: "",
+      description: "",
+      error: "",
       deleteAllClicked: false,
       uploadClicked: false,
-      downloadClicked: false
+      downloadClicked: false,
     });
   };
 
@@ -330,12 +331,12 @@ class Annotations extends React.Component {
         keys.length === 0
           ? this.setState({ selectAll: 0, selected: {}, filteredData: [] })
           : this.setState({
-            seriesAlreadyOpen: keys.length,
-            selected: notDeleted,
-            selectAll: 2
-          });
+              seriesAlreadyOpen: keys.length,
+              selected: notDeleted,
+              selectAll: 2,
+            });
       })
-      .catch(error => {
+      .catch((error) => {
         if (
           error.response &&
           error.response.data &&
@@ -357,7 +358,7 @@ class Annotations extends React.Component {
     }
   };
 
-  handleFormInput = e => {
+  handleFormInput = (e) => {
     const { name, value } = e.target;
     this.setState({ [name]: value });
   };
@@ -365,41 +366,36 @@ class Annotations extends React.Component {
   handleClearFilter = () => {
     this.setState({
       filteredData: [],
-      name: '',
-      subject: '',
-      template: '',
-      createdStart: '',
-      createdEnd: '',
-      isAllAims: false
+      name: "",
+      subject: "",
+      template: "",
+      createdStart: "",
+      createdEnd: "",
+      isAllAims: false,
     });
   };
 
-  handleKeyDown = e => {
-    if (e.key === 'Enter') {
+  handleKeyDown = (e) => {
+    if (e.key === "Enter") {
       e.preventDefault();
       this.filterTableData();
     }
   };
   filterTableData = () => {
-    const {
-      name,
-      patientName,
-      template,
-      createdStart,
-      createdEnd
-    } = this.state;
+    const { name, patientName, template, createdStart, createdEnd } =
+      this.state;
     if (!(name || patientName || template || createdStart || createdEnd)) {
       return;
     } else {
       let filteredData = [].concat(this.state.annotations);
       filteredData = name
-        ? this.filterText(filteredData, 'name')
+        ? this.filterText(filteredData, "name")
         : filteredData;
       filteredData = patientName
-        ? this.filterText(filteredData, 'patientName')
+        ? this.filterText(filteredData, "patientName")
         : filteredData;
       filteredData = template
-        ? this.filterText(filteredData, 'template')
+        ? this.filterText(filteredData, "template")
         : filteredData;
       filteredData = createdStart
         ? this.filterStartDate(filteredData)
@@ -422,13 +418,13 @@ class Annotations extends React.Component {
     return result;
   };
 
-  filterStartDate = arr => {
+  filterStartDate = (arr) => {
     const result = [];
     if (this.validateDateFormat(this.state.createdStart)) {
       const input = new Date(this.state.createdStart);
       for (let ann of arr) {
-        const formattedDate = this.convertDateFormat(ann.date, 'date');
-        let date = new Date(formattedDate.split(' ')[0] + ' 00:00:00');
+        const formattedDate = this.convertDateFormat(ann.date, "date");
+        let date = new Date(formattedDate.split(" ")[0] + " 00:00:00");
         if (date >= input) {
           result.push(ann);
         }
@@ -437,13 +433,13 @@ class Annotations extends React.Component {
     return result;
   };
 
-  filterEndDate = arr => {
+  filterEndDate = (arr) => {
     const result = [];
     if (this.validateDateFormat(this.state.createdEnd)) {
       const input = new Date(this.state.createdEnd);
       for (let ann of arr) {
         let date = new Date(
-          this.convertDateFormat(ann.date, 'date').split(' ')[0] + ' 00:00:00'
+          this.convertDateFormat(ann.date, "date").split(" ")[0] + " 00:00:00"
         );
         if (date <= input) {
           result.push(ann);
@@ -453,29 +449,29 @@ class Annotations extends React.Component {
     return result;
   };
 
-  formatDate = dateString => {
+  formatDate = (dateString) => {
     try {
-      const dateArr = dateString.split('-');
+      const dateArr = dateString.split("-");
       dateArr[0] = dateArr[0].substring(2);
-      dateArr[1] = dateArr[1][0] === '0' ? dateArr[1][1] : dateArr[1];
-      dateArr[2] = dateArr[2][0] === '0' ? dateArr[2][1] : dateArr[2];
-      return dateArr[1] + '/' + dateArr[2] + '/' + dateArr[0];
+      dateArr[1] = dateArr[1][0] === "0" ? dateArr[1][1] : dateArr[1];
+      dateArr[2] = dateArr[2][0] === "0" ? dateArr[2][1] : dateArr[2];
+      return dateArr[1] + "/" + dateArr[2] + "/" + dateArr[0];
     } catch (err) {
       console.error(err);
     }
   };
 
-  clearCarets = string => {
+  clearCarets = (string) => {
     if (string) {
       for (let i = 0; i < string.length; i++) {
-        string = string.replace('^', ' ');
+        string = string.replace("^", " ");
       }
       return string;
     }
   };
 
-  validateDateFormat = dateString => {
-    const dateArr = dateString.split('/');
+  validateDateFormat = (dateString) => {
+    const dateArr = dateString.split("/");
     const validFormat = dateArr.length === 3;
     let validMonth;
     let validDay;
@@ -487,7 +483,7 @@ class Annotations extends React.Component {
       validYear = dateArr[2].length === 2;
     }
     const isValid = validFormat && validMonth && validDay && validYear;
-    if (!isValid) toast.warn(messages.dateFormat + ' - ' + dateString);
+    if (!isValid) toast.warn(messages.dateFormat + " - " + dateString);
     return isValid;
   };
 
@@ -504,19 +500,14 @@ class Annotations extends React.Component {
     return { isOpen, index };
   };
 
-  openAnnotation = async selected => {
+  openAnnotation = async (selected) => {
     try {
-      const {
-        studyUID,
-        seriesUID,
-        aimID,
-        patientName,
-        name
-      } = selected.original;
+      const { studyUID, seriesUID, aimID, patientName, name } =
+        selected.original;
       const patientID = selected.original.subjectID;
       const projectID = selected.original.projectID
         ? selected.original.projectID
-        : 'lite';
+        : "lite";
       const { openSeries } = this.props;
       // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
       //check if there is enough space in the grid
@@ -564,8 +555,8 @@ class Annotations extends React.Component {
   defineColumns = () => {
     return [
       {
-        id: 'checkbox',
-        accessor: '',
+        id: "checkbox",
+        accessor: "",
         width: 30,
         Cell: ({ original }) => {
           return (
@@ -583,13 +574,13 @@ class Annotations extends React.Component {
             />
           );
         },
-        Header: x => {
+        Header: (x) => {
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
               checked={this.state.selectAll === 1}
-              ref={input => {
+              ref={(input) => {
                 if (input) {
                   input.indeterminate = this.state.selectAll === 2;
                 }
@@ -598,30 +589,30 @@ class Annotations extends React.Component {
             />
           );
         },
-        resizable: false
+        resizable: false,
       },
       {
-        Header: 'Name',
-        accessor: 'name',
+        Header: "Name",
+        accessor: "name",
         sortable: true,
-        resizable: true
+        resizable: true,
       },
       {
-        Header: 'Open',
+        Header: "Open",
         sortable: false,
         resizable: false,
-        style: { display: 'flex', justifyContent: 'center' },
-        Cell: data => {
+        style: { display: "flex", justifyContent: "center" },
+        Cell: (data) => {
           return this.state.isAllAims ? (
             <FaEyeSlash />
           ) : (
-            <Link className="open-link" to={'/display'}>
+            <Link className="open-link" to={"/display"}>
               <div
                 data-tip
                 data-for="open-annotations"
                 onClick={() => {
                   if (
-                    data.original.seriesUID === 'noseries' ||
+                    data.original.seriesUID === "noseries" ||
                     !data.original.seriesUID
                   ) {
                     this.displaySeries(data.original);
@@ -639,29 +630,29 @@ class Annotations extends React.Component {
                   delayShow={1000}
                 >
                   <span className="filter-label">Open annotation</span>
-                </ReactTooltip>{' '}
+                </ReactTooltip>{" "}
               </div>
             </Link>
           );
-        }
+        },
       },
       {
-        Header: 'Subject',
-        accessor: 'patientName',
+        Header: "Subject",
+        accessor: "patientName",
         sortable: true,
         resizable: true,
-        Cell: original => {
+        Cell: (original) => {
           return (
             <div>{this.clearCarets(original.row.checkbox.patientName)}</div>
           );
-        }
+        },
       },
       {
-        accessor: 'comment',
+        accessor: "comment",
         sortable: true,
         resizable: true,
-        className: 'wrapped',
-        style: { whiteSpace: 'normal' },
+        className: "wrapped",
+        style: { whiteSpace: "normal" },
         Header: () => {
           return (
             <div className="mng-anns__header-flex">
@@ -669,51 +660,51 @@ class Annotations extends React.Component {
               <div>Slice / Series #</div>
             </div>
           );
-        }
+        },
       },
       {
-        Header: 'Template',
-        accessor: 'template',
+        Header: "Template",
+        accessor: "template",
         resizable: true,
-        sortable: true
+        sortable: true,
       },
       {
-        Header: 'User',
-        accessor: 'userName',
-        style: { whiteSpace: 'normal' },
+        Header: "User",
+        accessor: "userName",
+        style: { whiteSpace: "normal" },
         resizable: true,
-        sortable: true
+        sortable: true,
       },
       {
-        Header: 'Study',
+        Header: "Study",
         sortable: true,
         width: 75,
-        accessor: 'studyDate',
+        accessor: "studyDate",
         filterMethod: (filter, rows) =>
-          matchSorter(rows, filter.value, { keys: ['date'] }),
+          matchSorter(rows, filter.value, { keys: ["date"] }),
         filterAll: true,
-        Cell: original => {
+        Cell: (original) => {
           const studyDateArr = this.convertDateFormat(
             original.row.checkbox.studyDate,
-            'studyDate'
-          ).split(' ');
+            "studyDate"
+          ).split(" ");
           return <div>{this.formatDate(studyDateArr[0])}</div>;
-        }
+        },
       },
       {
-        Header: 'Created',
+        Header: "Created",
         sortable: true,
-        accessor: 'date',
+        accessor: "date",
         filterMethod: (filter, rows) =>
-          matchSorter(rows, filter.value, { keys: ['date'] }),
+          matchSorter(rows, filter.value, { keys: ["date"] }),
         filterAll: true,
-        Cell: original => {
+        Cell: (original) => {
           const studyDateArr = this.convertDateFormat(
             original.row.checkbox.date,
-            'date'
-          ).split(' ');
+            "date"
+          ).split(" ");
           return <div>{this.formatDate(studyDateArr[0])}</div>;
-        }
+        },
       },
       {
         Header: () => {
@@ -725,18 +716,18 @@ class Annotations extends React.Component {
           );
         },
         sortable: true,
-        accessor: 'date',
+        accessor: "date",
         filterMethod: (filter, rows) =>
-          matchSorter(rows, filter.value, { keys: ['time'] }),
+          matchSorter(rows, filter.value, { keys: ["time"] }),
         filterAll: true,
-        Cell: original => {
+        Cell: (original) => {
           const studyDateArr = this.convertDateFormat(
             original.row.checkbox.date,
-            'date'
-          ).split(' ');
+            "date"
+          ).split(" ");
           return <div>{studyDateArr[1]}</div>;
-        }
-      }
+        },
+      },
     ];
   };
 
@@ -746,20 +737,20 @@ class Annotations extends React.Component {
 
   convertDateFormat = (str, attr) => {
     try {
-      let result = '';
+      let result = "";
       const dateArr = [];
       dateArr.push(str.substring(0, 4));
       dateArr.push(str.substring(4, 6));
       dateArr.push(str.substring(6, 8));
-      if (attr === 'date') {
+      if (attr === "date") {
         const timeArr = [];
         timeArr.push(str.substring(8, 10));
         timeArr.push(str.substring(10, 12));
         timeArr.push(str.substring(12));
-        result = dateArr.join('-') + ' ' + timeArr.join(':');
+        result = dateArr.join("-") + " " + timeArr.join(":");
       }
-      if (attr === 'studyDate') {
-        result = dateArr.join('-') + ' 00:00:00';
+      if (attr === "studyDate") {
+        result = dateArr.join("-") + " 00:00:00";
       }
       return result ? result : str;
     } catch (err) {
@@ -788,7 +779,7 @@ class Annotations extends React.Component {
     this.handleCancel();
   };
 
-  fetchData = async atributes => {
+  fetchData = async (atributes) => {
     try {
       const { projectID, bookmark, annotations, total } = this.state;
       const { page, pageSize, oldPage, oldPageSize } = this.state;
@@ -817,19 +808,35 @@ class Annotations extends React.Component {
     }
   };
 
-  getSeriesData = async selected => {
+  getSeriesData = async (selected) => {
     this.props.dispatch(startLoading());
     const { projectID, patientID, studyUID } = selected;
+    const { seriesData } = this.props;
+    const dataExists =
+      seriesData[projectID] &&
+      seriesData[projectID][patientID] &&
+      seriesData[projectID][patientID][studyUID] &&
+      seriesData[projectID][patientID][studyUID].list;
+
     try {
-      const { data: series } = await getSeries(projectID, patientID, studyUID);
-      this.props.dispatch(loadCompleted());
-      return series;
+      if (!dataExists) {
+        const { data: series } = await getSeries(
+          projectID,
+          patientID,
+          studyUID
+        );
+        this.props.dispatch(loadCompleted());
+        this.props.dispatch(
+          setSeriesData(projectID, patientID, studyUID, series, true)
+        );
+        return series;
+      } else return seriesData[projectID][patientID][studyUID].list;
     } catch (err) {
       this.props.dispatch(annotationsLoadingError(err));
     }
   };
 
-  excludeOpenSeries = allSeriesArr => {
+  excludeOpenSeries = (allSeriesArr) => {
     const result = [];
     //get all series number in an array
     const idArr = this.props.openSeries.reduce((all, item, index) => {
@@ -837,7 +844,7 @@ class Annotations extends React.Component {
       return all;
     }, []);
     //if array doesnot include that serie number
-    allSeriesArr.forEach(serie => {
+    allSeriesArr.forEach((serie) => {
       if (!idArr.includes(serie.seriesUID)) {
         //push that serie in the result arr
         result.push(serie);
@@ -846,7 +853,7 @@ class Annotations extends React.Component {
     return result;
   };
 
-  displaySeries = async selected => {
+  displaySeries = async (selected) => {
     if (this.props.openSeries.length === maxPort) {
       this.props.dispatch(alertViewPortFull());
     } else {
@@ -870,7 +877,7 @@ class Annotations extends React.Component {
         await this.setState({
           isSerieSelectionOpen: true,
           selectedStudy: [seriesArr],
-          studyName: selected.studyDescription
+          studyName: selected.studyDescription,
         });
       } else {
         //if there is enough room
@@ -882,8 +889,8 @@ class Annotations extends React.Component {
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => { })
-          .catch(err => console.error(err));
+          .then(() => {})
+          .catch((err) => console.error(err));
 
         //if patient doesnot exist get patient
         // -----> Delete after v1.0 <-----
@@ -901,8 +908,8 @@ class Annotations extends React.Component {
   };
 
   closeSelectionModal = () => {
-    this.setState(state => ({
-      isSerieSelectionOpen: !state.isSerieSelectionOpen
+    this.setState((state) => ({
+      isSerieSelectionOpen: !state.isSerieSelectionOpen,
     }));
   };
 
@@ -917,10 +924,10 @@ class Annotations extends React.Component {
       filteredData,
       pageSize,
       page,
-      data
+      data,
     } = this.state;
     const rowsToDisplay = filteredData.length > 0 ? filteredData : data;
-    const text = seriesAlreadyOpen > 1 ? 'annotations' : 'annotation';
+    const text = seriesAlreadyOpen > 1 ? "annotations" : "annotation";
     return (
       <div className="annotations menu-display" id="annotation">
         <ToolBar
@@ -943,7 +950,7 @@ class Annotations extends React.Component {
           <ReactTable
             NoDataComponent={() => null}
             className="pro-table"
-            style={{ maxHeight: '40rem' }}
+            style={{ maxHeight: "40rem" }}
             manual
             data={rowsToDisplay}
             columns={this.defineColumns()}
@@ -959,27 +966,27 @@ class Annotations extends React.Component {
               }, 10);
             }}
             // {this.fetchData}
-            onPageChange={page => {
+            onPageChange={(page) => {
               const oldPage = this.state.page;
-              this.setState({ page, oldPage, change: 'page' });
+              this.setState({ page, oldPage, change: "page" });
             }}
             showPageJump={false}
-            onPageSizeChange={size => {
+            onPageSizeChange={(size) => {
               const oldPageSize = this.state.pageSize;
               if (filteredData && filteredData.length > 0)
                 this.setState({
                   pages: Math.ceil(filteredData.length / size),
                   pageSize: size,
-                  oldPageSize
+                  oldPageSize,
                 });
               else {
                 this.setState({
                   pages: Math.ceil(this.state.total / size),
                   pageSize: size,
-                  oldPageSize
+                  oldPageSize,
                 });
               }
-              this.setState({ change: 'pageSize' });
+              this.setState({ change: "pageSize" });
             }}
           />
         )}
@@ -1006,7 +1013,7 @@ class Annotations extends React.Component {
           <DownloadModal
             onCancel={this.handleCancel}
             onSubmit={this.handleSubmitDownload}
-            updateStatus={() => console.log('update status')}
+            updateStatus={() => console.log("update status")}
             selected={this.state.selected}
             className="mng-download"
             projectID={this.state.projectID}
@@ -1031,14 +1038,15 @@ class Annotations extends React.Component {
   };
 }
 
-const mapsStateToProps = state => {
+const mapsStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
     uploadedPid: state.annotationsListReducer.uploadedPid,
     lastEventId: state.annotationsListReducer.lastEventId,
     refresh: state.annotationsListReducer.refresh,
-    projectMap: state.annotationsListReducer.projectMap
+    projectMap: state.annotationsListReducer.projectMap,
+    seriesData: state.annotationsListReducer.seriesData,
   };
 };
 
