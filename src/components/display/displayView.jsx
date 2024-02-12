@@ -349,7 +349,7 @@ class DisplayView extends Component {
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1], "didupdate 1");
+      this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], "didupdate 1");
       this.formInvertMap();
       this.setState({ multiFrameAimJumped: null });
       // } else if (
@@ -696,7 +696,7 @@ class DisplayView extends Component {
     return mergedMap;
   }
 
-  getData(multiFrameIndex, frameNo, fm, force) {
+  getData(multiFrameIndexData, frameNo, fm, force) {
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
       const { series, activePort, aimList } = this.props;
@@ -705,6 +705,8 @@ class DisplayView extends Component {
       const indexKeys = {};
       const newData = new Array(series.length);
       const indexOrder = [];
+      const multiFrameIndex = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[0]) : null;
+      const multiFramePort = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[1]) : null;
       for (let i = 0; i < series.length; i++) {
         // DONE/TODO: in order to not to get same stack again and again
         // add seriesUID-PrID etc info and look it up if we need to get it
@@ -716,13 +718,28 @@ class DisplayView extends Component {
 
         // if (typeof dataIndexMap[indexKey] !== "number") {
         if (!(dataIndexMap[indexKey] >= 0) || multiFrameIndex || force) {
-          const promise = this.getImageStack(
+          const promise = multiFrameIndex &&  multiFramePort === i ? this.getImageStack(
             series[i],
             i,
             multiFrameIndex,
             frameNo, 
             fm
+          ) : this.getImageStack(
+            series[i],
+            i,
+            null,
+            null, 
+            fm
           );
+
+          // const promise =  this.getImageStack(
+          //   series[i],
+          //   i,
+          //   multiFrameIndex,
+          //   frameNo, 
+          //   fm
+          // );
+
           promises.push(promise);
           indexKeys[indexKey] = i;
           indexOrder.push(i);
@@ -803,8 +820,9 @@ class DisplayView extends Component {
     //   undefined,
     //   "handleSerieReplace"
     // );
+    const mfIndex = multiFrameIndex ? `${multiFrameIndex}-${this.props.activePort}` : null;
     this.getData(
-      multiFrameIndex,
+      mfIndex,
       undefined,
       "handleSerieReplace"
     );
@@ -980,11 +998,12 @@ class DisplayView extends Component {
       if (urlsExist) {
         const seriesURL = wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage.split("/instances/")[0];
         seriesMetadata = await getMetadata(seriesURL); 
+        console.log(seriesMetadata);
+        seriesMetadata = seriesMetadata.data;
+        seriesMetadata.forEach(
+          (item) => (seriesMetadataMap[item["00080018"].Value[0]] = item)
+        );
       }
-      seriesMetadata = seriesMetadata.data;
-      seriesMetadata.forEach(
-        (item) => (seriesMetadataMap[item["00080018"].Value[0]] = item)
-      );
     } catch (err) {
       console.log("Can not get series metadata");
       console.error(err);
@@ -1004,6 +1023,9 @@ class DisplayView extends Component {
       seriesMetadata.length > 0 &&
       seriesMetadata.length === imgURLsLen;
     // get the first and the middle image
+    console.log(" ++++> imageUrls", imageUrls);
+    console.log(" ---> firstSeriesIndex", firstSeriesIndex);
+    console.log(" ++++", imageUrls[firstSeriesIndex]);
     const middleIndex = imageUrls[firstSeriesIndex][0].multiFrameImage ? 0 : Math.floor(imgURLsLen / 2);
     let firstImage = null;
     let middleImage = null;
@@ -2386,7 +2408,7 @@ class DisplayView extends Component {
       this.getData(null, null, "jumpToAimImage 1");
     } else {
       const multiFrameIndex = seriesAddition[activePort].multiFrameMap[imageID];
-      this.getData(multiFrameIndex, frameNo, "jumpToAimImage 2");
+      this.getData(`${multiFrameIndex}-${activePort}`, frameNo, "jumpToAimImage 2");
     }
   };
 
