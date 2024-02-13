@@ -105,7 +105,7 @@ const SeriesDropDown = (props) => {
 
     console.log(" ---> handleselect", UIDArr);
     // if (multiFrameIndex === undefined) {
-      const serie = seriesList.find((element) => element.seriesUID == e);
+      const serie = multiFrameIndex ? UIDArr[0] : seriesList.find((element) => element.seriesUID == e);
 
       if (props.isAimEditorShowing) {
         // if (!props.onCloseAimEditor(true))

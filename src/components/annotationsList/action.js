@@ -972,10 +972,14 @@ const getStudyAimsDataSorted = (arr, projectID, patientID) => {
 
 
 const getSeriesAdditionalData = (arr, uid) => {
+  console.log(" ++++> in action");
+  console.log(arr, uid);
   if (arr) {
     const data = arr.filter((el) => el.seriesUID === uid);
-    const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo } = data[0];
-    return { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo };
+    if (data.length > 0) {
+      const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo } = data[0];
+      return { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo };
+    } else return {};
   } else return {};
 }
 
