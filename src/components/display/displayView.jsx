@@ -2279,8 +2279,9 @@ class DisplayView extends Component {
 
   closeViewport = (index) => {
     const { showAimEditor, dirty } = this.state;
-    const { series } = this.props;
+    const { series, seriesAddition } = this.props;
     const { projectID, patientID, studyUID, seriesUID } = series[index];
+    const { multiFrameIndex } = seriesAddition[index];
     // closes the active viewport
     if (showAimEditor && dirty) {
       window.alert(
@@ -2290,8 +2291,9 @@ class DisplayView extends Component {
     }
 
     try {
-      const key = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
-      const gridIndex = this.state.dataIndexMap[key];
+      let key = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
+      key = multiFrameIndex ? `${key}-${multiFrameIndex}`: key;
+      const gridIndex = parseInt(this.state.dataIndexMap[key]);
       const newData = _.cloneDeep(this.state.data);
       const newDataIndexMap = { ...this.state.dataIndexMap };
       // build the from the uids
