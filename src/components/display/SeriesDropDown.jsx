@@ -103,6 +103,7 @@ const SeriesDropDown = (props) => {
     const multiFrameIndex = UIDArr[1];
     const { seriesUID } = props.openSeries[props.activePort];
 
+    console.log(" ---> handleselect", UIDArr);
     if (multiFrameIndex === undefined) {
       const serie = seriesList.find((element) => element.seriesUID == e);
 
@@ -178,6 +179,7 @@ const SeriesDropDown = (props) => {
               uniqueKey = `${seriesUID}_${currentIndex}`;
             }  
 
+            console.log(' dropdown', seriesDescription, uniqueKey)
             let isCurrent;
             if (multiFrameImage || multiFrameIndex) {
               const compound = `${openSeriesSeriesUID}_${openSeriesMultiFrameIndex}`;

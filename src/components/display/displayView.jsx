@@ -726,6 +726,7 @@ class DisplayView extends Component {
 
           console.log(JSON.stringify(dataIndexMap));
         if (!(parseInt(dataIndexMap[indexKey]) >= 0) || (multiFrameIndex &&  multiFramePort === i ) || force) {
+          console.log(" ------> serries passing to promise", series[i]);
           const promise = multiFrameIndex &&  multiFramePort === i ? this.getImageStack(
             series[i],
             i,
