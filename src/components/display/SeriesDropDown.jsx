@@ -100,11 +100,11 @@ const SeriesDropDown = (props) => {
   const handleSelect = (e) => {
     const UIDArr = e.split("_");
     const seriesUIDFmEvent = UIDArr[0];
-    const multiFrameIndex = UIDArr[1];
+    const multiFrameIndex = UIDArr[1] ? parseInt(UIDArr[1]) : null;
     const { seriesUID } = props.openSeries[props.activePort];
 
     console.log(" ---> handleselect", UIDArr);
-    if (multiFrameIndex === undefined) {
+    // if (multiFrameIndex === undefined) {
       const serie = seriesList.find((element) => element.seriesUID == e);
 
       if (props.isAimEditorShowing) {
@@ -120,22 +120,22 @@ const SeriesDropDown = (props) => {
           detail: {
             viewportId: props.activePort,
             id: e,
-            multiFrameIndex: parseInt(multiFrameIndex),
+            multiFrameIndex,
           },
         })
       );
-    } else {
-      // props.onSelect(0, props.activePort, e);
-      window.dispatchEvent(
-        new CustomEvent("serieReplaced", {
-          detail: {
-            viewportId: props.activePort,
-            id: e,
-            multiFrameIndex: parseInt(multiFrameIndex),
-          },
-        })
-      );
-    }
+    // }  else {
+    //   // props.onSelect(0, props.activePort, e);
+    //   window.dispatchEvent(
+    //     new CustomEvent("serieReplaced", {
+    //       detail: {
+    //         viewportId: props.activePort,
+    //         id: e,
+    //         multiFrameIndex: parseInt(multiFrameIndex),
+    //       },
+    //     })
+    //   );
+    // }
     window.dispatchEvent(new CustomEvent("deleteViewportWL"));
   };
 
