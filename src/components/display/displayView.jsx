@@ -920,8 +920,11 @@ class DisplayView extends Component {
     if (urls.length > 1) {
       this.formMultiframeImgData(urls);
     }
+    console.log(" ++++++> urls");
+    console.log(urls);
     const firstSeriesIndex = this.findFirstSeriesIndex(urls);
-    if (urls[firstSeriesIndex].length > 0) {
+    console.log(" ----> firstSeriesIndex", firstSeriesIndex);
+    if (urls[firstSeriesIndex] && urls[firstSeriesIndex].length > 0) {
       const arr = urls[firstSeriesIndex][0].lossyImage.split("/");
       this.props.dispatch(updateSubpath(arr[1], i));
     }
@@ -1030,21 +1033,23 @@ class DisplayView extends Component {
     console.log(" ---> firstSeriesIndex", firstSeriesIndex);
     console.log(" ++++", imageUrls[firstSeriesIndex]);
     console.log(" ====> grid index", index);
-    const middleIndex = imageUrls[firstSeriesIndex][0].multiFrameImage ? 0 : Math.floor(imgURLsLen / 2);
+    const middleIndex = imageUrls[firstSeriesIndex] && imageUrls[firstSeriesIndex][0] && imageUrls[firstSeriesIndex][0].multiFrameImage ? 0 : Math.floor(imgURLsLen / 2);
     let firstImage = null;
     let middleImage = null;
 
-    if (!useSeriesData) {
-      const result = await getImageMetadata(
-        wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage
-      );
-      const data = result.data;
-      firstImage = data[0];
-      middleImage = data[middleIndex];
-    } else {
-      firstImage = seriesMetadataMap[imageUrls[firstSeriesIndex][0].imageUID];
-      middleImage =
-        seriesMetadataMap[imageUrls[firstSeriesIndex][middleIndex].imageUID];
+    if (imageUrls[firstSeriesIndex] && imageUrls[firstSeriesIndex][0]) {
+      if (!useSeriesData) {
+        const result = await getImageMetadata(
+          wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage
+        );
+        const data = result.data;
+        firstImage = data[0];
+        middleImage = data[middleIndex];
+      } else {
+        firstImage = seriesMetadataMap[imageUrls[firstSeriesIndex][0].imageUID];
+        middleImage =
+          seriesMetadataMap[imageUrls[firstSeriesIndex][middleIndex].imageUID];
+      }
     }
 
     let referencePosition = null;
@@ -1055,7 +1060,7 @@ class DisplayView extends Component {
     const distanceDatasetPairs = [];
 
     // get position from the first image but orientation from the middle
-    const sortByGeo = !!firstImage["00200032"] && !!middleImage["00200037"];
+    const sortByGeo = !!firstImage && !!firstImage["00200032"] && !!middleImage && !!middleImage["00200037"];
     if (sortByGeo) {
       referencePosition = firstImage["00200032"].Value;
       rowVector = middleImage["00200037"].Value.slice(0, 3);
@@ -1067,7 +1072,7 @@ class DisplayView extends Component {
     }
 
 
-    const len = imageUrls[firstSeriesIndex].length;
+    const len = imageUrls[firstSeriesIndex] ? imageUrls[firstSeriesIndex].length : 0;
     for (let k = 0; k < len; k++) {
       baseUrl = wadoUrlNoWadors + imageUrls[firstSeriesIndex][k].lossyImage;
       let imgData;
