@@ -163,11 +163,11 @@ const SeriesDropDown = (props) => {
               props.openSeries[props.activePort].seriesUID;
             const openSeriesMultiFrameIndex =
               props.openSeriesAddition[props.activePort].multiFrameIndex;
-            if (multiFrameImage || multiFrameIndex) {
+            // if (multiFrameImage || multiFrameIndex) {
               const currentIndex = mfIndex[seriesUID] >= 0 ? mfIndex[seriesUID] + 1  : 0;
               mfIndex[seriesUID] = currentIndex;
               uniqueKey = `${seriesUID}_${currentIndex}`;
-            }  
+            // }  
 
             let isCurrent;
             if (multiFrameImage || multiFrameIndex) {
@@ -175,7 +175,7 @@ const SeriesDropDown = (props) => {
               isCurrent = compound === uniqueKey;
             } else {
               isCurrent =
-              openSeriesSeriesUID === uniqueKey && !openSeriesMultiFrameIndex;
+              `${openSeriesSeriesUID}_${currentIndex}` === uniqueKey && !openSeriesMultiFrameIndex;
               // openSeriesSeriesUID === uniqueKey;
             }
 

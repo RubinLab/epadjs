@@ -2591,10 +2591,10 @@ class DisplayView extends Component {
                       </span>
                     </div>
                   </div>
-                  <CornerstoneViewport
+                  {data.stack && data.stack.imageIds && <CornerstoneViewport
                     key={i}
-                    imageIds={data.stack?.imageIds}
-                    imageIdIndex={parseInt(data.stack?.currentImageIdIndex)}
+                    imageIds={data.stack.imageIds}
+                    imageIdIndex={data.stack.currentImageIdIndex ? parseInt(data.stack?.currentImageIdIndex) : 0}
                     viewportIndex={i}
                     tools={tools}
                     shouldInvert={this.state.invertMap[i]}
@@ -2628,7 +2628,7 @@ class DisplayView extends Component {
                     activeTool={activeTool}
                     isOverlayVisible={this.state.isOverlayVisible[i] || false}
                     jumpToImage={() => this.jumpToImage(0, i)}
-                  />
+                  />}
                 </div>
               );
             })}
