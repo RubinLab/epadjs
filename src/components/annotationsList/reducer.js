@@ -759,8 +759,6 @@ const asyncReducer = (state = initialState, action) => {
         replacedOpenSeries[state.activePort].seriesUID = action.payload.seriesUID;
         replacedOpenSeries[state.activePort].examType = action.payload.examType;
         const replacedOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
-        console.log(" ####### action replacedOpenSeriesAddition", replacedOpenSeriesAddition);
-        console.log(" ++++++> action.payload.seriesUID", action.payload);
         replacedOpenSeriesAddition[state.activePort].seriesUID = action.payload.seriesUID;
         replacedOpenSeriesAddition[state.activePort].examType = action.payload.examType;
         replacedOpenSeriesAddition[state.activePort].multiFrameIndex = action.payload.multiFrameIndex;
