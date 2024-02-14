@@ -362,7 +362,13 @@ class DisplayView extends Component {
     } else if (prevProps.series.length !== series.length || refreshPage || prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData(undefined, undefined, "didupdated 2", refreshPage);
+      let mfIndex = null;
+      let frame = null;
+      if ( prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID && seriesAddition[activePort].multiFrameIndex) {
+        mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
+        frame = 0;
+      }
+      this.getData(mfIndex, frame, "didupdated 2", refreshPage);
       this.formInvertMap();
     }
     // This is to handle late loading of aimsList from store but it also calls get Data
@@ -697,6 +703,7 @@ class DisplayView extends Component {
   }
 
   getData(multiFrameIndexData, frameNo, fm, force) {
+    console.log(`@@@@@@@@@@@@@@@@@@ fm`, fm)
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
       const { series, activePort, aimList } = this.props;
