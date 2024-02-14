@@ -703,7 +703,6 @@ class DisplayView extends Component {
   }
 
   getData(multiFrameIndexData, frameNo, fm, force) {
-    console.log(`@@@@@@@@@@@@@@@@@@ fm`, fm)
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
       const { series, activePort, aimList } = this.props;
@@ -721,19 +720,11 @@ class DisplayView extends Component {
 
         const { projectID, patientID, studyUID, seriesUID } = series[i];
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
-        console.log('$$$$$$$$$$', multiFrameIndex);
-        console.log('$$$$$$$$$$ multiFramePort', multiFramePort);
         if (multiFrameIndex &&  multiFramePort === i && !isNaN(multiFrameIndex)) indexKey = `${indexKey}-${multiFrameIndex}`
 
-          console.log(" ++++++> indexKey", indexKey);
         // if (typeof dataIndexMap[indexKey] !== "number") {
-          console.log(" -----> (dataIndexMap[indexKey] >= 0)", (dataIndexMap[indexKey] >= 0));
-          console.log(" +++++ force", force);
-          console.log(" +++++> (multiFrameIndex &&  multiFramePort === i )", (multiFrameIndex &&  multiFramePort === i ));
 
-          console.log(JSON.stringify(dataIndexMap));
         if (!(parseInt(dataIndexMap[indexKey]) >= 0) || (multiFrameIndex &&  multiFramePort === i ) || force) {
-          console.log(" ------> serries passing to promise", series[i]);
           const promise = multiFrameIndex &&  multiFramePort === i ? this.getImageStack(
             series[i],
             i,
@@ -927,10 +918,7 @@ class DisplayView extends Component {
     if (urls.length > 1) {
       this.formMultiframeImgData(urls);
     }
-    console.log(" ++++++> urls");
-    console.log(urls);
     const firstSeriesIndex = this.findFirstSeriesIndex(urls);
-    console.log(" ----> firstSeriesIndex", firstSeriesIndex);
     if (urls[firstSeriesIndex] && urls[firstSeriesIndex].length > 0) {
       const arr = urls[firstSeriesIndex][0].lossyImage.split("/");
       this.props.dispatch(updateSubpath(arr[1], i));
@@ -988,7 +976,6 @@ class DisplayView extends Component {
     const multiFrameMap = {};
     this.setState({ isLoading: true });
     const imageUrls = await this.getImages(serie, index);
-    console.log(" ---> imageUrls", index, imageUrls, serie)
     if (imageUrls.length > 1) {
       for (let i = 0; i < imageUrls.length; i++) {
         if (imageUrls[i] && Array.isArray(imageUrls[i]) && imageUrls[i][0].multiFrameImage) {
@@ -1010,8 +997,6 @@ class DisplayView extends Component {
       if (urlsExist) {
         const seriesURL = wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage.split("/instances/")[0];
         seriesMetadata = await getMetadata(seriesURL); 
-        console.log(" ---> parameters", serie, index, multiFrameIndex, frameNo);
-        console.log(seriesMetadata);
         seriesMetadata = seriesMetadata.data;
         seriesMetadata.forEach(
           (item) => (seriesMetadataMap[item["00080018"].Value[0]] = item)
@@ -1036,10 +1021,6 @@ class DisplayView extends Component {
       seriesMetadata.length > 0 &&
       seriesMetadata.length === imgURLsLen;
     // get the first and the middle image
-    console.log(" ++++> imageUrls", imageUrls, serie);
-    console.log(" ---> firstSeriesIndex", firstSeriesIndex);
-    console.log(" ++++", imageUrls[firstSeriesIndex]);
-    console.log(" ====> grid index", index);
     const middleIndex = imageUrls[firstSeriesIndex] && imageUrls[firstSeriesIndex][0] && imageUrls[firstSeriesIndex][0].multiFrameImage ? 0 : Math.floor(imgURLsLen / 2);
     let firstImage = null;
     let middleImage = null;

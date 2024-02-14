@@ -103,17 +103,11 @@ const SeriesDropDown = (props) => {
     const multiFrameIndex = UIDArr[1] ? parseInt(UIDArr[1]) : null;
     const { seriesUID } = props.openSeries[props.activePort];
 
-    console.log(" ---> handleselect", UIDArr, multiFrameIndex, seriesUIDFmEvent);
     // if (multiFrameIndex === undefined) {
       const serie = seriesList.find((element) => element.seriesUID === seriesUIDFmEvent);
 
       if ( multiFrameIndex ) serie.multiFrameIndex = multiFrameIndex;
       else serie.multiFrameIndex = null;
-
-      // if multiframeindex
-      // add multiframe multiframe index to serie
-      // change the multiframe index
-      // consider preparing jump array if the solution above won't work
 
       if (props.isAimEditorShowing) {
         // if (!props.onCloseAimEditor(true))
@@ -132,18 +126,6 @@ const SeriesDropDown = (props) => {
           },
         })
       );
-    // }  else {
-    //   // props.onSelect(0, props.activePort, e);
-    //   window.dispatchEvent(
-    //     new CustomEvent("serieReplaced", {
-    //       detail: {
-    //         viewportId: props.activePort,
-    //         id: e,
-    //         multiFrameIndex: parseInt(multiFrameIndex),
-    //       },
-    //     })
-    //   );
-    // }
     window.dispatchEvent(new CustomEvent("deleteViewportWL"));
   };
 
@@ -187,7 +169,6 @@ const SeriesDropDown = (props) => {
               uniqueKey = `${seriesUID}_${currentIndex}`;
             }  
 
-            console.log(' dropdown', seriesDescription, uniqueKey)
             let isCurrent;
             if (multiFrameImage || multiFrameIndex) {
               const compound = `${openSeriesSeriesUID}_${openSeriesMultiFrameIndex}`;
