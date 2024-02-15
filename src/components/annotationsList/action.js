@@ -390,10 +390,10 @@ export const addToGrid = (serie, annotation, port) => {
 };
 
 export const replaceInGrid = (serie) => {
-  let { seriesUID, examType } = serie;
+  let { seriesUID, examType, multiFrameIndex } = serie;
   // return async(dispatch)=>{
   //   await dispatch(getSingleSerie(serie));
-  return { type: REPLACE_IN_GRID, payload: { seriesUID, examType } };
+  return { type: REPLACE_IN_GRID, payload: { seriesUID, examType, multiFrameIndex } };
   // } 
 }
 
@@ -974,8 +974,10 @@ const getStudyAimsDataSorted = (arr, projectID, patientID) => {
 const getSeriesAdditionalData = (arr, uid) => {
   if (arr) {
     const data = arr.filter((el) => el.seriesUID === uid);
-    const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo } = data[0];
-    return { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo };
+    if (data.length > 0) {
+      const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo } = data[0];
+      return { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo };
+    } else return {};
   } else return {};
 }
 
