@@ -349,7 +349,7 @@ class DisplayView extends Component {
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData(multiFrameAimJumpData[0], multiFrameAimJumpData[1], "didupdate 1");
+      this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], "didupdate 1");
       this.formInvertMap();
       this.setState({ multiFrameAimJumped: null });
       // } else if (
@@ -362,7 +362,13 @@ class DisplayView extends Component {
     } else if (prevProps.series.length !== series.length || refreshPage || prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData(undefined, undefined, "didupdated 2", refreshPage);
+      let mfIndex = null;
+      let frame = null;
+      if ( prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID && seriesAddition[activePort].multiFrameIndex) {
+        mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
+        frame = 0;
+      }
+      this.getData(mfIndex, frame, "didupdated 2", refreshPage);
       this.formInvertMap();
     }
     // This is to handle late loading of aimsList from store but it also calls get Data
@@ -696,7 +702,7 @@ class DisplayView extends Component {
     return mergedMap;
   }
 
-  getData(multiFrameIndex, frameNo, fm, force) {
+  getData(multiFrameIndexData, frameNo, fm, force) {
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
       const { series, activePort, aimList } = this.props;
@@ -705,6 +711,8 @@ class DisplayView extends Component {
       const indexKeys = {};
       const newData = new Array(series.length);
       const indexOrder = [];
+      const multiFrameIndex = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[0]) : null;
+      const multiFramePort = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[1]) : null;
       for (let i = 0; i < series.length; i++) {
         // DONE/TODO: in order to not to get same stack again and again
         // add seriesUID-PrID etc info and look it up if we need to get it
@@ -712,17 +720,25 @@ class DisplayView extends Component {
 
         const { projectID, patientID, studyUID, seriesUID } = series[i];
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
-        if (multiFrameIndex && !isNaN(multiFrameIndex)) indexKey = `${indexKey}-${multiFrameIndex}`
+        if (multiFrameIndex &&  multiFramePort === i && !isNaN(multiFrameIndex)) indexKey = `${indexKey}-${multiFrameIndex}`
 
         // if (typeof dataIndexMap[indexKey] !== "number") {
-        if (!(dataIndexMap[indexKey] >= 0) || multiFrameIndex || force) {
-          const promise = this.getImageStack(
+
+        if (!(parseInt(dataIndexMap[indexKey]) >= 0) || (multiFrameIndex &&  multiFramePort === i ) || force) {
+          const promise = multiFrameIndex &&  multiFramePort === i ? this.getImageStack(
             series[i],
             i,
             multiFrameIndex,
             frameNo, 
             fm
+          ) : this.getImageStack(
+            series[i],
+            i,
+            null,
+            null, 
+            fm
           );
+
           promises.push(promise);
           indexKeys[indexKey] = i;
           indexOrder.push(i);
@@ -803,8 +819,9 @@ class DisplayView extends Component {
     //   undefined,
     //   "handleSerieReplace"
     // );
+    const mfIndex = multiFrameIndex ? `${multiFrameIndex}-${this.props.activePort}` : null;
     this.getData(
-      multiFrameIndex,
+      mfIndex,
       undefined,
       "handleSerieReplace"
     );
@@ -902,7 +919,7 @@ class DisplayView extends Component {
       this.formMultiframeImgData(urls);
     }
     const firstSeriesIndex = this.findFirstSeriesIndex(urls);
-    if (urls[firstSeriesIndex].length > 0) {
+    if (urls[firstSeriesIndex] && urls[firstSeriesIndex].length > 0) {
       const arr = urls[firstSeriesIndex][0].lossyImage.split("/");
       this.props.dispatch(updateSubpath(arr[1], i));
     }
@@ -980,11 +997,11 @@ class DisplayView extends Component {
       if (urlsExist) {
         const seriesURL = wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage.split("/instances/")[0];
         seriesMetadata = await getMetadata(seriesURL); 
+        seriesMetadata = seriesMetadata.data;
+        seriesMetadata.forEach(
+          (item) => (seriesMetadataMap[item["00080018"].Value[0]] = item)
+        );
       }
-      seriesMetadata = seriesMetadata.data;
-      seriesMetadata.forEach(
-        (item) => (seriesMetadataMap[item["00080018"].Value[0]] = item)
-      );
     } catch (err) {
       console.log("Can not get series metadata");
       console.error(err);
@@ -1004,21 +1021,23 @@ class DisplayView extends Component {
       seriesMetadata.length > 0 &&
       seriesMetadata.length === imgURLsLen;
     // get the first and the middle image
-    const middleIndex = imageUrls[firstSeriesIndex][0].multiFrameImage ? 0 : Math.floor(imgURLsLen / 2);
+    const middleIndex = imageUrls[firstSeriesIndex] && imageUrls[firstSeriesIndex][0] && imageUrls[firstSeriesIndex][0].multiFrameImage ? 0 : Math.floor(imgURLsLen / 2);
     let firstImage = null;
     let middleImage = null;
 
-    if (!useSeriesData) {
-      const result = await getImageMetadata(
-        wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage
-      );
-      const data = result.data;
-      firstImage = data[0];
-      middleImage = data[middleIndex];
-    } else {
-      firstImage = seriesMetadataMap[imageUrls[firstSeriesIndex][0].imageUID];
-      middleImage =
-        seriesMetadataMap[imageUrls[firstSeriesIndex][middleIndex].imageUID];
+    if (imageUrls[firstSeriesIndex] && imageUrls[firstSeriesIndex][0]) {
+      if (!useSeriesData) {
+        const result = await getImageMetadata(
+          wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage
+        );
+        const data = result.data;
+        firstImage = data[0];
+        middleImage = data[middleIndex];
+      } else {
+        firstImage = seriesMetadataMap[imageUrls[firstSeriesIndex][0].imageUID];
+        middleImage =
+          seriesMetadataMap[imageUrls[firstSeriesIndex][middleIndex].imageUID];
+      }
     }
 
     let referencePosition = null;
@@ -1029,7 +1048,7 @@ class DisplayView extends Component {
     const distanceDatasetPairs = [];
 
     // get position from the first image but orientation from the middle
-    const sortByGeo = !!firstImage["00200032"] && !!middleImage["00200037"];
+    const sortByGeo = !!firstImage && !!firstImage["00200032"] && !!middleImage && !!middleImage["00200037"];
     if (sortByGeo) {
       referencePosition = firstImage["00200032"].Value;
       rowVector = middleImage["00200037"].Value.slice(0, 3);
@@ -1041,7 +1060,7 @@ class DisplayView extends Component {
     }
 
 
-    const len = imageUrls[firstSeriesIndex].length;
+    const len = imageUrls[firstSeriesIndex] ? imageUrls[firstSeriesIndex].length : 0;
     for (let k = 0; k < len; k++) {
       baseUrl = wadoUrlNoWadors + imageUrls[firstSeriesIndex][k].lossyImage;
       let imgData;
@@ -2254,8 +2273,9 @@ class DisplayView extends Component {
 
   closeViewport = (index) => {
     const { showAimEditor, dirty } = this.state;
-    const { series } = this.props;
+    const { series, seriesAddition } = this.props;
     const { projectID, patientID, studyUID, seriesUID } = series[index];
+    const { multiFrameIndex } = seriesAddition[index];
     // closes the active viewport
     if (showAimEditor && dirty) {
       window.alert(
@@ -2265,8 +2285,9 @@ class DisplayView extends Component {
     }
 
     try {
-      const key = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
-      const gridIndex = this.state.dataIndexMap[key];
+      let key = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
+      key = multiFrameIndex ? `${key}-${multiFrameIndex}`: key;
+      const gridIndex = parseInt(this.state.dataIndexMap[key]);
       const newData = _.cloneDeep(this.state.data);
       const newDataIndexMap = { ...this.state.dataIndexMap };
       // build the from the uids
@@ -2386,7 +2407,7 @@ class DisplayView extends Component {
       this.getData(null, null, "jumpToAimImage 1");
     } else {
       const multiFrameIndex = seriesAddition[activePort].multiFrameMap[imageID];
-      this.getData(multiFrameIndex, frameNo, "jumpToAimImage 2");
+      this.getData(`${multiFrameIndex}-${activePort}`, frameNo, "jumpToAimImage 2");
     }
   };
 
@@ -2570,10 +2591,10 @@ class DisplayView extends Component {
                       </span>
                     </div>
                   </div>
-                  <CornerstoneViewport
+                  {data.stack && data.stack.imageIds && <CornerstoneViewport
                     key={i}
-                    imageIds={data.stack?.imageIds}
-                    imageIdIndex={parseInt(data.stack?.currentImageIdIndex)}
+                    imageIds={data.stack.imageIds}
+                    imageIdIndex={data.stack.currentImageIdIndex ? parseInt(data.stack?.currentImageIdIndex) : 0}
                     viewportIndex={i}
                     tools={tools}
                     shouldInvert={this.state.invertMap[i]}
@@ -2607,7 +2628,7 @@ class DisplayView extends Component {
                     activeTool={activeTool}
                     isOverlayVisible={this.state.isOverlayVisible[i] || false}
                     jumpToImage={() => this.jumpToImage(0, i)}
-                  />
+                  />}
                 </div>
               );
             })}

@@ -100,11 +100,14 @@ const SeriesDropDown = (props) => {
   const handleSelect = (e) => {
     const UIDArr = e.split("_");
     const seriesUIDFmEvent = UIDArr[0];
-    const multiFrameIndex = UIDArr[1];
+    const multiFrameIndex = UIDArr[1] ? parseInt(UIDArr[1]) : null;
     const { seriesUID } = props.openSeries[props.activePort];
 
-    if (multiFrameIndex === undefined) {
-      const serie = seriesList.find((element) => element.seriesUID == e);
+    // if (multiFrameIndex === undefined) {
+      const serie = seriesList.find((element) => element.seriesUID === seriesUIDFmEvent);
+
+      if ( multiFrameIndex ) serie.multiFrameIndex = multiFrameIndex;
+      else serie.multiFrameIndex = null;
 
       if (props.isAimEditorShowing) {
         // if (!props.onCloseAimEditor(true))
@@ -119,22 +122,10 @@ const SeriesDropDown = (props) => {
           detail: {
             viewportId: props.activePort,
             id: e,
-            multiFrameIndex: parseInt(multiFrameIndex),
+            multiFrameIndex: parseInt(multiFrameIndex)
           },
         })
       );
-    } else {
-      // props.onSelect(0, props.activePort, e);
-      window.dispatchEvent(
-        new CustomEvent("serieReplaced", {
-          detail: {
-            viewportId: props.activePort,
-            id: e,
-            multiFrameIndex: parseInt(multiFrameIndex),
-          },
-        })
-      );
-    }
     window.dispatchEvent(new CustomEvent("deleteViewportWL"));
   };
 
@@ -172,11 +163,11 @@ const SeriesDropDown = (props) => {
               props.openSeries[props.activePort].seriesUID;
             const openSeriesMultiFrameIndex =
               props.openSeriesAddition[props.activePort].multiFrameIndex;
-            if (multiFrameImage || multiFrameIndex) {
-              const currentIndex = mfIndex[seriesUID] ? mfIndex[seriesUID] + 1  : 1;
+            // if (multiFrameImage || multiFrameIndex) {
+              const currentIndex = mfIndex[seriesUID] >= 0 ? mfIndex[seriesUID] + 1  : 0;
               mfIndex[seriesUID] = currentIndex;
               uniqueKey = `${seriesUID}_${currentIndex}`;
-            }  
+            // }  
 
             let isCurrent;
             if (multiFrameImage || multiFrameIndex) {
@@ -184,7 +175,7 @@ const SeriesDropDown = (props) => {
               isCurrent = compound === uniqueKey;
             } else {
               isCurrent =
-              openSeriesSeriesUID === uniqueKey && !openSeriesMultiFrameIndex;
+              `${openSeriesSeriesUID}_${currentIndex}` === uniqueKey && !openSeriesMultiFrameIndex;
               // openSeriesSeriesUID === uniqueKey;
             }
 
