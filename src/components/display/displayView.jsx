@@ -364,7 +364,7 @@ class DisplayView extends Component {
       this.getViewports();
       let mfIndex = null;
       let frame = null;
-      if ( prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID && seriesAddition[activePort].multiFrameIndex) {
+      if ( active && prevActive && prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID && seriesAddition[activePort].multiFrameIndex) {
         mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
         frame = 0;
       }
