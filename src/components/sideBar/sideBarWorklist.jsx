@@ -13,6 +13,7 @@ import {
   GrTrash,
   GrCalculator,
   GrManual,
+  GrPowerReset
 } from "react-icons/gr";
 import { GoGraph, GoCheck } from "react-icons/go";
 import {
@@ -270,13 +271,56 @@ class WorkList extends React.Component {
     return [
       {
         id: "open",
-        Header: "Open",
-        width: 50,
+        // Header: "Open",
+        width: 30,
         resizable: true,
-        Cell: (row) => {
+        Cell: (original) => {
           return (
-            <div onClick={() => this.handleOpenClick(row.original)}>
-              <FaRegEye className="menu-clickable" />
+            <div >
+              <Button 
+                variant="dark"
+                data-tip
+                data-for={`display-${original.index}`}
+                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
+                onClick={() => this.handleOpenClick(original.original)}> 
+                <FaRegEye className="menu-clickable" />
+                <ReactTooltip
+                  id={`display-${original.index}`}
+                  place="right"
+                  type="light"
+                  delayShow={1000}
+                >
+                  <span>Display study</span>
+                </ReactTooltip>
+              </Button>
+            </div>
+          );
+        },
+      },
+      {
+        width: 30,
+        Cell: (original) => {
+          const { workListID, projectID, subjectID, studyUID, progressType } =
+            original.row._original;
+          return (
+            <div>
+              <Button
+                variant="dark"
+                data-tip
+                data-for={`delete-${original.index}`}
+                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
+                onClick={() => console.log("Clicked!!")}
+              >
+                <GrTrash />
+                <ReactTooltip
+                  id={`delete-${original.index}`}
+                  place="left"
+                  type="light"
+                  delayShow={1000}
+                >
+                  <span>Remove study from worklist</span>
+                </ReactTooltip>
+              </Button>
             </div>
           );
         },
@@ -609,7 +653,7 @@ class WorkList extends React.Component {
                   )
                 }
               >
-                <GrTrash />
+                <GrPowerReset />
                 <ReactTooltip
                   id={`progress-auto-button${original.index}`}
                   place="left"
