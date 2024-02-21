@@ -300,7 +300,7 @@ class WorkList extends React.Component {
       {
         width: 30,
         Cell: (original) => {
-          const { workListID, projectID, subjectID, studyUID, progressType } =
+          const { workListID, projectID, subjectID, studyUID } =
             original.row._original;
           return (
             <div>
@@ -309,7 +309,7 @@ class WorkList extends React.Component {
                 data-tip
                 data-for={`delete-${original.index}`}
                 style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
-                onClick={() => console.log("Clicked!!")}
+                onClick={() => this.handleSingleDelete(workListID, projectID, subjectID, studyUID)}
               >
                 <GrTrash />
                 <ReactTooltip
