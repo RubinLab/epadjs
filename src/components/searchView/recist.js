@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import jQuery from 'jquery';
 
-Number.prototype.times = function(fn) {
+Number.prototype.times = function (fn) {
   for (var r = [], i = 0; i < this; i++) r.push(fn(i));
   return r;
 };
@@ -35,7 +35,7 @@ var thRowHeight = '7px';
 
 function addRow(data, text, rowData, appendText, numofHeaderCols, hideCols) {
   return $('<tr/>').append(
-    (rowData.length + numofHeaderCols).times(function(c) {
+    (rowData.length + numofHeaderCols).times(function (c) {
       if (c == 0)
         return $('<td/>')
           .attr('colspan', numofHeaderCols - hideCols.length)
@@ -77,7 +77,7 @@ export function wordExport(patient, id) {
     'div.WordSection1 {page: WordSection1;}' +
     'table{border-collapse:collapse;text-align:center;}th{border:1px gray solid;text-color:black;}td{text-align:center;border:1px gray solid;text-color:black;}' +
     '</style>';
-  var exportDiv = $('#'+id+'docx').clone();
+  var exportDiv = $('#' + id + 'docx').clone();
 
   exportDiv.find('tbody').removeAttr('style');
   exportDiv.find('tr').removeAttr('style');
@@ -122,10 +122,10 @@ export function wordExport(patient, id) {
 
 function findMeasurements(table) {
   let allMeasurements = [];
-  jQuery.each(table, function(i, elem) {
-    jQuery.each(elem, function(j, selem) {
+  jQuery.each(table, function (i, elem) {
+    jQuery.each(elem, function (j, selem) {
       if (selem != null && typeof selem === 'object') {
-        Object.keys(selem).forEach(function(c) {
+        Object.keys(selem).forEach(function (c) {
           if (jQuery.inArray(c, allMeasurements) == -1) allMeasurements.push(c);
         });
       }
@@ -137,8 +137,8 @@ function findMeasurements(table) {
 
 function findTemplates(uids) {
   let allTemplates = [];
-  jQuery.each(uids, function(i, elem) {
-    jQuery.each(elem, function(j, selem) {
+  jQuery.each(uids, function (i, elem) {
+    jQuery.each(elem, function (j, selem) {
       if (selem != null && typeof selem['templateCode'] != 'undefined') {
         if (jQuery.inArray(selem['templateCode'], allTemplates) == -1)
           allTemplates.push(selem['templateCode']);
@@ -151,11 +151,11 @@ function findTemplates(uids) {
 function findShapes(uids) {
   let allShapes = [];
   let shapes;
-  jQuery.each(uids, function(i, elem) {
-    jQuery.each(elem, function(j, selem) {
+  jQuery.each(uids, function (i, elem) {
+    jQuery.each(elem, function (j, selem) {
       if (selem != null && typeof selem['shapes'] != 'undefined') {
         shapes = selem['shapes'].split(',');
-        shapes.forEach(function(shape) {
+        shapes.forEach(function (shape) {
           if (shape.trim() != '' && jQuery.inArray(shape, allShapes) == -1)
             allShapes.push(shape);
         });
@@ -169,8 +169,8 @@ function checkForShapes(aimShapes, filterShapes) {
   //no shape from aim return false
   if (!aimShapes && filterShapes) return false;
   let match = false;
-  aimShapes.split().forEach(function(as) {
-    filterShapes.split().forEach(function(fs) {
+  aimShapes.split().forEach(function (as) {
+    filterShapes.split().forEach(function (fs) {
       if (fs.toLowerCase().includes(as.toLowerCase())) match = true;
     });
   });
@@ -181,10 +181,10 @@ function shrinkTable(filteredTable, data, numofHeaderCols, rowsWithNoValue) {
   let shrinkedData = {};
   let rows = [];
   let cols = [];
-  jQuery.each(filteredTable, function(i, elem) {
+  jQuery.each(filteredTable, function (i, elem) {
     rows[i] = false;
     if (!rowsWithNoValue.includes(i))
-      jQuery.each(elem, function(j, selem) {
+      jQuery.each(elem, function (j, selem) {
         if (selem != null && selem != 'undefined') {
           if (j >= numofHeaderCols) rows[i] = true;
           cols[j] = true;
@@ -193,10 +193,10 @@ function shrinkTable(filteredTable, data, numofHeaderCols, rowsWithNoValue) {
   });
 
   let filtereddtTable = [];
-  jQuery.each(data.tTable, function(i, elem) {
+  jQuery.each(data.tTable, function (i, elem) {
     if (rows[i] === true && !rowsWithNoValue.includes(i)) {
       let row = [];
-      jQuery.each(elem, function(j, selem) {
+      jQuery.each(elem, function (j, selem) {
         if (
           cols[j] != null &&
           cols[j] != 'undefined' &&
@@ -211,27 +211,29 @@ function shrinkTable(filteredTable, data, numofHeaderCols, rowsWithNoValue) {
   shrinkedData.tTable = filtereddtTable;
 
   let filteredduids = [];
-  jQuery.each(data.tUIDs, function(i, elem) {
+  jQuery.each(data.tUIDs, function (i, elem) {
     if (rows[i] === true && !rowsWithNoValue.includes(i)) {
       let row = [];
-      jQuery.each(elem, function(j, selem) {
+      jQuery.each(elem, function (j, selem) {
         if (
           cols[j + numofHeaderCols] != null &&
           cols[j + numofHeaderCols] != 'undefined' &&
           cols[j + numofHeaderCols] == true
         ) {
-          selem.index = i;
-          row.push(selem);
+          if (selem) {
+            selem.index = i;
+            row.push(selem);
+          }
         }
       });
-      
+
       filteredduids.push(row);
     }
   });
   shrinkedData.tUIDs = filteredduids;
 
   let filtereddstudyDates = [];
-  jQuery.each(data.studyDates, function(i, elem) {
+  jQuery.each(data.studyDates, function (i, elem) {
     if (
       cols[i + numofHeaderCols] != null &&
       cols[i + numofHeaderCols] != 'undefined' &&
@@ -242,7 +244,7 @@ function shrinkTable(filteredTable, data, numofHeaderCols, rowsWithNoValue) {
   shrinkedData.studyDates = filtereddstudyDates;
 
   let filtereddtTimepoints = [];
-  jQuery.each(data.tTimepoints, function(i, elem) {
+  jQuery.each(data.tTimepoints, function (i, elem) {
     if (
       cols[i + numofHeaderCols] != null &&
       cols[i + numofHeaderCols] != 'undefined' &&
@@ -253,7 +255,7 @@ function shrinkTable(filteredTable, data, numofHeaderCols, rowsWithNoValue) {
   shrinkedData.tTimepoints = filtereddtTimepoints;
 
   let filtereddstTimepoints = [];
-  jQuery.each(data.stTimepoints, function(i, elem) {
+  jQuery.each(data.stTimepoints, function (i, elem) {
     if (
       cols[i + numofHeaderCols] != null &&
       cols[i + numofHeaderCols] != 'undefined' &&
@@ -264,7 +266,7 @@ function shrinkTable(filteredTable, data, numofHeaderCols, rowsWithNoValue) {
   shrinkedData.stTimepoints = filtereddstTimepoints;
 
   let filtereddtLesionNames = [];
-  jQuery.each(data.tLesionNames, function(i, elem) {
+  jQuery.each(data.tLesionNames, function (i, elem) {
     if (rows[i] != null && rows[i] != 'undefined' && rows[i] == true)
       filtereddtLesionNames.push(elem);
   });
@@ -289,34 +291,34 @@ function filterForMeasurementTemplateShape(
     shapes = null;
   }
   let filteredTable = [];
-  jQuery.each(table, function(i, elem) {
+  jQuery.each(table, function (i, elem) {
     let isThereLesionData = false;
-    var row = elem.map(function(selem, j) {
-        if (typeof selem === 'object') {
-          if (
-            (template == null ||
-              (template != null &&
-                template &&
-                data.tUIDs[i][j - numofHeaderCols] != 'undefined' &&
-                data.tUIDs[i][j - numofHeaderCols] != null &&
-                data.tUIDs[i][j - numofHeaderCols].templateCode == template)) &&
-            (shapes == null ||
-              (shapes != null &&
-                shapes &&
-                data.tUIDs[i][j - numofHeaderCols] != null &&
-                checkForShapes(
-                  data.tUIDs[i][j - numofHeaderCols].shapes,
-                  shapes
-                )))
-          )
-            if (selem != null && typeof selem[measurement] != 'undefined') {
-              if (selem[measurement].value) isThereLesionData = true;
-              return selem[measurement].value;
-            } else return 'NA';
-          else return null;
-        } else {
-          return selem;
-        }
+    var row = elem.map(function (selem, j) {
+      if (typeof selem === 'object') {
+        if (
+          (template == null ||
+            (template != null &&
+              template &&
+              data.tUIDs[i][j - numofHeaderCols] != 'undefined' &&
+              data.tUIDs[i][j - numofHeaderCols] != null &&
+              data.tUIDs[i][j - numofHeaderCols].templateCode == template)) &&
+          (shapes == null ||
+            (shapes != null &&
+              shapes &&
+              data.tUIDs[i][j - numofHeaderCols] != null &&
+              checkForShapes(
+                data.tUIDs[i][j - numofHeaderCols].shapes,
+                shapes
+              )))
+        )
+          if (selem != null && typeof selem[measurement] != 'undefined') {
+            if (selem[measurement].value) isThereLesionData = true;
+            return selem[measurement].value;
+          } else return 'NA';
+        else return null;
+      } else {
+        return selem;
+      }
     });
     if (!isThereLesionData) rowsWithNoValue.push(i);
     filteredTable.push(row);
@@ -341,7 +343,7 @@ function calcSums(filteredTable, timepoints, numofHeaderCols) {
             } catch (err) {
               console.log(
                 "Couldn't convert to double value=" +
-                  filteredTable[i][j + numofHeaderCols]
+                filteredTable[i][j + numofHeaderCols]
               );
             }
           }
@@ -484,7 +486,7 @@ function makeTable(data, filteredTable, modality, numofHeaderCols, hideCols) {
   }
 
   var timepointheader = (data.tTimepoints.length + numofHeaderCols).times(
-    function(c) {
+    function (c) {
       if (c == 0)
         return $('<th/>')
           .text('Lesion Name')
@@ -512,7 +514,7 @@ function makeTable(data, filteredTable, modality, numofHeaderCols, hideCols) {
       }
     }
   );
-  var header = (data.studyDates.length + numofHeaderCols).times(function(c) {
+  var header = (data.studyDates.length + numofHeaderCols).times(function (c) {
     if (c == 0 || hideCols.indexOf(c) != -1) return '';
     if (c >= numofHeaderCols) {
       let st = data.studyDates[c - numofHeaderCols];
@@ -521,7 +523,7 @@ function makeTable(data, filteredTable, modality, numofHeaderCols, hideCols) {
   });
 
   var modalityheader = (data.studyDates.length + numofHeaderCols).times(
-    function(c) {
+    function (c) {
       if (c == 0 || hideCols.indexOf(c) != -1) return '';
       if (c >= numofHeaderCols) {
         if (
@@ -534,9 +536,9 @@ function makeTable(data, filteredTable, modality, numofHeaderCols, hideCols) {
     }
   );
 
-  var row = function(r) {
+  var row = function (r) {
     return $('<tr/>').append(
-      (data.studyDates.length + numofHeaderCols).times(function(c) {
+      (data.studyDates.length + numofHeaderCols).times(function (c) {
         if (hideCols.indexOf(c) != -1) return '';
         if (
           filteredTable[r][c] == null ||
@@ -613,7 +615,7 @@ function MakeTableNonTarget(data, numofHeaderCols, hideCols) {
       '<div class="recist HeaderRow" id="nonMeasurableHeader">Non-measurable Disease Table</div>'
     );
 
-  var header = (data.studyDates.length + numofHeaderCols).times(function(c) {
+  var header = (data.studyDates.length + numofHeaderCols).times(function (c) {
     if (c == 0)
       return $('<th/>')
         .text('Lesion Name')
@@ -626,9 +628,9 @@ function MakeTableNonTarget(data, numofHeaderCols, hideCols) {
     } else return $('<th/>');
   });
 
-  var row = function(r) {
+  var row = function (r) {
     return $('<tr/>').append(
-      (data.studyDates.length + numofHeaderCols).times(function(c) {
+      (data.studyDates.length + numofHeaderCols).times(function (c) {
         if (c == 1) return '';
         if (data.ntTable[r][c] == null) {
           return $('<td/>')
@@ -672,7 +674,7 @@ function addResponseCatRow(
   hideCols
 ) {
   return $('<tr/>').append(
-    (rowData.length + numofHeaderCols).times(function(c) {
+    (rowData.length + numofHeaderCols).times(function (c) {
       let col;
       if (c == 0) {
         col = $('<td/>')
@@ -760,7 +762,7 @@ function checkAndColor(
     //   }
     // );
     let txt = recisttable.find('#c' + i + '0').text();
-    
+
     aNameTag.text(txt); // Populate the text with what's already there
     aNameTag.css('color', linkColor);
     aNameTag.css('text-decoration', 'none');
@@ -820,10 +822,10 @@ function checkAndColor(
         aTag.css('text-decoration', 'none');
         //                aTag.attr('target', '_blank');
         recisttable
-        .find('#c' + i + (j + numofHeaderCols))
-        .text('')
-        .append(aTag);
-        
+          .find('#c' + i + (j + numofHeaderCols))
+          .text('')
+          .append(aTag);
+
 
         //                recisttable.find('#c'+i+'1').hide();
         //the cell num of location is important! Assumes it is goig to be on second column
@@ -922,7 +924,7 @@ function checkAndColorNonTarget(
     var aNameTag = $('<a>', { href: '#', id: 'nc' + i + '0' });
     aNameTag.click(
       { projectID: projectID, patientID: patientID, row: data.ntUIDs[i] },
-      function(event) {
+      function (event) {
         openAllAimsOfLesion(
           event.data.row,
           event.data.patientID,
@@ -1003,7 +1005,7 @@ function checkAndColorNonTarget(
             seriesUID: data.ntUIDs[i][j].seriesUID,
             aimUID: data.ntUIDs[i][j].aimUID,
           },
-          function(event) {
+          function (event) {
             window.loadSpecific(
               event.data.projectID,
               event.data.patientID,
@@ -1120,9 +1122,9 @@ function filterAndFillInTables(
   let filterVal = 'length';
   let templateFilterVal = 'All';
   let shapesFilterVal = 'All';
-  const filter = recisttable.find('#'+id+'filter');
-  const templateFilter = recisttable.find('#'+id+'templateFilter');
-  const shapesFilter = recisttable.find('#'+id+'shapesFilter');
+  const filter = recisttable.find('#' + id + 'filter');
+  const templateFilter = recisttable.find('#' + id + 'templateFilter');
+  const shapesFilter = recisttable.find('#' + id + 'shapesFilter');
   if (filter) filterVal = filter.val();
   if (templateFilter) templateFilterVal = templateFilter.val();
   if (shapesFilter) shapesFilterVal = shapesFilter.val();
@@ -1204,40 +1206,40 @@ function fillFilterSelect(
 ) {
   let shrinkedData = data;
   // get the selected if already added
-  var selectedFilter = $('#'+id+'filter');
-  var selectedTemplateFilter = $('#'+id+'templateFilter');
-  var selectedShapeFilter = $('#'+id+'shapeFilter');
+  var selectedFilter = $('#' + id + 'filter');
+  var selectedTemplateFilter = $('#' + id + 'templateFilter');
+  var selectedShapeFilter = $('#' + id + 'shapeFilter');
   // empty and fill in filters
-  var filter = recisttable.find('#'+id+'filter');
+  var filter = recisttable.find('#' + id + 'filter');
   filter.empty();
-  $.each(findMeasurements(table), function(index, value) {
+  $.each(findMeasurements(table), function (index, value) {
     filter.append('<option>' + value + '</option>');
   });
-  var templateFilter = recisttable.find('#'+id+'templateFilter');
+  var templateFilter = recisttable.find('#' + id + 'templateFilter');
   templateFilter.empty();
   templateFilter.append('<option>All</option>');
-  $.each(findTemplates(data.tUIDs), function(index, value) {
+  $.each(findTemplates(data.tUIDs), function (index, value) {
     templateFilter.append('<option>' + value + '</option>');
   });
-  var shapesFilter = recisttable.find('#'+id+'shapesFilter');
+  var shapesFilter = recisttable.find('#' + id + 'shapesFilter');
   shapesFilter.empty();
   shapesFilter.append('<option>All</option>');
-  $.each(findShapes(data.tUIDs), function(index, value) {
+  $.each(findShapes(data.tUIDs), function (index, value) {
     shapesFilter.append(
       '<option value=' +
-        value +
-        ' text=' +
-        prettyShape(value) +
-        '>' +
-        prettyShape(value) +
-        '</option>'
+      value +
+      ' text=' +
+      prettyShape(value) +
+      '>' +
+      prettyShape(value) +
+      '</option>'
     );
   });
 
   if (!filter.is(':empty')) {
     if (loadFilter) {
       let filters = loadFilter.split('&');
-      filters.forEach(function(item) {
+      filters.forEach(function (item) {
         let pair = item.split('=');
         if (pair) {
           if (pair[0] === 'shapes') {
@@ -1253,10 +1255,10 @@ function fillFilterSelect(
         }
       });
     } else {
-      console.log('selected value', selectedFilter? selectedFilter.val(): 'non');
+      console.log('selected value', selectedFilter ? selectedFilter.val() : 'non');
       if (selectedFilter && selectedFilter.val()) filter.val(selectedFilter.val());
       else filter.selectedIndex = 0;
-      console.log('filter value after', filter? filter.val(): 'non');
+      console.log('filter value after', filter ? filter.val() : 'non');
       if (selectedTemplateFilter && selectedTemplateFilter.val()) templateFilter.val(selectedTemplateFilter.val());
       else templateFilter.selectedIndex = 0;
       if (selectedShapeFilter && selectedShapeFilter.val()) shapesFilter.val(selectedShapeFilter.val());
@@ -1278,16 +1280,16 @@ function fillFilterSelect(
       rowsWithNoValue
     );
   }
-  
+
   if (shrinkedData.tSums == null) {
     shrinkedData = makeCalcs(shrinkedData, numofHeaderCols);
   }
-  
+
   if (loadFilter || filter.is(':empty')) {
     filter.hide();
     templateFilter.hide();
     shapesFilter.hide();
-  } 
+  }
   // console.log('ref', refreshFilter, !refreshFilter, data, shrinkedData);
   if (!refreshFilter) {
     recisttable = fillInTables(
@@ -1373,13 +1375,13 @@ export async function renderTable(
 
   recisttable.html(
     '<div id="' +
-      id +
-      //  'class="recistingTest"' +
-      '" title="' +
-      report +
-      // '"  style="background-color:#4d4d4d;overflow-y:auto;overflow-x:auto;"><h6 style="font-size:100%;text-align:right;padding:0;border:0;margin:0;color:white;background-color:#666666;"><select id="shapesFilter"><option>Choose to filter</option></select>&nbsp;<select id="templateFilter"><option>Choose to filter</option></select>&nbsp;<select id="filter"><option>Choose to filter</option></select>&nbsp;<button class="w3-btn w3-tiny w3-round-large recistWhitetext" id="exportBtn">Export</button></h6></div><div id="docx"><div id= "tables" class="WordSection1"></div></div><h6 style="font-size:80%;text-align:left;padding:0;border:0;margin:0;color:white;background-color:#666666;"><button id="baseline" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Baseline</button>&nbsp;<button id="followup" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Followup</button>&nbsp;<button id="new" class="w3-btn w3-tiny w3-round-large recistWhitetext">New/Reappeared/Progressive</button>&nbsp;<button id="resolved" class="w3-btn w3-tiny w3-round-large recistWhitetext">Resolved</button>&nbsp;<button id="nontarget" class="w3-btn w3-tiny w3-round-large recistWhitetext">Present Lesion</button>&nbsp;<button id="error" class="w3-btn w3-tiny w3-round-large recistWhitetext">Error</button></h6></div>'
-      // `  style="background-color:#4d4d4d;overflow-y:auto;overflow-x:auto;"><h6 style="font-size:100%;text-align:right;padding:0;border:0;margin:0;color:white;background-color:#666666;"><select id="shapesFilter"><option>Choose to filter</option></select>&nbsp;<select id="templateFilter"><option>Choose to filter</option></select>&nbsp;<select id="filter"><option>Choose to filter</option></select>&nbsp;<button class="w3-btn w3-tiny w3-round-large recistWhitetext" id="exportBtn">Export</button><button class="w3-btn w3-round-large recistWhitetext" data-index=${index} id="closeBtn">&#215</button></h6></div><div id="docx"><div id= "tables" class="WordSection1"></div></div><h6 style="font-size:80%;text-align:left;padding:0;border:0;margin:0;color:white;background-color:#666666;"><button id="baseline" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Baseline</button>&nbsp;<button id="followup" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Followup</button>&nbsp;<button id="new" class="w3-btn w3-tiny w3-round-large recistWhitetext">New/Reappeared/Progressive</button>&nbsp;<button id="resolved" class="w3-btn w3-tiny w3-round-large recistWhitetext">Resolved</button>&nbsp;<button id="nontarget" class="w3-btn w3-tiny w3-round-large recistWhitetext">Present Lesion</button>&nbsp;<button id="error" class="w3-btn w3-tiny w3-round-large recistWhitetext">Error</button></h6></div>`
-      `  style="background-color:#4d4d4d;overflow-y:auto;overflow-x:auto;"><h6 style="font-size:100%;text-align:right;padding:0;border:0;margin:0;color:white;background-color:#666666;"><select id="`+id+`shapesFilter"><option>Choose to filter</option></select>&nbsp;<select id="`+id+`templateFilter"><option>Choose to filter</option></select>&nbsp;<select id="`+id+`filter"><option>Choose to filter</option></select>&nbsp;</h6></div><div id="`+id+`docx"><div id= "tables" class="WordSection1"></div></div><h6 style="font-size:80%;text-align:left;padding:0;border:0;margin:0;color:white;background-color:#666666;"><button id="baseline" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Baseline</button>&nbsp;<button id="followup" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Followup</button>&nbsp;<button id="new" class="w3-btn w3-tiny w3-round-large recistWhitetext">New/Reappeared/Progressive</button>&nbsp;<button id="resolved" class="w3-btn w3-tiny w3-round-large recistWhitetext">Resolved</button>&nbsp;<button id="nontarget" class="w3-btn w3-tiny w3-round-large recistWhitetext">Present Lesion</button>&nbsp;<button id="error" class="w3-btn w3-tiny w3-round-large recistWhitetext">Error</button></h6></div>`
+    id +
+    //  'class="recistingTest"' +
+    '" title="' +
+    report +
+    // '"  style="background-color:#4d4d4d;overflow-y:auto;overflow-x:auto;"><h6 style="font-size:100%;text-align:right;padding:0;border:0;margin:0;color:white;background-color:#666666;"><select id="shapesFilter"><option>Choose to filter</option></select>&nbsp;<select id="templateFilter"><option>Choose to filter</option></select>&nbsp;<select id="filter"><option>Choose to filter</option></select>&nbsp;<button class="w3-btn w3-tiny w3-round-large recistWhitetext" id="exportBtn">Export</button></h6></div><div id="docx"><div id= "tables" class="WordSection1"></div></div><h6 style="font-size:80%;text-align:left;padding:0;border:0;margin:0;color:white;background-color:#666666;"><button id="baseline" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Baseline</button>&nbsp;<button id="followup" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Followup</button>&nbsp;<button id="new" class="w3-btn w3-tiny w3-round-large recistWhitetext">New/Reappeared/Progressive</button>&nbsp;<button id="resolved" class="w3-btn w3-tiny w3-round-large recistWhitetext">Resolved</button>&nbsp;<button id="nontarget" class="w3-btn w3-tiny w3-round-large recistWhitetext">Present Lesion</button>&nbsp;<button id="error" class="w3-btn w3-tiny w3-round-large recistWhitetext">Error</button></h6></div>'
+    // `  style="background-color:#4d4d4d;overflow-y:auto;overflow-x:auto;"><h6 style="font-size:100%;text-align:right;padding:0;border:0;margin:0;color:white;background-color:#666666;"><select id="shapesFilter"><option>Choose to filter</option></select>&nbsp;<select id="templateFilter"><option>Choose to filter</option></select>&nbsp;<select id="filter"><option>Choose to filter</option></select>&nbsp;<button class="w3-btn w3-tiny w3-round-large recistWhitetext" id="exportBtn">Export</button><button class="w3-btn w3-round-large recistWhitetext" data-index=${index} id="closeBtn">&#215</button></h6></div><div id="docx"><div id= "tables" class="WordSection1"></div></div><h6 style="font-size:80%;text-align:left;padding:0;border:0;margin:0;color:white;background-color:#666666;"><button id="baseline" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Baseline</button>&nbsp;<button id="followup" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Followup</button>&nbsp;<button id="new" class="w3-btn w3-tiny w3-round-large recistWhitetext">New/Reappeared/Progressive</button>&nbsp;<button id="resolved" class="w3-btn w3-tiny w3-round-large recistWhitetext">Resolved</button>&nbsp;<button id="nontarget" class="w3-btn w3-tiny w3-round-large recistWhitetext">Present Lesion</button>&nbsp;<button id="error" class="w3-btn w3-tiny w3-round-large recistWhitetext">Error</button></h6></div>`
+    `  style="background-color:#4d4d4d;overflow-y:auto;overflow-x:auto;"><h6 style="font-size:100%;text-align:right;padding:0;border:0;margin:0;color:white;background-color:#666666;"><select id="` + id + `shapesFilter"><option>Choose to filter</option></select>&nbsp;<select id="` + id + `templateFilter"><option>Choose to filter</option></select>&nbsp;<select id="` + id + `filter"><option>Choose to filter</option></select>&nbsp;</h6></div><div id="` + id + `docx"><div id= "tables" class="WordSection1"></div></div><h6 style="font-size:80%;text-align:left;padding:0;border:0;margin:0;color:white;background-color:#666666;"><button id="baseline" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Baseline</button>&nbsp;<button id="followup" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Followup</button>&nbsp;<button id="new" class="w3-btn w3-tiny w3-round-large recistWhitetext">New/Reappeared/Progressive</button>&nbsp;<button id="resolved" class="w3-btn w3-tiny w3-round-large recistWhitetext">Resolved</button>&nbsp;<button id="nontarget" class="w3-btn w3-tiny w3-round-large recistWhitetext">Present Lesion</button>&nbsp;<button id="error" class="w3-btn w3-tiny w3-round-large recistWhitetext">Error</button></h6></div>`
   );
   var reportText = report;
   if (reportText === 'RECIST') reportText = 'Tumor Burden';
