@@ -421,7 +421,6 @@ const asyncReducer = (state = initialState, action) => {
             }, {})
         }
 
-
         if (annCalc.length > 0) {
           for (let i = 0; i < imageAddedSeries.length; i++) {
             if (imageAddedSeries[i].seriesUID === action.payload.serID) {
@@ -431,6 +430,7 @@ const asyncReducer = (state = initialState, action) => {
               if (!imageAddedSeries[i].numberOfImages) imageAddedSeries[i].numberOfImages = action.payload.ref.numberOfImages;
               if (!imageAddedSeries[i].seriesDescription) imageAddedSeries[i].seriesDescription = action.payload.ref.seriesDescription;
               if (!imageAddedSeries[i].seriesNo) imageAddedSeries[i].seriesNo = action.payload.ref.seriesNo;
+              if (!imageAddedSeries[i].examType) imageAddedSeries[i].examType = action.payload.ref.examType;
             }
           }
         }

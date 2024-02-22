@@ -975,8 +975,8 @@ const getSeriesAdditionalData = (arr, uid) => {
   if (arr) {
     const data = arr.filter((el) => el.seriesUID === uid);
     if (data.length > 0) {
-      const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo } = data[0];
-      return { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo };
+      const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo, examType } = data[0];
+      return { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo, examType };
     } else return {};
   } else return {};
 }

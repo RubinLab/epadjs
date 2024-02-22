@@ -198,12 +198,12 @@ class DisplayView extends Component {
   }
 
   formInvertMap = (buttonClicked, index) => {
-    const { series } = this.props;
+    const { series, seriesAddition } = this.props;
     const invertMap = { ...this.state.invertMap };
     if (buttonClicked) invertMap[index] = !invertMap[index];
     else
       series.forEach((el, i) => {
-        invertMap[i] = el.examType === "NM";
+        invertMap[i] = el.examType === "NM" || seriesAddition[i].examType === 'NM';
       });
     this.setState({ invertMap });
   };
@@ -2250,6 +2250,7 @@ class DisplayView extends Component {
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
     imgStatus[this.props.activePort] = null;
+    this.setState({ invertMap: {} });
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
   };
 
