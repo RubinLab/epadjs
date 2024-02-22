@@ -4,7 +4,7 @@ class PluginNavBar extends React.Component {
   render() {
     return (
       <div className="pluginnavbar">
-        <ul className="pluginform nav nav-tabs" id="myTab">
+        <ul className="pluginform nav nav-tabs">
           <li className="pluginform nav-item ">
             <a
               href="#"
