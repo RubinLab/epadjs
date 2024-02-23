@@ -262,11 +262,11 @@ class DisplayView extends Component {
   forceRefreshForMF = () => {
     const { seriesAddition, activePort } = this.props;
     const { aimID } = seriesAddition[activePort];
-    const { frameData } = seriesAddition[activePort];
+    const { frameData, multiFrameMap } = seriesAddition[activePort];
     let image = frameData && frameData[aimID] ? frameData[aimID][0] : null;
     if (!image) return false;
     const imageArr = image.split("/frames/");
-    const mfIndex =  seriesAddition[activePort].multiFrameMap[imageArr[0]];
+    const mfIndex =  multiFrameMap ? seriesAddition[activePort].multiFrameMap[imageArr[0]] : null;
     if (mfIndex && mfIndex > 0) return false;
     else return true;
   }
