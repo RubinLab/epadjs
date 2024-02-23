@@ -180,7 +180,6 @@ const AnnotationSearch = (props) => {
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
     if ((typeof pagination === "number" || pagination) && !afterDelete) {
-
       setData(data.concat(result.data.rows));
     } else {
       setData(result.data.rows);
@@ -1860,7 +1859,7 @@ const AnnotationSearch = (props) => {
             isTeachingFile={true}
             encrUrlArgs={encArgs}
             decrArgs={decrArgs}
-            onSave={getNewData}
+            onSave={() => getNewData(0, true)}
             completeLoading={props.completeLoading}
             forceUpdatePage={props.forceUpdatePage}
           />
