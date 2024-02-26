@@ -34,7 +34,7 @@ import {
   setSeriesData
   // fillSeriesDescfullData
 } from "../annotationsList/action";
-import { deleteAnnotation } from "../../services/annotationServices";
+import { deleteAnnotation, getAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
 import CornerstoneViewport from "react-cornerstone-viewport";
@@ -971,6 +971,7 @@ class DisplayView extends Component {
     let cornerstoneImageIds = [];
     let seriesMetadata = [];
     let seriesMetadataMap = {};
+    let imgID = null;
     const multiframeSeriesData = {};
     let metadata2D = [];
     const multiFrameMap = {};
@@ -983,13 +984,23 @@ class DisplayView extends Component {
           multiframeSeriesData[`${imageUrls[i][0].seriesUID}_${i}`] = imageUrls[i][0];
         } else multiFrameMap[imageUrls[i][0].seriesUID] = true;
       }
+      const { seriesAddition, activePort } = this.props;
+      const { projectID, aimID } = seriesAddition[activePort];
+      if (aimID && !multiFrameIndex) {
+        const { data: aimData } = await getAnnotation(projectID, aimID);
+        imgID = aimData.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+                    .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.instanceUid.root;
+      }
     }
+
+
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage
       .getItem("wadoUrl")
       .replace("wadors:", "");
+
     const firstSeriesIndex = multiFrameIndex
-      ? multiFrameIndex
+      ? multiFrameIndex : imgID && typeof multiFrameMap[imgID] === 'number' ? multiFrameMap[imgID]
       : this.findFirstSeriesIndex(imageUrls);
     
     const urlsExist = imageUrls[firstSeriesIndex] && imageUrls[firstSeriesIndex][0];
