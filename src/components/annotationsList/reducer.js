@@ -233,10 +233,7 @@ const asyncReducer = (state = initialState, action) => {
               return el;
             });
 
-            console.log(" +++++> state.openSeriesAddition[state.activePort]", state.openSeriesAddition[state.activePort]);
-            console.log(" ++++> ...seriesDataMulti", seriesDataMulti)
             const list = [state.openSeriesAddition[state.activePort], ...seriesDataMulti];
-            console.log(" ++++> after merging two", list);
             const map = list.reduce((all, item, index) => {
               if (item.multiFrameImage) {
                 all[item.imageUID] = index + 1;
@@ -245,7 +242,6 @@ const asyncReducer = (state = initialState, action) => {
               return all;
             }, {});
 
-            console.log(" ++++> map", map);
             if (multiPatIDExists) {
               newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = { list, map };
             } else if (multiPIDExists) {
