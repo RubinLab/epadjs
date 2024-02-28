@@ -34,13 +34,35 @@ const annotationsLink = (props) => {
     setPresentImgID(openSeries[activePort].imageID);
   }, [props.openSeries, props.aimsList]);
 
-  const checkIfSerieOpen = (selectedSerie) => {
+  const checkIfSerieOpen = (selectedSerie, imgIDs) => {
     let isOpen = false;
-    let index;
-    props.openSeries.forEach((serie, i) => {
+    let index = null;
+    let frameNo = null;
+    let mfIndex = null;
+//     Check if there is same seriesuid
+// İf there is same uid check if it has multiframeMap or hasMultiframe or multiframeIndex
+// If there is find the image id of the aim clicked
+// From the multiframemap find it’s index
+// İf the index is the same with the openseriesAddition return true
+// Else return false 
+    props.openSeriesAddition.forEach((serie, i) => {
+      // console.log(" +++serie.seriesUID === selectedSerie", serie.seriesUID === selectedSerie)
       if (serie.seriesUID === selectedSerie) {
-        isOpen = true;
-        index = i;
+        if (serie.hasMultiframe || serie.multiFrameMap || serie.multiFrameIndex) {
+          const keysArr = Object.keys(imgIDs);
+          for (let k = 0; k < keysArr.length; k++) {
+            const imgID = keysArr[k].split('/frames/')[0];
+            const mfIndex = serie.multiFrameMap && serie.multiFrameMap[imgID];
+            if ((mfIndex === true && serie.hasMultiframe && !serie.multiFrameIndex) || mfIndex === serie.multiFrameIndex) {
+              isOpen = true;
+              index = i;
+              break;
+            }
+          }
+        } else {
+          isOpen = true;
+          index = i;
+        }
       }
     });
     return { isOpen, index };
@@ -66,9 +88,11 @@ const annotationsLink = (props) => {
     const maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
     let isGridFull = openSeries.length === maxPort;
-    const { isOpen, index } = checkIfSerieOpen(selected.seriesUID);
+    const { isOpen, index } = checkIfSerieOpen(selected.seriesUID, selected.imgIDs);
 
-    if (isOpen && !openSeriesAddition[activePort].multiFrameMap) {
+    console.log(" ++++++ isOpen, index ", isOpen, index);
+
+    if (isOpen) {
       const imageUID = Object.keys(selected.imgIDs);
       const imgIDArr = imageUID[0].split("/frames/");
       props.dispatch(changeActivePort(index));
@@ -78,12 +102,13 @@ const annotationsLink = (props) => {
       handleJumpToAim(selected.aimID, index, imgIDArr[0], imgIDArr[1]);
       props.dispatch(clearSelection());
     } else {
-      if (isGridFull || openSeriesAddition[activePort].multiFrameMap) {
+      if (isGridFull) {
         props.dispatch(addToGrid(selected, selected.aimID, props.activePort));
       } else {
         props.dispatch(addToGrid(selected, selected.aimID));
       }
       const list = getExistingSeriesData(selected);
+      console.log("list --->", list);
       props
         .dispatch(getSingleSerie(selected, selected.aimID, null, list))
         .then(() => {})
