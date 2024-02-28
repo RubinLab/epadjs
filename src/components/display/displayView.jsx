@@ -1133,9 +1133,11 @@ class DisplayView extends Component {
       }
     }
 
+    console.log(' ---> multiFrameMap', multiFrameMap);
     if (Object.entries(multiFrameMap).length > 0) {
+      console.log(" ----> in if")
       this.props.dispatch(
-        updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData)
+        updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData, index)
       );
     }
     
