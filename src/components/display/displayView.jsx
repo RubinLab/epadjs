@@ -983,7 +983,12 @@ class DisplayView extends Component {
         if (imageUrls[i] && Array.isArray(imageUrls[i]) && imageUrls[i][0].multiFrameImage) {
           multiFrameMap[imageUrls[i][0].imageUID] = i;
           multiframeSeriesData[`${imageUrls[i][0].seriesUID}_${i}`] = imageUrls[i][0];
-        } else multiFrameMap[imageUrls[i][0].seriesUID] = true;
+        } else {
+          if (!multiFrameMap[imageUrls[i][0].seriesUID]) multiFrameMap[imageUrls[i][0].seriesUID] = true;
+          imageUrls[i].forEach(el => {
+            multiFrameMap[el.imageUID] = true;
+          })
+        }
       }
       const { seriesAddition, activePort, templates } = this.props;
       const { projectID, aimID, template } = seriesAddition[activePort];
