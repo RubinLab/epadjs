@@ -168,7 +168,7 @@ const asyncReducer = (state = initialState, action) => {
       case CHECK_MULTIFRAME:
         // const series = _.cloneDeep(state.openSeries);
         const seriesAddition = _.cloneDeep(state.openSeriesAddition);
-        const { hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData } = action.payload;
+        const { hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData, portInx } = action.payload;
         let seriesDataMulti = Object.values(multiframeSeriesData);
         const {
           projectID: multiPID,
@@ -177,8 +177,8 @@ const asyncReducer = (state = initialState, action) => {
         } = seriesDataMulti[0];
         let jumpArr = null;
         // check if framedata exists
-        const fmData = seriesAddition[state.activePort].frameData;
-        const aimSelected = (state.openSeries[state.activePort] && state.openSeries[state.activePort].aimID) || (seriesAddition[state.activePort] && seriesAddition[state.activePort].aimID);
+        const fmData = seriesAddition[portInx].frameData;
+        const aimSelected = (state.openSeries[portInx] && state.openSeries[portInx].aimID) || (seriesAddition[portInx] && seriesAddition[portInx].aimID);
         if (aimSelected && hasMultiframe && (fmData && fmData[aimSelected])) {
           const imgArr = fmData[aimSelected][0].split('/frames/');
           const mfIndex = multiFrameMap && multiFrameMap[imgArr[0]];
@@ -186,9 +186,9 @@ const asyncReducer = (state = initialState, action) => {
           if (mfIndex && typeof frameNo === 'number' && !isNaN(frameNo)) jumpArr = [mfIndex, frameNo - 1];
         }
 
-        seriesAddition[state.activePort].hasMultiframe = hasMultiframe;
-        seriesAddition[state.activePort].multiFrameIndex = multiframeIndex;
-        seriesAddition[state.activePort].multiFrameMap = multiFrameMap;
+        seriesAddition[portInx].hasMultiframe = hasMultiframe;
+        seriesAddition[portInx].multiFrameIndex = multiframeIndex;
+        seriesAddition[portInx].multiFrameMap = multiFrameMap;
         const newState = { ...state };
 
         let newSeriesDataMulti = _.cloneDeep(state.seriesData);
@@ -198,7 +198,7 @@ const asyncReducer = (state = initialState, action) => {
         let mfLookUpMap = {};
 
 
-        if (!state.openSeriesAddition[state.activePort].multiFrameMap) {
+        if (!state.openSeriesAddition[portInx].multiFrameMap) {
           if (existingSeries) {
             // find the correct series to get description from
             const seriesToCopyFm = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].list.find((element) => element.seriesUID === seriesDataMulti[0].seriesUID);
@@ -225,15 +225,18 @@ const asyncReducer = (state = initialState, action) => {
               }
             });
           } else {
-            const desc = state.openSeriesAddition[state.activePort].seriesDescription;
-            const srNo = state.openSeriesAddition[state.activePort].seriesNo;
+            const desc = state.openSeriesAddition[portInx].seriesDescription;
+            const srNo = state.openSeriesAddition[portInx].seriesNo;
             seriesDataMulti = seriesDataMulti.map((el) => {
               el.seriesDescription = desc ? desc : '';
               el.seriesNo = srNo ? srNo : null;
               return el;
             });
 
-            const list = [state.openSeriesAddition[state.activePort], ...seriesDataMulti];
+            console.log(" +++++> state.openSeriesAddition[state.activePort]", state.openSeriesAddition[state.activePort]);
+            console.log(" ++++> ...seriesDataMulti", seriesDataMulti)
+            const list = [state.openSeriesAddition[portInx], ...seriesDataMulti];
+            console.log(" ++++> after merging two", list);
             const map = list.reduce((all, item, index) => {
               if (item.multiFrameImage) {
                 all[item.imageUID] = index + 1;
@@ -256,6 +259,7 @@ const asyncReducer = (state = initialState, action) => {
         // newState.openSeries= series;
         newState.openSeriesAddition = seriesAddition;
         newState.multiFrameAimJumpData = jumpArr;
+        console.log(newState.openSeriesAddition);
         return newState;
       case AIM_SAVE: //tested
         const { seriesList, aimRefs } = action.payload;
