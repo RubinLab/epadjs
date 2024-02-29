@@ -34,7 +34,7 @@ import {
   setSeriesData
   // fillSeriesDescfullData
 } from "../annotationsList/action";
-import { deleteAnnotation } from "../../services/annotationServices";
+import { deleteAnnotation, getAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
 import CornerstoneViewport from "react-cornerstone-viewport";
@@ -159,6 +159,7 @@ const mapStateToProps = (state) => {
     subpath: state.annotationsListReducer.subpath,
     multiFrameAimJumpData: state.annotationsListReducer.multiFrameAimJumpData,
     otherSeriesAimsList: state.annotationsListReducer.otherSeriesAimsList,
+    templates: state.annotationsListReducer.templates
   };
 };
 
@@ -971,6 +972,7 @@ class DisplayView extends Component {
     let cornerstoneImageIds = [];
     let seriesMetadata = [];
     let seriesMetadataMap = {};
+    let imgID = null;
     const multiframeSeriesData = {};
     let metadata2D = [];
     const multiFrameMap = {};
@@ -983,13 +985,23 @@ class DisplayView extends Component {
           multiframeSeriesData[`${imageUrls[i][0].seriesUID}_${i}`] = imageUrls[i][0];
         } else multiFrameMap[imageUrls[i][0].seriesUID] = true;
       }
+      const { seriesAddition, activePort, templates } = this.props;
+      const { projectID, aimID, template } = seriesAddition[activePort];
+      const { templateType } = templates[template].TemplateContainer.Template[0];
+      if (aimID && !multiFrameIndex && templateType === 'Image') {
+        const { data: aimData } = await getAnnotation(projectID, aimID);
+        const imgAnn = aimData.ImageAnnotationCollection.imageAnnotations.ImageAnnotation;
+        imgID = imgAnn && imgAnn[0] && imgAnn[0].markupEntityCollection ? imgAnn[0].markupEntityCollection.MarkupEntity[0].imageReferenceUid.root : null;
+      }
     }
+
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage
       .getItem("wadoUrl")
       .replace("wadors:", "");
+
     const firstSeriesIndex = multiFrameIndex
-      ? multiFrameIndex
+      ? multiFrameIndex : imgID && typeof multiFrameMap[imgID] === 'number' ? multiFrameMap[imgID]
       : this.findFirstSeriesIndex(imageUrls);
     
     const urlsExist = imageUrls[firstSeriesIndex] && imageUrls[firstSeriesIndex][0];
