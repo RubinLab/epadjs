@@ -232,11 +232,7 @@ const asyncReducer = (state = initialState, action) => {
               el.seriesNo = srNo ? srNo : null;
               return el;
             });
-
-            console.log(" +++++> state.openSeriesAddition[state.activePort]", state.openSeriesAddition[state.activePort]);
-            console.log(" ++++> ...seriesDataMulti", seriesDataMulti)
             const list = [state.openSeriesAddition[portInx], ...seriesDataMulti];
-            console.log(" ++++> after merging two", list);
             const map = list.reduce((all, item, index) => {
               if (item.multiFrameImage) {
                 all[item.imageUID] = index + 1;
