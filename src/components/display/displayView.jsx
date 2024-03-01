@@ -451,6 +451,7 @@ class DisplayView extends Component {
         newData[i].stack.currentImageIdIndex = imageIndex;
       }
     });
+    console.log(" ----> jumpToAims", newData);
     this.setState({ data: newData });
   };
 
@@ -706,44 +707,64 @@ class DisplayView extends Component {
   getData(multiFrameIndexData, frameNo, fm, force) {
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
-      const { series, activePort, aimList } = this.props;
+      const { series, activePort, aimList, seriesAddition } = this.props;
       const { dataIndexMap, data } = this.state;
       var promises = [];
       const indexKeys = {};
       const newData = new Array(series.length);
       const indexOrder = [];
-      const multiFrameIndex = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[0]) : null;
+      let multiFrameIndex = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[0]) : null;
       const multiFramePort = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[1]) : null;
       for (let i = 0; i < series.length; i++) {
+        console.log(" ++++> multiFrameIndexData", i, multiFrameIndexData);
         // DONE/TODO: in order to not to get same stack again and again
         // add seriesUID-PrID etc info and look it up if we need to get it
         // [{stack -> UIDkey, ycurImgIndex, imfIds}, {}]
-
+        const storedMFIndex = seriesAddition[i].multiFrameIndex;
+        // console.log("&&&&&&&&&&&&&&& stored ", i, storedMFIndex, "mfindex", multiFrameIndex);
+        // multiFrameIndex = !multiFrameIndex && storedMFIndex ? storedMFIndex : multiFrameIndex;
+        // console.log(' +++++++++++++> seriesAddition[i].multiframeIndex', i, seriesAddition[i].multiFrameIndex);
+        console.log(" ----> multiFrameIndex", i, multiFrameIndex);
         const { projectID, patientID, studyUID, seriesUID } = series[i];
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
         if (multiFrameIndex &&  multiFramePort === i && !isNaN(multiFrameIndex)) indexKey = `${indexKey}-${multiFrameIndex}`
 
         // if (typeof dataIndexMap[indexKey] !== "number") {
 
-        if (!(parseInt(dataIndexMap[indexKey]) >= 0) || (multiFrameIndex &&  multiFramePort === i ) || force) {
+        if (!(parseInt(dataIndexMap[indexKey]) >= 0) || (typeof multiFrameIndex === 'number' &&  multiFramePort === i ) || force) {
           const promise = multiFrameIndex &&  multiFramePort === i ? this.getImageStack(
             series[i],
             i,
             multiFrameIndex,
             frameNo, 
-            fm
+            `${fm} - ${i} - ${multiFrameIndexData}`
           ) : this.getImageStack(
             series[i],
             i,
             null,
             null, 
-            fm
+            `${fm} - ${i} - ${multiFrameIndexData}`
           );
 
           promises.push(promise);
           indexKeys[indexKey] = i;
           indexOrder.push(i);
+        } else if (multiFramePort !== i && storedMFIndex) {
+          console.log(" ----> in else IFFFFFF", i);
+          const currentStack = this.state.data[i] ? this.state.data[i].stack : null;
+          const currentImageIdIndex = currentStack ? currentStack.currentImageIdIndex : 0;
+          const promise = this.getImageStack(
+            series[i],
+            i,
+            storedMFIndex,
+            currentImageIdIndex, 
+            `${fm} - ${i} - ${multiFrameIndexData}`
+          )
+          promises.push(promise);
+          indexKeys[indexKey] = i;
+          indexOrder.push(i);
         } else {
+          console.log(" ----> in else");
           const index = parseInt(dataIndexMap[indexKey]);
           newData[i] = { ...this.state.data[index] };
         }
@@ -755,12 +776,13 @@ class DisplayView extends Component {
           multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
           ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
           : null;
-          console.log(" getData fm ^^", fm);
+          console.log(" getData fm ^^", fm, multiFrameIndexData);
 
           res.forEach((el, inx) => {
             newData[indexOrder[inx]] = el;
           });
 
+          console.log(" ----> getData 1", newData);
           if (key && key !== this.state.multiFrameAimJumped) {
             this.setState({ data: newData, multiFrameAimJumped: key });
           } else {
@@ -792,6 +814,7 @@ class DisplayView extends Component {
         for (let i = 0; i < newData.length; i++) 
           if (!newData[i]) newData[i] = this.state.data[i];
 
+        console.log(" ----> getData 2", newData);  
         this.setState(
           {
             isLoading: false,
@@ -810,7 +833,7 @@ class DisplayView extends Component {
   }
 
   handleSerieReplace = (e) => {
-    const { series } = this.props;
+    const { seriesAddition, activePort } = this.props;
     var promises = [];
     const { viewportId, id, multiFrameIndex } = e.detail;
     // const promise = this.getImageStack(
@@ -820,7 +843,9 @@ class DisplayView extends Component {
     //   undefined,
     //   "handleSerieReplace"
     // );
-    const mfIndex = multiFrameIndex ? `${multiFrameIndex}-${this.props.activePort}` : null;
+    let mfIndex = multiFrameIndex ? `${multiFrameIndex}-${activePort}` : null;
+    const serUID = id.split('_')[0];
+    mfIndex = serUID === seriesAddition[activePort].seriesUID && !mfIndex ? `${0}-${activePort}` : mfIndex;
     this.getData(
       mfIndex,
       undefined,
@@ -992,7 +1017,7 @@ class DisplayView extends Component {
       }
       const { seriesAddition, activePort, templates } = this.props;
       const { projectID, aimID, template } = seriesAddition[activePort];
-      const { templateType } = templates[template].TemplateContainer.Template[0];
+      const templateType = template ? templates[template].TemplateContainer.Template[0].templateType : null;
       if (aimID && !multiFrameIndex && templateType === 'Image') {
         const { data: aimData } = await getAnnotation(projectID, aimID);
         const imgAnn = aimData.ImageAnnotationCollection.imageAnnotations.ImageAnnotation;
@@ -1138,7 +1163,6 @@ class DisplayView extends Component {
       }
     }
 
-    console.log(' ---> multiFrameMap', multiFrameMap);
     if (Object.entries(multiFrameMap).length > 0) {
       console.log(" ----> in if")
       this.props.dispatch(
@@ -2439,6 +2463,7 @@ class DisplayView extends Component {
       imageIndex,
       10
     );
+    console.log(" ----> jumpToImage", newData);
     this.setState({ data: newData });
     this.props.dispatch(clearMultiFrameAimJumpFlags());
   };
