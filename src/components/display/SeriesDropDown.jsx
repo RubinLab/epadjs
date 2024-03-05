@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
+import { toast } from "react-toastify";
 import PropagateLoader from "react-spinners/PropagateLoader";
 import Dropdown from "react-bootstrap/Dropdown";
 import DropdownButton from "react-bootstrap/DropdownButton";
@@ -51,6 +52,31 @@ const SeriesDropDown = (props) => {
     })
     return result;
   }
+
+  const checkIfSerieOpen = (key) => {
+    let isOpen = false;
+    let index = null;
+    const keyArr = key.split('_');
+    const seriesUID = keyArr[0];
+    const mfIndex = parseInt(keyArr[1]);
+    for (let i = 0; i < props.openSeriesAddition.length; i++) {
+      const serie = props.openSeriesAddition[i];
+      if (serie.seriesUID === seriesUID) {
+        if (serie.hasMultiframe || serie.multiFrameMap || serie.multiFrameIndex) {
+            const stillImages = mfIndex === 0 && serie.hasMultiframe && serie.multiFrameIndex === null;         
+            if (stillImages || mfIndex === serie.multiFrameIndex) {
+              isOpen = true;
+              index = i;
+              break
+            }
+        } else {
+          isOpen = true;
+          index = i;
+        }
+      }
+    };
+    return { isOpen, index };
+  };
 
   useEffect(() => {
     let studyUID;
@@ -113,20 +139,26 @@ const SeriesDropDown = (props) => {
         // if (!props.onCloseAimEditor(true))
         //     return;
       }
-      props.onSelect(0, props.activePort, true);
-      props.dispatch(replaceInGrid(serie));
-      const list = seriesList.length > 0 ? seriesList : null;
-      props.dispatch(getSingleSerie(serie, null, null, list));
-      window.dispatchEvent(
-        new CustomEvent("serieReplaced", {
-          detail: {
-            viewportId: props.activePort,
-            id: e,
-            multiFrameIndex: parseInt(multiFrameIndex)
-          },
-        })
-      );
-    window.dispatchEvent(new CustomEvent("deleteViewportWL"));
+      const { isOpen, index } = checkIfSerieOpen(e);
+
+      if (!isOpen) {
+        props.onSelect(0, props.activePort, true);
+        props.dispatch(replaceInGrid(serie));
+        const list = seriesList.length > 0 ? seriesList : null;
+        props.dispatch(getSingleSerie(serie, null, null, list));
+        window.dispatchEvent(
+          new CustomEvent("serieReplaced", {
+            detail: {
+              viewportId: props.activePort,
+              id: e,
+              multiFrameIndex: parseInt(multiFrameIndex)
+            },
+          })
+        );
+        window.dispatchEvent(new CustomEvent("deleteViewportWL"));
+      } else {
+        toast.info(`This series is already open at viewport ${index + 1}`);
+      }
   };
 
   return (
