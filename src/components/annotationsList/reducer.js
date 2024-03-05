@@ -181,7 +181,8 @@ const asyncReducer = (state = initialState, action) => {
         const aimSelected = (state.openSeries[portInx] && state.openSeries[portInx].aimID) || (seriesAddition[portInx] && seriesAddition[portInx].aimID);
         if (aimSelected && hasMultiframe && (fmData && fmData[aimSelected])) {
           const imgArr = fmData[aimSelected][0].split('/frames/');
-          const mfIndex = multiFrameMap && multiFrameMap[imgArr[0]];
+          let mfIndex = multiFrameMap && multiFrameMap[imgArr[0]];
+          if (mfIndex === true) mfIndex = 0;
           const frameNo = parseInt(imgArr[1]);
           if (mfIndex && typeof frameNo === 'number' && !isNaN(frameNo)) jumpArr = [mfIndex, frameNo - 1];
         }
