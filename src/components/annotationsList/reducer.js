@@ -232,6 +232,7 @@ const asyncReducer = (state = initialState, action) => {
               el.seriesNo = srNo ? srNo : null;
               return el;
             });
+
             const list = [state.openSeriesAddition[portInx], ...seriesDataMulti];
             const map = list.reduce((all, item, index) => {
               if (item.multiFrameImage) {
