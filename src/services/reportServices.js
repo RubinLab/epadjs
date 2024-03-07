@@ -8,7 +8,7 @@ export function getWaterfallReport(
   metric = "RECIST",
   exportCalcs
 ) {
-  let url = `${http.apiUrl()}/reports/waterfall?type=${type}&metric=${metric}`;
+  let url = `${http.apiUrl()}/${metric === 'Export (MIRACCL)' ? 'miracclexport' :'reports/waterfall'}?type=${type}&metric=${metric}`;
   if (exportCalcs) url += `&exportCalcs=${JSON.stringify(exportCalcs)}`;
   const body = pairs
     ? { pairs }

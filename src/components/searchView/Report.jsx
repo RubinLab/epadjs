@@ -21,7 +21,7 @@ import {
 const maxPort = parseInt(sessionStorage.getItem('maxPort'));
 // let waterfallOptions = sessionStorage.getItem('waterfallOptions');
 // if (waterfallOptions) waterfallOptions = waterfallOptions.split('-');
-const metricDefaultOptions = ['RECIST', 'ADLA', 'intensitystddev', 'Export (beta)'];
+const metricDefaultOptions = ['RECIST', 'ADLA', 'intensitystddev', 'Export (beta)', 'Export (MIRACCL)'];
 const messages = {
   title: 'Can not open all series',
   message: `Maximum ${maxPort} series can be opened. Please close already opened series first.`
