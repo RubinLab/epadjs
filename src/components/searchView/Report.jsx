@@ -391,7 +391,8 @@ const Report = props => {
   const handleLesionClick = (row, col, nontarget, rowIndex) => {
     try {
       const uidData = nontarget ? data[user].ntUIDs : data[user].tUIDs;
-      const actualRow = rowIndex || row;
+      // recist reports do not have index as they are not being filtered like longitudinal does
+      const actualRow = rowIndex && rowIndex !== 'undefined' ? rowIndex : row;
       const { openSeries } = props;
       const notOpenSeries = [];
       const { projectID, patientID, subjectName } = props.patient;
