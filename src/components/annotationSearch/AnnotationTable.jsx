@@ -738,6 +738,9 @@ function AnnotationTable(props) {
                 className="form-check-input __search-checkbox"
                 id={row.original.aimID}
                 value={row.original.name}
+                data-subjectid={row.original.subjectID}
+                data-studyuid={row.original.studyUID}
+                data-seriesuid={row.original.seriesUID}
                 // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
                 // checked={props.allSelected || listOfSelecteds[row.original.aimID]}
               />

@@ -18,7 +18,8 @@ export const findSelectedCheckboxesMap = () => {
   checkboxes = Array.from(checkboxes);
   let selected = checkboxes.filter(el => el.checked)
   selected = selected.reduce((all, el) => {
-    all[el.id] = { aimID: el.id, name: el.value }
+    const { subjectid, studyuid, seriesuid } = el.dataset;
+    all[el.id] = { aimID: el.id, name: el.value, subjectID: subjectid, studyUID: studyuid, seriesUID: seriesuid };
     return all;
   }, {});
   return selected;
