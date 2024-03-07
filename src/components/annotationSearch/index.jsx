@@ -60,6 +60,7 @@ import {
   findSelectedCheckboxes,
   handleSelectDeselectAll,
   resetSelectAllCheckbox,
+  findSelectedCheckboxesMap
 } from "Utils/aid.js";
 
 import "./annotationSearch.css";
@@ -1111,9 +1112,10 @@ const AnnotationSearch = (props) => {
   };
 
   const runPlugin = async () => {
+    const selectedAims = findSelectedCheckboxesMap();
     console.log(
       `selected aims to pass to plugin : ${JSON.stringify(
-        props.selectedAnnotations
+        selectedAims
       )}`
     );
 
@@ -1158,9 +1160,9 @@ const AnnotationSearch = (props) => {
       //     console.log("error happened while running queue");
       //  }
     } else if (tempPluginObject.processmultipleaims === 0) {
-      Object.keys(props.selectedAnnotations).forEach(async (eachAnnt) => {
+      Object.keys(selectedAims).forEach(async (eachAnnt) => {
         let aimObj = {};
-        aimObj[eachAnnt] = props.selectedAnnotations[eachAnnt];
+        aimObj[eachAnnt] = selectedAims[eachAnnt];
 
         console.log(`eachAnnt : ${JSON.stringify(aimObj)}`);
 
@@ -1211,8 +1213,8 @@ const AnnotationSearch = (props) => {
         tempPluginObject.processmultipleaims;
       tempQueueObject.runtimeParams = {};
       tempQueueObject.parameterType = "default";
-      if (props && props.selectedAnnotations) {
-        tempQueueObject.aims = { ...props.selectedAnnotations };
+      if (Object.keys(selectedAims).length > 0) {
+        tempQueueObject.aims = { ...selectedAims };
       } else {
         tempQueueObject.aims = {};
       }
