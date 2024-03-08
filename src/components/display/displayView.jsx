@@ -1064,6 +1064,15 @@ class DisplayView extends Component {
 
     // get position from the first image but orientation from the middle
     const sortByGeo = !!firstImage && !!firstImage["00200032"] && !!middleImage && !!middleImage["00200037"];
+
+    if (!!firstImage) {
+      console.log(" +++++> Show Grayscale Inverted Attribute")
+      console.log(firstImage["00720706"]);
+      console.log(" +++> Presentation LUT Shape Attribute ")
+      console.log(firstImage["20500020"]);
+      console.log(firstImage["00280004"]);
+    }
+
     if (sortByGeo) {
       referencePosition = firstImage["00200032"].Value;
       rowVector = middleImage["00200037"].Value.slice(0, 3);
