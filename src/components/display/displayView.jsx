@@ -376,7 +376,6 @@ class DisplayView extends Component {
     // each time visibility of aims change
     // else if (rerenderAims) {
       else if (rerenderAims) {
-      this.jumpToAims();
       this.renderAims(false, rerenderAims);
       //TODO: check if filling aimsList process changes openseries
       // if chanes sever that data from openseries
@@ -1896,6 +1895,7 @@ class DisplayView extends Component {
       const pathVariables = { studyUID, seriesUID: seriesInstanceUid.root };
 
       getSegmentation(pathVariables, sopInstanceUid.root).then(({ data }) => {
+        this.jumpToAims();
         this.renderSegmentation(data, aimId, serieIndex, labelMapIndex);
       }); 
     }
