@@ -987,7 +987,10 @@ class DisplayView extends Component {
       }
       const { seriesAddition, activePort, templates } = this.props;
       const { projectID, aimID, template } = seriesAddition[activePort];
-      const { templateType } = templates[template].TemplateContainer.Template[0];
+      const tempInfo = templates[template];
+      const templateType = tempInfo ? tempInfo.TemplateContainer.Template[0].templateType : null;
+      // const { templateType } = tempInfo.TemplateContainer.Template[0];
+
       if (aimID && !multiFrameIndex && templateType === 'Image') {
         const { data: aimData } = await getAnnotation(projectID, aimID);
         const imgAnn = aimData.ImageAnnotationCollection.imageAnnotations.ImageAnnotation;
