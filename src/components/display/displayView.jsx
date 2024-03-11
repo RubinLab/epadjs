@@ -987,6 +987,8 @@ class DisplayView extends Component {
       }
       const { seriesAddition, activePort, templates } = this.props;
       const { projectID, aimID, template } = seriesAddition[activePort];
+      // template is saved in openSeriesAddition if user select image aim from search
+      // for teaching files template is not saved in the store/openSeriesAddition
       const tempInfo = templates[template];
       const templateType = tempInfo ? tempInfo.TemplateContainer.Template[0].templateType : null;
       // const { templateType } = tempInfo.TemplateContainer.Template[0];
