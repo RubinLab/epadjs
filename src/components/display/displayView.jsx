@@ -990,7 +990,6 @@ class DisplayView extends Component {
       const tempInfo = templates[template];
       const templateType = tempInfo ? tempInfo.TemplateContainer.Template[0].templateType : null;
       // const { templateType } = tempInfo.TemplateContainer.Template[0];
-
       if (aimID && !multiFrameIndex && templateType === 'Image') {
         const { data: aimData } = await getAnnotation(projectID, aimID);
         const imgAnn = aimData.ImageAnnotationCollection.imageAnnotations.ImageAnnotation;
