@@ -1895,6 +1895,7 @@ class DisplayView extends Component {
       const pathVariables = { studyUID, seriesUID: seriesInstanceUid.root };
 
       getSegmentation(pathVariables, sopInstanceUid.root).then(({ data }) => {
+        this.jumpToAims();
         this.renderSegmentation(data, aimId, serieIndex, labelMapIndex);
       }); 
     }
