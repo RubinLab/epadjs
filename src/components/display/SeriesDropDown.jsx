@@ -179,10 +179,6 @@ const SeriesDropDown = (props) => {
               // openSeriesSeriesUID === uniqueKey;
             }
 
-            let counts = numberOfAnnotations
-              ? `${numberOfAnnotations} Ann -`
-              : "";
-
             return (
                 <Dropdown.Item
                   key={uniqueKey}
@@ -190,7 +186,7 @@ const SeriesDropDown = (props) => {
                   onSelect={handleSelect}
                   style={{ textAlign: "left !important" }}
                   >
-                  {seriesNo ? seriesNo : "#NA"} {" - "} {counts}{" "}
+                  {seriesNo ? seriesNo : "#NA"} {" - "} {" "}
                   {seriesDescription?.length
                     ? seriesDescription
                     : "No Description"}{" "}
