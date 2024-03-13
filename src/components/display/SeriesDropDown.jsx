@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
+import { toast } from "react-toastify";
 import PropagateLoader from "react-spinners/PropagateLoader";
 import Dropdown from "react-bootstrap/Dropdown";
 import DropdownButton from "react-bootstrap/DropdownButton";
@@ -9,11 +10,14 @@ import {
   replaceInGrid,
   getSingleSerie,
   setSeriesData,
-  getSeriesAdditional
+  getSeriesAdditional,
+  addToGrid
 } from "components/annotationsList/action";
 import { isSupportedModality, otherSeriesOpened } from "../../Utils/aid.js";
 
 import "./SeriesDropDown.css";
+
+const maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
 const SeriesDropDown = (props) => {
   const [seriesList, setSeriesList] = useState([]);
@@ -52,23 +56,42 @@ const SeriesDropDown = (props) => {
     return result;
   }
 
+  const findSeriesListFmStore = () => {
+    let studyUID;
+    let projectID;
+    let patientID;
+
+    const data = props.seriesData;
+
+    if (props.serie) {
+      studyUID = props.serie.studyUID;
+      projectID = props.serie.projectID;
+      patientID = props.serie.patientID;
+    }
+
+    const studyExist = props.serie ?
+      data[projectID] &&
+      data[projectID][patientID] &&
+      data[projectID][patientID][studyUID] : false;
+
+    const list = studyExist ? data[projectID][patientID][studyUID].list : null;
+    return { list, studyExist };
+  }
+
   useEffect(() => {
     let studyUID;
     let projectID;
     let patientID;
 
     const data = props.seriesData;
+
     if (props.serie) {
       studyUID = props.serie.studyUID;
       projectID = props.serie.projectID;
       patientID = props.serie.patientID;
     }
-    const studyExist =
-      data[projectID] &&
-      data[projectID][patientID] &&
-      data[projectID][patientID][studyUID];
 
-    const list = studyExist ? data[projectID][patientID][studyUID].list : null
+    const {list, studyExist} = findSeriesListFmStore();
     const isString = (currentValue) => currentValue.seriesDescription === '' || typeof currentValue.seriesDescription === 'string';
     const isFilled= (currentValue) => currentValue.filled || currentValue.multiFrameImage;
     const hasDescription = list ? list.every(isFilled) : false;
@@ -97,6 +120,32 @@ const SeriesDropDown = (props) => {
     }
   }, [props.seriesData]);
 
+
+  const checkIfSerieOpen = (key) => {
+    let isOpen = false;
+    let index = null;
+    const keyArr = key.split('_');
+    const seriesUID = keyArr[0];
+    const mfIndex = parseInt(keyArr[1]);
+    for (let i = 0; i < props.openSeriesAddition.length; i++) {
+      const serie = props.openSeriesAddition[i];
+      if (serie.seriesUID === seriesUID) {
+        if (serie.hasMultiframe || serie.multiFrameMap || serie.multiFrameIndex) {
+            const stillImages = mfIndex === 0 && serie.hasMultiframe && serie.multiFrameIndex === null;         
+            if (stillImages || mfIndex === serie.multiFrameIndex) {
+              isOpen = true;
+              index = i;
+              break
+            }
+        } else {
+          isOpen = true;
+          index = i;
+        }
+      }
+    };
+    return { isOpen, index };
+  };
+
   const handleSelect = (e) => {
     const UIDArr = e.split("_");
     const seriesUIDFmEvent = UIDArr[0];
@@ -113,19 +162,34 @@ const SeriesDropDown = (props) => {
         // if (!props.onCloseAimEditor(true))
         //     return;
       }
-      props.onSelect(0, props.activePort, true);
-      props.dispatch(replaceInGrid(serie));
-      const list = seriesList.length > 0 ? seriesList : null;
-      props.dispatch(getSingleSerie(serie, null, null, list));
-      window.dispatchEvent(
-        new CustomEvent("serieReplaced", {
-          detail: {
-            viewportId: props.activePort,
-            id: e,
-            multiFrameIndex: parseInt(multiFrameIndex)
-          },
-        })
-      );
+
+      const { isOpen, index } = checkIfSerieOpen(e);
+
+      if (!isOpen) { 
+        if ( props.openSeriesAddition.length < maxPort ) {
+          const serie = seriesList.find(el => el.seriesUID === seriesUIDFmEvent );
+          const { list }  = findSeriesListFmStore(); 
+          props.dispatch(addToGrid(serie));
+          props.dispatch(getSingleSerie(serie, null, null, list));   
+
+        } else {
+          props.onSelect(0, props.activePort, true);
+          props.dispatch(replaceInGrid(serie));
+          const list = seriesList.length > 0 ? seriesList : null;
+          props.dispatch(getSingleSerie(serie, null, null, list));
+          window.dispatchEvent(
+            new CustomEvent("serieReplaced", {
+              detail: {
+                viewportId: props.activePort,
+                id: e,
+                multiFrameIndex: parseInt(multiFrameIndex)
+              },
+            })
+          );
+        }
+      } else {
+        toast.info(`This series is already open at viewport ${index + 1}`);
+      }
     window.dispatchEvent(new CustomEvent("deleteViewportWL"));
   };
 
