@@ -1040,6 +1040,8 @@ class DisplayView extends Component {
     let firstImage = null;
     let middleImage = null;
 
+    console.log(" +++> imageUrls[firstSeriesIndex]", imageUrls[firstSeriesIndex]);
+
     if (imageUrls[firstSeriesIndex] && imageUrls[firstSeriesIndex][0]) {
       if (!useSeriesData) {
         const result = await getImageMetadata(
@@ -1065,12 +1067,24 @@ class DisplayView extends Component {
     // get position from the first image but orientation from the middle
     const sortByGeo = !!firstImage && !!firstImage["00200032"] && !!middleImage && !!middleImage["00200037"];
 
+    console.log(" +++++> first image before if ", firstImage);
+
     if (!!firstImage) {
-      console.log(" +++++> Show Grayscale Inverted Attribute")
+      console.log(" +++++> Show Grayscale Inverted Attribute");
       console.log(firstImage["00720706"]);
-      console.log(" +++> Presentation LUT Shape Attribute ")
+      console.log(" +++++> Presentation LUT Shape Attribute ");
       console.log(firstImage["20500020"]);
       console.log(firstImage["00280004"]);
+
+      console.log( "+++++> window Center", firstImage["00281050"]);
+      console.log( "+++++> window Width", firstImage["00281051"]);
+      console.log( "+++++> window Center & width explanation", firstImage["00281055"]);
+      console.log( "+++++> Voi Lut Function", firstImage["00281056"]);
+      console.log( "+++++> window Center", firstImage["00283010"]);
+      console.log( "+++++> LUT Descriptor", firstImage["00283002"]);
+      console.log( "+++++> LUT Exp", firstImage["00283003"]);
+      console.log( "+++++> LUT Data", firstImage["00283006"]);
+
     }
 
     if (sortByGeo) {
