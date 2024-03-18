@@ -257,7 +257,6 @@ const asyncReducer = (state = initialState, action) => {
         // newState.openSeries= series;
         newState.openSeriesAddition = seriesAddition;
         newState.multiFrameAimJumpData = jumpArr;
-        console.log(" CHECK_MULTIFRAME", action.payload.portInx);
 
         return newState;
       case AIM_SAVE: //tested
@@ -443,14 +442,11 @@ const asyncReducer = (state = initialState, action) => {
         // if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
 
         const prevSameSer = state.openSeriesAddition.find(el => el.seriesUID === serUIDFromRef && !!el.frameData && !!el.multiFrameMap);
-        console.log(" &&&&&&&&&&&&&&&&&& prevSameSer", prevSameSer);
         if ((imageAddedSeries[state.activePort].aimID && imageAddedSeries[state.activePort].multiFrameMap && imageAddedSeries[state.activePort].frameData) || !!prevSameSer) {
-          console.log(" =====> passed if in LOAD_SERIE_SUCCESS")
           const fmData1 = !!imageAddedSeries[state.activePort].frameData ? imageAddedSeries[state.activePort].frameData : prevSameSer.frameData;
           const multiFrameMap1 = !!imageAddedSeries[state.activePort].multiFrameMap ? imageAddedSeries[state.activePort].multiFrameMap : prevSameSer.multiFrameMap;
           // const imgs = fmData1[action.payload.ann];
           const imgs = fmData1[action.payload.ann];
-          console.log(" -----> imgs", imgs);
           const imgArr = imgs ? imgs[0].split('/frames/') : [];
           jumpArr1 = imgArr.length > 0 ? [multiFrameMap1[imgArr[0]], parseInt(imgArr[1]) - 1] : [];
         }
@@ -499,7 +495,6 @@ const asyncReducer = (state = initialState, action) => {
           multiFrameAimJumpData: jumpArr1,
           seriesData: seriesDataForTeaching
         });
-        console.log(" LOAD_SERIE_SUCCESS ");
         return result;
       case LOAD_ANNOTATIONS_ERROR:
         return Object.assign({}, state, {

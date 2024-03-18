@@ -365,10 +365,8 @@ class DisplayView extends Component {
       this.getViewports();
       let mfIndex = null;
       let frame = null;
-      console.log("-----> active",  active);
       if ( active && ((!prevProps.seriesAddition[activePort] && seriesAddition[activePort]) || prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) && seriesAddition[activePort].multiFrameIndex) {
         mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
-        console.log(" ====> in extra layer of assigning mfIndex", mfIndex);
         frame = 0;
       }
       this.getData(mfIndex, frame, "didupdated 2", refreshPage);
@@ -453,7 +451,6 @@ class DisplayView extends Component {
         newData[i].stack.currentImageIdIndex = imageIndex;
       }
     });
-    console.log(" ----> jumpToAims", newData);
     this.setState({ data: newData });
   };
 
@@ -707,7 +704,7 @@ class DisplayView extends Component {
   }
 
   getData(multiFrameIndexData, frameNo, fm, force) {
-    console.log('############## AT TOP getData fm', fm);
+    console.log(" getData fm ^^", fm, multiFrameIndexData);
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
       const { series, activePort, aimList, seriesAddition } = this.props;
@@ -719,15 +716,11 @@ class DisplayView extends Component {
       let multiFrameIndex = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[0]) : null;
       const multiFramePort = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[1]) : null;
       for (let i = 0; i < series.length; i++) {
-        // console.log(" ++++> multiFrameIndexData", i, multiFrameIndexData);
         // DONE/TODO: in order to not to get same stack again and again
         // add seriesUID-PrID etc info and look it up if we need to get it
         // [{stack -> UIDkey, ycurImgIndex, imfIds}, {}]
         const storedMFIndex = seriesAddition[i].multiFrameIndex;
-        // console.log("&&&&&&&&&&&&&&& stored ", i, storedMFIndex, "mfindex", multiFrameIndex);
         // multiFrameIndex = !multiFrameIndex && storedMFIndex ? storedMFIndex : multiFrameIndex;
-        // console.log(' +++++++++++++> seriesAddition[i].multiframeIndex', i, seriesAddition[i].multiFrameIndex);
-        console.log(" ----> multiFrameIndex", i, multiFrameIndex);
         const { projectID, patientID, studyUID, seriesUID } = series[i];
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
         if (multiFrameIndex &&  multiFramePort === i && !isNaN(multiFrameIndex)) indexKey = `${indexKey}-${multiFrameIndex}`
@@ -753,7 +746,6 @@ class DisplayView extends Component {
           indexKeys[indexKey] = i;
           indexOrder.push(i);
         } else if (multiFramePort !== i && storedMFIndex) {
-          console.log(" ----> in else IFFFFFF", i);
           const currentStack = this.state.data[i] ? this.state.data[i].stack : null;
           const currentImageIdIndex = currentStack ? currentStack.currentImageIdIndex : 0;
           const promise = this.getImageStack(
@@ -768,7 +760,6 @@ class DisplayView extends Component {
           indexOrder.push(i);
         } else {
           const index = parseInt(dataIndexMap[indexKey]);
-          console.log(" ----> in else index in dataIndexMap", index);
           newData[i] = { ...this.state.data[index] };
         }
       }
@@ -779,13 +770,10 @@ class DisplayView extends Component {
           multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
           ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
           : null;
-          console.log(" getData fm ^^", fm, multiFrameIndexData);
-
           res.forEach((el, inx) => {
             newData[indexOrder[inx]] = el;
           });
 
-          console.log(" ----> getData 1", newData);
           if (key && key !== this.state.multiFrameAimJumped) {
             this.setState({ data: newData, multiFrameAimJumped: key });
           } else {
@@ -817,7 +805,6 @@ class DisplayView extends Component {
         for (let i = 0; i < newData.length; i++) 
           if (!newData[i]) newData[i] = this.state.data[i];
 
-        console.log(" ----> getData 2", newData);  
         this.setState(
           {
             isLoading: false,
@@ -1168,7 +1155,6 @@ class DisplayView extends Component {
     }
 
     if (Object.entries(multiFrameMap).length > 0) {
-      // console.log(" ----> in if")
       this.props.dispatch(
         updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData, index)
       );
