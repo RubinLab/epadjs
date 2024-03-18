@@ -15,6 +15,7 @@ import {
 import "../annotationsList.css";
 
 const handleJumpToAim = (aimId, index, imageID, frame) => {
+  console.log(" ---> handleJumpToAim aimId, index, imageID, frame", aimId, index, imageID, frame);
   const frameNo = frame - 1;
   window.dispatchEvent(
     new CustomEvent("jumpToAimImage", {

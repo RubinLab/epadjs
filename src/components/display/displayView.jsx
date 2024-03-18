@@ -365,8 +365,10 @@ class DisplayView extends Component {
       this.getViewports();
       let mfIndex = null;
       let frame = null;
+      console.log("-----> active",  active);
       if ( active && ((!prevProps.seriesAddition[activePort] && seriesAddition[activePort]) || prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) && seriesAddition[activePort].multiFrameIndex) {
         mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
+        console.log(" ====> in extra layer of assigning mfIndex", mfIndex);
         frame = 0;
       }
       this.getData(mfIndex, frame, "didupdated 2", refreshPage);
@@ -705,6 +707,7 @@ class DisplayView extends Component {
   }
 
   getData(multiFrameIndexData, frameNo, fm, force) {
+    console.log('############## AT TOP getData fm', fm);
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
       const { series, activePort, aimList, seriesAddition } = this.props;
@@ -716,7 +719,7 @@ class DisplayView extends Component {
       let multiFrameIndex = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[0]) : null;
       const multiFramePort = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[1]) : null;
       for (let i = 0; i < series.length; i++) {
-        console.log(" ++++> multiFrameIndexData", i, multiFrameIndexData);
+        // console.log(" ++++> multiFrameIndexData", i, multiFrameIndexData);
         // DONE/TODO: in order to not to get same stack again and again
         // add seriesUID-PrID etc info and look it up if we need to get it
         // [{stack -> UIDkey, ycurImgIndex, imfIds}, {}]
@@ -764,8 +767,8 @@ class DisplayView extends Component {
           indexKeys[indexKey] = i;
           indexOrder.push(i);
         } else {
-          console.log(" ----> in else");
           const index = parseInt(dataIndexMap[indexKey]);
+          console.log(" ----> in else index in dataIndexMap", index);
           newData[i] = { ...this.state.data[index] };
         }
       }
@@ -1017,7 +1020,7 @@ class DisplayView extends Component {
       }
       const { seriesAddition, activePort, templates } = this.props;
       const { projectID, aimID, template } = seriesAddition[activePort];
-      console.log(" template ", template);
+      // console.log(" template ", template);
       const templateType = template ? templates[template]?.TemplateContainer.Template[0].templateType : null;
       if (aimID && !multiFrameIndex && templateType === 'Image') {
         const { data: aimData } = await getAnnotation(projectID, aimID);
@@ -1165,7 +1168,7 @@ class DisplayView extends Component {
     }
 
     if (Object.entries(multiFrameMap).length > 0) {
-      console.log(" ----> in if")
+      // console.log(" ----> in if")
       this.props.dispatch(
         updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData, index)
       );
