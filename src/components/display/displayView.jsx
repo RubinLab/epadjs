@@ -203,8 +203,11 @@ class DisplayView extends Component {
     const invertMap = { ...this.state.invertMap };
     if (buttonClicked) invertMap[index] = !invertMap[index];
     else
-      series.forEach((el, i) => {
-        invertMap[i] = el.examType === "NM" || seriesAddition[i].examType === 'NM';
+    series.forEach((el, i) => {
+        const isPET = el.examType === 'PET' || seriesAddition[i].examType === 'PET';
+        const isNM = el.examType === 'NM' || seriesAddition[i].examType === 'NM';
+        const isPT = el.examType === 'PT' || seriesAddition[i].examType === 'PT';
+        invertMap[i] = isPET || isNM || isPT;
       });
     this.setState({ invertMap });
   };
@@ -1065,6 +1068,7 @@ class DisplayView extends Component {
 
     // get position from the first image but orientation from the middle
     const sortByGeo = !!firstImage && !!firstImage["00200032"] && !!middleImage && !!middleImage["00200037"];
+
     if (sortByGeo) {
       referencePosition = firstImage["00200032"].Value;
       rowVector = middleImage["00200037"].Value.slice(0, 3);
@@ -1074,7 +1078,6 @@ class DisplayView extends Component {
         columnVector
       );
     }
-
 
     const len = imageUrls[firstSeriesIndex] ? imageUrls[firstSeriesIndex].length : 0;
     for (let k = 0; k < len; k++) {
