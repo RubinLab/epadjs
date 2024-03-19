@@ -76,10 +76,10 @@ const SeriesDropDown = (props) => {
     let studyInGrid = false;
 
     for (let i = 0; i < props.index; i++) {
-      const varPatient = props.openSeriesAddition[i].patientID || props.openSeriesAddition[i].subjectID;
-      const existing = props.serie.patientID || props.serie.subjectID;
+      const gridSeries = props.openSeriesAddition[i].patientID || props.openSeriesAddition[i].subjectID;
+      const seriesOfViewport = props.serie.patientID || props.serie.subjectID;
       const sameProject = props.openSeriesAddition[i].projectID === props.serie.projectID;
-      const samePatient = varPatient === existing;
+      const samePatient = gridSeries === seriesOfViewport;
       const sameStudy  = props.openSeriesAddition[i].studyUID === props.serie.studyUID;
       if ( sameProject && samePatient && sameStudy ) {
         studyInGrid = true;
