@@ -364,7 +364,8 @@ function AnnotationTable(props) {
           projectID,
           patientID,
           studyUID, 
-          force
+          force,
+          "getSeriesData, AnnotationTable"
           );
         props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
         props.dispatch(loadCompleted());
