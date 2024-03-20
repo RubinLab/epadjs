@@ -330,7 +330,7 @@ class Sidebar extends Component {
       let { pathname } = this.props.location;
       pathname = pathname.split("/").pop();
       if (mode !== "lite") {
-        const projectsList = projects.map(({ id, name, numberOfSubjects }) => {
+        const projectsList = projects.map(({ id, name, numberOfSubjects, numberOfTeachingFiles }) => {
           const matchProject =
             selected === id ||
             pathname === id ||
@@ -346,7 +346,7 @@ class Sidebar extends Component {
             }} style={{ padding: "0.2rem" }}>
               {name}
               <div className={'element_number'}>
-                {numberOfSubjects}
+                {mode !== 'teaching' ? numberOfSubjects : numberOfTeachingFiles}
               </div>
             </li>
           );
