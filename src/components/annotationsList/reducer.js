@@ -380,6 +380,7 @@ const asyncReducer = (state = initialState, action) => {
           };
         }
 
+        console.log(' -- CLOSE_SERIE')
         return {
           ...state,
           openSeries: delGrid,
@@ -448,7 +449,8 @@ const asyncReducer = (state = initialState, action) => {
           // const imgs = fmData1[action.payload.ann];
           const imgs = fmData1[action.payload.ann];
           const imgArr = imgs ? imgs[0].split('/frames/') : [];
-          jumpArr1 = imgArr.length > 0 ? [multiFrameMap1[imgArr[0]], parseInt(imgArr[1]) - 1] : [];
+          jumpArr1 = imgArr.length > 0 ? [parseInt(multiFrameMap1[imgArr[0]]), parseInt(imgArr[1]) - 1] : [];
+          imageAddedSeries[state.activePort].multiFrameIndex = parseInt(multiFrameMap1[imgArr[0]]);
         }
         const newDataKeys = Object.keys(action.payload.aimsData);
         const stateKeys = state.aimsList[action.payload.serID]
@@ -531,6 +533,7 @@ const asyncReducer = (state = initialState, action) => {
           }
         }
 
+        console.log(" --> CHANGE_ACTIVE_PORT");
         return Object.assign({}, state, {
           activePort: action.portIndex,
           openSeriesAddition: changedPortSeriesAddition,
@@ -618,6 +621,7 @@ const asyncReducer = (state = initialState, action) => {
           }
         }
 
+        console.log(" ---> CLEAR_GRID");
         return {
           ...state,
           openSeries: [],
@@ -748,6 +752,7 @@ const asyncReducer = (state = initialState, action) => {
         }
 
         const newActivePort = arePortsOccupied ? state.activePort : newOpenSeries.length - 1;
+        console.log('----> ADD_TO_GRID');
         return {
           ...state,
           openSeries: newOpenSeries,
@@ -805,6 +810,7 @@ const asyncReducer = (state = initialState, action) => {
         updatedOpenSeriesAddition[index].aimID = aimID;
 
         // return { ...state, openSeries: updatedGrid, aimsList: {...state.aimsList} };
+        console.log(' JUMP_TO_AIM ')
         return Object.assign({}, state, {
           activePort: index,
           openSeries: updatedGrid,

@@ -345,14 +345,17 @@ class DisplayView extends Component {
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
       multiFrameAimJumpData &&
       multiFrameAimJumpData[0] &&
-      `${series[activePort].aimID}-${multiFrameAimJumpData[0]}-${multiFrameAimJumpData[1]}` !==
+      // `${series[activePort].aimID}-${multiFrameAimJumpData[0]}-${multiFrameAimJumpData[1]}` !==
+      `${series[activePort].aimID}` !==
         this.state.multiFrameAimJumped
     ) {
+
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], "didupdate 1");
+      this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], `didupdate 1 ${this.state.multiFrameAimJumped} / ${series[activePort].aimID}`);
       this.formInvertMap();
-      this.setState({ multiFrameAimJumped: null });
+      this.props.dispatch(clearMultiFrameAimJumpFlags());
+      // this.setState({ multiFrameAimJumped: null });
       // } else if (
       //   (prevProps.series !== this.props.series &&
       //     prevProps.loading === true &&
@@ -684,6 +687,7 @@ class DisplayView extends Component {
   };
 
   mergeMaps = (keys) => {
+    console.log(keys);
     const { dataIndexMap } = this.state;
     const reversedMap = {}
     const reversedKeys = {};
@@ -723,11 +727,17 @@ class DisplayView extends Component {
         // multiFrameIndex = !multiFrameIndex && storedMFIndex ? storedMFIndex : multiFrameIndex;
         const { projectID, patientID, studyUID, seriesUID } = series[i];
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
-        if (multiFrameIndex &&  multiFramePort === i && !isNaN(multiFrameIndex)) indexKey = `${indexKey}-${multiFrameIndex}`
+        console.log('----> multiFrameIndex, multiFramePort', multiFrameIndex, multiFramePort);
+        console.log(" ---> isNaN", isNaN(multiFrameIndex));
+        if (multiFrameIndex && multiFramePort === i && !isNaN(multiFrameIndex)) {
+          indexKey = `${indexKey}-${multiFrameIndex}`
+        }
+        console.log(" ---> indexKey", indexKey);
 
         // if (typeof dataIndexMap[indexKey] !== "number") {
 
         if (!(parseInt(dataIndexMap[indexKey]) >= 0) || (typeof multiFrameIndex === 'number' &&  multiFramePort === i ) || force) {
+          console.log(" ---< in if force", force, multiFrameIndex, multiFramePort);
           const promise = multiFrameIndex &&  multiFramePort === i ? this.getImageStack(
             series[i],
             i,
@@ -746,6 +756,7 @@ class DisplayView extends Component {
           indexKeys[indexKey] = i;
           indexOrder.push(i);
         } else if (multiFramePort !== i && storedMFIndex) {
+          console.log(" ---< in else if")
           const currentStack = this.state.data[i] ? this.state.data[i].stack : null;
           const currentImageIdIndex = currentStack ? currentStack.currentImageIdIndex : 0;
           const promise = this.getImageStack(
@@ -759,16 +770,21 @@ class DisplayView extends Component {
           indexKeys[indexKey] = i;
           indexOrder.push(i);
         } else {
+          console.log("---in else");
           const index = parseInt(dataIndexMap[indexKey]);
+          // console.log(' ---> getData in else index', index);
           newData[i] = { ...this.state.data[index] };
         }
       }
 
       if (promises.length > 0) {
         Promise.all(promises).then((res) => {
+          // const key =
+          // multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
+          // ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
           const key =
           multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
-          ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
+          ? `${series[activePort].aimID}`
           : null;
           res.forEach((el, inx) => {
             newData[indexOrder[inx]] = el;
@@ -1410,7 +1426,7 @@ class DisplayView extends Component {
   hideShow = (current) => {
     const { hiding, containerHeight } = this.state;
     if (this.props.activePort !== current) {
-      this.setActive(current);
+      this.setActive(current, 'hideshow');
       return;
     }
     // const element = cornerstone.getEnabledElements()[practivePort];
@@ -1650,7 +1666,8 @@ class DisplayView extends Component {
     this.setState({ showAimEditor: true, selectedAim: undefined });
   };
 
-  setActive = async (i) => {
+  setActive = async (i, fm) => {
+    console.log(' ====> setActive', fm);
     const { activePort, series } = this.props;
     if (activePort !== i) {
       if (this.state.showAimEditor) {
@@ -2460,7 +2477,7 @@ class DisplayView extends Component {
 
   handleJumpChange = (i, event) => {
     if (this.props.activePort !== i) {
-      this.setActive(i);
+      this.setActive(i, 'handleJumpChange');
       return;
     }
     let imageIndex = event.target.value - 1;
@@ -2537,7 +2554,7 @@ class DisplayView extends Component {
                     height: this.state.height,
                     display: "inline-block",
                   }}
-                  onClick={() => this.setActive(i)}
+                  onClick={() => this.setActive(i, 'in render')}
                 >
                   <div className={"row"}>
                     <div className={"column left"}>
@@ -2656,7 +2673,7 @@ class DisplayView extends Component {
                       },
                     ]}
                     setViewportActive={() => {
-                      this.setActive(i);
+                      this.setActive(i, 'inrender 2');
                     }}
                     isStackPrefetchEnabled={true}
                     style={{ height: "calc(100% - 26px)" }}
