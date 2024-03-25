@@ -9,13 +9,18 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import { AiOutlineEyeInvisible, AiOutlineEye } from "react-icons/ai";
 import AimEntityData from "./aimEntityData";
 import CalculationLabel from "./calculationLabel";
+import { teachingFileTempCode } from '../../../constants';
+
 
 const annotation = (props) => {
+  const teachingStyle = {background: "#4c4c4c", color: "#dfdfdf", border: "#acacac solid 1px"};
+  const template = props.aim.typeCode[0].code;
   const mode = sessionStorage.getItem("mode");
   const [showMore, setShowMore] = useState(false);
   //conditional borderstyling
   let buttonStyle = { ...props.style.button };
-  let labelStyle = { ...props.style.label };
+  let labelStyle = template === teachingFileTempCode ? { ...props.style.label, background: "#606060" } : { ...props.style.label };
+
   // let borderStyle = `0.15rem solid ${props.style.button.background}`;
   // buttonStyle.border = borderStyle;
   // labelStyle.border = borderStyle;
@@ -29,7 +34,8 @@ const annotation = (props) => {
   const hasEntityData =
     props.aim.imagingObservationEntityCollection ||
     props.aim.imagingPhysicalEntityCollection;
-  const finalButtonStyle = !props.showLabel ? singleButtonStyle : buttonStyle;
+  const openCloseButtonStyle = !props.showLabel ? singleButtonStyle : buttonStyle; 
+  const finalButtonStyle = template ===  teachingFileTempCode ? teachingStyle : openCloseButtonStyle;
   const className =
     props.id === props.openSeriesAimID
       ? "annotation-button__container --selected"
