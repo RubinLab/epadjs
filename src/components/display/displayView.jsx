@@ -840,7 +840,7 @@ class DisplayView extends Component {
     // );
     let mfIndex = multiFrameIndex ? `${multiFrameIndex}-${activePort}` : null;
     const serUID = id.split('_')[0];
-    mfIndex = serUID === seriesAddition[activePort].seriesUID && !mfIndex ? `${0}-${activePort}` : mfIndex;
+    mfIndex = serUID === seriesAddition[activePort].seriesUID && !mfIndex ? `${serUID}-${activePort}` : mfIndex;
     this.getData(
       mfIndex,
       undefined,
