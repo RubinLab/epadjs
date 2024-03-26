@@ -687,7 +687,6 @@ class DisplayView extends Component {
   };
 
   mergeMaps = (keys) => {
-    console.log(keys);
     const { dataIndexMap } = this.state;
     const reversedMap = {}
     const reversedKeys = {};
@@ -727,17 +726,12 @@ class DisplayView extends Component {
         // multiFrameIndex = !multiFrameIndex && storedMFIndex ? storedMFIndex : multiFrameIndex;
         const { projectID, patientID, studyUID, seriesUID } = series[i];
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
-        console.log('----> multiFrameIndex, multiFramePort', multiFrameIndex, multiFramePort);
-        console.log(" ---> isNaN", isNaN(multiFrameIndex));
         if (multiFrameIndex && multiFramePort === i && !isNaN(multiFrameIndex)) {
           indexKey = `${indexKey}-${multiFrameIndex}`
         }
-        console.log(" ---> indexKey", indexKey);
 
         // if (typeof dataIndexMap[indexKey] !== "number") {
-
-        if (!(parseInt(dataIndexMap[indexKey]) >= 0) || (typeof multiFrameIndex === 'number' &&  multiFramePort === i ) || force) {
-          console.log(" ---< in if force", force, multiFrameIndex, multiFramePort);
+        if (!(parseInt(dataIndexMap[indexKey]) >= 0) || ((typeof multiFrameIndex === 'number' &&  multiFramePort === i ) && !(parseInt(dataIndexMap[indexKey]) >= 0) ) || force) {
           const promise = multiFrameIndex &&  multiFramePort === i ? this.getImageStack(
             series[i],
             i,
@@ -756,7 +750,7 @@ class DisplayView extends Component {
           indexKeys[indexKey] = i;
           indexOrder.push(i);
         } else if (multiFramePort !== i && storedMFIndex) {
-          console.log(" ---< in else if")
+          const confirmationKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}-${storedMFIndex}`
           const currentStack = this.state.data[i] ? this.state.data[i].stack : null;
           const currentImageIdIndex = currentStack ? currentStack.currentImageIdIndex : 0;
           const promise = this.getImageStack(
@@ -767,12 +761,10 @@ class DisplayView extends Component {
             `${fm} - ${i} - ${multiFrameIndexData}`
           )
           promises.push(promise);
-          indexKeys[indexKey] = i;
+          indexKeys[confirmationKey] = i;
           indexOrder.push(i);
         } else {
-          console.log("---in else");
           const index = parseInt(dataIndexMap[indexKey]);
-          // console.log(' ---> getData in else index', index);
           newData[i] = { ...this.state.data[index] };
         }
       }
@@ -796,7 +788,7 @@ class DisplayView extends Component {
             this.setState({ data: newData });
           }
           
-          const mergedMaps = this.mergeMaps(indexKeys);
+          const mergedMaps = this.mergeMaps(indexKeys, fm);
           this.setState(
             {
               isLoading: false,
@@ -1023,7 +1015,6 @@ class DisplayView extends Component {
       }
       const { seriesAddition, activePort, templates } = this.props;
       const { projectID, aimID, template } = seriesAddition[activePort];
-      // console.log(" template ", template);
       const templateType = template ? templates[template]?.TemplateContainer.Template[0].templateType : null;
       if (aimID && !multiFrameIndex && templateType === 'Image') {
         const { data: aimData } = await getAnnotation(projectID, aimID);
@@ -1667,7 +1658,6 @@ class DisplayView extends Component {
   };
 
   setActive = async (i, fm) => {
-    console.log(' ====> setActive', fm);
     const { activePort, series } = this.props;
     if (activePort !== i) {
       if (this.state.showAimEditor) {
@@ -1684,7 +1674,8 @@ class DisplayView extends Component {
       this.setState({ activePort: i });
       await this.props.dispatch(changeActivePort(i));
       const { imageIds, currentImageIdIndex } = this.state.data[i].stack;
-      const imageId = this.parseImgeId(imageIds[currentImageIdIndex]);
+      const imgToParse = imageIds[currentImageIdIndex] || imageIds[0];
+      const imageId = this.parseImgeId(imgToParse);
       await this.props.dispatch(updateImageId(imageId));
       this.setSerieActiveLabelMap();
     }
@@ -2387,10 +2378,10 @@ class DisplayView extends Component {
   };
   // this is in aimEditor. should be somewhare common so both can use (the new aimapi library)
   parseImgeId = (imageId) => {
-    if (imageId.includes("objectUID=")) {
+    if (imageId && imageId.includes("objectUID=")) {
       return imageId.split("objectUID=")[1];
     }
-    if (imageId.includes("wadors")) {
+    if (imageId && imageId.includes("wadors")) {
       return imageId.split("/instances/").pop();
     }
     return imageId.split("/").pop();
@@ -2470,7 +2461,6 @@ class DisplayView extends Component {
       imageIndex,
       10
     );
-    console.log(" ----> jumpToImage", newData);
     this.setState({ data: newData });
     this.props.dispatch(clearMultiFrameAimJumpFlags());
   };
