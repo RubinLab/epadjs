@@ -43,7 +43,7 @@ const tagsToInclude = [
 ];
 // PHI-related tags. If a tag is in this array, its data is only
 // included in the presentation if the 'Save Accession #' button is toggled on.
-const accessionTag = ['x00080050', 'x00100020'];
+const phiTags = ['x00080050', 'x00100020'];
 
 let wadoUrl;
 
@@ -60,7 +60,7 @@ class MediaExport extends Component {
     super(props);
     wadoUrl = sessionStorage.getItem('wadoUrl');
     this.pptTags = tagsToInclude;
-    this.sensitiveTags = accessionTag;
+    this.sensitiveTags = phiTags;
     // The following lines give this class a way to export and import the current
     // presentation and gif, so that you can close and re-open the class dialog
     // without losing progress.
