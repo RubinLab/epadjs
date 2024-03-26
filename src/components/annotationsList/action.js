@@ -666,7 +666,7 @@ const getRequiredFields = (arr, type, selectedID) => {
 
 const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
   try {
-    const { data: series } = await getSeries(projectID, patientID, studyID);
+    const { data: series } = await getSeries(projectID, patientID, studyID, false, "action.js, getSeriesData");
     const formattedSeries = getRequiredFields(series, "serie", selectedID);
     return new Promise((resolve, reject) => {
       resolve(formattedSeries);
@@ -762,7 +762,7 @@ const getSeriesAdditionalInfo = (uids) => {
   return new Promise(async (resolve, reject) => {
     try {
       let { studyUID, projectID, patientID } = uids;
-      const { data: series } = await getSeries(projectID, patientID, studyUID);
+      const { data: series } = await getSeries(projectID, patientID, studyUID, false, "action, getSeriesAdditionalInfo");
       const additionalaDataArray = series.reduce((all, item) => {
         const filled = true;
         const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo, seriesUID } = item;
@@ -810,7 +810,7 @@ export const updateOtherAims = (aimrefs) => {
       // name,
       const { projectID, patientID, studyUID } = aimrefs;
       // projectId, subjectId, studyId
-      const { data: seriesList } = await getSeries(projectID, patientID, studyUID);
+      const { data: seriesList } = await getSeries(projectID, patientID, studyUID, false, "action, updateOtherAims");
       await dispatch(otherAimsUpdated(seriesList, aimrefs));
     }
     catch (err) {
@@ -1007,7 +1007,7 @@ const getSingleSerieData = (serie, annotation, wadoUrl, seriesData) => {
     //  TODO: getseries call should get its data from the initial data
     const promises = [getStudyAims(patientID, studyUID, projectID)];
     if (!seriesData) {
-      promises.push(getSeries(projectID, patientID, studyUID, true));
+      promises.push(getSeries(projectID, patientID, studyUID, true, "action getSingleSerieData"));
     }
 
     Promise.all(promises)

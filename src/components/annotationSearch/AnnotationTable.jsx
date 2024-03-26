@@ -364,7 +364,8 @@ function AnnotationTable(props) {
           projectID,
           patientID,
           studyUID, 
-          force
+          force,
+          "getSeriesData, AnnotationTable"
           );
         props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
         props.dispatch(loadCompleted());
@@ -737,6 +738,10 @@ function AnnotationTable(props) {
                 type="checkbox"
                 className="form-check-input __search-checkbox"
                 id={row.original.aimID}
+                value={row.original.name}
+                data-subjectid={row.original.subjectID}
+                data-studyuid={row.original.studyUID}
+                data-seriesuid={row.original.seriesUID}
                 // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
                 // checked={props.allSelected || listOfSelecteds[row.original.aimID]}
               />

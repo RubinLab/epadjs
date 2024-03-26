@@ -203,8 +203,11 @@ class DisplayView extends Component {
     const invertMap = { ...this.state.invertMap };
     if (buttonClicked) invertMap[index] = !invertMap[index];
     else
-      series.forEach((el, i) => {
-        invertMap[i] = el.examType === "NM" || seriesAddition[i].examType === 'NM';
+    series.forEach((el, i) => {
+        const isPET = el.examType === 'PET' || seriesAddition[i].examType === 'PET';
+        const isNM = el.examType === 'NM' || seriesAddition[i].examType === 'NM';
+        const isPT = el.examType === 'PT' || seriesAddition[i].examType === 'PT';
+        invertMap[i] = isPET || isNM || isPT;
       });
     this.setState({ invertMap });
   };
@@ -1012,7 +1015,12 @@ class DisplayView extends Component {
       }
       const { seriesAddition, activePort, templates } = this.props;
       const { projectID, aimID, template } = seriesAddition[activePort];
-      const templateType = template ? templates[template]?.TemplateContainer.Template[0].templateType : null;
+
+      // template is saved in openSeriesAddition if user select image aim from search
+      // for teaching files template is not saved in the store/openSeriesAddition
+      const tempInfo = templates[template];
+      const templateType = tempInfo ? tempInfo.TemplateContainer.Template[0].templateType : null;
+      // const { templateType } = tempInfo.TemplateContainer.Template[0];
       if (aimID && !multiFrameIndex && templateType === 'Image') {
         const { data: aimData } = await getAnnotation(projectID, aimID);
         const imgAnn = aimData.ImageAnnotationCollection.imageAnnotations.ImageAnnotation;
@@ -1086,6 +1094,7 @@ class DisplayView extends Component {
 
     // get position from the first image but orientation from the middle
     const sortByGeo = !!firstImage && !!firstImage["00200032"] && !!middleImage && !!middleImage["00200037"];
+
     if (sortByGeo) {
       referencePosition = firstImage["00200032"].Value;
       rowVector = middleImage["00200037"].Value.slice(0, 3);
@@ -1095,7 +1104,6 @@ class DisplayView extends Component {
         columnVector
       );
     }
-
 
     const len = imageUrls[firstSeriesIndex] ? imageUrls[firstSeriesIndex].length : 0;
     for (let k = 0; k < len; k++) {
@@ -1921,6 +1929,7 @@ class DisplayView extends Component {
       const pathVariables = { studyUID, seriesUID: seriesInstanceUid.root };
 
       getSegmentation(pathVariables, sopInstanceUid.root).then(({ data }) => {
+        this.jumpToAims();
         this.renderSegmentation(data, aimId, serieIndex, labelMapIndex);
       }); 
     }

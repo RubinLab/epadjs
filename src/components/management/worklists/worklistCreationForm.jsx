@@ -206,11 +206,14 @@ class WorklistCreationForm extends React.Component {
   }
 
   handleRequirementFormInput = e => {
-    const { name, value } = e.target;
+    const { name, value, options, selectedIndex } = e.target;
+    const code = options && options[selectedIndex] ? options[selectedIndex].id : null;
     const newRequirement = { ...this.state.requirements };
-    name === "template" && value === "Any"
-      ? (newRequirement[name] = value.toLowerCase())
-      : (newRequirement[name] = value);
+    if (name === 'template') {
+      if (value === 'Any')
+        newRequirement[name] = value.toLowerCase()
+      else newRequirement[name] = code;
+    } else newRequirement[name] = value;
 
     if (name === "numOfAims" && !isNaN(parseInt(value))) {
       this.setState({ error: null });
@@ -345,6 +348,7 @@ class WorklistCreationForm extends React.Component {
               <RequirementForm
                 onNewReqInfo={this.handleRequirementFormInput}
                 requirements={requirements}
+                templateMap={this.props.templateMap}
               />
             </>
           )}

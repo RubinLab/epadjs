@@ -10,11 +10,14 @@ import {
   replaceInGrid,
   getSingleSerie,
   setSeriesData,
-  getSeriesAdditional
+  getSeriesAdditional,
+  addToGrid
 } from "components/annotationsList/action";
 import { isSupportedModality, otherSeriesOpened } from "../../Utils/aid.js";
 
 import "./SeriesDropDown.css";
+
+const maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
 const SeriesDropDown = (props) => {
   const [seriesList, setSeriesList] = useState([]);
@@ -78,33 +81,68 @@ const SeriesDropDown = (props) => {
     return { isOpen, index };
   };
 
+  const findSeriesListFmStore = () => {
+    let studyUID;
+    let projectID;
+    let patientID;
+
+    const data = props.seriesData;
+
+    if (props.serie) {
+      studyUID = props.serie.studyUID;
+      projectID = props.serie.projectID;
+      patientID = props.serie.patientID;
+    }
+
+    const studyExist = props.serie ?
+      data[projectID] &&
+      data[projectID][patientID] &&
+      data[projectID][patientID][studyUID] : false;
+
+    const list = studyExist ? data[projectID][patientID][studyUID].list : null;
+    return { list, studyExist };
+  }
+
   useEffect(() => {
     let studyUID;
     let projectID;
     let patientID;
 
     const data = props.seriesData;
+
     if (props.serie) {
       studyUID = props.serie.studyUID;
       projectID = props.serie.projectID;
       patientID = props.serie.patientID;
     }
-    const studyExist =
-      data[projectID] &&
-      data[projectID][patientID] &&
-      data[projectID][patientID][studyUID];
 
-    const list = studyExist ? data[projectID][patientID][studyUID].list : null
+    const {list, studyExist} = findSeriesListFmStore();
     const isString = (currentValue) => currentValue.seriesDescription === '' || typeof currentValue.seriesDescription === 'string';
     const isFilled= (currentValue) => currentValue.filled || currentValue.multiFrameImage;
     const hasDescription = list ? list.every(isFilled) : false;
 
+    let studyInGrid = false;
+
+    for (let i = 0; i < props.index; i++) {
+      const gridSeries = props.openSeriesAddition[i].patientID || props.openSeriesAddition[i].subjectID;
+      const seriesOfViewport = props.serie.patientID || props.serie.subjectID;
+      const sameProject = props.openSeriesAddition[i].projectID === props.serie.projectID;
+      const samePatient = gridSeries === seriesOfViewport;
+      const sameStudy  = props.openSeriesAddition[i].studyUID === props.serie.studyUID;
+      if ( sameProject && samePatient && sameStudy ) {
+        studyInGrid = true;
+        break;
+      }
+    }
+
     if (checkMultiframe() && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
-      getSeries(projectID, patientID, studyUID).then(res => {
-        const newList = mergeLists(data[projectID][patientID][studyUID], res.data);
-        props.dispatch(setSeriesData(projectID, patientID, studyUID, newList, true, true));
-        setLoading(false);
-      }).catch((err) => console.error(err));
+      if (!studyInGrid) {
+        getSeries(projectID, patientID, studyUID).then(res => {
+          const newList = mergeLists(data[projectID][patientID][studyUID], res.data);
+          props.dispatch(setSeriesData(projectID, patientID, studyUID, newList, true, true));
+          setLoading(false);
+        }).catch((err) => console.error(err));
+      }
     } if (studyExist && hasDescription) {
       let series = data[projectID][patientID][studyUID].list;
       series = series?.filter(isSupportedModality);
@@ -112,16 +150,44 @@ const SeriesDropDown = (props) => {
     } else {
       setLoading(true);
       const shouldFill = props.index === 0 || !hasDescription ? true : !otherSeriesOpened(props.openSeries, props.index);
-      if (studyExist && shouldFill && studyUID && projectID && patientID) {
+      if (studyExist && shouldFill && studyUID && projectID && patientID && !studyInGrid) {
         props.dispatch(getSeriesAdditional({studyUID, projectID, patientID}))
       } else {
-        getSeries(projectID, patientID, studyUID).then(res => {
-          props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
-          setLoading(false);
-        }).catch((err) => console.error(err));
+        if (!studyInGrid) {
+          getSeries(projectID, patientID, studyUID).then(res => {
+            props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
+            setLoading(false);
+          }).catch((err) => console.error(err));
+        }
       }
     }
   }, [props.seriesData]);
+
+
+  const checkIfSerieOpen = (key) => {
+    let isOpen = false;
+    let index = null;
+    const keyArr = key.split('_');
+    const seriesUID = keyArr[0];
+    const mfIndex = parseInt(keyArr[1]);
+    for (let i = 0; i < props.openSeriesAddition.length; i++) {
+      const serie = props.openSeriesAddition[i];
+      if (serie.seriesUID === seriesUID) {
+        if (serie.hasMultiframe || serie.multiFrameMap || serie.multiFrameIndex) {
+            const stillImages = mfIndex === 0 && serie.hasMultiframe && serie.multiFrameIndex === null;         
+            if (stillImages || mfIndex === serie.multiFrameIndex) {
+              isOpen = true;
+              index = i;
+              break
+            }
+        } else {
+          isOpen = true;
+          index = i;
+        }
+      }
+    };
+    return { isOpen, index };
+  };
 
   const handleSelect = (e) => {
     const UIDArr = e.split("_");
@@ -139,22 +205,31 @@ const SeriesDropDown = (props) => {
         // if (!props.onCloseAimEditor(true))
         //     return;
       }
+
       const { isOpen, index } = checkIfSerieOpen(e);
 
-      if (!isOpen) {
-        props.onSelect(0, props.activePort, true);
-        props.dispatch(replaceInGrid(serie));
-        const list = seriesList.length > 0 ? seriesList : null;
-        props.dispatch(getSingleSerie(serie, null, null, list));
-        window.dispatchEvent(
-          new CustomEvent("serieReplaced", {
-            detail: {
-              viewportId: props.activePort,
-              id: e,
-              multiFrameIndex: parseInt(multiFrameIndex)
-            },
-          })
-        );
+      if (!isOpen) { 
+        if ( props.openSeriesAddition.length < maxPort ) {
+          const serie = seriesList.find(el => el.seriesUID === seriesUIDFmEvent );
+          const { list }  = findSeriesListFmStore(); 
+          props.dispatch(addToGrid(serie));
+          props.dispatch(getSingleSerie(serie, null, null, list));   
+
+        } else {
+          props.onSelect(0, props.activePort, true);
+          props.dispatch(replaceInGrid(serie));
+          const list = seriesList.length > 0 ? seriesList : null;
+          props.dispatch(getSingleSerie(serie, null, null, list));
+          window.dispatchEvent(
+            new CustomEvent("serieReplaced", {
+              detail: {
+                viewportId: props.activePort,
+                id: e,
+                multiFrameIndex: parseInt(multiFrameIndex)
+              },
+            })
+          );
+        }
         window.dispatchEvent(new CustomEvent("deleteViewportWL"));
       } else {
         toast.info(`This series is already open at viewport ${index + 1}`);
@@ -211,10 +286,6 @@ const SeriesDropDown = (props) => {
               // openSeriesSeriesUID === uniqueKey;
             }
 
-            let counts = numberOfAnnotations
-              ? `${numberOfAnnotations} Ann -`
-              : "";
-
             return (
                 <Dropdown.Item
                   key={uniqueKey}
@@ -222,7 +293,7 @@ const SeriesDropDown = (props) => {
                   onSelect={handleSelect}
                   style={{ textAlign: "left !important" }}
                   >
-                  {seriesNo ? seriesNo : "#NA"} {" - "} {counts}{" "}
+                  {seriesNo ? seriesNo : "#NA"} {" - "} {" "}
                   {seriesDescription?.length
                     ? seriesDescription
                     : "No Description"}{" "}
