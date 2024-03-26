@@ -37,14 +37,8 @@ const annotationsLink = (props) => {
   const checkIfSerieOpen = (selectedSerie, imgIDs) => {
     let isOpen = false;
     let index = null;
-    let frameNo = null;
     let mfIndex = null;
-//     Check if there is same seriesuid
-// İf there is same uid check if it has multiframeMap or hasMultiframe or multiframeIndex
-// If there is find the image id of the aim clicked
-// From the multiframemap find it’s index
-// İf the index is the same with the openseriesAddition return true
-// Else return false 
+
     props.openSeriesAddition.forEach((serie, i) => {
       if (serie.seriesUID === selectedSerie) {
         if (serie.hasMultiframe || serie.multiFrameMap || serie.multiFrameIndex) {

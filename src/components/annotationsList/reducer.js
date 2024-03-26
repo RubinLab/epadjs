@@ -257,7 +257,6 @@ const asyncReducer = (state = initialState, action) => {
         // newState.openSeries= series;
         newState.openSeriesAddition = seriesAddition;
         newState.multiFrameAimJumpData = jumpArr;
-
         return newState;
       case AIM_SAVE: //tested
         const { seriesList, aimRefs } = action.payload;
@@ -380,7 +379,6 @@ const asyncReducer = (state = initialState, action) => {
           };
         }
 
-        console.log(' -- CLOSE_SERIE')
         return {
           ...state,
           openSeries: delGrid,
@@ -533,7 +531,6 @@ const asyncReducer = (state = initialState, action) => {
           }
         }
 
-        console.log(" --> CHANGE_ACTIVE_PORT");
         return Object.assign({}, state, {
           activePort: action.portIndex,
           openSeriesAddition: changedPortSeriesAddition,
@@ -621,7 +618,6 @@ const asyncReducer = (state = initialState, action) => {
           }
         }
 
-        console.log(" ---> CLEAR_GRID");
         return {
           ...state,
           openSeries: [],
@@ -774,7 +770,6 @@ const asyncReducer = (state = initialState, action) => {
         }
 
         const newActivePort = arePortsOccupied ? state.activePort : newOpenSeries.length - 1;
-        console.log('----> ADD_TO_GRID');
         return {
           ...state,
           openSeries: newOpenSeries,
@@ -832,7 +827,6 @@ const asyncReducer = (state = initialState, action) => {
         updatedOpenSeriesAddition[index].aimID = aimID;
 
         // return { ...state, openSeries: updatedGrid, aimsList: {...state.aimsList} };
-        console.log(' JUMP_TO_AIM ')
         return Object.assign({}, state, {
           activePort: index,
           openSeries: updatedGrid,

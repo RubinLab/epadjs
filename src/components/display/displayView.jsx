@@ -352,7 +352,7 @@ class DisplayView extends Component {
 
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], `didupdate 1 ${this.state.multiFrameAimJumped} / ${series[activePort].aimID}`);
+      this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], `didupdate 1`);
       this.formInvertMap();
       this.props.dispatch(clearMultiFrameAimJumpFlags());
       // this.setState({ multiFrameAimJumped: null });
@@ -737,13 +737,13 @@ class DisplayView extends Component {
             i,
             multiFrameIndex,
             frameNo, 
-            `${fm} - ${i} - ${multiFrameIndexData}`
+            `${fm}`
           ) : this.getImageStack(
             series[i],
             i,
             null,
             null, 
-            `${fm} - ${i} - ${multiFrameIndexData}`
+            `${fm}`
           );
 
           promises.push(promise);
@@ -758,7 +758,7 @@ class DisplayView extends Component {
             i,
             storedMFIndex,
             currentImageIdIndex, 
-            `${fm} - ${i} - ${multiFrameIndexData}`
+            `${fm}`
           )
           promises.push(promise);
           indexKeys[confirmationKey] = i;
@@ -771,9 +771,6 @@ class DisplayView extends Component {
 
       if (promises.length > 0) {
         Promise.all(promises).then((res) => {
-          // const key =
-          // multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
-          // ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
           const key =
           multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
           ? `${series[activePort].aimID}`
@@ -788,7 +785,7 @@ class DisplayView extends Component {
             this.setState({ data: newData });
           }
           
-          const mergedMaps = this.mergeMaps(indexKeys, fm);
+          const mergedMaps = this.mergeMaps(indexKeys);
           this.setState(
             {
               isLoading: false,
@@ -1417,7 +1414,7 @@ class DisplayView extends Component {
   hideShow = (current) => {
     const { hiding, containerHeight } = this.state;
     if (this.props.activePort !== current) {
-      this.setActive(current, 'hideshow');
+      this.setActive(current);
       return;
     }
     // const element = cornerstone.getEnabledElements()[practivePort];
@@ -1657,7 +1654,7 @@ class DisplayView extends Component {
     this.setState({ showAimEditor: true, selectedAim: undefined });
   };
 
-  setActive = async (i, fm) => {
+  setActive = async (i) => {
     const { activePort, series } = this.props;
     if (activePort !== i) {
       if (this.state.showAimEditor) {
@@ -2467,7 +2464,7 @@ class DisplayView extends Component {
 
   handleJumpChange = (i, event) => {
     if (this.props.activePort !== i) {
-      this.setActive(i, 'handleJumpChange');
+      this.setActive(i);
       return;
     }
     let imageIndex = event.target.value - 1;
@@ -2544,7 +2541,7 @@ class DisplayView extends Component {
                     height: this.state.height,
                     display: "inline-block",
                   }}
-                  onClick={() => this.setActive(i, 'in render')}
+                  onClick={() => this.setActive(i)}
                 >
                   <div className={"row"}>
                     <div className={"column left"}>
@@ -2663,7 +2660,7 @@ class DisplayView extends Component {
                       },
                     ]}
                     setViewportActive={() => {
-                      this.setActive(i, 'inrender 2');
+                      this.setActive(i);
                     }}
                     isStackPrefetchEnabled={true}
                     style={{ height: "calc(100% - 26px)" }}
