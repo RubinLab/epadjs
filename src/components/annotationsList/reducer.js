@@ -719,6 +719,11 @@ const asyncReducer = (state = initialState, action) => {
       case ADD_TO_GRID:
         const seriesInfo = { ...action.reference };
         const { projectMap } = state;
+        let sameSerI = -1;
+        for (let i = 0; i < state.openSeriesAddition.length; i++)
+          if (state.openSeriesAddition[i].seriesUID === seriesInfo.seriesUID) sameSerI = i;
+        const indexToCopyFm = action.port ? action.port : sameSerI;
+
         if (projectMap[seriesInfo.projectID]) {
           seriesInfo.projectName = projectMap[seriesInfo.projectID].projectName;
           seriesInfo.defaultTemplate =
@@ -731,24 +736,41 @@ const asyncReducer = (state = initialState, action) => {
         let newOpenSeries = [...state.openSeries];
         let newOpenSeriesAddtition = _.cloneDeep(state.openSeriesAddition);
 
-        const existingUID = newOpenSeriesAddtition[action.port] ? newOpenSeriesAddtition[action.port].seriesUID : ''
+        const existingUID = newOpenSeriesAddtition[indexToCopyFm] ? newOpenSeriesAddtition[indexToCopyFm].seriesUID : ''
         const newUID = seriesInfo.seriesUID;
         const sameSeries = existingUID && existingUID === newUID;
+
+        let copyMFMap, copyFmData, copyImageAnnotations;
+        if (sameSeries) {
+          copyMFMap = newOpenSeriesAddtition[indexToCopyFm].multiFrameMap;
+          copyFmData = newOpenSeriesAddtition[indexToCopyFm].frameData;
+          copyImageAnnotations = newOpenSeriesAddtition[indexToCopyFm].imageAnnotations;
+        }
 
         if (arePortsOccupied) {
           newOpenSeries[action.port] = seriesInfo;
           if (sameSeries) {
-            const copyMFMap = newOpenSeriesAddtition[action.port].multiFrameMap;
-            const copyFmData = newOpenSeriesAddtition[action.port].frameData;
-            const copyImageAnnotations = newOpenSeriesAddtition[action.port].imageAnnotations;
             newOpenSeriesAddtition[action.port] = seriesInfo;
             if (copyMFMap) newOpenSeriesAddtition[action.port].multiFrameMap = copyMFMap;
             if (copyFmData) newOpenSeriesAddtition[action.port].frameData = copyFmData;
             if (copyImageAnnotations) newOpenSeriesAddtition[action.port].imageAnnotations = copyImageAnnotations;
           } else newOpenSeriesAddtition[action.port] = seriesInfo;
         } else {
+          if (sameSeries) {
+            if (copyMFMap) seriesInfo.multiFrameMap = copyMFMap;
+            if (copyFmData) seriesInfo.frameData = copyFmData;
+            if (copyImageAnnotations) seriesInfo.imageAnnotations = copyImageAnnotations;
+            if (seriesInfo.aimID && seriesInfo.frameData && seriesInfo.frameData[seriesInfo.aimID]) {
+              const img = seriesInfo.frameData[seriesInfo.aimID][0].split('/frames/')[0];
+              const mfIndexAdded = seriesInfo.multiFrameMap[img];
+              if (typeof parseInt(mfIndexAdded) === "number" && !isNaN(parseInt(mfIndexAdded))) {
+                seriesInfo.multiFrameIndex = parseInt(mfIndexAdded);
+              }
+            }
+          }
           newOpenSeries = newOpenSeries.concat([seriesInfo]);
           newOpenSeriesAddtition = newOpenSeriesAddtition.concat([seriesInfo]);
+
         }
 
         const newActivePort = arePortsOccupied ? state.activePort : newOpenSeries.length - 1;
