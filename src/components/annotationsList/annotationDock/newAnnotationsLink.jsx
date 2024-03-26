@@ -15,7 +15,6 @@ import {
 import "../annotationsList.css";
 
 const handleJumpToAim = (aimId, index, imageID, frame) => {
-  console.log(" ---> handleJumpToAim aimId, index, imageID, frame", aimId, index, imageID, frame);
   const frameNo = frame - 1;
   window.dispatchEvent(
     new CustomEvent("jumpToAimImage", {
@@ -47,7 +46,6 @@ const annotationsLink = (props) => {
 // İf the index is the same with the openseriesAddition return true
 // Else return false 
     props.openSeriesAddition.forEach((serie, i) => {
-      // console.log(" +++serie.seriesUID === selectedSerie", serie.seriesUID === selectedSerie)
       if (serie.seriesUID === selectedSerie) {
         if (serie.hasMultiframe || serie.multiFrameMap || serie.multiFrameIndex) {
           const keysArr = Object.keys(imgIDs);
@@ -91,8 +89,6 @@ const annotationsLink = (props) => {
     let isGridFull = openSeries.length === maxPort;
     const { isOpen, index } = checkIfSerieOpen(selected.seriesUID, selected.imgIDs);
 
-    console.log(" ++++++ isOpen, index ", isOpen, index);
-
     if (isOpen) {
       const imageUID = Object.keys(selected.imgIDs);
       const imgIDArr = imageUID[0].split("/frames/");
@@ -109,7 +105,6 @@ const annotationsLink = (props) => {
         props.dispatch(addToGrid(selected, selected.aimID));
       }
       const list = getExistingSeriesData(selected);
-      console.log("list --->", list);
       props
         .dispatch(getSingleSerie(selected, selected.aimID, null, list))
         .then(() => {})
