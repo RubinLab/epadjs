@@ -34,7 +34,7 @@ class AnnotationsList extends React.Component {
           series.length === this.props.openSeries.length)
       ) {
         const { seriesUID } = this.props.openSeries[this.props.activePort];
-        let annotations = Object.values(this.props.aimsList[seriesUID]);
+        let annotations = this.props.aimsList[seriesUID] ? Object.values(this.props.aimsList[seriesUID]) : [];
         let labelDisplayAll = true;
         let annsDisplayAll = true;
 

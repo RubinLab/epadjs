@@ -87,8 +87,8 @@ export const clearMultiFrameAimJumpFlags = () => {
   return { type: CLEAR_MULTIFRAME_AIM_JUMP };
 }
 
-export const updateGridWithMultiFrameInfo = (hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData) => {
-  return { type: CHECK_MULTIFRAME, payload: { hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData } };
+export const updateGridWithMultiFrameInfo = (hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData, portInx) => {
+  return { type: CHECK_MULTIFRAME, payload: { hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData, portInx } };
 }
 
 export const updateSubpath = (subpath, portIndex) => {
