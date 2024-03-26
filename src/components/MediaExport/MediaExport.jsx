@@ -8,6 +8,7 @@ import { pptWrapper } from "./pptWrapper";
 import { videoExport } from "./videoExport";
 import cornerstoneTools from "cornerstone-tools";
 import { getToolState } from "cornerstone-tools/stateManagement/toolState";
+import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 
 import "./bootstrap-icons.css";
 import "./MediaExport.css";
@@ -29,11 +30,22 @@ const defaultFrameRate = 10;
 const maxFrameRate = 30;
 const debounceMilliseconds = 300;
 // Any DICOM data whose tag is included in this array should have its data included in the presentation.
-const tagsToInclude = ['(0008,0050)', '(0008,0020)', '(0010,0040)', '(0010,1010)', '(0008,103E)', '(0018,0080)', '(0018,0081)'];
-// The accessionTag array contains the tag for the accession numbers. It's an array in case we want
-// to add other PHI-related tags here in the future. If a tag is in this array, its data is only
+// Using the wadors format for tags
+const tagsToInclude = [
+  'x00080050',
+  'x00080020',
+  'x00100040',
+  'x00101010',
+  'x0008103E',
+  'x00180080',
+  'x00180081',
+  'x00100020'
+];
+// PHI-related tags. If a tag is in this array, its data is only
 // included in the presentation if the 'Save Accession #' button is toggled on.
-const accessionTag = ['(0008,0050)'];
+const phiTags = ['x00080050', 'x00100020'];
+
+let wadoUrl;
 
 /**
  * Handles media exporting. This class saves its data using the saveData parameter.
@@ -46,8 +58,9 @@ const accessionTag = ['(0008,0050)'];
 class MediaExport extends Component {
   constructor(props) {
     super(props);
+    wadoUrl = sessionStorage.getItem('wadoUrl');
     this.pptTags = tagsToInclude;
-    this.sensitiveTags = accessionTag;
+    this.sensitiveTags = phiTags;
     // The following lines give this class a way to export and import the current
     // presentation and gif, so that you can close and re-open the class dialog
     // without losing progress.
@@ -163,8 +176,12 @@ class MediaExport extends Component {
       const { activePort } = this.props;
       const { element } = cornerstone.getEnabledElements()[activePort];
       const image = cornerstone.getImage(element);
-      let stringArray = [''];
-      this.dumpDataSet(image.data, stringArray);
+      // fill in the metadata for wadors
+      if (wadoUrl.includes('wadors')) {
+        image.metadata = this.createImageDataFromMetadata(image.imageId);
+      }
+      let stringArray = ['', ''];
+      this.dumpDataSet(image.metadata, stringArray);
       this.gifData.text = stringArray[0];
       this.canv = element.getElementsByClassName('cornerstone-canvas')[0];
       this.gifData.width = this.canv.width;
@@ -227,8 +244,12 @@ class MediaExport extends Component {
     const { element } = cornerstone.getEnabledElements()[activePort];
     this.canv = element.getElementsByClassName('cornerstone-canvas')[0];
     const image = cornerstone.getImage(element);
+    // fill in the metadata for wadors
+    if (wadoUrl.includes('wadors')) {
+      image.metadata = this.createImageDataFromMetadata(image.imageId);
+    }
     let stringArray = ['', ''];
-    this.dumpDataSet(image.data, stringArray);
+    this.dumpDataSet(image.metadata, stringArray);
     this.pptw.addImageToSlide(
       this.canv.toDataURL(),
       this.canv.width,
@@ -306,393 +327,42 @@ class MediaExport extends Component {
     console.log(this.props.data);
   }
 
-  // This function iterates through dataSet recursively and adds new HTML strings
+  // Got from Aim Editor and modified the required tags
+  createImageDataFromMetadata = (id) => {
+    const data = {};
+    const requiredTags = this.pptTags;
+
+    const metadata = cornerstoneWADOImageLoader.wadors.metaDataManager.get(id);
+
+    for (let i = 0; i < requiredTags.length; i++) {
+      const key = requiredTags[i].substring(1).toUpperCase();
+      data[requiredTags[i]] = metadata[key]?.Value
+        ? metadata[key].Value[0]
+        : '';
+    }
+    if (
+      typeof data['x00100010'] === 'object' &&
+      data['x00100010'].hasOwnProperty('Alphabetic')
+    ) {
+      data['x00100010'] = data['x00100010']['Alphabetic'];
+    }
+    return data;
+  };
+
+  // This function iterates through dataSet and adds new HTML strings
   // to the output array passed into it.
-  // I took this function from MetaData.jsx, modified it a bit, and stripped out all of the 
-  // parts that weren't needed.
   dumpDataSet = (dataSet, array) => {
-    const maxLength = 128;
-    const untilTag = "";
-    const showGroupElement = false;
-    const showLength = false;
-    const showVR = false;
-    const showFragments = true;
-    const showFrames = true;
-    const showP10Header = true;
-    const showPrivateElements = true;
-    const showEmptyValues = false;
-
-    try {
-      var keys = [];
-      for (var propertyName in dataSet.elements) {
-        keys.push(propertyName);
+    // we add the strings to output array
+    for (const [tag, value] of Object.entries(dataSet)) {
+      const isSensitiveTag = this.sensitiveTags.includes(tag);
+      if (!isSensitiveTag) {
+        array[0] += '  ' + value + '\n';
+      } else {
+        array[1] += '  ' + value + '\n';
       }
-      keys.sort();
-
-
-      // the dataSet.elements object contains properties for each element parsed.  The name of the property
-      // is based on the elements tag and looks like 'xGGGGEEEE' where GGGG is the group number and EEEE is the
-      // element number both with lowercase hexadecimal letters.  For example, the Series Description DICOM element 0008,103E would
-      // be named 'x0008103e'.  Here we iterate over each property (element) so we can build a string describing its
-      // contents to add to the output array
-      for (var k = 0; k < keys.length; k++) {
-        var propertyName = keys[k];
-        var element = dataSet.elements[propertyName];
-
-        if (showP10Header === false && element.tag <= "x0002ffff") {
-          continue;
-        }
-        if (showPrivateElements === false && dicomParser.isPrivateTag(element.tag)) {
-          continue;
-        }
-        if (showEmptyValues === false && element.length <= 0) {
-          continue;
-        }
-        var text = "";
-        // var title = "";
-
-        // var color = 'black';
-
-        var tag = this.getTag(element.tag);
-        if (tag === undefined || !this.pptTags.includes(tag.tag)) {
-          continue;
-        }
-        const isSensitiveTag = this.sensitiveTags.includes(tag.tag);
-
-        // The output string begins with the element name (or tag if not in data dictionary), length and VR (if present).  VR is undefined for
-        // implicit transfer syntaxes
-        if (tag === undefined) {
-          text += element.tag;
-          text += " : ";
-
-          var lengthText = "length=" + element.length;
-          if (element.hadUndefinedLength) {
-            lengthText += " (-1)";
-          }
-          if (showLength === true) {
-            text += lengthText + "; ";
-          }
-
-          // title += lengthText;
-
-          var vrText = "";
-          if (element.vr) {
-            vrText += "VR=" + element.vr;
-          }
-
-          if (showVR) {
-            text += vrText + "; ";
-          }
-          //if (vrText) {
-          //  title += "; " + vrText;
-          //}
-
-          // title += "; dataOffset=" + element.dataOffset;
-          // make text lighter since this is an unknown attribute
-          // color = '#C8C8C8';
-        }
-        else {
-          text += tag.name;
-          if (showGroupElement === true) {
-            text += "(" + element.tag + ")";
-          }
-          text += " : ";
-
-          // title += "(" + element.tag + ")";
-
-          var lengthText = " length=" + element.length;
-          if (element.hadUndefinedLength) {
-            lengthText += " (-1)";
-          }
-
-          if (showLength === true) {
-            text += lengthText + "; ";
-          }
-          // title += "; " + lengthText;
-
-          var vrText = "";
-          if (element.vr) {
-            vrText += "VR=" + element.vr;
-          }
-
-          if (showVR) {
-            text += vrText + "; ";
-          }
-          //if (vrText) {
-          //  title += "; " + vrText;
-          //}
-
-          // title += "; dataOffset=" + element.dataOffset;
-
-        }
-
-        // Here we check for Sequence items and iterate over them if present.  items will not be set in the
-        // element object for elements that don't have SQ VR type.  Note that implicit little endian
-        // sequences will are currently not parsed.
-        if (element.items) {
-          // output.push('<li>' + text + '</li>');
-          // output.push('<ul>');
-
-          // each item contains its own data set so we iterate over the items
-          // and recursively call this function
-          // var itemNumber = 0;
-          element.items.forEach(function (item) {
-            // output.push('<li>Item #' + itemNumber++ + ' ' + item.tag);
-            var lengthText = " length=" + item.length;
-            if (item.hadUndefinedLength) {
-              lengthText += " (-1)";
-            }
-
-            if (showLength === true) {
-              text += lengthText + "; ";
-              // output.push(lengthText);
-            }
-            // output.push('</li>');
-            // output.push('<ul>');
-            // this.dumpDataSet(item.dataSet, output);
-            // output.push('</ul>');
-          });
-          // output.push('</ul>');
-        }
-        else if (element.fragments) {
-          text += "encapsulated pixel data with " + element.basicOffsetTable.length + " offsets and " +
-            element.fragments.length + " fragments";
-          text += this.sha1Text(dataSet.byteArray, element.dataOffset, element.length);
-
-          // output.push("<li title='" + title + "'=>" + text + '</li>');
-
-          // if (showFragments && element.encapsulatedPixelData) {
-          //   output.push('Fragments:<br>');
-          //   output.push('<ul>');
-          //   var itemNumber = 0;
-          //   element.fragments.forEach((fragment) => {
-          //     var str = '<li>Fragment #' + itemNumber++ + ' dataOffset = ' + fragment.position;
-          //     str += '; offset = ' + fragment.offset;
-          //     str += '; length = ' + fragment.length;
-          //     str += this.sha1Text(dataSet.byteArray, fragment.position, fragment.length);
-          //     str += '</li>';
-
-          //     output.push(str);
-          //   });
-          //   output.push('</ul>');
-          // }
-          //if (showFrames && element.encapsulatedPixelData) {
-          //  output.push('Frames:<br>');
-          //  output.push('<ul>');
-          //  var bot = element.basicOffsetTable;
-          //  // if empty bot and not RLE, calculate it
-          //  if (bot.length === 0) {
-          //    bot = dicomParser.createJPEGBasicOffsetTable(dataSet, element);
-          //  }
-
-          //  function imageFrameLink(frameIndex) {
-          //    var linkText = "<a class='imageFrameDownload' ";
-          //    linkText += "data-frameIndex='" + frameIndex + "'";
-          //    linkText += " href='#'> Frame #" + frameIndex + "</a>";
-          //    return linkText;
-          //  }
-
-          //  for (var frameIndex = 0; frameIndex < bot.length; frameIndex++) {
-          //    var str = "<li>";
-          //    str += imageFrameLink(frameIndex, "Frame #" + frameIndex);
-          //    str += ' dataOffset = ' + (element.fragments[0].position + bot[frameIndex]);
-          //    str += '; offset = ' + (bot[frameIndex]);
-          //    var imageFrame = dicomParser.readEncapsulatedImageFrame(dataSet, element, frameIndex, bot);
-          //    str += '; length = ' + imageFrame.length;
-          //    str += this.sha1Text(imageFrame);
-          //    str += '</li>';
-          //    output.push(str);
-          //  }
-          //  output.push('</ul>');
-          //}
-        }
-        else {
-          // use VR to display the right value
-          var vr;
-          if (element.vr !== undefined) {
-            vr = element.vr;
-          }
-          else {
-            if (tag !== undefined) {
-              vr = tag.vr;
-            }
-          }
-
-          // if the length of the element is less than 128 we try to show it.  We put this check in
-          // to avoid displaying large strings which makes it harder to use.
-          if (element.length < maxLength) {
-            // Since the dataset might be encoded using implicit transfer syntax and we aren't using
-            // a data dictionary, we need some simple logic to figure out what data types these
-            // elements might be.  Since the dataset might also be explicit we could be switch on the
-            // VR and do a better job on this, perhaps we can do that in another example
-
-            // First we check to see if the element's length is appropriate for a UI or US VR.
-            // US is an important type because it is used for the
-            // image Rows and Columns so that is why those are assumed over other VR types.
-            if (element.vr === undefined && tag === undefined) {
-              if (element.length === 2) {
-                text += " (" + dataSet.uint16(propertyName) + ")";
-              }
-              else if (element.length === 4) {
-                text += " (" + dataSet.uint32(propertyName) + ")";
-              }
-
-
-              // Next we ask the dataset to give us the element's data in string form.  Most elements are
-              // strings but some aren't so we do a quick check to make sure it actually has all ascii
-              // characters so we know it is reasonable to display it.
-              var str = dataSet.string(propertyName);
-              var stringIsAscii = this.isASCII(str);
-
-              if (stringIsAscii) {
-                // the string will be undefined if the element is present but has no data
-                // (i.e. attribute is of type 2 or 3 ) so we only display the string if it has
-                // data.  Note that the length of the element will be 0 to indicate "no data"
-                // so we don't put anything here for the value in that case.
-                if (str !== undefined) {
-                  text += '"' + str + '"' + this.mapUid(str);
-                }
-              }
-              else {
-                if (element.length !== 2 && element.length !== 4) {
-                  color = '#C8C8C8';
-                  // If it is some other length and we have no string
-                  text += "binary data";
-                }
-              }
-            }
-            else {
-              function isStringVr(vr) {
-                if (vr === 'AT'
-                  || vr === 'FL'
-                  || vr === 'FD'
-                  || vr === 'OB'
-                  || vr === 'OF'
-                  || vr === 'OW'
-                  || vr === 'SI'
-                  || vr === 'SQ'
-                  || vr === 'SS'
-                  || vr === 'UL'
-                  || vr === 'US'
-                ) {
-                  return false;
-                }
-                return true;
-              }
-              if (isStringVr(vr)) {
-                // Next we ask the dataset to give us the element's data in string form.  Most elements are
-                // strings but some aren't so we do a quick check to make sure it actually has all ascii
-                // characters so we know it is reasonable to display it.
-                var str = dataSet.string(propertyName);
-                var stringIsAscii = this.isASCII(str);
-
-                if (stringIsAscii) {
-                  // the string will be undefined if the element is present but has no data
-                  // (i.e. attribute is of type 2 or 3 ) so we only display the string if it has
-                  // data.  Note that the length of the element will be 0 to indicate "no data"
-                  // so we don't put anything here for the value in that case.
-                  if (str !== undefined) {
-                    text += '"' + str + '"' + this.mapUid(str);
-                  }
-                }
-                else {
-                  if (element.length !== 2 && element.length !== 4) {
-                    // color = '#C8C8C8';
-                    // If it is some other length and we have no string
-                    text += "binary data";
-                  }
-                }
-              }
-              else if (vr === 'US') {
-                text += dataSet.uint16(propertyName);
-                for (var i = 1; i < dataSet.elements[propertyName].length / 2; i++) {
-                  text += '\\' + dataSet.uint16(propertyName, i);
-                }
-              }
-              else if (vr === 'SS') {
-                text += dataSet.int16(propertyName);
-                for (var i = 1; i < dataSet.elements[propertyName].length / 2; i++) {
-                  text += '\\' + dataSet.int16(propertyName, i);
-                }
-              }
-              else if (vr === 'UL') {
-                text += dataSet.uint32(propertyName);
-                for (var i = 1; i < dataSet.elements[propertyName].length / 4; i++) {
-                  text += '\\' + dataSet.uint32(propertyName, i);
-                }
-              }
-              else if (vr === 'SL') {
-                text += dataSet.int32(propertyName);
-                for (var i = 1; i < dataSet.elements[propertyName].length / 4; i++) {
-                  text += '\\' + dataSet.int32(propertyName, i);
-                }
-              }
-              else if (vr == 'FD') {
-                text += dataSet.double(propertyName);
-                for (var i = 1; i < dataSet.elements[propertyName].length / 8; i++) {
-                  text += '\\' + dataSet.double(propertyName, i);
-                }
-              }
-              else if (vr == 'FL') {
-                text += dataSet.float(propertyName);
-                for (var i = 1; i < dataSet.elements[propertyName].length / 4; i++) {
-                  text += '\\' + dataSet.float(propertyName, i);
-                }
-              }
-              else if (vr === 'OB' || vr === 'OW' || vr === 'UN' || vr === 'OF' || vr === 'UT') {
-                color = '#C8C8C8';
-                // If it is some other length and we have no string
-                if (element.length === 2) {
-                  text += dataDownloadLink(element, "binary data") + " of length " + element.length + " as uint16: " + dataSet.uint16(propertyName);
-                } else if (element.length === 4) {
-                  text += dataDownloadLink(element, "binary data") + " of length " + element.length + " as uint32: " + dataSet.uint32(propertyName);
-                } else {
-                  text += dataDownloadLink(element, "binary data") + " of length " + element.length + " and VR " + vr;
-                }
-              }
-              else if (vr === 'AT') {
-                var group = dataSet.uint16(propertyName, 0);
-                var groupHexStr = ("0000" + group.toString(16)).substr(-4);
-                var element = dataSet.uint16(propertyName, 1);
-                var elementHexStr = ("0000" + element.toString(16)).substr(-4);
-                text += "x" + groupHexStr + elementHexStr;
-              }
-              else if (vr === 'SQ') {
-              }
-              else {
-                // If it is some other length and we have no string
-                text += "no display code for VR " + vr + " yet, sorry!";
-              }
-            }
-
-            //if (element.length === 0) {
-            //  color = '#C8C8C8';
-            //}
-          }
-          else {
-            //   color = '#C8C8C8';
-
-            // Add text saying the data is too long to show...
-            text += dataDownloadLink(element, "data");
-            text += " of length " + element.length + " for VR " + vr + " too long to show";
-            text += this.sha1Text(dataSet.byteArray, element.dataOffset, element.length);
-          }
-          // finally we add the string to our output array
-          if (!isSensitiveTag) {
-            array[0] += '  ' + text + '\n';
-          } else {
-            array[1] += '  ' + text + '\n';
-          }
-          // console.log(text);
-        }
-      }
-    } catch (err) {
-      var ex = {
-        exception: err
-      }
-      console.warn(ex);
     }
   }
+
   onChangeHandler = (e) => {
     this.setState({
       input: e.target.value,
@@ -827,8 +497,12 @@ class MediaExport extends Component {
       }
       // Record the gif:
       duration = Math.max(duration, numImages / frameRate);
+      // fill in the metadata for wadors
+      if (wadoUrl.includes('wadors')) {
+        image.metadata = this.createImageDataFromMetadata(image.imageId);
+      }
       let stringArray = ['', ''];
-      this.dumpDataSet(image.data, stringArray);
+      this.dumpDataSet(image.metadata, stringArray);
       this.gifData.text = stringArray[0];
       this.gifData.sensitiveText = stringArray[1];
       this.canv = element.getElementsByClassName('cornerstone-canvas')[0];
