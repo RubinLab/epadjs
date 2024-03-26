@@ -352,7 +352,7 @@ class MediaExport extends Component {
   // This function iterates through dataSet and adds new HTML strings
   // to the output array passed into it.
   dumpDataSet = (dataSet, array) => {
-    // finally we add the string to our output array
+    // we add the strings to output array
     for (const [tag, value] of Object.entries(dataSet)) {
       const isSensitiveTag = this.sensitiveTags.includes(tag);
       if (!isSensitiveTag) {
