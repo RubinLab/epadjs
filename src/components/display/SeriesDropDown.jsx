@@ -56,31 +56,6 @@ const SeriesDropDown = (props) => {
     return result;
   }
 
-  const checkIfSerieOpen = (key) => {
-    let isOpen = false;
-    let index = null;
-    const keyArr = key.split('_');
-    const seriesUID = keyArr[0];
-    const mfIndex = parseInt(keyArr[1]);
-    for (let i = 0; i < props.openSeriesAddition.length; i++) {
-      const serie = props.openSeriesAddition[i];
-      if (serie.seriesUID === seriesUID) {
-        if (serie.hasMultiframe || serie.multiFrameMap || serie.multiFrameIndex) {
-            const stillImages = mfIndex === 0 && serie.hasMultiframe && serie.multiFrameIndex === null;         
-            if (stillImages || mfIndex === serie.multiFrameIndex) {
-              isOpen = true;
-              index = i;
-              break
-            }
-        } else {
-          isOpen = true;
-          index = i;
-        }
-      }
-    };
-    return { isOpen, index };
-  };
-
   const findSeriesListFmStore = () => {
     let studyUID;
     let projectID;
@@ -162,7 +137,6 @@ const SeriesDropDown = (props) => {
       }
     }
   }, [props.seriesData]);
-
 
   const checkIfSerieOpen = (key) => {
     let isOpen = false;
