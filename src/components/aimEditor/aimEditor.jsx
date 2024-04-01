@@ -668,6 +668,7 @@ class AimEditor extends Component {
         alert(
           'Annotation could not be saved! More information about the error can be found in the logs.'
         );
+        this.setState({ saveButtonIsActive: true });
         console.error(error);
       });
   };
@@ -1278,11 +1279,12 @@ class AimEditor extends Component {
       uploadSegmentation(segmentation, segId, projectID)
         .then(() => {
           this.props.dispatch(segUploadStarted(segId));
-          this.setState({ uploadingSegId: segId, showModal: true });
+          this.setState({ uploadingSegId: segId, showModal: true, saveButtonIsActive: false });
           resolve('success');
         })
         .catch((error) => {
           console.error(error);
+          this.setState({ saveButtonIsActive: false });
           reject('error');
         });
     });
