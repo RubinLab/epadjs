@@ -1279,12 +1279,12 @@ class AimEditor extends Component {
       uploadSegmentation(segmentation, segId, projectID)
         .then(() => {
           this.props.dispatch(segUploadStarted(segId));
-          this.setState({ uploadingSegId: segId, showModal: true, saveButtonIsActive: false });
+          this.setState({ uploadingSegId: segId, showModal: true, saveButtonIsActive: true });
           resolve('success');
         })
         .catch((error) => {
           console.error(error);
-          this.setState({ saveButtonIsActive: false });
+          this.setState({ saveButtonIsActive: true });
           reject('error');
         });
     });
