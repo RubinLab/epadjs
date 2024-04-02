@@ -371,7 +371,9 @@ class DisplayView extends Component {
       this.getViewports();
       let mfIndex = null;
       let frame = null;
-      if ( active && ((!prevProps.seriesAddition[activePort] && seriesAddition[activePort]) || prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) && seriesAddition[activePort].multiFrameIndex) {
+      const seriesAdded = !!(!prevProps.seriesAddition[activePort] && seriesAddition[activePort]);
+      const seriesReplaced = (!!prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID);
+      if ( !!active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex) {
         mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
         frame = 0;
       }
@@ -1005,7 +1007,7 @@ class DisplayView extends Component {
       for (let i = 0; i < imageUrls.length; i++) {
         if (imageUrls[i] && Array.isArray(imageUrls[i]) && imageUrls[i][0].multiFrameImage) {
           multiFrameMap[imageUrls[i][0].imageUID] = i;
-          multiframeSeriesData[`${imageUrls[i][0].seriesUID}_${i}`] = imageUrls[i][0];
+          multiframeSeriesData[`${imageUrls[i][0].seriesUID}_${i}`] = { ...imageUrls[i][0], multiFrameIndex: i};
         } else {
           if (!multiFrameMap[imageUrls[i][0].seriesUID]) multiFrameMap[imageUrls[i][0].seriesUID] = true;
           imageUrls[i].forEach(el => {
