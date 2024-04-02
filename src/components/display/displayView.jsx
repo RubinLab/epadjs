@@ -207,7 +207,7 @@ class DisplayView extends Component {
         const isPET = el.examType === 'PET' || seriesAddition[i].examType === 'PET';
         const isNM = el.examType === 'NM' || seriesAddition[i].examType === 'NM';
         const isPT = el.examType === 'PT' || seriesAddition[i].examType === 'PT';
-        invertMap[i] = isPET || isNM || isPT;
+        invertMap[i] = isPET || isNM || isPT || this.state.invertMap[i];
       });
     this.setState({ invertMap });
   };
@@ -2312,6 +2312,13 @@ class DisplayView extends Component {
 
   deleteViewportImageStatus = () => {
     let imgStatus = sessionStorage.getItem("imgStatus");
+    let invertMap = Object.values(this.state.invertMap);
+    invertMap.splice(this.props.activePort, 1);
+    invertMap = invertMap.reduce((all, item, index) => {
+      all[index] = item;
+      return all;
+    }, {});
+    this.setState({ invertMap });
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
     imgStatus.splice(this.props.activePort, 1);
