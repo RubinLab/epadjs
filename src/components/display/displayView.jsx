@@ -584,7 +584,7 @@ class DisplayView extends Component {
     const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
 
-    let isSegmentation = this.checkSegmentation(aimID);
+    let isSegmentation = aimID ? this.checkSegmentation(aimID): true;
 
     if (isSegmentation) this.setVisibilityOfSegmentations(aimID, element, isVisible);
     this.setVisibilityOfShapes(isVisible, aimID);
