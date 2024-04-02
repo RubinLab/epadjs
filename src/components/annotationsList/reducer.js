@@ -717,7 +717,9 @@ const asyncReducer = (state = initialState, action) => {
         const { projectMap } = state;
         let sameSerI = -1;
         for (let i = 0; i < state.openSeriesAddition.length; i++)
-          if (state.openSeriesAddition[i].seriesUID === seriesInfo.seriesUID) sameSerI = i;
+          if (state.openSeriesAddition[i].seriesUID === seriesInfo.seriesUID) {
+            if ((state.openSeriesAddition[i].multiFrameIndex || seriesInfo.multiFrameIndex) && state.openSeriesAddition[i].multiFrameIndex === seriesInfo.multiFrameIndex) sameSerI = i
+          };
         const indexToCopyFm = action.port ? action.port : sameSerI;
 
         if (projectMap[seriesInfo.projectID]) {
