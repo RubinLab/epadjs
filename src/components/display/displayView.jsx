@@ -563,8 +563,10 @@ class DisplayView extends Component {
 
   checkSegmentation = (aimID) => {
     const { activePort, seriesAddition } = this.props;
-    const imageID = seriesAddition[activePort].frameData[aimID][0];
-    const aims = seriesAddition[activePort].imageAnnotations[imageID];
+    const aimArr = seriesAddition[activePort] && seriesAddition[activePort].frameData && seriesAddition[activePort].frameData[aimID];
+    const imageID = aimArr && Array.isArray(aimArr) && aimArr.length > 0 ? 
+        seriesAddition[activePort].frameData[aimID][0] : null;
+    const aims = imageID ? seriesAddition[activePort].imageAnnotations[imageID] : null;
     let isSegmentation = false;
     if (aims) {
       for (let i = 0; i < aims.length; i++) {
