@@ -40,11 +40,11 @@ function range(lowEnd, highEnd) {
   return arr;
 }
 
-const max = function(arr) {
+const max = function (arr) {
   return Math.max.apply(null, arr);
 };
 
-const min = function(arr) {
+const min = function (arr) {
   return Math.min.apply(null, arr);
 };
 
@@ -54,7 +54,7 @@ function nearestIndex(arr, x) {
   const l = [];
   const h = [];
 
-  arr.forEach(function(v) {
+  arr.forEach(function (v) {
     if (v < x) {
       l.push(v);
     } else if (v > x) {
@@ -116,7 +116,7 @@ function prefetch(element) {
   stackPrefetchData.data[0].indicesToRequest.sort((a, b) => a - b);
   const indicesToRequestCopy = stackPrefetch.indicesToRequest.slice();
 
-  indicesToRequestCopy.forEach(function(imageIdIndex) {
+  indicesToRequestCopy.forEach(function (imageIdIndex) {
     const imageId = stack.imageIds[imageIdIndex];
 
     if (!imageId) {
@@ -250,7 +250,7 @@ function prefetch(element) {
 }
 
 function getPromiseRemovedHandler(element) {
-  return function(e) {
+  return function (e) {
     const eventData = e.detail;
 
     // When an imagePromise has been pushed out of the cache, re-add its index
@@ -296,7 +296,7 @@ function onImageUpdated(e) {
   // Start prefetching again (after a delay)
   // When the user has scrolled to a new image
   clearTimeout(resetPrefetchTimeout);
-  resetPrefetchTimeout = setTimeout(function() {
+  resetPrefetchTimeout = setTimeout(function () {
     const element = e.target;
 
     // If playClip is enabled and the user loads a different series in the viewport
@@ -374,10 +374,12 @@ function enable(element) {
 
 function disable(element) {
   clearTimeout(resetPrefetchTimeout);
-  element.removeEventListener(
-    external.cornerstone.EVENTS.NEW_IMAGE,
-    onImageUpdated
-  );
+  if (element) {
+    element.removeEventListener(
+      external.cornerstone.EVENTS.NEW_IMAGE,
+      onImageUpdated
+    );
+  }
 
   const promiseRemovedHandler = getPromiseRemovedHandler(element);
 
