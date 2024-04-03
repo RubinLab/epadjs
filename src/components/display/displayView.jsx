@@ -737,19 +737,29 @@ class DisplayView extends Component {
           indexKey = `${indexKey}-${multiFrameIndex}`
         }
 
+            // if there is an imageID 
+            // find its index and pass it here
         // if (typeof dataIndexMap[indexKey] !== "number") {
         if (!(parseInt(dataIndexMap[indexKey]) >= 0) || ((typeof multiFrameIndex === 'number' &&  multiFramePort === i ) && !(parseInt(dataIndexMap[indexKey]) >= 0) ) || force) {
+          console.log(" ---> 1", storedMFIndex);
+          let mfIndex = multiFrameIndex;
+          let fmNo = frameNo;
+          if (storedMFIndex) {
+            mfIndex = storedMFIndex;
+            fmNo = series[i].imageID ? parseInt(series[i].imageID.split('/frames/')[1]) - 1 : 0;
+            console.log(" ---> fmNo", fmNo);
+          }
           const promise = multiFrameIndex &&  multiFramePort === i ? this.getImageStack(
             series[i],
             i,
             multiFrameIndex,
-            frameNo, 
+            frameNo || 0, 
             `${fm}`
           ) : this.getImageStack(
             series[i],
             i,
-            null,
-            null, 
+            mfIndex,
+            fmNo, 
             `${fm}`
           );
 
@@ -757,6 +767,7 @@ class DisplayView extends Component {
           indexKeys[indexKey] = i;
           indexOrder.push(i);
         } else if (multiFramePort !== i && storedMFIndex) {
+          console.log(" ---> 2");
           const confirmationKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}-${storedMFIndex}`
           const currentStack = this.state.data[i] ? this.state.data[i].stack : null;
           const currentImageIdIndex = currentStack ? currentStack.currentImageIdIndex : 0;
@@ -771,6 +782,7 @@ class DisplayView extends Component {
           indexKeys[confirmationKey] = i;
           indexOrder.push(i);
         } else {
+          console.log(" ---> 3");
           const index = parseInt(dataIndexMap[indexKey]);
           newData[i] = { ...this.state.data[index] };
         }
@@ -778,12 +790,28 @@ class DisplayView extends Component {
 
       if (promises.length > 0) {
         Promise.all(promises).then((res) => {
+
+          // let sliceNo = frameNo;
+          // let mfNo = multiFrameIndex || storedMFIndex;
+          // if (fm === 'componentDidMount') {
+          //   if (series[i].imageID) {
+          //     if (seriesAddition[i].multiFrameIndex) 
+          //       sliceNo = parseInt(series[i].imageID.split('/frames/')[1])
+          //     else sliceNo = ""           
+          //   }
+          // }
+
+
           const key =
           multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
           ? `${series[activePort].aimID}`
           : null;
           res.forEach((el, inx) => {
             newData[indexOrder[inx]] = el;
+          });
+
+          newData.forEach((el, i) => {
+
           });
 
           if (key && key !== this.state.multiFrameAimJumped) {
