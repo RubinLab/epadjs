@@ -170,40 +170,37 @@ const SeriesDropDown = (props) => {
     const { seriesUID } = props.openSeries[props.activePort];
 
     // if (multiFrameIndex === undefined) {
-      const serie = seriesList.find((element) => element.seriesUID === seriesUIDFmEvent);
+    const serie = seriesList.find((element) => multiFrameIndex ? element.seriesUID === seriesUIDFmEvent && multiFrameIndex === element.multiFrameIndex : element.seriesUID === seriesUIDFmEvent);
+    if ( multiFrameIndex ) serie.multiFrameIndex = multiFrameIndex;
+    else serie.multiFrameIndex = null;
 
-      if ( multiFrameIndex ) serie.multiFrameIndex = multiFrameIndex;
-      else serie.multiFrameIndex = null;
-
-      if (props.isAimEditorShowing) {
+    if (props.isAimEditorShowing) {
         // if (!props.onCloseAimEditor(true))
         //     return;
+    }
+
+    const { isOpen, index } = checkIfSerieOpen(e);
+
+    if (!isOpen) { 
+      if ( props.openSeriesAddition.length < maxPort ) {
+        const { list }  = findSeriesListFmStore(); 
+        props.dispatch(addToGrid(serie));
+        props.dispatch(getSingleSerie(serie, null, null, list));   
+      } else {
+        props.onSelect(0, props.activePort, true);
+        props.dispatch(replaceInGrid(serie));
+        const list = seriesList.length > 0 ? seriesList : null;
+        props.dispatch(getSingleSerie(serie, null, null, list));
+        window.dispatchEvent(
+          new CustomEvent("serieReplaced", {
+            detail: {
+              viewportId: props.activePort,
+              id: e,
+              multiFrameIndex: parseInt(multiFrameIndex)              
+            },
+          })
+        );
       }
-
-      const { isOpen, index } = checkIfSerieOpen(e);
-
-      if (!isOpen) { 
-        if ( props.openSeriesAddition.length < maxPort ) {
-          const serie = seriesList.find(el => el.seriesUID === seriesUIDFmEvent );
-          const { list }  = findSeriesListFmStore(); 
-          props.dispatch(addToGrid(serie));
-          props.dispatch(getSingleSerie(serie, null, null, list));   
-
-        } else {
-          props.onSelect(0, props.activePort, true);
-          props.dispatch(replaceInGrid(serie));
-          const list = seriesList.length > 0 ? seriesList : null;
-          props.dispatch(getSingleSerie(serie, null, null, list));
-          window.dispatchEvent(
-            new CustomEvent("serieReplaced", {
-              detail: {
-                viewportId: props.activePort,
-                id: e,
-                multiFrameIndex: parseInt(multiFrameIndex)
-              },
-            })
-          );
-        }
         window.dispatchEvent(new CustomEvent("deleteViewportWL"));
       } else {
         toast.info(`This series is already open at viewport ${index + 1}`);
