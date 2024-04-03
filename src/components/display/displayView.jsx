@@ -789,6 +789,7 @@ class DisplayView extends Component {
       }
 
       if (promises.length > 0) {
+
         Promise.all(promises).then((res) => {
 
           // let sliceNo = frameNo;
@@ -810,8 +811,23 @@ class DisplayView extends Component {
             newData[indexOrder[inx]] = el;
           });
 
-          newData.forEach((el, i) => {
-
+          newData.forEach((el, inx) => {
+            let imgIndex = 0;
+            if (series[inx].imageID) {
+              if (seriesAddition[inx].hasMultiframe && seriesAddition[inx].multiFrameIndex) {
+                console.log(" ---->  in if");
+                imgIndex = parseInt(series[inx].imageID.split('/frames/')[1]) - 1;
+              } else {
+              for (let k = 0; k < el.stack.imageIds.length; k++) {
+                const partURL = el.stack.imageIds[k].split('/instances/')[1];
+                if (partURL.includes(series[inx].imageID)) {
+                  imgIndex = k;
+                  break;
+                  }
+                }
+              }
+            }
+            el.stack.currentImageIdIndex = imgIndex;
           });
 
           if (key && key !== this.state.multiFrameAimJumped) {
