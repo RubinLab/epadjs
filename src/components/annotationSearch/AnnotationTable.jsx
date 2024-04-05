@@ -379,17 +379,18 @@ function AnnotationTable(props) {
   const excludeOpenSeries = (allSeriesArr) => {
     const result = [];
     //get all series number in an array
-    const idArr = props.openSeries.reduce((all, item, index) => {
-      all.push(item.seriesUID);
+    const serUIDIndexMap = props.openSeriesAddition.reduce((all, item, index) => {
+      all[item.seriesUID] = item.multiFrameIndex;
       return all;
-    }, []);
+    }, {});
     //if array doesnot include that serie number
     allSeriesArr.forEach((serie) => {
-      if (!idArr.includes(serie.seriesUID)) {
+      if (!serUIDIndexMap[serie.seriesUID] || (typeof serUIDIndexMap[serie.seriesUID] === 'number' && serUIDIndexMap[serie.seriesUID] !== serie.multiFrameIndex)) {
         //push that serie in the result arr
         result.push(serie);
       }
     });
+    console.log(result)
     return result;
   };
 
@@ -586,9 +587,11 @@ function AnnotationTable(props) {
                     !row.original.seriesUID
                   ) {
                     // study aim opening
+                    console.log(" ----> study aim");
                     displaySeries(row.original);
                   } else {
                     // series opening
+                    console.log(" ----> image aim");
                     openAnnotation(row.original);
                   }
                 }}
@@ -922,6 +925,7 @@ const mapsStateToProps = (state) => {
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
     searchTableIndex: state.annotationsListReducer.searchTableIndex,
     seriesData: state.annotationsListReducer.seriesData,
+    openSeriesAddition: state.annotationsListReducer.openSeriesAddition
   };
 };
 
