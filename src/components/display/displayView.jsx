@@ -739,17 +739,18 @@ class DisplayView extends Component {
 
         // if (typeof dataIndexMap[indexKey] !== "number") {
         if (!(parseInt(dataIndexMap[indexKey]) >= 0) || ((typeof multiFrameIndex === 'number' &&  multiFramePort === i ) && !(parseInt(dataIndexMap[indexKey]) >= 0) ) || force) {
-          const promise = multiFrameIndex &&  multiFramePort === i ? this.getImageStack(
+          let mfIndex = multiFrameIndex;
+          let fmNo = frameNo;
+          if (storedMFIndex) {
+            mfIndex = storedMFIndex;
+            fmNo = series[i].imageID ? parseInt(series[i].imageID.split('/frames/')[1]) - 1 : 0;
+          }
+
+          const promise = this.getImageStack(
             series[i],
             i,
-            multiFrameIndex,
-            frameNo, 
-            `${fm}`
-          ) : this.getImageStack(
-            series[i],
-            i,
-            null,
-            null, 
+            mfIndex,
+            fmNo,
             `${fm}`
           );
 
@@ -777,13 +778,33 @@ class DisplayView extends Component {
       }
 
       if (promises.length > 0) {
+
         Promise.all(promises).then((res) => {
+
           const key =
           multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
           ? `${series[activePort].aimID}`
           : null;
           res.forEach((el, inx) => {
             newData[indexOrder[inx]] = el;
+          });
+
+          newData.forEach((el, inx) => {
+            let imgIndex = 0;
+            if (series[inx].imageID) {
+              if (seriesAddition[inx].hasMultiframe && seriesAddition[inx].multiFrameIndex) {
+                imgIndex = parseInt(series[inx].imageID.split('/frames/')[1]) - 1;
+              } else {
+              for (let k = 0; k < el.stack.imageIds.length; k++) {
+                const partURL = el.stack.imageIds[k].split('/instances/')[1];
+                if (partURL.includes(series[inx].imageID)) {
+                  imgIndex = k;
+                  break;
+                  }
+                }
+              }
+            }
+            el.stack.currentImageIdIndex = imgIndex;
           });
 
           if (key && key !== this.state.multiFrameAimJumped) {
