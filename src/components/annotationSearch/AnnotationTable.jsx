@@ -598,11 +598,9 @@ function AnnotationTable(props) {
                     !row.original.seriesUID
                   ) {
                     // study aim opening
-                    console.log(" ----> study aim");
                     displaySeries(row.original);
                   } else {
                     // series opening
-                    console.log(" ----> image aim");
                     openAnnotation(row.original);
                   }
                 }}
