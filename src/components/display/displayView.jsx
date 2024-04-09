@@ -745,17 +745,12 @@ class DisplayView extends Component {
             mfIndex = storedMFIndex;
             fmNo = series[i].imageID ? parseInt(series[i].imageID.split('/frames/')[1]) - 1 : 0;
           }
-          const promise = multiFrameIndex &&  multiFramePort === i ? this.getImageStack(
-            series[i],
-            i,
-            multiFrameIndex,
-            frameNo || 0, 
-            `${fm}`
-          ) : this.getImageStack(
+
+          const promise = this.getImageStack(
             series[i],
             i,
             mfIndex,
-            fmNo, 
+            fmNo,
             `${fm}`
           );
 
