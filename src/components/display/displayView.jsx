@@ -270,7 +270,7 @@ class DisplayView extends Component {
     let image = frameData && frameData[aimID] ? frameData[aimID][0] : null;
     if (!image) return false;
     const imageArr = image.split("/frames/");
-    const mfIndex =  multiFrameMap ? seriesAddition[activePort].multiFrameMap[imageArr[0]] : null;
+    const mfIndex =  seriesAddition[activePort].multiFrameMap[imageArr[0]];
     if (mfIndex && mfIndex > 0) return false;
     else return true;
   }
@@ -342,7 +342,8 @@ class DisplayView extends Component {
     const prevActive = prevSeriesAddition[activePort];
     const aimIDChanged = active && prevActive ? seriesAddition[activePort].aimID !== prevSeriesAddition[activePort].aimID : false;
     const sameSeries = active && prevActive ? seriesAddition[activePort].seriesUID === prevSeriesAddition[activePort].seriesUID : false;
-    const refreshPage = sameSeries && aimIDChanged ? this.forceRefreshForMF() : false;
+    
+    const refreshPage = sameSeries && aimIDChanged && active.multiFrameData ? this.forceRefreshForMF() : false;
 
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
