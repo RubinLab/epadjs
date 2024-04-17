@@ -21,7 +21,7 @@ import {
 const maxPort = parseInt(sessionStorage.getItem('maxPort'));
 // let waterfallOptions = sessionStorage.getItem('waterfallOptions');
 // if (waterfallOptions) waterfallOptions = waterfallOptions.split('-');
-const metricDefaultOptions = ['RECIST', 'ADLA', 'intensitystddev', 'Export (beta)'];
+const metricDefaultOptions = ['RECIST', 'ADLA', 'intensitystddev', 'Export (beta)', 'Export (MIRACCL)'];
 const messages = {
   title: 'Can not open all series',
   message: `Maximum ${maxPort} series can be opened. Please close already opened series first.`
@@ -391,7 +391,8 @@ const Report = props => {
   const handleLesionClick = (row, col, nontarget, rowIndex) => {
     try {
       const uidData = nontarget ? data[user].ntUIDs : data[user].tUIDs;
-      const actualRow = rowIndex || row;
+      // recist reports do not have index as they are not being filtered like longitudinal does
+      const actualRow = rowIndex && rowIndex !== 'undefined' ? rowIndex : row;
       const { openSeries } = props;
       const notOpenSeries = [];
       const { projectID, patientID, subjectName } = props.patient;

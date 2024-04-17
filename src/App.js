@@ -882,7 +882,7 @@ class App extends Component {
         seriesData[projectID][patientID][studyUID] &&
         seriesData[projectID][patientID][studyUID].list;
       if (!dataExists) {
-        const { data: series } = await getSeries(projectID, patientID, studyUID);
+        const { data: series } = await getSeries(projectID, patientID, studyUID, false, "App.js, getSeriesData");
         this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series, true));
         this.setState({ teachingLoading: false });
         return series;

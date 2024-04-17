@@ -10,7 +10,8 @@ export function getSignificantSeries(projectId, subjectId, studyId) {
     encodeURIComponent(studyId) + "/significantseries");
 }
 
-export function getSeries(projectId, subjectId, studyId, forceDicomweb) {
+export function getSeries(projectId, subjectId, studyId, forceDicomweb, fm) {
+  // console.log(" ---> ", fm);
   const endpointProject = http.mode() === "lite" ?
     http.apiUrl() + "/projects/lite/subjects/"
     : http.apiUrl() + "/projects/" + encodeURIComponent(projectId) + "/subjects/";

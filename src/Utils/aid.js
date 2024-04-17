@@ -13,6 +13,18 @@ export const findSelectedCheckboxes = () => {
   return selected;
 }
 
+export const findSelectedCheckboxesMap = () => {
+  let checkboxes = document.getElementsByClassName('__search-checkbox');
+  checkboxes = Array.from(checkboxes);
+  let selected = checkboxes.filter(el => el.checked)
+  selected = selected.reduce((all, el) => {
+    const { subjectid, studyuid, seriesuid } = el.dataset;
+    all[el.id] = { aimID: el.id, name: el.value, subjectID: subjectid, studyUID: studyuid, seriesUID: seriesuid };
+    return all;
+  }, {});
+  return selected;
+}
+
 export const handleSelectDeselectAll = (checked) => {
   let checkboxes = document.getElementsByClassName('__search-checkbox');
   checkboxes = Array.from(checkboxes);

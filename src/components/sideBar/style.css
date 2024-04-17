@@ -166,7 +166,9 @@ body {
 
 .element {
   width: 170px !important;
-  display: inline-table;
+  /* display: inline-table; */
+  height: 85%;
+  overflow-y: auto;
   margin-bottom: 1.7em !important;
   text-transform: capitalize;
   padding: 3px;
@@ -297,6 +299,8 @@ body {
 .Collapsible__contentInner {
   background: #cccccc;
   width: 172px;
+  height: 400px;
+  overflow-y: auto
 }
 
 .Collapsible__contentInner p {

@@ -364,7 +364,8 @@ function AnnotationTable(props) {
           projectID,
           patientID,
           studyUID, 
-          force
+          force,
+          "getSeriesData, AnnotationTable"
           );
         props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
         props.dispatch(loadCompleted());
@@ -378,28 +379,40 @@ function AnnotationTable(props) {
   const excludeOpenSeries = (allSeriesArr) => {
     const result = [];
     //get all series number in an array
-    const idArr = props.openSeries.reduce((all, item, index) => {
-      all.push(item.seriesUID);
+    const serUIDIndexMap = props.openSeriesAddition.reduce((all, item, index) => {
+      all[item.seriesUID] = item.multiFrameIndex;
       return all;
-    }, []);
+    }, {});
     //if array doesnot include that serie number
     allSeriesArr.forEach((serie) => {
-      if (!idArr.includes(serie.seriesUID)) {
+      if (!serUIDIndexMap[serie.seriesUID] || (typeof serUIDIndexMap[serie.seriesUID] === 'number' && serUIDIndexMap[serie.seriesUID] !== serie.multiFrameIndex)) {
         //push that serie in the result arr
         result.push(serie);
       }
     });
+    console.log(result)
     return result;
   };
 
-  const checkIfSerieOpen = (obj, openSeries) => {
+  const checkIfSerieOpen = (selected) => {
     let isOpen = false;
-    let index;
-    const { seriesUID, projectID } = obj;
-    openSeries.forEach((serie, i) => {
-      if (serie.seriesUID === seriesUID && projectID === serie.projectID) {
-        isOpen = true;
-        index = i;
+    let index = null;
+    let mfIndex = null;
+
+    const { seriesUID, instanceUID } = selected;
+
+    props.openSeriesAddition.forEach((serie, i) => {
+      if (serie.seriesUID === seriesUID) {
+        if (serie.hasMultiframe || serie.multiFrameMap || serie.multiFrameIndex) {
+          const mfIndex = serie.multiFrameMap && serie.multiFrameMap[instanceUID];
+          if ((mfIndex === true && serie.hasMultiframe && !serie.multiFrameIndex) || mfIndex === serie.multiFrameIndex) {
+            isOpen = true;
+            index = i;
+          }
+        } else {
+          isOpen = true;
+          index = i;
+        }
       }
     });
     return { isOpen, index };
@@ -737,6 +750,10 @@ function AnnotationTable(props) {
                 type="checkbox"
                 className="form-check-input __search-checkbox"
                 id={row.original.aimID}
+                value={row.original.name}
+                data-subjectid={row.original.subjectID}
+                data-studyuid={row.original.studyUID}
+                data-seriesuid={row.original.seriesUID}
                 // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
                 // checked={props.allSelected || listOfSelecteds[row.original.aimID]}
               />
@@ -917,6 +934,7 @@ const mapsStateToProps = (state) => {
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
     searchTableIndex: state.annotationsListReducer.searchTableIndex,
     seriesData: state.annotationsListReducer.seriesData,
+    openSeriesAddition: state.annotationsListReducer.openSeriesAddition
   };
 };
 

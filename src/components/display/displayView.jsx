@@ -34,7 +34,7 @@ import {
   setSeriesData
   // fillSeriesDescfullData
 } from "../annotationsList/action";
-import { deleteAnnotation } from "../../services/annotationServices";
+import { deleteAnnotation, getAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
 import CornerstoneViewport from "react-cornerstone-viewport";
@@ -159,6 +159,7 @@ const mapStateToProps = (state) => {
     subpath: state.annotationsListReducer.subpath,
     multiFrameAimJumpData: state.annotationsListReducer.multiFrameAimJumpData,
     otherSeriesAimsList: state.annotationsListReducer.otherSeriesAimsList,
+    templates: state.annotationsListReducer.templates
   };
 };
 
@@ -198,12 +199,15 @@ class DisplayView extends Component {
   }
 
   formInvertMap = (buttonClicked, index) => {
-    const { series } = this.props;
+    const { series, seriesAddition } = this.props;
     const invertMap = { ...this.state.invertMap };
     if (buttonClicked) invertMap[index] = !invertMap[index];
     else
-      series.forEach((el, i) => {
-        invertMap[i] = el.examType === "NM";
+    series.forEach((el, i) => {
+        const isPET = el.examType === 'PET' || seriesAddition[i].examType === 'PET';
+        const isNM = el.examType === 'NM' || seriesAddition[i].examType === 'NM';
+        const isPT = el.examType === 'PT' || seriesAddition[i].examType === 'PT';
+        invertMap[i] = isPET || isNM || isPT || this.state.invertMap[i];
       });
     this.setState({ invertMap });
   };
@@ -262,7 +266,7 @@ class DisplayView extends Component {
   forceRefreshForMF = () => {
     const { seriesAddition, activePort } = this.props;
     const { aimID } = seriesAddition[activePort];
-    const { frameData } = seriesAddition[activePort];
+    const { frameData, multiFrameMap } = seriesAddition[activePort];
     let image = frameData && frameData[aimID] ? frameData[aimID][0] : null;
     if (!image) return false;
     const imageArr = image.split("/frames/");
@@ -338,20 +342,24 @@ class DisplayView extends Component {
     const prevActive = prevSeriesAddition[activePort];
     const aimIDChanged = active && prevActive ? seriesAddition[activePort].aimID !== prevSeriesAddition[activePort].aimID : false;
     const sameSeries = active && prevActive ? seriesAddition[activePort].seriesUID === prevSeriesAddition[activePort].seriesUID : false;
-    const refreshPage = sameSeries && aimIDChanged ? this.forceRefreshForMF() : false;
+    
+    const refreshPage = sameSeries && aimIDChanged && active.multiFrameData ? this.forceRefreshForMF() : false;
 
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
       multiFrameAimJumpData &&
       multiFrameAimJumpData[0] &&
-      `${series[activePort].aimID}-${multiFrameAimJumpData[0]}-${multiFrameAimJumpData[1]}` !==
+      // `${series[activePort].aimID}-${multiFrameAimJumpData[0]}-${multiFrameAimJumpData[1]}` !==
+      `${series[activePort].aimID}` !==
         this.state.multiFrameAimJumped
     ) {
+
       await this.setState({ isLoading: true });
       this.getViewports();
-      this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], "didupdate 1");
+      this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], `didupdate 1`);
       this.formInvertMap();
-      this.setState({ multiFrameAimJumped: null });
+      this.props.dispatch(clearMultiFrameAimJumpFlags());
+      // this.setState({ multiFrameAimJumped: null });
       // } else if (
       //   (prevProps.series !== this.props.series &&
       //     prevProps.loading === true &&
@@ -364,7 +372,9 @@ class DisplayView extends Component {
       this.getViewports();
       let mfIndex = null;
       let frame = null;
-      if ( active && ((!prevProps.seriesAddition[activePort] && seriesAddition[activePort]) || prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) && seriesAddition[activePort].multiFrameIndex) {
+      const seriesAdded = !!(!prevProps.seriesAddition[activePort] && seriesAddition[activePort]);
+      const seriesReplaced = (!!prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID);
+      if ( !!active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex) {
         mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
         frame = 0;
       }
@@ -556,8 +566,10 @@ class DisplayView extends Component {
 
   checkSegmentation = (aimID) => {
     const { activePort, seriesAddition } = this.props;
-    const imageID = seriesAddition[activePort].frameData[aimID][0];
-    const aims = seriesAddition[activePort].imageAnnotations[imageID];
+    const aimArr = seriesAddition[activePort] && seriesAddition[activePort].frameData && seriesAddition[activePort].frameData[aimID];
+    const imageID = aimArr && Array.isArray(aimArr) && aimArr.length > 0 ? 
+        seriesAddition[activePort].frameData[aimID][0] : null;
+    const aims = imageID ? seriesAddition[activePort].imageAnnotations[imageID] : null;
     let isSegmentation = false;
     if (aims) {
       for (let i = 0; i < aims.length; i++) {
@@ -575,7 +587,7 @@ class DisplayView extends Component {
     const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
 
-    let isSegmentation = this.checkSegmentation(aimID);
+    let isSegmentation = aimID ? this.checkSegmentation(aimID): true;
 
     if (isSegmentation) this.setVisibilityOfSegmentations(aimID, element, isVisible);
     this.setVisibilityOfShapes(isVisible, aimID);
@@ -703,44 +715,62 @@ class DisplayView extends Component {
   }
 
   getData(multiFrameIndexData, frameNo, fm, force) {
+    console.log(" getData fm ^^", fm, multiFrameIndexData);
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
-      const { series, activePort, aimList } = this.props;
+      const { series, activePort, aimList, seriesAddition } = this.props;
       const { dataIndexMap, data } = this.state;
       var promises = [];
       const indexKeys = {};
       const newData = new Array(series.length);
       const indexOrder = [];
-      const multiFrameIndex = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[0]) : null;
+      let multiFrameIndex = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[0]) : null;
       const multiFramePort = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[1]) : null;
       for (let i = 0; i < series.length; i++) {
         // DONE/TODO: in order to not to get same stack again and again
         // add seriesUID-PrID etc info and look it up if we need to get it
         // [{stack -> UIDkey, ycurImgIndex, imfIds}, {}]
-
+        const storedMFIndex = seriesAddition[i].multiFrameIndex;
+        // multiFrameIndex = !multiFrameIndex && storedMFIndex ? storedMFIndex : multiFrameIndex;
         const { projectID, patientID, studyUID, seriesUID } = series[i];
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
-        if (multiFrameIndex &&  multiFramePort === i && !isNaN(multiFrameIndex)) indexKey = `${indexKey}-${multiFrameIndex}`
+        if (multiFrameIndex && multiFramePort === i && !isNaN(multiFrameIndex)) {
+          indexKey = `${indexKey}-${multiFrameIndex}`
+        }
 
         // if (typeof dataIndexMap[indexKey] !== "number") {
+        if (!(parseInt(dataIndexMap[indexKey]) >= 0) || ((typeof multiFrameIndex === 'number' &&  multiFramePort === i ) && !(parseInt(dataIndexMap[indexKey]) >= 0) ) || force) {
+          let mfIndex = multiFrameIndex;
+          let fmNo = frameNo;
+          if (storedMFIndex) {
+            mfIndex = storedMFIndex;
+            fmNo = series[i].imageID ? parseInt(series[i].imageID.split('/frames/')[1]) - 1 : 0;
+          }
 
-        if (!(parseInt(dataIndexMap[indexKey]) >= 0) || (multiFrameIndex &&  multiFramePort === i ) || force) {
-          const promise = multiFrameIndex &&  multiFramePort === i ? this.getImageStack(
+          const promise = this.getImageStack(
             series[i],
             i,
-            multiFrameIndex,
-            frameNo, 
-            fm
-          ) : this.getImageStack(
-            series[i],
-            i,
-            null,
-            null, 
-            fm
+            mfIndex,
+            fmNo,
+            `${fm}`
           );
 
           promises.push(promise);
           indexKeys[indexKey] = i;
+          indexOrder.push(i);
+        } else if (multiFramePort !== i && storedMFIndex) {
+          const confirmationKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}-${storedMFIndex}`
+          const currentStack = this.state.data[i] ? this.state.data[i].stack : null;
+          const currentImageIdIndex = currentStack ? currentStack.currentImageIdIndex : 0;
+          const promise = this.getImageStack(
+            series[i],
+            i,
+            storedMFIndex,
+            currentImageIdIndex, 
+            `${fm}`
+          )
+          promises.push(promise);
+          indexKeys[confirmationKey] = i;
           indexOrder.push(i);
         } else {
           const index = parseInt(dataIndexMap[indexKey]);
@@ -749,15 +779,33 @@ class DisplayView extends Component {
       }
 
       if (promises.length > 0) {
+
         Promise.all(promises).then((res) => {
+
           const key =
           multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
-          ? `${series[activePort].aimID}-${multiFrameIndex}-${frameNo}`
+          ? `${series[activePort].aimID}`
           : null;
-          console.log(" getData fm ^^", fm);
-
           res.forEach((el, inx) => {
             newData[indexOrder[inx]] = el;
+          });
+
+          newData.forEach((el, inx) => {
+            let imgIndex = 0;
+            if (series[inx].imageID) {
+              if (seriesAddition[inx].hasMultiframe && seriesAddition[inx].multiFrameIndex) {
+                imgIndex = parseInt(series[inx].imageID.split('/frames/')[1]) - 1;
+              } else {
+              for (let k = 0; k < el.stack.imageIds.length; k++) {
+                const partURL = el.stack.imageIds[k].split('/instances/')[1];
+                if (partURL.includes(series[inx].imageID)) {
+                  imgIndex = k;
+                  break;
+                  }
+                }
+              }
+            }
+            el.stack.currentImageIdIndex = imgIndex;
           });
 
           if (key && key !== this.state.multiFrameAimJumped) {
@@ -809,7 +857,7 @@ class DisplayView extends Component {
   }
 
   handleSerieReplace = (e) => {
-    const { series } = this.props;
+    const { seriesAddition, activePort } = this.props;
     var promises = [];
     const { viewportId, id, multiFrameIndex } = e.detail;
     // const promise = this.getImageStack(
@@ -819,7 +867,9 @@ class DisplayView extends Component {
     //   undefined,
     //   "handleSerieReplace"
     // );
-    const mfIndex = multiFrameIndex ? `${multiFrameIndex}-${this.props.activePort}` : null;
+    let mfIndex = multiFrameIndex ? `${multiFrameIndex}-${activePort}` : null;
+    const serUID = id.split('_')[0];
+    mfIndex = serUID === seriesAddition[activePort].seriesUID && !mfIndex ? `${serUID}-${activePort}` : mfIndex;
     this.getData(
       mfIndex,
       undefined,
@@ -971,6 +1021,7 @@ class DisplayView extends Component {
     let cornerstoneImageIds = [];
     let seriesMetadata = [];
     let seriesMetadataMap = {};
+    let imgID = null;
     const multiframeSeriesData = {};
     let metadata2D = [];
     const multiFrameMap = {};
@@ -980,16 +1031,36 @@ class DisplayView extends Component {
       for (let i = 0; i < imageUrls.length; i++) {
         if (imageUrls[i] && Array.isArray(imageUrls[i]) && imageUrls[i][0].multiFrameImage) {
           multiFrameMap[imageUrls[i][0].imageUID] = i;
-          multiframeSeriesData[`${imageUrls[i][0].seriesUID}_${i}`] = imageUrls[i][0];
-        } else multiFrameMap[imageUrls[i][0].seriesUID] = true;
+          multiframeSeriesData[`${imageUrls[i][0].seriesUID}_${i}`] = { ...imageUrls[i][0], multiFrameIndex: i};
+        } else {
+          if (!multiFrameMap[imageUrls[i][0].seriesUID]) multiFrameMap[imageUrls[i][0].seriesUID] = true;
+          imageUrls[i].forEach(el => {
+            multiFrameMap[el.imageUID] = true;
+          })
+        }
+      }
+      const { seriesAddition, activePort, templates } = this.props;
+      const { projectID, aimID, template } = seriesAddition[activePort];
+
+      // template is saved in openSeriesAddition if user select image aim from search
+      // for teaching files template is not saved in the store/openSeriesAddition
+      const tempInfo = templates[template];
+      const templateType = tempInfo ? tempInfo.TemplateContainer.Template[0].templateType : null;
+      // const { templateType } = tempInfo.TemplateContainer.Template[0];
+      if (aimID && !multiFrameIndex && templateType === 'Image') {
+        const { data: aimData } = await getAnnotation(projectID, aimID);
+        const imgAnn = aimData.ImageAnnotationCollection.imageAnnotations.ImageAnnotation;
+        imgID = imgAnn && imgAnn[0] && imgAnn[0].markupEntityCollection ? imgAnn[0].markupEntityCollection.MarkupEntity[0].imageReferenceUid.root : null;
       }
     }
+
     let baseUrl;
     let wadoUrlNoWadors = sessionStorage
       .getItem("wadoUrl")
       .replace("wadors:", "");
+
     const firstSeriesIndex = multiFrameIndex
-      ? multiFrameIndex
+      ? multiFrameIndex : imgID && typeof multiFrameMap[imgID] === 'number' ? multiFrameMap[imgID]
       : this.findFirstSeriesIndex(imageUrls);
     
     const urlsExist = imageUrls[firstSeriesIndex] && imageUrls[firstSeriesIndex][0];
@@ -1049,6 +1120,7 @@ class DisplayView extends Component {
 
     // get position from the first image but orientation from the middle
     const sortByGeo = !!firstImage && !!firstImage["00200032"] && !!middleImage && !!middleImage["00200037"];
+
     if (sortByGeo) {
       referencePosition = firstImage["00200032"].Value;
       rowVector = middleImage["00200037"].Value.slice(0, 3);
@@ -1058,7 +1130,6 @@ class DisplayView extends Component {
         columnVector
       );
     }
-
 
     const len = imageUrls[firstSeriesIndex] ? imageUrls[firstSeriesIndex].length : 0;
     for (let k = 0; k < len; k++) {
@@ -1123,7 +1194,7 @@ class DisplayView extends Component {
 
     if (Object.entries(multiFrameMap).length > 0) {
       this.props.dispatch(
-        updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData)
+        updateGridWithMultiFrameInfo(true, multiFrameIndex, multiFrameMap, multiframeSeriesData, index)
       );
     }
     
@@ -1634,7 +1705,8 @@ class DisplayView extends Component {
       this.setState({ activePort: i });
       await this.props.dispatch(changeActivePort(i));
       const { imageIds, currentImageIdIndex } = this.state.data[i].stack;
-      const imageId = this.parseImgeId(imageIds[currentImageIdIndex]);
+      const imgToParse = imageIds[currentImageIdIndex] || imageIds[0];
+      const imageId = this.parseImgeId(imgToParse);
       await this.props.dispatch(updateImageId(imageId));
       this.setSerieActiveLabelMap();
     }
@@ -1883,6 +1955,7 @@ class DisplayView extends Component {
       const pathVariables = { studyUID, seriesUID: seriesInstanceUid.root };
 
       getSegmentation(pathVariables, sopInstanceUid.root).then(({ data }) => {
+        this.jumpToAims();
         this.renderSegmentation(data, aimId, serieIndex, labelMapIndex);
       }); 
     }
@@ -2250,6 +2323,7 @@ class DisplayView extends Component {
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
     imgStatus[this.props.activePort] = null;
+    this.setState({ invertMap: {} });
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
   };
 
@@ -2264,6 +2338,13 @@ class DisplayView extends Component {
 
   deleteViewportImageStatus = () => {
     let imgStatus = sessionStorage.getItem("imgStatus");
+    let invertMap = Object.values(this.state.invertMap);
+    invertMap.splice(this.props.activePort, 1);
+    invertMap = invertMap.reduce((all, item, index) => {
+      all[index] = item;
+      return all;
+    }, {});
+    this.setState({ invertMap });
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
     imgStatus.splice(this.props.activePort, 1);
@@ -2336,10 +2417,10 @@ class DisplayView extends Component {
   };
   // this is in aimEditor. should be somewhare common so both can use (the new aimapi library)
   parseImgeId = (imageId) => {
-    if (imageId.includes("objectUID=")) {
+    if (imageId && imageId.includes("objectUID=")) {
       return imageId.split("objectUID=")[1];
     }
-    if (imageId.includes("wadors")) {
+    if (imageId && imageId.includes("wadors")) {
       return imageId.split("/instances/").pop();
     }
     return imageId.split("/").pop();

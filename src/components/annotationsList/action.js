@@ -87,8 +87,8 @@ export const clearMultiFrameAimJumpFlags = () => {
   return { type: CLEAR_MULTIFRAME_AIM_JUMP };
 }
 
-export const updateGridWithMultiFrameInfo = (hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData) => {
-  return { type: CHECK_MULTIFRAME, payload: { hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData } };
+export const updateGridWithMultiFrameInfo = (hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData, portInx) => {
+  return { type: CHECK_MULTIFRAME, payload: { hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData, portInx } };
 }
 
 export const updateSubpath = (subpath, portIndex) => {
@@ -362,7 +362,7 @@ export const selectAnnotation = (
 // opens a new port to display series
 // adds series details to the array
 export const addToGrid = (serie, annotation, port) => {
-  let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment, seriesDescription, numberOfAnnotations, numberOfImages, seriesNo, template, significanceOrder } = serie;
+  let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment, seriesDescription, numberOfAnnotations, numberOfImages, seriesNo, template, significanceOrder, multiFrameIndex } = serie;
   const modFmComment = comment ? comment.split('/')[0].trim() : '';
   examType = examType ? examType.toUpperCase() : modality ? modality.toUpperCase() : modFmComment.toUpperCase();
 
@@ -386,6 +386,7 @@ export const addToGrid = (serie, annotation, port) => {
     significanceOrder
     // imageIndex: 0
   };
+  if (multiFrameIndex) reference.multiFrameIndex = multiFrameIndex;
   return { type: ADD_TO_GRID, reference, port };
 };
 
@@ -666,7 +667,7 @@ const getRequiredFields = (arr, type, selectedID) => {
 
 const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
   try {
-    const { data: series } = await getSeries(projectID, patientID, studyID);
+    const { data: series } = await getSeries(projectID, patientID, studyID, false, "action.js, getSeriesData");
     const formattedSeries = getRequiredFields(series, "serie", selectedID);
     return new Promise((resolve, reject) => {
       resolve(formattedSeries);
@@ -762,7 +763,7 @@ const getSeriesAdditionalInfo = (uids) => {
   return new Promise(async (resolve, reject) => {
     try {
       let { studyUID, projectID, patientID } = uids;
-      const { data: series } = await getSeries(projectID, patientID, studyUID);
+      const { data: series } = await getSeries(projectID, patientID, studyUID, false, "action, getSeriesAdditionalInfo");
       const additionalaDataArray = series.reduce((all, item) => {
         const filled = true;
         const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo, seriesUID } = item;
@@ -810,7 +811,7 @@ export const updateOtherAims = (aimrefs) => {
       // name,
       const { projectID, patientID, studyUID } = aimrefs;
       // projectId, subjectId, studyId
-      const { data: seriesList } = await getSeries(projectID, patientID, studyUID);
+      const { data: seriesList } = await getSeries(projectID, patientID, studyUID, false, "action, updateOtherAims");
       await dispatch(otherAimsUpdated(seriesList, aimrefs));
     }
     catch (err) {
@@ -975,8 +976,8 @@ const getSeriesAdditionalData = (arr, uid) => {
   if (arr) {
     const data = arr.filter((el) => el.seriesUID === uid);
     if (data.length > 0) {
-      const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo } = data[0];
-      return { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo };
+      const { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo, examType } = data[0];
+      return { numberOfAnnotations, numberOfImages, seriesDescription, seriesNo, examType };
     } else return {};
   } else return {};
 }
@@ -1007,7 +1008,7 @@ const getSingleSerieData = (serie, annotation, wadoUrl, seriesData) => {
     //  TODO: getseries call should get its data from the initial data
     const promises = [getStudyAims(patientID, studyUID, projectID)];
     if (!seriesData) {
-      promises.push(getSeries(projectID, patientID, studyUID, true));
+      promises.push(getSeries(projectID, patientID, studyUID, true, "action getSingleSerieData"));
     }
 
     Promise.all(promises)

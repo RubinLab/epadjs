@@ -457,7 +457,7 @@ class Projects extends React.Component {
         minResizeWidth: 20,
         width: 30,
         Cell: (original) => (
-          <Link className="open-link" to={"/list/" + original.row.checkbox.id}>
+          <Link className="open-link" to={ mode === 'teaching' ? "/search/" + original.row.checkbox.id : "/list/" + original.row.checkbox.id}>
             <div onClick={this.props.onClose} data-tip data-for="project-open">
               <FaRegEye className="menu-clickable" />
             </div>

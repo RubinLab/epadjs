@@ -168,7 +168,7 @@ const asyncReducer = (state = initialState, action) => {
       case CHECK_MULTIFRAME:
         // const series = _.cloneDeep(state.openSeries);
         const seriesAddition = _.cloneDeep(state.openSeriesAddition);
-        const { hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData } = action.payload;
+        const { hasMultiframe, multiframeIndex, multiFrameMap, multiframeSeriesData, portInx } = action.payload;
         let seriesDataMulti = Object.values(multiframeSeriesData);
         const {
           projectID: multiPID,
@@ -177,18 +177,19 @@ const asyncReducer = (state = initialState, action) => {
         } = seriesDataMulti[0];
         let jumpArr = null;
         // check if framedata exists
-        const fmData = seriesAddition[state.activePort].frameData;
-        const aimSelected = (state.openSeries[state.activePort] && state.openSeries[state.activePort].aimID) || (seriesAddition[state.activePort] && seriesAddition[state.activePort].aimID);
+        const fmData = seriesAddition[portInx].frameData;
+        const aimSelected = (state.openSeries[portInx] && state.openSeries[portInx].aimID) || (seriesAddition[portInx] && seriesAddition[portInx].aimID);
         if (aimSelected && hasMultiframe && (fmData && fmData[aimSelected])) {
           const imgArr = fmData[aimSelected][0].split('/frames/');
-          const mfIndex = multiFrameMap && multiFrameMap[imgArr[0]];
+          let mfIndex = multiFrameMap && multiFrameMap[imgArr[0]];
+          if (mfIndex === true) mfIndex = 0;
           const frameNo = parseInt(imgArr[1]);
           if (mfIndex && typeof frameNo === 'number' && !isNaN(frameNo)) jumpArr = [mfIndex, frameNo - 1];
         }
 
-        seriesAddition[state.activePort].hasMultiframe = hasMultiframe;
-        seriesAddition[state.activePort].multiFrameIndex = multiframeIndex;
-        seriesAddition[state.activePort].multiFrameMap = multiFrameMap;
+        seriesAddition[portInx].hasMultiframe = hasMultiframe;
+        seriesAddition[portInx].multiFrameIndex = multiframeIndex;
+        seriesAddition[portInx].multiFrameMap = multiFrameMap;
         const newState = { ...state };
 
         let newSeriesDataMulti = _.cloneDeep(state.seriesData);
@@ -198,7 +199,7 @@ const asyncReducer = (state = initialState, action) => {
         let mfLookUpMap = {};
 
 
-        if (!state.openSeriesAddition[state.activePort].multiFrameMap) {
+        if (!state.openSeriesAddition[portInx].multiFrameMap) {
           if (existingSeries) {
             // find the correct series to get description from
             const seriesToCopyFm = newSeriesDataMulti[multiPID][multiPatID][multiStudyUID].list.find((element) => element.seriesUID === seriesDataMulti[0].seriesUID);
@@ -225,18 +226,15 @@ const asyncReducer = (state = initialState, action) => {
               }
             });
           } else {
-            const desc = state.openSeriesAddition[state.activePort].seriesDescription;
-            const srNo = state.openSeriesAddition[state.activePort].seriesNo;
+            const desc = state.openSeriesAddition[portInx].seriesDescription;
+            const srNo = state.openSeriesAddition[portInx].seriesNo;
             seriesDataMulti = seriesDataMulti.map((el) => {
               el.seriesDescription = desc ? desc : '';
               el.seriesNo = srNo ? srNo : null;
               return el;
             });
 
-            console.log(" +++++> state.openSeriesAddition[state.activePort]", state.openSeriesAddition[state.activePort]);
-            console.log(" ++++> ...seriesDataMulti", seriesDataMulti)
-            const list = [state.openSeriesAddition[state.activePort], ...seriesDataMulti];
-            console.log(" ++++> after merging two", list);
+            const list = [state.openSeriesAddition[portInx], ...seriesDataMulti];
             const map = list.reduce((all, item, index) => {
               if (item.multiFrameImage) {
                 all[item.imageUID] = index + 1;
@@ -245,7 +243,6 @@ const asyncReducer = (state = initialState, action) => {
               return all;
             }, {});
 
-            console.log(" ++++> map", map);
             if (multiPatIDExists) {
               newSeriesDataMulti[multiPID][multiPatID][multiStudyUID] = { list, map };
             } else if (multiPIDExists) {
@@ -406,7 +403,7 @@ const asyncReducer = (state = initialState, action) => {
       case LOAD_SERIE_SUCCESS:
         let imageAddedSeries = _.cloneDeep(state.openSeriesAddition);
         let annCalc = Object.keys(action.payload.imageData);
-        const { projectID: pidFromRef, studyUID: stUIDFromRef } = action.payload.ref;
+        const { projectID: pidFromRef, studyUID: stUIDFromRef, seriesUID: serUIDFromRef } = action.payload.ref;
         let latestOtherSeriesAimsList = _.cloneDeep(state.otherSeriesAimsList);
         if (latestOtherSeriesAimsList[pidFromRef] && action.payload.otherSeriesAimsData[pidFromRef])
           latestOtherSeriesAimsList[pidFromRef][stUIDFromRef] = action.payload.otherSeriesAimsData[pidFromRef][stUIDFromRef];
@@ -421,7 +418,6 @@ const asyncReducer = (state = initialState, action) => {
             }, {})
         }
 
-
         if (annCalc.length > 0) {
           for (let i = 0; i < imageAddedSeries.length; i++) {
             if (imageAddedSeries[i].seriesUID === action.payload.serID) {
@@ -431,6 +427,7 @@ const asyncReducer = (state = initialState, action) => {
               if (!imageAddedSeries[i].numberOfImages) imageAddedSeries[i].numberOfImages = action.payload.ref.numberOfImages;
               if (!imageAddedSeries[i].seriesDescription) imageAddedSeries[i].seriesDescription = action.payload.ref.seriesDescription;
               if (!imageAddedSeries[i].seriesNo) imageAddedSeries[i].seriesNo = action.payload.ref.seriesNo;
+              if (!imageAddedSeries[i].examType) imageAddedSeries[i].examType = action.payload.ref.examType;
             }
           }
         }
@@ -442,10 +439,16 @@ const asyncReducer = (state = initialState, action) => {
         let jumpArr1 = []
         // coming from the right sidebar hasMultiframe flag is overridden by the new data
         // if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
-        if (imageAddedSeries[state.activePort].aimID && imageAddedSeries[state.activePort].multiFrameMap && imageAddedSeries[state.activePort].frameData) {
-          const imgs = imageAddedSeries[state.activePort].frameData[action.payload.ann];
+
+        const prevSameSer = state.openSeriesAddition.find(el => el.seriesUID === serUIDFromRef && !!el.frameData && !!el.multiFrameMap);
+        if ((imageAddedSeries[state.activePort].aimID && imageAddedSeries[state.activePort].multiFrameMap && imageAddedSeries[state.activePort].frameData) || !!prevSameSer) {
+          const fmData1 = !!imageAddedSeries[state.activePort].frameData ? imageAddedSeries[state.activePort].frameData : prevSameSer.frameData;
+          const multiFrameMap1 = !!imageAddedSeries[state.activePort].multiFrameMap ? imageAddedSeries[state.activePort].multiFrameMap : prevSameSer.multiFrameMap;
+          // const imgs = fmData1[action.payload.ann];
+          const imgs = fmData1[action.payload.ann];
           const imgArr = imgs ? imgs[0].split('/frames/') : [];
-          jumpArr1 = imgArr.length > 0 ? [imageAddedSeries[state.activePort].multiFrameMap[imgArr[0]], parseInt(imgArr[1]) - 1] : [];
+          jumpArr1 = imgArr.length > 0 ? [parseInt(multiFrameMap1[imgArr[0]]), parseInt(imgArr[1]) - 1] : [];
+          imageAddedSeries[state.activePort].multiFrameIndex = parseInt(multiFrameMap1[imgArr[0]]);
         }
         const newDataKeys = Object.keys(action.payload.aimsData);
         const stateKeys = state.aimsList[action.payload.serID]
@@ -712,6 +715,13 @@ const asyncReducer = (state = initialState, action) => {
       case ADD_TO_GRID:
         const seriesInfo = { ...action.reference };
         const { projectMap } = state;
+        let sameSerI = -1;
+        for (let i = 0; i < state.openSeriesAddition.length; i++)
+          if (state.openSeriesAddition[i].seriesUID === seriesInfo.seriesUID) {
+            if ((state.openSeriesAddition[i].multiFrameIndex || seriesInfo.multiFrameIndex) && state.openSeriesAddition[i].multiFrameIndex === seriesInfo.multiFrameIndex) sameSerI = i
+          };
+        const indexToCopyFm = action.port ? action.port : sameSerI;
+
         if (projectMap[seriesInfo.projectID]) {
           seriesInfo.projectName = projectMap[seriesInfo.projectID].projectName;
           seriesInfo.defaultTemplate =
@@ -724,24 +734,41 @@ const asyncReducer = (state = initialState, action) => {
         let newOpenSeries = [...state.openSeries];
         let newOpenSeriesAddtition = _.cloneDeep(state.openSeriesAddition);
 
-        const existingUID = newOpenSeriesAddtition[action.port] ? newOpenSeriesAddtition[action.port].seriesUID : ''
+        const existingUID = newOpenSeriesAddtition[indexToCopyFm] ? newOpenSeriesAddtition[indexToCopyFm].seriesUID : ''
         const newUID = seriesInfo.seriesUID;
         const sameSeries = existingUID && existingUID === newUID;
+
+        let copyMFMap, copyFmData, copyImageAnnotations;
+        if (sameSeries) {
+          copyMFMap = newOpenSeriesAddtition[indexToCopyFm].multiFrameMap;
+          copyFmData = newOpenSeriesAddtition[indexToCopyFm].frameData;
+          copyImageAnnotations = newOpenSeriesAddtition[indexToCopyFm].imageAnnotations;
+        }
 
         if (arePortsOccupied) {
           newOpenSeries[action.port] = seriesInfo;
           if (sameSeries) {
-            const copyMFMap = newOpenSeriesAddtition[action.port].multiFrameMap;
-            const copyFmData = newOpenSeriesAddtition[action.port].frameData;
-            const copyImageAnnotations = newOpenSeriesAddtition[action.port].imageAnnotations;
             newOpenSeriesAddtition[action.port] = seriesInfo;
             if (copyMFMap) newOpenSeriesAddtition[action.port].multiFrameMap = copyMFMap;
             if (copyFmData) newOpenSeriesAddtition[action.port].frameData = copyFmData;
             if (copyImageAnnotations) newOpenSeriesAddtition[action.port].imageAnnotations = copyImageAnnotations;
           } else newOpenSeriesAddtition[action.port] = seriesInfo;
         } else {
+          if (sameSeries) {
+            if (copyMFMap) seriesInfo.multiFrameMap = copyMFMap;
+            if (copyFmData) seriesInfo.frameData = copyFmData;
+            if (copyImageAnnotations) seriesInfo.imageAnnotations = copyImageAnnotations;
+            if (seriesInfo.aimID && seriesInfo.frameData && seriesInfo.frameData[seriesInfo.aimID]) {
+              const img = seriesInfo.frameData[seriesInfo.aimID][0].split('/frames/')[0];
+              const mfIndexAdded = seriesInfo.multiFrameMap[img];
+              if (typeof parseInt(mfIndexAdded) === "number" && !isNaN(parseInt(mfIndexAdded))) {
+                seriesInfo.multiFrameIndex = parseInt(mfIndexAdded);
+              }
+            }
+          }
           newOpenSeries = newOpenSeries.concat([seriesInfo]);
           newOpenSeriesAddtition = newOpenSeriesAddtition.concat([seriesInfo]);
+
         }
 
         const newActivePort = arePortsOccupied ? state.activePort : newOpenSeries.length - 1;
