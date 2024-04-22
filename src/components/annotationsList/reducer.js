@@ -52,6 +52,7 @@ import {
   CLEAR_MULTIFRAME_AIM_JUMP,
   SET_SERIES_DATA,
   FILL_DESC,
+  STORE_AIM_SELECTION,
   colors,
   commonLabels,
 } from "./types";
@@ -91,7 +92,8 @@ const initialState = {
   refreshMap: {},
   subpath: [],
   multiFrameAimJumpData: null,
-  seriesData: {}
+  seriesData: {},
+  multipageAimSelection: {}
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -108,6 +110,14 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case STORE_AIM_SELECTION:
+        const { selectionMap, pageIndex } = action.payload;
+        let newMultipageAimSelection = { ...state.multipageAimSelection };
+        if (pageIndex < 0) newMultipageAimSelection = selectionMap;
+        else if (Object.keys(selectionMap).length === 0 && newMultipageAimSelection[pageIndex])
+          delete newMultipageAimSelection[pageIndex];
+        else newMultipageAimSelection[pageIndex] = selectionMap
+        return { ...state, multipageAimSelection: newMultipageAimSelection }
       case FILL_DESC:
         const descFilledOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
         const descFilledSeriesData = _.cloneDeep(state.seriesData);
