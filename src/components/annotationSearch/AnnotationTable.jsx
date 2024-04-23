@@ -20,13 +20,14 @@ import {
   annotationsLoadingError,
   updateSearchTableIndex,
   setSeriesData,
+  storeAimSelection
 } from "../annotationsList/action";
 import { formatDate } from "../flexView/helperMethods";
 import { getSeries, getSignificantSeries } from "../../services/seriesServices";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
-import { isSupportedModality } from "../../Utils/aid.js";
+import { isSupportedModality, findSelectedCheckboxesMap } from "../../Utils/aid.js";
 import { COMP_MODALITIES as compModality, teachingFileTempCode } from "../../constants.js";
-const defaultPageSize = 200;
+const defaultPageSize = 10;
 
 let maxPort;
 let mode;
@@ -265,9 +266,14 @@ function AnnotationTable(props) {
   // const [aimMap, setAimMap] = useState({})
 
   const handlePageIndex = (act) => {
+    const currentIndex = props.searchTableIndex;
     let newIndex =
-      act === "prev" ? props.searchTableIndex - 1 : props.searchTableIndex + 1;
+      act === "prev" ? currentIndex - 1 : currentIndex + 1;
     props.dispatch(updateSearchTableIndex(newIndex));
+    // find the page's selected annotations
+    const map = findSelectedCheckboxesMap();
+    // dispatch the action
+    props.dispatch(storeAimSelection(map, currentIndex));
   };
 
   // Render the UI for your table
@@ -573,14 +579,19 @@ function AnnotationTable(props) {
           id: "select",
           class: "select_row",
           Cell: ({ row }) => {
+            const { multipageAimSelection, searchTableIndex } = props;
             return (
               <input
                 type="checkbox"
                 className="form-check-input __search-checkbox"
                 id={row.original.aimID}
+                value={row.original.name}
+                data-subjectid={row.original.subjectID}
+                data-studyuid={row.original.studyUID}
+                data-seriesuid={row.original.seriesUID}
                 // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
                 // checked={listOfSelecteds[row.original.aimID]}
-                // checked={props.allSelected}
+                checked={multipageAimSelection[searchTableIndex] && multipageAimSelection[searchTableIndex][row.original.aimID]}
               />
             );
           },
@@ -934,7 +945,8 @@ const mapsStateToProps = (state) => {
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
     searchTableIndex: state.annotationsListReducer.searchTableIndex,
     seriesData: state.annotationsListReducer.seriesData,
-    openSeriesAddition: state.annotationsListReducer.openSeriesAddition
+    openSeriesAddition: state.annotationsListReducer.openSeriesAddition,
+    multipageAimSelection: state.annotationsListReducer.multipageAimSelection
   };
 };
 

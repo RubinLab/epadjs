@@ -113,9 +113,12 @@ const asyncReducer = (state = initialState, action) => {
       case STORE_AIM_SELECTION:
         const { selectionMap, pageIndex } = action.payload;
         let newMultipageAimSelection = { ...state.multipageAimSelection };
+        // clear selection
         if (pageIndex < 0) newMultipageAimSelection = selectionMap;
+        // remove the page if nothing selected
         else if (Object.keys(selectionMap).length === 0 && newMultipageAimSelection[pageIndex])
           delete newMultipageAimSelection[pageIndex];
+        // set selection
         else newMultipageAimSelection[pageIndex] = selectionMap
         return { ...state, multipageAimSelection: newMultipageAimSelection }
       case FILL_DESC:
