@@ -265,15 +265,27 @@ function AnnotationTable(props) {
   const [showSpinner, setShowSpinner] = useState(false);
   // const [aimMap, setAimMap] = useState({})
 
+  const selectCheckbox = id => {
+    const { searchTableIndex, multipageAimSelection } = props;
+    const element = document.getElementById(id);
+    if (element && multipageAimSelection[searchTableIndex]) { 
+      element.checked = !!(multipageAimSelection[searchTableIndex][id]); 
+    }
+  }
+  
+  const updateStoredAims = (e) => {
+    const { searchTableIndex } = props;
+    const { subjectid, studyuid, seriesuid } = e.target.dataset;
+    const { id, value } = e.target;
+    const map =  { aimID: id, name: value, subjectID: subjectid, studyUID: studyuid, seriesUID: seriesuid };
+    props.dispatch(storeAimSelection(map, searchTableIndex));
+  }
+
   const handlePageIndex = (act) => {
     const currentIndex = props.searchTableIndex;
     let newIndex =
       act === "prev" ? currentIndex - 1 : currentIndex + 1;
     props.dispatch(updateSearchTableIndex(newIndex));
-    // find the page's selected annotations
-    const map = findSelectedCheckboxesMap();
-    // dispatch the action
-    props.dispatch(storeAimSelection(map, currentIndex));
   };
 
   // Render the UI for your table
@@ -290,6 +302,7 @@ function AnnotationTable(props) {
     rawData.forEach((el, i) => {
       if (i >= startIndex && i < endIndex) {
         const aim = el.data ? el.data : el;
+
         pageData.push(aim);
         const {
           aimID,
@@ -343,13 +356,14 @@ function AnnotationTable(props) {
 
   useEffect(() => {
     preparePageData(props.data, defaultPageSize, props.searchTableIndex);
-  }, [props.pid, props.data]);
+
+  }, [props.pid, props.data, props.multiFrameAimJumpData]);
 
   useEffect(() => {
     if (props.data.length <= defaultPageSize * props.searchTableIndex) {
       preparePageData(props.data, defaultPageSize, props.searchTableIndex);
     }
-  }, [props.noOfRows, props.data, props.searchTableIndex]);
+  }, [props.noOfRows, props.data, props.searchTableIndex, props.multiFrameAimJumpData]);
 
   // TODO: spinner doesn't appear anymore check the logic
   const getSeriesData = async (selected, force) => {
@@ -396,7 +410,6 @@ function AnnotationTable(props) {
         result.push(serie);
       }
     });
-    console.log(result)
     return result;
   };
 
@@ -580,6 +593,7 @@ function AnnotationTable(props) {
           class: "select_row",
           Cell: ({ row }) => {
             const { multipageAimSelection, searchTableIndex } = props;
+            const checked = !!multipageAimSelection[searchTableIndex] ? !!multipageAimSelection[searchTableIndex][row.original.aimID] : false;
             return (
               <input
                 type="checkbox"
@@ -589,9 +603,9 @@ function AnnotationTable(props) {
                 data-subjectid={row.original.subjectID}
                 data-studyuid={row.original.studyUID}
                 data-seriesuid={row.original.seriesUID}
-                // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
+                onClick={updateStoredAims}
                 // checked={listOfSelecteds[row.original.aimID]}
-                checked={multipageAimSelection[searchTableIndex] && multipageAimSelection[searchTableIndex][row.original.aimID]}
+                checked={checked}
               />
             );
           },
@@ -746,7 +760,7 @@ function AnnotationTable(props) {
         },
       ],
       // [data, listOfSelecteds, props.selectedAnnotations]
-      [data]
+      [data, props.multipageAimSelection]
     );
   } else {
     columns = React.useMemo(
@@ -864,7 +878,7 @@ function AnnotationTable(props) {
         },
       ],
       // [data, listOfSelecteds, props.selectedAnnotations]
-      [data]
+      [data, props.multipageAimSelection]
     );
   }
 

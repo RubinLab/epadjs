@@ -112,15 +112,18 @@ const asyncReducer = (state = initialState, action) => {
       //   return { ...state, openSeries: updatedOpenSeries };
       case STORE_AIM_SELECTION:
         const { selectionMap, pageIndex } = action.payload;
-        let newMultipageAimSelection = { ...state.multipageAimSelection };
+        let newMultipageAimSelection = _.cloneDeep(state.multipageAimSelection);
         // clear selection
-        if (pageIndex < 0) newMultipageAimSelection = selectionMap;
+        if (pageIndex < 0) newMultipageAimSelection = {};
         // remove the page if nothing selected
-        else if (Object.keys(selectionMap).length === 0 && newMultipageAimSelection[pageIndex])
-          delete newMultipageAimSelection[pageIndex];
+        else if (newMultipageAimSelection[pageIndex] && newMultipageAimSelection[pageIndex][selectionMap.aimID]) {
+          delete newMultipageAimSelection[pageIndex][selectionMap.aimID];
+        } else if (!newMultipageAimSelection[pageIndex])
+          newMultipageAimSelection[pageIndex] = { [selectionMap.aimID]: selectionMap };
         // set selection
-        else newMultipageAimSelection[pageIndex] = selectionMap
-        return { ...state, multipageAimSelection: newMultipageAimSelection }
+        else newMultipageAimSelection[pageIndex][selectionMap.aimID] = selectionMap
+        const newStateWithAimSelection = { ...state, multipageAimSelection: newMultipageAimSelection };
+        return newStateWithAimSelection;
       case FILL_DESC:
         const descFilledOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
         const descFilledSeriesData = _.cloneDeep(state.seriesData);
