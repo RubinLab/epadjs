@@ -351,6 +351,7 @@ class App extends Component {
     let patient;
     if (selectedProject) {
       ({ data: patient } = await getSubject(selectedProject, name));
+      if (!patient.patientID) patient.patientID = patient.subjectID;
     } else {
       patient = this.props.selectedPatients[name];
     }
