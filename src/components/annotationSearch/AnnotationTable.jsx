@@ -605,7 +605,10 @@ function AnnotationTable(props) {
                 data-seriesuid={row.original.seriesUID}
                 onClick={updateStoredAims}
                 // checked={listOfSelecteds[row.original.aimID]}
+                disabled={props.allSelected}
+                // checked={checked || props.allSelected}
                 checked={checked}
+                // checked={(checked || props.allSelected ) && !(checked && props.allSelected)}
               />
             );
           },
@@ -760,7 +763,7 @@ function AnnotationTable(props) {
         },
       ],
       // [data, listOfSelecteds, props.selectedAnnotations]
-      [data, props.multipageAimSelection]
+      [data, props.multipageAimSelection, props.allSelected]
     );
   } else {
     columns = React.useMemo(
@@ -770,6 +773,7 @@ function AnnotationTable(props) {
           id: "select",
           class: "select_row",
           Cell: ({ row }) => {
+            const checked = !!multipageAimSelection[searchTableIndex] ? !!multipageAimSelection[searchTableIndex][row.original.aimID] : false;
             return (
               <input
                 type="checkbox"
@@ -779,6 +783,11 @@ function AnnotationTable(props) {
                 data-subjectid={row.original.subjectID}
                 data-studyuid={row.original.studyUID}
                 data-seriesuid={row.original.seriesUID}
+                onClick={updateStoredAims}
+                // checked={checked || props.allSelected}
+                disabled={props.allSelected}
+                checked={checked}
+                // checked={(checked || props.allSelected ) && !(checked && props.allSelected)}
                 // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
                 // checked={props.allSelected || listOfSelecteds[row.original.aimID]}
               />
