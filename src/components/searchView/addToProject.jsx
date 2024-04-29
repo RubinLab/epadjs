@@ -5,6 +5,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import { FaProjectDiagram } from 'react-icons/fa';
 import ReactTooltip from 'react-tooltip';
 import { addAimsToProject } from "../../services/projectServices";
+import { addSubjectToProject } from "../../services/subjectServices";
 import { findSelectedCheckboxes, resetSelectAllCheckbox } from '../../Utils/aid.js';
 
 
@@ -19,6 +20,21 @@ const ProjectAdd = (props) => {
     const aimsPassed = annotations && annotations.length > 0;
     if (!aimsPassed && onSave) {
       onSave(projectId);
+    } else if (parent === 'display') {
+      try {
+        const { projectID, patientID, subjectID } = props.openSeriesAddition[props.activePort];
+        await addSubjectToProject(projectId, subjectID || patientID, projectID);
+      } catch (err) {
+        toast.error("Error moving subject to project.", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: false,
+        });
+        console.error(err);
+      }
     } else {
       const storeIds = Object.keys(annotations);
       const selectedIds = findSelectedCheckboxes();
@@ -34,7 +50,7 @@ const ProjectAdd = (props) => {
           pauseOnHover: true,
           draggable: false,
         });
-        deselect();
+        if (deselect) deselect();
       } catch (e) {
         toast.error("Error moving annotation(s).", {
           position: "top-right",
@@ -72,6 +88,24 @@ const ProjectAdd = (props) => {
     </button>
   ));
 
+  const CustomToggle1 = React.forwardRef(({ children, onClick }, ref) => (
+    <button type="button" ref={ref} className="btn btn-sm"
+    // className="btn btn-sm color-schema" 
+      style={{ 
+        color: "white",
+        paddingTop: "0rem",
+        paddingBottom: "1.2rem",
+        fontSize: "11px"
+      }}
+      onClick={e => {
+        e.preventDefault();
+        onClick(e);
+      }}>
+      <FaProjectDiagram style={{ fontSize: "1.1rem"}}/><br />
+      {children}
+    </button>
+  ));
+
   const CustomToggleList = React.forwardRef(({ children, onClick }, ref) => (
     <div
       className={
@@ -103,16 +137,27 @@ const ProjectAdd = (props) => {
     </div>
   ));
 
+  const handleSelect = async eventKey => {
+    try {
+      await addSelectionToProject(eventKey); 
+      if (updateUrl) updateUrl(`/search/${eventKey}`);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   return (
     <Dropdown id="1" className="d-inline">
-      <Dropdown.Toggle as={parent !== "patientList" ? CustomToggle3 : CustomToggleList}>
-        Copy To Project
-      </Dropdown.Toggle>
+      {/* { !props.toolMenu && ( */}
+      <Dropdown.Toggle as={parent === "display" ? CustomToggle1 : parent === "patientList" ? CustomToggleList : CustomToggle3}>
+          Copy To Project
+        </Dropdown.Toggle>
+        {/* )} */}
 
       <Dropdown.Menu as={ProjectMenu} className="dropdown-menu p-2 dropdown-menu-dark" style={{ maxHeight: '20rem', overflow: 'auto', backgroundColor: '#333', borderColor: 'white', minWidth: '15rem', fontSize: '11px', scrollbarColor: 'inherit' }} >
         {projectNames?.map(({ projectName }, y) => {
           return (
-            <Dropdown.Item key={y} eventKey={projectIDs[y]} onSelect={eventKey => { addSelectionToProject(eventKey); updateUrl(`/search/${eventKey}`) }}>{projectName}</Dropdown.Item>
+            <Dropdown.Item key={y} eventKey={projectIDs[y]} onSelect={handleSelect}>{projectName}</Dropdown.Item>
           )
         })
         }
@@ -126,7 +171,9 @@ const mapStateToProps = (state) => {
     patients: state.annotationsListReducer.selectedPatients,
     studies: state.annotationsListReducer.selectedStudies,
     projectMap: state.annotationsListReducer.projectMap,
-    annotations: state.annotationsListReducer.selectedAnnotations
+    annotations: state.annotationsListReducer.selectedAnnotations,
+    activePort: state.annotationsListReducer.activePort,
+    openSeriesAddition: state.annotationsListReducer.openSeriesAddition
   };
 };
 export default connect(mapStateToProps)(ProjectAdd);

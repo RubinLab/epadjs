@@ -9,6 +9,7 @@ import { WindowLevel } from "../WindowLevel/WindowLevel";
 import ColormapSelector from "./ColormapSelector";
 import FuseSelector from "./FuseSelector";
 import cornerstoneTools from "cornerstone-tools";
+import AddToProject from "../searchView/addToProject";
 import {
   FaLocationArrow,
   FaEraser,
@@ -31,6 +32,7 @@ import {
   FaDotCircle,
   FaTimes,
   FaCamera,
+  FaProjectDiagram
 } from "react-icons/fa";
 import { BsArrowUpLeft } from "react-icons/bs";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
@@ -627,8 +629,7 @@ class ToolMenu extends Component {
               onClick={() => this.handleToolClicked(i, tool)}
             />
           );
-        })}
-
+        })} 
         {/* {this.state.showMetaData && (<MetaData onClose={this.showMetaData} />)} */}
         {/*<div
           id="angle"
@@ -787,6 +788,7 @@ class ToolMenu extends Component {
                     </div> */}
         {/* </Collapsible> */}
         {/* <Collapsible trigger={"Segmentation Tools"} transitionTime={100}> */}
+        <AddToProject toolMenu={true} parent="display"/>
         {mode !== "teaching" &&
           this.segmentationTools.map((segmentationTool, i) => {
             i = i + this.imagingTools.length + this.markupTools.length;
