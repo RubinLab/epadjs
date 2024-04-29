@@ -107,6 +107,7 @@ class AimEditor extends Component {
       }
     }
     window.addEventListener('checkShapes', this.checkShapes);
+    window.addEventListener("keydown", this.handleUserKeyPress);
   }
 
   componentDidUpdate(prevProps) {
@@ -136,6 +137,7 @@ class AimEditor extends Component {
 
   componentWillUnmount() {
     window.removeEventListener('checkShapes', this.checkShapes);
+    window.removeEventListener("keydown", this.handleUserKeyPress);
   }
 
   loadAim = (event) => {
@@ -211,6 +213,12 @@ class AimEditor extends Component {
   getTrackingUId = (aim) => {
     return aim.ImageAnnotationCollection?.imageAnnotations?.ImageAnnotation[0]
       ?.trackingUniqueIdentifier.root;
+  };
+
+  handleUserKeyPress = (e) => {
+    if (e.key === "Enter") {
+      this.save();
+    }
   };
 
   render() {
