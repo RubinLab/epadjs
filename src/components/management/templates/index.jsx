@@ -4,6 +4,7 @@ import ReactTable from 'react-table-v6';
 import ReactTooltip from 'react-tooltip';
 import { toast } from 'react-toastify';
 import ToolBar from './toolbar';
+import { BsList } from "react-icons/bs";
 import { FaRegTrashAlt, FaProjectDiagram } from 'react-icons/fa';
 import {
   getTemplatesOfProjects,
@@ -373,15 +374,17 @@ class Templates extends React.Component {
             : 'Add template to a project';
         return (
           <>
-            <div
+             <button
               data-tip
               data-for="template-project-relation"
+              variant="primary"
+              className="btn btn-sm btn-outline-light"
               onClick={() =>
                 this.handleProjectClick(templateUID, templateName, projects)
               }
             >
-              <p className={className}>{text}</p>
-            </div>
+              <BsList className="menu-clickable" />
+            </button>
             <ReactTooltip
               id="template-project-relation"
               place="left"

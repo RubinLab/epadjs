@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import Table from 'react-table-v6';
 import { toast } from 'react-toastify';
 import ReactTooltip from 'react-tooltip';
-import { FaRegTrashAlt, FaEdit, FaRegEye } from 'react-icons/fa';
+import { BsList } from "react-icons/bs";
+import { FaRegTrashAlt } from 'react-icons/fa';
 import ToolBar from '../common/basicToolBar';
 import {
   getWorklistsOfCreator,
@@ -503,20 +504,21 @@ class WorkList extends React.Component {
               : 'wrapped click-to-add menu-clickable';
           return (
             <>
-              <div
+              <button
                 data-tip
                 data-for="worklist-assignee"
+                variant="primary"
+                className="btn btn-sm btn-outline-light"
                 onClick={() => {
                   this.handleUpdateAssignee(assignees, workListID);
                   this.setState({
                     initialAssignees: [...assignees]
                   });
                 }}
-                className={className}
                 id={`assignees-${original.row.checkbox.workListID}`}
               >
-                {assignees.length > 0 ? this.concatenateNames(assignees) : `Add assignees`}
-              </div>
+                <BsList className="menu-clickable" />
+              </button>
               <ReactTooltip
                 id="worklist-assignee"
                 place="right"
