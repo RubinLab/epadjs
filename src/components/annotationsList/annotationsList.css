@@ -614,3 +614,8 @@ th {
   color: #ccc;
   font-size: 10px;
 }
+
+.annList-container {
+  height: 15rem;
+  overflow: auto;
+}
