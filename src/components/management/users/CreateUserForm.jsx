@@ -86,10 +86,10 @@ class CreateUserForm extends React.Component {
               projectToRole={projectToRole}
             />
           )}
-          <div className="err-message">
-            {this.props.error || this.state.error}
-          </div>
         </Modal.Body>
+        {(!!this.props.error || !!this.state.error) && (<div className="err-message" id="user-cr-error">
+          {this.props.error || this.state.error}
+        </div>)}
         <Modal.Footer className="create-user__modal--footer">
           <div className="create-user__modal--buttons">
             <FormButton
