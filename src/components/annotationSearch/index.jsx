@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
 import PropagateLoader from "react-spinners/PropagateLoader";
-import _ from "lodash";
+import _, { set } from "lodash";
 import Collapsible from "react-collapsible";
 import { HiOutlineFolderDownload } from "react-icons/hi";
 import {
@@ -39,6 +39,7 @@ import {
   selectAnnotation,
   updateSearchTableIndex,
   refreshPage,
+  storeAimSelection
 } from "../annotationsList/action";
 import AnnotationDownloadModal from "../searchView/annotationDownloadModal";
 import UploadModal from "../searchView/uploadModal";
@@ -54,6 +55,7 @@ import Projects from "../searchView/addToProject";
 import Spinner from "react-bootstrap/Spinner";
 import SeriesModal from "../annotationsList/selectSerieModal";
 import WarningModal from "../common/warningModal";
+import ConfirmationModal from "../common/confirmationModal";
 import { COMP_MODALITIES as compModality } from "../../constants.js";
 import {
   isSupportedModality,
@@ -173,6 +175,7 @@ const AnnotationSearch = (props) => {
   const [showDownload, setShowDownload] = useState(false);
   const [showSelectSeries, setShowSelectSeries] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
+  const [showDownloadAll, setShowDownloadAll] = useState(false);
   const [seriesList, setSeriesList] = useState([]);
   const [encArgs, setEncArgs] = useState("");
   const [decrArgs, setDecrArgs] = useState("");
@@ -670,10 +673,12 @@ const AnnotationSearch = (props) => {
     if (Object.keys(filters).length) body["filter"] = newFilters;
     searchAnnotations(body, bm)
       .then((res) => {
+        console.log(" ----> in resolve search");
         populateSearchResult(res, pageIndex, afterDelete);
         setRows(res.data.total_rows);
         setShowSpinner(false);
         props.completeLoading();
+        props.dispatch(storeAimSelection({}, -1));
       })
       .catch((err) => {
         console.error(err);
@@ -756,6 +761,7 @@ const AnnotationSearch = (props) => {
   };
 
   const downloadProjectAim = () => {
+    setShowDownloadAll(false);
     if (props.pid === "all" || props.pid === "nonassigned") return;
     downloadProjectAnnotation(props.pid)
       .then((result) => {
@@ -767,6 +773,10 @@ const AnnotationSearch = (props) => {
             autoClose: false,
             position: "bottom-left",
           });
+        props.dispatch(storeAimSelection({}, -1));
+        setAllSelected(false);
+        const checkAll = document.getElementById("search-select_all");
+        checkAll.checked = false;
       })
       .catch((err) => console.error(err));
   };
@@ -1061,6 +1071,7 @@ const AnnotationSearch = (props) => {
       .then(() => {
         getNewData(props.searchTableIndex, true);
         resetSelectAllCheckbox(false);
+        props.dispatch(storeAimSelection({}, -1));
       })
       .catch((error) => {
         if (
@@ -1144,6 +1155,7 @@ const AnnotationSearch = (props) => {
       tempQueueObject.aims = {};
 
       const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+      props.dispatch(storeAimSelection({}, -1));
       let responseRunPluginsQueue = null;
       // console.log('plugin running queue ', JSON.stringify(resultAddQueue));
       // if (resultAddQueue && resultAddQueue.data){
@@ -1183,6 +1195,7 @@ const AnnotationSearch = (props) => {
         tempQueueObject.aims = aimObj;
 
         const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+        props.dispatch(storeAimSelection({}, -1));
         let responseRunPluginsQueue = null;
         console.log("plugin running queue ", JSON.stringify(resultAddQueue));
         // if (resultAddQueue && resultAddQueue.data){
@@ -1220,6 +1233,7 @@ const AnnotationSearch = (props) => {
       }
 
       const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+      props.dispatch(storeAimSelection({}, -1));
       let responseRunPluginsQueue = null;
       console.log("plugin running queue ", JSON.stringify(resultAddQueue));
       // if (resultAddQueue && resultAddQueue.data){
@@ -1255,6 +1269,18 @@ const AnnotationSearch = (props) => {
     setQuery("");
     clearAllTeachingFilers();
   };
+
+  const selectAll = (checked) => {
+    setAllSelected(checked);
+  }
+  
+  const aimDownload = () => {
+    // if all selected or non selected show confirmation modal
+
+    const arr = Object.keys(props.multipageAimSelection);
+    if (arr.length === 0 || allSelected) setShowDownloadAll(true);
+    else setShowDownload(!showDownload);
+  }
 
   return (
     <>
@@ -1440,7 +1466,8 @@ const AnnotationSearch = (props) => {
             <button
               type="button"
               className="btn btn-sm"
-              onClick={() => setShowDownload(!showDownload)}
+              // onClick={() => setShowDownload(!showDownload)}
+              onClick={aimDownload}
             >
               <BiDownload />
               <br />
@@ -1561,9 +1588,10 @@ const AnnotationSearch = (props) => {
                   id="search-select_all"
                   className="form-check-input __select-all"
                   type="checkbox"
-                  onChange={({ target: { checked } }) =>
-                    handleSelectDeselectAll(checked)
-                  }
+                  onChange={({ target: { checked } }) => {
+                    handleSelectDeselectAll(checked);
+                    setAllSelected(checked)
+                  }}
                 />
               </div>
             </th>
@@ -1900,6 +1928,15 @@ const AnnotationSearch = (props) => {
           }`}
         />
       )}
+      {showDownloadAll && (
+        <ConfirmationModal
+          onSubmit={downloadProjectAim}
+          onCancel={() => setShowDownloadAll(false)}
+          button={'Download All'}
+          title={"Downloading all"}
+          message={`Do you want to download all annotations of the project?`}
+        />
+      )}
     </>
   );
 };
@@ -1911,6 +1948,7 @@ const mapsStateToProps = (state) => {
     openSeries: state.annotationsListReducer.openSeries,
     searchTableIndex: state.annotationsListReducer.searchTableIndex,
     refreshMap: state.annotationsListReducer.refreshMap,
+    multipageAimSelection: state.annotationsListReducer.multipageAimSelection
   };
 };
 

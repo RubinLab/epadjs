@@ -52,6 +52,7 @@ import {
   CLEAR_MULTIFRAME_AIM_JUMP,
   SET_SERIES_DATA,
   FILL_DESC,
+  STORE_AIM_SELECTION,
   colors,
   commonLabels,
 } from "./types";
@@ -91,7 +92,8 @@ const initialState = {
   refreshMap: {},
   subpath: [],
   multiFrameAimJumpData: null,
-  seriesData: {}
+  seriesData: {},
+  multipageAimSelection: {}
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -108,6 +110,20 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case STORE_AIM_SELECTION:
+        const { selectionMap, pageIndex } = action.payload;
+        let newMultipageAimSelection = _.cloneDeep(state.multipageAimSelection);
+        // clear selection
+        if (pageIndex < 0) newMultipageAimSelection = {};
+        // remove the page if nothing selected
+        else if (newMultipageAimSelection[pageIndex] && newMultipageAimSelection[pageIndex][selectionMap.aimID]) {
+          delete newMultipageAimSelection[pageIndex][selectionMap.aimID];
+        } else if (!newMultipageAimSelection[pageIndex])
+          newMultipageAimSelection[pageIndex] = { [selectionMap.aimID]: selectionMap };
+        // set selection
+        else newMultipageAimSelection[pageIndex][selectionMap.aimID] = selectionMap
+        const newStateWithAimSelection = { ...state, multipageAimSelection: newMultipageAimSelection };
+        return newStateWithAimSelection;
       case FILL_DESC:
         const descFilledOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
         const descFilledSeriesData = _.cloneDeep(state.seriesData);
