@@ -20,14 +20,13 @@ import {
   annotationsLoadingError,
   updateSearchTableIndex,
   setSeriesData,
-  storeAimSelection
 } from "../annotationsList/action";
 import { formatDate } from "../flexView/helperMethods";
 import { getSeries, getSignificantSeries } from "../../services/seriesServices";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
-import { isSupportedModality, findSelectedCheckboxesMap } from "../../Utils/aid.js";
+import { isSupportedModality } from "../../Utils/aid.js";
 import { COMP_MODALITIES as compModality, teachingFileTempCode } from "../../constants.js";
-const defaultPageSize = 10;
+const defaultPageSize = 200;
 
 let maxPort;
 let mode;
@@ -265,26 +264,9 @@ function AnnotationTable(props) {
   const [showSpinner, setShowSpinner] = useState(false);
   // const [aimMap, setAimMap] = useState({})
 
-  const selectCheckbox = id => {
-    const { searchTableIndex, multipageAimSelection } = props;
-    const element = document.getElementById(id);
-    if (element && multipageAimSelection[searchTableIndex]) { 
-      element.checked = !!(multipageAimSelection[searchTableIndex][id]); 
-    }
-  }
-  
-  const updateStoredAims = (e) => {
-    const { searchTableIndex } = props;
-    const { subjectid, studyuid, seriesuid } = e.target.dataset;
-    const { id, value } = e.target;
-    const map =  { aimID: id, name: value, subjectID: subjectid, studyUID: studyuid, seriesUID: seriesuid };
-    props.dispatch(storeAimSelection(map, searchTableIndex));
-  }
-
   const handlePageIndex = (act) => {
-    const currentIndex = props.searchTableIndex;
     let newIndex =
-      act === "prev" ? currentIndex - 1 : currentIndex + 1;
+      act === "prev" ? props.searchTableIndex - 1 : props.searchTableIndex + 1;
     props.dispatch(updateSearchTableIndex(newIndex));
   };
 
@@ -302,7 +284,6 @@ function AnnotationTable(props) {
     rawData.forEach((el, i) => {
       if (i >= startIndex && i < endIndex) {
         const aim = el.data ? el.data : el;
-
         pageData.push(aim);
         const {
           aimID,
@@ -356,14 +337,13 @@ function AnnotationTable(props) {
 
   useEffect(() => {
     preparePageData(props.data, defaultPageSize, props.searchTableIndex);
-
-  }, [props.pid, props.data, props.multiFrameAimJumpData]);
+  }, [props.pid, props.data]);
 
   useEffect(() => {
     if (props.data.length <= defaultPageSize * props.searchTableIndex) {
       preparePageData(props.data, defaultPageSize, props.searchTableIndex);
     }
-  }, [props.noOfRows, props.data, props.searchTableIndex, props.multiFrameAimJumpData]);
+  }, [props.noOfRows, props.data, props.searchTableIndex]);
 
   // TODO: spinner doesn't appear anymore check the logic
   const getSeriesData = async (selected, force) => {
@@ -410,6 +390,7 @@ function AnnotationTable(props) {
         result.push(serie);
       }
     });
+    console.log(result)
     return result;
   };
 
@@ -592,23 +573,14 @@ function AnnotationTable(props) {
           id: "select",
           class: "select_row",
           Cell: ({ row }) => {
-            const { multipageAimSelection, searchTableIndex } = props;
-            const checked = !!multipageAimSelection[searchTableIndex] ? !!multipageAimSelection[searchTableIndex][row.original.aimID] : false;
             return (
               <input
                 type="checkbox"
                 className="form-check-input __search-checkbox"
                 id={row.original.aimID}
-                value={row.original.name}
-                data-subjectid={row.original.subjectID}
-                data-studyuid={row.original.studyUID}
-                data-seriesuid={row.original.seriesUID}
-                onClick={updateStoredAims}
+                // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
                 // checked={listOfSelecteds[row.original.aimID]}
-                disabled={props.allSelected}
-                // checked={checked || props.allSelected}
-                checked={checked}
-                // checked={(checked || props.allSelected ) && !(checked && props.allSelected)}
+                // checked={props.allSelected}
               />
             );
           },
@@ -763,7 +735,7 @@ function AnnotationTable(props) {
         },
       ],
       // [data, listOfSelecteds, props.selectedAnnotations]
-      [data, props.multipageAimSelection, props.allSelected]
+      [data]
     );
   } else {
     columns = React.useMemo(
@@ -773,7 +745,6 @@ function AnnotationTable(props) {
           id: "select",
           class: "select_row",
           Cell: ({ row }) => {
-            const checked = !!multipageAimSelection[searchTableIndex] ? !!multipageAimSelection[searchTableIndex][row.original.aimID] : false;
             return (
               <input
                 type="checkbox"
@@ -783,11 +754,6 @@ function AnnotationTable(props) {
                 data-subjectid={row.original.subjectID}
                 data-studyuid={row.original.studyUID}
                 data-seriesuid={row.original.seriesUID}
-                onClick={updateStoredAims}
-                // checked={checked || props.allSelected}
-                disabled={props.allSelected}
-                checked={checked}
-                // checked={(checked || props.allSelected ) && !(checked && props.allSelected)}
                 // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
                 // checked={props.allSelected || listOfSelecteds[row.original.aimID]}
               />
@@ -887,7 +853,7 @@ function AnnotationTable(props) {
         },
       ],
       // [data, listOfSelecteds, props.selectedAnnotations]
-      [data, props.multipageAimSelection]
+      [data]
     );
   }
 
@@ -968,8 +934,7 @@ const mapsStateToProps = (state) => {
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
     searchTableIndex: state.annotationsListReducer.searchTableIndex,
     seriesData: state.annotationsListReducer.seriesData,
-    openSeriesAddition: state.annotationsListReducer.openSeriesAddition,
-    multipageAimSelection: state.annotationsListReducer.multipageAimSelection
+    openSeriesAddition: state.annotationsListReducer.openSeriesAddition
   };
 };
 

@@ -51,7 +51,6 @@ import {
   CLEAR_MULTIFRAME_AIM_JUMP,
   SET_SERIES_DATA,
   FILL_DESC,
-  STORE_AIM_SELECTION,
   colors,
   commonLabels,
 } from "./types";
@@ -73,10 +72,6 @@ const wadoUrl = sessionStorage.getItem('wadoUrl');
 
 export const fillSeriesDescfullData = (data) => {
   return { type: FILL_DESC, data };
-}
-
-export const storeAimSelection = (selectionMap, pageIndex) => {
-  return { type: STORE_AIM_SELECTION, payload: { selectionMap, pageIndex } };
 }
 
 export const setSeriesData = (projectID, patientID, studyUID, seriesData, filled, mfMerged) => {
