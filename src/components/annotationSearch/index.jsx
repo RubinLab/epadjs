@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
 import PropagateLoader from "react-spinners/PropagateLoader";
-import _, { set } from "lodash";
+import _ from "lodash";
 import Collapsible from "react-collapsible";
 import { HiOutlineFolderDownload } from "react-icons/hi";
 import {
@@ -673,7 +673,6 @@ const AnnotationSearch = (props) => {
     if (Object.keys(filters).length) body["filter"] = newFilters;
     searchAnnotations(body, bm)
       .then((res) => {
-        console.log(" ----> in resolve search");
         populateSearchResult(res, pageIndex, afterDelete);
         setRows(res.data.total_rows);
         setShowSpinner(false);

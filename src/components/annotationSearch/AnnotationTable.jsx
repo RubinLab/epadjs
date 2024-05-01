@@ -25,9 +25,9 @@ import {
 import { formatDate } from "../flexView/helperMethods";
 import { getSeries, getSignificantSeries } from "../../services/seriesServices";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
-import { isSupportedModality, findSelectedCheckboxesMap } from "../../Utils/aid.js";
+import { isSupportedModality } from "../../Utils/aid.js";
 import { COMP_MODALITIES as compModality, teachingFileTempCode } from "../../constants.js";
-const defaultPageSize = 10;
+const defaultPageSize = 200;
 
 let maxPort;
 let mode;
@@ -357,13 +357,13 @@ function AnnotationTable(props) {
   useEffect(() => {
     preparePageData(props.data, defaultPageSize, props.searchTableIndex);
 
-  }, [props.pid, props.data, props.multiFrameAimJumpData]);
+  }, [props.pid, props.data]);
 
   useEffect(() => {
     if (props.data.length <= defaultPageSize * props.searchTableIndex) {
       preparePageData(props.data, defaultPageSize, props.searchTableIndex);
     }
-  }, [props.noOfRows, props.data, props.searchTableIndex, props.multiFrameAimJumpData]);
+  }, [props.noOfRows, props.data, props.searchTableIndex]);
 
   // TODO: spinner doesn't appear anymore check the logic
   const getSeriesData = async (selected, force) => {
