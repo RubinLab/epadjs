@@ -4,6 +4,7 @@ import cornerstone from "cornerstone-core";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import MetaData from "../MetaData/MetaData";
 import SmartBrushMenu from "../SmartBrushMenu/SmartBrushMenu";
+import AddToWorklist from "../searchView/addWorklist";
 import BrushSizeSelector from "./BrushSizeSelector";
 import { WindowLevel } from "../WindowLevel/WindowLevel";
 import ColormapSelector from "./ColormapSelector";
@@ -787,6 +788,7 @@ class ToolMenu extends Component {
                     </div> */}
         {/* </Collapsible> */}
         {/* <Collapsible trigger={"Segmentation Tools"} transitionTime={100}> */}
+        <AddToWorklist toolMenu={true} parent="display"/>
         {mode !== "teaching" &&
           this.segmentationTools.map((segmentationTool, i) => {
             i = i + this.imagingTools.length + this.markupTools.length;
