@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import _ from "lodash";
 import cornerstone from "cornerstone-core";
+import { toast } from "react-toastify";
 import cornerstoneTools from "cornerstone-tools";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import PropagateLoader from "react-spinners/PropagateLoader";
@@ -1568,6 +1569,18 @@ class DisplayView extends Component {
       this.props.dispatch(
         getSingleSerie({ patientID, projectID, seriesUID, studyUID })
       );
+    }).catch(err => {
+      console.error(err);
+      if (err.message.includes("403")) {
+        toast.error("You don't have permission to delete annotation from the project!", {
+          position: "top-right",
+          autoClose: 5000,
+          // hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
     });
   };
 
