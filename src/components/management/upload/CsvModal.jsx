@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import "./CsvModal.css";
+import "./csvModal.css";
 
 const CsvModal = (props) => {
     return (
