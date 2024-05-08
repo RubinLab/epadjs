@@ -1,9 +1,11 @@
 
-.body {
+.csv-modal-body {
     margin: 0px;
     background-color: #222222 !important; 
     font-family: "Open-Sans", sans-serif;
     color: #ececec;
+    position: fixed;
+    z-index: 1000;
   }
   .overlay-dk{
     background-color: rgba(0, 0, 0, 0.9); 

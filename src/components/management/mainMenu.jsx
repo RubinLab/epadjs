@@ -4,6 +4,7 @@ import Modal from "./common/customModal";
 import Users from "./users";
 import Projects from "./projects/projects";
 import WorkLists from "./worklists/workLists";
+import CsvUpload from "./upload/CsvModal";
 import Annotations from "./annotations/annotations";
 import Templates from "./templates";
 import Plugins from "./plugins/main";
@@ -26,7 +27,8 @@ class MainMenu extends React.Component {
       selection: "",
       isModalOpen: false,
       coordinate: "50%",
-      templateMap: {}
+      templateMap: {},
+      isUploadOpen: false
     };
   }
 
@@ -74,7 +76,7 @@ class MainMenu extends React.Component {
   };
 
   selectDisplay = () => {
-    switch (this.state.selection) {
+    switch (this.state.selection) {     
       case "Users":
         return (
           <Users
@@ -141,8 +143,14 @@ class MainMenu extends React.Component {
     const style = { left: this.state.coordinate };
     return (
       <div>
-        {!this.state.isModalOpen && (
+        {!this.state.isModalOpen && !this.state.isUploadOpen && (
           <div className="mng-menu" style={style}>
+            <div
+              className="mng-menu__option"
+              onClick={() => { this.setState({ isUploadOpen: true, isModalOpen: !this.state.isModalOpen })}}
+            >
+              Aim Upload
+            </div>
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Users
             </div>
@@ -219,7 +227,7 @@ class MainMenu extends React.Component {
             )}
           </div>
         )}
-        {this.state.isModalOpen && (
+        {this.state.isModalOpen && !this.state.isUploadOpen && (
           <Modal>
             <Header
               selection={this.state.selection}
@@ -227,6 +235,9 @@ class MainMenu extends React.Component {
             />
             {this.selectDisplay()}
           </Modal>
+        )}
+        {this.state.isUploadOpen && (
+          <CsvUpload onCancel={() => this.setState({ isUploadOpen: false })}/>
         )}
       </div>
     );
