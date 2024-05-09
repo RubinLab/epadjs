@@ -1,10 +1,52 @@
 import React, { useState } from "react";
-import { connect } from "react-redux";
+import { toast } from 'react-toastify';
+import { uploadBulk } from "services/annotationServices";
 import "./csvModal.css";
 
 const CsvModal = (props) => {
     const [uploadSpreadsheet, setUploadSpreadsheet] = useState(false);
     const [uploadAimFile, setUploadAimFile] = useState(false);
+    const [files, setFiles] = useState([]);
+
+    const onSelectFile = e => {
+        const selectedFiles = Array.from(e.target.files);
+        setFiles(selectedFiles);
+      };
+
+    const handleUpload = () => {
+        const promises = [];
+        const formData = new FormData();
+        files.forEach((file, index) => {
+          formData.append(`file${index + 1}`, file);
+        });
+        const config = {
+          headers: {
+            'content-type': 'multipart/form-data'
+          }
+        };
+        promises.push(uploadBulk(formData, config))
+        Promise.all(promises).then((res) => {
+            toast.success("Aim upload is successful!", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+              });
+        }).catch(err => {
+            console.error(err);
+            toast.error("Could not upload the aim(s)!", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+              });
+        });
+        props.onCancel();
+    }
 
     console.log(" ----> here")
     return (
@@ -29,7 +71,7 @@ const CsvModal = (props) => {
                                 be downloaded <a href="#">here</a>.</p>
                                 <div className="container">
                                 <label htmlFor="formFile" className="form-label">Upload CSV file to bootstrap teaching files in bulk:</label>
-                                <input className="form-control" type="file" id="formFile" />
+                                <input className="form-control" type="file" id="formFile" onChange={onSelectFile}/>
                             </div>
                             </div>}
                         </div>
@@ -40,11 +82,11 @@ const CsvModal = (props) => {
                             files and want to upload them to STELLA!.
                         {uploadAimFile && <div className="container top-margin" id="collapseUpload">
                             <label htmlFor="formFile" className="form-label">Upload JSON files:</label>
-                            <input className="form-control" type="file" id="formFileMultiple" multiple />
+                            <input className="form-control" type="file" id="formFileMultiple" onChange={onSelectFile} multiple />
                         </div>}
                         </div>
                         <div className="series-selection-buttons">
-                        <button className="btn btn-sm btn-secondary btn-selection"> Submit</button>
+                        <button className="btn btn-sm btn-secondary btn-selection" onClick={handleUpload}> Submit</button>
                         <button className="btn btn-sm btn-secondary btn-selection" onClick={props.onCancel}> Cancel </button>
                         </div>
                     </div>

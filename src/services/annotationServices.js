@@ -207,3 +207,8 @@ export function uploadSegmentation(segmentation, segName, projectId = "lite") {
 export function getAnnotation(pid, aimID) {
   return http.get(http.apiUrl() + "/projects/" + encodeURIComponent(pid) + "/aims/" + encodeURIComponent(aimID));
 }
+
+export function uploadBulk(csvData, config) {
+  let url = http.apiUrl() + "/processCsv";
+  return http.post(url, csvData, config);
+}

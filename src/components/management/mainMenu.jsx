@@ -237,7 +237,7 @@ class MainMenu extends React.Component {
           </Modal>
         )}
         {this.state.isUploadOpen && (
-          <CsvUpload onCancel={() => { this.setState({ isUploadOpen: false, isModalOpen: false }); this.props.closeMenu()}} />
+          <CsvUpload onCancel={() => { this.setState({ isUploadOpen: false, isModalOpen: false }); this.props.closeMenu()}}/>
         )}
       </div>
     );
