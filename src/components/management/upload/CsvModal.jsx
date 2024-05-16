@@ -63,6 +63,19 @@ const CsvModal = (props) => {
         });
     }
 
+    const downloadSample = async () => {
+        fetch(`${process.env.PUBLIC_URL}/CSVtoAIM_Template.csv`).then(response => {
+            response.blob().then(blob => {
+                const fileURL = window.URL.createObjectURL(blob);
+                let alink = document.createElement('a');
+                alink.href = fileURL;
+                alink.download = 'CSVtoAIM_Template.csv';
+                alink.click();
+              }).catch(error => console.error('Reading CSVtoAIM_Template.csv', error))
+        }).catch(err => console.error("Downloading CSVtoAIM_Template.csv", err))
+    }
+    
+
     return (
         <div className="csv-modal-body">   
             <div className="overlay-dk">
@@ -81,7 +94,7 @@ const CsvModal = (props) => {
                             {uploadSpreadsheet && <div className="top-margin" id="collapseDescription">
                                 <p className="indent">Your file has to be in comma separated value (csv) format and contain the critical
                                 information and identical header titles needed to create a valid teaching file. <br />A sample csv file can
-                                be downloaded <a href="#">here</a>.</p>
+                                be downloaded <a href="#" onClick={downloadSample}>here</a>.</p>
                                 <div className="container">
                                 <label htmlFor="formFile" id="upload-info" className="form-label">Upload CSV file to bootstrap teaching files in bulk:</label>
                                 <input className="form-control" type="file" id="formFile" onChange={onSelectFile}/>
