@@ -8,9 +8,13 @@
     z-index: 1000;
   }
   .overlay-dk{
-    background-color: rgba(0, 0, 0, 0.9); 
+    background-color: rgba(0, 0, 0, 0.65);
     background-size: cover;
+    height: 100%;
+    width: 100%;
+    position: fixed;
   }
+
   #series-window-bk {
     box-shadow: 0 3px 10px rgb(0 0 0 / 0.5);
       position: fixed;
