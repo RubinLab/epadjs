@@ -39,7 +39,8 @@ import {
   selectAnnotation,
   updateSearchTableIndex,
   refreshPage,
-  storeAimSelection
+  storeAimSelection,
+  storeAimSelectionAll
 } from "../annotationsList/action";
 import AnnotationDownloadModal from "../searchView/annotationDownloadModal";
 import UploadModal from "../searchView/uploadModal";
@@ -60,8 +61,8 @@ import { COMP_MODALITIES as compModality } from "../../constants.js";
 import {
   isSupportedModality,
   findSelectedCheckboxes,
-  handleSelectDeselectAll,
-  resetSelectAllCheckbox,
+  // handleSelectDeselectAll,
+  // resetSelectAllCheckbox,
   findSelectedCheckboxesMap
 } from "Utils/aid.js";
 
@@ -210,7 +211,7 @@ const AnnotationSearch = (props) => {
   };
 
   useEffect(() => {
-    resetSelectAllCheckbox(false);
+    // resetSelectAllCheckbox(false);
     if (mode === "teaching") return;
     setSelectedProject(props.pid);
     setQuery("");
@@ -1069,7 +1070,7 @@ const AnnotationSearch = (props) => {
     Promise.all(promiseArr)
       .then(() => {
         getNewData(props.searchTableIndex, true);
-        resetSelectAllCheckbox(false);
+        // resetSelectAllCheckbox(false);
         props.dispatch(storeAimSelection({}, -1));
       })
       .catch((error) => {
@@ -1080,7 +1081,7 @@ const AnnotationSearch = (props) => {
         )
           toast.error(error.response.data.message, { autoClose: false });
         getNewData(props.searchTableIndex, true);
-        resetSelectAllCheckbox(false);
+        // resetSelectAllCheckbox(false);
       });
     setShowDeleteModal(false);
     props.dispatch(clearSelection());
@@ -1281,6 +1282,16 @@ const AnnotationSearch = (props) => {
     else setShowDownload(!showDownload);
   }
 
+  const selectAllChecked = checked => {
+    console.log(" +++++> checked", checked);
+    const map =  checked ? data.reduce((all, item, i) => {
+      const { aimID, name, subjectID, studyUID, seriesUID } = item;
+      all[aimID] = { aimID, name, subjectID, studyUID, seriesUID };
+      return all;
+    }, {}) : {};
+    props.dispatch(storeAimSelectionAll(checked, map, props.searchTableIndex));
+  }
+
   return (
     <>
       <div
@@ -1476,15 +1487,15 @@ const AnnotationSearch = (props) => {
           {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
             <AddToWorklist
               deselect={() => {
-                handleSelectDeselectAll(false);
-                resetSelectAllCheckbox(false);
+                // handleSelectDeselectAll(false);
+                // resetSelectAllCheckbox(false);
               }}
               forceUpdatePage={props.forceUpdatePage}
             />
             <Projects
               deselect={() => {
-                handleSelectDeselectAll(false);
-                resetSelectAllCheckbox(false);
+                // handleSelectDeselectAll(false);
+                // resetSelectAllCheckbox(false);
               }}
               updateUrl={props.history.push}
             />
@@ -1588,8 +1599,9 @@ const AnnotationSearch = (props) => {
                   className="form-check-input __select-all"
                   type="checkbox"
                   onChange={({ target: { checked } }) => {
-                    handleSelectDeselectAll(checked);
+                    // handleSelectDeselectAll(checked);
                     setAllSelected(checked)
+                    selectAllChecked(checked);
                   }}
                 />
               </div>

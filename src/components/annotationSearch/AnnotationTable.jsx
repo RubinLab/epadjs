@@ -605,7 +605,7 @@ function AnnotationTable(props) {
                 data-seriesuid={row.original.seriesUID}
                 onClick={updateStoredAims}
                 // checked={listOfSelecteds[row.original.aimID]}
-                disabled={props.allSelected}
+                // disabled={props.allSelected}
                 // checked={checked || props.allSelected}
                 checked={checked}
                 // checked={(checked || props.allSelected ) && !(checked && props.allSelected)}
