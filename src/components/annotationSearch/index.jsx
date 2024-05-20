@@ -180,7 +180,7 @@ const AnnotationSearch = (props) => {
   const [seriesList, setSeriesList] = useState([]);
   const [encArgs, setEncArgs] = useState("");
   const [decrArgs, setDecrArgs] = useState("");
-  const [allSelected, setAllSelected] = useState(false);
+  const [allSelected, setAllSelected] = useState({});
 
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -679,6 +679,7 @@ const AnnotationSearch = (props) => {
         setShowSpinner(false);
         props.completeLoading();
         props.dispatch(storeAimSelection({}, -1));
+        if(!bm) setAllSelected({});
       })
       .catch((err) => {
         console.error(err);
@@ -1278,18 +1279,26 @@ const AnnotationSearch = (props) => {
     // if all selected or non selected show confirmation modal
 
     const arr = Object.keys(props.multipageAimSelection);
-    if (arr.length === 0 || allSelected) setShowDownloadAll(true);
+    if (arr.length === 0) setShowDownloadAll(true);
     else setShowDownload(!showDownload);
   }
 
   const selectAllChecked = checked => {
-    console.log(" +++++> checked", checked);
     const map =  checked ? data.reduce((all, item, i) => {
       const { aimID, name, subjectID, studyUID, seriesUID } = item;
       all[aimID] = { aimID, name, subjectID, studyUID, seriesUID };
       return all;
     }, {}) : {};
     props.dispatch(storeAimSelectionAll(checked, map, props.searchTableIndex));
+  }
+
+  const handleSelectDeselectAll = ({ target: { checked } }) => {
+    const { searchTableIndex } = props;
+    const curState = { ...allSelected };
+    if (checked) curState[searchTableIndex] = true;
+    else if (!checked && curState[searchTableIndex]) delete curState[searchTableIndex];
+    setAllSelected(curState);
+    selectAllChecked(checked);
   }
 
   return (
@@ -1598,11 +1607,8 @@ const AnnotationSearch = (props) => {
                   id="search-select_all"
                   className="form-check-input __select-all"
                   type="checkbox"
-                  onChange={({ target: { checked } }) => {
-                    // handleSelectDeselectAll(checked);
-                    setAllSelected(checked)
-                    selectAllChecked(checked);
-                  }}
+                  onChange={handleSelectDeselectAll}
+                  checked={allSelected[props.searchTableIndex]}
                 />
               </div>
             </th>
@@ -1876,7 +1882,6 @@ const AnnotationSearch = (props) => {
           {data.length > 0 && !showSpinner && (
             <AnnotationTable
               data={data}
-              allSelected={allSelected}
               selected={props.selectedAnnotations}
               updateSelectedAims={updateSelectedAims}
               noOfRows={rows}

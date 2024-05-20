@@ -604,11 +604,7 @@ function AnnotationTable(props) {
                 data-studyuid={row.original.studyUID}
                 data-seriesuid={row.original.seriesUID}
                 onClick={updateStoredAims}
-                // checked={listOfSelecteds[row.original.aimID]}
-                // disabled={props.allSelected}
-                // checked={checked || props.allSelected}
                 checked={checked}
-                // checked={(checked || props.allSelected ) && !(checked && props.allSelected)}
               />
             );
           },
@@ -763,7 +759,7 @@ function AnnotationTable(props) {
         },
       ],
       // [data, listOfSelecteds, props.selectedAnnotations]
-      [data, props.multipageAimSelection, props.allSelected]
+      [data, props.multipageAimSelection]
     );
   } else {
     columns = React.useMemo(
@@ -784,12 +780,7 @@ function AnnotationTable(props) {
                 data-studyuid={row.original.studyUID}
                 data-seriesuid={row.original.seriesUID}
                 onClick={updateStoredAims}
-                // checked={checked || props.allSelected}
-                disabled={props.allSelected}
                 checked={checked}
-                // checked={(checked || props.allSelected ) && !(checked && props.allSelected)}
-                // onClick={() => { props.updateSelectedAims(row.original); updateListOfSelected(row.original) }}
-                // checked={props.allSelected || listOfSelecteds[row.original.aimID]}
               />
             );
           },
