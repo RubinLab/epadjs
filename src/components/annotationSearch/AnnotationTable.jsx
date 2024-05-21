@@ -131,6 +131,21 @@ function Table({
   React.useEffect(() => {
     fetchData({ pageIndex, pageSize });
   }, [fetchData, pageIndex, pageSize]);
+
+  const renderFooterText = () => {
+    // const { noOfRows } = props;
+    let text = '';      
+    if (noOfRows <= defaultPageSize) {
+      text = `Showing ${noOfRows} results`;
+    } else {
+      const begin = defaultPageSize * pageIndex;
+      let end = defaultPageSize * (pageIndex + 1);
+      if ( end > noOfRows) end = noOfRows;
+      text = `Showing ${begin + 1} - ${end} of ${noOfRows} results`
+    }
+    return text;
+  } 
+
   return (
     <>
       {mode !== "teaching" && (
@@ -188,15 +203,11 @@ function Table({
           </tr>
         );
       })}
-      {noOfRows / defaultPageSize > 1 && (
         <tr>
           <td colSpan="10000">
-            Showing {defaultPageSize * pageIndex}-
-            {defaultPageSize * (pageIndex + 1)} of {noOfRows}{" "}
-            results
+            {renderFooterText()}
           </td>
         </tr>
-      )}
       {mode !== "teaching" && (
         <>
           {/* </tbody>
