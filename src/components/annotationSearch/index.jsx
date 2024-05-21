@@ -84,7 +84,7 @@ const lists = {
   criteria: ["contains"], // 'equals'
 };
 
-const pageSize = 200;
+const pageSize = 50;
 
 const explanation = {
   invalidQuery: "This search query is not valid.",

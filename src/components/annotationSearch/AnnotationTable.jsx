@@ -27,7 +27,7 @@ import { getSeries, getSignificantSeries } from "../../services/seriesServices";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
 import { isSupportedModality } from "../../Utils/aid.js";
 import { COMP_MODALITIES as compModality, teachingFileTempCode } from "../../constants.js";
-const defaultPageSize = 200;
+const defaultPageSize = 50;
 
 let maxPort;
 let mode;
@@ -192,7 +192,7 @@ function Table({
         <tr>
           <td colSpan="10000">
             Showing {defaultPageSize * pageIndex}-
-            {defaultPageSize * (pageIndex + 1)} of ~{pageCount * pageSize}{" "}
+            {defaultPageSize * (pageIndex + 1)} of {noOfRows}{" "}
             results
           </td>
         </tr>
