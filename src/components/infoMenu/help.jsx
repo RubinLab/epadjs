@@ -47,7 +47,8 @@ class Help extends React.Component {
                 </button>)}
               {mode === 'teaching' && (<button
                 className="info-about__button"
-                onClick={this.downloadManual}
+                // onClick={this.downloadManual}
+                onClick={() => window.open("https://stella.stanford.edu/user-guide/", "_blank", "")}
               >
                 Online User Manual
               </button>)}
