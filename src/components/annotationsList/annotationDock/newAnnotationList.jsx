@@ -95,17 +95,19 @@ class AnnotationsList extends React.Component {
   handleToggleAllLabels = ({ target }, e, id) => {
     this.setState({ labelDisplayAll: target.checked });
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
-    this.props.dispatch(toggleAllLabels(seriesUID, target.checked));
+    this.props.openSeries.forEach(el => this.props.dispatch(toggleAllLabels(el.seriesUID, target.checked)));
   };
 
   handleToggleAllAnnotations = ({ target }, e, id) => {
-    const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
-    this.props.dispatch(toggleAllAnnotations(seriesUID, target.checked));
-    window.dispatchEvent(
-      new CustomEvent("toggleAnnotations", {
-        detail: { isVisible: target.checked },
-      })
-    );
+    this.props.openSeries.forEach((el, i) => {
+      const { seriesUID } = el;
+      this.props.dispatch(toggleAllAnnotations(seriesUID, target.checked));
+      window.dispatchEvent(
+        new CustomEvent("toggleAnnotations", {
+          detail: { isVisible: target.checked },
+        })
+      );
+    });
     this.setState({ annsDisplayAll: target.checked });
   };
 

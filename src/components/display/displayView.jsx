@@ -586,13 +586,19 @@ class DisplayView extends Component {
     const { aimID, isVisible } = event.detail;
     const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
-
-    let isSegmentation = aimID ? this.checkSegmentation(aimID): true;
-
-    if (isSegmentation) this.setVisibilityOfSegmentations(aimID, element, isVisible);
-    this.setVisibilityOfShapes(isVisible, aimID);
-
-    cornerstone.updateImage(element);
+    const elements = cornerstone.getEnabledElements();
+    if ( aimID ) {
+      let isSegmentation = aimID ? this.checkSegmentation(aimID) : true;
+      if (isSegmentation) this.setVisibilityOfSegmentations(aimID, element, isVisible);
+      this.setVisibilityOfShapes(isVisible, aimID, this.props.series[activePort].seriesUID);
+      cornerstone.updateImage(element);
+    } else {
+      elements.forEach((el, i)=> {
+        this.setVisibilityOfSegmentations(aimID, element, isVisible);
+        this.setVisibilityOfShapes(isVisible, aimID, this.props.series[i].seriesUID);
+        cornerstone.updateImage(el.element);
+      });
+    }
   };
 
   updateWL = (event) => {
@@ -620,10 +626,10 @@ class DisplayView extends Component {
   };
 
   // Traverse all shapes and set visibility, if aimID is passed only sets aim's shapes
-  setVisibilityOfShapes = (visibility, aimID) => {
-    const { series, activePort } = this.props;
-    const { seriesUID } = series[activePort];
-    const shapesOfSerie = this.getShapesOfSerie(seriesUID);
+  setVisibilityOfShapes = (visibility, aimID, seriesUID) => {
+    const { activePort } = this.props;
+    const series = seriesUID ? seriesUID : this.props.series[activePort].seriesUID;
+    const shapesOfSerie = this.getShapesOfSerie(series);
     shapesOfSerie.forEach((shape) => {
       if (aimID && shape.aimId === aimID) shape.visible = visibility;
       else if (!aimID) {
