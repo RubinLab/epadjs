@@ -594,6 +594,7 @@ class DisplayView extends Component {
       cornerstone.updateImage(element);
     } else {
       elements.forEach((el, i)=> {
+        this.setVisibilityOfSegmentations(aimID, element, isVisible);
         this.setVisibilityOfShapes(isVisible, aimID, this.props.series[i].seriesUID);
         cornerstone.updateImage(el.element);
       });
