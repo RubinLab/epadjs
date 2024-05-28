@@ -112,9 +112,10 @@ const asyncReducer = (state = initialState, action) => {
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
       case STORE_AIM_SELECTION_ALL:
-        const { checked, map, tbPageIndex } = action.payload;
+        const { checked, map, tbPageIndex, clearAll } = action.payload;
         let newMultipageAimSelectionAll = _.cloneDeep(state.multipageAimSelection);
-        if (checked) newMultipageAimSelectionAll[tbPageIndex] = map;
+        if (clearAll) newMultipageAimSelectionAll = {};
+        else if (checked) newMultipageAimSelectionAll[tbPageIndex] = map;
         else delete newMultipageAimSelectionAll[tbPageIndex];
         const newStateWithAimSelectionAll = { ...state, multipageAimSelection: newMultipageAimSelectionAll };
         return newStateWithAimSelectionAll;

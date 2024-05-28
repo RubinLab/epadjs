@@ -80,8 +80,8 @@ export const storeAimSelection = (selectionMap, pageIndex) => {
   return { type: STORE_AIM_SELECTION, payload: { selectionMap, pageIndex } };
 }
 
-export const storeAimSelectionAll = (checked, map, tbPageIndex) => {
-  return { type: STORE_AIM_SELECTION_ALL, payload: { checked, map, tbPageIndex } };
+export const storeAimSelectionAll = (checked, map, tbPageIndex, clearAll) => {
+  return { type: STORE_AIM_SELECTION_ALL, payload: { checked, map, tbPageIndex, clearAll } };
 }
 
 export const setSeriesData = (projectID, patientID, studyUID, seriesData, filled, mfMerged) => {
