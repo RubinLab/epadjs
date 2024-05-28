@@ -1284,12 +1284,14 @@ const AnnotationSearch = (props) => {
   }
 
   const selectAllChecked = checked => {
-    const map =  checked ? data.reduce((all, item, i) => {
+    const { searchTableIndex } = props;
+    const pageData = data.slice(searchTableIndex * pageSize, (searchTableIndex + 1) * pageSize);
+    const map =  checked ? pageData.reduce((all, item, i) => {
       const { aimID, name, subjectID, studyUID, seriesUID } = item;
       all[aimID] = { aimID, name, subjectID, studyUID, seriesUID };
       return all;
     }, {}) : {};
-    props.dispatch(storeAimSelectionAll(checked, map, props.searchTableIndex));
+    props.dispatch(storeAimSelectionAll(checked, map, searchTableIndex));
   }
 
   const handleSelectDeselectAll = ({ target: { checked } }) => {
