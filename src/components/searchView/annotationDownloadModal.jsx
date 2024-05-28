@@ -24,10 +24,11 @@ class AnnnotationDownloadModal extends React.Component {
   onDownload = () => {
     const optionObj = this.state;
     const { pid, projectID } = this.props;
-    const annsToDownload =
-      Object.keys(this.props.selectedAnnotations).length > 0
-        ? this.props.selectedAnnotations : this.props.selected ?
-       this.props.selected : findSelectedCheckboxes();
+    let annsToDownload = [];
+    for (let page in this.props.multipageAimSelection) {
+      const aimIDs = Object.keys(this.props.multipageAimSelection[page]);
+      annsToDownload = annsToDownload.concat(aimIDs);
+    }
     const aimList = Array.isArray(annsToDownload) ? annsToDownload : Object.keys(annsToDownload);
     // this.props.updateStatus();
     const promise =
@@ -162,7 +163,8 @@ AnnnotationDownloadModal.propTypes = {};
 
 const mapStateToProps = state => {
   return {
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
+    multipageAimSelection: state.annotationsListReducer.multipageAimSelection
   };
 };
 
