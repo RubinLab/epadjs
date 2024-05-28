@@ -75,7 +75,7 @@ export function getAnnotations2() {
 export function searchAnnotations(body, bookmark) {
   // body["fields"]={"teachingFiles":true};
   const hash = objectHash(body);
-  const url = `${http.apiUrl()}/search${bookmark ? `?bookmark=${bookmark}&hash=${hash}` : `?hash=${hash}`
+  const url = `${http.apiUrl()}/search/${bookmark ? `?bookmark=${bookmark}&hash=${hash}` : `?hash=${hash}`
     }`;
   return http.post(url, body);
 }
