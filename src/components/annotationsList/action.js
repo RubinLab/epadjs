@@ -52,6 +52,7 @@ import {
   SET_SERIES_DATA,
   FILL_DESC,
   STORE_AIM_SELECTION,
+  STORE_AIM_SELECTION_ALL,
   colors,
   commonLabels,
 } from "./types";
@@ -77,6 +78,10 @@ export const fillSeriesDescfullData = (data) => {
 
 export const storeAimSelection = (selectionMap, pageIndex) => {
   return { type: STORE_AIM_SELECTION, payload: { selectionMap, pageIndex } };
+}
+
+export const storeAimSelectionAll = (checked, map, tbPageIndex, clearAll) => {
+  return { type: STORE_AIM_SELECTION_ALL, payload: { checked, map, tbPageIndex, clearAll } };
 }
 
 export const setSeriesData = (projectID, patientID, studyUID, seriesData, filled, mfMerged) => {
