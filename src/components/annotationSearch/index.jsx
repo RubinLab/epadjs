@@ -211,7 +211,7 @@ const AnnotationSearch = (props) => {
   };
 
   useEffect(() => {
-    // resetSelectAllCheckbox(false);
+    props.dispatch(storeAimSelectionAll(null, null, null, true));
     if (mode === "teaching") return;
     setSelectedProject(props.pid);
     setQuery("");
@@ -1071,7 +1071,7 @@ const AnnotationSearch = (props) => {
     Promise.all(promiseArr)
       .then(() => {
         getNewData(props.searchTableIndex, true);
-        // resetSelectAllCheckbox(false);
+        props.dispatch(storeAimSelectionAll(null, null, null, true));
         props.dispatch(storeAimSelection({}, -1));
       })
       .catch((error) => {
@@ -1082,7 +1082,7 @@ const AnnotationSearch = (props) => {
         )
           toast.error(error.response.data.message, { autoClose: false });
         getNewData(props.searchTableIndex, true);
-        // resetSelectAllCheckbox(false);
+        props.dispatch(storeAimSelectionAll(null, null, null, true));
       });
     setShowDeleteModal(false);
     props.dispatch(clearSelection());
@@ -1498,15 +1498,13 @@ const AnnotationSearch = (props) => {
           {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
             <AddToWorklist
               deselect={() => {
-                // handleSelectDeselectAll(false);
-                // resetSelectAllCheckbox(false);
+                props.dispatch(storeAimSelectionAll(null, null, null, true));
               }}
               forceUpdatePage={props.forceUpdatePage}
             />
             <Projects
               deselect={() => {
-                // handleSelectDeselectAll(false);
-                // resetSelectAllCheckbox(false);
+                props.dispatch(storeAimSelectionAll(null, null, null, true));
               }}
               updateUrl={props.history.push}
             />

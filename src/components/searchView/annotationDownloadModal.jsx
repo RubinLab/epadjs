@@ -7,7 +7,7 @@ import {
   downloadAllAnnotations
 } from "../../services/annotationServices";
 import { ToastContainer, toast } from "react-toastify";
-import { clearSelection } from "../annotationsList/action";
+import { clearSelection, storeAimSelectionAll } from "../annotationsList/action";
 import { findSelectedCheckboxes, resetSelectAllCheckbox } from '../../Utils/aid.js';
 import "../infoMenu/infoMenu.css";
 
@@ -40,12 +40,12 @@ class AnnnotationDownloadModal extends React.Component {
         let blob = new Blob([result[0].data], { type: "application/zip" });
         this.triggerBrowserDownload(blob, "Annotations");
         // this.props.updateStatus();
-        resetSelectAllCheckbox(false);
+        this.props.dispatch(storeAimSelectionAll(null, null, null, true));
         this.props.onSubmit();
       })
       .catch(err => {
         console.log(err);
-        resetSelectAllCheckbox(false);
+        this.props.dispatch(storeAimSelectionAll(null, null, null, true));
         if (err.response && err.response.status === 503) {
           toast.error("Select a download format!", { autoClose: false });
         }
