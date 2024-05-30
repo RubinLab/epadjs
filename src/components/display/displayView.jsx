@@ -194,7 +194,8 @@ class DisplayView extends Component {
       templateType: "",
       multiFrameAimJumped: false,
       dataIndexMap: {},
-      aimEdited: false
+      aimEdited: false,
+      isVisible: true
     };
   }
 
@@ -353,7 +354,6 @@ class DisplayView extends Component {
       `${series[activePort].aimID}` !==
         this.state.multiFrameAimJumped
     ) {
-
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], `didupdate 1`);
@@ -582,11 +582,12 @@ class DisplayView extends Component {
     return isSegmentation;
   }
 
-  toggleAnnotations = (event) => {
+  toggleAnnotations = (event, fm) => {
     const { aimID, isVisible } = event.detail;
     const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
     const elements = cornerstone.getEnabledElements();
+    this.setState({ isVisible })
     if ( aimID ) {
       let isSegmentation = aimID ? this.checkSegmentation(aimID) : true;
       if (isSegmentation) this.setVisibilityOfSegmentations(aimID, element, isVisible);
@@ -785,9 +786,7 @@ class DisplayView extends Component {
       }
 
       if (promises.length > 0) {
-
         Promise.all(promises).then((res) => {
-
           const key =
           multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
           ? `${series[activePort].aimID}`
@@ -1746,8 +1745,8 @@ class DisplayView extends Component {
         //   //image is not multiframe so strip the frame number from the imageId
         //   imageId = imageId.split("&frame=")[0];
         // }
-
         this.renderMarkup(imageId, value, color);
+        if (!this.state.isVisible) this.toggleAnnotations({ detail: { isVisible: this.state.isVisible }});
       });
     });
     // this.refreshAllViewports();

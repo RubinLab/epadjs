@@ -39,7 +39,8 @@ import {
   selectAnnotation,
   updateSearchTableIndex,
   refreshPage,
-  storeAimSelection
+  storeAimSelection,
+  storeAimSelectionAll
 } from "../annotationsList/action";
 import AnnotationDownloadModal from "../searchView/annotationDownloadModal";
 import UploadModal from "../searchView/uploadModal";
@@ -60,8 +61,8 @@ import { COMP_MODALITIES as compModality } from "../../constants.js";
 import {
   isSupportedModality,
   findSelectedCheckboxes,
-  handleSelectDeselectAll,
-  resetSelectAllCheckbox,
+  // handleSelectDeselectAll,
+  // resetSelectAllCheckbox,
   findSelectedCheckboxesMap
 } from "Utils/aid.js";
 
@@ -179,7 +180,7 @@ const AnnotationSearch = (props) => {
   const [seriesList, setSeriesList] = useState([]);
   const [encArgs, setEncArgs] = useState("");
   const [decrArgs, setDecrArgs] = useState("");
-  const [allSelected, setAllSelected] = useState(false);
+  const [allSelected, setAllSelected] = useState({});
 
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -210,7 +211,7 @@ const AnnotationSearch = (props) => {
   };
 
   useEffect(() => {
-    resetSelectAllCheckbox(false);
+    props.dispatch(storeAimSelectionAll(null, null, null, true));
     if (mode === "teaching") return;
     setSelectedProject(props.pid);
     setQuery("");
@@ -678,6 +679,7 @@ const AnnotationSearch = (props) => {
         setShowSpinner(false);
         props.completeLoading();
         props.dispatch(storeAimSelection({}, -1));
+        if(!bm) setAllSelected({});
       })
       .catch((err) => {
         console.error(err);
@@ -1069,7 +1071,7 @@ const AnnotationSearch = (props) => {
     Promise.all(promiseArr)
       .then(() => {
         getNewData(props.searchTableIndex, true);
-        resetSelectAllCheckbox(false);
+        props.dispatch(storeAimSelectionAll(null, null, null, true));
         props.dispatch(storeAimSelection({}, -1));
       })
       .catch((error) => {
@@ -1080,7 +1082,7 @@ const AnnotationSearch = (props) => {
         )
           toast.error(error.response.data.message, { autoClose: false });
         getNewData(props.searchTableIndex, true);
-        resetSelectAllCheckbox(false);
+        props.dispatch(storeAimSelectionAll(null, null, null, true));
       });
     setShowDeleteModal(false);
     props.dispatch(clearSelection());
@@ -1277,8 +1279,28 @@ const AnnotationSearch = (props) => {
     // if all selected or non selected show confirmation modal
 
     const arr = Object.keys(props.multipageAimSelection);
-    if (arr.length === 0 || allSelected) setShowDownloadAll(true);
+    if (arr.length === 0) setShowDownloadAll(true);
     else setShowDownload(!showDownload);
+  }
+
+  const selectAllChecked = checked => {
+    const { searchTableIndex } = props;
+    const pageData = data.slice(searchTableIndex * pageSize, (searchTableIndex + 1) * pageSize);
+    const map =  checked ? pageData.reduce((all, item, i) => {
+      const { aimID, name, subjectID, studyUID, seriesUID } = item;
+      all[aimID] = { aimID, name, subjectID, studyUID, seriesUID };
+      return all;
+    }, {}) : {};
+    props.dispatch(storeAimSelectionAll(checked, map, searchTableIndex));
+  }
+
+  const handleSelectDeselectAll = ({ target: { checked } }) => {
+    const { searchTableIndex } = props;
+    const curState = { ...allSelected };
+    if (checked) curState[searchTableIndex] = true;
+    else if (!checked && curState[searchTableIndex]) delete curState[searchTableIndex];
+    setAllSelected(curState);
+    selectAllChecked(checked);
   }
 
   return (
@@ -1476,15 +1498,13 @@ const AnnotationSearch = (props) => {
           {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
             <AddToWorklist
               deselect={() => {
-                handleSelectDeselectAll(false);
-                resetSelectAllCheckbox(false);
+                props.dispatch(storeAimSelectionAll(null, null, null, true));
               }}
               forceUpdatePage={props.forceUpdatePage}
             />
             <Projects
               deselect={() => {
-                handleSelectDeselectAll(false);
-                resetSelectAllCheckbox(false);
+                props.dispatch(storeAimSelectionAll(null, null, null, true));
               }}
               updateUrl={props.history.push}
             />
@@ -1587,10 +1607,8 @@ const AnnotationSearch = (props) => {
                   id="search-select_all"
                   className="form-check-input __select-all"
                   type="checkbox"
-                  onChange={({ target: { checked } }) => {
-                    handleSelectDeselectAll(checked);
-                    setAllSelected(checked)
-                  }}
+                  onChange={handleSelectDeselectAll}
+                  checked={allSelected[props.searchTableIndex]}
                 />
               </div>
             </th>
@@ -1864,7 +1882,6 @@ const AnnotationSearch = (props) => {
           {data.length > 0 && !showSpinner && (
             <AnnotationTable
               data={data}
-              allSelected={allSelected}
               selected={props.selectedAnnotations}
               updateSelectedAims={updateSelectedAims}
               noOfRows={rows}

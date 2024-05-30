@@ -53,6 +53,7 @@ import {
   SET_SERIES_DATA,
   FILL_DESC,
   STORE_AIM_SELECTION,
+  STORE_AIM_SELECTION_ALL,
   colors,
   commonLabels,
 } from "./types";
@@ -110,6 +111,14 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case STORE_AIM_SELECTION_ALL:
+        const { checked, map, tbPageIndex, clearAll } = action.payload;
+        let newMultipageAimSelectionAll = _.cloneDeep(state.multipageAimSelection);
+        if (clearAll) newMultipageAimSelectionAll = {};
+        else if (checked) newMultipageAimSelectionAll[tbPageIndex] = map;
+        else delete newMultipageAimSelectionAll[tbPageIndex];
+        const newStateWithAimSelectionAll = { ...state, multipageAimSelection: newMultipageAimSelectionAll };
+        return newStateWithAimSelectionAll;
       case STORE_AIM_SELECTION:
         const { selectionMap, pageIndex } = action.payload;
         let newMultipageAimSelection = _.cloneDeep(state.multipageAimSelection);
