@@ -469,7 +469,7 @@ const asyncReducer = (state = initialState, action) => {
         // if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
 
         const prevSameSer = state.openSeriesAddition.find(el => el.seriesUID === serUIDFromRef && !!el.frameData && !!el.multiFrameMap);
-        if ((imageAddedSeries[state.activePort].aimID && imageAddedSeries[state.activePort].multiFrameMap && imageAddedSeries[state.activePort].frameData) || !!prevSameSer) {
+        if ((imageAddedSeries[state.activePort].aimID && imageAddedSeries[state.activePort].multiFrameMap && imageAddedSeries[state.activePort].frameData) || (!!prevSameSer && imageAddedSeries[state.activePort].aimID)) {
           const fmData1 = !!imageAddedSeries[state.activePort].frameData ? imageAddedSeries[state.activePort].frameData : prevSameSer.frameData;
           const multiFrameMap1 = !!imageAddedSeries[state.activePort].multiFrameMap ? imageAddedSeries[state.activePort].multiFrameMap : prevSameSer.multiFrameMap;
           // const imgs = fmData1[action.payload.ann];
