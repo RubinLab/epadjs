@@ -734,64 +734,49 @@ class DisplayView extends Component {
       let multiFrameIndex = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[0]) : null;
       const multiFramePort = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[1]) : null;
 
-
       // ?????? if multiFramePort is i use the argument mfData else use stored data
-
-      for (let i = 0; i < series.length; i++) {
-        // DONE/TODO: in order to not to get same stack again and again
-        // add seriesUID-PrID etc info and look it up if we need to get it
-        // [{stack -> UIDkey, ycurImgIndex, imfIds}, {}]
-        
+      for (let i = 0; i < series.length; i++) {        
         const isMFPort = multiFramePort === i; 
         const storedMFIndex = seriesAddition[i].multiFrameIndex;
-        const mfIndexFinal = isMFPort ? multiFrameIndex : storedMFIndex; // ?????? use this assignment to decide to use argument or stored data
-        const isLegitMFIndex = typeof mfIndexFinal === 'number' && !isNaN(mfIndexFinal); // ?????? make sure it is not NaN
+        const mfIndexFinal = isMFPort ? multiFrameIndex : storedMFIndex;
+        const isLegitMFIndex = typeof mfIndexFinal === 'number' && !isNaN(mfIndexFinal);
         
-        // multiFrameIndex = !multiFrameIndex && storedMFIndex ? storedMFIndex : multiFrameIndex;
+        let fmNo = 0;
+        if (activePort === i && frameNo) fmNo = frameNo;
+        if (series[i].imageID && !frameNo) fmNo = parseInt(series[i].imageID.split('/frames/')[1]) - 1;
+
         const { projectID, patientID, studyUID, seriesUID } = series[i];
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
-        if (multiFrameIndex && multiFramePort === i && !isNaN(multiFrameIndex)) { // ?????? what if there is a mfIndex in store
-          indexKey = `${indexKey}-${multiFrameIndex}`
+        // if (mfIndexFinal && isMFPort && !isNaN(mfIndexFinal)) {
+        if (isLegitMFIndex) {  
+          indexKey = `${indexKey}-${mfIndexFinal}`
         }
-
-        // if (typeof dataIndexMap[indexKey] !== "number") {
         const dataExistsInState = parseInt(dataIndexMap[indexKey]) >= 0;
 
         // ?????? ((isLegitMFIndex && isMFPort ) this passes if there is a passed multiFrameIndexData argument, it downt handle stored mfIndex
+        // at the end of the day we shouldn't need isMFPort control because we need to get the only changing port. in jumps and dropdown changes
+        // check this -> ((isLegitMFIndex && isMFPort ) && !dataExistsInState)
 
-        if (!dataExistsInState || ((isLegitMFIndex && isMFPort ) && !dataExistsInState) || force) { 
-          let mfIndex = multiFrameIndex;
-          let fmNo = frameNo;
-          if (storedMFIndex) { //// ??????
-            mfIndex = storedMFIndex;
-            fmNo = series[i].imageID ? parseInt(series[i].imageID.split('/frames/')[1]) - 1 : 0;
-          }
+        console.log(" ++++++++++++++++++++++++++++ iterator", i);
+        console.log(JSON.stringify(dataIndexMap));
+        console.log(" ----> portno", parseInt(dataIndexMap[indexKey]));
+        console.log(" ===> dataExistsInState", dataExistsInState, indexKey);
+        console.log(" ===> mfIndexFinal", mfIndexFinal);
+        console.log(" ===> fmNo", fmNo);
+        console.log(" ++++++++++++++++++++++++++++ ");
 
-          const promise = this.getImageStack(
-            series[i],
-            i,
-            mfIndex,
-            fmNo,
-            `${fm}`
-          );
-
-          promises.push(promise);
-          indexKeys[indexKey] = i;
-          indexOrder.push(i);
-        } else if (!isMFPort && storedMFIndex) { // ?????? it should check if the state has this data with the correct mfIndex, either at i or at another index
-          const confirmationKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}-${storedMFIndex}`
-          const currentStack = this.state.data[i] ? this.state.data[i].stack : null;
-          const currentImageIdIndex = currentStack ? currentStack.currentImageIdIndex : 0;
-          const promise = this.getImageStack(
-            series[i],
-            i,
-            storedMFIndex,
-            currentImageIdIndex, 
-            `${fm}`
-          )
-          promises.push(promise);
-          indexKeys[confirmationKey] = i;
-          indexOrder.push(i);
+        // if (!dataExistsInState || ((isLegitMFIndex && isMFPort ) && !dataExistsInState) || force) { 
+        if (!dataExistsInState || force) { 
+            const promise = this.getImageStack(
+              series[i],
+              i,
+              mfIndexFinal,
+              fmNo,
+              `${fm}`
+            );
+            promises.push(promise);
+            indexKeys[indexKey] = i;
+            indexOrder.push(i);
         } else {
           const index = parseInt(dataIndexMap[indexKey]);
           newData[i] = { ...this.state.data[index] };
