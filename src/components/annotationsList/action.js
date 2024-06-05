@@ -735,6 +735,7 @@ const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
 
 // action to open series
 export const getSingleSerie = (serie, annotation, wadoUrl, seriesData) => {
+  console.log(" -------------> getSingleSerie argument", serie);
   return async (dispatch, getState) => {
     try {
       await dispatch(loadAnnotations());
