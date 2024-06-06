@@ -189,6 +189,7 @@ const asyncReducer = (state = initialState, action) => {
         const aimClearedSeriesAddition = _.cloneDeep(state.openSeriesAddition);
         aimClearedSeries[state.activePort].aimID = null;
         aimClearedSeriesAddition[state.activePort].aimID = null;
+        console.log('reducer- CLEAR_MULTIFRAME_AIM_JUMP', aimClearedSeriesAddition[state.activePort].aimID);
         return { ...state, openSeries: aimClearedSeries, multiFrameAimJumpData: null, openSeriesAddition: aimClearedSeriesAddition };
       case CHECK_MULTIFRAME:
         // const series = _.cloneDeep(state.openSeries);
@@ -279,6 +280,7 @@ const asyncReducer = (state = initialState, action) => {
           }
         }
 
+        console.log('reducer- CHECK_MULTIFRAME', seriesAddition);
         newState.seriesData = newSeriesDataMulti;
         // newState.openSeries= series;
         newState.openSeriesAddition = seriesAddition;
@@ -351,6 +353,7 @@ const asyncReducer = (state = initialState, action) => {
         for (let serie of aimIDClearedOpenSeries) {
           serie.aimID = null;
         }
+        console.log('reducer- CLEAR_AIMID');
         return { ...state, openSeries: aimIDClearedOpenSeries, openSeriesAddition: aimIDClearedOpenSeriesAddition };
       case UPDATE_IMAGEID:
         let openSeriesToUpdate = _.cloneDeep(state.openSeries);
@@ -468,12 +471,13 @@ const asyncReducer = (state = initialState, action) => {
         // coming from the right sidebar hasMultiframe flag is overridden by the new data
         // if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
 
+        const aimToJump = action.payload.ann || imageAddedSeries[state.activePort].aimID;
         const prevSameSer = state.openSeriesAddition.find(el => el.seriesUID === serUIDFromRef && !!el.frameData && !!el.multiFrameMap);
-        if ((imageAddedSeries[state.activePort].aimID && imageAddedSeries[state.activePort].multiFrameMap && imageAddedSeries[state.activePort].frameData) || (!!prevSameSer && imageAddedSeries[state.activePort].aimID)) {
+        if ((aimToJump && imageAddedSeries[state.activePort].multiFrameMap && imageAddedSeries[state.activePort].frameData) || (!!prevSameSer && aimToJump)) {
           const fmData1 = !!imageAddedSeries[state.activePort].frameData ? imageAddedSeries[state.activePort].frameData : prevSameSer.frameData;
           const multiFrameMap1 = !!imageAddedSeries[state.activePort].multiFrameMap ? imageAddedSeries[state.activePort].multiFrameMap : prevSameSer.multiFrameMap;
           // const imgs = fmData1[action.payload.ann];
-          const imgs = fmData1[action.payload.ann];
+          const imgs = fmData1[aimToJump];
           console.log("%%%%%%%% imgs", fmData1, imgs);
           const imgArr = imgs ? imgs[0].split('/frames/') : [];
           jumpArr1 = imgArr.length > 0 ? [parseInt(multiFrameMap1[imgArr[0]]), parseInt(imgArr[1]) - 1] : [];
@@ -513,6 +517,7 @@ const asyncReducer = (state = initialState, action) => {
           }
         }
 
+        console.log('reducer- LOAD_SERIE_SUCCESS', imageAddedSeries);
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
@@ -743,6 +748,7 @@ const asyncReducer = (state = initialState, action) => {
       //     patientLoadingError: false
       //   };
       case ADD_TO_GRID:
+        console.log(" ----> action", action);
         const seriesInfo = { ...action.reference };
         const { projectMap } = state;
         let sameSerI = -1;
@@ -802,6 +808,8 @@ const asyncReducer = (state = initialState, action) => {
 
         }
 
+        console.log(' ====>newOpenSeries', newOpenSeries);
+        console.log(' ====>newOpenSeriesAddtition', newOpenSeriesAddtition);
         const newActivePort = arePortsOccupied ? state.activePort : newOpenSeries.length - 1;
         return {
           ...state,
@@ -859,7 +867,7 @@ const asyncReducer = (state = initialState, action) => {
         let updatedOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
         updatedGrid[index].aimID = aimID;
         updatedOpenSeriesAddition[index].aimID = aimID;
-
+        console.log('reducer- JUMP_TO_AIM', aimID);
         // return { ...state, openSeries: updatedGrid, aimsList: {...state.aimsList} };
         return Object.assign({}, state, {
           activePort: index,
@@ -969,6 +977,7 @@ const asyncReducer = (state = initialState, action) => {
           }
           newOpenSeriesAddition[serieToUpdateIndex] = updatedSerie;
         }
+        console.log('reducer- AIM_DELETE', newOpenSeriesAddition);
         return { ...state, openSeriesAddition: newOpenSeriesAddition, otherSeriesAimsList: deepOther };
       }
       default:
