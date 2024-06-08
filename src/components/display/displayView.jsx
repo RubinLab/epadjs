@@ -339,12 +339,15 @@ class DisplayView extends Component {
 
     // TODO: check if loading/true-false control is required for the first condition
 
-    const active = seriesAddition[activePort];
-    const prevActive = prevSeriesAddition[activePort];
+    const active = !!seriesAddition[activePort];
+    const prevActive = !!prevSeriesAddition[activePort];
     const aimIDChanged = active && prevActive ? seriesAddition[activePort].aimID !== prevSeriesAddition[activePort].aimID : false;
-    const sameSeries = active && prevActive ? seriesAddition[activePort].seriesUID === prevSeriesAddition[activePort].seriesUID : false;
-    
+    const sameSeries = active && prevActive ? seriesAddition[activePort].seriesUID === prevSeriesAddition[activePort].seriesUID : false;    
     const refreshPage = sameSeries && aimIDChanged && active.multiFrameData ? this.forceRefreshForMF() : false;
+    const prevActiveFrameDataMissing = prevActive && !(!!prevProps.seriesAddition[activePort].frameData);
+    const frameDataFilled = !!seriesAddition[activePort].frameData;
+    // const seriesReplaced = prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID;
+    const seriesReplaced = (!!prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID);
 
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
@@ -367,14 +370,14 @@ class DisplayView extends Component {
       //   (prevProps.series.length !== this.props.series.length &&
       //     this.props.loading === false)
       // ) {
-    } else if (prevProps.series.length !== series.length || refreshPage || prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) {
+    } else if (prevProps.series.length !== series.length || refreshPage || seriesReplaced || (prevActiveFrameDataMissing && frameDataFilled)) {
       await this.setState({ isLoading: true });
       this.getViewports();
       let mfIndex = null;
       let frame = null;
       const seriesAdded = !!(!prevProps.seriesAddition[activePort] && seriesAddition[activePort]);
-      const seriesReplaced = (!!prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID);
-      if ( !!active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex) {
+      console.log(" +++++++> seriesReplaced", seriesReplaced, frame);
+      if ( active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex) {
         mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
         frame = 0;
       }
@@ -450,7 +453,8 @@ class DisplayView extends Component {
       this.setState({ activeTool });
   };
 
-  jumpToAims = () => {
+  jumpToAims = (src) => {
+    console.log(" !!!!!!", src);
     const { series, seriesAddition } = this.props;
     const newData = [...this.state.data]; // this should be deepclone
     series.forEach((serie, i) => {
@@ -485,7 +489,8 @@ class DisplayView extends Component {
   setSubComponentHeights = (e) => {
     try {
       if (e && e.detail) var { isMaximize } = e.detail;
-      const navbar = document.getElementsByClassName("navbar")[0].clientHeight;
+      let navbar = document.getElementsByClassName("navbar");
+      navbar = navbar && navbar[0] ? navbar[0].clientHeight : 0;
       let toolbarHeight =
         document.getElementsByClassName("toolbar")[0].clientHeight;
       const windowInner = window.innerHeight;
@@ -744,6 +749,19 @@ class DisplayView extends Component {
         let fmNo = 0;
         if (activePort === i && frameNo) fmNo = frameNo;
         if (series[i].imageID && !frameNo) fmNo = parseInt(series[i].imageID.split('/frames/')[1]) - 1;
+        if (!series[i].imageID && !frameNo) {
+          console.log(" =====> in last if", series[i].aimID);
+          if (series[i].aimID && seriesAddition[i].frameData) {
+            const imgIDArr = seriesAddition[i].frameData[series[i].aimID];
+            console.log(" ++++++++++++++ imageAnnotations",  seriesAddition[i].frameData);
+            console.log(" ++++++++++++++ imgID", imgIDArr);
+            if (imgIDArr && imgIDArr.length > 0) {
+              const imagID = imgIDArr[0];
+              fmNo = parseInt(imagID.split('/frames/')[1]) - 1;
+            }
+          } 
+        }
+
 
         const { projectID, patientID, studyUID, seriesUID } = series[i];
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
@@ -757,6 +775,7 @@ class DisplayView extends Component {
         // at the end of the day we shouldn't need isMFPort control because we need to get the only changing port. in jumps and dropdown changes
         // check this -> ((isLegitMFIndex && isMFPort ) && !dataExistsInState)
 
+        /*
         console.log(" ++++++++++++++++++++++++++++ iterator", i);
         console.log(JSON.stringify(dataIndexMap));
         console.log(" ----> portno", parseInt(dataIndexMap[indexKey]));
@@ -764,6 +783,9 @@ class DisplayView extends Component {
         console.log(" ===> mfIndexFinal", mfIndexFinal);
         console.log(" ===> fmNo", fmNo);
         console.log(" ++++++++++++++++++++++++++++ ");
+        */
+       
+        console.log(" ===> fmNo", fmNo);
 
         // if (!dataExistsInState || ((isLegitMFIndex && isMFPort ) && !dataExistsInState) || force) { 
         if (!dataExistsInState || force) { 
@@ -784,6 +806,7 @@ class DisplayView extends Component {
       }
 
       if (promises.length > 0) {
+        console.log('!!!!!!!!!! if');
         Promise.all(promises).then((res) => {
           const key =
           multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
@@ -824,8 +847,8 @@ class DisplayView extends Component {
               dataIndexMap: mergedMaps,
             },
             () => {
-              this.jumpToAims();
-              this.renderAims();
+              this.jumpToAims(' getdata 1');
+              this.renderAims(false, ' getdata 1');
             }
           );
           // if teaching and aim is a study aim
@@ -839,6 +862,7 @@ class DisplayView extends Component {
             }
         });
       } else {
+        console.log('!!!!!!!!!! else');
         for (let i = 0; i < newData.length; i++) 
           if (!newData[i]) newData[i] = this.state.data[i];
 
@@ -848,8 +872,8 @@ class DisplayView extends Component {
             data: newData
           },
           () => {
-            this.jumpToAims();
-            this.renderAims();
+            this.jumpToAims(' get data else');
+            this.renderAims(' get data else');
           }
         );
       }
@@ -908,7 +932,8 @@ class DisplayView extends Component {
     cornerstoneTools.store.modules.segmentation.state.series = {};
   };
 
-  renderAims = (notShowAimEditor = false) => {
+  renderAims = (notShowAimEditor = false, src) => {
+    console.log(" !!!!!! src", src);
     const { seriesAddition } = this.props;
     this.setState({
       activeLabelMapIndex: 0,
@@ -1451,7 +1476,7 @@ class DisplayView extends Component {
   hideShow = (current) => {
     const { hiding, containerHeight } = this.state;
     if (this.props.activePort !== current) {
-      this.setActive(current);
+      this.setActive(current, ' hideShow');
       return;
     }
     // const element = cornerstone.getEnabledElements()[practivePort];
@@ -1691,8 +1716,9 @@ class DisplayView extends Component {
     this.setState({ showAimEditor: true, selectedAim: undefined });
   };
 
-  setActive = async (i) => {
+  setActive = async (i, fm) => {
     const { activePort, series } = this.props;
+    console.log(" 00000 setActive", fm, i, activePort);
     if (activePort !== i) {
       if (this.state.showAimEditor) {
         // check if the series belongs to the same study
@@ -1708,6 +1734,8 @@ class DisplayView extends Component {
       this.setState({ activePort: i });
       await this.props.dispatch(changeActivePort(i));
       const { imageIds, currentImageIdIndex } = this.state.data[i].stack;
+      console.log(" ++++> imageIds", imageIds);
+      console.log(" =====> currentImageIdIndex", currentImageIdIndex);
       const imgToParse = imageIds[currentImageIdIndex] || imageIds[0];
       const imageId = this.parseImgeId(imgToParse);
       await this.props.dispatch(updateImageId(imageId));
@@ -2061,6 +2089,7 @@ class DisplayView extends Component {
 
   refreshAllViewports = () => {
     const elements = cornerstone.getEnabledElements();
+    console.log(" -----> refreshAllViewports", elements);
     if (elements) {
       elements.map(({ element }) => {
         try {
@@ -2286,7 +2315,7 @@ class DisplayView extends Component {
     });
 
     // use clearMultiFrameAimJumpFlags to replace clear-active-aimid
-    this.props.dispatch(clearMultiFrameAimJumpFlags()); // this data is rendered so clear the aim Id in props
+    this.props.dispatch(clearMultiFrameAimJumpFlags(' ---> closeAimEditor')); // this data is rendered so clear the aim Id in props
     this.clearSculptState();
     this.clearSmartBrushState();
     this.renderAims(true);
@@ -2430,6 +2459,8 @@ class DisplayView extends Component {
   };
 
   newImage = (event, index) => {
+    console.log('$$$$$$$$$$$$$$$$$$$$$$$')
+    console.log(event);
     let { imageId } = event.detail.image;
     imageId = this.parseImgeId(imageId); //strip from cs imagePath to imageId
     const { activePort } = this.props;
@@ -2448,6 +2479,7 @@ class DisplayView extends Component {
       // this.setState({ data: tempData });
       // // dispatch to write the newImageId to store
       event.detail.viewportIndex = index;
+      console.log(" 000000000 updateImageId newImage", imageId,  event.detail.viewportIndex)
       this.props.dispatch(updateImageId(imageId, event.detail.viewportIndex));
       const yaw = event.detail;
       window.dispatchEvent(new CustomEvent("newImage", { detail: yaw }));
@@ -2460,7 +2492,7 @@ class DisplayView extends Component {
 
   handleClose = (i) => {
     if (this.props.activePort !== i) {
-      this.setActive(i);
+      this.setActive(i, 'handleclose');
       return;
     }
     this.closeViewport(i);
@@ -2504,12 +2536,12 @@ class DisplayView extends Component {
       10
     );
     this.setState({ data: newData });
-    this.props.dispatch(clearMultiFrameAimJumpFlags());
+    this.props.dispatch(clearMultiFrameAimJumpFlags(' -----> jumpToImage'));
   };
 
   handleJumpChange = (i, event) => {
     if (this.props.activePort !== i) {
-      this.setActive(i);
+      this.setActive(i, 'handleJumpChange');
       return;
     }
     let imageIndex = event.target.value - 1;
@@ -2586,7 +2618,7 @@ class DisplayView extends Component {
                     height: this.state.height,
                     display: "inline-block",
                   }}
-                  onClick={() => this.setActive(i)}
+                  onClick={() => this.setActive(i, ' on click 1')}
                 >
                   <div className={"row"}>
                     <div className={"column left"}>
@@ -2705,7 +2737,7 @@ class DisplayView extends Component {
                       },
                     ]}
                     setViewportActive={() => {
-                      this.setActive(i);
+                      this.setActive(i, ' setViewportActive');
                     }}
                     isStackPrefetchEnabled={true}
                     style={{ height: "calc(100% - 26px)" }}
