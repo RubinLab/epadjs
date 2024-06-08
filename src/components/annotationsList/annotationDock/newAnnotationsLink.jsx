@@ -1,16 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import {
-  alertViewPortFull,
   getSingleSerie,
   clearSelection,
-  selectAnnotation,
   changeActivePort,
   addToGrid,
-  getWholeData,
-  updatePatient,
   jumpToAim,
-  updateImageId,
 } from "../action";
 import "../annotationsList.css";
 
