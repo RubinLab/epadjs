@@ -214,7 +214,7 @@ const asyncReducer = (state = initialState, action) => {
         }
 
         seriesAddition[portInx].hasMultiframe = hasMultiframe;
-        console.log('----> reducer 1', multiframeIndex);
+        // console.log('----> reducer 1', multiframeIndex);
         seriesAddition[portInx].multiFrameIndex = multiframeIndex;
         seriesAddition[portInx].multiFrameMap = multiFrameMap;
         const newState = { ...state };
@@ -430,8 +430,8 @@ const asyncReducer = (state = initialState, action) => {
         const viewPortStatus = !state.showGridFullAlert;
         return { ...state, showGridFullAlert: viewPortStatus };
       case LOAD_SERIE_SUCCESS:
-        console.log('#############################');
-        console.log(action.payload);
+        // console.log('#############################');
+        // console.log(action.payload);
         let imageAddedSeries = _.cloneDeep(state.openSeriesAddition);
         let annCalc = Object.keys(action.payload.imageData);
         const { projectID: pidFromRef, studyUID: stUIDFromRef, seriesUID: serUIDFromRef } = action.payload.ref;
@@ -478,10 +478,10 @@ const asyncReducer = (state = initialState, action) => {
           const multiFrameMap1 = !!imageAddedSeries[state.activePort].multiFrameMap ? imageAddedSeries[state.activePort].multiFrameMap : prevSameSer.multiFrameMap;
           // const imgs = fmData1[action.payload.ann];
           const imgs = fmData1[aimToJump];
-          console.log("%%%%%%%% imgs", fmData1, imgs);
+          // console.log("%%%%%%%% imgs", fmData1, imgs);
           const imgArr = imgs ? imgs[0].split('/frames/') : [];
           jumpArr1 = imgArr.length > 0 ? [parseInt(multiFrameMap1[imgArr[0]]), parseInt(imgArr[1]) - 1] : [];
-          console.log('----> reducer 2', parseInt(multiFrameMap1[imgArr[0]]));
+          // console.log('----> reducer 2', parseInt(multiFrameMap1[imgArr[0]]));
           imageAddedSeries[state.activePort].multiFrameIndex = parseInt(multiFrameMap1[imgArr[0]]);
         }
         const newDataKeys = Object.keys(action.payload.aimsData);
@@ -748,7 +748,7 @@ const asyncReducer = (state = initialState, action) => {
       //     patientLoadingError: false
       //   };
       case ADD_TO_GRID:
-        console.log(" ----> action", action);
+        // console.log(" ----> action", action);
         const seriesInfo = { ...action.reference };
         const { projectMap } = state;
         let sameSerI = -1;
@@ -798,7 +798,7 @@ const asyncReducer = (state = initialState, action) => {
               const img = seriesInfo.frameData[seriesInfo.aimID][0].split('/frames/')[0];
               const mfIndexAdded = seriesInfo.multiFrameMap[img];
               if (typeof parseInt(mfIndexAdded) === "number" && !isNaN(parseInt(mfIndexAdded))) {
-                console.log(' ----> reducer 3', parseInt(mfIndexAdded))
+                // console.log(' ----> reducer 3', parseInt(mfIndexAdded))
                 seriesInfo.multiFrameIndex = parseInt(mfIndexAdded);
               }
             }
@@ -808,8 +808,8 @@ const asyncReducer = (state = initialState, action) => {
 
         }
 
-        console.log(' ====>newOpenSeries', newOpenSeries);
-        console.log(' ====>newOpenSeriesAddtition', newOpenSeriesAddtition);
+        // console.log(' ====>newOpenSeries', newOpenSeries);
+        // console.log(' ====>newOpenSeriesAddtition', newOpenSeriesAddtition);
         const newActivePort = arePortsOccupied ? state.activePort : newOpenSeries.length - 1;
         return {
           ...state,
@@ -827,7 +827,7 @@ const asyncReducer = (state = initialState, action) => {
         const replacedOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
         replacedOpenSeriesAddition[state.activePort].seriesUID = action.payload.seriesUID;
         replacedOpenSeriesAddition[state.activePort].examType = action.payload.examType;
-        console.log('----> reducer 4', action.payload.multiFrameIndex);
+        // console.log('----> reducer 4', action.payload.multiFrameIndex);
         replacedOpenSeriesAddition[state.activePort].multiFrameIndex = action.payload.multiFrameIndex;
         return {
           ...state,
