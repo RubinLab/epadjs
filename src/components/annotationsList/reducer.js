@@ -97,6 +97,13 @@ const initialState = {
   multipageAimSelection: {}
 };
 
+const seriesUIDCounter = (arr) => {
+  const uidCountMap = arr.reduce((all, el, i) => {
+    all[el.seriesUID] = all[el.seriesUID] ? all[el.seriesUID] + 1 : 1;
+    return all;
+  }, {});
+  return uidCountMap;
+}
 const asyncReducer = (state = initialState, action) => {
   try {
     let aimRefs = {};
@@ -367,8 +374,12 @@ const asyncReducer = (state = initialState, action) => {
         let delPatientID = state.openSeries[state.activePort].patientID || state.openSeries[state.activePort].subjectID;
         let delOpenStudiesAddition = _.cloneDeep(state.openSeriesAddition);
         delOpenStudiesAddition.splice(state.activePort, 1);
+        const serUIDMap = seriesUIDCounter(state.openSeriesAddition);
         const delAims = { ...state.aimsList };
-        delete delAims[delSeriesUID];
+
+        if (serUIDMap[delSeriesUID] === 1) {
+          delete delAims[delSeriesUID];
+        }
         let delGrid = state.openSeries.slice(0, state.activePort);
         let delSubpath = state.openSeries.slice(0, state.activePort);
         delGrid = delGrid.concat(state.openSeries.slice(state.activePort + 1));
