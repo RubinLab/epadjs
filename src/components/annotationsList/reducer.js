@@ -748,15 +748,21 @@ const asyncReducer = (state = initialState, action) => {
       //     patientLoadingError: false
       //   };
       case ADD_TO_GRID:
-        // console.log(" ----> action", action);
+        console.log(" ****** action", action);
         const seriesInfo = { ...action.reference };
         const { projectMap } = state;
         let sameSerI = -1;
-        for (let i = 0; i < state.openSeriesAddition.length; i++)
+        for (let i = 0; i < state.openSeriesAddition.length; i++) {
+          console.log(' %%%%%%% seriesuid', state.openSeriesAddition[i].seriesUID, seriesInfo.seriesUID);
           if (state.openSeriesAddition[i].seriesUID === seriesInfo.seriesUID) {
-            if ((state.openSeriesAddition[i].multiFrameIndex || seriesInfo.multiFrameIndex) && state.openSeriesAddition[i].multiFrameIndex === seriesInfo.multiFrameIndex) sameSerI = i
+            // if ((state.openSeriesAddition[i].multiFrameIndex || seriesInfo.multiFrameIndex) && state.openSeriesAddition[i].multiFrameIndex === seriesInfo.multiFrameIndex) sameSerI = i
+            // if (state.openSeriesAddition[i].multiFrameIndex === seriesInfo.multiFrameIndex && seriesInfo.multiFrameIndex !== undefined) {
+            sameSerI = i;
+            break;
+            // }
           };
-        const indexToCopyFm = action.port ? action.port : sameSerI;
+        }
+        // const indexToCopyFm = action.port ? action.port : sameSerI;
 
         if (projectMap[seriesInfo.projectID]) {
           seriesInfo.projectName = projectMap[seriesInfo.projectID].projectName;
@@ -770,16 +776,20 @@ const asyncReducer = (state = initialState, action) => {
         let newOpenSeries = [...state.openSeries];
         let newOpenSeriesAddtition = _.cloneDeep(state.openSeriesAddition);
 
-        const existingUID = newOpenSeriesAddtition[indexToCopyFm] ? newOpenSeriesAddtition[indexToCopyFm].seriesUID : ''
+        const existingUID = sameSerI > -1 ? newOpenSeriesAddtition[sameSerI].seriesUID : ''
         const newUID = seriesInfo.seriesUID;
         const sameSeries = existingUID && existingUID === newUID;
 
         let copyMFMap, copyFmData, copyImageAnnotations;
         if (sameSeries) {
-          copyMFMap = newOpenSeriesAddtition[indexToCopyFm].multiFrameMap;
-          copyFmData = newOpenSeriesAddtition[indexToCopyFm].frameData;
-          copyImageAnnotations = newOpenSeriesAddtition[indexToCopyFm].imageAnnotations;
+          copyMFMap = newOpenSeriesAddtition[sameSerI].multiFrameMap;
+          copyFmData = newOpenSeriesAddtition[sameSerI].frameData;
+          copyImageAnnotations = newOpenSeriesAddtition[sameSerI].imageAnnotations;
         }
+
+        console.log(' %%%%%%%% sameSerI', sameSerI);
+        console.log(' %%%%%%%% arePortsOccupied', arePortsOccupied);
+        console.log(' %%%%%%%% sameSeries', sameSeries);
 
         if (arePortsOccupied) {
           newOpenSeries[action.port] = seriesInfo;

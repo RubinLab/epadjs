@@ -455,7 +455,7 @@ class DisplayView extends Component {
   };
 
   jumpToAims = (src) => {
-    // console.log(" !!!!!!", src);
+    console.log(" !!!!!! jumpToAims", src);
     const { series, seriesAddition } = this.props;
     const newData = [...this.state.data]; // this should be deepclone
     series.forEach((serie, i) => {
@@ -820,19 +820,22 @@ class DisplayView extends Component {
 
           newData.forEach((el, inx) => {
             let imgIndex = fmNo ? fmNo : 0;
+            console.log(" @@@@@@@@@ initial", imgIndex);
             if (series[inx].imageID) {
               if (seriesAddition[inx].hasMultiframe && seriesAddition[inx].multiFrameIndex) {
                 imgIndex = parseInt(series[inx].imageID.split('/frames/')[1]) - 1;
               } else {
               for (let k = 0; k < el.stack.imageIds.length; k++) {
                 const partURL = el.stack.imageIds[k].split('/instances/')[1];
-                if (partURL.includes(series[inx].imageID)) {
+                // if (partURL.includes(series[inx].imageID)) {
+                if (el.stack.imageIds[k].includes(series[inx].imageID)) {
                   imgIndex = k;
                   break;
                   }
                 }
               }
             }
+            console.log(" @@@@@@@@@ after if", imgIndex);
             el.stack.currentImageIdIndex = imgIndex;
           });
 
@@ -936,7 +939,7 @@ class DisplayView extends Component {
   };
 
   renderAims = (notShowAimEditor = false, src) => {
-    // console.log(" !!!!!! src", src);
+    console.log(" !!!!!! renderAims", src);
     const { seriesAddition } = this.props;
     this.setState({
       activeLabelMapIndex: 0,
