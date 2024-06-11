@@ -10,12 +10,13 @@ export const DISP_MODALITIES = [
   "OT",
   "XA",
   "OCT",
-  "NM"
+  "NM",
+  "PX"
 ];
 
-export const COMP_MODALITIES = {"rid10341":"PET-CT", "rid10342":"PET-MR", "rid49581":"US-RF"};
+export const COMP_MODALITIES = { "rid10341": "PET-CT", "rid10342": "PET-MR", "rid49581": "US-RF" };
 
-export const COMP_MODALITY_VALS = {"PET-CT":"RID10341", "PET-MR":"RID10342", "US-RF":"RID49581"};
+export const COMP_MODALITY_VALS = { "PET-CT": "RID10341", "PET-MR": "RID10342", "US-RF": "RID49581" };
 
 export const formatDates = (timeStamp) => {
   //split it by space
