@@ -364,7 +364,7 @@ const asyncReducer = (state = initialState, action) => {
         return { ...state, openSeries: aimIDClearedOpenSeries, openSeriesAddition: aimIDClearedOpenSeriesAddition };
       case UPDATE_IMAGEID:
         let openSeriesToUpdate = _.cloneDeep(state.openSeries);
-        const port = action.port || state.activePort;
+        const port = typeof action.port === 'number' ? action.port : state.activePort;
         openSeriesToUpdate[port].imageID = action.imageID;
         return { ...state, openSeries: openSeriesToUpdate };
       case CLOSE_SERIE: // tested
@@ -759,12 +759,12 @@ const asyncReducer = (state = initialState, action) => {
       //     patientLoadingError: false
       //   };
       case ADD_TO_GRID:
-        console.log(" ****** action", action);
+        // console.log(" ****** action", action);
         const seriesInfo = { ...action.reference };
         const { projectMap } = state;
         let sameSerI = -1;
         for (let i = 0; i < state.openSeriesAddition.length; i++) {
-          console.log(' %%%%%%% seriesuid', state.openSeriesAddition[i].seriesUID, seriesInfo.seriesUID);
+          // console.log(' %%%%%%% seriesuid', state.openSeriesAddition[i].seriesUID, seriesInfo.seriesUID);
           if (state.openSeriesAddition[i].seriesUID === seriesInfo.seriesUID) {
             // if ((state.openSeriesAddition[i].multiFrameIndex || seriesInfo.multiFrameIndex) && state.openSeriesAddition[i].multiFrameIndex === seriesInfo.multiFrameIndex) sameSerI = i
             // if (state.openSeriesAddition[i].multiFrameIndex === seriesInfo.multiFrameIndex && seriesInfo.multiFrameIndex !== undefined) {
@@ -798,9 +798,9 @@ const asyncReducer = (state = initialState, action) => {
           copyImageAnnotations = newOpenSeriesAddtition[sameSerI].imageAnnotations;
         }
 
-        console.log(' %%%%%%%% sameSerI', sameSerI);
-        console.log(' %%%%%%%% arePortsOccupied', arePortsOccupied);
-        console.log(' %%%%%%%% sameSeries', sameSeries);
+        // console.log(' %%%%%%%% sameSerI', sameSerI);
+        // console.log(' %%%%%%%% arePortsOccupied', arePortsOccupied);
+        // console.log(' %%%%%%%% sameSeries', sameSeries);
 
         if (arePortsOccupied) {
           newOpenSeries[action.port] = seriesInfo;

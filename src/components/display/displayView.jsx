@@ -359,7 +359,7 @@ class DisplayView extends Component {
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      console.log(" ------> multiFrameAimJumpData", multiFrameAimJumpData);
+      // console.log(" ------> multiFrameAimJumpData", multiFrameAimJumpData);
       this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], `didupdate 1`);
       this.formInvertMap();
       this.props.dispatch(clearMultiFrameAimJumpFlags());
@@ -455,7 +455,7 @@ class DisplayView extends Component {
   };
 
   jumpToAims = (src) => {
-    console.log(" !!!!!! jumpToAims", src);
+    // console.log(" !!!!!! jumpToAims", src);
     const { series, seriesAddition } = this.props;
     const newData = [...this.state.data]; // this should be deepclone
     series.forEach((serie, i) => {
@@ -755,15 +755,13 @@ class DisplayView extends Component {
           if (series[i].aimID && seriesAddition[i].frameData) {
             const imgIDArr = seriesAddition[i].frameData[series[i].aimID];
             // console.log(" ++++++++++++++ imageAnnotations",  seriesAddition[i].frameData);
-            console.log(" ++++++++++++++ imgID", imgIDArr);
+            // console.log(" ++++++++++++++ imgID", imgIDArr);
             if (imgIDArr && imgIDArr.length > 0) {
               const imagID = imgIDArr[0];
               fmNo = parseInt(imagID.split('/frames/')[1]) - 1;
             }
           } 
         }
-
-        console.log(" ++++++>", fmNo);
 
         const { projectID, patientID, studyUID, seriesUID } = series[i];
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
@@ -805,10 +803,11 @@ class DisplayView extends Component {
           const index = parseInt(dataIndexMap[indexKey]);
           newData[i] = { ...this.state.data[index] };
         }
+        fmNo = 0;
       }
 
       if (promises.length > 0) {
-        console.log('!!!!!!!!!! if');
+        // console.log('!!!!!!!!!! if');
         Promise.all(promises).then((res) => {
           const key =
           multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
@@ -820,7 +819,7 @@ class DisplayView extends Component {
 
           newData.forEach((el, inx) => {
             let imgIndex = fmNo ? fmNo : 0;
-            console.log(" @@@@@@@@@ initial", imgIndex);
+            // console.log(" @@@@@@@@@ initial", imgIndex);
             if (series[inx].imageID) {
               if (seriesAddition[inx].hasMultiframe && seriesAddition[inx].multiFrameIndex) {
                 imgIndex = parseInt(series[inx].imageID.split('/frames/')[1]) - 1;
@@ -835,7 +834,7 @@ class DisplayView extends Component {
                 }
               }
             }
-            console.log(" @@@@@@@@@ after if", imgIndex);
+            // console.log(" @@@@@@@@@ after if", imgIndex);
             el.stack.currentImageIdIndex = imgIndex;
           });
 
@@ -868,7 +867,7 @@ class DisplayView extends Component {
             }
         });
       } else {
-        console.log('!!!!!!!!!! else');
+        // console.log('!!!!!!!!!! else');
         for (let i = 0; i < newData.length; i++) 
           if (!newData[i]) newData[i] = this.state.data[i];
 
@@ -879,7 +878,7 @@ class DisplayView extends Component {
           },
           () => {
             this.jumpToAims(' get data else');
-            this.renderAims(' get data else');
+            this.renderAims(false, ' get data else');
           }
         );
       }
@@ -939,7 +938,7 @@ class DisplayView extends Component {
   };
 
   renderAims = (notShowAimEditor = false, src) => {
-    console.log(" !!!!!! renderAims", src);
+    // console.log(" !!!!!! renderAims", src);
     const { seriesAddition } = this.props;
     this.setState({
       activeLabelMapIndex: 0,
@@ -977,17 +976,22 @@ class DisplayView extends Component {
     // create the same data shape for studySeries
     // update the reducer with the new data
     const studySeries = arr.reduce((all, item) => {
+      // console.log(' ====> series[activePort]', series[activePort]);
+      let seriesDescription, examType, numberOfImages, numberOfAnnotations, seriesNo, significanceOrder;
+      if (series[activePort]) {
+        ({ seriesDescription, examType, numberOfImages, numberOfAnnotations, seriesNo, significanceOrder } = series[activePort]);
+      }
       const obj = {
         projectID: item[0].projectID,
         patientID: item[0].patientID,
         studyUID: item[0].studyUID,
         seriesUID: item[0].seriesUID,
-        seriesDescription: series[activePort].seriesDescription,
-        examType: series[activePort].examType,
-        numberOfImages: series[activePort].numberOfImages,
-        numberOfAnnotations: series[activePort].numberOfAnnotations,
-        seriesNo: series[activePort].seriesNo,
-        significanceOrder: series[activePort].significanceOrder,
+        seriesDescription: seriesDescription,
+        examType: examType,
+        numberOfImages: numberOfImages,
+        numberOfAnnotations: numberOfAnnotations,
+        seriesNo: seriesNo,
+        significanceOrder: significanceOrder,
         multiFrameImage: item[0].multiFrameImage,
         numberOfFrames: item[0].numberOfFrames,
       };
@@ -2324,7 +2328,7 @@ class DisplayView extends Component {
     this.props.dispatch(clearMultiFrameAimJumpFlags(' ---> closeAimEditor')); // this data is rendered so clear the aim Id in props
     this.clearSculptState();
     this.clearSmartBrushState();
-    this.renderAims(true);
+    this.renderAims(true, 'close aim editor');
     this.handleActiveTool();
     return 1;
   };
@@ -2423,8 +2427,8 @@ class DisplayView extends Component {
       this.props.dispatch(closeSerie());
       this.deleteViewportImageStatus();
       this.setState({ data: newData, dataIndexMap: newDataIndexMap });
-      // this.jumpToAims();
-      // this.renderAims();
+      this.jumpToAims(" close viewport - jumpToAims");
+      this.renderAims(false, " close viewport - renderaimr");
       // this.props.onSwitchView("search");
     } catch (err) {
       console.error(err);
@@ -2465,8 +2469,6 @@ class DisplayView extends Component {
   };
 
   newImage = (event, index) => {
-    // console.log('$$$$$$$$$$$$$$$$$$$$$$$')
-    // console.log(event);
     let { imageId } = event.detail.image;
     imageId = this.parseImgeId(imageId); //strip from cs imagePath to imageId
     const { activePort } = this.props;
@@ -2739,7 +2741,7 @@ class DisplayView extends Component {
                       {
                         target: "element",
                         eventName: "cornerstonenewimage",
-                        handler: (e) => this.newImage(e, i),
+                        handler: (e) => this.newImage(e, i)
                       },
                     ]}
                     setViewportActive={() => {

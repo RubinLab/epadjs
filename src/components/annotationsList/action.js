@@ -94,7 +94,7 @@ export const setSeriesData = (projectID, patientID, studyUID, seriesData, filled
 }
 
 export const clearMultiFrameAimJumpFlags = (src) => {
-  console.log('++++++++++++++++', src);
+  // console.log('++++++++++++++++', src);
   return { type: CLEAR_MULTIFRAME_AIM_JUMP };
 }
 

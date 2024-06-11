@@ -167,14 +167,11 @@ const SeriesDropDown = (props) => {
     const UIDArr = e.split("_");
     console.log(" ----> UIDArr", UIDArr);
     const seriesUIDFmEvent = UIDArr[0];
-    const multiFrameIndex = UIDArr[1] ? parseInt(UIDArr[1]) : null;
-    const { seriesUID } = props.openSeries[props.activePort];
+    const multiFrameIndex = parseInt(UIDArr[1]) ? parseInt(UIDArr[1]) : null;
 
     // if (multiFrameIndex === undefined) {
     const serie = seriesList.find((element) => multiFrameIndex ? element.seriesUID === seriesUIDFmEvent && multiFrameIndex === element.multiFrameIndex : element.seriesUID === seriesUIDFmEvent);
-    console.log(" %%%%%%%%% multiFrameIndex", multiFrameIndex);
-    if ( multiFrameIndex ) serie.multiFrameIndex = multiFrameIndex;
-    else serie.multiFrameIndex = null;
+    serie.multiFrameIndex = multiFrameIndex;
 
     if (props.isAimEditorShowing) {
         // if (!props.onCloseAimEditor(true))
@@ -186,7 +183,6 @@ const SeriesDropDown = (props) => {
     if (!isOpen) { 
       if ( props.openSeriesAddition.length < maxPort ) {
         const { list }  = findSeriesListFmStore(); 
-        console.log(" ---> serie", serie);
         props.dispatch(addToGrid(serie));
         props.dispatch(getSingleSerie(serie, null, null, list));   
       } else {

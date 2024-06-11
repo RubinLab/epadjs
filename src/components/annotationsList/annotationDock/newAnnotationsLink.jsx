@@ -78,6 +78,7 @@ const annotationsLink = (props) => {
     let isGridFull = openSeries.length === maxPort;
     const { isOpen, index } = checkIfSerieOpen(selected.seriesUID, selected.imgIDs);
 
+    console.log('******** isOpen', isOpen);
     if (isOpen) {
       const imageUID = Object.keys(selected.imgIDs);
       const imgIDArr = imageUID[0].split("/frames/");
