@@ -647,3 +647,7 @@ body{
 .add-subject__mbody, .add-study__mbody, .add-series__mbody {
   background: #444;
 }
+
+.csv-link {
+  color: #fdd800
+}

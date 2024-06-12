@@ -566,7 +566,8 @@ const Report = props => {
                   {...{
                     data: data.waterfallExport,
                     headers: data.waterfallHeaders,
-                    filename: 'waterfall.csv'
+                    filename: 'waterfall.csv',
+                    className: 'csv-link'
                   }}
                 >
                   Export to CSV
