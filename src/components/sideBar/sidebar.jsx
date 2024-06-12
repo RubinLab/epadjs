@@ -129,15 +129,21 @@ class Sidebar extends Component {
   };
 
   setStateProjectData = (projects, setPid, pidTojump) => {
+    const paths = ['list', 'search', 'flex'];
     let { pathname } = this.props.location;
-    pathname = pathname.split('/').pop();
+    const pathParts = pathname.split('/');
+    pathname = pathParts.pop();
+    const view = pathParts.pop();
     this.setState({ projects });
     if (this.props.openSeries.length === 0 && setPid) {
       // check if url has a valid pid
       pathname = this.props.projectMap[pathname] ? pathname : null;
       let pid = pidTojump || pathname || projects[0].id
       this.setState({ pid, selected: pid });
-      if (mode !== 'teaching') this.props.history.push(`/list/${pid}`);
+      if (mode !== 'teaching') {
+        const prev = paths.includes(view) ? view : 'list';
+        this.props.history.push(`/${prev}/${pid}`);
+      }
       if (mode === 'teaching') this.props.history.push(`/search/${pid}`);
       this.props.getPidUpdate(pid);
     }
