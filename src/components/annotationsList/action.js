@@ -94,7 +94,6 @@ export const setSeriesData = (projectID, patientID, studyUID, seriesData, filled
 }
 
 export const clearMultiFrameAimJumpFlags = (src) => {
-  // console.log('++++++++++++++++', src);
   return { type: CLEAR_MULTIFRAME_AIM_JUMP };
 }
 
@@ -736,7 +735,6 @@ const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
 
 // action to open series
 export const getSingleSerie = (serie, annotation, wadoUrl, seriesData) => {
-  console.log(" -------------> getSingleSerie argument", serie);
   return async (dispatch, getState) => {
     try {
       await dispatch(loadAnnotations());

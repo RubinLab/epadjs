@@ -165,7 +165,6 @@ const SeriesDropDown = (props) => {
 
   const handleSelect = (e) => {
     const UIDArr = e.split("_");
-    console.log(" ----> UIDArr", UIDArr);
     const seriesUIDFmEvent = UIDArr[0];
     const multiFrameIndex = parseInt(UIDArr[1]) ? parseInt(UIDArr[1]) : null;
 

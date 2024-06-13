@@ -360,7 +360,6 @@ class DisplayView extends Component {
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      // console.log(" ------> multiFrameAimJumpData", multiFrameAimJumpData);
       this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], `didupdate 1`);
       this.formInvertMap();
       this.props.dispatch(clearMultiFrameAimJumpFlags());
@@ -378,7 +377,6 @@ class DisplayView extends Component {
       let mfIndex = null;
       let frame = null;
       const seriesAdded = !!(!prevProps.seriesAddition[activePort] && seriesAddition[activePort]);
-      // console.log(" +++++++> seriesReplaced", seriesReplaced, frame);
       if ( active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex) {
         mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
         frame = 0;
@@ -456,7 +454,6 @@ class DisplayView extends Component {
   };
 
   jumpToAims = (src) => {
-    // console.log(" !!!!!! jumpToAims", src);
     const { series, seriesAddition } = this.props;
     const newData = [...this.state.data]; // this should be deepclone
     series.forEach((serie, i) => {
@@ -752,11 +749,8 @@ class DisplayView extends Component {
         if (activePort === i && frameNo) fmNo = frameNo;
         if (series[i].imageID && !frameNo) fmNo = parseInt(series[i].imageID.split('/frames/')[1]) - 1;
         if (!series[i].imageID && (typeof frameNo !== 'number' && !isNaN(frameNo))) {
-          // console.log(" =====> in last if", series[i].aimID);
           if (series[i].aimID && seriesAddition[i].frameData) {
             const imgIDArr = seriesAddition[i].frameData[series[i].aimID];
-            // console.log(" ++++++++++++++ imageAnnotations",  seriesAddition[i].frameData);
-            // console.log(" ++++++++++++++ imgID", imgIDArr);
             if (imgIDArr && imgIDArr.length > 0) {
               const imagID = imgIDArr[0];
               fmNo = parseInt(imagID.split('/frames/')[1]) - 1;
@@ -775,19 +769,6 @@ class DisplayView extends Component {
         // ?????? ((isLegitMFIndex && isMFPort ) this passes if there is a passed multiFrameIndexData argument, it downt handle stored mfIndex
         // at the end of the day we shouldn't need isMFPort control because we need to get the only changing port. in jumps and dropdown changes
         // check this -> ((isLegitMFIndex && isMFPort ) && !dataExistsInState)
-
-        /*
-        console.log(" ++++++++++++++++++++++++++++ iterator", i);
-        console.log(JSON.stringify(dataIndexMap));
-        console.log(" ----> portno", parseInt(dataIndexMap[indexKey]));
-        console.log(" ===> dataExistsInState", dataExistsInState, indexKey);
-        console.log(" ===> mfIndexFinal", mfIndexFinal);
-        console.log(" ===> fmNo", fmNo);
-        console.log(" ++++++++++++++++++++++++++++ ");
-        */
-       
-        // console.log(" ===> fmNo", fmNo);
-
         // if (!dataExistsInState || ((isLegitMFIndex && isMFPort ) && !dataExistsInState) || force) { 
         if (!dataExistsInState || force) { 
             const promise = this.getImageStack(
@@ -808,7 +789,6 @@ class DisplayView extends Component {
       }
 
       if (promises.length > 0) {
-        // console.log('!!!!!!!!!! if');
         Promise.all(promises).then((res) => {
           const key =
           multiFrameIndex && (frameNo || frameNo === 0) && series[activePort].aimID
@@ -820,7 +800,6 @@ class DisplayView extends Component {
 
           newData.forEach((el, inx) => {
             let imgIndex = fmNo ? fmNo : 0;
-            // console.log(" @@@@@@@@@ initial", imgIndex);
             if (series[inx].imageID) {
               if (seriesAddition[inx].hasMultiframe && seriesAddition[inx].multiFrameIndex) {
                 imgIndex = parseInt(series[inx].imageID.split('/frames/')[1]) - 1;
@@ -835,7 +814,6 @@ class DisplayView extends Component {
                 }
               }
             }
-            // console.log(" @@@@@@@@@ after if", imgIndex);
             el.stack.currentImageIdIndex = imgIndex;
           });
 
@@ -868,7 +846,6 @@ class DisplayView extends Component {
             }
         });
       } else {
-        // console.log('!!!!!!!!!! else');
         for (let i = 0; i < newData.length; i++) 
           if (!newData[i]) newData[i] = this.state.data[i];
 
@@ -939,7 +916,6 @@ class DisplayView extends Component {
   };
 
   renderAims = (notShowAimEditor = false, src) => {
-    // console.log(" !!!!!! renderAims", src);
     const { seriesAddition } = this.props;
     this.setState({
       activeLabelMapIndex: 0,
@@ -977,7 +953,6 @@ class DisplayView extends Component {
     // create the same data shape for studySeries
     // update the reducer with the new data
     const studySeries = arr.reduce((all, item) => {
-      // console.log(' ====> series[activePort]', series[activePort]);
       let seriesDescription, examType, numberOfImages, numberOfAnnotations, seriesNo, significanceOrder;
       if (series[activePort]) {
         ({ seriesDescription, examType, numberOfImages, numberOfAnnotations, seriesNo, significanceOrder } = series[activePort]);
@@ -1729,7 +1704,6 @@ class DisplayView extends Component {
 
   setActive = async (i, fm) => {
     const { activePort, series } = this.props;
-    // console.log(" 00000 setActive", fm, i, activePort);
     if (activePort !== i) {
       if (this.state.showAimEditor) {
         // check if the series belongs to the same study
@@ -1745,8 +1719,6 @@ class DisplayView extends Component {
       this.setState({ activePort: i });
       await this.props.dispatch(changeActivePort(i));
       const { imageIds, currentImageIdIndex } = this.state.data[i].stack;
-      // console.log(" ++++> imageIds", imageIds);
-      // console.log(" =====> currentImageIdIndex", currentImageIdIndex);
       const imgToParse = imageIds[currentImageIdIndex] || imageIds[0];
       const imageId = this.parseImgeId(imgToParse);
       await this.props.dispatch(updateImageId(imageId));
@@ -2100,7 +2072,6 @@ class DisplayView extends Component {
 
   refreshAllViewports = () => {
     const elements = cornerstone.getEnabledElements();
-    // console.log(" -----> refreshAllViewports", elements);
     if (elements) {
       elements.map(({ element }) => {
         try {
@@ -2489,7 +2460,6 @@ class DisplayView extends Component {
       // this.setState({ data: tempData });
       // // dispatch to write the newImageId to store
       event.detail.viewportIndex = index;
-      // console.log(" 000000000 updateImageId newImage", imageId,  event.detail.viewportIndex)
       this.props.dispatch(updateImageId(imageId, event.detail.viewportIndex));
       const yaw = event.detail;
       window.dispatchEvent(new CustomEvent("newImage", { detail: yaw }));

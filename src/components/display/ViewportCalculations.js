@@ -1,7 +1,5 @@
 const getVPDimensions = (numSeries) => {
   const navbar = document.getElementsByClassName("navbar")[0].clientHeight;
-  // let navbar = document.getElementsByClassName("navbar")
-  // navbar = navbar && navbar[0] ? navbar[0].clientHeight : 0;
   let toolbarHeight =
     document.getElementsByClassName("toolbar")[0]?.clientHeight || 0;
   const windowInner = window.innerHeight;
