@@ -594,6 +594,7 @@ function AnnotationTable(props) {
   // TODOOOOOO: instead of creating the column array according to mode, mode attribute should be
   // added to columns and filtered that way
 
+  const { multipageAimSelection, searchTableIndex } = props;
   let columns = [];
   if (mode === "teaching") {
     columns = React.useMemo(
@@ -603,7 +604,7 @@ function AnnotationTable(props) {
           id: "select",
           class: "select_row",
           Cell: ({ row }) => {
-            const { multipageAimSelection, searchTableIndex } = props;
+            // const { multipageAimSelection, searchTableIndex } = props;
             const checked = !!multipageAimSelection[searchTableIndex] ? !!multipageAimSelection[searchTableIndex][row.original.aimID] : false;
             return (
               <input
