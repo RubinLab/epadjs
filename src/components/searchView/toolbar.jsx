@@ -248,7 +248,7 @@ const toolBar = props => {
       </ReactTooltip> */}
       {props.project && mode !== 'lite' && (
         <div className="searchView-toolbar__group">
-          {props.admin && (
+          {/* {props.admin && (
             <div
               className={
                 props.showTagEditor ? 'searchView-toolbar__icon' : 'hide-delete'
@@ -268,7 +268,7 @@ const toolBar = props => {
                 <span className="filter-label">Epad tag editor</span>
               </ReactTooltip>
             </div>
-          )}
+          )} */}
           <div
             className="searchView-toolbar__icon new-icon"
             onClick={props.onNew}
