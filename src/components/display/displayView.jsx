@@ -2427,7 +2427,8 @@ class DisplayView extends Component {
       }
       this.props.dispatch(closeSerie());
       this.deleteViewportImageStatus();
-      this.setState({ data: newData, dataIndexMap: newDataIndexMap });
+      const { width, height } = getVPDimensions(newData.length);
+      this.setState({ data: newData, dataIndexMap: newDataIndexMap, width, height  });
       // this.jumpToAims(" close viewport - jumpToAims");
       // this.renderAims(false, " close viewport - renderaimr");
       // this.props.onSwitchView("search");

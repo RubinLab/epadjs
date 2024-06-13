@@ -306,6 +306,7 @@ const asyncReducer = (state = initialState, action) => {
         return { ...state, otherSeriesAimsList: clonedOtherAims };
       case SUBPATH:
         const { subpath, portIndex } = action.payload;
+        console.log(" $$$$ action.payload", action.payload);
         const newSubpath = [...state.subpath];
         newSubpath[portIndex] = subpath;
         return { ...state, subpath: newSubpath };
@@ -381,7 +382,7 @@ const asyncReducer = (state = initialState, action) => {
           delete delAims[delSeriesUID];
         }
         let delGrid = state.openSeries.slice(0, state.activePort);
-        let delSubpath = state.openSeries.slice(0, state.activePort);
+        let delSubpath = state.subpath.slice(0, state.activePort);
         delGrid = delGrid.concat(state.openSeries.slice(state.activePort + 1));
         delSubpath = delSubpath.concat(state.subpath.slice(state.activePort + 1));
         let shouldStudyExist = false;
