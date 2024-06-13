@@ -347,7 +347,8 @@ class DisplayView extends Component {
     const prevActiveFrameDataMissing = prevActive && !(!!prevProps.seriesAddition[activePort].frameData);
     const frameDataFilled = !!seriesAddition[activePort].frameData;
     // const seriesReplaced = prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID;
-    const seriesReplaced = (!!prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID);
+    const sameLength = prevProps.seriesAddition.length === seriesAddition.length;
+    const seriesReplaced = (!!prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) && sameLength;
 
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
@@ -371,7 +372,7 @@ class DisplayView extends Component {
       //   (prevProps.series.length !== this.props.series.length &&
       //     this.props.loading === false)
       // ) {
-    } else if (prevProps.series.length !== series.length || refreshPage || seriesReplaced || (prevActiveFrameDataMissing && frameDataFilled)) {
+    } else if (prevProps.series.length < series.length || refreshPage || seriesReplaced || (prevActiveFrameDataMissing && frameDataFilled)) {
       await this.setState({ isLoading: true });
       this.getViewports();
       let mfIndex = null;
@@ -2427,8 +2428,8 @@ class DisplayView extends Component {
       this.props.dispatch(closeSerie());
       this.deleteViewportImageStatus();
       this.setState({ data: newData, dataIndexMap: newDataIndexMap });
-      this.jumpToAims(" close viewport - jumpToAims");
-      this.renderAims(false, " close viewport - renderaimr");
+      // this.jumpToAims(" close viewport - jumpToAims");
+      // this.renderAims(false, " close viewport - renderaimr");
       // this.props.onSwitchView("search");
     } catch (err) {
       console.error(err);
