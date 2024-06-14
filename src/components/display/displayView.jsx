@@ -339,12 +339,16 @@ class DisplayView extends Component {
 
     // TODO: check if loading/true-false control is required for the first condition
 
-    const active = seriesAddition[activePort];
-    const prevActive = prevSeriesAddition[activePort];
+    const active = !!seriesAddition[activePort];
+    const prevActive = !!prevSeriesAddition[activePort];
     const aimIDChanged = active && prevActive ? seriesAddition[activePort].aimID !== prevSeriesAddition[activePort].aimID : false;
-    const sameSeries = active && prevActive ? seriesAddition[activePort].seriesUID === prevSeriesAddition[activePort].seriesUID : false;
-    
+    const sameSeries = active && prevActive ? seriesAddition[activePort].seriesUID === prevSeriesAddition[activePort].seriesUID : false;    
     const refreshPage = sameSeries && aimIDChanged && active.multiFrameData ? this.forceRefreshForMF() : false;
+    const prevActiveFrameDataMissing = prevActive && !(!!prevProps.seriesAddition[activePort].frameData);
+    const frameDataFilled = !!seriesAddition[activePort].frameData;
+    // const seriesReplaced = prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID;
+    const sameLength = prevProps.seriesAddition.length === seriesAddition.length;
+    const seriesReplaced = (!!prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) && sameLength;
 
     if (
       prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
@@ -367,14 +371,13 @@ class DisplayView extends Component {
       //   (prevProps.series.length !== this.props.series.length &&
       //     this.props.loading === false)
       // ) {
-    } else if (prevProps.series.length !== series.length || refreshPage || prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) {
+    } else if (prevProps.series.length < series.length || refreshPage || seriesReplaced || (prevActiveFrameDataMissing && frameDataFilled)) {
       await this.setState({ isLoading: true });
       this.getViewports();
       let mfIndex = null;
       let frame = null;
       const seriesAdded = !!(!prevProps.seriesAddition[activePort] && seriesAddition[activePort]);
-      const seriesReplaced = (!!prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID);
-      if ( !!active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex) {
+      if ( active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex) {
         mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
         frame = 0;
       }
@@ -485,7 +488,8 @@ class DisplayView extends Component {
   setSubComponentHeights = (e) => {
     try {
       if (e && e.detail) var { isMaximize } = e.detail;
-      const navbar = document.getElementsByClassName("navbar")[0].clientHeight;
+      let navbar = document.getElementsByClassName("navbar");
+      navbar = navbar && navbar[0] ? navbar[0].clientHeight : 0;
       let toolbarHeight =
         document.getElementsByClassName("toolbar")[0].clientHeight;
       const windowInner = window.innerHeight;
@@ -721,8 +725,8 @@ class DisplayView extends Component {
     return mergedMap;
   }
 
-  getData(multiFrameIndexData, frameNo, fm, force) {
-    console.log(" getData fm ^^", fm, multiFrameIndexData);
+  getData(multiFrameIndexData, frameNo, fm, force) { // 
+    console.log(" getData fm ^^", fm, multiFrameIndexData, frameNo);
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
       const { series, activePort, aimList, seriesAddition } = this.props;
@@ -733,56 +737,50 @@ class DisplayView extends Component {
       const indexOrder = [];
       let multiFrameIndex = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[0]) : null;
       const multiFramePort = multiFrameIndexData ? parseInt(multiFrameIndexData.split('-')[1]) : null;
-      for (let i = 0; i < series.length; i++) {
-        // DONE/TODO: in order to not to get same stack again and again
-        // add seriesUID-PrID etc info and look it up if we need to get it
-        // [{stack -> UIDkey, ycurImgIndex, imfIds}, {}]
+      let fmNo = 0;
+      // if multiFramePort is i use the argument mfData else use stored data
+      for (let i = 0; i < series.length; i++) {        
+        const isMFPort = multiFramePort === i; 
         const storedMFIndex = seriesAddition[i].multiFrameIndex;
-        // multiFrameIndex = !multiFrameIndex && storedMFIndex ? storedMFIndex : multiFrameIndex;
-        const { projectID, patientID, studyUID, seriesUID } = series[i];
-        let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
-        if (multiFrameIndex && multiFramePort === i && !isNaN(multiFrameIndex)) {
-          indexKey = `${indexKey}-${multiFrameIndex}`
+        const mfIndexFinal = isMFPort ? multiFrameIndex : storedMFIndex;
+        const isLegitMFIndex = typeof mfIndexFinal === 'number' && !isNaN(mfIndexFinal);
+        
+        if (activePort === i && frameNo) fmNo = frameNo;
+        if (series[i].imageID && !frameNo) fmNo = parseInt(series[i].imageID.split('/frames/')[1]) - 1;
+        if (!series[i].imageID && (typeof frameNo !== 'number' && !isNaN(frameNo))) {
+          if (series[i].aimID && seriesAddition[i].frameData) {
+            const imgIDArr = seriesAddition[i].frameData[series[i].aimID];
+            if (imgIDArr && imgIDArr.length > 0) {
+              const imagID = imgIDArr[0];
+              fmNo = parseInt(imagID.split('/frames/')[1]) - 1;
+            }
+          } 
         }
 
-        // if (typeof dataIndexMap[indexKey] !== "number") {
-        if (!(parseInt(dataIndexMap[indexKey]) >= 0) || ((typeof multiFrameIndex === 'number' &&  multiFramePort === i ) && !(parseInt(dataIndexMap[indexKey]) >= 0) ) || force) {
-          let mfIndex = multiFrameIndex;
-          let fmNo = frameNo;
-          if (storedMFIndex) {
-            mfIndex = storedMFIndex;
-            fmNo = series[i].imageID ? parseInt(series[i].imageID.split('/frames/')[1]) - 1 : 0;
-          }
+        const { projectID, patientID, studyUID, seriesUID } = series[i];
+        let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
+        // if (mfIndexFinal && isMFPort && !isNaN(mfIndexFinal)) {
+        if (isLegitMFIndex) {  
+          indexKey = `${indexKey}-${mfIndexFinal}`
+        }
+        const dataExistsInState = parseInt(dataIndexMap[indexKey]) >= 0;
 
-          const promise = this.getImageStack(
-            series[i],
-            i,
-            mfIndex,
-            fmNo,
-            `${fm}`
-          );
-
-          promises.push(promise);
-          indexKeys[indexKey] = i;
-          indexOrder.push(i);
-        } else if (multiFramePort !== i && storedMFIndex) {
-          const confirmationKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}-${storedMFIndex}`
-          const currentStack = this.state.data[i] ? this.state.data[i].stack : null;
-          const currentImageIdIndex = currentStack ? currentStack.currentImageIdIndex : 0;
-          const promise = this.getImageStack(
-            series[i],
-            i,
-            storedMFIndex,
-            currentImageIdIndex, 
-            `${fm}`
-          )
-          promises.push(promise);
-          indexKeys[confirmationKey] = i;
-          indexOrder.push(i);
+        if (!dataExistsInState || force) { 
+            const promise = this.getImageStack(
+              series[i],
+              i,
+              mfIndexFinal,
+              fmNo,
+              `${fm}`
+            );
+            promises.push(promise);
+            indexKeys[indexKey] = i;
+            indexOrder.push(i);
         } else {
           const index = parseInt(dataIndexMap[indexKey]);
           newData[i] = { ...this.state.data[index] };
         }
+        fmNo = 0;
       }
 
       if (promises.length > 0) {
@@ -792,25 +790,7 @@ class DisplayView extends Component {
           ? `${series[activePort].aimID}`
           : null;
           res.forEach((el, inx) => {
-            newData[indexOrder[inx]] = el;
-          });
-
-          newData.forEach((el, inx) => {
-            let imgIndex = 0;
-            if (series[inx].imageID) {
-              if (seriesAddition[inx].hasMultiframe && seriesAddition[inx].multiFrameIndex) {
-                imgIndex = parseInt(series[inx].imageID.split('/frames/')[1]) - 1;
-              } else {
-              for (let k = 0; k < el.stack.imageIds.length; k++) {
-                const partURL = el.stack.imageIds[k].split('/instances/')[1];
-                if (partURL.includes(series[inx].imageID)) {
-                  imgIndex = k;
-                  break;
-                  }
-                }
-              }
-            }
-            el.stack.currentImageIdIndex = imgIndex;
+             newData[indexOrder[inx]] = el;
           });
 
           if (key && key !== this.state.multiFrameAimJumped) {
@@ -948,17 +928,21 @@ class DisplayView extends Component {
     // create the same data shape for studySeries
     // update the reducer with the new data
     const studySeries = arr.reduce((all, item) => {
+      let seriesDescription, examType, numberOfImages, numberOfAnnotations, seriesNo, significanceOrder;
+      if (series[activePort]) {
+        ({ seriesDescription, examType, numberOfImages, numberOfAnnotations, seriesNo, significanceOrder } = series[activePort]);
+      }
       const obj = {
         projectID: item[0].projectID,
         patientID: item[0].patientID,
         studyUID: item[0].studyUID,
         seriesUID: item[0].seriesUID,
-        seriesDescription: series[activePort].seriesDescription,
-        examType: series[activePort].examType,
-        numberOfImages: series[activePort].numberOfImages,
-        numberOfAnnotations: series[activePort].numberOfAnnotations,
-        seriesNo: series[activePort].seriesNo,
-        significanceOrder: series[activePort].significanceOrder,
+        seriesDescription: seriesDescription,
+        examType: examType,
+        numberOfImages: numberOfImages,
+        numberOfAnnotations: numberOfAnnotations,
+        seriesNo: seriesNo,
+        significanceOrder: significanceOrder,
         multiFrameImage: item[0].multiFrameImage,
         numberOfFrames: item[0].numberOfFrames,
       };
@@ -2389,9 +2373,10 @@ class DisplayView extends Component {
       }
       this.props.dispatch(closeSerie());
       this.deleteViewportImageStatus();
-      this.setState({ data: newData, dataIndexMap: newDataIndexMap });
-      // this.jumpToAims();
-      // this.renderAims();
+      const { width, height } = getVPDimensions(newData.length);
+      this.setState({ data: newData, dataIndexMap: newDataIndexMap, width, height  });
+      // this.jumpToAims(" close viewport - jumpToAims");
+      // this.renderAims(false, " close viewport - renderaimr");
       // this.props.onSwitchView("search");
     } catch (err) {
       console.error(err);
@@ -2703,7 +2688,7 @@ class DisplayView extends Component {
                       {
                         target: "element",
                         eventName: "cornerstonenewimage",
-                        handler: (e) => this.newImage(e, i),
+                        handler: (e) => this.newImage(e, i)
                       },
                     ]}
                     setViewportActive={() => {
