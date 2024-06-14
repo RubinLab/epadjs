@@ -37,6 +37,7 @@ import { BsArrowUpLeft } from "react-icons/bs";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
 import { MdLoop, MdPanTool } from "react-icons/md";
+import { TbReplace } from "react-icons/tb";
 import {
   TiDeleteOutline,
   TiPencil,
@@ -240,6 +241,10 @@ class ToolMenu extends Component {
       { name: "Eraser", icon: <FaEraser />, tool: "Eraser", teaching: true },
     ];
 
+    this.managementTools = [
+      { name: "Save order", icon: <TbReplace />, tool: "order", teaching: true },
+    ]
+
     this.segmentationTools = [
       {
         name: "Brush",
@@ -387,6 +392,10 @@ class ToolMenu extends Component {
     });
   };
 
+  saveSignificantOrder = () => {
+
+  }
+
   handleToolClicked = (index, tool) => {
     sessionStorage.setItem("activeTool", tool);
     if (tool === "Noop") {
@@ -466,6 +475,9 @@ class ToolMenu extends Component {
       this.setState({ showFuse: true });
       return;
       this.selectFreehand();
+    } else if (tool='order') {
+      this.saveSignificantOrder();
+      return;
     }
     // else if (tool === "FreehandRoiTool") {
     //   this.selectFreehand();
@@ -670,6 +682,20 @@ class ToolMenu extends Component {
               isActive={this.state.activeToolIdx === i}
               onClick={() => this.handleToolClicked(i, tool)}
               children={child}
+            />
+          );
+        })}
+        {/* {mode === 'teaching' && this.managementTools.length > 0 && <div className="toolbarSectionButton" id="toolmenu-mng"></div>} */}
+        {mode === 'teaching' && this.managementTools.map(({ name, icon, tool, child }, i) => {
+          return (
+            <ToolMenuItem
+              key={name}
+              name={name}
+              icon={icon}
+              index={i}
+              onClick={() => this.handleToolClicked(i, tool)}
+              children={child}
+              style={i=== 0 ? {paddingLeft: '5px'} : {}}
             />
           );
         })}
