@@ -196,7 +196,6 @@ const asyncReducer = (state = initialState, action) => {
         const aimClearedSeriesAddition = _.cloneDeep(state.openSeriesAddition);
         aimClearedSeries[state.activePort].aimID = null;
         aimClearedSeriesAddition[state.activePort].aimID = null;
-        console.log('reducer- CLEAR_MULTIFRAME_AIM_JUMP', aimClearedSeriesAddition[state.activePort].aimID);
         return { ...state, openSeries: aimClearedSeries, multiFrameAimJumpData: null, openSeriesAddition: aimClearedSeriesAddition };
       case CHECK_MULTIFRAME:
         // const series = _.cloneDeep(state.openSeries);
@@ -285,8 +284,6 @@ const asyncReducer = (state = initialState, action) => {
             }
           }
         }
-
-        console.log('reducer- CHECK_MULTIFRAME', seriesAddition);
         newState.seriesData = newSeriesDataMulti;
         // newState.openSeries= series;
         newState.openSeriesAddition = seriesAddition;
@@ -359,7 +356,6 @@ const asyncReducer = (state = initialState, action) => {
         for (let serie of aimIDClearedOpenSeries) {
           serie.aimID = null;
         }
-        console.log('reducer- CLEAR_AIMID');
         return { ...state, openSeries: aimIDClearedOpenSeries, openSeriesAddition: aimIDClearedOpenSeriesAddition };
       case UPDATE_IMAGEID:
         let openSeriesToUpdate = _.cloneDeep(state.openSeries);
@@ -522,8 +518,6 @@ const asyncReducer = (state = initialState, action) => {
             else seriesDataForTeaching[pidFromRef] = { [action.payload.ref.patientID]: { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] } };
           }
         }
-
-        console.log('reducer- LOAD_SERIE_SUCCESS', imageAddedSeries);
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
@@ -873,7 +867,6 @@ const asyncReducer = (state = initialState, action) => {
         let updatedOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
         updatedGrid[index].aimID = aimID;
         updatedOpenSeriesAddition[index].aimID = aimID;
-        console.log('reducer- JUMP_TO_AIM', aimID);
         // return { ...state, openSeries: updatedGrid, aimsList: {...state.aimsList} };
         return Object.assign({}, state, {
           activePort: index,
@@ -983,7 +976,6 @@ const asyncReducer = (state = initialState, action) => {
           }
           newOpenSeriesAddition[serieToUpdateIndex] = updatedSerie;
         }
-        console.log('reducer- AIM_DELETE', newOpenSeriesAddition);
         return { ...state, openSeriesAddition: newOpenSeriesAddition, otherSeriesAimsList: deepOther };
       }
       default:
