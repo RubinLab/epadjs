@@ -93,7 +93,7 @@ export const setSeriesData = (projectID, patientID, studyUID, seriesData, filled
   return { type: SET_SERIES_DATA, payload: { projectID, patientID, studyUID, data, mfMerged } };
 }
 
-export const clearMultiFrameAimJumpFlags = (src) => {
+export const clearMultiFrameAimJumpFlags = () => {
   return { type: CLEAR_MULTIFRAME_AIM_JUMP };
 }
 
