@@ -795,28 +795,30 @@ class DisplayView extends Component {
           ? `${series[activePort].aimID}`
           : null;
           res.forEach((el, inx) => {
-            newData[indexOrder[inx]] = el;
+             newData[indexOrder[inx]] = el;
           });
 
-          newData.forEach((el, inx) => {
-            let imgIndex = fmNo ? fmNo : 0;
-            if (series[inx].imageID) {
-              if (seriesAddition[inx].hasMultiframe && seriesAddition[inx].multiFrameIndex) {
-                imgIndex = parseInt(series[inx].imageID.split('/frames/')[1]) - 1;
-              } else {
-              for (let k = 0; k < el.stack.imageIds.length; k++) {
-                const partURL = el.stack.imageIds[k].split('/instances/')[1];
-                // if (partURL.includes(series[inx].imageID)) {
-                if (el.stack.imageIds[k].includes(series[inx].imageID)) {
-                  imgIndex = k;
-                  break;
-                  }
-                }
-              }
-            }
-            el.stack.currentImageIdIndex = imgIndex;
-          });
+          // newData.forEach((el, inx) => {
+          //   let imgIndex = fmNo ? fmNo : 0;
+          //   if (series[inx].imageID) {
+          //     if (seriesAddition[inx].hasMultiframe && seriesAddition[inx].multiFrameIndex) {
+          //       imgIndex = parseInt(series[inx].imageID.split('/frames/')[1]) - 1;
+          //     } else {
+          //     for (let k = 0; k < el.stack.imageIds.length; k++) {
+          //       const partURL = el.stack.imageIds[k].split('/instances/')[1];
+          //       // if (partURL.includes(series[inx].imageID)) {
+          //       console.log(el.stack.imageIds[k]);
 
+          //       if (el.stack.imageIds[k].includes(series[inx].imageID)) {
+          //         imgIndex = k;
+          //         break;
+          //         }
+          //       }
+          //     }
+          //   }
+          //   console.log(" ##### imgindex", inx, imgIndex);
+          //   el.stack.currentImageIdIndex = imgIndex;
+          // });
 
           if (key && key !== this.state.multiFrameAimJumped) {
             this.setState({ data: newData, multiFrameAimJumped: key });
