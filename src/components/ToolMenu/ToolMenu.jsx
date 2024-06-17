@@ -499,7 +499,7 @@ class ToolMenu extends Component {
       this.setState({ showFuse: true });
       return;
       this.selectFreehand();
-    } else if (tool='order') {
+    } else if (tool === 'order') {
       this.saveSignificantOrder();
       return;
     }
