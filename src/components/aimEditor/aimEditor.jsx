@@ -435,6 +435,7 @@ class AimEditor extends Component {
       user = getUserForAim(aim.users);
     } else user = getUserForAim();
     // try {
+    console.log(" ++++> create aim");  
     if (hasSegmentation) {
       // if (!this.checkSegmentationFrames()) return;
       // segmentation and markups
@@ -450,6 +451,7 @@ class AimEditor extends Component {
       // markups without segmentation
       const image = this.getAimSeedDataFromMarkup(markupsToSave);
       const aimData = { image, answers, user };
+      console.log(" ----> image else if", image);
       const aim = new Aim(
         aimData,
         enumAimType.imageAnnotation,
@@ -479,7 +481,9 @@ class AimEditor extends Component {
         study.examTypes = examTypes.filter((type) =>
           DISP_MODALITIES.includes(type)
         );
+        console.log(' ---> study aim examTypes', examTypes);
         aimData = { study, answers, user };
+        console.log(" ---> aimData", aimData);
         aim = new Aim(
           aimData,
           enumAimType.studyAnnotation,
@@ -495,6 +499,7 @@ class AimEditor extends Component {
           image.metadata = this.createImageDataFromMetadata(image.imageId);
         }
         aimData = { image, answers, user };
+        console.log(' ---> aimData', aimData);
         aim = new Aim(
           aimData,
           enumAimType.imageAnnotation,
@@ -502,6 +507,8 @@ class AimEditor extends Component {
           this.state.trackingUId
         );
       }
+      console.log(' ----> aim');
+      console.log(aim);
       this.saveAim(aim);
     }
     // } catch (error) {
