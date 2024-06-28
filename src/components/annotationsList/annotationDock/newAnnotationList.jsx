@@ -8,6 +8,7 @@ import {
   toggleAllLabels,
   toggleSingleLabel,
   toggleAllAnnotations,
+  toggleAllCalculations
 } from "../action";
 import { deleteAnnotation } from "../../../services/annotationServices";
 import cornerstone from "cornerstone-core";
@@ -25,23 +26,36 @@ class AnnotationsList extends React.Component {
 
   componentDidUpdate = (prevProps) => {
     try {
+      const { openSeriesAddition, activePort } = this.props;
       const series = Object.keys(this.props.aimsList);
+      const { seriesUID } = this.props.openSeries[this.props.activePort];
+      const seriesAims = this.props.aimsList[seriesUID];
+      const prevSeriesAims = prevProps[seriesUID];
+      const recentCount = seriesAims ? Object.keys(seriesAims).length : 0;
+      const prevCount = prevSeriesAims ? Object.keys(prevSeriesAims).length : 0;
+      const aimDeleted = prevCount > recentCount && prevCount === recentCount + 1;
+      const aimSaved = recentCount > prevCount && recentCount === prevCount + 1;
+      const vp = openSeriesAddition[activePort];
       if (
         (this.props.activePort !== prevProps.activePort &&
           !this.props.loading) ||
         (!this.props.loading &&
           prevProps.loading &&
-          series.length === this.props.openSeries.length)
-      ) {
-        const { seriesUID } = this.props.openSeries[this.props.activePort];
-        let annotations = this.props.aimsList[seriesUID] ? Object.values(this.props.aimsList[seriesUID]) : [];
-        let labelDisplayAll = true;
-        let annsDisplayAll = true;
-
-        annsDisplayAll = annotations[0]?.isDisplayed;
-        labelDisplayAll = annotations[0]?.showLabel;
-
-        this.setState({ labelDisplayAll, annsDisplayAll });
+          series.length === this.props.openSeries.length) ||
+      (!this.props.loading && (aimDeleted || aimSaved))
+      ) 
+      {
+        // let annotations = this.props.aimsList[seriesUID] ? Object.values(this.props.aimsList[seriesUID]) : [];
+        let labelDisplayAll = vp ? !!vp.showLabels : false;
+        let annsDisplayAll = vp ? !!vp.showAnnotations : true;
+        let showCalculations = vp ? !!vp.showCalculations : false;
+        this.setState({ labelDisplayAll, annsDisplayAll, showCalculations });
+        if (labelDisplayAll) 
+          this.props.dispatch(toggleAllLabels(openSeriesAddition[activePort].seriesUID, labelDisplayAll));
+        if (!annsDisplayAll)
+          this.props.dispatch(toggleAllAnnotations(openSeriesAddition[activePort].seriesUID, annsDisplayAll));
+        if (showCalculations)
+          this.props.dispatch(toggleAllCalculations(openSeriesAddition[activePort].seriesUID, showCalculations));
       }
     } catch (err) {
       console.error(err);
@@ -90,6 +104,7 @@ class AnnotationsList extends React.Component {
       state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
       this.refreshAllViewports();
     });
+    this.props.dispatch(toggleAllCalculations(this.props.openSeries[this.props.activePort].seriesUID, target.checked));
   };
 
   handleToggleAllLabels = ({ target }, e, id) => {
@@ -282,6 +297,7 @@ class AnnotationsList extends React.Component {
                     id="showAnnotations"
                     onChange={this.handleCalculations}
                     checked={this.state.showCalculations}
+                    name="showCalculations"
                   />
                   <label
                     className="form-check-label"
@@ -297,6 +313,7 @@ class AnnotationsList extends React.Component {
                     id="showAnnotations"
                     onChange={this.handleToggleAllLabels}
                     checked={this.state.labelDisplayAll}
+                    name="showLabels"
                   />
                   <label
                     className="form-check-label"
@@ -312,6 +329,7 @@ class AnnotationsList extends React.Component {
                     id="showAnnotations"
                     onChange={this.handleToggleAllAnnotations}
                     checked={this.state.annsDisplayAll}
+                    name="showAnnotations"
                   />
                   <label
                     className="form-check-label"

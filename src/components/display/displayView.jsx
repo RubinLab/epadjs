@@ -698,7 +698,7 @@ class DisplayView extends Component {
     const seriesAims = aimList[seriesUID];
     const segAims = [];
     Object.entries(seriesAims).forEach(([key, value]) => {
-      if (value.json.segmentationEntityCollection) {
+      if (value.json && value.json.segmentationEntityCollection) {
         segAims.push(key);
       }
     });
