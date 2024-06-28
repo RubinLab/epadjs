@@ -54,6 +54,7 @@ import {
   FILL_DESC,
   STORE_AIM_SELECTION,
   STORE_AIM_SELECTION_ALL,
+  TOGGLE_ALL_CALCULATIONS,
   colors,
   commonLabels,
 } from "./types";
@@ -118,6 +119,10 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case TOGGLE_ALL_CALCULATIONS:
+        const aimsCalsToggled = _.cloneDeep(state.openSeriesAddition);
+        aimsCalsToggled[state.activePort].showCalculations = action.payload.checked;
+        return { ...state, openSeriesAddition: aimsCalsToggled };
       case STORE_AIM_SELECTION_ALL:
         const { checked, map, tbPageIndex, clearAll } = action.payload;
         let newMultipageAimSelectionAll = _.cloneDeep(state.multipageAimSelection);
@@ -486,23 +491,31 @@ const asyncReducer = (state = initialState, action) => {
           jumpArr1 = imgArr.length > 0 ? [parseInt(multiFrameMap1[imgArr[0]]), parseInt(imgArr[1]) - 1] : [];
           imageAddedSeries[state.activePort].multiFrameIndex = parseInt(multiFrameMap1[imgArr[0]]);
         }
+
+        const serAimData = state.aimsList[action.payload.serID];
         const newDataKeys = Object.keys(action.payload.aimsData);
-        const stateKeys = state.aimsList[action.payload.serID]
-          ? Object.keys(state.aimsList[action.payload.serID])
+        const stateKeys = serAimData
+          ? Object.keys(serAimData)
           : [];
 
         const colorAimsList =
           newDataKeys.length >= stateKeys.length
             ? persistColorInSaveAim(
-              state.aimsList[action.payload.serID] || {},
+              serAimData || {},
               action.payload.aimsData,
               colors
             )
             : persistColorInDeleteAim(
-              state.aimsList[action.payload.serID] || {},
+              serAimData || {},
               action.payload.aimsData,
               colors
             );
+
+        const actSer = imageAddedSeries[state.activePort];
+
+        actSer.showCalculations = typeof actSer.showCalculations === 'boolean' ? actSer.showCalculations : false;
+        actSer.showLabels = typeof actSer.showLabels === 'boolean' ? actSer.showLabels : false;
+        actSer.showAnnotations = typeof actSer.showAnnotations === 'boolean' ? actSer.showAnnotations : true;
 
         // check if openSeries[activeport] is significant and teaching file 
         // if so check if seriesData is filled  // if not fill the data
@@ -575,35 +588,44 @@ const asyncReducer = (state = initialState, action) => {
       case TOGGLE_ALL_ANNOTATIONS:
         //update openSeries
         let { seriesUID, displayStatus } = action.payload;
+        const toogledAnnsSeries = _.cloneDeep(state.openSeriesAddition);
         let toggleAnns = Object.assign({}, state.aimsList);
         for (let ann in toggleAnns[seriesUID]) {
-          toggleAnns[seriesUID][ann].isDisplayed = displayStatus;
+          if (typeof toggleAnns[seriesUID][ann] === 'object')
+            toggleAnns[seriesUID][ann].isDisplayed = displayStatus;
         }
+        toogledAnnsSeries[state.activePort].showAnnotations = displayStatus;
         return Object.assign({}, state, {
           aimsList: toggleAnns,
+          openSeriesAddition: toogledAnnsSeries
         });
       case TOGGLE_ALL_LABELS:
-        const toggledLabelSerie = { ...state.aimsList };
-        const anns = toggledLabelSerie[action.payload.serieID];
+        const toggledLabeAimList = _.cloneDeep(state.aimsList);
+        const anns = toggledLabeAimList[action.payload.serieID];
+        const toogledLabelsSeries = _.cloneDeep(state.openSeriesAddition);
         const studyAims = {};
         for (let ann in anns) {
-          anns[ann].showLabel = action.payload.checked;
-          if (anns[ann].type === 'study') {
-            if (studyAims[ann]) delete studyAims[ann];
-            else studyAims[ann] = true;
+          if (typeof anns[ann] === 'object') {
+            anns[ann].showLabel = action.payload.checked;
+            if (anns[ann].type === 'study') {
+              if (studyAims[ann]) delete studyAims[ann];
+              else studyAims[ann] = true;
+            }
           }
         }
         if (Object.keys(studyAims).length > 0) {
           const ids = Object.keys(studyAims);
-          for (let series in toggledLabelSerie) {
+          for (let series in toggledLabeAimList) {
             if (series !== action.payload.serieID) {
               for (let id of ids) {
-                toggledLabelSerie[series][id].showLabel = action.payload.checked;
+                toggledLabeAimList[series][id].showLabel = action.payload.checked;
               }
             }
           }
         }
-        return Object.assign({}, state, { aimsList: toggledLabelSerie });
+
+        toogledLabelsSeries[state.activePort].showLabels = action.payload.checked;
+        return Object.assign({}, state, { openSeriesAddition: toogledLabelsSeries, aimsList: toggledLabeAimList });
 
       case TOGGLE_LABEL:
         const singleLabelToggled = { ...state.aimsList };

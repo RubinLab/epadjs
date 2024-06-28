@@ -53,6 +53,7 @@ import {
   FILL_DESC,
   STORE_AIM_SELECTION,
   STORE_AIM_SELECTION_ALL,
+  TOGGLE_ALL_CALCULATIONS,
   colors,
   commonLabels,
 } from "./types";
@@ -468,6 +469,13 @@ export const toggleAllLabels = (serieID, checked) => {
   return {
     type: TOGGLE_ALL_LABELS,
     payload: { serieID, checked },
+  };
+};
+
+export const toggleAllCalculations = (seriesUID, checked) => {
+  return {
+    type: TOGGLE_ALL_CALCULATIONS,
+    payload: { seriesUID, checked },
   };
 };
 
