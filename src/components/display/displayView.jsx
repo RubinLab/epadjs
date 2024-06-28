@@ -746,7 +746,9 @@ class DisplayView extends Component {
         const isLegitMFIndex = typeof mfIndexFinal === 'number' && !isNaN(mfIndexFinal);
         
         if (activePort === i && frameNo) fmNo = frameNo;
-        if (series[i].imageID && !frameNo) fmNo = parseInt(series[i].imageID.split('/frames/')[1]) - 1;
+        // if (series[i].imageID && !frameNo && seriesAddition[i].hasMultiframe) { 
+        if (series[i].imageID && !frameNo && seriesAddition[i].hasMultiframe)
+          fmNo = parseInt(series[i].imageID.split('/frames/')[1]) - 1;
         if (!series[i].imageID && (typeof frameNo !== 'number' && !isNaN(frameNo))) {
           if (series[i].aimID && seriesAddition[i].frameData) {
             const imgIDArr = seriesAddition[i].frameData[series[i].aimID];
@@ -763,6 +765,7 @@ class DisplayView extends Component {
         if (isLegitMFIndex) {  
           indexKey = `${indexKey}-${mfIndexFinal}`
         }
+
         const dataExistsInState = parseInt(dataIndexMap[indexKey]) >= 0;
 
         if (!dataExistsInState || force) { 
@@ -1209,14 +1212,17 @@ class DisplayView extends Component {
       });
     }
 
+
     // if serie is being open from the annotation jump to that image and load the aim editor
     if (multiFrameIndex && frameNo) imageIndex = frameNo;
     else if (serie.aimID)
       imageIndex = this.getImageIndex(
         this.props.seriesAddition[index],
-        cornerstoneImageIds
+        cornerstoneImageIds,
+        serie.aimID
       );
-
+    else if (this.props.series[index] && this.props.series[index].imageID)
+      imageIndex = this.getImageIndexFromStore(cornerstoneImageIds, this.props.series[index].imageID)
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
     // form split series data
@@ -1358,6 +1364,17 @@ class DisplayView extends Component {
   isDicomSegEntity = (markupType) => {
     return markupType === "DicomSegmentationEntity";
   };
+
+  getImageIndexFromStore = (cornerstoneImageIds, imgID) => {
+    let index = 0;
+    for (let i = 0; i < cornerstoneImageIds.length; i++) {
+      if (cornerstoneImageIds[i].includes(imgID)) {
+        index = i;
+        break;
+      }
+    }
+    return index;
+  }
 
   // Returns the image index of the aim of the serie or the passed aim if aimID is passed
   getImageIndex = (serie, cornerstoneImageIds, aimID = "") => {
