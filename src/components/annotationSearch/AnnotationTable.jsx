@@ -521,6 +521,8 @@ function AnnotationTable(props) {
     try {
       const { subjectID: patientID, studyUID, projectID } = selected;
       const { data: seriesArr } = await getSignificantSeries(projectID, patientID, studyUID);
+      console.log(" ++++++> seriesArr");
+      console.log(seriesArr);
       return seriesArr;
     } catch (err) {
       console.error(err);
@@ -537,23 +539,33 @@ function AnnotationTable(props) {
 
     if (isTeachingFile) {
       seriesArr =  await getSignificantSeriesData(selected);
-      if (seriesArr.length > 0){
+      console.log(" ----> in if isTeachingfile");
+      console.log(" ---> seriesArr", seriesArr);
+      console.log(" ----> existingData", existingData);
+
+      if (seriesArr.length > 0) {
+        console.log(" ---> if");
         seriesArr = seriesArr.map( el => ({...el, patientID, studyUID, projectID, template }));}
       else if (existingData && existingData.length <= maxPort) {
+        console.log(" ---> else if");
         seriesArr = existingData;
       } else if (existingData && existingData.length > maxPort) {
+        console.log(" ---> else if");
         seriesArr = existingData.slice(0,maxPort);
         // setSelected(seriesArr);
         // setShowSelectSeriesModal(true);
       } else {
+        console.log(" ---> else if");
         seriesArr = await getSeriesData(selected, true);
         seriesArr = seriesArr.slice(0,maxPort);
       }
     } else {
+      console.log(" ---> else, not a teaching file");
       seriesArr = await getSeriesData(selected);
     }
 
     setSelected(seriesArr);
+    console.log(" --> seriesArr before state set", seriesArr);
     if (props.openSeries.length === maxPort) {
       setShowSelectSeriesModal(true);
       return;
