@@ -25,10 +25,15 @@ class AnnnotationDownloadModal extends React.Component {
     const optionObj = this.state;
     const { pid, projectID } = this.props;
     let annsToDownload = [];
-    for (let page in this.props.multipageAimSelection) {
-      const aimIDs = Object.keys(this.props.multipageAimSelection[page]);
-      annsToDownload = annsToDownload.concat(aimIDs);
+    if (Object.keys(this.props.multipageAimSelection).length > 0) {
+      for (let page in this.props.multipageAimSelection) {
+        const aimIDs = Object.keys(this.props.multipageAimSelection[page]);
+        annsToDownload = annsToDownload.concat(aimIDs);
+      }
+    } else if (Object.keys(this.props.selectedAnnotations).length > 0) {
+      annsToDownload = Object.keys(this.props.selectedAnnotations);
     }
+
     const aimList = Array.isArray(annsToDownload) ? annsToDownload : Object.keys(annsToDownload);
     // this.props.updateStatus();
     const promise =
@@ -41,16 +46,17 @@ class AnnnotationDownloadModal extends React.Component {
         this.triggerBrowserDownload(blob, "Annotations");
         // this.props.updateStatus();
         this.props.dispatch(storeAimSelectionAll(null, null, null, true));
+        this.props.dispatch(clearSelection());
         this.props.onSubmit();
       })
       .catch(err => {
-        console.log(err);
+        console.error(err);
         this.props.dispatch(storeAimSelectionAll(null, null, null, true));
+        this.props.dispatch(clearSelection());
         if (err.response && err.response.status === 503) {
           toast.error("Select a download format!", { autoClose: false });
         }
       });
-    // this.props.dispatch(clearSelection());
     this.props.onCancel();
   };
 
