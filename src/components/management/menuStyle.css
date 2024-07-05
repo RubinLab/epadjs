@@ -835,6 +835,10 @@
   font-weight: 450;
 }
 
+.info-about__link {
+  cursor: pointer
+}
+
 .info-about__link:visited,
 .response__link:visited {
   color: #fff;
