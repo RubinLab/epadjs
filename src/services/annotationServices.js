@@ -95,6 +95,10 @@ export function downloadAllAnnotations(optionObj, aimIDlist) {
   return http.post(url, aimIDlist, { responseType: "blob" });
 }
 
+export function downloadAnnotationsWithLink(url) {
+  return http.get(url, { responseType: "blob" });
+}
+
 export function downloadProjectAnnotation(pid) {
   return http.get(
     `${http.apiUrl()}/projects/${encodeURIComponent(pid)}/aims?format=stream`,
