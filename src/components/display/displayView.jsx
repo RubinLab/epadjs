@@ -2476,6 +2476,7 @@ class DisplayView extends Component {
     // if there are multiframe data call get image stack and pass frame data etc
     const { seriesAddition, series, activePort } = this.props;
     const { aimId, index, imageID, frameNo } = event.detail;
+
     const imageIndex = this.getImageIndex(
       seriesAddition[index],
       this.state.data[index].stack.imageIds,
@@ -2495,7 +2496,7 @@ class DisplayView extends Component {
       this.getData(null, null, "jumpToAimImage 1");
     } else {
       const multiFrameIndex = seriesAddition[activePort].multiFrameMap[imageID];
-      this.getData(`${multiFrameIndex}-${activePort}`, frameNo, "jumpToAimImage 2");
+      this.getData(`${multiFrameIndex}-${index}`, frameNo, "jumpToAimImage 2");
     }
   };
 
