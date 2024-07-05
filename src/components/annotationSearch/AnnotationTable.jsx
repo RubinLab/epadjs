@@ -556,40 +556,36 @@ function AnnotationTable(props) {
         setShowSpinner(false);
     }
 
-      setSelected(seriesArr);
-      if (props.openSeries.length === maxPort) {
-        setShowSelectSeriesModal(true);
-        return;
-      }
+    setSelected(seriesArr);
+    if (props.openSeries.length === maxPort) {
+      setShowSelectSeriesModal(true);
+      return;
+    }
       //get extraction of the series (extract unopen series)
-      if (seriesArr && seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
+    if (seriesArr && seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
 
       // filter the series according to displayable modalities
-      seriesArr = Array.isArray(seriesArr) ? seriesArr.filter(isSupportedModality) : [];
+    seriesArr = Array.isArray(seriesArr) ? seriesArr.filter(isSupportedModality) : [];
 
       //check if there is enough room
-      if (seriesArr.length + props.openSeries.length > maxPort) {
+    if (seriesArr.length + props.openSeries.length > maxPort) {
         //if there is not bring the modal
-        setShowSelectSeriesModal(true);
+      setShowSelectSeriesModal(true);
         // TODO show toast
-      } else {
+    } else {
         //if there is enough room
         //add serie to the grid
-        const promiseArr = [];
+      const promiseArr = [];
 
-        existingData = getExistingData(selected);
-        for (let i = 0; i < seriesArr.length; i++) {
-          props.dispatch(addToGrid(seriesArr[i], aimID));
-          promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i], aimID, null, existingData)));
-        }
-        //getsingleSerie
-        Promise.all(promiseArr)
-        .then(() => {
-          props.switchToDisplay();
-        })
-        .catch((err) => console.error(err));
+      existingData = getExistingData(selected);
+      for (let i = 0; i < seriesArr.length; i++) {
+        props.dispatch(addToGrid(seriesArr[i], aimID));
+        promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i], aimID, null, existingData)));
       }
-    };
+        //getsingleSerie
+      Promise.all(promiseArr).then(() => { props.switchToDisplay(); }).catch((err) => console.error(err));
+    }
+  };
  
 
   const { patientName } = props.filters;
