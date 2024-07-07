@@ -668,7 +668,7 @@ class AimEditor extends Component {
       .then(() => {
         // Write the aim to session storage for further autoFill
         sessionStorage.setItem('lastSavedAim', JSON.stringify(aimSaved));
-
+        console.log(" ---> after lastSavedAim set");
         if (segmentationBlob) this.saveSegmentation(segmentationBlob, segId);
         else this.uploadCompleted(aimRefs);
       })
@@ -677,6 +677,7 @@ class AimEditor extends Component {
           'Annotation could not be saved! More information about the error can be found in the logs.'
         );
         this.setState({ saveButtonIsActive: true });
+        console.log(" ---> upload aim error <--- ");
         console.error(error);
       });
   };
