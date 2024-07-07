@@ -531,26 +531,29 @@ function AnnotationTable(props) {
   const displaySeries = async (selected) => {
     const { subjectID: patientID, studyUID, aimID, projectID, template } = selected;
     let isTeachingFile = teachingFileTempCode === template;
-    let seriesArr;
-
+    let seriesArr = [];   
     let existingData = getExistingData(selected);
-
-    if (isTeachingFile) {
-      seriesArr =  await getSignificantSeriesData(selected);
-      if (seriesArr.length > 0){
-        seriesArr = seriesArr.map( el => ({...el, patientID, studyUID, projectID, template }));}
-      else if (existingData && existingData.length <= maxPort) {
-        seriesArr = existingData;
-      } else if (existingData && existingData.length > maxPort) {
-        seriesArr = existingData.slice(0,maxPort);
-        // setSelected(seriesArr);
-        // setShowSelectSeriesModal(true);
-      } else {
-        seriesArr = await getSeriesData(selected, true);
-        seriesArr = seriesArr.slice(0,maxPort);
-      }
-    } else {
-      seriesArr = await getSeriesData(selected);
+    
+    try {
+      if (isTeachingFile) {
+        seriesArr =  await getSignificantSeriesData(selected);
+        if (seriesArr.length > 0){
+          seriesArr = seriesArr.map( el => ({...el, patientID, studyUID, projectID, template }));}
+        else if (existingData && existingData.length <= maxPort) {
+          seriesArr = existingData;
+        } else if (existingData && existingData.length > maxPort) {
+          seriesArr = existingData.slice(0,maxPort);
+          // setSelected(seriesArr);
+          // setShowSelectSeriesModal(true);
+        } else {
+          seriesArr = await getSeriesData(selected, true);
+          seriesArr = seriesArr.slice(0,maxPort);
+        }
+      } else 
+        seriesArr = await getSeriesData(selected);
+      
+    } catch (err) {
+        setShowSpinner(false);
     }
 
     setSelected(seriesArr);
@@ -558,20 +561,20 @@ function AnnotationTable(props) {
       setShowSelectSeriesModal(true);
       return;
     }
-    //get extraction of the series (extract unopen series)
+      //get extraction of the series (extract unopen series)
     if (seriesArr && seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
 
-    // filter the series according to displayable modalities
-    seriesArr = seriesArr.filter(isSupportedModality);
+      // filter the series according to displayable modalities
+    seriesArr = Array.isArray(seriesArr) ? seriesArr.filter(isSupportedModality) : [];
 
-    //check if there is enough room
+      //check if there is enough room
     if (seriesArr.length + props.openSeries.length > maxPort) {
-      //if there is not bring the modal
+        //if there is not bring the modal
       setShowSelectSeriesModal(true);
-      // TODO show toast
+        // TODO show toast
     } else {
-      //if there is enough room
-      //add serie to the grid
+        //if there is enough room
+        //add serie to the grid
       const promiseArr = [];
 
       existingData = getExistingData(selected);
@@ -579,15 +582,11 @@ function AnnotationTable(props) {
         props.dispatch(addToGrid(seriesArr[i], aimID));
         promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i], aimID, null, existingData)));
       }
-    
-      //getsingleSerie
-      Promise.all(promiseArr)
-        .then(() => {
-          props.switchToDisplay();
-        })
-        .catch((err) => console.error(err));
+        //getsingleSerie
+      Promise.all(promiseArr).then(() => { props.switchToDisplay(); }).catch((err) => console.error(err));
     }
   };
+ 
 
   const { patientName } = props.filters;
 
