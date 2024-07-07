@@ -1,4 +1,5 @@
 import React from "react";
+import { downloadAnnotationsWithLink } from "../../../services/annotationServices";
 import { FaCheckCircle, FaBell, FaExclamationCircle } from "react-icons/fa";
 
 const checkStyle = {
@@ -16,6 +17,28 @@ const exclamationStyle = {
 const responseList = ({ item }) => {
   const { seen, error, action, message, time } = item;
   const className = seen ? "response-item" : "response-item newNotification";
+  const triggerBrowserDownload = (blob, fileName) => {
+    const url = window.URL.createObjectURL(new Blob([blob]));
+    const link = document.createElement("a");
+    document.body.appendChild(link);
+    link.style = "display: none";
+    link.href = url;
+    link.download = `${fileName}.zip`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const onDownload = () => {
+    downloadAnnotationsWithLink(message)
+    .then(result => {
+      let blob = new Blob([result.data], { type: "application/zip" });
+      triggerBrowserDownload(blob, "Annotations");
+    })
+    .catch(err => {
+      console.error(err);
+    });
+  }
+
   return (
     <li className={className}>
       <div className="response-item__icon">
@@ -31,7 +54,7 @@ const responseList = ({ item }) => {
         <div className="response-item__msg">{action}</div>
         <div className="response-item__msg">
           {action && action.includes("Download ready") ? (
-            <a href={message} target="_self" className="info-about__link">
+            <a target="_self" className="info-about__link" onClick={onDownload} >
               Click here to download files!
             </a>
           ) : (
