@@ -54,7 +54,7 @@ const responseList = ({ item }) => {
         <div className="response-item__msg">{action}</div>
         <div className="response-item__msg">
           {action && action.includes("Download ready") ? (
-            <a download="annotations.zip" target="_self" className="info-about__link" onClick={onDownload} >
+            <a target="_self" className="info-about__link" onClick={onDownload} >
               Click here to download files!
             </a>
           ) : (
