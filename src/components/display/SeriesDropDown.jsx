@@ -179,7 +179,9 @@ const SeriesDropDown = (props) => {
 
     const { isOpen, index } = checkIfSerieOpen(e);
     console.log(" ----> seriesdropdown isOpen, index ", isOpen, index);
-
+    console.log(' -----> props.openSeriesAddition.length', props.openSeriesAddition);
+    console.log(' -----> props.openSeriesAddition.length', props.openSeriesAddition.length);
+    console.log(" ++++> maxPort", maxPort);
     if (!isOpen) { 
       if ( props.openSeriesAddition.length < maxPort ) {
         console.log(" ----> seriesdropdown in if length < maxPort");
