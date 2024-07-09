@@ -668,7 +668,6 @@ class AimEditor extends Component {
       .then(() => {
         // Write the aim to session storage for further autoFill
         sessionStorage.setItem('lastSavedAim', JSON.stringify(aimSaved));
-
         if (segmentationBlob) this.saveSegmentation(segmentationBlob, segId);
         else this.uploadCompleted(aimRefs);
       })

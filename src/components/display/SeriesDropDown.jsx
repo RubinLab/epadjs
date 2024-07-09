@@ -17,12 +17,13 @@ import { isSupportedModality, otherSeriesOpened } from "../../Utils/aid.js";
 
 import "./SeriesDropDown.css";
 
-const maxPort = parseInt(sessionStorage.getItem("maxPort"));
+let maxPort; 
 
 const SeriesDropDown = (props) => {
   const [seriesList, setSeriesList] = useState([]);
   const [loading, setLoading] = useState(false);
   let mfIndex = {};
+  maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
   const checkMultiframe = () => {
     const { openSeries, activePort, openSeriesAddition } = props;
@@ -178,7 +179,6 @@ const SeriesDropDown = (props) => {
     }
 
     const { isOpen, index } = checkIfSerieOpen(e);
-
     if (!isOpen) { 
       if ( props.openSeriesAddition.length < maxPort ) {
         const { list }  = findSeriesListFmStore(); 

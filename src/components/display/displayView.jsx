@@ -349,15 +349,10 @@ class DisplayView extends Component {
     // const seriesReplaced = prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID;
     const sameLength = prevProps.seriesAddition.length === seriesAddition.length;
     const seriesReplaced = (!!prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) && sameLength;
-
-    if (
-      prevProps.multiFrameAimJumpData !== multiFrameAimJumpData &&
-      multiFrameAimJumpData &&
-      multiFrameAimJumpData[0] &&
-      // `${series[activePort].aimID}-${multiFrameAimJumpData[0]}-${multiFrameAimJumpData[1]}` !==
-      `${series[activePort].aimID}` !==
-        this.state.multiFrameAimJumped
-    ) {
+    const mfAimJumpDataFilled =  prevProps.multiFrameAimJumpData !== multiFrameAimJumpData && multiFrameAimJumpData && multiFrameAimJumpData[0];
+    const newMFAimToJump = `${series[activePort].aimID}` !== this.state.multiFrameAimJumped;
+    
+    if ( (mfAimJumpDataFilled && newMFAimToJump) || (prevActiveFrameDataMissing && frameDataFilled && multiFrameAimJumpData && multiFrameAimJumpData[0]) ) {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], `didupdate 1`);
@@ -726,7 +721,7 @@ class DisplayView extends Component {
   }
 
   getData(multiFrameIndexData, frameNo, fm, force) { // 
-    console.log(" getData fm ^^", fm, multiFrameIndexData, frameNo);
+    console.log(" before getData fm ^^", fm, multiFrameIndexData, frameNo);
     this.clearAllMarkups(); //we are already clearing in it renderAims do we need to here?
     try {
       const { series, activePort, aimList, seriesAddition } = this.props;
