@@ -179,18 +179,12 @@ const SeriesDropDown = (props) => {
     }
 
     const { isOpen, index } = checkIfSerieOpen(e);
-    console.log(" ----> seriesdropdown isOpen, index ", isOpen, index);
-    console.log(' -----> props.openSeriesAddition.length', props.openSeriesAddition);
-    console.log(' -----> props.openSeriesAddition.length', props.openSeriesAddition.length);
-    console.log(" ++++> maxPort", maxPort);
     if (!isOpen) { 
       if ( props.openSeriesAddition.length < maxPort ) {
-        console.log(" ----> seriesdropdown in if length < maxPort");
         const { list }  = findSeriesListFmStore(); 
         props.dispatch(addToGrid(serie));
         props.dispatch(getSingleSerie(serie, null, null, list));   
       } else {
-        console.log(" ----> seriesdropdown in else replacing");
         props.onSelect(0, props.activePort, true);
         props.dispatch(replaceInGrid(serie));
         const list = seriesList.length > 0 ? seriesList : null;

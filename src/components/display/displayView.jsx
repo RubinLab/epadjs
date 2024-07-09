@@ -837,7 +837,6 @@ class DisplayView extends Component {
     } catch (error) {
       console.error(error);
     }
-    console.log(" end getData fm ^^", fm, multiFrameIndexData, frameNo);
   }
 
   handleSerieReplace = (e) => {
