@@ -33,8 +33,8 @@ class AnnotationsList extends React.Component {
       const prevSeriesAims = prevProps[seriesUID];
       const recentCount = seriesAims ? Object.keys(seriesAims).length : 0;
       const prevCount = prevSeriesAims ? Object.keys(prevSeriesAims).length : 0;
-      const aimDeleted = prevCount > recentCount && prevCount === recentCount + 1;
-      const aimSaved = recentCount > prevCount && recentCount === prevCount + 1;
+      const aimDeleted = prevCount === recentCount + 1;
+      const aimSaved = recentCount === prevCount + 1;
       const vp = openSeriesAddition[activePort];
       if (
         (this.props.activePort !== prevProps.activePort &&
