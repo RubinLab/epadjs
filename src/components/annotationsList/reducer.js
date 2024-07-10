@@ -377,6 +377,9 @@ const asyncReducer = (state = initialState, action) => {
         const serUIDMap = seriesUIDCounter(state.openSeriesAddition);
         const delAims = { ...state.aimsList };
 
+        console.log(' ----> serUIDMap', serUIDMap);
+        console.log(' ----> serUIDMap[delSeriesUID]', serUIDMap[delSeriesUID]);
+
         if (serUIDMap[delSeriesUID] === 1) {
           delete delAims[delSeriesUID];
         }
@@ -385,12 +388,14 @@ const asyncReducer = (state = initialState, action) => {
         delGrid = delGrid.concat(state.openSeries.slice(state.activePort + 1));
         delSubpath = delSubpath.concat(state.subpath.slice(state.activePort + 1));
         let shouldStudyExist = false;
+        console.log(" ----> delGrid", delGrid);
         for (let item of delGrid) {
           if (item.studyUID === delStudyUID) {
             shouldStudyExist = true;
             break;
           }
         }
+        console.log(" ----> shouldStudyExist", shouldStudyExist);
 
         let delActivePort;
         let delOtherSeriesAimsList = _.cloneDeep(state.otherSeriesAimsList);;
