@@ -390,6 +390,7 @@ const asyncReducer = (state = initialState, action) => {
         let shouldStudyExist = false;
         console.log(" ----> delGrid", delGrid);
         for (let item of delGrid) {
+          console.log(" ----> item uid, delstudyuid ", item.studyUID, delStudyUID);
           if (item.studyUID === delStudyUID) {
             shouldStudyExist = true;
             break;
