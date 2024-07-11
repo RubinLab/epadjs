@@ -147,6 +147,7 @@ const annotationsLink = (props) => {
                 : null;
             seriesList.push(
               <li
+                key={`${index}-${aim.aimID}`}
                 style={{
                   background: color,
                   listStyleType: "none",
