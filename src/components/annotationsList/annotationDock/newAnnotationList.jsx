@@ -13,7 +13,6 @@ import {
 import { deleteAnnotation } from "../../../services/annotationServices";
 import cornerstone from "cornerstone-core";
 import { state } from "cornerstone-tools/store/index.js";
-import { findIndex } from "lodash";
 
 let wadoUrl;
 
