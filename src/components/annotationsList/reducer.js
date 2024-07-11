@@ -101,6 +101,10 @@ const initialState = {
   showAnnotations: true,
 };
 
+const checkLastAnnotationDeleted = (seriesList) => {
+  return seriesList.length === 1 && seriesList[0][2].length === 0;
+}
+
 const seriesUIDCounter = (arr) => {
   const uidCountMap = arr.reduce((all, el, i) => {
     all[el.seriesUID] = all[el.seriesUID] ? all[el.seriesUID] + 1 : 1;
@@ -464,9 +468,18 @@ const asyncReducer = (state = initialState, action) => {
         let annCalc = Object.keys(action.payload.imageData);
         const { projectID: pidFromRef, studyUID: stUIDFromRef, seriesUID: serUIDFromRef } = action.payload.ref;
         let latestOtherSeriesAimsList = _.cloneDeep(state.otherSeriesAimsList);
-        if (latestOtherSeriesAimsList[pidFromRef] && action.payload.otherSeriesAimsData[pidFromRef])
-          latestOtherSeriesAimsList[pidFromRef][stUIDFromRef] = action.payload.otherSeriesAimsData[pidFromRef][stUIDFromRef];
-        else latestOtherSeriesAimsList[pidFromRef] = action.payload.otherSeriesAimsData[pidFromRef];
+
+        const projectHasAims = !!latestOtherSeriesAimsList && !!latestOtherSeriesAimsList[pidFromRef];
+        const studyHasAims = projectHasAims && !!latestOtherSeriesAimsList[pidFromRef][stUIDFromRef];
+
+        if (action.payload.otherSeriesAimsData[pidFromRef]) {
+          if (projectHasAims)
+            latestOtherSeriesAimsList[pidFromRef][stUIDFromRef] = action.payload.otherSeriesAimsData[pidFromRef][stUIDFromRef];
+          else
+            latestOtherSeriesAimsList[pidFromRef] = action.payload.otherSeriesAimsData[pidFromRef]
+        } else if (studyHasAims && checkLastAnnotationDeleted(latestOtherSeriesAimsList[pidFromRef][stUIDFromRef]) && !!!action.payload.otherSeriesAimsData[pidFromRef]) {
+          delete latestOtherSeriesAimsList[pidFromRef][stUIDFromRef];
+        }
 
         let numberOfimageAnnotationsMap = {};
         if (pidFromRef && latestOtherSeriesAimsList[pidFromRef] && latestOtherSeriesAimsList[pidFromRef][stUIDFromRef]) {
@@ -1005,7 +1018,7 @@ const asyncReducer = (state = initialState, action) => {
 
           if (reformedOtherSeries[serieToUpdateIndex] && reformedOtherSeries[serieToUpdateIndex][2] && reformedOtherSeries[serieToUpdateIndex][2].length === 0) {
             updatedSerie.numberOfAnnotations = 0;
-            if (deepOther[projectID][studyUID].length === 1) {
+            if (deepOther[projectID][studyUID].length === 1 && checkLastAnnotationDeleted(reformedOtherSeries)) {
               delete deepOther[projectID][studyUID];
             } else {
               const arr1 = deepOther[projectID][studyUID].slice(0, serieToUpdateIndex + 1);
