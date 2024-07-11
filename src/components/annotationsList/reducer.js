@@ -95,7 +95,10 @@ const initialState = {
   subpath: [],
   multiFrameAimJumpData: null,
   seriesData: {},
-  multipageAimSelection: {}
+  multipageAimSelection: {},
+  showCalculations: false,
+  showLabels: false,
+  showAnnotations: true,
 };
 
 const seriesUIDCounter = (arr) => {
@@ -120,9 +123,7 @@ const asyncReducer = (state = initialState, action) => {
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
       case TOGGLE_ALL_CALCULATIONS:
-        const aimsCalsToggled = _.cloneDeep(state.openSeriesAddition);
-        aimsCalsToggled[state.activePort].showCalculations = action.payload.checked;
-        return { ...state, openSeriesAddition: aimsCalsToggled };
+        return { ...state, showCalculations: action.payload.checked };
       case STORE_AIM_SELECTION_ALL:
         const { checked, map, tbPageIndex, clearAll } = action.payload;
         let newMultipageAimSelectionAll = _.cloneDeep(state.multipageAimSelection);
@@ -517,12 +518,6 @@ const asyncReducer = (state = initialState, action) => {
               colors
             );
 
-        const actSer = imageAddedSeries[state.activePort];
-
-        actSer.showCalculations = typeof actSer.showCalculations === 'boolean' ? actSer.showCalculations : false;
-        actSer.showLabels = typeof actSer.showLabels === 'boolean' ? actSer.showLabels : false;
-        actSer.showAnnotations = typeof actSer.showAnnotations === 'boolean' ? actSer.showAnnotations : true;
-
         // check if openSeries[activeport] is significant and teaching file 
         // if so check if seriesData is filled  // if not fill the data
         const { significanceOrder: order, template: tempCode } = state.openSeries[state.activePort];
@@ -594,21 +589,18 @@ const asyncReducer = (state = initialState, action) => {
       case TOGGLE_ALL_ANNOTATIONS:
         //update openSeries
         let { seriesUID, displayStatus } = action.payload;
-        const toogledAnnsSeries = _.cloneDeep(state.openSeriesAddition);
         let toggleAnns = Object.assign({}, state.aimsList);
         for (let ann in toggleAnns[seriesUID]) {
           if (typeof toggleAnns[seriesUID][ann] === 'object')
             toggleAnns[seriesUID][ann].isDisplayed = displayStatus;
         }
-        toogledAnnsSeries[state.activePort].showAnnotations = displayStatus;
         return Object.assign({}, state, {
           aimsList: toggleAnns,
-          openSeriesAddition: toogledAnnsSeries
+          showAnnotations: displayStatus
         });
       case TOGGLE_ALL_LABELS:
         const toggledLabeAimList = _.cloneDeep(state.aimsList);
         const anns = toggledLabeAimList[action.payload.serieID];
-        const toogledLabelsSeries = _.cloneDeep(state.openSeriesAddition);
         const studyAims = {};
         for (let ann in anns) {
           if (typeof anns[ann] === 'object') {
@@ -630,8 +622,7 @@ const asyncReducer = (state = initialState, action) => {
           }
         }
 
-        toogledLabelsSeries[state.activePort].showLabels = action.payload.checked;
-        return Object.assign({}, state, { openSeriesAddition: toogledLabelsSeries, aimsList: toggledLabeAimList });
+        return Object.assign({}, state, { aimsList: toggledLabeAimList, showLabels: action.payload.checked });
 
       case TOGGLE_LABEL:
         const singleLabelToggled = { ...state.aimsList };
