@@ -528,6 +528,12 @@ const asyncReducer = (state = initialState, action) => {
               colors
             );
 
+        if (!state.showAnnotations || state.showLabels) {
+          for (let aim in colorAimsList) {
+            colorAimsList[aim].isDisplayed = state.showAnnotations;
+            colorAimsList[aim].showLabel = state.showLabels;
+          }
+        }
         // check if openSeries[activeport] is significant and teaching file 
         // if so check if seriesData is filled  // if not fill the data
         const { significanceOrder: order, template: tempCode } = state.openSeries[state.activePort];
