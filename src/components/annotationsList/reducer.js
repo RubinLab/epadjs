@@ -419,8 +419,10 @@ const asyncReducer = (state = initialState, action) => {
 
         if (!shouldStudyExist) {
           if (delGrid.length > 0) {
-            delete delOtherSeriesAimsList[delPID][delStudyUID];
-            delete delSeriesData[delPID][delPatientID][delStudyUID];
+            if (delOtherSeriesAimsList[delPID] && delOtherSeriesAimsList[delPID][delStudyUID])
+              delete delOtherSeriesAimsList[delPID][delStudyUID];
+            if (delSeriesData[delPID] && delSeriesData[delPID][delPatientID] && delSeriesData[delPID][delPatientID][delStudyUID])
+              delete delSeriesData[delPID][delPatientID][delStudyUID];
           }
           return {
             ...state,
