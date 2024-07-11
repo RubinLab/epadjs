@@ -13,49 +13,28 @@ import {
 import { deleteAnnotation } from "../../../services/annotationServices";
 import cornerstone from "cornerstone-core";
 import { state } from "cornerstone-tools/store/index.js";
+import { findIndex } from "lodash";
 
 let wadoUrl;
 
 class AnnotationsList extends React.Component {
   wadoUrl = sessionStorage.getItem("wadoUrl");
   state = {
-    labelDisplayAll: false,
-    annsDisplayAll: true,
     showCalculations: false,
   };
 
   componentDidUpdate = (prevProps) => {
+    const { showCalculations, aimsList, activePort, openSeriesAddition } = this.props;
+    const { seriesUID } = openSeriesAddition[activePort];
+    const prevAims = prevProps.aimsList[seriesUID] ? Object.keys(prevProps.aimsList[seriesUID]) : [];
+    const curAims = aimsList[seriesUID] ? Object.keys(aimsList[seriesUID]) : [];
+
     try {
-      const { openSeriesAddition, activePort } = this.props;
-      const series = Object.keys(this.props.aimsList);
-      const { seriesUID } = this.props.openSeries[this.props.activePort];
-      const seriesAims = this.props.aimsList[seriesUID];
-      const prevSeriesAims = prevProps[seriesUID];
-      const recentCount = seriesAims ? Object.keys(seriesAims).length : 0;
-      const prevCount = prevSeriesAims ? Object.keys(prevSeriesAims).length : 0;
-      const aimDeleted = prevCount === recentCount + 1;
-      const aimSaved = recentCount === prevCount + 1;
-      const vp = openSeriesAddition[activePort];
-      if (
-        (this.props.activePort !== prevProps.activePort &&
-          !this.props.loading) ||
-        (!this.props.loading &&
-          prevProps.loading &&
-          series.length === this.props.openSeries.length) ||
-      (!this.props.loading && (aimDeleted || aimSaved))
-      ) 
-      {
-        // let annotations = this.props.aimsList[seriesUID] ? Object.values(this.props.aimsList[seriesUID]) : [];
-        let labelDisplayAll = vp ? !!vp.showLabels : false;
-        let annsDisplayAll = vp ? !!vp.showAnnotations : true;
-        let showCalculations = vp ? !!vp.showCalculations : false;
-        this.setState({ labelDisplayAll, annsDisplayAll, showCalculations });
-        if (labelDisplayAll) 
-          this.props.dispatch(toggleAllLabels(openSeriesAddition[activePort].seriesUID, labelDisplayAll));
-        if (!annsDisplayAll)
-          this.props.dispatch(toggleAllAnnotations(openSeriesAddition[activePort].seriesUID, annsDisplayAll));
-        if (showCalculations)
-          this.props.dispatch(toggleAllCalculations(openSeriesAddition[activePort].seriesUID, showCalculations));
+      if ( prevProps.showCalculations !== showCalculations || prevAims.length !== curAims.length) {
+        this.setState({ showCalculations: this.props.showCalculations }, () => {
+          state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
+          this.refreshAllViewports();
+        });
       }
     } catch (err) {
       console.error(err);
@@ -100,16 +79,10 @@ class AnnotationsList extends React.Component {
   };
 
   handleCalculations = ({ target }) => {
-    this.setState({ showCalculations: target.checked }, () => {
-      state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
-      this.refreshAllViewports();
-    });
-    this.props.dispatch(toggleAllCalculations(this.props.openSeries[this.props.activePort].seriesUID, target.checked));
+    this.props.dispatch(toggleAllCalculations(target.checked));
   };
 
   handleToggleAllLabels = ({ target }, e, id) => {
-    this.setState({ labelDisplayAll: target.checked });
-    const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.openSeries.forEach(el => this.props.dispatch(toggleAllLabels(el.seriesUID, target.checked)));
   };
 
@@ -123,7 +96,6 @@ class AnnotationsList extends React.Component {
         })
       );
     });
-    this.setState({ annsDisplayAll: target.checked });
   };
 
   handleToggleSingleLabel = (e) => {
@@ -296,7 +268,7 @@ class AnnotationsList extends React.Component {
                     role="switch"
                     id="showAnnotations"
                     onChange={this.handleCalculations}
-                    checked={this.state.showCalculations}
+                    checked={this.props.showCalculations}
                     name="showCalculations"
                   />
                   <label
@@ -312,7 +284,7 @@ class AnnotationsList extends React.Component {
                     role="switch"
                     id="showAnnotations"
                     onChange={this.handleToggleAllLabels}
-                    checked={this.state.labelDisplayAll}
+                    checked={this.props.showLabels}
                     name="showLabels"
                   />
                   <label
@@ -328,7 +300,7 @@ class AnnotationsList extends React.Component {
                     role="switch"
                     id="showAnnotations"
                     onChange={this.handleToggleAllAnnotations}
-                    checked={this.state.annsDisplayAll}
+                    checked={this.props.showAnnotations}
                     name="showAnnotations"
                   />
                   <label
@@ -358,6 +330,9 @@ const mapStateToProps = (state) => {
     aimsList: state.annotationsListReducer.aimsList,
     imageID: state.annotationsListReducer.imageID,
     loading: state.annotationsListReducer.loading,
+    showCalculations: state.annotationsListReducer.showCalculations,
+    showLabels: state.annotationsListReducer.showLabels,
+    showAnnotations: state.annotationsListReducer.showAnnotations,
   };
 };
 export default connect(mapStateToProps)(AnnotationsList);
