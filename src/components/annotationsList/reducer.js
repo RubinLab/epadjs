@@ -374,6 +374,10 @@ const asyncReducer = (state = initialState, action) => {
         let delPID = state.openSeries[state.activePort].projectID;
         let delPatientID = state.openSeries[state.activePort].patientID || state.openSeries[state.activePort].subjectID;
         let delOpenStudiesAddition = _.cloneDeep(state.openSeriesAddition);
+        let delShowCalculations = state.showCalculations;
+        let delShowLabels = state.showLabels;
+        let delShowAnnotations = state.showAnnotations;
+
         delOpenStudiesAddition.splice(state.activePort, 1);
         const serUIDMap = seriesUIDCounter(state.openSeriesAddition);
         const delAims = { ...state.aimsList };
@@ -406,6 +410,9 @@ const asyncReducer = (state = initialState, action) => {
           delActivePort = null;
           delOtherSeriesAimsList = {};
           delSeriesData = {};
+          delShowCalculations = false;
+          delShowLabels = false;
+          delShowAnnotations = true;
         } else {
           delActivePort = delGrid.length - 1;
         }
@@ -422,7 +429,10 @@ const asyncReducer = (state = initialState, action) => {
             activePort: delActivePort,
             otherSeriesAimsList: delOtherSeriesAimsList,
             seriesData: delSeriesData,
-            openSeriesAddition: delOpenStudiesAddition
+            openSeriesAddition: delOpenStudiesAddition,
+            showCalculations: delShowCalculations,
+            showLabels: delShowLabels,
+            showAnnotations: delShowAnnotations
           };
         }
 
@@ -678,7 +688,10 @@ const asyncReducer = (state = initialState, action) => {
           aimsList: {},
           activePort: 0,
           seriesData: {},
-          openSeriesAddition: []
+          openSeriesAddition: [],
+          showCalculations: false,
+          showLabels: false,
+          showAnnotations: true,
         };
       case CLEAR_SELECTION:
         let selectionState = { ...state };
