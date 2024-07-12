@@ -472,10 +472,10 @@ export const toggleAllLabels = (serieID, checked) => {
   };
 };
 
-export const toggleAllCalculations = (seriesUID, checked) => {
+export const toggleAllCalculations = (checked) => {
   return {
     type: TOGGLE_ALL_CALCULATIONS,
-    payload: { seriesUID, checked },
+    payload: { checked },
   };
 };
 
