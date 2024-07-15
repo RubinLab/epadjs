@@ -28,16 +28,8 @@ class AnnotationsList extends React.Component {
     const prevAims = prevProps.aimsList[seriesUID] ? Object.keys(prevProps.aimsList[seriesUID]) : [];
     const curAims = aimsList[seriesUID] ? Object.keys(aimsList[seriesUID]) : [];
 
-    // try {
-    //   if ( prevProps.showCalculations !== showCalculations || prevAims.length !== curAims.length) {
-    //     this.setState({ showCalculations: this.props.showCalculations }, () => {
-    //       state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
-    //       this.refreshAllViewports();
-    //     });
-    //   }
-    // } catch (err) {
-    //   console.error(err);
-    // }
+    state.showCalculations = showCalculations; //set the cornerstone state with componenets state
+    this.refreshAllViewports();
   };
 
   handleDisplayClick = (e) => {
@@ -79,6 +71,10 @@ class AnnotationsList extends React.Component {
 
   handleCalculations = ({ target }) => {
     this.props.dispatch(toggleAllCalculations(target.checked));
+    this.setState({ showCalculations: target.checked }, () => {
+      state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
+      this.refreshAllViewports();
+    });
   };
 
   handleToggleAllLabels = ({ target }, e, id) => {
