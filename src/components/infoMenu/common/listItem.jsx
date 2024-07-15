@@ -29,6 +29,7 @@ const responseList = ({ item }) => {
   };
 
   const onDownload = () => {
+    console.log(' ====> message', message);
     downloadAnnotationsWithLink(message)
     .then(result => {
       let blob = new Blob([result.data], { type: "application/zip" });
