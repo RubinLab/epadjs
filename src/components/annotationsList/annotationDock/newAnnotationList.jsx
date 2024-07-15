@@ -71,10 +71,12 @@ class AnnotationsList extends React.Component {
 
   handleCalculations = ({ target }) => {
     this.props.dispatch(toggleAllCalculations(target.checked));
-    this.setState({ showCalculations: target.checked }, () => {
-      state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
-      this.refreshAllViewports();
-    });
+    state.showCalculations = target.checked;
+    this.refreshAllViewports();
+    // this.setState({ showCalculations: target.checked }, () => {
+    //   state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
+    //   this.refreshAllViewports();
+    // });
   };
 
   handleToggleAllLabels = ({ target }, e, id) => {
