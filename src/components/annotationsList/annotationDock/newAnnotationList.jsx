@@ -28,16 +28,16 @@ class AnnotationsList extends React.Component {
     const prevAims = prevProps.aimsList[seriesUID] ? Object.keys(prevProps.aimsList[seriesUID]) : [];
     const curAims = aimsList[seriesUID] ? Object.keys(aimsList[seriesUID]) : [];
 
-    try {
-      if ( prevProps.showCalculations !== showCalculations || prevAims.length !== curAims.length) {
-        this.setState({ showCalculations: this.props.showCalculations }, () => {
-          state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
-          this.refreshAllViewports();
-        });
-      }
-    } catch (err) {
-      console.error(err);
-    }
+    // try {
+    //   if ( prevProps.showCalculations !== showCalculations || prevAims.length !== curAims.length) {
+    //     this.setState({ showCalculations: this.props.showCalculations }, () => {
+    //       state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
+    //       this.refreshAllViewports();
+    //     });
+    //   }
+    // } catch (err) {
+    //   console.error(err);
+    // }
   };
 
   handleDisplayClick = (e) => {
