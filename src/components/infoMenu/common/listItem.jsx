@@ -30,7 +30,12 @@ const responseList = ({ item }) => {
 
   const onDownload = () => {
     console.log(' ====> message', message);
-    downloadAnnotationsWithLink(message)
+    const urlLastPart = message.split('://');
+    const { href } = window.location;
+    const urlFirstPart = href.split('://');
+    const url = urlFirstPart[0] + '://' + urlLastPart[1];
+    console.log(" ---> full url", url);
+    downloadAnnotationsWithLink(url)
     .then(result => {
       let blob = new Blob([result.data], { type: "application/zip" });
       triggerBrowserDownload(blob, "Annotations");
