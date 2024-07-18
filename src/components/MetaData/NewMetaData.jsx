@@ -23,46 +23,22 @@ const mapStateToProps = state => {
 };
 
 const NewMetaData = (props) => {
-    // console.log(" =====> props", props);
     const [output, setOutput] = useState([]);
     const [input, setInput] = useState("");
     const [imageDownloaded, setImageDownloaded] = useState(false);
 
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       output: [],
-//       input: "",
-//       imageDownloaded: false
-//     }
-//     this.dumpDataSet = this.dumpDataSet.bind(this);
-//     this.getImageData = this.getImageData.bind(this);
-//     this.fillImageData = this.fillImageData.bind(this);
-//   }
-
   const getImageData = async () => {
     let data = null;
-    // check if the image has data
     const { activePort } = props;
     const item = cornerstone.getEnabledElements()[activePort];
     const element = item ? item.element : null;
     const image = element ? cornerstone.getImage(element) : null;
-    // console.log(" ====> image", image);
     if (image.data) data = image.data;
-    // if not get series metada 
-    // const response = await getImage(props.imageData.imageID.replace("wadors:", ""));
-    // const arrayBuffer = await response.arrayBuffer();
-    // console.log(" +++++> array buffer", arrayBuffer);
-    // const byteArray = new Uint8Array(arrayBuffer);
-    // const dataSet = dicomParser.parseDicom(byteArray);
-    // console.log(" ===> dataSet", dataSet);
     if (!image.data && props.imageData) {
-        // getImageMetadata
         try { 
             const seriesURL = props.imageData.imageID.replace("wadors:", "").split("/instances/")[0];
             ({ data } = await getMetadata(seriesURL));
             data = data[props.imageData.index];
-            // if fails get metadata for the image
         } catch (error1) {
             console.log("Couldn't get series metadata! Trying image metadata call");
             console.error(error1);
@@ -80,32 +56,27 @@ const NewMetaData = (props) => {
 
   const fillImageData = async () => {
     const data = await getImageData();
-    // console.log(" ++++++++++++> fillImageData", data);
-    const tempOutput = [];
     if (data) {
-      // console.log(" ++++> data", data);  
-      formText(data, tempOutput);
+      formText(data);
       setImageDownloaded(true);
     }
-    setOutput(tempOutput);
   }
 
   useEffect(() => {
     fillImageData();
-  }, [imageDownloaded])
+  }, [imageDownloaded, props.loading, props.activePort])
 
   const formText = (data) => {
     let resultData = {};
     try {
-        for (let tag in data) {
-            const result = returnValueFromVR(data, data[tag], tag, !!data[tag].vr);
-            resultData[tag] = result;
-        }
-        // console.log(" ==> result", resultData);
-        printDicomMetadata(resultData);
+      for (let tag in data) {
+        const result = returnValueFromVR(data, data[tag], tag, !!data[tag].vr);
+        resultData[tag] = result;
+      }
+      printDicomMetadata(resultData);
     } catch (err) {
-        console.log(" ++++> error in reding tags");
-        console.error(err);
+      console.log(" ++++> error in reding tags");
+      console.error(err);
     }
   }
 
@@ -121,25 +92,25 @@ const NewMetaData = (props) => {
         let text = `${tagName}: `;
         if (tagName && value && Array.isArray(value) && value.length > 0) {
           if (typeof value[0] === 'string' || typeof value[0] === 'number') {
-            // Handle different value representations
             value = value.join(', ');
           } else if (typeof value[0] === 'object') {
-              value = Object.entries(value[0])
-                  .map(([key, val]) => `${getTagName(key)}: ${val.Value}`)
-                  .join(' ');
+            value = Object.entries(value[0])
+              .map(([key, val]) => `${getTagName(key)}: ${val.Value}`)
+              .join(' ');
           } else {
-              value = value[0];
+            value = value[0];
           }
+
+        if (value && (value !== 'null' && value !== 'undefined')) {
           text = text + `${value}`;
           display.push(text);
+        }
       }
     }
-    console.log(display);
+    setOutput(display);
   }
 
   const returnValueFromVR = (dataset, field, tag, withVR) => { 
-    // console.log(" +++++> returnValueFromVR <++++++");
-    // console.log(field, tag, withVR) ;
     var Value = field.Value;
     var vr = field.vr;
   
@@ -236,19 +207,6 @@ const NewMetaData = (props) => {
     return result;
   };
   /*
-  componentDidMount() {
-    fillImageData();
-    // // const dataset = dcmjs.data.DicomMetaDictionary.namifyDataset(elements);
-    // Object.keys(elements).forEach(tag => {
-    //   const data = Object.assign({}, elements[tag]);
-    //   Object.keys(data.Value).forEach(index => {
-    //     console.log("inner", data.Value[index], index);
-    //   });
-    // });
-    // console.log("namedDataset", namedDataset);
-  }
-
-
   componentDidUpdate(prevProps) {
     if (prevProps.loading !== this.props.loading && !imageDownloaded) {
       this.fillImageData();
@@ -280,7 +238,12 @@ const NewMetaData = (props) => {
           <input value={input} type="text" onChange={onChangeHandler} />
         </div>
         <div>
-          {output.length && (<ul dangerouslySetInnerHTML={listHtml} />)}
+          {output.length > 0 && (<ul className="metadata-list"> {output.map((el, i) => 
+              <li className="metadata-line" key={`tag-${i}`}>
+                <span className="metadata-line__tag">{`${el.split(':')[0]}:`}</span>
+                <span className="metadata-line__info">{el.split(':')[1]}</span>
+              </li>
+              )} </ul>)}
         </div>
       </div>
       {/*  */}
