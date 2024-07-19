@@ -28,8 +28,8 @@ const NewMetaData = (props) => {
     const item = cornerstone.getEnabledElements()[activePort];
     const element = item ? item.element : null;
     const image = element ? cornerstone.getImage(element) : null;
-    if (image.data) data = image.data;
-    if (!image.data && props.imageData) {
+    if (image && image.data) data = image.data;
+    if ((!image || (image && !image.data)) &&  props.imageData) {
         try { 
             const seriesURL = props.imageData.imageID.replace("wadors:", "").split("/instances/")[0];
             ({ data } = await getMetadata(seriesURL));
@@ -59,7 +59,7 @@ const NewMetaData = (props) => {
 
   useEffect(() => {
     fillImageData();
-  }, [imageDownloaded, props.loading, props.activePort])
+  }, [imageDownloaded, props.loading, props.activePort, props.imageData])
 
   const formText = (data) => {
     let resultData = {};
