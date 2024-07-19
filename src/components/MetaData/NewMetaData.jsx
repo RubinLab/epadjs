@@ -2,17 +2,11 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import Draggable from "react-draggable";
 import cornerstone from "cornerstone-core";
-import DOMPurify from 'dompurify'
-import * as dcmjs from "dcmjs";
-import dicomParser from 'dicom-parser';
-import { uids } from "./uids";
-import { getImageMetadata, getImage } from "../../services/imageServices"
+import { getImageMetadata } from "../../services/imageServices"
 import { getMetadata } from "../../services/seriesServices";
-import { getAuthHeader } from "../../services/authService";
 import btoa from "./btoa";
 import getBulkDataURI from "./getBulkDataURI";
 import { DicomTags } from "./DICOMTags";
-
 import "./MetaData.css";
 
 const mapStateToProps = state => {
@@ -24,6 +18,7 @@ const mapStateToProps = state => {
 
 const NewMetaData = (props) => {
     const [output, setOutput] = useState([]);
+    const [filtered, setFiltered] = useState([]);
     const [input, setInput] = useState("");
     const [imageDownloaded, setImageDownloaded] = useState(false);
 
@@ -217,13 +212,21 @@ const NewMetaData = (props) => {
   // helper function to see if a string only has ascii characters in it
 
   const onChangeHandler = (e) => {
-    setInput(e.target.value)
+    const typed = e.target.value;
+    setInput(typed)
+    const filteredOutput = output.filter(d => typed === '' || d.toLowerCase().includes(typed.toLowerCase()));
+    setFiltered(filteredOutput);
   }
 
-  const lowerInput = input.toLowerCase();
-  const list = output.filter(d => input === '' || d.toLowerCase().includes(lowerInput));
-
-  const listHtml = { __html: DOMPurify.sanitize(list.join('')) };
+  const renderList = () => {
+    const listTorender = input ? filtered : output;
+    return listTorender.map((el, i) => 
+      <li className="metadata-line" key={`tag-${i}`}>
+        <span className="metadata-line__tag">{`${el.split(':')[0]}:`}</span>
+        <span className="metadata-line__info">{el.split(':')[1]}</span>
+      </li>
+      )
+  }
 
     return (imageDownloaded ? <Draggable handle="#handle">
       <div className="md-pop-up">
@@ -238,12 +241,7 @@ const NewMetaData = (props) => {
           <input value={input} type="text" onChange={onChangeHandler} />
         </div>
         <div>
-          {output.length > 0 && (<ul className="metadata-list"> {output.map((el, i) => 
-              <li className="metadata-line" key={`tag-${i}`}>
-                <span className="metadata-line__tag">{`${el.split(':')[0]}:`}</span>
-                <span className="metadata-line__info">{el.split(':')[1]}</span>
-              </li>
-              )} </ul>)}
+          {output.length > 0 && (<ul className="metadata-list">{ renderList() }</ul>)}
         </div>
       </div>
       {/*  */}
