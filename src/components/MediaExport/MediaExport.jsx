@@ -39,11 +39,12 @@ const tagsToInclude = [
   'x0008103E',
   'x00180080',
   'x00180081',
-  'x00100020'
+  'x00100020',
+  'x00100030'
 ];
 // PHI-related tags. If a tag is in this array, its data is only
 // included in the presentation if the 'Save Accession #' button is toggled on.
-const phiTags = ['x00080050', 'x00100020'];
+const phiTags = ['x00080050', 'x00100020', 'x00100030'];
 
 let wadoUrl;
 
@@ -327,6 +328,31 @@ class MediaExport extends Component {
     console.log(this.props.data);
   }
 
+  formatDate = (dicomDate) => {
+    return `${dicomDate.substring(4, 6)}/${dicomDate.substring(6, 8)}/${dicomDate.substring(
+        0, 4
+      )}`
+  }
+  getAge = (birthDate, date) => {
+    let age = '';
+    const studyDate = new Date(this.formatDate(date));
+    const dobDate = new Date(this.formatDate(birthDate));
+    const timeDiff = studyDate.getTime() - dobDate.getTime();
+    const timeDiffDate = new Date(timeDiff);
+    const dayDiff = Math.round(timeDiff / (1000 * 3600 * 24));
+    const years = timeDiffDate.getFullYear() - 1970;
+    if (dayDiff <= 59) {
+      age = `${dayDiff}-day-old `;
+    } else if (years < 2) {
+      let months = (studyDate.getFullYear() - dobDate.getFullYear()) * 12;
+      months += studyDate.getMonth() - dobDate.getMonth();
+      age = `${months}-month-old `;
+    } else {
+      age = `${years}-year-old `;
+    }
+    return age;
+  }
+
   // Got from Aim Editor and modified the required tags
   createImageDataFromMetadata = (id) => {
     const data = {};
@@ -355,7 +381,10 @@ class MediaExport extends Component {
     // we add the strings to output array
     for (const [tag, value] of Object.entries(dataSet)) {
       const isSensitiveTag = this.sensitiveTags.includes(tag);
-      if (!isSensitiveTag) {
+      if (tag === 'x00100030') {
+        array[0] += '  ' + this.getAge(value, dataSet['x00080020']) + '\n';
+      }
+      else if (!isSensitiveTag) {
         array[0] += '  ' + value + '\n';
       } else {
         array[1] += '  ' + value + '\n';
