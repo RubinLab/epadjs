@@ -42,7 +42,7 @@ class StudyCreationForm extends React.Component {
           this.props.onSubmit();
           this.props.onCancel();
           this.props.onResolve();
-          this.props.updateTreeDataOnSave(obj, 'study');
+          // this.props.updateTreeDataOnSave(obj, 'study');
           toast.success('Study successfully saved!');
         })
         .catch(error => {
