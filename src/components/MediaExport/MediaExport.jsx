@@ -35,7 +35,6 @@ const tagsToInclude = [
   'x00080050',
   'x00080020',
   'x00100040',
-  'x00101010',
   'x0008103E',
   'x00180080',
   'x00180081',
@@ -44,7 +43,7 @@ const tagsToInclude = [
 ];
 // PHI-related tags. If a tag is in this array, its data is only
 // included in the presentation if the 'Save Accession #' button is toggled on.
-const phiTags = ['x00080050', 'x00100020', 'x00100030'];
+const phiTags = ['x00080050', 'x00100020'];
 
 let wadoUrl;
 
