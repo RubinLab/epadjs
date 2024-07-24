@@ -174,16 +174,10 @@ class Plugins extends React.Component {
       }
     );
 
-    const tempPlugins = this.state.plugins;
-    let arrayIndex = -1;
-    for (let i = 0; i < tempPlugins.length; i++) {
-      if (tempPlugins[i].id === selectedPluginId) {
-        tempPlugins[i].projects = projectsArrayAsResponse.data;
-      }
-    }
+    const { data: plugins } = await getPluginsWithProject();
     this.setState({
       hasAddProjectClicked: false,
-      plugins: tempPlugins,
+      plugins,
       tableSelectedData: {},
     });
     this.props.dispatch(refreshPage('plugins', true));

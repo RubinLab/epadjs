@@ -20,8 +20,8 @@ const AddToWorklist = (props) => {
   const [firstRun, setFirstRun] = useState(true);
   const [selectedData, setSelectedData] = useState([]);
 
-  const formStudyData = () => {
-    const studies = Object.values(props.selectedStudies);
+  const formStudyData = (storedData) => {
+    const studies = storedData ? storedData : Object.values(props.selectedStudies);
     const data = [];
     studies.forEach(el => {
       const {
@@ -54,14 +54,18 @@ const AddToWorklist = (props) => {
   useEffect(() => {
     const studies = Object.values(props.selectedStudies);
     const subjects = Object.values(props.selectedPatients);
-    if (studies.length > 0) {
+    const { activePort, openSeriesAddition } = props;
+
+    if (props.toolMenu) {
+      formStudyData([openSeriesAddition[activePort]]);
+    } else if (studies.length > 0) {
       formStudyData();
     } else if (subjects.length > 0) {
       formPatientData();
     } else {
       setSelectedData({});
     }
-  }, [props.selectedPatients, props.selectedStudies])
+  }, [props.selectedPatients, props.selectedStudies, props.toolMenu])
 
   const addAnnotationsToWorklist = async (annotations, worklist) => {
     const aimIDs = Array.isArray(annotations) ? annotations : Object.keys(annotations);
@@ -79,7 +83,7 @@ const AddToWorklist = (props) => {
       // props.deselect();
       props.dispatch(clearSelection());
       if (mode !== 'teaching' && props.refresh) props.refresh();
-      else props.forceUpdatePage()
+      else if (props.forceUpdatePage) props.forceUpdatePage()
     } catch (e) {
       toast.error("Error adding annotation(s) to worklist.", {
         position: "top-right",
@@ -108,7 +112,7 @@ const AddToWorklist = (props) => {
       // props.deselect();
       props.dispatch(clearSelection());
       if (mode !== 'teaching' && props.refresh) props.refresh();
-      else props.forceUpdatePage();
+      else if (props.forceUpdatePage) props.forceUpdatePage();
     } catch (e) {
       toast.error("Error adding studies to worklist.", {
         position: "top-right",
@@ -136,7 +140,7 @@ const AddToWorklist = (props) => {
       // props.deselect();
       props.dispatch(clearSelection());
       if (mode !== 'teaching' && props.refresh) props.refresh();
-      else props.forceUpdatePage()
+      else if (props.forceUpdatePage) props.forceUpdatePage()
     } catch (e) {
       toast.error("Error adding subjects to worklist.", {
         position: "top-right",
@@ -159,7 +163,7 @@ const AddToWorklist = (props) => {
     const { selectedStudies, selectedPatients, selectedAnnotations } = props;
     const storedAims = Object.keys(selectedAnnotations);
     const selectedAims = storedAims.length > 0 ? storedAims : findSelectedCheckboxes();
-    if (Object.values(selectedStudies).length > 0) {
+    if (props.toolMenu || Object.values(selectedStudies).length > 0) {
       addSelectedStudiesToWorklist(workListID, selectedData);
     } else if (Object.values(selectedPatients).length > 0) {
       addSelectedSubjectsToWorklist(workListID, selectedData);
@@ -191,6 +195,27 @@ const AddToWorklist = (props) => {
         onClick(e);
       }}>
       <FaClipboardList /> <br />
+      {children}
+    </button>
+  ));
+
+  const CustomToggle1 = React.forwardRef(({ children, onClick }, ref) => (
+    <button type="button" ref={ref} className="btn btn-sm"
+    // className="btn btn-sm color-schema" 
+      style={{ 
+        color: "white",
+        paddingTop: "0rem",
+        paddingBottom: "1.2rem",
+        fontSize: "11px"
+      }}
+      onClick={e => {
+        if (firstRun) {
+          fillWorklists();
+          setFirstRun(false);
+        }
+        onClick(e);
+      }}>
+      <FaClipboardList style={{ fontSize: "1.1rem"}}/><br />
       {children}
     </button>
   ));
@@ -227,7 +252,7 @@ const AddToWorklist = (props) => {
 
   return (
     <Dropdown id="1" className="d-inline">
-      <Dropdown.Toggle as={props.parent !== "patientList" ? CustomToggleSearch : CustomToggleList} id="dropdown-custom-components">
+      <Dropdown.Toggle as={props.parent === "patientList" ? CustomToggleList : props.parent === "display" ? CustomToggle1 : CustomToggleSearch} id="dropdown-custom-components">
         Add To Worklist
       </Dropdown.Toggle>
 
@@ -249,7 +274,9 @@ const mapStateToProps = state => {
     selectedProjects: state.annotationsListReducer.selectedProjects,
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
+    activePort: state.annotationsListReducer.activePort,
+    openSeriesAddition: state.annotationsListReducer.openSeriesAddition
   };
 };
 export default connect(mapStateToProps)(AddToWorklist);

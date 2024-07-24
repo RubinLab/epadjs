@@ -427,7 +427,7 @@ const Report = props => {
         // if so copy the input array and delete the item from the copied input array
         uidData[actualRow].forEach((el, index) => {
           if (
-            !checkIfSeriesOpen(openSeries, el.seriesUID, 'seriesUID').isOpen
+            el && !checkIfSeriesOpen(openSeries, el.seriesUID, 'seriesUID').isOpen
           ) {
             notOpenSeries.push(el);
           }
@@ -566,7 +566,8 @@ const Report = props => {
                   {...{
                     data: data.waterfallExport,
                     headers: data.waterfallHeaders,
-                    filename: 'waterfall.csv'
+                    filename: 'waterfall.csv',
+                    className: 'csv-link'
                   }}
                 >
                   Export to CSV

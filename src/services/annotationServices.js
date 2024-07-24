@@ -1,4 +1,5 @@
 import http from "./httpService";
+import objectHash from 'object-hash';
 // const apiUrl = sessionStorage.getItem("apiUrl");
 // const mode = sessionStorage.getItem("mode");
 
@@ -73,9 +74,10 @@ export function getAnnotations2() {
 
 export function searchAnnotations(body, bookmark) {
   // body["fields"]={"teachingFiles":true};
-  const url = `${http.apiUrl()}/search${bookmark ? `?bookmark=${bookmark}` : ``
+  const hash = objectHash(body);
+  const url = `${http.apiUrl()}/search${bookmark ? `?bookmark=${bookmark}&hash=${hash}` : `?hash=${hash}`
     }`;
-  return http.put(url, body);
+  return http.post(url, body);
 }
 
 export function downloadAnnotations(optionObj, aimIDlist, projectID) {
@@ -91,6 +93,10 @@ export function downloadAllAnnotations(optionObj, aimIDlist) {
   const { summary, aim, seg } = optionObj;
   const url = `${http.apiUrl()}/aims/download?summary=${summary}&aim=${aim}&seg=${seg}`;
   return http.post(url, aimIDlist, { responseType: "blob" });
+}
+
+export function downloadAnnotationsWithLink(url) {
+  return http.get(url, { responseType: "blob" });
 }
 
 export function downloadProjectAnnotation(pid) {
@@ -206,4 +212,9 @@ export function uploadSegmentation(segmentation, segName, projectId = "lite") {
 
 export function getAnnotation(pid, aimID) {
   return http.get(http.apiUrl() + "/projects/" + encodeURIComponent(pid) + "/aims/" + encodeURIComponent(aimID));
+}
+
+export function uploadBulk(csvData, config) {
+  let url = http.apiUrl() + "/processCsv";
+  return http.post(url, csvData, config);
 }

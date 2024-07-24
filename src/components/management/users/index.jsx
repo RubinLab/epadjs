@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactTable from 'react-table-v6';
 import { FaCheck, FaRegTrashAlt, FaTimes } from 'react-icons/fa';
+import { BsList } from "react-icons/bs";
 import ReactTooltip from 'react-tooltip';
 import { connect } from 'react-redux';
 import '../menuStyle.css';
@@ -417,13 +418,11 @@ class Users extends React.Component {
       },
       {
         Header: 'Projects',
-        className: 'usersTable-cell',
         accessor: 'projects',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50,
-        className: 'mng-user__cell',
+        minWidth: 30,
         Cell: original => {
           const { projects } = original.row;
           const { projectMap } = this.props;
@@ -439,17 +438,18 @@ class Users extends React.Component {
               : 'Add user to a project';
           return (
             <>
-              <div
+             <button
                 id={`projects-${original.row.checkbox.username}`}
                 data-tip
                 data-for="users-projects"
+                className="btn btn-sm btn-outline-light"
                 onClick={() => {
                   this.displayUserRoleEdit();
                   this.saveClickedUser(original);
                 }}
               >
-                <p className={className}>{text}</p>
-              </div>
+                <BsList className="menu-clickable" />
+              </button>
               <ReactTooltip
                 id="users-projects"
                 place="right"

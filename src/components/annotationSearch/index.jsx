@@ -39,6 +39,8 @@ import {
   selectAnnotation,
   updateSearchTableIndex,
   refreshPage,
+  storeAimSelection,
+  storeAimSelectionAll
 } from "../annotationsList/action";
 import AnnotationDownloadModal from "../searchView/annotationDownloadModal";
 import UploadModal from "../searchView/uploadModal";
@@ -54,12 +56,13 @@ import Projects from "../searchView/addToProject";
 import Spinner from "react-bootstrap/Spinner";
 import SeriesModal from "../annotationsList/selectSerieModal";
 import WarningModal from "../common/warningModal";
+import ConfirmationModal from "../common/confirmationModal";
 import { COMP_MODALITIES as compModality } from "../../constants.js";
 import {
   isSupportedModality,
   findSelectedCheckboxes,
-  handleSelectDeselectAll,
-  resetSelectAllCheckbox,
+  // handleSelectDeselectAll,
+  // resetSelectAllCheckbox,
   findSelectedCheckboxesMap
 } from "Utils/aid.js";
 
@@ -82,7 +85,7 @@ const lists = {
   criteria: ["contains"], // 'equals'
 };
 
-const pageSize = 200;
+const pageSize = 50;
 
 const explanation = {
   invalidQuery: "This search query is not valid.",
@@ -173,10 +176,11 @@ const AnnotationSearch = (props) => {
   const [showDownload, setShowDownload] = useState(false);
   const [showSelectSeries, setShowSelectSeries] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
+  const [showDownloadAll, setShowDownloadAll] = useState(false);
   const [seriesList, setSeriesList] = useState([]);
   const [encArgs, setEncArgs] = useState("");
   const [decrArgs, setDecrArgs] = useState("");
-  const [allSelected, setAllSelected] = useState(false);
+  const [allSelected, setAllSelected] = useState({});
 
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -207,7 +211,7 @@ const AnnotationSearch = (props) => {
   };
 
   useEffect(() => {
-    resetSelectAllCheckbox(false);
+    props.dispatch(storeAimSelectionAll(null, null, null, true));
     if (mode === "teaching") return;
     setSelectedProject(props.pid);
     setQuery("");
@@ -674,6 +678,8 @@ const AnnotationSearch = (props) => {
         setRows(res.data.total_rows);
         setShowSpinner(false);
         props.completeLoading();
+        props.dispatch(storeAimSelection({}, -1));
+        if(!bm) setAllSelected({});
       })
       .catch((err) => {
         console.error(err);
@@ -756,6 +762,7 @@ const AnnotationSearch = (props) => {
   };
 
   const downloadProjectAim = () => {
+    setShowDownloadAll(false);
     if (props.pid === "all" || props.pid === "nonassigned") return;
     downloadProjectAnnotation(props.pid)
       .then((result) => {
@@ -767,6 +774,10 @@ const AnnotationSearch = (props) => {
             autoClose: false,
             position: "bottom-left",
           });
+        props.dispatch(storeAimSelection({}, -1));
+        setAllSelected(false);
+        const checkAll = document.getElementById("search-select_all");
+        checkAll.checked = false;
       })
       .catch((err) => console.error(err));
   };
@@ -1060,7 +1071,8 @@ const AnnotationSearch = (props) => {
     Promise.all(promiseArr)
       .then(() => {
         getNewData(props.searchTableIndex, true);
-        resetSelectAllCheckbox(false);
+        props.dispatch(storeAimSelectionAll(null, null, null, true));
+        props.dispatch(storeAimSelection({}, -1));
       })
       .catch((error) => {
         if (
@@ -1070,7 +1082,7 @@ const AnnotationSearch = (props) => {
         )
           toast.error(error.response.data.message, { autoClose: false });
         getNewData(props.searchTableIndex, true);
-        resetSelectAllCheckbox(false);
+        props.dispatch(storeAimSelectionAll(null, null, null, true));
       });
     setShowDeleteModal(false);
     props.dispatch(clearSelection());
@@ -1144,6 +1156,7 @@ const AnnotationSearch = (props) => {
       tempQueueObject.aims = {};
 
       const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+      props.dispatch(storeAimSelection({}, -1));
       let responseRunPluginsQueue = null;
       // console.log('plugin running queue ', JSON.stringify(resultAddQueue));
       // if (resultAddQueue && resultAddQueue.data){
@@ -1183,6 +1196,7 @@ const AnnotationSearch = (props) => {
         tempQueueObject.aims = aimObj;
 
         const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+        props.dispatch(storeAimSelection({}, -1));
         let responseRunPluginsQueue = null;
         console.log("plugin running queue ", JSON.stringify(resultAddQueue));
         // if (resultAddQueue && resultAddQueue.data){
@@ -1220,6 +1234,7 @@ const AnnotationSearch = (props) => {
       }
 
       const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+      props.dispatch(storeAimSelection({}, -1));
       let responseRunPluginsQueue = null;
       console.log("plugin running queue ", JSON.stringify(resultAddQueue));
       // if (resultAddQueue && resultAddQueue.data){
@@ -1255,6 +1270,38 @@ const AnnotationSearch = (props) => {
     setQuery("");
     clearAllTeachingFilers();
   };
+
+  const selectAll = (checked) => {
+    setAllSelected(checked);
+  }
+  
+  const aimDownload = () => {
+    // if all selected or non selected show confirmation modal
+
+    const arr = Object.keys(props.multipageAimSelection);
+    if (arr.length === 0) setShowDownloadAll(true);
+    else setShowDownload(!showDownload);
+  }
+
+  const selectAllChecked = checked => {
+    const { searchTableIndex } = props;
+    const pageData = data.slice(searchTableIndex * pageSize, (searchTableIndex + 1) * pageSize);
+    const map =  checked ? pageData.reduce((all, item, i) => {
+      const { aimID, name, subjectID, studyUID, seriesUID } = item;
+      all[aimID] = { aimID, name, subjectID, studyUID, seriesUID };
+      return all;
+    }, {}) : {};
+    props.dispatch(storeAimSelectionAll(checked, map, searchTableIndex));
+  }
+
+  const handleSelectDeselectAll = ({ target: { checked } }) => {
+    const { searchTableIndex } = props;
+    const curState = { ...allSelected };
+    if (checked) curState[searchTableIndex] = true;
+    else if (!checked && curState[searchTableIndex]) delete curState[searchTableIndex];
+    setAllSelected(curState);
+    selectAllChecked(checked);
+  }
 
   return (
     <>
@@ -1440,7 +1487,8 @@ const AnnotationSearch = (props) => {
             <button
               type="button"
               className="btn btn-sm"
-              onClick={() => setShowDownload(!showDownload)}
+              // onClick={() => setShowDownload(!showDownload)}
+              onClick={aimDownload}
             >
               <BiDownload />
               <br />
@@ -1450,15 +1498,13 @@ const AnnotationSearch = (props) => {
           {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
             <AddToWorklist
               deselect={() => {
-                handleSelectDeselectAll(false);
-                resetSelectAllCheckbox(false);
+                props.dispatch(storeAimSelectionAll(null, null, null, true));
               }}
               forceUpdatePage={props.forceUpdatePage}
             />
             <Projects
               deselect={() => {
-                handleSelectDeselectAll(false);
-                resetSelectAllCheckbox(false);
+                props.dispatch(storeAimSelectionAll(null, null, null, true));
               }}
               updateUrl={props.history.push}
             />
@@ -1561,9 +1607,8 @@ const AnnotationSearch = (props) => {
                   id="search-select_all"
                   className="form-check-input __select-all"
                   type="checkbox"
-                  onChange={({ target: { checked } }) =>
-                    handleSelectDeselectAll(checked)
-                  }
+                  onChange={handleSelectDeselectAll}
+                  checked={allSelected[props.searchTableIndex]}
                 />
               </div>
             </th>
@@ -1837,7 +1882,6 @@ const AnnotationSearch = (props) => {
           {data.length > 0 && !showSpinner && (
             <AnnotationTable
               data={data}
-              allSelected={allSelected}
               selected={props.selectedAnnotations}
               updateSelectedAims={updateSelectedAims}
               noOfRows={rows}
@@ -1900,6 +1944,15 @@ const AnnotationSearch = (props) => {
           }`}
         />
       )}
+      {showDownloadAll && (
+        <ConfirmationModal
+          onSubmit={downloadProjectAim}
+          onCancel={() => setShowDownloadAll(false)}
+          button={'Download All'}
+          title={"Downloading all"}
+          message={`Do you want to download all annotations of the project?`}
+        />
+      )}
     </>
   );
 };
@@ -1911,6 +1964,7 @@ const mapsStateToProps = (state) => {
     openSeries: state.annotationsListReducer.openSeries,
     searchTableIndex: state.annotationsListReducer.searchTableIndex,
     refreshMap: state.annotationsListReducer.refreshMap,
+    multipageAimSelection: state.annotationsListReducer.multipageAimSelection
   };
 };
 

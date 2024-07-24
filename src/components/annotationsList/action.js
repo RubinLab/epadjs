@@ -51,6 +51,9 @@ import {
   CLEAR_MULTIFRAME_AIM_JUMP,
   SET_SERIES_DATA,
   FILL_DESC,
+  STORE_AIM_SELECTION,
+  STORE_AIM_SELECTION_ALL,
+  TOGGLE_ALL_CALCULATIONS,
   colors,
   commonLabels,
 } from "./types";
@@ -72,6 +75,14 @@ const wadoUrl = sessionStorage.getItem('wadoUrl');
 
 export const fillSeriesDescfullData = (data) => {
   return { type: FILL_DESC, data };
+}
+
+export const storeAimSelection = (selectionMap, pageIndex) => {
+  return { type: STORE_AIM_SELECTION, payload: { selectionMap, pageIndex } };
+}
+
+export const storeAimSelectionAll = (checked, map, tbPageIndex, clearAll) => {
+  return { type: STORE_AIM_SELECTION_ALL, payload: { checked, map, tbPageIndex, clearAll } };
 }
 
 export const setSeriesData = (projectID, patientID, studyUID, seriesData, filled, mfMerged) => {
@@ -458,6 +469,13 @@ export const toggleAllLabels = (serieID, checked) => {
   return {
     type: TOGGLE_ALL_LABELS,
     payload: { serieID, checked },
+  };
+};
+
+export const toggleAllCalculations = (checked) => {
+  return {
+    type: TOGGLE_ALL_CALCULATIONS,
+    payload: { checked },
   };
 };
 

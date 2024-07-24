@@ -112,7 +112,7 @@ const ProjectAdd = (props) => {
       <Dropdown.Menu as={ProjectMenu} className="dropdown-menu p-2 dropdown-menu-dark" style={{ maxHeight: '20rem', overflow: 'auto', backgroundColor: '#333', borderColor: 'white', minWidth: '15rem', fontSize: '11px', scrollbarColor: 'inherit' }} >
         {projectNames?.map(({ projectName }, y) => {
           return (
-            <Dropdown.Item key={y} eventKey={projectIDs[y]} onSelect={eventKey => { addSelectionToProject(eventKey); updateUrl(`/search/${eventKey}`) }}>{projectName}</Dropdown.Item>
+            <Dropdown.Item key={y} eventKey={projectIDs[y]} onSelect={eventKey => { addSelectionToProject(eventKey)}}>{projectName}</Dropdown.Item>
           )
         })
         }

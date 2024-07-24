@@ -133,6 +133,7 @@ class TrackTab extends React.Component {
       //  alert("an error occourred while deleting plugin process");
     }
   };
+
   handleRunQueue = async () => {
     const tempPluginQueueList = [...this.state.pluginQueueList];
     const sequence = this.state.sequence;
@@ -141,11 +142,18 @@ class TrackTab extends React.Component {
     );
     if (responseRunPluginsQueue.status === 202) {
       console.log("queue is running");
+      try {
+        const tempPluginQueueList = await getPluginsQueue();
+        this.setState({ pluginQueueList: tempPluginQueueList.data })
+      } catch (err) {
+        console.error(err)
+      }
     } else {
       console.log("error happened while running queue");
     }
     this.setState({ selectedQueueIds: [] });
   };
+
   handleStartOne = async (dbid) => {
     console.log("start one ");
     const queuelist = [];
@@ -154,6 +162,12 @@ class TrackTab extends React.Component {
     const responseRunPluginsQueue = await runPluginsQueue({ ids: queuelist, sequence });
     if (responseRunPluginsQueue.status === 202) {
       console.log("queue is running");
+      try {
+        const tempPluginQueueList = await getPluginsQueue();
+        this.setState({ pluginQueueList: tempPluginQueueList.data })
+      } catch (err) {
+        console.error(err)
+      }
     } else {
       console.log("error happened while running queue");
     }

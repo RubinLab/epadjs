@@ -39,7 +39,8 @@ import {
   getTemplates,
   segUploadCompleted,
   annotationsLoadingError,
-  setSeriesData
+  setSeriesData,
+  storeAimSelectionAll
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
@@ -351,6 +352,7 @@ class App extends Component {
     let patient;
     if (selectedProject) {
       ({ data: patient } = await getSubject(selectedProject, name));
+      if (!patient.patientID) patient.patientID = patient.subjectID;
     } else {
       patient = this.props.selectedPatients[name];
     }
@@ -562,12 +564,15 @@ class App extends Component {
   };
 
   switchView = (viewType, force) => {
+    this.props.dispatch(clearSelection());
+    this.props.dispatch(storeAimSelectionAll(null, null, null, true));
+
     const { pid } = this.state;
     this.setState({ viewType });
     const { openSeries } = this.props;
     const portOpen = openSeries.length > 0;
     if (viewType === "list") {
-      this.props.dispatch(clearSelection());
+      // this.props.dispatch(clearSelection());
       if (!portOpen || force) {
         pid
           ? this.props.history.push(`/list/${pid}`)

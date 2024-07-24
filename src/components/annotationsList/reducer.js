@@ -52,6 +52,9 @@ import {
   CLEAR_MULTIFRAME_AIM_JUMP,
   SET_SERIES_DATA,
   FILL_DESC,
+  STORE_AIM_SELECTION,
+  STORE_AIM_SELECTION_ALL,
+  TOGGLE_ALL_CALCULATIONS,
   colors,
   commonLabels,
 } from "./types";
@@ -91,9 +94,24 @@ const initialState = {
   refreshMap: {},
   subpath: [],
   multiFrameAimJumpData: null,
-  seriesData: {}
+  seriesData: {},
+  multipageAimSelection: {},
+  showCalculations: false,
+  showLabels: false,
+  showAnnotations: true,
 };
 
+const checkLastAnnotationDeleted = (seriesList) => {
+  return seriesList.length === 1 && seriesList[0][2].length === 0;
+}
+
+const seriesUIDCounter = (arr) => {
+  const uidCountMap = arr.reduce((all, el, i) => {
+    all[el.seriesUID] = all[el.seriesUID] ? all[el.seriesUID] + 1 : 1;
+    return all;
+  }, {});
+  return uidCountMap;
+}
 const asyncReducer = (state = initialState, action) => {
   try {
     let aimRefs = {};
@@ -108,6 +126,30 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case TOGGLE_ALL_CALCULATIONS:
+        return { ...state, showCalculations: action.payload.checked };
+      case STORE_AIM_SELECTION_ALL:
+        const { checked, map, tbPageIndex, clearAll } = action.payload;
+        let newMultipageAimSelectionAll = _.cloneDeep(state.multipageAimSelection);
+        if (clearAll) newMultipageAimSelectionAll = {};
+        else if (checked) newMultipageAimSelectionAll[tbPageIndex] = map;
+        else delete newMultipageAimSelectionAll[tbPageIndex];
+        const newStateWithAimSelectionAll = { ...state, multipageAimSelection: newMultipageAimSelectionAll };
+        return newStateWithAimSelectionAll;
+      case STORE_AIM_SELECTION:
+        const { selectionMap, pageIndex } = action.payload;
+        let newMultipageAimSelection = _.cloneDeep(state.multipageAimSelection);
+        // clear selection
+        if (pageIndex < 0) newMultipageAimSelection = {};
+        // remove the page if nothing selected
+        else if (newMultipageAimSelection[pageIndex] && newMultipageAimSelection[pageIndex][selectionMap.aimID]) {
+          delete newMultipageAimSelection[pageIndex][selectionMap.aimID];
+        } else if (!newMultipageAimSelection[pageIndex])
+          newMultipageAimSelection[pageIndex] = { [selectionMap.aimID]: selectionMap };
+        // set selection
+        else newMultipageAimSelection[pageIndex][selectionMap.aimID] = selectionMap
+        const newStateWithAimSelection = { ...state, multipageAimSelection: newMultipageAimSelection };
+        return newStateWithAimSelection;
       case FILL_DESC:
         const descFilledOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
         const descFilledSeriesData = _.cloneDeep(state.seriesData);
@@ -252,7 +294,6 @@ const asyncReducer = (state = initialState, action) => {
             }
           }
         }
-
         newState.seriesData = newSeriesDataMulti;
         // newState.openSeries= series;
         newState.openSeriesAddition = seriesAddition;
@@ -328,7 +369,7 @@ const asyncReducer = (state = initialState, action) => {
         return { ...state, openSeries: aimIDClearedOpenSeries, openSeriesAddition: aimIDClearedOpenSeriesAddition };
       case UPDATE_IMAGEID:
         let openSeriesToUpdate = _.cloneDeep(state.openSeries);
-        const port = action.port || state.activePort;
+        const port = typeof action.port === 'number' ? action.port : state.activePort;
         openSeriesToUpdate[port].imageID = action.imageID;
         return { ...state, openSeries: openSeriesToUpdate };
       case CLOSE_SERIE: // tested
@@ -337,11 +378,19 @@ const asyncReducer = (state = initialState, action) => {
         let delPID = state.openSeries[state.activePort].projectID;
         let delPatientID = state.openSeries[state.activePort].patientID || state.openSeries[state.activePort].subjectID;
         let delOpenStudiesAddition = _.cloneDeep(state.openSeriesAddition);
+        let delShowCalculations = state.showCalculations;
+        let delShowLabels = state.showLabels;
+        let delShowAnnotations = state.showAnnotations;
+
         delOpenStudiesAddition.splice(state.activePort, 1);
+        const serUIDMap = seriesUIDCounter(state.openSeriesAddition);
         const delAims = { ...state.aimsList };
-        delete delAims[delSeriesUID];
+
+        if (serUIDMap[delSeriesUID] === 1) {
+          delete delAims[delSeriesUID];
+        }
         let delGrid = state.openSeries.slice(0, state.activePort);
-        let delSubpath = state.openSeries.slice(0, state.activePort);
+        let delSubpath = state.subpath.slice(0, state.activePort);
         delGrid = delGrid.concat(state.openSeries.slice(state.activePort + 1));
         delSubpath = delSubpath.concat(state.subpath.slice(state.activePort + 1));
         let shouldStudyExist = false;
@@ -359,14 +408,19 @@ const asyncReducer = (state = initialState, action) => {
           delActivePort = null;
           delOtherSeriesAimsList = {};
           delSeriesData = {};
+          delShowCalculations = false;
+          delShowLabels = false;
+          delShowAnnotations = true;
         } else {
           delActivePort = delGrid.length - 1;
         }
 
         if (!shouldStudyExist) {
           if (delGrid.length > 0) {
-            delete delOtherSeriesAimsList[delPID][delStudyUID];
-            delete delSeriesData[delPID][delPatientID][delStudyUID];
+            if (delOtherSeriesAimsList[delPID] && delOtherSeriesAimsList[delPID][delStudyUID])
+              delete delOtherSeriesAimsList[delPID][delStudyUID];
+            if (delSeriesData[delPID] && delSeriesData[delPID][delPatientID] && delSeriesData[delPID][delPatientID][delStudyUID])
+              delete delSeriesData[delPID][delPatientID][delStudyUID];
           }
           return {
             ...state,
@@ -375,7 +429,10 @@ const asyncReducer = (state = initialState, action) => {
             activePort: delActivePort,
             otherSeriesAimsList: delOtherSeriesAimsList,
             seriesData: delSeriesData,
-            openSeriesAddition: delOpenStudiesAddition
+            openSeriesAddition: delOpenStudiesAddition,
+            showCalculations: delShowCalculations,
+            showLabels: delShowLabels,
+            showAnnotations: delShowAnnotations
           };
         }
 
@@ -405,9 +462,18 @@ const asyncReducer = (state = initialState, action) => {
         let annCalc = Object.keys(action.payload.imageData);
         const { projectID: pidFromRef, studyUID: stUIDFromRef, seriesUID: serUIDFromRef } = action.payload.ref;
         let latestOtherSeriesAimsList = _.cloneDeep(state.otherSeriesAimsList);
-        if (latestOtherSeriesAimsList[pidFromRef] && action.payload.otherSeriesAimsData[pidFromRef])
-          latestOtherSeriesAimsList[pidFromRef][stUIDFromRef] = action.payload.otherSeriesAimsData[pidFromRef][stUIDFromRef];
-        else latestOtherSeriesAimsList[pidFromRef] = action.payload.otherSeriesAimsData[pidFromRef];
+
+        const projectHasAims = !!latestOtherSeriesAimsList && !!latestOtherSeriesAimsList[pidFromRef];
+        const studyHasAims = projectHasAims && !!latestOtherSeriesAimsList[pidFromRef][stUIDFromRef];
+
+        if (action.payload.otherSeriesAimsData[pidFromRef]) {
+          if (projectHasAims)
+            latestOtherSeriesAimsList[pidFromRef][stUIDFromRef] = action.payload.otherSeriesAimsData[pidFromRef][stUIDFromRef];
+          else
+            latestOtherSeriesAimsList[pidFromRef] = action.payload.otherSeriesAimsData[pidFromRef]
+        } else if (studyHasAims && checkLastAnnotationDeleted(latestOtherSeriesAimsList[pidFromRef][stUIDFromRef]) && !!!action.payload.otherSeriesAimsData[pidFromRef]) {
+          delete latestOtherSeriesAimsList[pidFromRef][stUIDFromRef];
+        }
 
         let numberOfimageAnnotationsMap = {};
         if (pidFromRef && latestOtherSeriesAimsList[pidFromRef] && latestOtherSeriesAimsList[pidFromRef][stUIDFromRef]) {
@@ -440,34 +506,43 @@ const asyncReducer = (state = initialState, action) => {
         // coming from the right sidebar hasMultiframe flag is overridden by the new data
         // if (imageAddedSeries.aimID && imageAddedSeries.hasMultiframe && imageAddedSeries.multiframeMap) {
 
+        const aimToJump = action.payload.ann || imageAddedSeries[state.activePort].aimID;
         const prevSameSer = state.openSeriesAddition.find(el => el.seriesUID === serUIDFromRef && !!el.frameData && !!el.multiFrameMap);
-        if ((imageAddedSeries[state.activePort].aimID && imageAddedSeries[state.activePort].multiFrameMap && imageAddedSeries[state.activePort].frameData) || !!prevSameSer) {
+        if ((aimToJump && imageAddedSeries[state.activePort].multiFrameMap && imageAddedSeries[state.activePort].frameData) || (!!prevSameSer && aimToJump)) {
           const fmData1 = !!imageAddedSeries[state.activePort].frameData ? imageAddedSeries[state.activePort].frameData : prevSameSer.frameData;
           const multiFrameMap1 = !!imageAddedSeries[state.activePort].multiFrameMap ? imageAddedSeries[state.activePort].multiFrameMap : prevSameSer.multiFrameMap;
           // const imgs = fmData1[action.payload.ann];
-          const imgs = fmData1[action.payload.ann];
+          const imgs = fmData1[aimToJump];
           const imgArr = imgs ? imgs[0].split('/frames/') : [];
           jumpArr1 = imgArr.length > 0 ? [parseInt(multiFrameMap1[imgArr[0]]), parseInt(imgArr[1]) - 1] : [];
           imageAddedSeries[state.activePort].multiFrameIndex = parseInt(multiFrameMap1[imgArr[0]]);
         }
+
+        const serAimData = state.aimsList[action.payload.serID];
         const newDataKeys = Object.keys(action.payload.aimsData);
-        const stateKeys = state.aimsList[action.payload.serID]
-          ? Object.keys(state.aimsList[action.payload.serID])
+        const stateKeys = serAimData
+          ? Object.keys(serAimData)
           : [];
 
         const colorAimsList =
           newDataKeys.length >= stateKeys.length
             ? persistColorInSaveAim(
-              state.aimsList[action.payload.serID] || {},
+              serAimData || {},
               action.payload.aimsData,
               colors
             )
             : persistColorInDeleteAim(
-              state.aimsList[action.payload.serID] || {},
+              serAimData || {},
               action.payload.aimsData,
               colors
             );
 
+        if (!state.showAnnotations || state.showLabels) {
+          for (let aim in colorAimsList) {
+            colorAimsList[aim].isDisplayed = state.showAnnotations;
+            colorAimsList[aim].showLabel = state.showLabels;
+          }
+        }
         // check if openSeries[activeport] is significant and teaching file 
         // if so check if seriesData is filled  // if not fill the data
         const { significanceOrder: order, template: tempCode } = state.openSeries[state.activePort];
@@ -482,7 +557,6 @@ const asyncReducer = (state = initialState, action) => {
             else seriesDataForTeaching[pidFromRef] = { [action.payload.ref.patientID]: { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] } };
           }
         }
-
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
@@ -542,33 +616,38 @@ const asyncReducer = (state = initialState, action) => {
         let { seriesUID, displayStatus } = action.payload;
         let toggleAnns = Object.assign({}, state.aimsList);
         for (let ann in toggleAnns[seriesUID]) {
-          toggleAnns[seriesUID][ann].isDisplayed = displayStatus;
+          if (typeof toggleAnns[seriesUID][ann] === 'object')
+            toggleAnns[seriesUID][ann].isDisplayed = displayStatus;
         }
         return Object.assign({}, state, {
           aimsList: toggleAnns,
+          showAnnotations: displayStatus
         });
       case TOGGLE_ALL_LABELS:
-        const toggledLabelSerie = { ...state.aimsList };
-        const anns = toggledLabelSerie[action.payload.serieID];
+        const toggledLabeAimList = _.cloneDeep(state.aimsList);
+        const anns = toggledLabeAimList[action.payload.serieID];
         const studyAims = {};
         for (let ann in anns) {
-          anns[ann].showLabel = action.payload.checked;
-          if (anns[ann].type === 'study') {
-            if (studyAims[ann]) delete studyAims[ann];
-            else studyAims[ann] = true;
+          if (typeof anns[ann] === 'object') {
+            anns[ann].showLabel = action.payload.checked;
+            if (anns[ann].type === 'study') {
+              if (studyAims[ann]) delete studyAims[ann];
+              else studyAims[ann] = true;
+            }
           }
         }
         if (Object.keys(studyAims).length > 0) {
           const ids = Object.keys(studyAims);
-          for (let series in toggledLabelSerie) {
+          for (let series in toggledLabeAimList) {
             if (series !== action.payload.serieID) {
               for (let id of ids) {
-                toggledLabelSerie[series][id].showLabel = action.payload.checked;
+                toggledLabeAimList[series][id].showLabel = action.payload.checked;
               }
             }
           }
         }
-        return Object.assign({}, state, { aimsList: toggledLabelSerie });
+
+        return Object.assign({}, state, { aimsList: toggledLabeAimList, showLabels: action.payload.checked });
 
       case TOGGLE_LABEL:
         const singleLabelToggled = { ...state.aimsList };
@@ -624,7 +703,10 @@ const asyncReducer = (state = initialState, action) => {
           aimsList: {},
           activePort: 0,
           seriesData: {},
-          openSeriesAddition: []
+          openSeriesAddition: [],
+          showCalculations: false,
+          showLabels: false,
+          showAnnotations: true,
         };
       case CLEAR_SELECTION:
         let selectionState = { ...state };
@@ -716,11 +798,16 @@ const asyncReducer = (state = initialState, action) => {
         const seriesInfo = { ...action.reference };
         const { projectMap } = state;
         let sameSerI = -1;
-        for (let i = 0; i < state.openSeriesAddition.length; i++)
+        for (let i = 0; i < state.openSeriesAddition.length; i++) {
           if (state.openSeriesAddition[i].seriesUID === seriesInfo.seriesUID) {
-            if ((state.openSeriesAddition[i].multiFrameIndex || seriesInfo.multiFrameIndex) && state.openSeriesAddition[i].multiFrameIndex === seriesInfo.multiFrameIndex) sameSerI = i
+            // if ((state.openSeriesAddition[i].multiFrameIndex || seriesInfo.multiFrameIndex) && state.openSeriesAddition[i].multiFrameIndex === seriesInfo.multiFrameIndex) sameSerI = i
+            // if (state.openSeriesAddition[i].multiFrameIndex === seriesInfo.multiFrameIndex && seriesInfo.multiFrameIndex !== undefined) {
+            sameSerI = i;
+            break;
+            // }
           };
-        const indexToCopyFm = action.port ? action.port : sameSerI;
+        }
+        // const indexToCopyFm = action.port ? action.port : sameSerI;
 
         if (projectMap[seriesInfo.projectID]) {
           seriesInfo.projectName = projectMap[seriesInfo.projectID].projectName;
@@ -734,15 +821,15 @@ const asyncReducer = (state = initialState, action) => {
         let newOpenSeries = [...state.openSeries];
         let newOpenSeriesAddtition = _.cloneDeep(state.openSeriesAddition);
 
-        const existingUID = newOpenSeriesAddtition[indexToCopyFm] ? newOpenSeriesAddtition[indexToCopyFm].seriesUID : ''
+        const existingUID = sameSerI > -1 ? newOpenSeriesAddtition[sameSerI].seriesUID : ''
         const newUID = seriesInfo.seriesUID;
         const sameSeries = existingUID && existingUID === newUID;
 
         let copyMFMap, copyFmData, copyImageAnnotations;
         if (sameSeries) {
-          copyMFMap = newOpenSeriesAddtition[indexToCopyFm].multiFrameMap;
-          copyFmData = newOpenSeriesAddtition[indexToCopyFm].frameData;
-          copyImageAnnotations = newOpenSeriesAddtition[indexToCopyFm].imageAnnotations;
+          copyMFMap = newOpenSeriesAddtition[sameSerI].multiFrameMap;
+          copyFmData = newOpenSeriesAddtition[sameSerI].frameData;
+          copyImageAnnotations = newOpenSeriesAddtition[sameSerI].imageAnnotations;
         }
 
         if (arePortsOccupied) {
@@ -827,7 +914,6 @@ const asyncReducer = (state = initialState, action) => {
         let updatedOpenSeriesAddition = _.cloneDeep(state.openSeriesAddition);
         updatedGrid[index].aimID = aimID;
         updatedOpenSeriesAddition[index].aimID = aimID;
-
         // return { ...state, openSeries: updatedGrid, aimsList: {...state.aimsList} };
         return Object.assign({}, state, {
           activePort: index,
@@ -926,7 +1012,7 @@ const asyncReducer = (state = initialState, action) => {
 
           if (reformedOtherSeries[serieToUpdateIndex] && reformedOtherSeries[serieToUpdateIndex][2] && reformedOtherSeries[serieToUpdateIndex][2].length === 0) {
             updatedSerie.numberOfAnnotations = 0;
-            if (deepOther[projectID][studyUID].length === 1) {
+            if (deepOther[projectID][studyUID].length === 1 && checkLastAnnotationDeleted(reformedOtherSeries)) {
               delete deepOther[projectID][studyUID];
             } else {
               const arr1 = deepOther[projectID][studyUID].slice(0, serieToUpdateIndex + 1);

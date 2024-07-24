@@ -7,7 +7,7 @@ import {
   downloadAllAnnotations
 } from "../../services/annotationServices";
 import { ToastContainer, toast } from "react-toastify";
-import { clearSelection } from "../annotationsList/action";
+import { clearSelection, storeAimSelectionAll } from "../annotationsList/action";
 import { findSelectedCheckboxes, resetSelectAllCheckbox } from '../../Utils/aid.js';
 import "../infoMenu/infoMenu.css";
 
@@ -24,10 +24,16 @@ class AnnnotationDownloadModal extends React.Component {
   onDownload = () => {
     const optionObj = this.state;
     const { pid, projectID } = this.props;
-    const annsToDownload =
-      Object.keys(this.props.selectedAnnotations).length > 0
-        ? this.props.selectedAnnotations : this.props.selected ?
-       this.props.selected : findSelectedCheckboxes();
+    let annsToDownload = [];
+    if (Object.keys(this.props.multipageAimSelection).length > 0) {
+      for (let page in this.props.multipageAimSelection) {
+        const aimIDs = Object.keys(this.props.multipageAimSelection[page]);
+        annsToDownload = annsToDownload.concat(aimIDs);
+      }
+    } else if (Object.keys(this.props.selectedAnnotations).length > 0) {
+      annsToDownload = Object.keys(this.props.selectedAnnotations);
+    }
+
     const aimList = Array.isArray(annsToDownload) ? annsToDownload : Object.keys(annsToDownload);
     // this.props.updateStatus();
     const promise =
@@ -39,17 +45,18 @@ class AnnnotationDownloadModal extends React.Component {
         let blob = new Blob([result[0].data], { type: "application/zip" });
         this.triggerBrowserDownload(blob, "Annotations");
         // this.props.updateStatus();
-        resetSelectAllCheckbox(false);
+        this.props.dispatch(storeAimSelectionAll(null, null, null, true));
+        this.props.dispatch(clearSelection());
         this.props.onSubmit();
       })
       .catch(err => {
-        console.log(err);
-        resetSelectAllCheckbox(false);
+        console.error(err);
+        this.props.dispatch(storeAimSelectionAll(null, null, null, true));
+        this.props.dispatch(clearSelection());
         if (err.response && err.response.status === 503) {
           toast.error("Select a download format!", { autoClose: false });
         }
       });
-    // this.props.dispatch(clearSelection());
     this.props.onCancel();
   };
 
@@ -162,7 +169,8 @@ AnnnotationDownloadModal.propTypes = {};
 
 const mapStateToProps = state => {
   return {
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
+    multipageAimSelection: state.annotationsListReducer.multipageAimSelection
   };
 };
 

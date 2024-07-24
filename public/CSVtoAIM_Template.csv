@@ -1,0 +1,2 @@
+Date,Name,Medical record number,SUID,Accession number,Sex,Date of birth,Modality,Description,Body part,Teaching file keywords,Specialty,Report author
+1/8/2024,"Mouse, Minnie",12345678,1.2.840.114350.2.171.2.798268.2.617460485.1,12345678,M,1/27/1982,MR,MR ABDOMEN W AND WO IV CONTRAST MRCP,ABDOMEN,"liver mass  (RID39466), lymphoma  (RID3840)",MR BODY,"Radiologist, Joe"

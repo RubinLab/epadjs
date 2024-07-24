@@ -17,12 +17,13 @@ import { isSupportedModality, otherSeriesOpened } from "../../Utils/aid.js";
 
 import "./SeriesDropDown.css";
 
-const maxPort = parseInt(sessionStorage.getItem("maxPort"));
+let maxPort; 
 
 const SeriesDropDown = (props) => {
   const [seriesList, setSeriesList] = useState([]);
   const [loading, setLoading] = useState(false);
   let mfIndex = {};
+  maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
   const checkMultiframe = () => {
     const { openSeries, activePort, openSeriesAddition } = props;
@@ -166,13 +167,11 @@ const SeriesDropDown = (props) => {
   const handleSelect = (e) => {
     const UIDArr = e.split("_");
     const seriesUIDFmEvent = UIDArr[0];
-    const multiFrameIndex = UIDArr[1] ? parseInt(UIDArr[1]) : null;
-    const { seriesUID } = props.openSeries[props.activePort];
+    const multiFrameIndex = parseInt(UIDArr[1]) ? parseInt(UIDArr[1]) : null;
 
     // if (multiFrameIndex === undefined) {
     const serie = seriesList.find((element) => multiFrameIndex ? element.seriesUID === seriesUIDFmEvent && multiFrameIndex === element.multiFrameIndex : element.seriesUID === seriesUIDFmEvent);
-    if ( multiFrameIndex ) serie.multiFrameIndex = multiFrameIndex;
-    else serie.multiFrameIndex = null;
+    serie.multiFrameIndex = multiFrameIndex;
 
     if (props.isAimEditorShowing) {
         // if (!props.onCloseAimEditor(true))
@@ -180,7 +179,6 @@ const SeriesDropDown = (props) => {
     }
 
     const { isOpen, index } = checkIfSerieOpen(e);
-
     if (!isOpen) { 
       if ( props.openSeriesAddition.length < maxPort ) {
         const { list }  = findSeriesListFmStore(); 

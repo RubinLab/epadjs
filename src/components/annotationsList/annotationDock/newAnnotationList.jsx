@@ -8,6 +8,7 @@ import {
   toggleAllLabels,
   toggleSingleLabel,
   toggleAllAnnotations,
+  toggleAllCalculations
 } from "../action";
 import { deleteAnnotation } from "../../../services/annotationServices";
 import cornerstone from "cornerstone-core";
@@ -18,34 +19,17 @@ let wadoUrl;
 class AnnotationsList extends React.Component {
   wadoUrl = sessionStorage.getItem("wadoUrl");
   state = {
-    labelDisplayAll: false,
-    annsDisplayAll: true,
     showCalculations: false,
   };
 
   componentDidUpdate = (prevProps) => {
-    try {
-      const series = Object.keys(this.props.aimsList);
-      if (
-        (this.props.activePort !== prevProps.activePort &&
-          !this.props.loading) ||
-        (!this.props.loading &&
-          prevProps.loading &&
-          series.length === this.props.openSeries.length)
-      ) {
-        const { seriesUID } = this.props.openSeries[this.props.activePort];
-        let annotations = this.props.aimsList[seriesUID] ? Object.values(this.props.aimsList[seriesUID]) : [];
-        let labelDisplayAll = true;
-        let annsDisplayAll = true;
+    const { showCalculations, aimsList, activePort, openSeriesAddition } = this.props;
+    const { seriesUID } = openSeriesAddition[activePort];
+    const prevAims = prevProps.aimsList[seriesUID] ? Object.keys(prevProps.aimsList[seriesUID]) : [];
+    const curAims = aimsList[seriesUID] ? Object.keys(aimsList[seriesUID]) : [];
 
-        annsDisplayAll = annotations[0]?.isDisplayed;
-        labelDisplayAll = annotations[0]?.showLabel;
-
-        this.setState({ labelDisplayAll, annsDisplayAll });
-      }
-    } catch (err) {
-      console.error(err);
-    }
+    state.showCalculations = showCalculations; //set the cornerstone state with componenets state
+    this.refreshAllViewports();
   };
 
   handleDisplayClick = (e) => {
@@ -86,27 +70,29 @@ class AnnotationsList extends React.Component {
   };
 
   handleCalculations = ({ target }) => {
-    this.setState({ showCalculations: target.checked }, () => {
-      state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
-      this.refreshAllViewports();
-    });
+    this.props.dispatch(toggleAllCalculations(target.checked));
+    state.showCalculations = target.checked;
+    this.refreshAllViewports();
+    // this.setState({ showCalculations: target.checked }, () => {
+    //   state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
+    //   this.refreshAllViewports();
+    // });
   };
 
   handleToggleAllLabels = ({ target }, e, id) => {
-    this.setState({ labelDisplayAll: target.checked });
-    const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
-    this.props.dispatch(toggleAllLabels(seriesUID, target.checked));
+    this.props.openSeries.forEach(el => this.props.dispatch(toggleAllLabels(el.seriesUID, target.checked)));
   };
 
   handleToggleAllAnnotations = ({ target }, e, id) => {
-    const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
-    this.props.dispatch(toggleAllAnnotations(seriesUID, target.checked));
-    window.dispatchEvent(
-      new CustomEvent("toggleAnnotations", {
-        detail: { isVisible: target.checked },
-      })
-    );
-    this.setState({ annsDisplayAll: target.checked });
+    this.props.openSeries.forEach((el, i) => {
+      const { seriesUID } = el;
+      this.props.dispatch(toggleAllAnnotations(seriesUID, target.checked));
+      window.dispatchEvent(
+        new CustomEvent("toggleAnnotations", {
+          detail: { isVisible: target.checked },
+        })
+      );
+    });
   };
 
   handleToggleSingleLabel = (e) => {
@@ -279,7 +265,8 @@ class AnnotationsList extends React.Component {
                     role="switch"
                     id="showAnnotations"
                     onChange={this.handleCalculations}
-                    checked={this.state.showCalculations}
+                    checked={this.props.showCalculations}
+                    name="showCalculations"
                   />
                   <label
                     className="form-check-label"
@@ -294,7 +281,8 @@ class AnnotationsList extends React.Component {
                     role="switch"
                     id="showAnnotations"
                     onChange={this.handleToggleAllLabels}
-                    checked={this.state.labelDisplayAll}
+                    checked={this.props.showLabels}
+                    name="showLabels"
                   />
                   <label
                     className="form-check-label"
@@ -309,7 +297,8 @@ class AnnotationsList extends React.Component {
                     role="switch"
                     id="showAnnotations"
                     onChange={this.handleToggleAllAnnotations}
-                    checked={this.state.annsDisplayAll}
+                    checked={this.props.showAnnotations}
+                    name="showAnnotations"
                   />
                   <label
                     className="form-check-label"
@@ -321,7 +310,7 @@ class AnnotationsList extends React.Component {
               </div>
             </div>
 
-            <div>{annList}</div>
+            <div className="annList-container">{annList}</div>
             <AnnotationsLink imageAims={imageAims} />
           </React.Fragment>
         )}
@@ -338,6 +327,9 @@ const mapStateToProps = (state) => {
     aimsList: state.annotationsListReducer.aimsList,
     imageID: state.annotationsListReducer.imageID,
     loading: state.annotationsListReducer.loading,
+    showCalculations: state.annotationsListReducer.showCalculations,
+    showLabels: state.annotationsListReducer.showLabels,
+    showAnnotations: state.annotationsListReducer.showAnnotations,
   };
 };
 export default connect(mapStateToProps)(AnnotationsList);

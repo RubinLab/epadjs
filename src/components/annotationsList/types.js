@@ -64,7 +64,9 @@ export const CHECK_MULTIFRAME = 'epadjs/annotationList/CHECK_MULTIFRAME';
 export const CLEAR_MULTIFRAME_AIM_JUMP = 'epadjs/annotationList/CLEAR_MULTIFRAME_AIM_JUMP';
 export const SET_SERIES_DATA = 'epadjs/annotationList/SET_SERIES_DATA';
 export const FILL_DESC = 'epadjs/annotationList/FILL_DESC';
-
+export const STORE_AIM_SELECTION = 'epadjs/annotationList/STORE_AIM_SELECTION';
+export const STORE_AIM_SELECTION_ALL = 'epadjs/annotationList/STORE_AIM_SELECTION_ALL';
+export const TOGGLE_ALL_CALCULATIONS = 'epadjs/annotationList/TOGGLE_ALL_CALCULATIONS'
 export const commonLabels = {
   button: { background: "#6c757d", color: "#ECECEC", border: "#acacac solid 1px" },
   label: { background: "#616970", color: "white" },
