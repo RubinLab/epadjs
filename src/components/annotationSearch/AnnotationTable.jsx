@@ -826,6 +826,9 @@ function AnnotationTable(props) {
           Header: "Patient Id",
           accessor: "subjectID",
         },
+        { Header: "Acc No",
+          accessor: "accessionNumber"
+        },
         {
           Header: "Annotation Name",
           accessor: "name",
