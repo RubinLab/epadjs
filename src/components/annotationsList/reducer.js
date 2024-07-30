@@ -936,6 +936,7 @@ const asyncReducer = (state = initialState, action) => {
           projectMap: action.projectMap,
         };
       case SET_SEG_LABEL_MAP_INDEX: {
+        // console.log(" ---> SET_SEG_LABEL_MAP_INDEX");
         const { aimID, labelMapIndex } = action.payload;
         return {
           ...state,
@@ -951,12 +952,14 @@ const asyncReducer = (state = initialState, action) => {
         });
       }
       case SEG_UPLOAD_COMPLETED: {
+        console.log(" ---> SEG_UPLOAD_COMPLETED");
         let segUid = action.payload;
         return Object.assign({}, state, {
           isSegUploaded: { ...state.isSegUploaded, [segUid]: true },
         });
       }
       case SEG_UPLOAD_REMOVE: {
+        console.log(" ---> SEG_UPLOAD_REMOVE");
         let segUid = action.payload;
         const { [segUid]: value, ...theRest } = state.isSegUploaded;
         return Object.assign({}, state, {

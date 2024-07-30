@@ -37,12 +37,14 @@ export default class BrushTool extends BaseBrushTool {
    * @returns {void}
    */
   _paint(evt) {
+    // console.log(" ====> in paint")
     const { configuration } = segmentationModule;
     const eventData = evt.detail;
     const element = eventData.element;
     const { rows, columns } = eventData.image;
     const { x, y } = eventData.currentPoints.image;
-
+    // console.log(" ====> element", element);
+    // console.log(eventData);
     if (x < 0 || x > columns || y < 0 || y > rows) {
       return;
     }
@@ -51,6 +53,7 @@ export default class BrushTool extends BaseBrushTool {
     const pointerArray = getCircle(radius, rows, columns, x, y);
 
     const { labelmap2D, labelmap3D, shouldErase } = this.paintEventData;
+
 
     // Draw / Erase the active color.
     drawBrushPixels(

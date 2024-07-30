@@ -19,6 +19,13 @@ function drawBrushPixels(
 ) {
   const getPixelIndex = (x, y) => y * columns + x;
 
+  console.log("---->   pointerArray,", pointerArray);
+  console.log("---->   pixelData,", pixelData);
+  console.log("---->   segmentIndex,", segmentIndex);
+  console.log("---->   columns,", columns);
+  console.log("---->   shouldErase = false", shouldErase);
+
+
   pointerArray.forEach(point => {
     const spIndex = getPixelIndex(...point);
 

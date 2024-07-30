@@ -663,6 +663,7 @@ class DisplayView extends Component {
   };
 
   setVisibilityOfSegmentations = (aimID, element, setVisibilityTo) => {
+    console.log(" ----> setVisibilityOfSegmentations");
     const { series, activePort, aimSegLabelMaps } = this.props;
     const { seriesUID } = series[activePort];
     const { setters, getters } = cornerstoneTools.getModule("segmentation");
@@ -682,6 +683,7 @@ class DisplayView extends Component {
   };
 
   getLabelMapsOfSerie = (seriesUID) => {
+    console.log(" ---> getLabelMapsOfSerie");
     const segAims = this.getSegmentationAimsOfSerie(seriesUID);
     const { aimSegLabelMaps } = this.props;
     return segAims.map((aimId) => {
@@ -1304,6 +1306,7 @@ class DisplayView extends Component {
   };
 
   openAimEditor = (aimID, seriesUID) => {
+    console.log(" ---> openAimEditor");
     try {
       const { aimList } = this.props;
       if (Object.entries(aimList).length !== 0) {
@@ -1336,6 +1339,7 @@ class DisplayView extends Component {
   // };
 
   setActiveLabelMapIndex = (index) => {
+    console.log(" ---> setActiveLabelMapIndex");
     // console.log("Parameter element", element);
     // console.log("Element", cornerstone.getEnabledElements());
     const { setters } = cornerstoneTools.getModule("segmentation");
@@ -1620,6 +1624,7 @@ class DisplayView extends Component {
   };
 
   handleMarkupSelected = (event) => {
+    console.log(" ---> handleMarkupSelected");
     const { aimList, series, activePort } = this.props;
     const { seriesUID } = series[activePort];
     const { aimId, ancestorEvent } = event.detail;
@@ -1682,8 +1687,11 @@ class DisplayView extends Component {
   handleMarkupCreated = (event) => {
     const { detail } = event;
     const { hasSegmentation } = this.state;
+    console.log(" ----> has segmentation", hasSegmentation);
+    console.log(" ----> detail", detail);
 
     if (!hasSegmentation && detail === "brush") {
+      console.log(" ---> in if")
       this.setState({ hasSegmentation: true });
       this.refreshAllViewports();
     }
@@ -1716,6 +1724,7 @@ class DisplayView extends Component {
   };
 
   parseAims = (aimList, seriesUid, studyUid, serieIndex) => {
+    console.log(" ----> parseAims")
     const seriesSegmentations = [];
     const wadors = wadoUrl.includes("wadors");
     Object.entries(aimList).forEach(([key, values]) => {
@@ -1893,7 +1902,10 @@ class DisplayView extends Component {
           },
         });
         this.setSerieActiveLabelMap(aimID);
-      });
+      }).catch((err1 => {
+        console.log(" fails here!");
+        console.error(err1);
+      }));
     } catch (error) {
       console.error(error);
     }
