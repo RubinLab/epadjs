@@ -1688,7 +1688,10 @@ class DisplayView extends Component {
       this.refreshAllViewports();
     }
     this.setDirtyFlag();
-    this.setState({ showAimEditor: true, selectedAim: undefined });
+    // this was setting the aimeditor to create aim mode when I start painting with the brush to edit the segmentation.
+    // not sure if it can cause any issues
+    // this.setState({ showAimEditor: true, selectedAim: undefined });
+    this.setState({ showAimEditor: true});
   };
 
   setActive = async (i) => {
@@ -1872,7 +1875,9 @@ class DisplayView extends Component {
             segLabelMaps[aimUid] = i;
           }
         );
-        const aimID = this.props.series[serieIndex] ? this.props.series[serieIndex].aimID : null;
+        // check if we need to put aim in edit mode
+        // this might not be necessary
+        const aimID = this.showAimEditor && this.props.series[serieIndex] ? this.props.series[serieIndex].aimID : null;
         const { seriesLabelMaps } = this.state;
         // If an aim is selected and it has segmentatio set the activeLabelMap of serie as selected
         // aim's labelMap. Else set it as the next available labelMap to brush new segs
@@ -1914,7 +1919,8 @@ class DisplayView extends Component {
     });
     Promise.all(imagePromises).then(() => {
       let newLabelMapIndex;
-      if (!aimId) {
+      // We do not put segmentation in edit mode if show aim editor is false
+      if (!aimId && this.state.showAimEditor) {
         const { aimID } = series[activePort];
         aimId = aimID;
       }
@@ -2014,9 +2020,11 @@ class DisplayView extends Component {
 
         const { setters, getters } = cornerstoneTools.getModule("segmentation");
 
+        // send in the ArrayBuffer itself
+        // generateToolStatereturns an array of array buffers with version 4, but labelmap3DByFirstImageId wants just one arraybuffer
         setters.labelmap3DByFirstImageId(
           imageIds[0],
-          labelmapBufferArray,
+          labelmapBufferArray[0],
           labelMapIndex,
           segMetadata.data,
           imageIds.length,
