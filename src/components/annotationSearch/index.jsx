@@ -1650,10 +1650,9 @@ const AnnotationSearch = (props) => {
                 value={filters.subjectID || ""}
               />
             </th>
-            {mode === "teaching" && (
-              <th>
+            <th>
                 <span onClick={() => handleSort("accessionNumber")}>
-                  Accession #{" "}
+                  Accession#{" "}
                 </span>
                 {(sort[0] === "accessionNumber" && (
                   <AiOutlineSortAscending style={{ fontSize: "1.5em" }} />
@@ -1671,8 +1670,7 @@ const AnnotationSearch = (props) => {
                   }
                   value={filters.accessionNumber || ""}
                 />
-              </th>
-            )}
+            </th>
             <th>
               <span onClick={() => handleSort("name")}>
                 {mode === "teaching" ? "Case Title" : "Annotation Name"}{" "}
