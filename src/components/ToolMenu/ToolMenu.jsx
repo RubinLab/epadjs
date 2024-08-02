@@ -432,8 +432,8 @@ class ToolMenu extends Component {
       const max = parseInt(maxPort);
       const imgStatus = new Array(max);
       sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
-      if (mode !== "teaching") this.props.onSwitchView("search");
-      else this.props.onSwitchView("annotations");
+      if (mode === "thick") this.props.onSwitchView("list");
+      else this.props.onSwitchView("search");
       return;
     } else if (tool === "Presets") {
       this.showPresets();
