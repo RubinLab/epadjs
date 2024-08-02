@@ -885,7 +885,28 @@ function AnnotationTable(props) {
         },
         {
           Header: "Comment",
-          accessor: "userComment",
+          Cell: ({ row }) => {
+            const text = row.original.userComment;
+            const subText =
+              text || text?.length >= 100 ? text.substring(0, 100) + "..." : "";
+            return (
+              <>
+                <div data-tip data-for="narrative">
+                  {subText}
+                </div>
+                <ReactTooltip
+                  id="narrative"
+                  place="left"
+                  type="info"
+                  delayShow={500}
+                >
+                  <span className="filter-label">
+                    Please open aim to see the comment!
+                  </span>
+                </ReactTooltip>
+              </>
+            );
+          },
         },
       ],
       // [data, listOfSelecteds, props.selectedAnnotations]
