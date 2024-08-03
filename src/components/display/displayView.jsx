@@ -278,6 +278,21 @@ class DisplayView extends Component {
     else return true;
   }
 
+  checkImgAnnsFilled = (oldSeries, newSeries) => {   
+    try { 
+      if (oldSeries && newSeries)
+        for (let i = 0; i < newSeries.length; i++) {
+          // const sameSeries = oldSeries[i] &&  newSeries[i] && oldSeries[i].seriesUID === newSeries[i].seriesUID;
+          if (!oldSeries[i].imageAnnotations && !!newSeries[i].imageAnnotations) {
+            return true;
+          }
+        }
+      return false; }
+    catch (err) {
+      console.error(err)
+    }
+  }
+
   async componentDidUpdate(prevProps, prevState) {
     const {
       pid,
@@ -336,8 +351,9 @@ class DisplayView extends Component {
     // prevProps.seriesAddition[activePort].numberOfAnnotations;
     aimsDeletedOrSaved = currentAimsCalc !== prevAimsCalc;
     const aimEditSaved = this.state.aimEdited && prevLoading && !loading;
+    const imgAnnsLoaded = this.checkImgAnnsFilled(prevSeriesAddition, seriesAddition);
     const rerenderAims =
-      newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved || studyAimsLengthChanged;
+      newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved || studyAimsLengthChanged || imgAnnsLoaded;
 
     // TODO: check if loading/true-false control is required for the first condition
 
@@ -385,7 +401,7 @@ class DisplayView extends Component {
     // each time visibility of aims change
     // else if (rerenderAims) {
       else if (rerenderAims) {
-      this.renderAims(false, rerenderAims);
+      this.renderAims(false);
       //TODO: check if filling aimsList process changes openseries
       // if chanes sever that data from openseries
       // refresh only cornerstone by calling this.renderAims();

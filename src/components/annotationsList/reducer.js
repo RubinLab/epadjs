@@ -592,18 +592,11 @@ const asyncReducer = (state = initialState, action) => {
 
       case CHANGE_ACTIVE_PORT:
         //get openseries iterate over the
-        const changedPortSeriesAddition = state.openSeriesAddition.map((serie) => {
-          const newSerie = _.cloneDeep(serie);
-          newSerie.aimID = null;
-          return newSerie;
-        });
 
+        const changedPortSeriesAddition = _.cloneDeep(state.openSeriesAddition);
         const changedPortSeries = _.cloneDeep(state.openSeries);
-        for (let i = 0; i < changedPortSeries.length; i++) {
-          if (i !== action.portIndex) {
-            changedPortSeries[i].aimID = null;
-          }
-        }
+        changedPortSeries[action.portIndex].aimID = null;
+        changedPortSeriesAddition[action.portIndex].aimID = null;
 
         return Object.assign({}, state, {
           activePort: action.portIndex,
