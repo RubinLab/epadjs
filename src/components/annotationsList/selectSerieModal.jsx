@@ -346,7 +346,7 @@ class selectSerieModal extends React.Component {
         let disabled = !selectedToDisplay[seriesUID] && limit >= this.maxPort;
         let seriesNo = series[i][k].seriesNo || "";
         let desc = series[i][k].seriesDescription;
-        let description = desc ? desc : !desc && series[i][k].significanceOrder ? `Sig ser ${series[i][k].significanceOrder}` :  "Unnamed Series";
+        let description = desc ? desc : !desc && series[i][k].significanceOrder ? `Sig Series ${series[i][k].significanceOrder}` :  "Unnamed Series";
         desc = `${seriesNo} - ${description}`;
         if (series[i][k].significanceOrder) {
           desc = desc + " (S)";
