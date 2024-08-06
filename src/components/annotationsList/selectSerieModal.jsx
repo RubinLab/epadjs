@@ -164,16 +164,19 @@ class selectSerieModal extends React.Component {
     }
   };
 
-  setSignificantSeries = (series) => {
+  saveSignificantSeries = (series) => {
     const { selectedToDisplay } = this.state;
     let significantSeries = [];
     let significanceOrder = 1;
     let significanceSet = series.some((serie) => serie.significanceOrder > 0);
     for (let key of Object.keys(selectedToDisplay)) {
+      const ser = series.filter(el => el.seriesUID === key);
+      const seriesDescription = ser.length > 0 ? ser[0].seriesDescription : null;
       if (!significanceSet) {
         significantSeries.push({
           seriesUID: key,
           significanceOrder,
+          seriesDescription
         });
         significanceOrder++;
       }
@@ -209,7 +212,7 @@ class selectSerieModal extends React.Component {
     studies.forEach((arr) => {
       series = series.concat(arr);
     });
-    this.setSignificantSeries(series);
+    this.saveSignificantSeries(series);
 
     //concatanete all arrays to getther
     for (let key of Object.keys(selectedToDisplay)) {
@@ -478,7 +481,7 @@ class selectSerieModal extends React.Component {
         studies.forEach((arr) => {
           series = series.concat(arr);
         });
-        await this.setSignificantSeries(series);
+        await this.saveSignificantSeries(series);
         window.dispatchEvent(new Event("refreshProjects"));
         // to prevent concatanating the annotation list pass afterDelete parameter true
         this.props.onSave(this.props.searchTableIndex, true);
