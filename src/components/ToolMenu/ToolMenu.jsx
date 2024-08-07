@@ -169,7 +169,7 @@ class ToolMenu extends Component {
       { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate", teaching: true },
       // { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
       { name: "Color", icon: <FaPalette />, tool: "colorLut" },
-      { name: "Fusion", icon: <FaObjectUngroup />, tool: "fuse" },
+      { name: "Fusion", icon: <FaObjectUngroup />, tool: "fuse", teaching: true },
     ];
 
     this.markupTools = [
