@@ -301,12 +301,12 @@ class ToolMenu extends Component {
   }
 
   handleKeyPressed = (event) => {
-    // ctrl + c => Reset
+    // space bar => Reset
     if (
       event.target.nodeName !== "INPUT" &&
       event.target.nodeName !== "TEXTAREA"
     ) {
-      if (event.keyCode == 67 && event.ctrlKey) {
+      if (event.keyCode == 32) {
         this.handleToolClicked(1, "Reset");
       }
       // d => Length
