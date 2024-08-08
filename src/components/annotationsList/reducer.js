@@ -228,7 +228,6 @@ const asyncReducer = (state = initialState, action) => {
           const frameNo = parseInt(imgArr[1]);
           if (mfIndex && typeof frameNo === 'number' && !isNaN(frameNo)) jumpArr = [mfIndex, frameNo - 1];
         }
-
         seriesAddition[portInx].hasMultiframe = hasMultiframe;
         seriesAddition[portInx].multiFrameIndex = multiframeIndex;
         seriesAddition[portInx].multiFrameMap = multiFrameMap;
@@ -515,7 +514,7 @@ const asyncReducer = (state = initialState, action) => {
           const imgs = fmData1[aimToJump];
           const imgArr = imgs ? imgs[0].split('/frames/') : [];
           jumpArr1 = imgArr.length > 0 ? [parseInt(multiFrameMap1[imgArr[0]]), parseInt(imgArr[1]) - 1] : [];
-          imageAddedSeries[state.activePort].multiFrameIndex = parseInt(multiFrameMap1[imgArr[0]]);
+          imageAddedSeries[state.activePort].multiFrameIndex = !isNaN(parseInt(multiFrameMap1[imgArr[0]])) ? parseInt(multiFrameMap1[imgArr[0]]) : null;
         }
 
         const serAimData = state.aimsList[action.payload.serID];
