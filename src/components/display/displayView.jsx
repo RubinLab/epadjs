@@ -2439,6 +2439,8 @@ class DisplayView extends Component {
   };
 
   newImage = (event, index) => {
+    console.log(" ---> imageData");
+    console.log(event.detail.image);
     let { imageId } = event.detail.image;
     imageId = this.parseImgeId(imageId); //strip from cs imagePath to imageId
     const { activePort } = this.props;
