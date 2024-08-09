@@ -2334,7 +2334,7 @@ class DisplayView extends Component {
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
     imgStatus[this.props.activePort] = null;
-    this.setState({ invertMap: {} });
+    this.formInvertMap();
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
   };
 
