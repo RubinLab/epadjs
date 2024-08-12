@@ -588,14 +588,20 @@ class CornerstoneViewport extends Component {
   onImageRendered = (event) => {
     const { viewport, element, image } = event.detail;
     const { viewportIndex } = this.props;
-    
-    event.detail.viewport.invert = this.props.shouldInvert;
-    cornerstone.setViewport(element, viewport);
+
 
     // let wwwc = sessionStorage.getItem('wwwc');
     let imgStatus = sessionStorage.getItem('imgStatus');
     imgStatus = JSON.parse(imgStatus);
     imgStatus = imgStatus ? imgStatus : [];
+
+    let invertMap = sessionStorage.getItem('invertMap');
+    invertMap = JSON.parse(invertMap);
+    invertMap = invertMap ? invertMap : [];
+
+    event.detail.viewport.invert = invertMap[viewportIndex];
+    cornerstone.setViewport(element, viewport);
+
     let wwwc = imgStatus[viewportIndex] && imgStatus[viewportIndex].wwwc ? imgStatus[viewportIndex].wwwc : {};
     // let pan = imgStatus[viewportIndex] && imgStatus[viewportIndex].pan ? imgStatus[viewportIndex].pan : {};
     let zoom = imgStatus[viewportIndex] && imgStatus[viewportIndex].zoom ? imgStatus[viewportIndex].zoom : null;
