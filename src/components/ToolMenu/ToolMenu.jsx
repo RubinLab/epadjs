@@ -345,6 +345,10 @@ class ToolMenu extends Component {
       else if (event.keyCode == 83) {
         this.handleToolClicked(1, "Noop");
       }
+      // i => invert
+      else if (event.keyCode == 73) {
+        this.handleToolClicked(5, "Invert");
+      }
     }
   };
 
