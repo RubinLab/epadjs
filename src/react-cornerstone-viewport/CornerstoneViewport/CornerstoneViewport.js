@@ -597,7 +597,7 @@ class CornerstoneViewport extends Component {
 
     let invertMap = sessionStorage.getItem('invertMap');
     invertMap = JSON.parse(invertMap);
-    invertMap = invertMap ? invertMap : [];
+    invertMap = invertMap ? invertMap : {};
 
     event.detail.viewport.invert = invertMap[viewportIndex];
     cornerstone.setViewport(element, viewport);
