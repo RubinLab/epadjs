@@ -209,6 +209,8 @@ class DisplayView extends Component {
     if (buttonClicked) invertMap[index] = !invertMap[index];
     else
     series.forEach((el, i) => {
+        console.log(" el.examType ", el.examType, i);
+        console.log(" seriesAddition[i].examType ", seriesAddition[i].examType, i);
         const isPET = el.examType === 'PET' || seriesAddition[i].examType === 'PET';
         const isNM = el.examType === 'NM' || seriesAddition[i].examType === 'NM';
         const isPT = el.examType === 'PT' || seriesAddition[i].examType === 'PT';
