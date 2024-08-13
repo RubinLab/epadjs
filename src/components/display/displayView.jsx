@@ -204,21 +204,16 @@ class DisplayView extends Component {
   formInvertMap = (buttonClicked, index) => {
     const { series, seriesAddition } = this.props;
     let invertMap = sessionStorage.getItem("invertMap");
-    // { ...this.state.invertMap };
     invertMap = invertMap ? JSON.parse(invertMap) : {};
     if (buttonClicked) invertMap[index] = !invertMap[index];
     else
     series.forEach((el, i) => {
-        console.log(" el.examType ", el.examType, i);
-        console.log(" seriesAddition[i].examType ", seriesAddition[i].examType, i);
         const isPET = el.examType === 'PET' || seriesAddition[i].examType === 'PET';
         const isNM = el.examType === 'NM' || seriesAddition[i].examType === 'NM';
         const isPT = el.examType === 'PT' || seriesAddition[i].examType === 'PT';
         invertMap[i] = isPET || isNM || isPT || invertMap[i];
       });
-    // this.setState({ invertMap });
     sessionStorage.setItem("invertMap", JSON.stringify(invertMap));
-    
   };
 
   setWwwc = (ww, wc) => {
@@ -2448,8 +2443,6 @@ class DisplayView extends Component {
   };
 
   newImage = (event, index) => {
-    console.log(" ---> imageData");
-    console.log(event.detail.image);
     let { imageId } = event.detail.image;
     imageId = this.parseImgeId(imageId); //strip from cs imagePath to imageId
     const { activePort } = this.props;
