@@ -213,8 +213,13 @@ class selectSerieModal extends React.Component {
       series = series.concat(arr);
     });
     const { data: seriesArr } = await this.saveSignificantSeries(series);
-    seriesArr.forEach((series) => {
-      selectedToDisplay[series.seriesUID].significanceOrder = series.significanceOrder;
+    const significanceOrder = {};
+    seriesArr.forEach((serie) => {
+      significanceOrder[serie.seriesUID] = serie.significanceOrder;
+    });
+
+    series.forEach((serie) => {
+      if (significanceOrder[serie.seriesUID]) serie.significanceOrder = significanceOrder[serie.seriesUID];
     });
     
 
