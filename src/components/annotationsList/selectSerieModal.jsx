@@ -206,26 +206,18 @@ class selectSerieModal extends React.Component {
 
   displaySelection = async (aimID) => {
     let studies = Object.values(this.props.seriesPassed);
-    const { selectedToDisplay } = this.state;
     let series = [];
     // TODO: what is the logic here?
     studies.forEach((arr) => {
       series = series.concat(arr);
     });
     const { data: seriesArr } = await this.saveSignificantSeries(series);
-    const significanceOrder = {};
-    seriesArr.forEach((serie) => {
-      significanceOrder[serie.seriesUID] = serie.significanceOrder;
-    });
-
-    series.forEach((serie) => {
-      if (significanceOrder[serie.seriesUID]) serie.significanceOrder = significanceOrder[serie.seriesUID];
-    });
-    
+    console.log(" ---> seriesArr", seriesArr);
 
     //concatanete all arrays to getther
-    for (let key of Object.keys(selectedToDisplay)) {
-      let serie = this.findSerieFromSeries(key, series);
+    // for (let key of Object.keys(selectedToDisplay)) {
+    for (let el of seriesArr) {  
+      let serie = this.findSerieFromSeries(el.seriesUID, series);
       const existingData = this.getExistingSeriesData(serie);
       if (aimID) this.props.dispatch(addToGrid(serie, aimID));
       else this.props.dispatch(addToGrid(serie, serie.aimID));
