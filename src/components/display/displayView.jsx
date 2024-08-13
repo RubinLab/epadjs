@@ -1107,8 +1107,22 @@ class DisplayView extends Component {
 
     const distanceDatasetPairs = [];
 
+    // check if it is multiphase mri
+    const isMultiPhase =
+      !!firstImage &&
+      !!middleImage &&
+      firstImage["00080060"] === "MR" &&
+      (!!firstImage["00189087"] ||
+        !!firstImage["00200100"] ||
+        !!middleImage["00189087"] ||
+        !!middleImage["00200100"]) &&
+      !!firstImage["00200013"] &&
+      !!middleImage["00200013"] &&
+      Integer.parseInt(firstImage["00200013"]) <
+        Integer.parseInt(middleImage["00200013"]);
+
     // get position from the first image but orientation from the middle
-    const sortByGeo = !!firstImage && !!firstImage["00200032"] && !!middleImage && !!middleImage["00200037"];
+    const sortByGeo = !isMultiPhase && !!firstImage && !!firstImage["00200032"] && !!middleImage && !!middleImage["00200037"];
 
     if (sortByGeo) {
       referencePosition = firstImage["00200032"].Value;
