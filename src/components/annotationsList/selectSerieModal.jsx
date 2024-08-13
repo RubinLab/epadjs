@@ -185,7 +185,7 @@ class selectSerieModal extends React.Component {
     const subID = patientID ? patientID : subjectID;
 
     if (!significanceSet && this.mode === "teaching") {
-      setSignificantSeries(projectID, subID, studyUID, significantSeries);
+      return setSignificantSeries(projectID, subID, studyUID, significantSeries);
     }
   };
 
@@ -212,7 +212,11 @@ class selectSerieModal extends React.Component {
     studies.forEach((arr) => {
       series = series.concat(arr);
     });
-    this.saveSignificantSeries(series);
+    const { data: seriesArr } = await this.saveSignificantSeries(series);
+    seriesArr.forEach((series) => {
+      selectedToDisplay[series.seriesUID].significanceOrder = series.significanceOrder;
+    });
+    
 
     //concatanete all arrays to getther
     for (let key of Object.keys(selectedToDisplay)) {
