@@ -80,29 +80,40 @@ const NewMetaData = (props) => {
   }
 
   const printDicomMetadata = (metadata) => {
-    const display = [];
-    for (const [tag, details] of Object.entries(metadata)) {
+    try {
+      const display = [];
+      for (const [tag, details] of Object.entries(metadata)) {
         let value = details.Value;
         let tagName = getTagName(tag);
         let text = `${tagName}: `;
         if (tagName && value && Array.isArray(value) && value.length > 0) {
-          if (typeof value[0] === 'string' || typeof value[0] === 'number') {
-            value = value.join(', ');
+          if ((typeof value[0] === 'string' || typeof value[0] === 'number') && text) {
+            text = text + value.join(', ');
+            display.push(text);
           } else if (typeof value[0] === 'object') {
-            value = Object.entries(value[0])
-              .map(([key, val]) => `${getTagName(key)}: ${val.Value}`)
-              .join(' ');
+            Object.entries(value[0])
+              .forEach(([key, val]) => {
+                if (typeof key === 'string' && key === 'Alphabetic') {
+                  text = text + `${val}`;
+                  display.push(text);
+                  text = '';
+                } else {
+                  if (text) display.push(text);
+                  text = `-- ${getTagName(key)}: ${val.Value.join(', ')}`
+                  display.push(text);
+                  text = '';
+                }}
+              );      
           } else {
-            value = value[0];
+            text = text + `${value[0]}`;
+            display.push(text);
           }
-
-        if (value && (value !== 'null' && value !== 'undefined')) {
-          text = text + `${value}`;
-          display.push(text);
         }
       }
+      setOutput(display); 
+    } catch (err) {
+      console.error(err);
     }
-    setOutput(display);
   }
 
   const returnValueFromVR = (dataset, field, tag, withVR) => { 
