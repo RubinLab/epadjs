@@ -1054,7 +1054,6 @@ class DisplayView extends Component {
     try {
       if (urlsExist) {
         const seriesURL = wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage.split("/instances/")[0];
-        console.log(" ----> seriesURL", seriesURL)
         seriesMetadata = await getMetadata(seriesURL); 
         seriesMetadata = seriesMetadata.data;
         seriesMetadata.forEach(
