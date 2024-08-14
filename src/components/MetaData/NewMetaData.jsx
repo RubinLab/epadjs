@@ -30,31 +30,15 @@ const NewMetaData = (props) => {
     const image = element ? cornerstone.getImage(element) : null;
     if (image && image.data) data = image.data;
     if ((!image || (image && !image.data)) &&  props.imageData) {
-      /*
-            try {
-        ({ data } = await getImageMetadata(props.imageData.imageID));
+      const imgURL = props.imageData.imageID.replace("wadors:", "").split('/frames/')[0];
+      try {
+        ({ data } = await getImageMetadata(imgURL));
       } catch(error2) {
         console.log("Couldn't get image metadata either!");
         console.error(error2);
       }   
-      */
-        try { 
-            const seriesURL = props.imageData.imageID.replace("wadors:", "").split("/instances/")[0];
-            ({ data } = await getMetadata(seriesURL));
-            data = data[props.imageData.index];
-        } catch (error1) {
-            console.log("Couldn't get series metadata! Trying image metadata call");
-            console.error(error1);
-            try {
-                ({ data } = await getImageMetadata(props.imageData.imageID));
-                console.log(' ===> array?', Array.isArray(data));
-            } catch(error2) {
-                console.log("Couldn't get image metadata either!");
-                console.error(error2);
-            }
-        }
     }
-    return data;  
+    return data[0];  
   }
 
   const fillImageData = async () => {
