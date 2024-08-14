@@ -30,6 +30,14 @@ const NewMetaData = (props) => {
     const image = element ? cornerstone.getImage(element) : null;
     if (image && image.data) data = image.data;
     if ((!image || (image && !image.data)) &&  props.imageData) {
+      /*
+            try {
+        ({ data } = await getImageMetadata(props.imageData.imageID));
+      } catch(error2) {
+        console.log("Couldn't get image metadata either!");
+        console.error(error2);
+      }   
+      */
         try { 
             const seriesURL = props.imageData.imageID.replace("wadors:", "").split("/instances/")[0];
             ({ data } = await getMetadata(seriesURL));
