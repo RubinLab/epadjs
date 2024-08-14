@@ -346,7 +346,7 @@ class selectSerieModal extends React.Component {
         let disabled = !selectedToDisplay[seriesUID] && limit >= this.maxPort;
         let seriesNo = series[i][k].seriesNo || "";
         let desc = `${seriesNo} - ${
-          series[i][k].seriesDescription || "Unnamed Serie"
+          series[i][k].seriesDescription || "Unnamed Series"
         }`;
         if (series[i][k].significanceOrder) {
           desc = desc + " (S)";
@@ -549,9 +549,10 @@ class selectSerieModal extends React.Component {
           </div>
           {openSeries.length > 0 && (
             <div>
-              Four viewports in use - close some or all to open new series.
+              <span style={{padding: '6px'}}>{`${openSeries.length} viewport${openSeries.length > 1 ? 's' : ''} in use - close some or all to open new series.`}</span>
               <br />
               <button
+              style={{marginLeft: '4px'}}
                 size="lg"
                 className="selectSerie-clearButton"
                 onClick={() => this.props.dispatch(clearGrid())}
