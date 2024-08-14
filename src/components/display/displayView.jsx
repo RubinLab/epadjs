@@ -1087,6 +1087,7 @@ class DisplayView extends Component {
 
     if (imageUrls[firstSeriesIndex] && imageUrls[firstSeriesIndex][0]) {
       if (!useSeriesData) {
+        console.log(" ----> imagedata", wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage);
         const result = await getImageMetadata(
           wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage
         );
@@ -1127,6 +1128,7 @@ class DisplayView extends Component {
       let distance = null;
       try {
         if (!useSeriesData) {
+          console.log(" ---> baseUrl", baseUrl);
           const result = await getImageMetadata(baseUrl);
           const data = result.data;
           imgData = data[0];
@@ -2551,6 +2553,7 @@ class DisplayView extends Component {
     // if (this.state.data[0])
     // console.log(this.state.data[0].stack.imageIds.length);
     // if (this.state.redirect) return <Redirect to="/list" />;
+    const stack = data[activePort] ? data[activePort].stack : null;
     const redirect = mode === "teaching" ? "search" : "list";
     return !Object.entries(series).length ? (
       <Redirect to={`/${redirect}`} />
@@ -2571,6 +2574,7 @@ class DisplayView extends Component {
           <ToolMenu
             onSwitchView={this.props.onSwitchView}
             onInvertClick={this.formInvertMap}
+            imageData={stack && stack.imageIds ? {'imageID': stack.imageIds[stack.currentImageIdIndex], 'index': stack.currentImageIdIndex }: null}
           />
           {this.state.isLoading && (
             <div style={{ marginTop: "30%", marginLeft: "50%" }}>
