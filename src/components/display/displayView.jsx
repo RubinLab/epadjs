@@ -353,8 +353,11 @@ class DisplayView extends Component {
     const seriesReplaced = (!!prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) && sameLength;
     const mfAimJumpDataFilled =  prevProps.multiFrameAimJumpData !== multiFrameAimJumpData && multiFrameAimJumpData && multiFrameAimJumpData[0];
     const newMFAimToJump = `${series[activePort].aimID}` !== this.state.multiFrameAimJumped;
+    const samePortControl = activePort === prevActivePort && active && prevActive;
+
+    const mfChanged = samePortControl && prevProps.seriesAddition[activePort].multiFrameIndex !== this.props.seriesAddition[activePort].multiFrameIndex && this.props.seriesAddition[activePort].multiFrameIndex === null;
     
-    if ( (mfAimJumpDataFilled && newMFAimToJump) || (prevActiveFrameDataMissing && frameDataFilled && multiFrameAimJumpData && multiFrameAimJumpData[0]) ) {
+    if ( (mfAimJumpDataFilled && newMFAimToJump) || (prevActiveFrameDataMissing && frameDataFilled && multiFrameAimJumpData && multiFrameAimJumpData[0]) || mfChanged) {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], `didupdate 1`);
@@ -1087,6 +1090,7 @@ class DisplayView extends Component {
 
     if (imageUrls[firstSeriesIndex] && imageUrls[firstSeriesIndex][0]) {
       if (!useSeriesData) {
+        console.log(" ----> imagedata", wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage);
         const result = await getImageMetadata(
           wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage
         );
@@ -1107,8 +1111,21 @@ class DisplayView extends Component {
 
     const distanceDatasetPairs = [];
 
+    // check if it is multiphase mri
+    const isMultiPhase =
+      !!firstImage &&
+      !!middleImage &&
+      !!firstImage["00080060"] && firstImage["00080060"].Value[0] === "MR" &&
+      (!!firstImage["00189087"] ||
+        !!firstImage["00200100"] ||
+        !!middleImage["00189087"] ||
+        !!middleImage["00200100"]) &&
+      !!firstImage["00200013"] &&
+      !!middleImage["00200013"] &&
+      parseInt(firstImage["00200013"].Value[0]) <
+        parseInt(middleImage["00200013"].Value[0]);
     // get position from the first image but orientation from the middle
-    const sortByGeo = !!firstImage && !!firstImage["00200032"] && !!middleImage && !!middleImage["00200037"];
+    const sortByGeo = !isMultiPhase && !!firstImage && !!firstImage["00200032"] && !!middleImage && !!middleImage["00200037"];
 
     if (sortByGeo) {
       referencePosition = firstImage["00200032"].Value;
@@ -1127,6 +1144,7 @@ class DisplayView extends Component {
       let distance = null;
       try {
         if (!useSeriesData) {
+          console.log(" ---> baseUrl", baseUrl);
           const result = await getImageMetadata(baseUrl);
           const data = result.data;
           imgData = data[0];
@@ -2551,6 +2569,7 @@ class DisplayView extends Component {
     // if (this.state.data[0])
     // console.log(this.state.data[0].stack.imageIds.length);
     // if (this.state.redirect) return <Redirect to="/list" />;
+    const stack = data[activePort] ? data[activePort].stack : null;
     const redirect = mode === "teaching" ? "search" : "list";
     return !Object.entries(series).length ? (
       <Redirect to={`/${redirect}`} />
@@ -2571,6 +2590,7 @@ class DisplayView extends Component {
           <ToolMenu
             onSwitchView={this.props.onSwitchView}
             onInvertClick={this.formInvertMap}
+            imageData={stack && stack.imageIds ? {'imageID': stack.imageIds[stack.currentImageIdIndex], 'index': stack.currentImageIdIndex }: null}
           />
           {this.state.isLoading && (
             <div style={{ marginTop: "30%", marginLeft: "50%" }}>
