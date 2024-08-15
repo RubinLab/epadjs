@@ -189,7 +189,6 @@ class DisplayView extends Component {
       containerHeight: 0,
       tokenRefresh: null,
       activeTool: "",
-      invertMap: {},
       isOverlayVisible: {},
       wwwc: {},
       multiFrameData: {},
@@ -201,18 +200,21 @@ class DisplayView extends Component {
     };
   }
 
-  formInvertMap = (buttonClicked, index) => {
+  formInvertMap = (buttonClicked, index, reset) => {
     const { series, seriesAddition } = this.props;
-    const invertMap = { ...this.state.invertMap };
+    let invertMap = sessionStorage.getItem("invertMap");
+    invertMap = invertMap ? JSON.parse(invertMap) : {};
     if (buttonClicked) invertMap[index] = !invertMap[index];
-    else
-    series.forEach((el, i) => {
+    else {    
+      if (reset) invertMap = {};
+      series.forEach((el, i) => {
         const isPET = el.examType === 'PET' || seriesAddition[i].examType === 'PET';
         const isNM = el.examType === 'NM' || seriesAddition[i].examType === 'NM';
         const isPT = el.examType === 'PT' || seriesAddition[i].examType === 'PT';
-        invertMap[i] = isPET || isNM || isPT || this.state.invertMap[i];
+        invertMap[i] = isPET || isNM || isPT || invertMap[i];
       });
-    this.setState({ invertMap });
+    }
+    sessionStorage.setItem("invertMap", JSON.stringify(invertMap));
   };
 
   setWwwc = (ww, wc) => {
@@ -2367,7 +2369,7 @@ class DisplayView extends Component {
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
     imgStatus[this.props.activePort] = null;
-    this.setState({ invertMap: {} });
+    this.formInvertMap();
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
   };
 
@@ -2382,18 +2384,20 @@ class DisplayView extends Component {
 
   deleteViewportImageStatus = () => {
     let imgStatus = sessionStorage.getItem("imgStatus");
-    let invertMap = Object.values(this.state.invertMap);
-    invertMap.splice(this.props.activePort, 1);
-    invertMap = invertMap.reduce((all, item, index) => {
-      all[index] = item;
-      return all;
-    }, {});
-    this.setState({ invertMap });
+    let invertMap = sessionStorage.getItem("invertMap");
+    invertMap = invertMap ? JSON.parse(invertMap) : {};
+    delete invertMap[this.props.activePort];
+    const newInvertMap = {};
+    for (let port in invertMap) {
+      if (port < this.props.activePort) newInvertMap[port] = invertMap[port];
+      if (port > this.props.activePort) newInvertMap[port - 1] = invertMap[port];
+    }
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
     imgStatus.splice(this.props.activePort, 1);
     imgStatus.push(null);
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+    sessionStorage.setItem("invertMap", JSON.stringify(newInvertMap));
   };
 
   closeViewport = (index) => {
@@ -2586,6 +2590,8 @@ class DisplayView extends Component {
     // if (this.state.redirect) return <Redirect to="/list" />;
     const stack = data[activePort] ? data[activePort].stack : null;
     const redirect = mode === "teaching" ? "search" : "list";
+    let invertMap = sessionStorage.getItem("invertMap");
+    invertMap = invertMap ? JSON.parse(invertMap) : {};
     return !Object.entries(series).length ? (
       <Redirect to={`/${redirect}`} />
     ) : (
@@ -2726,7 +2732,8 @@ class DisplayView extends Component {
                     imageIdIndex={data.stack.currentImageIdIndex ? parseInt(data.stack?.currentImageIdIndex) : 0}
                     viewportIndex={i}
                     tools={tools}
-                    shouldInvert={this.state.invertMap[i]}
+                    // CornerstoneViewport reads invert map from session storage
+                    // shouldInvert={invertMap[i]}
                     eventListeners={[
                       {
                         target: "element",

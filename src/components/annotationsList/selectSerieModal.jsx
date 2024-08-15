@@ -506,6 +506,14 @@ class selectSerieModal extends React.Component {
     this.displaySelection(result);
   };
 
+  closeAllSeries = () => {
+    this.props.dispatch(clearGrid());
+    sessionStorage.removeItem("wwwc");
+    const imgStatus = new Array(this.maxPort);
+    sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+    sessionStorage.removeItem("invertMap");
+  }
+
   render = () => {
     const { openSeries, isTeachingFile } = this.props;
     const title = isTeachingFile
@@ -555,7 +563,7 @@ class selectSerieModal extends React.Component {
               style={{marginLeft: '4px'}}
                 size="lg"
                 className="selectSerie-clearButton"
-                onClick={() => this.props.dispatch(clearGrid())}
+                onClick={this.closeAllSeries}
               >
                 X - Close all series
               </button>

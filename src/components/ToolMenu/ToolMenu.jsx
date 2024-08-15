@@ -345,6 +345,10 @@ class ToolMenu extends Component {
       else if (event.keyCode == 83) {
         this.handleToolClicked(1, "Noop");
       }
+      // i => invert
+      else if (event.keyCode == 73) {
+        this.handleToolClicked(5, "Invert");
+      }
     }
   };
 
@@ -432,6 +436,7 @@ class ToolMenu extends Component {
       const max = parseInt(maxPort);
       const imgStatus = new Array(max);
       sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+      this.props.onInvertClick(false, null, true);
       if (mode === "thick") this.props.onSwitchView("list");
       else this.props.onSwitchView("search");
       return;
