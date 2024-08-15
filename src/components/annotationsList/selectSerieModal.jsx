@@ -164,16 +164,19 @@ class selectSerieModal extends React.Component {
     }
   };
 
-  setSignificantSeries = (series) => {
+  saveSignificantSeries = (series) => {
     const { selectedToDisplay } = this.state;
     let significantSeries = [];
     let significanceOrder = 1;
     let significanceSet = series.some((serie) => serie.significanceOrder > 0);
     for (let key of Object.keys(selectedToDisplay)) {
+      const ser = series.filter(el => el.seriesUID === key);
+      const seriesDescription = ser.length > 0 ? ser[0].seriesDescription : null;
       if (!significanceSet) {
         significantSeries.push({
           seriesUID: key,
           significanceOrder,
+          seriesDescription
         });
         significanceOrder++;
       }
@@ -182,7 +185,7 @@ class selectSerieModal extends React.Component {
     const subID = patientID ? patientID : subjectID;
 
     if (!significanceSet && this.mode === "teaching") {
-      setSignificantSeries(projectID, subID, studyUID, significantSeries);
+      return setSignificantSeries(projectID, subID, studyUID, significantSeries);
     }
   };
 
@@ -203,17 +206,17 @@ class selectSerieModal extends React.Component {
 
   displaySelection = async (aimID) => {
     let studies = Object.values(this.props.seriesPassed);
-    const { selectedToDisplay } = this.state;
     let series = [];
     // TODO: what is the logic here?
     studies.forEach((arr) => {
       series = series.concat(arr);
     });
-    this.setSignificantSeries(series);
+    const { data: seriesArr } = await this.saveSignificantSeries(series);
 
     //concatanete all arrays to getther
-    for (let key of Object.keys(selectedToDisplay)) {
-      let serie = this.findSerieFromSeries(key, series);
+    // for (let key of Object.keys(selectedToDisplay)) {
+    for (let el of seriesArr) {  
+      let serie = this.findSerieFromSeries(el.seriesUID, series);
       const existingData = this.getExistingSeriesData(serie);
       if (aimID) this.props.dispatch(addToGrid(serie, aimID));
       else this.props.dispatch(addToGrid(serie, serie.aimID));
@@ -478,7 +481,7 @@ class selectSerieModal extends React.Component {
         studies.forEach((arr) => {
           series = series.concat(arr);
         });
-        await this.setSignificantSeries(series);
+        await this.saveSignificantSeries(series);
         window.dispatchEvent(new Event("refreshProjects"));
         // to prevent concatanating the annotation list pass afterDelete parameter true
         this.props.onSave(this.props.searchTableIndex, true);

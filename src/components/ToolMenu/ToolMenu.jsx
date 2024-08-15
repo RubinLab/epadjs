@@ -418,7 +418,7 @@ class ToolMenu extends Component {
       } 
     }
     if (!differentStudy) {
-      setSignificantSeries(projectID, subjectUID, studyUID, significantSeries).then(res => {
+      setSignificantSeries(projectID, subjectUID, studyUID, significantSeries, true).then(res => {
         toast.success('Significant Series and Layout Saved!');
       }).catch((err) => toast.error('Could not save the signifance order'));
     }
