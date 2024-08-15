@@ -189,7 +189,6 @@ class DisplayView extends Component {
       containerHeight: 0,
       tokenRefresh: null,
       activeTool: "",
-      // invertMap: {},
       isOverlayVisible: {},
       wwwc: {},
       multiFrameData: {},
@@ -2358,7 +2357,6 @@ class DisplayView extends Component {
       if (port < this.props.activePort) newInvertMap[port] = invertMap[port];
       if (port > this.props.activePort) newInvertMap[port - 1] = invertMap[port];
     }
-    // this.setState({ invertMap });
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
     imgStatus.splice(this.props.activePort, 1);
@@ -2556,7 +2554,6 @@ class DisplayView extends Component {
     // console.log(this.state.data[0].stack.imageIds.length);
     // if (this.state.redirect) return <Redirect to="/list" />;
     const redirect = mode === "teaching" ? "search" : "list";
-    // this.state.invertMap[i]
     let invertMap = sessionStorage.getItem("invertMap");
     invertMap = invertMap ? JSON.parse(invertMap) : {};
     return !Object.entries(series).length ? (
@@ -2698,7 +2695,8 @@ class DisplayView extends Component {
                     imageIdIndex={data.stack.currentImageIdIndex ? parseInt(data.stack?.currentImageIdIndex) : 0}
                     viewportIndex={i}
                     tools={tools}
-                    shouldInvert={invertMap[i]}
+                    // CornerstoneViewport reads invert map from session storage
+                    // shouldInvert={invertMap[i]}
                     eventListeners={[
                       {
                         target: "element",
