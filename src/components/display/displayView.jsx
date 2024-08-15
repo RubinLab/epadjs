@@ -200,18 +200,20 @@ class DisplayView extends Component {
     };
   }
 
-  formInvertMap = (buttonClicked, index) => {
+  formInvertMap = (buttonClicked, index, reset) => {
     const { series, seriesAddition } = this.props;
     let invertMap = sessionStorage.getItem("invertMap");
     invertMap = invertMap ? JSON.parse(invertMap) : {};
     if (buttonClicked) invertMap[index] = !invertMap[index];
-    else
-    series.forEach((el, i) => {
+    else {    
+      if (reset) invertMap = {};
+      series.forEach((el, i) => {
         const isPET = el.examType === 'PET' || seriesAddition[i].examType === 'PET';
         const isNM = el.examType === 'NM' || seriesAddition[i].examType === 'NM';
         const isPT = el.examType === 'PT' || seriesAddition[i].examType === 'PT';
         invertMap[i] = isPET || isNM || isPT || invertMap[i];
       });
+    }
     sessionStorage.setItem("invertMap", JSON.stringify(invertMap));
   };
 

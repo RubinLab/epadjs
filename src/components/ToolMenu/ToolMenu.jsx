@@ -436,6 +436,7 @@ class ToolMenu extends Component {
       const max = parseInt(maxPort);
       const imgStatus = new Array(max);
       sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+      this.props.onInvertClick(false, null, true);
       if (mode === "thick") this.props.onSwitchView("list");
       else this.props.onSwitchView("search");
       return;
