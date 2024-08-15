@@ -212,7 +212,6 @@ class selectSerieModal extends React.Component {
       series = series.concat(arr);
     });
     const { data: seriesArr } = await this.saveSignificantSeries(series);
-    console.log(" ---> seriesArr", seriesArr);
 
     //concatanete all arrays to getther
     // for (let key of Object.keys(selectedToDisplay)) {
