@@ -282,7 +282,6 @@ class DisplayView extends Component {
     try { 
       if (oldSeries && newSeries)
         for (let i = 0; i < newSeries.length; i++) {
-          // const sameSeries = oldSeries[i] &&  newSeries[i] && oldSeries[i].seriesUID === newSeries[i].seriesUID;
           if (!oldSeries[i].imageAnnotations && !!newSeries[i].imageAnnotations) {
             return true;
           }
