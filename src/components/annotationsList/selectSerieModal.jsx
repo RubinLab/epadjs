@@ -164,11 +164,12 @@ class selectSerieModal extends React.Component {
     }
   };
 
-  saveSignificantSeries = (series) => {
+  saveSignificantSeries = async (series) => {
     const { selectedToDisplay } = this.state;
     let significantSeries = [];
     let significanceOrder = 1;
     let significanceSet = series.some((serie) => serie.significanceOrder > 0);
+    const seriesInDetail = [];
     for (let key of Object.keys(selectedToDisplay)) {
       const ser = series.filter(el => el.seriesUID === key);
       const seriesDescription = ser.length > 0 ? ser[0].seriesDescription : null;
@@ -179,14 +180,18 @@ class selectSerieModal extends React.Component {
           seriesDescription
         });
         significanceOrder++;
+      } else {
+        seriesInDetail.push(ser[0]);
       }
     }
     const { projectID, patientID, studyUID, subjectID } = series[0];
     const subID = patientID ? patientID : subjectID;
 
     if (!significanceSet && this.mode === "teaching") {
-      return setSignificantSeries(projectID, subID, studyUID, significantSeries);
-    }
+       const { data: res } = await setSignificantSeries(projectID, subID, studyUID, significantSeries);
+       return res;
+    } 
+    return seriesInDetail;
   };
 
   getExistingSeriesData = (serie) => {
@@ -211,8 +216,7 @@ class selectSerieModal extends React.Component {
     studies.forEach((arr) => {
       series = series.concat(arr);
     });
-    const { data: seriesArr } = await this.saveSignificantSeries(series);
-
+    const seriesArr = await this.saveSignificantSeries(series);
     //concatanete all arrays to getther
     // for (let key of Object.keys(selectedToDisplay)) {
     for (let el of seriesArr) {  
