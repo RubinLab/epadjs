@@ -35,11 +35,9 @@ class FuseSelector extends Component {
     }
     
     componentDidMount() {
-        console.log(" %%%%%%%%%%%% %%%%%%%%%%%%");
         const elements = cornerstone.getEnabledElements();
         // We only support two viewports for fuse
         if (elements.length != 2) return false;
-        console.log(elements);
         let modalities = {};
         elements.forEach(({ element }, i) => {
             const modality = this.getModality(element);
@@ -48,16 +46,12 @@ class FuseSelector extends Component {
             }
             else return false;
         })
-        console.log(" ----> modalities");
-        console.log(modalities);
         const { CT, PT } = modalities;
         if (CT === undefined || PT === undefined) return;
         this.setState({ ...modalities }, () => {
             const ctElement = this.getCtElement();
             const layers = cornerstone.getLayers(ctElement);
             let ctLayerId, petLayerId;
-            console.log(' ---> ctElement, layers.length')
-            console.log(ctElement, layers.length)
             if (ctElement && layers.length) {
                 if (layers[0].options.name === "CT") {
                     ctLayerId = layers[0].layerId;
@@ -88,7 +82,6 @@ class FuseSelector extends Component {
         const image = cornerstone.getImage(element);
         const seriesModule = cornerstone.metaData.get("generalSeriesModule", image.imageId) || {};
         const modality = seriesModule.modality;
-        console.log(" ---> modality", modality);
         if (modality === "CT" || modality === "PT") return modality;
         return false;
     }
