@@ -556,6 +556,11 @@ const asyncReducer = (state = initialState, action) => {
             else seriesDataForTeaching[pidFromRef] = { [action.payload.ref.patientID]: { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] } };
           }
         }
+
+        imageAddedSeries.forEach(el => {
+          if (!el.examType && el.seriesUID === serUIDFromRef) el.examType = action.payload.ref.examType;
+        });
+
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
