@@ -29,10 +29,6 @@ class FuseSelector extends Component {
             visibile: true
         };
     }
-
-    getModalities = () => {
-
-    }
     
     componentDidMount() {
         const elements = cornerstone.getEnabledElements();
