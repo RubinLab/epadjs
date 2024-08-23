@@ -200,11 +200,12 @@ class DisplayView extends Component {
     };
   }
 
-  formInvertMap = (buttonClicked, index, reset) => {
+  formInvertMap = (buttonClicked, index, reset, clearGrid) => {
     const { series, seriesAddition } = this.props;
     let invertMap = sessionStorage.getItem("invertMap");
     invertMap = invertMap ? JSON.parse(invertMap) : {};
     if (buttonClicked) invertMap[index] = !invertMap[index];
+    else if (clearGrid) invertMap = {};
     else {    
       if (reset) invertMap = {};
       series.forEach((el, i) => {
@@ -2369,7 +2370,7 @@ class DisplayView extends Component {
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
     imgStatus[this.props.activePort] = null;
-    this.formInvertMap();
+    this.formInvertMap(null, null, true);
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
   };
 
