@@ -39,12 +39,3 @@ a {
   color: red;
   text-align: right !important;
 }
-
-.metadata-list {
-  list-style-type: none;
-}
-
-.metadata-line__tag {
-  /* color: #0dcaf0 */
-  color: #ffc107
-}
