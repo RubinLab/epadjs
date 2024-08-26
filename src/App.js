@@ -1480,6 +1480,7 @@ class App extends Component {
                       admin={this.state.admin}
                       collapseSubjects={this.collapseSubjects}
                       update={this.state.update}
+                      forceUpdatePage={() => this.setState(state => ({ update: state.update + 1 }))}
                     />
                   )}
                 />

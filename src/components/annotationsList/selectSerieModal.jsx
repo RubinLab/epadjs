@@ -164,26 +164,34 @@ class selectSerieModal extends React.Component {
     }
   };
 
-  setSignificantSeries = (series) => {
+  saveSignificantSeries = async (series) => {
     const { selectedToDisplay } = this.state;
     let significantSeries = [];
     let significanceOrder = 1;
     let significanceSet = series.some((serie) => serie.significanceOrder > 0);
+    const seriesInDetail = [];
     for (let key of Object.keys(selectedToDisplay)) {
+      const ser = series.filter(el => el.seriesUID === key);
+      const seriesDescription = ser.length > 0 ? ser[0].seriesDescription : null;
       if (!significanceSet) {
         significantSeries.push({
           seriesUID: key,
           significanceOrder,
+          seriesDescription
         });
         significanceOrder++;
+      } else {
+        seriesInDetail.push(ser[0]);
       }
     }
     const { projectID, patientID, studyUID, subjectID } = series[0];
     const subID = patientID ? patientID : subjectID;
 
     if (!significanceSet && this.mode === "teaching") {
-      setSignificantSeries(projectID, subID, studyUID, significantSeries);
-    }
+       const { data: res } = await setSignificantSeries(projectID, subID, studyUID, significantSeries);
+       return res;
+    } 
+    return seriesInDetail;
   };
 
   getExistingSeriesData = (serie) => {
@@ -203,17 +211,16 @@ class selectSerieModal extends React.Component {
 
   displaySelection = async (aimID) => {
     let studies = Object.values(this.props.seriesPassed);
-    const { selectedToDisplay } = this.state;
     let series = [];
     // TODO: what is the logic here?
     studies.forEach((arr) => {
       series = series.concat(arr);
     });
-    this.setSignificantSeries(series);
-
+    const seriesArr = await this.saveSignificantSeries(series);
     //concatanete all arrays to getther
-    for (let key of Object.keys(selectedToDisplay)) {
-      let serie = this.findSerieFromSeries(key, series);
+    // for (let key of Object.keys(selectedToDisplay)) {
+    for (let el of seriesArr) {  
+      let serie = this.findSerieFromSeries(el.seriesUID, series);
       const existingData = this.getExistingSeriesData(serie);
       if (aimID) this.props.dispatch(addToGrid(serie, aimID));
       else this.props.dispatch(addToGrid(serie, serie.aimID));
@@ -345,9 +352,9 @@ class selectSerieModal extends React.Component {
         let alreadyOpen = this.isSerieOpen(seriesUID);
         let disabled = !selectedToDisplay[seriesUID] && limit >= this.maxPort;
         let seriesNo = series[i][k].seriesNo || "";
-        let desc = `${seriesNo} - ${
-          series[i][k].seriesDescription || "Unnamed Serie"
-        }`;
+        let desc = series[i][k].seriesDescription;
+        let description = desc ? desc : !desc && series[i][k].significanceOrder ? `Sig Series ${series[i][k].significanceOrder}` :  "Unnamed Series";
+        desc = `${seriesNo} - ${description}`;
         if (series[i][k].significanceOrder) {
           desc = desc + " (S)";
           isSignificant = true;
@@ -478,7 +485,7 @@ class selectSerieModal extends React.Component {
         studies.forEach((arr) => {
           series = series.concat(arr);
         });
-        await this.setSignificantSeries(series);
+        await this.saveSignificantSeries(series);
         window.dispatchEvent(new Event("refreshProjects"));
         // to prevent concatanating the annotation list pass afterDelete parameter true
         this.props.onSave(this.props.searchTableIndex, true);
@@ -505,6 +512,14 @@ class selectSerieModal extends React.Component {
 
     this.displaySelection(result);
   };
+
+  closeAllSeries = () => {
+    this.props.dispatch(clearGrid());
+    sessionStorage.removeItem("wwwc");
+    const imgStatus = new Array(this.maxPort);
+    sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+    sessionStorage.removeItem("invertMap");
+  }
 
   render = () => {
     const { openSeries, isTeachingFile } = this.props;
@@ -549,12 +564,13 @@ class selectSerieModal extends React.Component {
           </div>
           {openSeries.length > 0 && (
             <div>
-              Four viewports in use - close some or all to open new series.
+              <span style={{padding: '6px'}}>{`${openSeries.length} viewport${openSeries.length > 1 ? 's' : ''} in use - close some or all to open new series.`}</span>
               <br />
               <button
+              style={{marginLeft: '4px'}}
                 size="lg"
                 className="selectSerie-clearButton"
-                onClick={() => this.props.dispatch(clearGrid())}
+                onClick={this.closeAllSeries}
               >
                 X - Close all series
               </button>

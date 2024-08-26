@@ -22,14 +22,14 @@ class TeachingFilters extends React.Component {
                         <DiagnosisFilter selectedDiagnosis={selectedDiagnosis} setSelectedDiagnosis={setSelectedDiagnosis} />
                     </div>
                 </div>
-                <div className="col-3" style={{ fontSize: '.9em', float: 'right' }}>
-                    <div className="form-check form-check-inline" >
-                        <label className="form-check-label" htmlFor="flexCheckChecked" style={{ color: "rgba(255,255,255,.55)", paddingLeft: '0px', paddingRight: '5px' }}>Inc Significant Images</label>
+                <div className="col-3" style={{ fontSize: '.9em', float: 'right', display: 'flex', justifyContent: 'space-around' }}>
+                    <div className="form-check form-check-inline" style={{display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop:"-1rem"}}>
                         <input className="form-check-input" type="checkbox" id="flexCheckChecked" key={"tfOnly"} checked={!tfOnly} onChange={e => setTfOnly(!e.target.checked)} />
+                        <label className="form-check-label" htmlFor="flexCheckChecked" style={{ color: "rgba(255,255,255,.55)", paddingLeft: '0px', paddingRight: '5px' }}>Inc Significant Images</label>
                     </div>
-                    <div className="form-check form-check-inline">
-                        <label className="form-check-label" htmlFor="flexCheckChecked" style={{ color: "rgba(255,255,255,.55)", paddingLeft: '0px' }}>Only My Cases</label>
+                    <div className="form-check form-check-inline" style={{display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop:"-1rem"}}>
                         <input className="form-check-input" type="checkbox" id="flexCheckChecked" key={"myCases"} checked={myCases} onChange={e => setMyCases(e.target.checked)} />
+                        <label className="form-check-label" htmlFor="flexCheckChecked" style={{ color: "rgba(255,255,255,.55)", paddingLeft: '0px' }}>Only My Cases</label>
                     </div>
                 </div>
             </>

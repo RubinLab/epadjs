@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import cornerstone from "cornerstone-core";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
-import MetaData from "../MetaData/NewMetaData";
+import MetaData from "../MetaData/MetaData";
 import SmartBrushMenu from "../SmartBrushMenu/SmartBrushMenu";
 import AddToWorklist from "../searchView/addWorklist";
 import BrushSizeSelector from "./BrushSizeSelector";
@@ -165,11 +165,11 @@ class ToolMenu extends Component {
       { name: "Invert", icon: <FaAdjust />, tool: "Invert", teaching: true },
       { name: "Reset", icon: <MdLoop />, tool: "Reset", teaching: true },
       { name: "Pan", icon: <MdPanTool />, tool: "Pan", teaching: true },
-      { name: "MetaData", icon: <FaListAlt />, tool: "MetaData", teaching: true },
+      // { name: "MetaData", icon: <FaListAlt />, tool: "MetaData", teaching: true },
       { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate", teaching: true },
       // { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
       { name: "Color", icon: <FaPalette />, tool: "colorLut" },
-      { name: "Fusion", icon: <FaObjectUngroup />, tool: "fuse" },
+      { name: "Fusion", icon: <FaObjectUngroup />, tool: "fuse", teaching: true },
     ];
 
     this.markupTools = [
@@ -301,12 +301,12 @@ class ToolMenu extends Component {
   }
 
   handleKeyPressed = (event) => {
-    // ctrl + r => Reset
+    // space bar => Reset
     if (
       event.target.nodeName !== "INPUT" &&
       event.target.nodeName !== "TEXTAREA"
     ) {
-      if (event.keyCode == 82 && event.ctrlKey) {
+      if (event.keyCode == 32) {
         this.handleToolClicked(1, "Reset");
       }
       // d => Length
@@ -344,6 +344,10 @@ class ToolMenu extends Component {
       // s => Select
       else if (event.keyCode == 83) {
         this.handleToolClicked(1, "Noop");
+      }
+      // i => invert
+      else if (event.keyCode == 73) {
+        this.handleToolClicked(5, "Invert");
       }
     }
   };
@@ -414,8 +418,8 @@ class ToolMenu extends Component {
       } 
     }
     if (!differentStudy) {
-      setSignificantSeries(projectID, subjectUID, studyUID, significantSeries).then(res => {
-        toast.success('The signifance order is successfully saved');
+      setSignificantSeries(projectID, subjectUID, studyUID, significantSeries, true).then(res => {
+        toast.success('Significant Series and Layout Saved!');
       }).catch((err) => toast.error('Could not save the signifance order'));
     }
   }
@@ -432,8 +436,9 @@ class ToolMenu extends Component {
       const max = parseInt(maxPort);
       const imgStatus = new Array(max);
       sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
-      if (mode !== "teaching") this.props.onSwitchView("search");
-      else this.props.onSwitchView("annotations");
+      this.props.onInvertClick(false, null, null, true);
+      if (mode === "thick") this.props.onSwitchView("list");
+      else this.props.onSwitchView("search");
       return;
     } else if (tool === "Presets") {
       this.showPresets();
@@ -838,7 +843,6 @@ class ToolMenu extends Component {
                     </div> */}
         {/* </Collapsible> */}
         {/* <Collapsible trigger={"Segmentation Tools"} transitionTime={100}> */}
-        {this.state.showMetaData && (<MetaData onClose={this.showMetaData} imageData={this.props.imageData}/>)}
         <AddToWorklist toolMenu={true} parent="display"/>
         {mode !== "teaching" &&
           this.segmentationTools.map((segmentationTool, i) => {
@@ -985,7 +989,6 @@ class ToolMenu extends Component {
           />
         )}
         {this.state.showFuse && <FuseSelector onClose={this.closeFuse} />}
-        {this.state.showMetaData && (<MetaData onClose={this.showMetaData} imageData={this.props.imageData} />)}
       </div>
     );
   }

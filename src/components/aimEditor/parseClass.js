@@ -3745,7 +3745,7 @@ export var AimEditor = function (
         for (let n = 0; n < jsonShapeObj.length; n++) {
           self.runtimeUserShapes[jsonShapeObj[n].formshape] = { validate: "" };
         }
-      } else {
+      } else if (!!jsonShapeObj) {
         self.runtimeUserShapes[jsonShapeObj.formshape] = { validate: "" };
       }
 

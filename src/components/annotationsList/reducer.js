@@ -228,7 +228,6 @@ const asyncReducer = (state = initialState, action) => {
           const frameNo = parseInt(imgArr[1]);
           if (mfIndex && typeof frameNo === 'number' && !isNaN(frameNo)) jumpArr = [mfIndex, frameNo - 1];
         }
-
         seriesAddition[portInx].hasMultiframe = hasMultiframe;
         seriesAddition[portInx].multiFrameIndex = multiframeIndex;
         seriesAddition[portInx].multiFrameMap = multiFrameMap;
@@ -515,7 +514,7 @@ const asyncReducer = (state = initialState, action) => {
           const imgs = fmData1[aimToJump];
           const imgArr = imgs ? imgs[0].split('/frames/') : [];
           jumpArr1 = imgArr.length > 0 ? [parseInt(multiFrameMap1[imgArr[0]]), parseInt(imgArr[1]) - 1] : [];
-          imageAddedSeries[state.activePort].multiFrameIndex = parseInt(multiFrameMap1[imgArr[0]]);
+          imageAddedSeries[state.activePort].multiFrameIndex = !isNaN(parseInt(multiFrameMap1[imgArr[0]])) ? parseInt(multiFrameMap1[imgArr[0]]) : null;
         }
 
         const serAimData = state.aimsList[action.payload.serID];
@@ -557,6 +556,11 @@ const asyncReducer = (state = initialState, action) => {
             else seriesDataForTeaching[pidFromRef] = { [action.payload.ref.patientID]: { [action.payload.ref.studyUID]: action.payload.seriesOfStudy[action.payload.ref.studyUID] } };
           }
         }
+
+        imageAddedSeries.forEach(el => {
+          if (!el.examType && el.seriesUID === serUIDFromRef) el.examType = action.payload.ref.examType;
+        });
+
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
@@ -592,18 +596,11 @@ const asyncReducer = (state = initialState, action) => {
 
       case CHANGE_ACTIVE_PORT:
         //get openseries iterate over the
-        const changedPortSeriesAddition = state.openSeriesAddition.map((serie) => {
-          const newSerie = _.cloneDeep(serie);
-          newSerie.aimID = null;
-          return newSerie;
-        });
 
+        const changedPortSeriesAddition = _.cloneDeep(state.openSeriesAddition);
         const changedPortSeries = _.cloneDeep(state.openSeries);
-        for (let i = 0; i < changedPortSeries.length; i++) {
-          if (i !== action.portIndex) {
-            changedPortSeries[i].aimID = null;
-          }
-        }
+        changedPortSeries[action.portIndex].aimID = null;
+        changedPortSeriesAddition[action.portIndex].aimID = null;
 
         return Object.assign({}, state, {
           activePort: action.portIndex,

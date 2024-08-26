@@ -29,13 +29,11 @@ class FuseSelector extends Component {
             visibile: true
         };
     }
-
+    
     componentDidMount() {
         const elements = cornerstone.getEnabledElements();
         // We only support two viewports for fuse
-        if (elements.length != 2)
-            return false;
-        //
+        if (elements.length != 2) return false;
         let modalities = {};
         elements.forEach(({ element }, i) => {
             const modality = this.getModality(element);

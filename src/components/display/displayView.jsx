@@ -146,6 +146,8 @@ const tools = [
   // { name: "RectangleScissors", modeOptions: { mouseButtonMask: 1 } },
 
   { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
+  { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
+  { name: "DragProbe", mode: "active",  modeOptions: { mouseButtonMask: 1 }},
 ];
 
 const mapStateToProps = (state) => {
@@ -187,7 +189,6 @@ class DisplayView extends Component {
       containerHeight: 0,
       tokenRefresh: null,
       activeTool: "",
-      invertMap: {},
       isOverlayVisible: {},
       wwwc: {},
       multiFrameData: {},
@@ -199,18 +200,22 @@ class DisplayView extends Component {
     };
   }
 
-  formInvertMap = (buttonClicked, index) => {
+  formInvertMap = (buttonClicked, index, reset, clearGrid) => {
     const { series, seriesAddition } = this.props;
-    const invertMap = { ...this.state.invertMap };
+    let invertMap = sessionStorage.getItem("invertMap");
+    invertMap = invertMap ? JSON.parse(invertMap) : {};
     if (buttonClicked) invertMap[index] = !invertMap[index];
-    else
-    series.forEach((el, i) => {
+    else if (clearGrid) invertMap = {};
+    else {    
+      if (reset) invertMap = {};
+      series.forEach((el, i) => {
         const isPET = el.examType === 'PET' || seriesAddition[i].examType === 'PET';
         const isNM = el.examType === 'NM' || seriesAddition[i].examType === 'NM';
         const isPT = el.examType === 'PT' || seriesAddition[i].examType === 'PT';
-        invertMap[i] = isPET || isNM || isPT || this.state.invertMap[i];
+        invertMap[i] = isPET || isNM || isPT || invertMap[i];
       });
-    this.setState({ invertMap });
+    }
+    sessionStorage.setItem("invertMap", JSON.stringify(invertMap));
   };
 
   setWwwc = (ww, wc) => {
@@ -276,6 +281,20 @@ class DisplayView extends Component {
     else return true;
   }
 
+  checkImgAnnsFilled = (oldSeries, newSeries) => {   
+    try { 
+      if (oldSeries && newSeries)
+        for (let i = 0; i < newSeries.length; i++) {
+          if (!oldSeries[i].imageAnnotations && !!newSeries[i].imageAnnotations) {
+            return true;
+          }
+        }
+      return false; }
+    catch (err) {
+      console.error(err)
+    }
+  }
+
   async componentDidUpdate(prevProps, prevState) {
     const {
       pid,
@@ -334,8 +353,9 @@ class DisplayView extends Component {
     // prevProps.seriesAddition[activePort].numberOfAnnotations;
     aimsDeletedOrSaved = currentAimsCalc !== prevAimsCalc;
     const aimEditSaved = this.state.aimEdited && prevLoading && !loading;
+    const imgAnnsLoaded = this.checkImgAnnsFilled(prevSeriesAddition, seriesAddition);
     const rerenderAims =
-      newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved || studyAimsLengthChanged;
+      newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved || studyAimsLengthChanged || imgAnnsLoaded;
 
     // TODO: check if loading/true-false control is required for the first condition
 
@@ -351,8 +371,11 @@ class DisplayView extends Component {
     const seriesReplaced = (!!prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].seriesUID !== seriesAddition[activePort].seriesUID) && sameLength;
     const mfAimJumpDataFilled =  prevProps.multiFrameAimJumpData !== multiFrameAimJumpData && multiFrameAimJumpData && multiFrameAimJumpData[0];
     const newMFAimToJump = `${series[activePort].aimID}` !== this.state.multiFrameAimJumped;
+    const samePortControl = activePort === prevActivePort && active && prevActive;
+
+    const mfChanged = samePortControl && prevProps.seriesAddition[activePort].multiFrameIndex !== this.props.seriesAddition[activePort].multiFrameIndex && this.props.seriesAddition[activePort].multiFrameIndex === null;
     
-    if ( (mfAimJumpDataFilled && newMFAimToJump) || (prevActiveFrameDataMissing && frameDataFilled && multiFrameAimJumpData && multiFrameAimJumpData[0]) ) {
+    if ( (mfAimJumpDataFilled && newMFAimToJump) || (prevActiveFrameDataMissing && frameDataFilled && multiFrameAimJumpData && multiFrameAimJumpData[0]) || mfChanged) {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], `didupdate 1`);
@@ -383,7 +406,7 @@ class DisplayView extends Component {
     // each time visibility of aims change
     // else if (rerenderAims) {
       else if (rerenderAims) {
-      this.renderAims(false, rerenderAims);
+      this.renderAims(false);
       //TODO: check if filling aimsList process changes openseries
       // if chanes sever that data from openseries
       // refresh only cornerstone by calling this.renderAims();
@@ -1085,7 +1108,6 @@ class DisplayView extends Component {
 
     if (imageUrls[firstSeriesIndex] && imageUrls[firstSeriesIndex][0]) {
       if (!useSeriesData) {
-        console.log(" ----> imagedata", wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage);
         const result = await getImageMetadata(
           wadoUrlNoWadors + imageUrls[firstSeriesIndex][0].lossyImage
         );
@@ -1106,8 +1128,21 @@ class DisplayView extends Component {
 
     const distanceDatasetPairs = [];
 
+    // check if it is multiphase mri
+    const isMultiPhase =
+      !!firstImage &&
+      !!middleImage &&
+      !!firstImage["00080060"] && firstImage["00080060"].Value[0] === "MR" &&
+      (!!firstImage["00189087"] ||
+        !!firstImage["00200100"] ||
+        !!middleImage["00189087"] ||
+        !!middleImage["00200100"]) &&
+      !!firstImage["00200013"] &&
+      !!middleImage["00200013"] &&
+      parseInt(firstImage["00200013"].Value[0]) <
+        parseInt(middleImage["00200013"].Value[0]);
     // get position from the first image but orientation from the middle
-    const sortByGeo = !!firstImage && !!firstImage["00200032"] && !!middleImage && !!middleImage["00200037"];
+    const sortByGeo = !isMultiPhase && !!firstImage && !!firstImage["00200032"] && !!middleImage && !!middleImage["00200037"];
 
     if (sortByGeo) {
       referencePosition = firstImage["00200032"].Value;
@@ -1126,7 +1161,6 @@ class DisplayView extends Component {
       let distance = null;
       try {
         if (!useSeriesData) {
-          console.log(" ---> baseUrl", baseUrl);
           const result = await getImageMetadata(baseUrl);
           const data = result.data;
           imgData = data[0];
@@ -1688,7 +1722,10 @@ class DisplayView extends Component {
       this.refreshAllViewports();
     }
     this.setDirtyFlag();
-    this.setState({ showAimEditor: true, selectedAim: undefined });
+    // this was setting the aimeditor to create aim mode when I start painting with the brush to edit the segmentation.
+    // not sure if it can cause any issues
+    // this.setState({ showAimEditor: true, selectedAim: undefined });
+    this.setState({ showAimEditor: true});
   };
 
   setActive = async (i) => {
@@ -1872,7 +1909,9 @@ class DisplayView extends Component {
             segLabelMaps[aimUid] = i;
           }
         );
-        const aimID = this.props.series[serieIndex] ? this.props.series[serieIndex].aimID : null;
+        // check if we need to put aim in edit mode
+        // this might not be necessary
+        const aimID = this.showAimEditor && this.props.series[serieIndex] ? this.props.series[serieIndex].aimID : null;
         const { seriesLabelMaps } = this.state;
         // If an aim is selected and it has segmentatio set the activeLabelMap of serie as selected
         // aim's labelMap. Else set it as the next available labelMap to brush new segs
@@ -1914,7 +1953,8 @@ class DisplayView extends Component {
     });
     Promise.all(imagePromises).then(() => {
       let newLabelMapIndex;
-      if (!aimId) {
+      // We do not put segmentation in edit mode if show aim editor is false
+      if (!aimId && this.state.showAimEditor) {
         const { aimID } = series[activePort];
         aimId = aimID;
       }
@@ -2014,9 +2054,11 @@ class DisplayView extends Component {
 
         const { setters, getters } = cornerstoneTools.getModule("segmentation");
 
+        // send in the ArrayBuffer itself
+        // generateToolStatereturns an array of array buffers with version 4, but labelmap3DByFirstImageId wants just one arraybuffer
         setters.labelmap3DByFirstImageId(
           imageIds[0],
-          labelmapBufferArray,
+          labelmapBufferArray[0],
           labelMapIndex,
           segMetadata.data,
           imageIds.length,
@@ -2326,7 +2368,7 @@ class DisplayView extends Component {
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
     imgStatus[this.props.activePort] = null;
-    this.setState({ invertMap: {} });
+    this.formInvertMap(null, null, true);
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
   };
 
@@ -2341,18 +2383,20 @@ class DisplayView extends Component {
 
   deleteViewportImageStatus = () => {
     let imgStatus = sessionStorage.getItem("imgStatus");
-    let invertMap = Object.values(this.state.invertMap);
-    invertMap.splice(this.props.activePort, 1);
-    invertMap = invertMap.reduce((all, item, index) => {
-      all[index] = item;
-      return all;
-    }, {});
-    this.setState({ invertMap });
+    let invertMap = sessionStorage.getItem("invertMap");
+    invertMap = invertMap ? JSON.parse(invertMap) : {};
+    delete invertMap[this.props.activePort];
+    const newInvertMap = {};
+    for (let port in invertMap) {
+      if (port < this.props.activePort) newInvertMap[port] = invertMap[port];
+      if (port > this.props.activePort) newInvertMap[port - 1] = invertMap[port];
+    }
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
     imgStatus.splice(this.props.activePort, 1);
     imgStatus.push(null);
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+    sessionStorage.setItem("invertMap", JSON.stringify(newInvertMap));
   };
 
   closeViewport = (index) => {
@@ -2544,6 +2588,8 @@ class DisplayView extends Component {
     // console.log(this.state.data[0].stack.imageIds.length);
     // if (this.state.redirect) return <Redirect to="/list" />;
     const redirect = mode === "teaching" ? "search" : "list";
+    let invertMap = sessionStorage.getItem("invertMap");
+    invertMap = invertMap ? JSON.parse(invertMap) : {};
     return !Object.entries(series).length ? (
       <Redirect to={`/${redirect}`} />
     ) : (
@@ -2683,7 +2729,8 @@ class DisplayView extends Component {
                     imageIdIndex={data.stack.currentImageIdIndex ? parseInt(data.stack?.currentImageIdIndex) : 0}
                     viewportIndex={i}
                     tools={tools}
-                    shouldInvert={this.state.invertMap[i]}
+                    // CornerstoneViewport reads invert map from session storage
+                    // shouldInvert={invertMap[i]}
                     eventListeners={[
                       {
                         target: "element",
