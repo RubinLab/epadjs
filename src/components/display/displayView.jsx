@@ -2543,7 +2543,6 @@ class DisplayView extends Component {
     // if (this.state.data[0])
     // console.log(this.state.data[0].stack.imageIds.length);
     // if (this.state.redirect) return <Redirect to="/list" />;
-    const stack = data[activePort] ? data[activePort].stack : null;
     const redirect = mode === "teaching" ? "search" : "list";
     return !Object.entries(series).length ? (
       <Redirect to={`/${redirect}`} />
@@ -2564,7 +2563,6 @@ class DisplayView extends Component {
           <ToolMenu
             onSwitchView={this.props.onSwitchView}
             onInvertClick={this.formInvertMap}
-            imageData={stack && stack.imageIds ? {'imageID': stack.imageIds[stack.currentImageIdIndex], 'index': stack.currentImageIdIndex }: null}
           />
           {this.state.isLoading && (
             <div style={{ marginTop: "30%", marginLeft: "50%" }}>

@@ -12,7 +12,8 @@ import "./MetaData.css";
 const mapStateToProps = state => {
   return {
     activePort: state.annotationsListReducer.activePort,
-    loading: state.annotationsListReducer.loading
+    loading: state.annotationsListReducer.loading,
+    openSeries: state.annotationsListReducer.openSeries
   };
 };
 
@@ -29,8 +30,8 @@ const NewMetaData = (props) => {
     const element = item ? item.element : null;
     const image = element ? cornerstone.getImage(element) : null;
     if (image && image.data) data = image.data;
-    if ((!image || (image && !image.data)) &&  props.imageData) {
-      const imgURL = props.imageData.imageID.replace("wadors:", "").split('/frames/')[0];
+    if ((!image || (image && !image.data))) {
+      const imgURL = image.imageId.replace("wadors:", "").split('/frames/')[0];
       try {
         ({ data } = await getImageMetadata(imgURL));
       } catch(error2) {
@@ -51,7 +52,7 @@ const NewMetaData = (props) => {
 
   useEffect(() => {
     fillImageData();
-  }, [imageDownloaded, props.loading, props.activePort, props.imageData])
+  }, [imageDownloaded, props.loading, props.activePort, props.openSeries[props.activePort].imageID])
 
   const formText = (data) => {
     let resultData = {};
