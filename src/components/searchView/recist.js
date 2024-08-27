@@ -200,8 +200,7 @@ function shrinkTable(filteredTable, data, numofHeaderCols, rowsWithNoValue) {
         if (
           cols[j] != null &&
           cols[j] != 'undefined' &&
-          cols[j] == true &&
-          filteredTable[i][j] != null
+          cols[j] == true
         )
           row.push(filteredTable[i][j]);
       });
