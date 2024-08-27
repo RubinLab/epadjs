@@ -311,22 +311,22 @@ class ToolMenu extends Component {
       }
       // d => Length
       else if (event.keyCode == 68) {
-        const index = mode === "teaching" ? 10 : 12;
+        const index = mode === "teaching" ? 12 : 13;
         this.handleToolClicked(index, "Length");
       }
       // o => Perpendicular/Bidirectional
       else if (event.keyCode == 79) {
-        const index = mode === "teaching" ? 13 : 15;
+        const index = mode === "teaching" ? 15 : 16;
         this.handleToolClicked(index, "Bidirectional");
       }
       // f => Arrow
       else if (event.keyCode == 70) {
-        const index = mode === "teaching" ? 11 : 13;
+        const index = mode === "teaching" ? 13 : 14;
         this.handleToolClicked(index, "ArrowAnnotate");
       }
       // r => Circle
       else if (event.keyCode == 82) {
-        const index = mode === "teaching" ? 12 : 14;
+        const index = mode === "teaching" ? 14 : 15;
         this.handleToolClicked(index, "CircleRoi");
       }
       // z => zoom
