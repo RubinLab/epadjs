@@ -200,8 +200,7 @@ function shrinkTable(filteredTable, data, numofHeaderCols, rowsWithNoValue) {
         if (
           cols[j] != null &&
           cols[j] != 'undefined' &&
-          cols[j] == true &&
-          filteredTable[i][j] != null
+          cols[j] == true
         )
           row.push(filteredTable[i][j]);
       });
@@ -220,10 +219,9 @@ function shrinkTable(filteredTable, data, numofHeaderCols, rowsWithNoValue) {
           cols[j + numofHeaderCols] != 'undefined' &&
           cols[j + numofHeaderCols] == true
         ) {
-          if (selem) {
+            if (!selem) selem = {};
             selem.index = i;
             row.push(selem);
-          }
         }
       });
 
@@ -301,11 +299,13 @@ function filterForMeasurementTemplateShape(
               template &&
               data.tUIDs[i][j - numofHeaderCols] != 'undefined' &&
               data.tUIDs[i][j - numofHeaderCols] != null &&
+              data.tUIDs[i][j - numofHeaderCols].templateCode &&
               data.tUIDs[i][j - numofHeaderCols].templateCode == template)) &&
           (shapes == null ||
             (shapes != null &&
               shapes &&
               data.tUIDs[i][j - numofHeaderCols] != null &&
+              data.tUIDs[i][j - numofHeaderCols].shapes &&
               checkForShapes(
                 data.tUIDs[i][j - numofHeaderCols].shapes,
                 shapes
@@ -784,7 +784,7 @@ function checkAndColor(
         }
       }
       //put link
-      if (data.tUIDs[i][j] != null) {
+      if (data.tUIDs[i][j] != null && data.tUIDs[i][j].studyUID) {
         var aTag = $('<a>', {
           id: 'a' + i + (j + 1) + '_' + data.tUIDs[i][j].index,
           href: createLinkUrl(
@@ -869,7 +869,7 @@ function checkAndColor(
         //check if it is different from the row above (or j?)
         if (
           i > 0 &&
-          (data.tUIDs[i - 1][j] != null &&
+          (data.tUIDs[i - 1][j] != null && data.tUIDs[i - 1][j].studyUID &&
             data.tUIDs[i][j].timepoint != data.tUIDs[i - 1][j].timepoint)
         ) {
           recisttable
@@ -882,7 +882,7 @@ function checkAndColor(
         let hasAnyInSpanBefore = false;
         for (let t = j; t < data.stTimepoints.length; t++) {
           if (data.stTimepoints[t] == data.tTimepoints[k]) {
-            if (data.tUIDs[i][t] != null) {
+            if (data.tUIDs[i][t] != null && data.tUIDs[i][t].studyUID) {
               hasAnyInSpanAfter = true;
               break;
             }
@@ -892,7 +892,7 @@ function checkAndColor(
         }
         for (let t = j; t > 0; t--) {
           if (data.stTimepoints[t] == data.tTimepoints[k]) {
-            if (data.tUIDs[i][t] != null) {
+            if (data.tUIDs[i][t] != null && data.tUIDs[i][t].studyUID) {
               hasAnyInSpanBefore = true;
               break;
             }
@@ -900,10 +900,11 @@ function checkAndColor(
             break;
           }
         }
-        if (!isInSpan && !hasAnyInSpanAfter && !hasAnyInSpanBefore)
+        if (!isInSpan && !hasAnyInSpanAfter && !hasAnyInSpanBefore){
           recisttable
             .find('#c' + i + (j + numofHeaderCols))
             .css('background-color', errorColor);
+        }
       }
     }
   }
@@ -1044,7 +1045,7 @@ function fillInTables(
   let modality = [];
   for (i = 0; i < data.tUIDs.length; i++) {
     for (j = 0; j < data.tUIDs[i].length; j++) {
-      if (data.tUIDs[i][j] != null && data.tUIDs[i][j] != '') {
+      if (data.tUIDs[i][j] != null && data.tUIDs[i][j] != '' && data.tUIDs[i][j].studyUID) {
         if (modality[j] == null) modality[j] = data.tUIDs[i][j].modality;
         else if (modality[j].indexOf(data.tUIDs[i][j].modality) == -1)
           modality[j] += '/' + data.tUIDs[i][j].modality;
@@ -1208,7 +1209,7 @@ function fillFilterSelect(
   // get the selected if already added
   var selectedFilter = $('#' + id + 'filter');
   var selectedTemplateFilter = $('#' + id + 'templateFilter');
-  var selectedShapeFilter = $('#' + id + 'shapeFilter');
+  var selectedShapesFilter = $('#' + id + 'shapesFilter');
   // empty and fill in filters
   var filter = recisttable.find('#' + id + 'filter');
   filter.empty();
@@ -1261,7 +1262,7 @@ function fillFilterSelect(
       console.log('filter value after', filter ? filter.val() : 'non');
       if (selectedTemplateFilter && selectedTemplateFilter.val()) templateFilter.val(selectedTemplateFilter.val());
       else templateFilter.selectedIndex = 0;
-      if (selectedShapeFilter && selectedShapeFilter.val()) shapesFilter.val(selectedShapeFilter.val());
+      if (selectedShapesFilter && selectedShapesFilter.val()) shapesFilter.val(selectedShapesFilter.val());
       else shapesFilter.selectedIndex = 0;
     }
     let { filteredTable, rowsWithNoValue } = filterForMeasurementTemplateShape(
