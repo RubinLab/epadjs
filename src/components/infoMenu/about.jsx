@@ -16,13 +16,13 @@ class About extends React.Component {
     }
   };
   getData = () => {
-    const url = apiUrl + "/epads/version/";
+    const url = apiUrl + "/appVersion";
     http.get(url).then(res => this.setState({ data: res.data }));
   };
 
   render = () => {
-    const version = this.state.data.description
-      ? this.state.data.description
+    const version = this.state.data.version
+      ? this.state.data.version
       : "beta";
     return (
       // <Modal.Dialog dialogClassName="info-about__modal">
