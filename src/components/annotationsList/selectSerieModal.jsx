@@ -165,9 +165,7 @@ class selectSerieModal extends React.Component {
   };
 
   saveSignificantSeries = async (series) => {
-    console.log(" ---> series", series);
     const { selectedToDisplay } = this.state;
-    console.log(" ---> selectedToDisplay", selectedToDisplay);
     let significantSeries = [];
     let significanceOrder = 1;
     let significanceSet = series.some((serie) => serie.significanceOrder > 0);
@@ -176,7 +174,6 @@ class selectSerieModal extends React.Component {
       const ser = series.filter(el => el.seriesUID === key);
       const seriesDescription = ser.length > 0 ? ser[0].seriesDescription : null;
       if (!significanceSet && this.mode === "teaching") {
-        console.log(" ---> in if ")
         significantSeries.push({
           seriesUID: key,
           significanceOrder,
@@ -184,7 +181,6 @@ class selectSerieModal extends React.Component {
         });
         significanceOrder++;
       } else {
-        console.log(" ---> in else ser", ser);
         seriesInDetail.push(ser[0]);
       }
     }
