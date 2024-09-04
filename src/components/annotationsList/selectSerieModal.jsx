@@ -173,7 +173,7 @@ class selectSerieModal extends React.Component {
     for (let key of Object.keys(selectedToDisplay)) {
       const ser = series.filter(el => el.seriesUID === key);
       const seriesDescription = ser.length > 0 ? ser[0].seriesDescription : null;
-      if (!significanceSet) {
+      if (!significanceSet && this.mode === "teaching") {
         significantSeries.push({
           seriesUID: key,
           significanceOrder,
