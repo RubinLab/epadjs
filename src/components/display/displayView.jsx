@@ -373,8 +373,8 @@ class DisplayView extends Component {
     const newMFAimToJump = `${series[activePort].aimID}` !== this.state.multiFrameAimJumped;
     const samePortControl = activePort === prevActivePort && active && prevActive;
 
-    const mfChanged = samePortControl && prevProps.seriesAddition[activePort].multiFrameIndex !== this.props.seriesAddition[activePort].multiFrameIndex && this.props.seriesAddition[activePort].multiFrameIndex === null;
-    
+    const mfChanged = samePortControl && prevProps.seriesAddition[activePort].multiFrameIndex != this.props.seriesAddition[activePort].multiFrameIndex && this.props.seriesAddition[activePort].multiFrameIndex === null;
+
     if ( (mfAimJumpDataFilled && newMFAimToJump) || (prevActiveFrameDataMissing && frameDataFilled && multiFrameAimJumpData && multiFrameAimJumpData[0]) || mfChanged) {
       await this.setState({ isLoading: true });
       this.getViewports();
