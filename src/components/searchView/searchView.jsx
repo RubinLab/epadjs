@@ -710,8 +710,10 @@ class SearchView extends Component {
           let blob = new Blob([result.data], { type: "application/zip" });
           this.triggerBrowserDownload(blob, fileName);
           this.setState({ error: null, downloading: false, update });
+          this.props.dispatch(clearSelection());
         })
         .catch((err) => {
+          this.props.dispatch(clearSelection());
           this.setState({ downloading: false, update });
           console.log(err);
         });
