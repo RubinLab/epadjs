@@ -1116,3 +1116,9 @@
   height: 100%;
   background: #444;
 }
+
+.mng__table {
+  height: 20rem;
+  overflow: auto;
+  background: #444;
+}
