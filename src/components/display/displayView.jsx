@@ -147,7 +147,7 @@ const tools = [
 
   { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
   { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
-  { name: "DragProbe", mode: "active",  modeOptions: { mouseButtonMask: 1 }},
+  { name: "DragProbe",  modeOptions: { mouseButtonMask: 1 }},
 ];
 
 const mapStateToProps = (state) => {
