@@ -39,7 +39,7 @@ import {
 import { BsArrowUpLeft } from "react-icons/bs";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
-import { MdLoop, MdPanTool } from "react-icons/md";
+import { MdLoop, MdPanTool, MdMyLocation } from "react-icons/md";
 import { TbReplace } from "react-icons/tb";
 import {
   TiDeleteOutline,
@@ -170,6 +170,7 @@ class ToolMenu extends Component {
       // { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
       { name: "Color", icon: <FaPalette />, tool: "colorLut" },
       { name: "Fusion", icon: <FaObjectUngroup />, tool: "fuse", teaching: true },
+      { name: "Pixel", icon: <MdMyLocation />, tool: "DragProbe", teaching: true },
     ];
 
     this.markupTools = [
@@ -311,22 +312,22 @@ class ToolMenu extends Component {
       }
       // d => Length
       else if (event.keyCode == 68) {
-        const index = mode === "teaching" ? 12 : 13;
+        const index = mode === "teaching" ? 13 : 14;
         this.handleToolClicked(index, "Length");
       }
       // o => Perpendicular/Bidirectional
       else if (event.keyCode == 79) {
-        const index = mode === "teaching" ? 15 : 16;
+        const index = mode === "teaching" ? 16 : 17;
         this.handleToolClicked(index, "Bidirectional");
       }
       // f => Arrow
       else if (event.keyCode == 70) {
-        const index = mode === "teaching" ? 13 : 14;
+        const index = mode === "teaching" ? 14 : 15;
         this.handleToolClicked(index, "ArrowAnnotate");
       }
       // r => Circle
       else if (event.keyCode == 82) {
-        const index = mode === "teaching" ? 14 : 15;
+        const index = mode === "teaching" ? 15 : 16;
         this.handleToolClicked(index, "CircleRoi");
       }
       // z => zoom
