@@ -285,7 +285,7 @@ class DisplayView extends Component {
     try { 
       if (oldSeries && newSeries)
         for (let i = 0; i < newSeries.length; i++) {
-          if (!oldSeries[i].imageAnnotations && !!newSeries[i].imageAnnotations) {
+          if (oldSeries[i] && !oldSeries[i].imageAnnotations && newSeries[i] && !!newSeries[i].imageAnnotations) {
             return true;
           }
         }
@@ -373,7 +373,7 @@ class DisplayView extends Component {
     const newMFAimToJump = `${series[activePort].aimID}` !== this.state.multiFrameAimJumped;
     const samePortControl = activePort === prevActivePort && active && prevActive;
 
-    const isInitialIndex = prevProps.seriesAddition[activePort].multiFrameIndex === undefined && this.props.seriesAddition[activePort].multiFrameIndex === null;
+    const isInitialIndex = prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].multiFrameIndex === undefined && this.props.seriesAddition[activePort].multiFrameIndex === null;
     const mfChanged = samePortControl && (prevProps.seriesAddition[activePort].multiFrameIndex !== this.props.seriesAddition[activePort].multiFrameIndex && !isInitialIndex) && this.props.seriesAddition[activePort].multiFrameIndex === null;
 
     if ( (mfAimJumpDataFilled && newMFAimToJump) || (prevActiveFrameDataMissing && frameDataFilled && multiFrameAimJumpData && multiFrameAimJumpData[0]) || mfChanged) {
