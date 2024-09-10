@@ -207,7 +207,7 @@ class WorkList extends React.Component {
 
     try {
       if (!dataExists) {
-        ({ data: series } = await getSeries(projectID, subjectID, studyUID, true));
+        ({ data: series } = await getSeries(projectID, subjectID, studyUID));
         this.props.dispatch(setSeriesData(projectID, subjectID, studyUID, series, true));
       } else series = seriesData[projectID][subjectID][studyUID].list;
       series = series.filter(isSupportedModality);
