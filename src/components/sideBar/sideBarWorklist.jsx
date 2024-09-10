@@ -35,6 +35,7 @@ import {
   selectPatient,
   setSeriesData,
 } from "../annotationsList/action";
+import { isSupportedModality } from "../../Utils/aid.js";
 
 let mode;
 
@@ -209,7 +210,9 @@ class WorkList extends React.Component {
         ({ data: series } = await getSeries(projectID, subjectID, studyUID));
         this.props.dispatch(setSeriesData(projectID, subjectID, studyUID, series, true));
       } else series = seriesData[projectID][subjectID][studyUID].list;
+      series = series.filter(isSupportedModality);
       const maxPort = parseInt(sessionStorage.getItem("maxPort"));
+
       const { openSeries } = this.props;
       if (series.length + openSeries.length <= maxPort) {
         this.setState({ selectedSeries: series }, () => this.viewSelection());
