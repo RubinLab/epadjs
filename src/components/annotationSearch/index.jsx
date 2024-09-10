@@ -1050,9 +1050,12 @@ const AnnotationSearch = (props) => {
     let newSelected = formSelectedAnnotationsData();
     const toBeDeleted = {};
     const promiseArr = [];
+    let isOpen = [];
     for (let annotation in newSelected) {
+      const aimIsOpen  = checkIfSerieOpen(newSelected[annotation], props.openSeries).isOpen;
+      isOpen.push(aimIsOpen);
       const { projectID } = newSelected[annotation];
-      if (checkIfSerieOpen(newSelected[annotation], props.openSeries).isOpen) {
+      if (aimIsOpen) {
         notDeleted[annotation] = newSelected[annotation];
         delete newSelected[annotation];
       } else {
@@ -1068,6 +1071,10 @@ const AnnotationSearch = (props) => {
       promiseArr.push(deleteAnnotationsList(pid, aims[i]));
     });
 
+    if (isOpen.some(el => el === true)) {
+      toast.error("Series is open in display view. Please close it to delete all selected aims.", { autoClose: false });
+    } 
+      
     Promise.all(promiseArr)
       .then(() => {
         getNewData(props.searchTableIndex, true);
@@ -1080,10 +1087,11 @@ const AnnotationSearch = (props) => {
           error.response.data &&
           error.response.data.message
         )
-          toast.error(error.response.data.message, { autoClose: false });
-        getNewData(props.searchTableIndex, true);
-        props.dispatch(storeAimSelectionAll(null, null, null, true));
-      });
+         toast.error(error.response.data.message, { autoClose: false });
+          getNewData(props.searchTableIndex, true);
+          props.dispatch(storeAimSelectionAll(null, null, null, true));
+        });
+      
     setShowDeleteModal(false);
     props.dispatch(clearSelection());
   };
