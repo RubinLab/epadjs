@@ -24,13 +24,13 @@ const NewMetaData = (props) => {
     const [imageDownloaded, setImageDownloaded] = useState(false);
 
   const getImageData = async () => {
-    let data = null;
+    let data = [];
     const { activePort } = props;
     const item = cornerstone.getEnabledElements()[activePort];
     const element = item ? item.element : null;
     const image = element ? cornerstone.getImage(element) : null;
     if (image && image.data) data = image.data;
-    if ((!image || (image && !image.data))) {
+    if (image && !image.data) {
       const imgURL = image.imageId.replace("wadors:", "").split('/frames/')[0];
       try {
         ({ data } = await getImageMetadata(imgURL));
