@@ -296,12 +296,30 @@ body {
   background: #cccccc;
 }
 
-.Collapsible__contentInner {
+@media (max-height: 1040px) {
+  .Collapsible__contentInner {
+    background: #cccccc;
+    width: 172px;
+    height: 260px;
+    overflow-y: auto
+  };
+}
+
+@media (min-height: 1040px) {
+  .Collapsible__contentInner {
+    background: #cccccc;
+    width: 172px;
+    height: 400px;
+    overflow-y: auto
+  };
+}
+
+/* .Collapsible__contentInner {
   background: #cccccc;
   width: 172px;
   height: 400px;
   overflow-y: auto
-}
+} */
 
 .Collapsible__contentInner p {
   margin-bottom: 10px;

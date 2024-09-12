@@ -522,6 +522,7 @@ class AimEditor extends Component {
   };
 
   createAimSegmentation = async (answers) => {
+    this.setState({ saveButtonIsActive: false })
     let aimName = answers.name.value;
     // try {
     const activeLabelMapIndex = this.getActiveLabelMapIndex();
@@ -1286,7 +1287,7 @@ class AimEditor extends Component {
       uploadSegmentation(segmentation, segId, projectID)
         .then(() => {
           this.props.dispatch(segUploadStarted(segId));
-          this.setState({ uploadingSegId: segId, showModal: true, saveButtonIsActive: true });
+          this.setState({ uploadingSegId: segId, showModal: true });
           resolve('success');
         })
         .catch((error) => {

@@ -12,7 +12,7 @@ class SubjectCreationForm extends React.Component {
     } else {
       saveSubject(this.props.project, this.state.abbreviation, this.state.name)
         .then(() => {
-          this.props.onSubmit();
+          this.props.onSubmit('subject');
           this.handleCancel();
           this.props.onResolve();
           toast.success("Subject successfully saved!");

@@ -301,7 +301,7 @@ class SearchView extends Component {
     this.handleSelectionOnExpandChange(2);
   };
 
-  updateUploadStatus = () => {
+  updateUploadStatus = (level) => {
     // this.setState(state => ({ update: state.update + 1 }));
     this.state.uploading
       ? this.setState({ uploading: false })
@@ -317,38 +317,7 @@ class SearchView extends Component {
     }, {});
     // pass it to getwholedata
     const promiseArr = [];
-    // -----> Delete after v1.0 <-----
-    // for (let patient in patients) {
-    // promiseArr.push(
-    //   this.props.dispatch(
-    //     getWholeData(this.props.openSeries[patients[patient]])
-    //   )
-    // );
-    //   promiseArr.push(getWholeData(this.props.openSeries[patients[patient]]));
-    // }
-    // Promise.all(promiseArr)
-    //   .then(() => {
-    //     //keep the current state
-    //     this.props.dispatch(clearSelection());
-
-    //     this.setState(state => ({ update: state.update + 1 }));
-    //     this.props.history.push(`/list/${this.props.pid}`);
-    //     for (let serie of this.props.openSeries) {
-    //       let type = serie.aimID ? 'annotation' : 'serie';
-    //       this.props.dispatch(
-    //         updatePatient(
-    //           type,
-    //           true,
-    //           serie.patientID,
-    //           serie.studyUID,
-    //           serie.seriesUID
-    //         )
-    //       );
-    //     }
-    //   })
-    //   .catch(err => {
-    //     console.log(err);
-    //   });
+    if (level === 'subject') this.props.forceUpdatePage();
   };
 
   updateSubjectCount = async () => {
@@ -741,8 +710,10 @@ class SearchView extends Component {
           let blob = new Blob([result.data], { type: "application/zip" });
           this.triggerBrowserDownload(blob, fileName);
           this.setState({ error: null, downloading: false, update });
+          this.props.dispatch(clearSelection());
         })
         .catch((err) => {
+          this.props.dispatch(clearSelection());
           this.setState({ downloading: false, update });
           console.log(err);
         });

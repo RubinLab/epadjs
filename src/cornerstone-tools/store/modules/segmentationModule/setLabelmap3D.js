@@ -96,7 +96,10 @@ function setLabelmap3DByFirstImageId(
     redo: [],
   };
 
-  buffer = buffer[0];
+  // this seems to be added to be able to display the segmentation. 
+  // we need the buffer to be ArrayBuffer. Not array of ArrayBuffers also in the main object
+  // buffer = buffer[0];
+  
   const labelmaps2D = brushStackState.labelmaps3D[labelmapIndex].labelmaps2D;
   const slicelengthInBytes = buffer.byteLength / numberOfFrames;
   const sliceLengthInUint16 = slicelengthInBytes / 2; // SliceLength in Uint16.

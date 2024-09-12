@@ -110,7 +110,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
       accessor: "examTypes",
       id: "examTypes-id",
       resizable: true,
-      sortable: false,
+      sortable: true,
       show: true,
       filterMethod: (filter, row) => filterExam(filter, row),
       getProps: (state, rowInfo) => ({

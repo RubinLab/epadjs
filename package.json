@@ -1,6 +1,6 @@
 {
   "name": "ejs",
-  "version": "1.4",
+  "version": "1.5",
   "private": true,
   "dependencies": {
     "aimapi": "^0.1.26",
