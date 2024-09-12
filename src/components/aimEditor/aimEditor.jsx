@@ -216,7 +216,8 @@ class AimEditor extends Component {
   };
 
   handleUserKeyPress = (e) => {
-    if (e.key === "Enter") {
+    // save shortcut ctrl + y
+    if (e.keyCode == 89 && e.ctrlKey) {
       this.save();
     }
   };
