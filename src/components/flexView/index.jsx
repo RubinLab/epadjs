@@ -18,6 +18,7 @@ import {
   getSingleSerie,
   clearSelection,
   setSeriesData,
+  setLastLocation
 } from "../annotationsList/action";
 import "react-table-v6/react-table.css";
 // import "../annotationSearch/annotationSearch.css";
@@ -175,6 +176,8 @@ class FlexView extends React.Component {
 
   componentDidMount = async () => {
     const order = JSON.parse(sessionStorage.getItem("studyListColumns"));
+    const lastLocation = this.props.location && this.props.location.pathname ? this.props.location.pathname : '/'
+    this.props.dispatch(setLastLocation(lastLocation));
     this.props.dispatch(clearSelection());
     if (order && order.length) this.setState({ order });
     try {
