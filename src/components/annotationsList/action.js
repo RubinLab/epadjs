@@ -54,6 +54,7 @@ import {
   STORE_AIM_SELECTION,
   STORE_AIM_SELECTION_ALL,
   TOGGLE_ALL_CALCULATIONS,
+  SET_LAST_LOCATION,
   colors,
   commonLabels,
 } from "./types";
@@ -75,6 +76,10 @@ const wadoUrl = sessionStorage.getItem('wadoUrl');
 
 export const fillSeriesDescfullData = (data) => {
   return { type: FILL_DESC, data };
+}
+
+export const setLastLocation = (lastLocation) => {
+  return { type: SET_LAST_LOCATION, lastLocation }
 }
 
 export const storeAimSelection = (selectionMap, pageIndex) => {
