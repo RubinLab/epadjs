@@ -638,7 +638,7 @@ const asyncReducer = (state = initialState, action) => {
           for (let series in toggledLabeAimList) {
             if (series !== action.payload.serieID) {
               for (let id of ids) {
-                toggledLabeAimList[series][id].showLabel = action.payload.checked;
+                if (toggledLabeAimList[series] && toggledLabeAimList[series][id]) toggledLabeAimList[series][id].showLabel = action.payload.checked;
               }
             }
           }
