@@ -1071,26 +1071,31 @@ const AnnotationSearch = (props) => {
       promiseArr.push(deleteAnnotationsList(pid, aims[i]));
     });
 
-    if (isOpen.some(el => el === true)) {
-      toast.error("Series is open in display view. Please close it to delete all selected aims.", { autoClose: false });
-    } 
-      
-    Promise.all(promiseArr)
-      .then(() => {
-        getNewData(props.searchTableIndex, true);
-        props.dispatch(storeAimSelectionAll(null, null, null, true));
-        props.dispatch(storeAimSelection({}, -1));
-      })
-      .catch((error) => {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.message
-        )
-         toast.error(error.response.data.message, { autoClose: false });
+    const aimsNotDeleted = isOpen.filter(el => el === true);
+    if (promiseArr.length === 0) {
+      toast.error(`Couldn't delete any of the selected aims, because series is open in display view. Please close the series to delete aims.`, { autoClose: false });
+    }
+     
+    if (promiseArr.length > 0) {
+      Promise.all(promiseArr)
+        .then(() => {
+          if (aimsNotDeleted.length > 0) 
+            toast.error(`Couldn't delete ${aimsNotDeleted.length} ${aimsNotDeleted.length > 1 ? 'aims' : 'aim'} because Series is open in display view. Please close the series to delete aims.`, { autoClose: false });
           getNewData(props.searchTableIndex, true);
           props.dispatch(storeAimSelectionAll(null, null, null, true));
-        });
+          props.dispatch(storeAimSelection({}, -1));
+        })
+        .catch((error) => {
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.message
+          )
+          toast.error(error.response.data.message, { autoClose: false });
+            getNewData(props.searchTableIndex, true);
+            props.dispatch(storeAimSelectionAll(null, null, null, true));
+          });
+    }
       
     setShowDeleteModal(false);
     props.dispatch(clearSelection());
