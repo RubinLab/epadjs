@@ -1074,9 +1074,7 @@ const AnnotationSearch = (props) => {
     const aimsNotDeleted = isOpen.filter(el => el === true);
     if (promiseArr.length === 0) {
       toast.error(`Couldn't delete any of the selected aims, because series is open in display view. Please close the series to delete aims.`, { autoClose: false });
-    }
-     
-    if (promiseArr.length > 0) {
+    } else {
       Promise.all(promiseArr)
         .then(() => {
           if (aimsNotDeleted.length > 0) 
@@ -1096,7 +1094,7 @@ const AnnotationSearch = (props) => {
             props.dispatch(storeAimSelectionAll(null, null, null, true));
           });
     }
-      
+
     setShowDeleteModal(false);
     props.dispatch(clearSelection());
   };
