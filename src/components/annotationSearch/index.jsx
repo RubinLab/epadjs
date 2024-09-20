@@ -1050,9 +1050,12 @@ const AnnotationSearch = (props) => {
     let newSelected = formSelectedAnnotationsData();
     const toBeDeleted = {};
     const promiseArr = [];
+    let isOpen = [];
     for (let annotation in newSelected) {
+      const aimIsOpen  = checkIfSerieOpen(newSelected[annotation], props.openSeries).isOpen;
+      isOpen.push(aimIsOpen);
       const { projectID } = newSelected[annotation];
-      if (checkIfSerieOpen(newSelected[annotation], props.openSeries).isOpen) {
+      if (aimIsOpen) {
         notDeleted[annotation] = newSelected[annotation];
         delete newSelected[annotation];
       } else {
@@ -1068,22 +1071,30 @@ const AnnotationSearch = (props) => {
       promiseArr.push(deleteAnnotationsList(pid, aims[i]));
     });
 
-    Promise.all(promiseArr)
-      .then(() => {
-        getNewData(props.searchTableIndex, true);
-        props.dispatch(storeAimSelectionAll(null, null, null, true));
-        props.dispatch(storeAimSelection({}, -1));
-      })
-      .catch((error) => {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.message
-        )
+    const aimsNotDeleted = isOpen.filter(el => el === true);
+    if (promiseArr.length === 0) {
+      toast.error(`Couldn't delete any of the selected aims, because series is open in display view. Please close the series to delete aims.`, { autoClose: false });
+    } else {
+      Promise.all(promiseArr)
+        .then(() => {
+          if (aimsNotDeleted.length > 0) 
+            toast.error(`Couldn't delete ${aimsNotDeleted.length} ${aimsNotDeleted.length > 1 ? 'aims' : 'aim'} because Series is open in display view. Please close the series to delete aims.`, { autoClose: false });
+          getNewData(props.searchTableIndex, true);
+          props.dispatch(storeAimSelectionAll(null, null, null, true));
+          props.dispatch(storeAimSelection({}, -1));
+        })
+        .catch((error) => {
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.message
+          )
           toast.error(error.response.data.message, { autoClose: false });
-        getNewData(props.searchTableIndex, true);
-        props.dispatch(storeAimSelectionAll(null, null, null, true));
-      });
+            getNewData(props.searchTableIndex, true);
+            props.dispatch(storeAimSelectionAll(null, null, null, true));
+          });
+    }
+
     setShowDeleteModal(false);
     props.dispatch(clearSelection());
   };
