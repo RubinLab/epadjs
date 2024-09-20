@@ -40,7 +40,8 @@ import {
   updateSearchTableIndex,
   refreshPage,
   storeAimSelection,
-  storeAimSelectionAll
+  storeAimSelectionAll,
+  setLastLocation
 } from "../annotationsList/action";
 import AnnotationDownloadModal from "../searchView/annotationDownloadModal";
 import UploadModal from "../searchView/uploadModal";
@@ -211,6 +212,9 @@ const AnnotationSearch = (props) => {
   };
 
   useEffect(() => {
+    console.log(" --->props", Object.keys(props).length);
+    const lastLocation = props && props.location && props.location.pathname ? props.location.pathname : '/'
+    props.dispatch(setLastLocation(lastLocation));
     props.dispatch(storeAimSelectionAll(null, null, null, true));
     if (mode === "teaching") return;
     setSelectedProject(props.pid);

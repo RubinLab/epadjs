@@ -34,6 +34,7 @@ import {
   changeActivePort,
   selectPatient,
   setSeriesData,
+  setLastLocation
 } from "../annotationsList/action";
 import { isSupportedModality } from "../../Utils/aid.js";
 
@@ -66,6 +67,8 @@ class WorkList extends React.Component {
 
   componentDidMount = async () => {
     mode = sessionStorage.getItem("mode");
+    const lastLocation = this.props.location && this.props.location.pathname ? this.props.location.pathname : '/'
+    this.props.dispatch(setLastLocation(lastLocation));
     this.getWorkListData(true);
   };
 
