@@ -201,13 +201,17 @@ class DisplayView extends Component {
   }
 
   formInvertMap = (buttonClicked, index, reset, clearGrid) => {
-    const { series, seriesAddition } = this.props;
+    const { series, seriesAddition, activePort } = this.props;
     let invertMap = sessionStorage.getItem("invertMap");
     invertMap = invertMap ? JSON.parse(invertMap) : {};
     if (buttonClicked) invertMap[index] = !invertMap[index];
     else if (clearGrid) invertMap = {};
-    else {    
-      if (reset) invertMap = {};
+    else if (reset) {
+        const isPET = series[activePort].examType === 'PET' || seriesAddition[activePort].examType === 'PET';
+        const isNM = series[activePort].examType === 'NM' || seriesAddition[activePort].examType === 'NM';
+        const isPT = series[activePort].examType === 'PT' || seriesAddition[activePort].examType === 'PT';
+        invertMap[activePort] = isPET || isNM || isPT;
+    } else {
       series.forEach((el, i) => {
         const isPET = el.examType === 'PET' || seriesAddition[i].examType === 'PET';
         const isNM = el.examType === 'NM' || seriesAddition[i].examType === 'NM';
