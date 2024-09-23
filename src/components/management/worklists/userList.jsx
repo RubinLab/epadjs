@@ -73,7 +73,7 @@ const userList = props => {
   return (
     <div>
       <Table
-        className="__table"
+        className="mng__table"
         data={props.users}
         columns={columns}
         pageSize={props.users.length}
