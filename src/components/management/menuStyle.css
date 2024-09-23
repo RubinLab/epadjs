@@ -353,6 +353,9 @@
 .edit-userRole.modal-body {
   color: gray;
   width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: auto;
 }
 
 .user-table__header {
