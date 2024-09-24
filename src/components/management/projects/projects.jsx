@@ -406,6 +406,12 @@ class Projects extends React.Component {
     return fullNames.join(", ");
   };
 
+  goToProject = id => {
+    this.props.onClose();
+    const route = mode === 'teaching' ? "/search/" + id : "/list/" + id;
+    this.props.openProject(id, route);
+  }
+
   defineColumns = () => {
     return [
       {
@@ -457,8 +463,8 @@ class Projects extends React.Component {
         minResizeWidth: 20,
         width: 30,
         Cell: (original) => (
-          <Link className="open-link" to={ mode === 'teaching' ? "/search/" + original.row.checkbox.id : "/list/" + original.row.checkbox.id}>
-            <div onClick={this.props.onClose} data-tip data-for="project-open">
+          <>
+            <div onClick={() => this.goToProject(original.row.checkbox.id)} data-tip data-for="project-open">
               <FaRegEye className="menu-clickable" />
             </div>
             <ReactTooltip
@@ -466,10 +472,10 @@ class Projects extends React.Component {
               place="right"
               type="info"
               delayShow={1000}
-            >
+              >
               <span className="filter-label">Jump to project</span>
             </ReactTooltip>
-          </Link>
+          </>  
         ),
       },
       {

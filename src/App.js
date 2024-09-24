@@ -1229,6 +1229,11 @@ class App extends Component {
     this.setState({ pid });
   };
 
+  openProject = (pid, route) => {
+    this.getPidUpdate(pid);
+    this.props.history.push(route)
+  }
+
   clearTreeExpand = () => {
     this.setState({ treeExpand: {}, expandLevel: 0 });
   };
@@ -1383,6 +1388,7 @@ class App extends Component {
             pid={this.state.pid}
             clearAllTreeData={this.clearAllTreeData}
             clearTreeExpand={this.clearTreeExpand}
+            openProject={this.openProject}
           />
         )}
         {this.state.openInfo && (
