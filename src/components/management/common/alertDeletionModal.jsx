@@ -16,7 +16,7 @@ const alertDeletionModal = ({ message, onCancel, onDelete, error, show = true, i
       <Modal.Body className="notification-modal">
         <p className="alert-delete__message">{message}</p>
         {error && <div className="err-message">{error}</div>}
-        {isDeleting &&<BarLoader loading={true} height={8} width={200} /> }
+        {isDeleting && !error &&<BarLoader loading={true} height={8} width={200} /> }
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
         {!error && (
@@ -24,7 +24,7 @@ const alertDeletionModal = ({ message, onCancel, onDelete, error, show = true, i
             Delete
           </Button>
         )}
-        <Button variant="secondary" onClick={onCancel} disabled={isDeleting}>
+        <Button variant="secondary" onClick={onCancel} disabled={isDeleting && !error}>
           Cancel
         </Button>
       </Modal.Footer>

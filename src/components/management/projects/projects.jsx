@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import Table from "react-table-v6";
+import { toast } from 'react-toastify';
 import ReactTooltip from "react-tooltip";
 import { FaRegTrashAlt, FaEdit, FaRegEye } from "react-icons/fa";
 import { BsList } from "react-icons/bs";
@@ -177,7 +178,10 @@ class Projects extends React.Component {
         this.getProjectData();
         this.handleCancel();
       })
-      .catch((err) => console.log(err));
+      .catch((err) =>{
+        console.error(err);
+        toast.error(err.response.data.message)
+      });
   };
 
   saveNewProject = async () => {
@@ -207,6 +211,7 @@ class Projects extends React.Component {
         })
         .catch((error) => {
           this.setState({ errorMessage: error.response.data.message });
+          toast.error(error.response.data.message);
         });
     }
   };
@@ -238,6 +243,7 @@ class Projects extends React.Component {
           errorMessage: error.response.data.message,
         });
         this.handleCancel();
+        toast.error(error.response.data.message)
       });
   };
 
@@ -322,6 +328,7 @@ class Projects extends React.Component {
         this.setState({
           errorMessage: err.response.data.message,
         });
+        toast.error(err.response.data.message);
       })
       .finally(() => {
         this.getProjectData();
@@ -344,6 +351,7 @@ class Projects extends React.Component {
       })
       .catch((err) => {
         this.setState({ errorMessage: err.response.data.message });
+        toast.error(err.response.data.message);
       });
   };
 
@@ -395,8 +403,9 @@ class Projects extends React.Component {
         this.getProjectData();
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
         this.setState({ errorMessage: error.response.data.message });
+        toast.error(error.response.data.message);
       });
   };
 
