@@ -912,7 +912,7 @@ const formAimData = (aim, projectID, patientID) => {
     }, {})
   } else {
     imgIDs = imgs.reduce((all, item) => {
-      all[item.sopInstanceUid.root] = true;
+      all[`${item.sopInstanceUid.root}/frames/1`] = true;
       return all;
     }, {})
   }
