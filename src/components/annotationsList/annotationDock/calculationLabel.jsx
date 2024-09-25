@@ -1,15 +1,18 @@
 import React from "react";
-
+let mode;
 const calculationLabel = ({ calculations, name }) => {
+  mode = sessionStorage.getItem("mode");
   const labelArr = [];
   if (calculations) {
     calculations = Object.values(calculations);
     for (let k = 0; k < calculations.length; k++) {
-      labelArr.push(
-        <div key={k + "markupType"} className="-calculation__label--title ">
-          {calculations[k].markupType}
-        </div>
-      );
+      if (mode !== 'teaching') {
+        labelArr.push(
+          <div key={k + "markupType"} className="-calculation__label--title ">
+            {calculations[k].markupType}
+          </div>
+        );
+      }
       let calcArr = calculations[k].calculations;
       for (let i = 0; i < calcArr.length; i++) {
         let classDesc = calcArr[i].type + "-label";
