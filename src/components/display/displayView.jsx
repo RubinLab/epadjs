@@ -57,6 +57,7 @@ import { errorMonitor } from "events";
 import FreehandRoiSculptorTool from "../../cornerstone-tools/tools/FreehandRoiSculptorTool";
 import getVPDimensions from "./ViewportCalculations";
 import SeriesDropDown from "./SeriesDropDown";
+import { toast } from "react-toastify";
 
 let mode;
 let wadoUrl;
@@ -1606,6 +1607,8 @@ class DisplayView extends Component {
       this.props.dispatch(
         getSingleSerie({ patientID, projectID, seriesUID, studyUID })
       );
+    }).catch(err => {
+      toast.error(err.response.data.message);
     });
   };
 
