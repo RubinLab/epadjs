@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactTable from 'react-table-v6';
+import { toast } from 'react-toastify';
 import { FaCheck, FaRegTrashAlt, FaTimes } from 'react-icons/fa';
 import { BsList } from "react-icons/bs";
 import ReactTooltip from 'react-tooltip';
@@ -113,6 +114,7 @@ class Users extends React.Component {
         this.handleCancel();
       })
       .catch(err => {
+        toast.error(err.response.data.message);
         this.setState({ errorMessage: err.response.data.message });
         console.error(err);
       });
@@ -127,6 +129,7 @@ class Users extends React.Component {
         this.handleCancel();
       })
       .catch(err => {
+        toast.error(err.response.data.message);
         this.setState({ errorMessage: err.response.data.message });
         console.error(err);
       });
@@ -153,6 +156,7 @@ class Users extends React.Component {
           this.handleCancel();
         })
         .catch(err => {
+          toast.error(err.response.data.message);
           this.setState({ errorMessage: err.response.data.message });
           console.error(err);
         });
@@ -176,6 +180,7 @@ class Users extends React.Component {
         this.handleCancel();
       })
       .catch(err => {
+        toast.error(err.response.data.message);
         this.setState({ errorMessage: err.response.data.message });
         console.error(err);
       });
