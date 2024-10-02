@@ -10,7 +10,7 @@ const assigneeDeletionWarning = props => {
         <div>
           <p>Worklist is going to removed from the following assignee(s)!</p>
           <p>This can not be undone!</p>
-          <div>{props.warningList.join(",")}</div>
+          <div>{props.allSelected ? "All of the assigned users" : props.warningList.join(",")}</div>
         </div>
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
