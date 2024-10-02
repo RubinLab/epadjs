@@ -243,6 +243,7 @@ class Templates extends React.Component {
       this.getTemplatesData();
       this.props.getProjectAdded();
     } catch (err) {
+      toast.error(err.response.data.message);
       console.log(err);
     }
   };
