@@ -92,7 +92,7 @@ const annotation = (props) => {
       {props.showLabel && (
         <div className={'annotation-back'} style={labelStyle}>
           <div className="annotation-text">
-            {props.user} - {props.aim.typeCode[0].code}
+            {`${props.user} ${mode !== 'teaching' ? `- ${props.aim.typeCode[0].code}` : ''}`}
             <ul>
 
               {hasEntityData && (
