@@ -422,6 +422,7 @@ export var AimEditor = function (
     textareaDomObject.id = "comment";
     textareaDomObject.style.color = "black";
     textareaDomObject.style.width = "100%";
+    textareaDomObject.style.height = "8rem";
 
     commentDiv.appendChild(textareaDomObject);
 
