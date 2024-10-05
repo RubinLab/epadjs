@@ -748,6 +748,7 @@ class WorkList extends React.Component {
             users={this.state.userList}
             onSubmit={this.submitUpdateAssignees}
             initialAssignees={this.state.initialAssignees}
+            userNameMap={this.state.userNameMap}
           />
         )}
         {this.state.updateDueDate && (

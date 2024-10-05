@@ -11,7 +11,6 @@ class UpdateAssignee extends React.Component {
     this.state = { showWarning: false, warningList: [], isSelectedAll: 0 };
   }
 
-
   componentDidMount = () => {
     if (Object.keys(this.props.assigneeList).length === this.props.users.length) {
       this.setState({ isSelectedAll: 1})
@@ -44,13 +43,13 @@ class UpdateAssignee extends React.Component {
 
   checkWorklistDeletion = () => {
     const warningList = [];
-    const assigneeList = Object.keys(this.props.assigneeList);
-    for (let i = 0; i < assigneeList.length; i += 1) {
+    const assigneeListKeys = Object.keys(this.props.assigneeList);
+    for (let i = 0; i < assigneeListKeys.length; i += 1) {
       if (
-        !this.props.assigneeList[assigneeList[i]] &&
-        this.props.initialAssignees.includes(assigneeList[i])
+        !this.props.assigneeList[assigneeListKeys[i]] &&
+        this.props.initialAssignees.includes(assigneeListKeys[i])
       ) {
-        warningList.push(assigneeList[i]);
+        warningList.push(this.props.userNameMap[assigneeListKeys[i]]);
       }
     }
     if (warningList.length > 0 || this.state.isSelectedAll === 0)
