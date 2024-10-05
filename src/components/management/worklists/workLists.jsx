@@ -57,7 +57,7 @@ class WorkList extends React.Component {
       : lastname ? `${lastname}`
         : firstname ? `${firstname}`
           : null;
-    const name = fullName || displayname || username;
+    const name = fullName ?  fullName : !!displayname && !displayname.includes('null') ? displayname : username;
     return name;
   }
 
@@ -748,6 +748,7 @@ class WorkList extends React.Component {
             users={this.state.userList}
             onSubmit={this.submitUpdateAssignees}
             initialAssignees={this.state.initialAssignees}
+            userNameMap={this.state.userNameMap}
           />
         )}
         {this.state.updateDueDate && (

@@ -16,7 +16,7 @@ const userList = props => {
       : lastname ? `${lastname}`
         : firstname ? `${firstname}`
           : null;
-    const name = fullName || displayname || username;
+    const name = fullName ?  fullName : !!displayname && !displayname.includes('null') ? displayname : username;
     return name;
   }
 
