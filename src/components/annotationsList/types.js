@@ -90,8 +90,8 @@ export const colors = [
     label: { background: "#7d522d" },
   },
   {
-    button: { background: "#fff06a" },
-    label: { background: "#807835" },
+    button: { background: "#02c7b0" },
+    label: { background: "#0f7569" },
   },
   {
     button: { background: "#72ba6f" },
