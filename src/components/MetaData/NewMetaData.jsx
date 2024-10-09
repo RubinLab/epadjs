@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import Draggable from "react-draggable";
 import cornerstone from "cornerstone-core";
 import { getImageMetadata } from "../../services/imageServices"
-import { getMetadata } from "../../services/seriesServices";
 import btoa from "./btoa";
 import getBulkDataURI from "./getBulkDataURI";
 import { DicomTags } from "./DICOMTags";
@@ -104,6 +103,8 @@ const NewMetaData = (props) => {
         }
       }
       setOutput(display); 
+      if (input) 
+        filterOutput(input, display); 
     } catch (err) {
       console.error(err);
     }
@@ -215,11 +216,16 @@ const NewMetaData = (props) => {
 
   // helper function to see if a string only has ascii characters in it
 
+  const filterOutput = (typed, data) => {
+    const raw = data ? data : output;
+    const filteredOutput = raw.filter(d => typed === '' || d.toLowerCase().includes(typed.toLowerCase()));
+    setFiltered(filteredOutput);
+  }
+
   const onChangeHandler = (e) => {
     const typed = e.target.value;
     setInput(typed)
-    const filteredOutput = output.filter(d => typed === '' || d.toLowerCase().includes(typed.toLowerCase()));
-    setFiltered(filteredOutput);
+    filterOutput(typed);
   }
 
   const renderList = () => {
@@ -232,7 +238,7 @@ const NewMetaData = (props) => {
       )
   }
 
-    return (imageDownloaded ? <Draggable handle="#handle">
+    return (imageDownloaded && <Draggable handle="#handle">
       <div className="md-pop-up">
         <div className="close-meta-data-menu" onClick={props.onClose}>
           <a href="#">X</a>
@@ -249,7 +255,7 @@ const NewMetaData = (props) => {
         </div>
       </div>
       {/*  */}
-    </Draggable> : null)
+    </Draggable>)
 }
 
 export default connect(mapStateToProps)(NewMetaData);
