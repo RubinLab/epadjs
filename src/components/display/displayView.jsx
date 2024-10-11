@@ -257,7 +257,6 @@ class DisplayView extends Component {
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
     window.addEventListener("keydown", this.handleKeyPressed);
-    window.addEventListener("serieReplaced", this.handleSerieReplace);
     window.addEventListener("saveTemplateType", this.saveTemplateType);
 
     if (this.props.keycloak && series && series.length > 0) {
@@ -438,7 +437,6 @@ class DisplayView extends Component {
     window.removeEventListener("deleteAim", this.deleteAimHandler);
     window.removeEventListener("resize", this.setSubComponentHeights);
     window.removeEventListener("keydown", this.handleKeyPressed);
-    window.removeEventListener("serieReplaced", this.handleSerieReplace);
     window.removeEventListener("getTemplateType", this.saveTemplateType);
     // clear all aimID of openseries so aim editor doesn't open next time
     this.props.dispatch(clearAimId());
@@ -867,36 +865,6 @@ class DisplayView extends Component {
       console.error(error);
     }
   }
-
-  handleSerieReplace = (e) => {
-    const { seriesAddition, activePort } = this.props;
-    var promises = [];
-    const { viewportId, id, multiFrameIndex } = e.detail;
-    // const promise = this.getImageStack(
-    //   series[viewportId],
-    //   viewportId,
-    //   multiFrameIndex,
-    //   undefined,
-    //   "handleSerieReplace"
-    // );
-    let mfIndex = multiFrameIndex ? `${multiFrameIndex}-${activePort}` : null;
-    const serUID = id.split('_')[0];
-    mfIndex = serUID === seriesAddition[activePort].seriesUID && !mfIndex ? `${serUID}-${activePort}` : mfIndex;
-    this.getData(
-      mfIndex,
-      undefined,
-      "handleSerieReplace"
-    );
-    // promises.push(promise);
-    // Promise.all(promises).then((res) => {
-    //   console.log(" ====-> handleSerieReplace resolved", viewportId);
-    //   console.log(res);
-    //   const newData = [...this.state.data];
-    //   newData[viewportId] = res[0];
-    //   newData[viewportId].stack.currentImageIdIndex = 0; 
-    //   this.setState({ data: newData, isLoading: false });
-    // });
-  };
 
   // Remove this function to disable openning aim editor by default
   // once user clecked on an aim
