@@ -15,6 +15,7 @@ class About extends React.Component {
       this.getData();
     }
   };
+
   getData = () => {
     const url = apiUrl + "/appVersion";
     http.get(url).then(res => this.setState({ data: res.data }));
@@ -28,31 +29,34 @@ class About extends React.Component {
       // <Modal.Dialog dialogClassName="info-about__modal">
       <Modal id="modal-fix" show={true}>
         <Modal.Header className="modal-header">
-          <Modal.Title>About ePAD {mode === "lite" ? "Lite" : ""}</Modal.Title>
+          <Modal.Title>{`About ${mode === 'teaching' ? `STELLA` : `ePAD`}`} {mode === "lite" ? "Lite" : ""}</Modal.Title>
         </Modal.Header>
         <Modal.Body className={"notification-modal"}>
           <div >
-            A web-based platform for quantitative imaging in the clinical
-            workflow.
+            {mode === 'teaching' ? `A web-based platform for radiology training and data collection to advance AI.` : `A web-based platform for quantitative imaging in the clinical
+            workflow.`}
           </div>
           <button
               className="info-about__button"
-              onClick={() => {
-                window.open(
+              onClick={() => { mode === 'teaching' ? window.open(
+                  "https://stella.stanford.edu/",
+                  "_blank",
+                  ""
+                ) : window.open(
                   "https://epad.stanford.edu/ways-contact-us",
                   "_blank",
                   ""
                 );
               }}
             >
-              More info about ePAD
+              {`More info about ${mode === 'teaching' ? `STELLA` : `ePAD`}`}
             </button>
           <div>Version {version}</div>
           <div>
-            ePAD Copyright 2016 Stanford University. All rights reserved.
+            {mode === 'teaching' ? `` : `ePAD Copyright 2016 Stanford University. All rights reserved.`}
           </div>
           <div>
-            ePAD is made possible by the{" "}
+           {`${mode === 'teaching' ? `STELLA` : `ePAD`} is made possible by the`}{" "}
             <a
               href="https://rubinlab.stanford.edu/"
               target="_blank"
@@ -71,7 +75,7 @@ class About extends React.Component {
             </a>{" "}
           </div>
           <div>
-            ePAD{" "}
+          {mode === 'teaching' ? `STELLA` : `ePAD`}{" "}
             <a
               href="https://epad.stanford.edu/license"
               target="_blank"
