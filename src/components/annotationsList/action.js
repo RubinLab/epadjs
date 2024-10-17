@@ -912,6 +912,7 @@ const formAimData = (aim, projectID, patientID) => {
     }, {})
   } else {
     imgIDs = imgs.reduce((all, item) => {
+      // this will show non roi image annotations on mf images at the first frame no matter which frame they are created at
       all[`${item.sopInstanceUid.root}/frames/1`] = true;
       return all;
     }, {})
