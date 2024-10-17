@@ -162,7 +162,8 @@ const mapStateToProps = (state) => {
     subpath: state.annotationsListReducer.subpath,
     multiFrameAimJumpData: state.annotationsListReducer.multiFrameAimJumpData,
     otherSeriesAimsList: state.annotationsListReducer.otherSeriesAimsList,
-    templates: state.annotationsListReducer.templates
+    templates: state.annotationsListReducer.templates,
+    lastLocation: state.annotationsListReducer.lastLocation,
   };
 };
 
@@ -321,9 +322,7 @@ class DisplayView extends Component {
     } = prevProps;
 
     if (this.props.series.length < 1) {
-      if (mode === "teaching") this.props.history.push("/search");
-      else if (pid) this.props.history.push(`/list/${pid}`);
-      else return;
+      this.props.history.push(this.props.lastLocation);
       return;
     }
 
