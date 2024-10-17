@@ -212,7 +212,6 @@ const AnnotationSearch = (props) => {
   };
 
   useEffect(() => {
-    console.log(" --->props", Object.keys(props).length);
     const lastLocation = props && props.location && props.location.pathname ? props.location.pathname : '/'
     props.dispatch(setLastLocation(lastLocation));
     props.dispatch(storeAimSelectionAll(null, null, null, true));
