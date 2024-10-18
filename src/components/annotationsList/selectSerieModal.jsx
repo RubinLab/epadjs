@@ -537,8 +537,7 @@ class selectSerieModal extends React.Component {
           {isTeachingFile && (
             <>
               <div id="stella-beta-warning">
-                Warning! Beta Software, Not For Routine Use During Preclinical
-                Testing
+              Enter metadata and select series.  For diagnosis you can use normal, abnormal or unlisted as needed.
               </div>
               <div id="questionaire" className={"field-grid"}>
                 <row>

@@ -559,10 +559,9 @@ th {
 }
 
 #stella-beta-warning {
-  color: #DB2828;
+  color: #ccc;
   font-size: 1rem;
-  font-weight: bold;
-  margin: 0.3rem;
+  margin: 0.3rem 0.3rem 0.9rem 0.3rem;
 }
 
 .other-annotations {
