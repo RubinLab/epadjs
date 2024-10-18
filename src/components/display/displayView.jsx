@@ -925,7 +925,7 @@ class DisplayView extends Component {
     });
     // markups will be rendered so clear all previously renders
     this.clearAllMarkups();
-
+    const uids = {};
     seriesAddition.forEach((serie, serieIndex) => {
       // Remove this part to disable openning aim editor by default
       // once user clecked on an aim
@@ -935,7 +935,7 @@ class DisplayView extends Component {
       // this.openAimEditor(aimID, seriesUID);
       // }
 
-      if (serie.imageAnnotations) {
+      if (serie.imageAnnotations && !uids[serie.seriesUID]) {
         this.parseAims(
           serie.imageAnnotations,
           serie.seriesUID,
@@ -944,6 +944,7 @@ class DisplayView extends Component {
           serie
         );
       }
+      uids[serie.seriesUID] = true;
     });
 
     this.refreshAllViewports();
