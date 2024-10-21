@@ -55,6 +55,7 @@ import {
   STORE_AIM_SELECTION,
   STORE_AIM_SELECTION_ALL,
   TOGGLE_ALL_CALCULATIONS,
+  SET_LAST_LOCATION,
   colors,
   commonLabels,
 } from "./types";
@@ -102,6 +103,7 @@ const initialState = {
   showCalculations: false,
   showLabels: false,
   showAnnotations: mode === 'teaching' ? false : true,
+  lastLocation: '',
 };
 
 const checkLastAnnotationDeleted = (seriesList) => {
@@ -129,6 +131,8 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case SET_LAST_LOCATION:
+        return { ...state, lastLocation: action.lastLocation };
       case TOGGLE_ALL_CALCULATIONS:
         return { ...state, showCalculations: action.payload.checked };
       case STORE_AIM_SELECTION_ALL:

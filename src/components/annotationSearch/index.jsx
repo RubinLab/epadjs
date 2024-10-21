@@ -40,7 +40,8 @@ import {
   updateSearchTableIndex,
   refreshPage,
   storeAimSelection,
-  storeAimSelectionAll
+  storeAimSelectionAll,
+  setLastLocation
 } from "../annotationsList/action";
 import AnnotationDownloadModal from "../searchView/annotationDownloadModal";
 import UploadModal from "../searchView/uploadModal";
@@ -211,6 +212,8 @@ const AnnotationSearch = (props) => {
   };
 
   useEffect(() => {
+    const lastLocation = props && props.location && props.location.pathname ? props.location.pathname : '/'
+    props.dispatch(setLastLocation(lastLocation));
     props.dispatch(storeAimSelectionAll(null, null, null, true));
     if (mode === "teaching") return;
     setSelectedProject(props.pid);
@@ -1533,7 +1536,6 @@ const AnnotationSearch = (props) => {
               Delete
             </button>
           </div>
-        </div>
         {showPlugins && mode !== "teaching" && (
           <div
             style={{
@@ -1601,6 +1603,10 @@ const AnnotationSearch = (props) => {
             </button>
           </div>
         )}
+          <div style={{ alignContent: 'end', fontSize: '0.8rem', padding: '3.5px 7px'}}>
+            {`Showing ${rows} results`}
+          </div>
+        </div>
       </div>
       <table
         className="table table-dark table-striped table-hover title-case"

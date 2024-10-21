@@ -34,6 +34,7 @@ import {
   jumpToAim,
   updateSingleSerie,
   setSeriesData,
+  setLastLocation
   // updatePatientOnAimDelete
 } from "../annotationsList/action";
 import DownloadSelection from "./annotationDownloadModal";
@@ -116,9 +117,11 @@ class SearchView extends Component {
   componentDidMount = async () => {
     try {
       const { pid, treeData } = this.props;
-      if (mode === "thick" && !pid) {
-        this.props.history.push(`/list/${pid}`);
-      }
+      // if (mode === "thick" && !pid) {
+      //   this.props.history.push(`/list/${pid}`);
+      // }
+      const lastLocation = this.props.location && this.props.location.pathname ? this.props.location.pathname : '/'
+      this.props.dispatch(setLastLocation(lastLocation));
       let subjects;
       if (treeData) {
         subjects = Object.values(treeData);
@@ -927,6 +930,7 @@ class SearchView extends Component {
       this.props.dispatch(clearSelection());
       window.dispatchEvent(new Event("refreshProjects"));
       this.props.history.push(`/list/${projectId}`);
+      this.props.dispatch(setLastLocation(`/list/${projectId}`));
     } catch (err) {
       console.log(err);
     }
