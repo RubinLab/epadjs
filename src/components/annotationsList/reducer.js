@@ -64,6 +64,9 @@ import {
   persistColorInDeleteAim,
 } from "../../Utils/aid";
 import { teachingFileTempCode } from "../../constants";
+
+const mode = sessionStorage.getItem('mode');
+
 const initialState = {
   openSeries: [],
   openSeriesAddition: [],
@@ -99,7 +102,7 @@ const initialState = {
   multipageAimSelection: {},
   showCalculations: false,
   showLabels: false,
-  showAnnotations: true,
+  showAnnotations: mode === 'teaching' ? false : true,
   lastLocation: '',
 };
 
@@ -413,7 +416,7 @@ const asyncReducer = (state = initialState, action) => {
           delSeriesData = {};
           delShowCalculations = false;
           delShowLabels = false;
-          delShowAnnotations = true;
+          delShowAnnotations = mode === 'teaching' ? false : true;
         } else {
           delActivePort = delGrid.length - 1;
         }
@@ -707,7 +710,7 @@ const asyncReducer = (state = initialState, action) => {
           openSeriesAddition: [],
           showCalculations: false,
           showLabels: false,
-          showAnnotations: true,
+          showAnnotations: mode === 'teaching' ? false : true,
         };
       case CLEAR_SELECTION:
         let selectionState = { ...state };
