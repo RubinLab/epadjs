@@ -1536,7 +1536,6 @@ const AnnotationSearch = (props) => {
               Delete
             </button>
           </div>
-        </div>
         {showPlugins && mode !== "teaching" && (
           <div
             style={{
@@ -1604,6 +1603,10 @@ const AnnotationSearch = (props) => {
             </button>
           </div>
         )}
+          <div style={{ alignContent: 'end', fontSize: '0.8rem', padding: '3.5px 7px'}}>
+            {`Showing ${rows} results`}
+          </div>
+        </div>
       </div>
       <table
         className="table table-dark table-striped table-hover title-case"
