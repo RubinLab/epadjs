@@ -87,9 +87,10 @@ class WorkList extends React.Component {
     const filteredWorklists = [];
     const notAuthorized = [];
     const { projectMap } = this.props;
+    const projectsFilled = Object.keys(projectMap).length > 0;
     worklists.forEach((el, i) => {
-      if (!projectMap[el.projectID]) notAuthorized.push(el.projectID);
-      else filteredWorklists.push(el);
+      if (projectsFilled && !projectMap[el.projectID]) notAuthorized.push(el.projectID);
+      else if (projectsFilled) filteredWorklists.push(el);
     });
     return { notAuthorized, filteredWorklists };
   };
