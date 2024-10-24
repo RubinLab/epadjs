@@ -251,7 +251,7 @@ class WorkList extends React.Component {
     if (e.key === 'Escape') {
       this.handleUpdateField(null, null);
     } else if (e.key === 'Enter' && fieldUpdateValidation) {
-      this.updateWorklist();
+      if (nameNotEmpty) this.updateWorklist();
     }
   };
 
