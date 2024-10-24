@@ -164,6 +164,7 @@ const mapStateToProps = (state) => {
     otherSeriesAimsList: state.annotationsListReducer.otherSeriesAimsList,
     templates: state.annotationsListReducer.templates,
     lastLocation: state.annotationsListReducer.lastLocation,
+    seriesData: state.annotationsListReducer.seriesData
   };
 };
 
@@ -2550,7 +2551,7 @@ class DisplayView extends Component {
   };
 
   render() {
-    const { series, activePort, updateProgress, updateTreeDataOnSave } =
+    const { series, activePort, updateProgress, updateTreeDataOnSave, seriesData } =
       this.props;
     const {
       showAimEditor,
@@ -2598,6 +2599,13 @@ class DisplayView extends Component {
           {!this.state.isLoading &&
             Object.entries(series).length &&
             data.map((data, i) => {
+              const patID = series[i].patientID || series[i].subjectID;
+              const prID = series[i].projectID;
+              const stID = series[i].studyUID;
+              const seriesDesc = seriesData[prID] && seriesData[prID][patID] 
+                  && seriesData[prID][patID][stID] && seriesData[prID][patID][stID].map 
+                  ? seriesData[prID][patID][stID].map[series[i].seriesUID] : null;
+
               return (
                 <div
                   className={
@@ -2705,6 +2713,7 @@ class DisplayView extends Component {
                     imageIdIndex={data.stack.currentImageIdIndex ? parseInt(data.stack?.currentImageIdIndex) : 0}
                     viewportIndex={i}
                     tools={tools}
+                    seriesDesc={seriesDesc}
                     // CornerstoneViewport reads invert map from session storage
                     // shouldInvert={invertMap[i]}
                     eventListeners={[
