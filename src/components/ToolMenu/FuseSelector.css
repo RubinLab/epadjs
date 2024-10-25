@@ -25,24 +25,29 @@
 }
 .layers {
     float: left;
+    color: #f8f9fa
 }
 
 .visibility {
     float:right;
     padding-top: 25px;
+    color: #f8f9fa
 }
 
 .opt-select {
     display: block;
+    color: #f8f9fa
 }
 
 .opacity {
     clear: both;
+    color: #f8f9fa
 }
 
 .colormap {
     clear: both;
     display: block;
+    color: #f8f9fa
 }
 
 label {
