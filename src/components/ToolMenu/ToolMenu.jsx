@@ -433,6 +433,7 @@ class ToolMenu extends Component {
       return;
     } else if (tool === "ClearGrid") {
       this.props.dispatch(clearGrid());
+      window.dispatchEvent(new CustomEvent("unfuse"));
       sessionStorage.removeItem("wwwc");
       const max = parseInt(maxPort);
       const imgStatus = new Array(max);

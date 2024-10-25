@@ -2412,6 +2412,7 @@ class DisplayView extends Component {
       // this.jumpToAims(" close viewport - jumpToAims");
       // this.renderAims(false, " close viewport - renderaimr");
       // this.props.onSwitchView("search");
+      window.dispatchEvent(new CustomEvent("unfuse"));
     } catch (err) {
       console.error(err);
     }
