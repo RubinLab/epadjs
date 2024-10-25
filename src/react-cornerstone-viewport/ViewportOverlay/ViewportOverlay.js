@@ -128,7 +128,6 @@ class ViewportOverlay extends PureComponent {
           <div>
             {formatDA(studyDate)} {formatTM(studyTime)}
           </div>
-          <div>{seriesDescription || seriesDesc}</div>
         </div>
         <div className="bottom-right overlay-element">
           <div>Zoom: {zoomPercentage}%</div>
@@ -153,6 +152,7 @@ class ViewportOverlay extends PureComponent {
                 ? `Thick: ${formatNumberPrecision(sliceThickness, 2)} mm`
                 : ""}
             </div>
+            <div>{seriesDescription || seriesDesc}</div>
           </div>
         </div>
       </React.Fragment>
