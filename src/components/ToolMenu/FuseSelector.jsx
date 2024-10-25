@@ -70,6 +70,18 @@ class FuseSelector extends Component {
         });
     }
 
+    componentWillUnmount() {
+        window.removeEventListener("unfuse", this.unfuseEventHandler);
+    }
+
+    unfuseEventHandler = () => {
+        if (this.state.isFused) {
+            const ctElement = cornerstone.getEnabledElements()[CT].element;
+            this.unfuse(ctElement);
+            this.setState({ isFused: false, CT: undefined, PT: undefined });
+        }
+    }
+
     getModality = (element) => {
         // if image has already layers it should be the CT 
         // if not handle it returns the active layers modality that causes a problem
@@ -96,6 +108,7 @@ class FuseSelector extends Component {
                 this.teleportAnnotations();
                 this.setState({ isFused: true });
                 this.addSynchronizers();
+                window.addEventListener("unfuse", this.unfuseEventHandler);
             }
         }
         else {
