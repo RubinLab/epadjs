@@ -346,7 +346,6 @@ class CornerstoneViewport extends Component {
           windowWidth={windowWidth}
           windowCenter={windowCenter}
           imageId={imageId}
-          seriesDesc={seriesDesc}
         />
       )
     );

@@ -1,5 +1,6 @@
 import { PureComponent } from "react";
 import React from "react";
+import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import PropTypes from "prop-types";
 import cornerstone from "cornerstone-core";
 import dicomParser from "dicom-parser";
@@ -76,7 +77,7 @@ class ViewportOverlay extends PureComponent {
   }
 
   render() {
-    const { imageId, scale, windowWidth, windowCenter, seriesDesc } = this.props;
+    const { imageId, scale, windowWidth, windowCenter } = this.props;
 
     if (!imageId) {
       return null;
@@ -85,12 +86,16 @@ class ViewportOverlay extends PureComponent {
     const zoomPercentage = formatNumberPrecision(scale * 100, 0);
     const seriesMetadata =
       cornerstone.metaData.get("generalSeriesModule", imageId) || {};
+
     const imagePlaneModule =
       cornerstone.metaData.get("imagePlaneModule", imageId) || {};
     const { rows, columns, sliceThickness, sliceLocation } = imagePlaneModule;
     const { seriesNumber } = seriesMetadata;
-    const { seriesDescription } =
-      cornerstone.metaData.get("specialSeriesModule", imageId) || {};
+    // const { seriesDescription } =
+    //   cornerstone.metaData.get("specialSeriesModule", imageId) || {};
+
+    const metadata = cornerstoneWADOImageLoader.wadors.metaDataManager.get(imageId);
+    const seriesDescription = metadata['0008103E'].Value[0];
 
     const generalStudyModule =
       cornerstone.metaData.get("generalStudyModule", imageId) || {};
@@ -152,7 +157,7 @@ class ViewportOverlay extends PureComponent {
                 ? `Thick: ${formatNumberPrecision(sliceThickness, 2)} mm`
                 : ""}
             </div>
-            <div>{seriesDescription || seriesDesc}</div>
+            <div>{seriesDescription}</div>
           </div>
         </div>
       </React.Fragment>
