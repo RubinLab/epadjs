@@ -12,7 +12,8 @@ import ColormapSelector from "./ColormapSelector";
 import FuseSelector from "./FuseSelector";
 import cornerstoneTools from "cornerstone-tools";
 import { setSignificantSeries } from "../../services/seriesServices";
-
+// import Modal from "../common/warningModal";
+import HotKeysList from "./HotKeysList";
 import {
   FaLocationArrow,
   FaEraser,
@@ -39,7 +40,7 @@ import {
 import { BsArrowUpLeft } from "react-icons/bs";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
-import { MdLoop, MdPanTool, MdMyLocation } from "react-icons/md";
+import { MdLoop, MdPanTool, MdMyLocation, MdOutlineKeyboardCommandKey } from "react-icons/md";
 import { TbReplace } from "react-icons/tb";
 import {
   TiDeleteOutline,
@@ -144,6 +145,7 @@ class ToolMenu extends Component {
       activeTool: "",
       activeToolIdx: 1,
       fuse: false,
+      keys: null
     };
 
     this.imagingTools = [
@@ -247,6 +249,7 @@ class ToolMenu extends Component {
 
     this.managementTools = [
       { name: "Save order", icon: <TbReplace />, tool: "order", teaching: true },
+      { name: "Hot Keys", icon: <MdOutlineKeyboardCommandKey />, tool: "keys", teaching: true },
     ]
 
     this.segmentationTools = [
@@ -299,6 +302,29 @@ class ToolMenu extends Component {
   componentWillUnmount() {
     window.removeEventListener("keydown", this.handleKeyPressed);
     sessionStorage.removeItem("activeTool");
+  }
+
+  showHotkeyInfo = () => {
+    const keyMap = {
+      space: 'Reset',
+      x: 'Expand view',
+      d: 'Length',
+      r: 'Circle',
+      o: 'Perpendicular',
+      f: 'Arrow',
+      z: 'Zoom',
+      p: 'Pan',
+      w: 'Wwwc',
+      s: 'Select',
+      i: 'invert',
+    }
+    const hotKeys = Object.keys(keyMap);
+    const tools = Object.values(keyMap);
+    const keys = hotKeys.reduce((all, item, index) => {
+      all.push(<li>{`${item}: ${tools[index]}`}</li>)
+      return all;
+    }, [])
+    this.setState({ keys });
   }
 
   handleKeyPressed = (event) => {
@@ -507,6 +533,9 @@ class ToolMenu extends Component {
       this.selectFreehand();
     } else if (tool === 'order') {
       this.saveSignificantOrder();
+      return;
+    } else if (tool === 'keys') {
+      this.showHotkeyInfo();
       return;
     }
     // else if (tool === "FreehandRoiTool") {
@@ -992,6 +1021,7 @@ class ToolMenu extends Component {
         )}
         {this.state.showFuse && <FuseSelector onClose={this.closeFuse} />}
         {this.state.showMetaData && (<MetaData onClose={this.showMetaData} imageData={this.props.imageData} />)}
+        {this.state.keys && (<HotKeysList onClose={() => this.setState({keys: null})} list={this.state.keys} />)}
       </div>
     );
   }
