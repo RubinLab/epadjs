@@ -84,7 +84,7 @@ class WorkList extends React.Component {
   };
 
   getWorkListData = async () => {
-    let { data: worklists } = await getWorklistsOfCreator();
+    let { data: worklists } = await getWorklistsOfCreator(true);
     for (let wl of worklists) {
       let display = wl.requirements.reduce((all, item, i) => {
         const { level, numOfAims, template } = item;
