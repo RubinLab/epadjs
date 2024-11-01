@@ -950,17 +950,15 @@ class AimEditor extends Component {
       imageId,
       frameNum
     );
-
     // find out the unit about statistics to write to aim
     let unit, mean, stdDev, min, max;
-    if (polygon.meanStdDev) {
+    if (polygon.meanStdDevSUV) {
+      ({ mean, stdDev, min, max } = polygon.meanStdDevSUV);
+      unit = 'suv';
+    } else if (polygon.meanStdDev) {
       ({ mean, stdDev, min, max } = polygon.meanStdDev);
       unit = 'hu';
-    } else if (polygon.meanStdDevSUV) {
-      ({ mean, stdDev, min, max } = polygon.meanStdDev);
-      unit = 'suv';
-    }
-
+    } 
     const meanId = aim.createMeanCalcEntity({ mean, unit });
     aim.createImageAnnotationStatement(1, markupId, meanId);
 
@@ -994,8 +992,13 @@ class AimEditor extends Component {
       imageId,
       frameNum
     );
-
-    const { unit, calcUnit, length, min, max, mean, stdDev } = line;
+    const { unit, calcUnit, length } = line;
+    let mean, stdDev, min, max;
+    if (line.meanStdDevSUV) {
+      ({ mean, stdDev, min, max } = line.meanStdDevSUV);
+    } else {
+      ({ mean, stdDev, min, max } = line);
+    }
 
     const lengthId = aim.createLengthCalcEntity({ value: length, unit });
     aim.createImageAnnotationStatement(1, markupId, lengthId);
@@ -1043,7 +1046,12 @@ class AimEditor extends Component {
     if (circle.unit === 'HU') unit = 'hu';
     else if (circle.unit === 'SUV') unit = 'suv';
 
-    const { mean, stdDev, min, max } = circle.cachedStats;
+    let mean, stdDev, min, max;
+    if (circle.cachedStats.meanStdDevSUV) {
+      ({ mean, stdDev, min, max } = circle.cachedStats.meanStdDevSUV);
+    } else {
+      ({ mean, stdDev, min, max } = circle.cachedStats);
+    } 
 
     const meanId = aim.createMeanCalcEntity({ mean, unit });
     aim.createImageAnnotationStatement(1, markupId, meanId);

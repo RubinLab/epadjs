@@ -534,6 +534,14 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
                   image,
                   (meanStdDev.stdDev - image.intercept) / image.slope
                 ),
+                min: calculateSUV(
+                  image,
+                  (meanStdDev.min - image.intercept) / image.slope
+                ),
+                max: calculateSUV(
+                  image,
+                  (meanStdDev.max - image.intercept) / image.slope
+                ),
               };
             }
 

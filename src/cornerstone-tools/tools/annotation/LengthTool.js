@@ -21,6 +21,7 @@ import throttle from "../../util/throttle";
 import { state } from "../../store/index.js";
 import calculateLineStatistics from "cornerstone-tools/util/line/calculateLineStatistics.js";
 import numbersWithCommas from "../../util/numbersWithCommas.js";
+import calculateSUV from "./../../util/calculateSUV.js";
 
 const logger = getLogger("tools:annotation:LengthTool");
 
@@ -122,7 +123,7 @@ export default class LengthTool extends BaseAnnotationTool {
     );
   }
 
-  updateCachedStats(image, element, data) {
+  updateCachedStats(image, element, data, modality) {
     const { rowPixelSpacing, colPixelSpacing } = getPixelSpacing(image);
     const { start, end } = data.handles;
 
@@ -152,6 +153,17 @@ export default class LengthTool extends BaseAnnotationTool {
     // Store the length inside the tool for outside access
     data.length = length;
     data.invalidated = false;
+    if (modality === "PT") {
+      // If the image is from a PET scan, use the DICOM tags to
+      // Calculate the SUV from the mean and standard deviation.
+      const meanStdDevSUV = {
+        mean: calculateSUV(image,mean,true),
+        stdDev: calculateSUV(image,stdDev,true),
+        min: calculateSUV(image,min,true),
+        max: calculateSUV(image,max,true),
+      };
+      data.meanStdDevSUV = meanStdDevSUV;
+    }
   }
 
   renderToolData(evt) {
@@ -229,9 +241,9 @@ export default class LengthTool extends BaseAnnotationTool {
         // Update textbox stats
         if (data.invalidated === true) {
           if (data.length) {
-            this.throttledUpdateCachedStats(image, element, data);
+            this.throttledUpdateCachedStats(image, element, data, modality);
           } else {
-            this.updateCachedStats(image, element, data);
+            this.updateCachedStats(image, element, data, modality);
           }
         }
 

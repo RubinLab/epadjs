@@ -448,6 +448,8 @@ function _calculateStats(image, element, handles, modality, pixelSpacing) {
       meanStdDevSUV = {
         mean: calculateSUV(image, ellipseMeanStdDev.mean, true) || 0,
         stdDev: calculateSUV(image, ellipseMeanStdDev.stdDev, true) || 0,
+        min: calculateSUV(image, ellipseMeanStdDev.min, true) || 0,
+        max: calculateSUV(image, ellipseMeanStdDev.max, true) || 0,
       };
     }
 
