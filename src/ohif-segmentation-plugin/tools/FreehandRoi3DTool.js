@@ -521,26 +521,26 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
               // If the image is from a PET scan, use the DICOM tags to
               // Calculate the SUV from the mean and standard deviation.
 
-              // Note that because we are using modality pixel values from getPixels, and
-              // The calculateSUV routine also rescales to modality pixel values, we are first
-              // Returning the values to storedPixel values before calcuating SUV with them.
-              // TODO: Clean this up? Should we add an option to not scale in calculateSUV?
               meanStdDevSUV = {
                 mean: calculateSUV(
                   image,
-                  (meanStdDev.mean - image.intercept) / image.slope
+                  meanStdDev.mean,
+                  true
                 ),
                 stdDev: calculateSUV(
                   image,
-                  (meanStdDev.stdDev - image.intercept) / image.slope
+                  meanStdDev.stdDev,
+                  true
                 ),
                 min: calculateSUV(
                   image,
-                  (meanStdDev.min - image.intercept) / image.slope
+                  meanStdDev.min,
+                  true
                 ),
                 max: calculateSUV(
                   image,
-                  (meanStdDev.max - image.intercept) / image.slope
+                  meanStdDev.max,
+                  true
                 ),
               };
             }
