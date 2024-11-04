@@ -3,7 +3,9 @@ import Draggable from "react-draggable";
 import "./FuseSelector.css";
 
 const HotKeysList = (props) => {
-    
+        const formList = () => {
+
+        }
 
         return (
             <Draggable>
@@ -13,7 +15,7 @@ const HotKeysList = (props) => {
                     <div className="close-fuse-selector" onClick={props.onClose}>
                         <a href="#">X</a>
                     </div>
-                    <ul>{props.list}</ul>
+                    {props.list}
                 </div>
             </Draggable>
         );

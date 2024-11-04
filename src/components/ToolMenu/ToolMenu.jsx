@@ -306,24 +306,34 @@ class ToolMenu extends Component {
 
   showHotkeyInfo = () => {
     const keyMap = {
-      space: 'Reset',
-      x: 'Expand view',
-      d: 'Length',
-      r: 'Circle',
-      o: 'Perpendicular',
       f: 'Arrow',
-      z: 'Zoom',
-      p: 'Pan',
-      w: 'Wwwc',
-      s: 'Select',
+      r: 'Circle',
+      x: 'Expand view',
       i: 'invert',
+      d: 'Length',
+      p: 'Pan',
+      o: 'Perpendicular',
+      space: 'Reset',
+      s: 'Select',
+      w: 'Window-Level',
+      z: 'Zoom',
     }
     const hotKeys = Object.keys(keyMap);
     const tools = Object.values(keyMap);
-    const keys = hotKeys.reduce((all, item, index) => {
-      all.push(<li>{`${item}: ${tools[index]}`}</li>)
+    const rows = hotKeys.reduce((all, item, index) => {
+      all.push(<tr scope="row"><td className="hotkeys-cell">{`${tools[index]}`}</td><td className="hotkeys-cell">{`${item}`}</td></tr>)
       return all;
     }, [])
+    const keys = (
+      <table style={{width: "100%"}}>
+        <thead>
+          <tr style={{paddingLeft:"0.3rem"}}>
+            <th scope="col" style={{paddingLeft:"0.3rem"}} >Tool</th>
+            <th scope="col">Hot key</th>
+          </tr>
+        </thead>
+          {rows}
+      </table>); 
     this.setState({ keys });
   }
 

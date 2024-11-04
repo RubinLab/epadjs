@@ -75,6 +75,12 @@ h5 {
 }
 
 .hotkeys-title {
-    color: #ffc107;
+    color: #eaddb2;
     font-size: larger
+}
+
+.hotkeys-cell {
+    padding-left: 0.3rem; 
+    border-bottom: 0.02px solid #eaddb2;
+    padding: 4px;
 }
