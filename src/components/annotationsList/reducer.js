@@ -65,7 +65,7 @@ import {
 } from "../../Utils/aid";
 import { teachingFileTempCode } from "../../constants";
 
-const mode = sessionStorage.getItem('mode');
+let mode = sessionStorage.getItem('mode');
 
 const initialState = {
   openSeries: [],
@@ -118,6 +118,7 @@ const seriesUIDCounter = (arr) => {
   return uidCountMap;
 }
 const asyncReducer = (state = initialState, action) => {
+  mode = sessionStorage.getItem('mode');
   try {
     let aimRefs = {};
     switch (action.type) {
