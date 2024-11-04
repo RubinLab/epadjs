@@ -20,7 +20,7 @@ const annotation = (props) => {
   //conditional borderstyling
   let buttonStyle = { ...props.style.button };
   let labelStyle = template === teachingFileTempCode ? {  background: "#858585", color: "white" } : { ...props.style.label };
-  let selectedStyle = { border: '#FDD800 4px double', fontSize: '1.2rem', borderRadius: '5px' };
+  let selectedStyle = { border: '#FDD800 4px double', borderRadius: '5px' };
 
   // let borderStyle = `0.15rem solid ${props.style.button.background}`;
   // buttonStyle.border = borderStyle;
