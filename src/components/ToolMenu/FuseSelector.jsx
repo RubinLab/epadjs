@@ -65,6 +65,7 @@ class FuseSelector extends Component {
                     else
                         evt.target = { selectedIndex: 1, value: petLayerId };
                     this.handleLayerChange(evt);
+
                 });
             }
         });
@@ -96,7 +97,7 @@ class FuseSelector extends Component {
 
     // 
     setFuseState = () => {
-        const { isFused, CT, PT } = this.state;
+        const { isFused, CT, PT, ctLayerId, petLayerId } = this.state;
         const petElement = cornerstone.getEnabledElements()[PT].element;
         const ctElement = cornerstone.getEnabledElements()[CT].element;
         if (!ctElement || !petElement) return;
@@ -108,7 +109,7 @@ class FuseSelector extends Component {
                 this.teleportAnnotations();
                 this.setState({ isFused: true });
                 this.addSynchronizers();
-                window.addEventListener("unfuse", this.unfuseEventHandler);
+                // window.addEventListener("unfuse", this.unfuseEventHandler);
             }
         }
         else {
@@ -175,6 +176,7 @@ class FuseSelector extends Component {
             cornerstone.setActiveLayer(ctElement, petLayerId);
         else cornerstone.setActiveLayer(ctElement, ctLayerId);
         this.setState({ ctLayerId, petLayerId });
+        this.props.onFuseUnfuse(true, this.state.CT, this.state.PT, ctLayerId, petLayerId, this.synchronizers, this.newImage);
         return true;
     };
 
@@ -185,6 +187,7 @@ class FuseSelector extends Component {
         this.removeSynchronizers();
         this.teleportAnnotations(true);
         this.props.onClose();
+        this.props.onFuseUnfuse(false);
     };
 
     getOptions = () => {

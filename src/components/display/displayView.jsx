@@ -506,6 +506,81 @@ class DisplayView extends Component {
     }
   };
 
+  removeSynchronizers = () => {
+    cornerstone.getEnabledElements().forEach(({ element }) => {
+        this.state.fusion.synchronizers.forEach(synchronizer => {
+            synchronizer.remove(element);
+            synchronizer.enabled = false;
+        })
+    });
+  };
+  
+  teleportAnnotations = (unfuse, ctElement, petElement) => {
+    const stackToolState = cornerstoneTools.getToolState(ctElement, "stack");
+    const petStackToolState = cornerstoneTools.getToolState(petElement, "stack");
+
+    const ctImageIds = stackToolState.data[0].imageIds;
+    const petImageIds = petStackToolState.data[0].imageIds;
+
+    const ctImage = ctImageIds[0];
+    const petImage = petImageIds[0];
+
+    let segMod = cornerstoneTools.getModule("segmentation");
+    const petSeg = segMod.state.series[petImage];
+    if (petSeg && !unfuse) {
+        segMod.state.series = { ...segMod.state.series, [ctImage]: petSeg };
+    }
+    else {
+        delete segMod.state.series.ctImage; //its unfuse and delete the seg from pet
+    }
+  }
+
+  newImageFuse = (event, close) => {
+    try {
+        const newImageElement = event.detail.element;
+        const { PT, CT } = this.state.fusion;
+        const petElement = cornerstone.getEnabledElements()[PT]?.element;
+        const ctElement = cornerstone.getEnabledElements()[CT]?.element;
+        if (ctElement && petElement) {
+            if (newImageElement === ctElement) this.fuse(petElement, ctElement);
+            else if (newImageElement === petElement) this.teleportAnnotations(true, ctElement, petElement);
+        }
+    } catch (error) {
+        console.error(error);
+        // close();
+    }
+  };
+
+  unFuseBeforeClose = () => {
+    if (this.state.fusion) {
+      // window.removeEventListener("newImage");
+      window.removeEventListener("newImage", this.state.fusion.func);
+      const { CT, PT, ctLayerId, petLayerId } = this.state.fusion;
+      const elements = cornerstone.getEnabledElements();
+      const ctElement = elements[CT]?.element;
+      const petElement = elements[PT]?.element;
+      cornerstone.setActiveLayer(ctElement, ctLayerId);
+      cornerstone.purgeLayers(ctElement);
+      this.removeSynchronizers();
+      // cornerstone.removeLayer(ctElement, ctLayerId);
+      this.teleportAnnotations(true, ctElement, petElement);
+      return 1;
+    }
+    return 0;
+  }
+
+  getFuseUnfuseState = (fused, CT, PT, ctLayerId, petLayerId, synchronizers, func) => {
+    console.log(' ---> synchronizers', synchronizers);
+    if (fused) {
+      this.setState({ fusion: { CT, PT, ctLayerId, petLayerId, synchronizers, func }});
+      // window.addEventListener("newImage", this.newImageFuse);
+    } else {
+      this.setState({ fusion: false });
+      console.log('--->', this.state.fusion.func);
+      // window.addEventListener("newImage", this.newImage);
+    }
+  }
+
   setSubComponentHeights = (e) => {
     try {
       if (e && e.detail) var { isMaximize } = e.detail;
@@ -2376,6 +2451,7 @@ class DisplayView extends Component {
   };
 
   closeViewport = (index) => {
+    const val = this.unFuseBeforeClose();
     const { showAimEditor, dirty } = this.state;
     const { series, seriesAddition } = this.props;
     const { projectID, patientID, studyUID, seriesUID } = series[index];
@@ -2412,7 +2488,7 @@ class DisplayView extends Component {
       // this.jumpToAims(" close viewport - jumpToAims");
       // this.renderAims(false, " close viewport - renderaimr");
       // this.props.onSwitchView("search");
-      window.dispatchEvent(new CustomEvent("unfuse"));
+      // window.dispatchEvent(new CustomEvent("unfuse"));
     } catch (err) {
       console.error(err);
     }
@@ -2586,6 +2662,8 @@ class DisplayView extends Component {
           <ToolMenu
             onSwitchView={this.props.onSwitchView}
             onInvertClick={this.formInvertMap}
+            onFuseUnfuse={this.getFuseUnfuseState}
+            onFuseNewImage={this.newImageFuse}
           />
           {this.state.isLoading && (
             <div style={{ marginTop: "30%", marginLeft: "50%" }}>

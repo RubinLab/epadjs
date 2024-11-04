@@ -991,7 +991,7 @@ class ToolMenu extends Component {
             onClose={this.closeColormap}
           />
         )}
-        {this.state.showFuse && <FuseSelector onClose={this.closeFuse} />}
+        {this.state.showFuse && <FuseSelector onClose={this.closeFuse} onFuseUnfuse={this.props.onFuseUnfuse} onFuseNewImage={this.props.onFuseNewImage} />}
         {this.state.showMetaData && (<MetaData onClose={this.showMetaData} imageData={this.props.imageData} />)}
       </div>
     );
