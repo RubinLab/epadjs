@@ -29,7 +29,8 @@ export default function(sp, boundingBox, dataHandles) {
   statisticsObj.variance =
     sum.squared / sum.count - statisticsObj.mean * statisticsObj.mean;
   statisticsObj.stdDev = Math.sqrt(statisticsObj.variance);
-
+  statisticsObj.min = sum.min;
+  statisticsObj.max = sum.max;
   return statisticsObj;
 }
 
@@ -45,10 +46,14 @@ export default function(sp, boundingBox, dataHandles) {
  * @returns {Object} Object containing the sum, squared sum and pixel count.
  */
 function getSum(sp, boundingBox, dataHandles) {
+  let min = null;
+  let max = null;
   const sum = {
     value: 0,
     squared: 0,
     count: 0,
+    min: null,
+    max: null,
   };
   let index = 0;
 
@@ -87,5 +92,12 @@ function sumPointIfInFreehand(dataHandles, point, workingSum, pixelValue) {
     workingSum.value += pixelValue;
     workingSum.squared += pixelValue * pixelValue;
     workingSum.count++;
+    if (workingSum.min === null) {
+      workingSum.min = pixelValue;
+      workingSum.max = pixelValue;
+    } else {
+      workingSum.min = Math.min(workingSum.min, pixelValue);
+      workingSum.max = Math.max(workingSum.max, pixelValue);
+    }
   }
 }
