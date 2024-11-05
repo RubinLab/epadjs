@@ -182,7 +182,7 @@ const annotationsLink = (props) => {
     <React.Fragment>
       {otherSeriesAimsList[projectID] &&
         otherSeriesAimsList[projectID][studyUID] && (
-          <div>
+          <div className="other-annotations-cont">
             <div className="other-annotations"> Other Annotations</div>
             <div className="annotation-back">
               <p className="img-label">Image / Series</p>
