@@ -309,7 +309,7 @@ class ToolMenu extends Component {
       f: 'Arrow',
       r: 'Circle',
       x: 'Expand view',
-      i: 'invert',
+      i: 'Invert',
       d: 'Length',
       p: 'Pan',
       o: 'Perpendicular',
@@ -325,7 +325,7 @@ class ToolMenu extends Component {
       return all;
     }, [])
     const keys = (
-      <table style={{width: "100%"}}>
+      <table style={{width: "100%", background: 'unset'}}>
         <thead>
           <tr style={{paddingLeft:"0.3rem"}}>
             <th scope="col" style={{paddingLeft:"0.3rem"}} >Tool</th>
