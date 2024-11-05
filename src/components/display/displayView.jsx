@@ -453,9 +453,6 @@ class DisplayView extends Component {
     if (event.key === "Enter") {
       event.preventDefault();
     }
-    if (event.key === "Enter") {
-      event.preventDefault();
-    }
     if (event.key === "Escape") {
       const evnt = new CustomEvent("escPressed", {
         cancelable: true,
