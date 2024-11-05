@@ -58,3 +58,29 @@ h5 {
     font-size: 2em;
     margin-bottom: 0em;
 }
+
+.hotkeys-selector {
+    position: absolute;
+    background-color: #3a3f44;
+    padding: 5px 10px;
+    outline: solid;
+    outline-width: 1px;
+    background-color: #3a3f44;
+    outline-color: black;
+    width: 170px;
+    /* height: 250px; */
+    top: 92px;
+    left: 585px;
+    z-index: 1000;
+}
+
+.hotkeys-title {
+    color: #eaddb2;
+    font-size: larger
+}
+
+.hotkeys-cell {
+    padding-left: 0.3rem; 
+    border-bottom: 0.02px solid #eaddb2;
+    padding: 4px;
+}
