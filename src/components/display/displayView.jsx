@@ -449,6 +449,9 @@ class DisplayView extends Component {
   };
 
   handleKeyPressed = (event) => {
+    if (event.keyCode === 88) {
+      this.hideShow(this.props.activePort)
+    }
     if (event.key === "Enter") {
       event.preventDefault();
     }
