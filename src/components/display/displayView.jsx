@@ -164,7 +164,6 @@ const mapStateToProps = (state) => {
     otherSeriesAimsList: state.annotationsListReducer.otherSeriesAimsList,
     templates: state.annotationsListReducer.templates,
     lastLocation: state.annotationsListReducer.lastLocation,
-    seriesData: state.annotationsListReducer.seriesData
   };
 };
 
@@ -2551,7 +2550,7 @@ class DisplayView extends Component {
   };
 
   render() {
-    const { series, activePort, updateProgress, updateTreeDataOnSave, seriesData } =
+    const { series, activePort, updateProgress, updateTreeDataOnSave } =
       this.props;
     const {
       showAimEditor,
