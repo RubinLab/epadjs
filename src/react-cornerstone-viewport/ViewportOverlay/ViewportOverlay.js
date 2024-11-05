@@ -95,8 +95,8 @@ class ViewportOverlay extends PureComponent {
     //   cornerstone.metaData.get("specialSeriesModule", imageId) || {};
 
     const metadata = cornerstoneWADOImageLoader.wadors.metaDataManager.get(imageId);
-    const seriesDescription = metadata['0008103E'].Value[0];
-
+    const seriesDescription = metadata['0008103E'] && metadata['0008103E'].Value && metadata['0008103E'].Value[0]
+      ? metadata['0008103E'].Value[0] : '';
     const generalStudyModule =
       cornerstone.metaData.get("generalStudyModule", imageId) || {};
     const { studyDate, studyTime, studyDescription } = generalStudyModule;
