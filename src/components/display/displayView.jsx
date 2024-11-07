@@ -259,6 +259,7 @@ class DisplayView extends Component {
     window.addEventListener("deleteAim", this.deleteAimHandler);
     window.addEventListener("keydown", this.handleKeyPressed);
     window.addEventListener("saveTemplateType", this.saveTemplateType);
+    window.addEventListener("unfuse", this.unFuseBeforeClose);
 
     if (this.props.keycloak && series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
@@ -415,6 +416,9 @@ class DisplayView extends Component {
       // if chanes sever that data from openseries
       // refresh only cornerstone by calling this.renderAims();
     } 
+    if (this.state.fusion && prevSeries.length < series.length) {
+      window.dispatchEvent(new CustomEvent("unfuse", { detail: { source: 'open' } }));
+    }
   }
 
   componentWillUnmount() {
@@ -437,6 +441,8 @@ class DisplayView extends Component {
     window.removeEventListener("resize", this.setSubComponentHeights);
     window.removeEventListener("keydown", this.handleKeyPressed);
     window.removeEventListener("getTemplateType", this.saveTemplateType);
+    window.removeEventListener("unfuse", this.unFuseBeforeClose);
+
     // clear all aimID of openseries so aim editor doesn't open next time
     this.props.dispatch(clearAimId());
     clearInterval(this.state.tokenRefresh);
@@ -516,22 +522,26 @@ class DisplayView extends Component {
   };
   
   teleportAnnotations = (unfuse, ctElement, petElement) => {
-    const stackToolState = cornerstoneTools.getToolState(ctElement, "stack");
-    const petStackToolState = cornerstoneTools.getToolState(petElement, "stack");
+    try {
+      const stackToolState = cornerstoneTools.getToolState(ctElement, "stack");
+      const petStackToolState = cornerstoneTools.getToolState(petElement, "stack");
 
-    const ctImageIds = stackToolState.data[0].imageIds;
-    const petImageIds = petStackToolState.data[0].imageIds;
+      const ctImageIds = stackToolState.data[0].imageIds;
+      const petImageIds = petStackToolState.data[0].imageIds;
 
-    const ctImage = ctImageIds[0];
-    const petImage = petImageIds[0];
+      const ctImage = ctImageIds[0];
+      const petImage = petImageIds[0];
 
-    let segMod = cornerstoneTools.getModule("segmentation");
-    const petSeg = segMod.state.series[petImage];
-    if (petSeg && !unfuse) {
-        segMod.state.series = { ...segMod.state.series, [ctImage]: petSeg };
-    }
-    else {
-        delete segMod.state.series.ctImage; //its unfuse and delete the seg from pet
+      let segMod = cornerstoneTools.getModule("segmentation");
+      const petSeg = segMod.state.series[petImage];
+      if (petSeg && !unfuse) {
+          segMod.state.series = { ...segMod.state.series, [ctImage]: petSeg };
+      }
+      else {
+          delete segMod.state.series.ctImage; //its unfuse and delete the seg from pet
+      }
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -547,38 +557,48 @@ class DisplayView extends Component {
         }
     } catch (error) {
         console.error(error);
-        // close();
     }
   };
 
-  unFuseBeforeClose = () => {
-    if (this.state.fusion) {
+  unFuseBeforeClose = (evt) => {
+    if (!!this.state.fusion) {
       // window.removeEventListener("newImage");
       window.removeEventListener("newImage", this.state.fusion.func);
+      window.dispatchEvent(new CustomEvent("closeFuseMenu"));
       const { CT, PT, ctLayerId, petLayerId } = this.state.fusion;
       const elements = cornerstone.getEnabledElements();
       const ctElement = elements[CT]?.element;
       const petElement = elements[PT]?.element;
-      cornerstone.setActiveLayer(ctElement, ctLayerId);
-      cornerstone.purgeLayers(ctElement);
+      try { 
+        cornerstone.setActiveLayer(ctElement, ctLayerId);
+        cornerstone.purgeLayers(ctElement);
+      } catch (err) {
+        console.error(err);
+      }
       this.removeSynchronizers();
       // cornerstone.removeLayer(ctElement, ctLayerId);
       this.teleportAnnotations(true, ctElement, petElement);
+      this.getFuseUnfuseState(false);
+      if (evt.detail.source === 'open' || evt.detail.source === 'close') {
+        toast.info("Only two viewports of PET and CT modalities should be open for fusion. Disabling fusion!", {
+          position: "top-right",
+          autoClose: false,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
       return 1;
     }
     return 0;
   }
 
   getFuseUnfuseState = (fused, CT, PT, ctLayerId, petLayerId, synchronizers, func) => {
-    console.log(' ---> synchronizers', synchronizers);
-    if (fused) {
+    if (fused) 
       this.setState({ fusion: { CT, PT, ctLayerId, petLayerId, synchronizers, func }});
-      // window.addEventListener("newImage", this.newImageFuse);
-    } else {
+    else 
       this.setState({ fusion: false });
-      console.log('--->', this.state.fusion.func);
-      // window.addEventListener("newImage", this.newImage);
-    }
   }
 
   setSubComponentHeights = (e) => {
@@ -2451,7 +2471,7 @@ class DisplayView extends Component {
   };
 
   closeViewport = (index) => {
-    const val = this.unFuseBeforeClose();
+    this.unFuseBeforeClose({detail: {source: 'close'}});
     const { showAimEditor, dirty } = this.state;
     const { series, seriesAddition } = this.props;
     const { projectID, patientID, studyUID, seriesUID } = series[index];

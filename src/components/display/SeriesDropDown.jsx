@@ -191,7 +191,6 @@ const SeriesDropDown = (props) => {
         props.dispatch(getSingleSerie(serie, null, null, list));
       }
         window.dispatchEvent(new CustomEvent("deleteViewportWL"));
-        window.dispatchEvent(new CustomEvent("unfuse", { detail: { source: 'dropdown' } }));
       } else {
         toast.info(`This series is already open at viewport ${index + 1}`);
       }
