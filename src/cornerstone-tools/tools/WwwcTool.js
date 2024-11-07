@@ -1,7 +1,13 @@
 import external from '../externalModules.js';
 import BaseTool from './base/BaseTool.js';
 import { wwwcCursor } from './cursors/index.js';
+// import calculateSUV from '../util/calculateSUV.js';
+import { toWindowLevel, toLowHighRange } from '../util/windowLevel.js';
 
+// Todo: should move to configuration
+const DEFAULT_MULTIPLIER = 4;
+const DEFAULT_IMAGE_DYNAMIC_RANGE = 1024;
+const PT = 'PT';
 /**
  * @public
  * @class WwwcTool
@@ -52,30 +58,104 @@ export default class WwwcTool extends BaseTool {
 function basicLevelingStrategy(evt) {
   const { orientation } = this.configuration;
   const eventData = evt.detail;
-
-  const maxVOI =
+  console.log('eventdata', eventData);
+  if (!eventData.viewport.voiRange) {
+    const maxVOI =
     eventData.image.maxPixelValue * eventData.image.slope +
     eventData.image.intercept;
   const minVOI =
     eventData.image.minPixelValue * eventData.image.slope +
     eventData.image.intercept;
-  const imageDynamicRange = maxVOI - minVOI;
-  const multiplier = imageDynamicRange / 1024;
-
-  const deltaX = eventData.deltaPoints.page.x * multiplier;
-  const deltaY = eventData.deltaPoints.page.y * multiplier;
-
-  if (orientation === 0) {
-    eventData.viewport.voi.windowWidth += deltaX;
-    eventData.viewport.voi.windowCenter += deltaY;
-  } else {
-    eventData.viewport.voi.windowWidth += deltaY;
-    eventData.viewport.voi.windowCenter += deltaX;
+    eventData.viewport.voiRange = {lower: minVOI, upper: maxVOI};
   }
+  console.log('eventdata after', eventData);
+  const modality = 'PET';
+  const isPreScaled = true;
+  let newRange;
+  if (modality === PT && isPreScaled) {
+    newRange = getPTScaledNewRange(
+      eventData,
+      isPreScaled,
+    );
+  } else {
+    newRange = getNewRange(eventData, orientation);
+  }
+  // If the range is not valid. Do nothing
+  if (newRange.lower >= newRange.upper) {
+    return;
+  }
+
+  eventData.viewport.voiRange = {lower:newRange.lower, upper: newRange.upper};
+  eventData.viewport.voi.windowWidth = newRange.windowWidth;
+  eventData.viewport.voi.windowCenter = newRange.windowCenter;
 
   window.dispatchEvent(
     // new CustomEvent("updateWL", { detail: { wc: eventData.viewport.voi.windowCenter, ww: eventData.viewport.voi.windowWidth } })
     new CustomEvent("updateImageStatus", { detail: { type: 'wwwc', value: { wc: eventData.viewport.voi.windowCenter, ww: eventData.viewport.voi.windowWidth} } })
   );
 
+}
+
+function getNewRange(eventData, orientation) {
+  // old version   
+  // const multiplier = getMultiplierDynamicRange(eventData.image);
+  // const deltaX = eventData.deltaPoints.page.x * multiplier;
+  // const deltaY = eventData.deltaPoints.page.y * multiplier;
+  // let windowWidth, windowCenter;
+  // if (orientation === 0) {
+  //   windowWidth = deltaX + eventData.viewport.voi.windowWidth;
+  //   windowCenter = deltaY + eventData.viewport.voi.windowCenter;
+  // } else {
+  //   windowWidth = deltaY + eventData.viewport.voi.windowWidth;
+  //   windowCenter = deltaX + eventData.viewport.voi.windowCenter;
+  // }
+  // return {windowWidth, windowCenter}
+
+  const multiplier = getMultiplierDynamicRange(eventData.image);
+  const deltaX = eventData.deltaPoints.page.x * multiplier;
+  const deltaY = eventData.deltaPoints.page.y * multiplier;
+  let { windowWidth, windowCenter } = toWindowLevel(
+    eventData.viewport.voiRange.lower,
+    eventData.viewport.voiRange.upper
+  );
+  if (orientation === 0) {
+    windowWidth = deltaX + eventData.viewport.voi.windowWidth;
+    windowCenter = deltaY + eventData.viewport.voi.windowCenter;
+  } else {
+    windowWidth = deltaY + eventData.viewport.voi.windowWidth;
+    windowCenter = deltaX + eventData.viewport.voi.windowCenter;
+  }
+  windowWidth = Math.max(windowWidth, 1);
+  // Convert back to range
+  return {...toLowHighRange(windowWidth, windowCenter), windowWidth, windowCenter};
+}
+
+function getMultiplierDynamicRange(image) {
+  const maxVOI =
+    image.maxPixelValue * image.slope +
+    image.intercept;
+  const minVOI =
+    image.minPixelValue * image.slope +
+    image.intercept;
+  const imageDynamicRange = maxVOI - minVOI;
+  return imageDynamicRange / DEFAULT_IMAGE_DYNAMIC_RANGE;
+}
+
+
+function getPTScaledNewRange(eventData, isPreScaled) {
+  if (isPreScaled) {
+    multiplier = 5 / eventData.element.clientHeight;
+  } else {
+    multiplier =
+      getMultiplierDynamicRange(eventData.image) ||
+      DEFAULT_MULTIPLIER;
+  }
+
+  const deltaY = eventData.deltaPoints.page.y;
+  const wcDelta = deltaY * multiplier;
+
+  let upper = eventData.viewport.voiRange.upper - wcDelta;
+  upper = isPreScaled ? Math.max(upper, 0.1) : upper;
+
+  return { lower: eventData.viewport.voiRange.lower, upper };
 }
