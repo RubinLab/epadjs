@@ -53,6 +53,7 @@ function basicLevelingStrategy(evt) {
   const { orientation } = this.configuration;
   const eventData = evt.detail;
 
+  const colormap = eventData && eventData.viewport ? eventData.viewport.colormap : null;
   const maxVOI =
     eventData.image.maxPixelValue * eventData.image.slope +
     eventData.image.intercept;
@@ -75,7 +76,7 @@ function basicLevelingStrategy(evt) {
 
   window.dispatchEvent(
     // new CustomEvent("updateWL", { detail: { wc: eventData.viewport.voi.windowCenter, ww: eventData.viewport.voi.windowWidth } })
-    new CustomEvent("updateImageStatus", { detail: { type: 'wwwc', value: { wc: eventData.viewport.voi.windowCenter, ww: eventData.viewport.voi.windowWidth} } })
+    new CustomEvent("updateImageStatus", { detail: { tool: 'wwwc', type: 'wwwc', value: { wc: eventData.viewport.voi.windowCenter, ww: eventData.viewport.voi.windowWidth } } })
   );
 
 }

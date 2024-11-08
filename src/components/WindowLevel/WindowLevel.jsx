@@ -40,7 +40,7 @@ export class WindowLevel extends Component {
 
     window.dispatchEvent(
       // new CustomEvent("updateWL", { detail: { wc: preset.level, ww: preset.window } })
-      new CustomEvent("updateImageStatus", { detail: { type: 'wwwc', value: { wc: preset.level, ww: preset.window } } })
+      new CustomEvent("updateImageStatus", { detail: { tool: 'preset', type: 'wwwc', value: { wc: preset.level, ww: preset.window } } })
     );
 
     vp.voiLUT = undefined;

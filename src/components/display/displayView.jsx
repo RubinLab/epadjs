@@ -734,7 +734,7 @@ class DisplayView extends Component {
   };
 
   updateImageStatus = (event) => {
-    const { type, value } = event.detail;
+    const { type, value, tool } = event.detail;
     // const { ww, wc } = event.detail;
     let imgStatus = sessionStorage.getItem("imgStatus");
     const max = parseInt(maxPort);
@@ -744,6 +744,28 @@ class DisplayView extends Component {
     obj[type] = value;
     imgStatus[this.props.activePort] = obj;
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+
+    try { 
+      if (this.state.fusion) {
+        const { CT, PT, petLayerId, ctLayerId } = this.state.fusion;
+        const elements = cornerstone.getEnabledElements();
+        const petElement = elements[PT]?.element;
+        const ctElement = elements[CT]?.element;
+        console.log(" -> tool", tool);
+        if (tool === 'wwwc' && this.state.fusion.tool !== 'wwwc' ) {
+          console.log(" ---> wwwc");
+          cornerstone.setActiveLayer(petElement, petLayerId);
+          this.setState( {fusion: {...this.state.fusion, tool}} );
+        }
+        if (tool === 'preset' && this.state.fusion.tool !== 'preset') {
+          console.log(" ---> preset");
+          cornerstone.setActiveLayer(ctElement, ctLayerId);
+          this.setState( {fusion: {...this.state.fusion, tool}} );
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Traverse all shapes and set visibility, if aimID is passed only sets aim's shapes
