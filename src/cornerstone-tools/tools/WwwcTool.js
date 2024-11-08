@@ -1,10 +1,9 @@
 import external from '../externalModules.js';
 import BaseTool from './base/BaseTool.js';
 import { wwwcCursor } from './cursors/index.js';
-// import calculateSUV from '../util/calculateSUV.js';
+import { default as calculateSUV, reverseSUV } from '../util/calculateSUV.js';
 import { toWindowLevel, toLowHighRange } from '../util/windowLevel.js';
 
-// Todo: should move to configuration
 const DEFAULT_MULTIPLIER = 4;
 const DEFAULT_IMAGE_DYNAMIC_RANGE = 1024;
 const PT = 'PT';
@@ -45,6 +44,13 @@ export default class WwwcTool extends BaseTool {
   }
 }
 
+function getCorrectedValue(image, val, modality) {
+  if (modality === 'PT'){
+    return calculateSUV(image, val, true) || val;
+  }
+  return image.maxPixelValue;
+}
+
 /**
  * Here we normalize the ww/wc adjustments so the same number of on screen pixels
  * adjusts the same percentage of the dynamic range of the image.  This is needed to
@@ -58,19 +64,28 @@ export default class WwwcTool extends BaseTool {
 function basicLevelingStrategy(evt) {
   const { orientation } = this.configuration;
   const eventData = evt.detail;
+  
+  let modality = '';
+  const cornerstone = external.cornerstone;;
+  const seriesModule = cornerstone.metaData.get(
+    'generalSeriesModule',
+    eventData.image.imageId
+  );
+  if (seriesModule) {
+    modality = seriesModule.modality;
+  }
+   
   console.log('eventdata', eventData);
   if (!eventData.viewport.voiRange) {
-    const maxVOI =
-    eventData.image.maxPixelValue * eventData.image.slope +
-    eventData.image.intercept;
-  const minVOI =
-    eventData.image.minPixelValue * eventData.image.slope +
-    eventData.image.intercept;
-    eventData.viewport.voiRange = {lower: minVOI, upper: maxVOI};
+    console.log('ww', eventData.viewport.voi.windowWidth, eventData.viewport.voi.windowCenter);
+    const range = toLowHighRange(eventData.viewport.voi.windowWidth, eventData.viewport.voi.windowCenter);
+    range.lower = getCorrectedValue(eventData.image, range.lower, modality);
+    range.upper = getCorrectedValue(eventData.image, range.upper, modality);
+    eventData.viewport.voiRange = range;
   }
   console.log('eventdata after', eventData);
-  const modality = 'PET';
-  const isPreScaled = true;
+  const isPreScaled = !!calculateSUV(eventData.image, 1000, true);
+  console.log('isPreScaled', isPreScaled, calculateSUV(eventData.image, 1000, true));
   let newRange;
   if (modality === PT && isPreScaled) {
     newRange = getPTScaledNewRange(
@@ -143,6 +158,7 @@ function getMultiplierDynamicRange(image) {
 
 
 function getPTScaledNewRange(eventData, isPreScaled) {
+  let multiplier;
   if (isPreScaled) {
     multiplier = 5 / eventData.element.clientHeight;
   } else {
@@ -153,9 +169,14 @@ function getPTScaledNewRange(eventData, isPreScaled) {
 
   const deltaY = eventData.deltaPoints.page.y;
   const wcDelta = deltaY * multiplier;
-
+  console.log('before', eventData.viewport.voiRange.lower, eventData.viewport.voiRange.upper, wcDelta, deltaY, multiplier);
   let upper = eventData.viewport.voiRange.upper - wcDelta;
-  upper = isPreScaled ? Math.max(upper, 0.1) : upper;
-
-  return { lower: eventData.viewport.voiRange.lower, upper };
+  upper = Math.min(upper, 20);
+  // upper = isPreScaled ? Math.max(upper, 0.1) : upper;
+  console.log('after', eventData.viewport.voiRange.lower, upper);
+  const range = { lower: eventData.viewport.voiRange.lower, upper };
+  return {...range, ...toWindowLevel(
+    reverseSUV(eventData.image, range.lower, true) || range.lower,
+    reverseSUV(eventData.image, range.upper, true) || range.upper,
+  ) };
 }
