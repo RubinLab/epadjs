@@ -13,7 +13,7 @@ class FuseSelector extends Component {
             CT: undefined, //Ct viewport index
             PT: undefined, //PET viewport index
             opacity: 0.7,
-            colormap: 'hotIron',
+            colormap: 'pet',
         }
         this.synchronizers = [];
         this.defaultCtOptions = {
@@ -25,7 +25,7 @@ class FuseSelector extends Component {
         this.defaultPetOptions = {
             name: "PET",
             opacity: 0.7,
-            viewport: { colormap: "hotIron" },
+            viewport: { colormap: "pet" },
             visibile: true
         };
     }
@@ -71,17 +71,6 @@ class FuseSelector extends Component {
         });
     }
 
-    componentWillUnmount() {
-        window.removeEventListener("unfuse", this.unfuseEventHandler);
-    }
-
-    unfuseEventHandler = () => {
-        if (this.state.isFused) {
-            const ctElement = cornerstone.getEnabledElements()[CT].element;
-            this.unfuse(ctElement);
-            this.setState({ isFused: false, CT: undefined, PT: undefined });
-        }
-    }
 
     getModality = (element) => {
         // if image has already layers it should be the CT 
@@ -109,7 +98,6 @@ class FuseSelector extends Component {
                 this.teleportAnnotations();
                 this.setState({ isFused: true });
                 this.addSynchronizers();
-                // window.addEventListener("unfuse", this.unfuseEventHandler);
             }
         }
         else {
@@ -317,7 +305,7 @@ class FuseSelector extends Component {
     }
 
     render() {
-        const { CT, PT, isFused, ctLayerId, petLayerId, opacity = 0.7, visible = true, colormap = "hotIron" } = this.state;
+        const { CT, PT, isFused, ctLayerId, petLayerId, opacity = 0.7, visible = true, colormap = "pet" } = this.state;
         const colormapsList = cornerstone.colors.getColormapsList();
         const buttonLabel = isFused ? "Unfuse" : "Fuse PET and CT";
         return (
@@ -326,7 +314,8 @@ class FuseSelector extends Component {
                     <span>Fusion Menu</span>
                     <hr />
                     {!isFused && (<b>Note:This is a beta functionality and may have bugs!</b>)}
-                    {isFused && (<div className="layers">
+                    
+                    {/* {isFused && (<div className="layers">
                         <label htmlFor="layers">Active Layer</label>
                         <select className="opt-select" name={"layers"} value={this.getActiveLayer()?.layerId} onChange={this.handleLayerChange}>
                             <option value={ctLayerId}>CT</option>
@@ -343,7 +332,8 @@ class FuseSelector extends Component {
                     {isFused && (<div className="opacity">
                         <label htmlFor="opacity">Opacity</label>
                         <input type="range" name={"opacity"} min={0} max={1} step={0.1} onChange={this.handleOpacityChange} value={opacity} />
-                    </div>)}
+                    </div>)} */}
+                    
                     {isFused && (<div className="colormap">
                         <label htmlFor="opacity">Colormap</label>
                         <select value={colormap} onChange={this.handleColormapChange}>

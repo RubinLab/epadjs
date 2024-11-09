@@ -294,10 +294,12 @@ class ToolMenu extends Component {
 
   componentDidMount() {
     window.addEventListener("keydown", this.handleKeyPressed);
+    window.addEventListener("closeFuseMenu", this.closeFuse);
   }
 
   componentWillUnmount() {
     window.removeEventListener("keydown", this.handleKeyPressed);
+    window.removeEventListener("closeFuseMenu", this.closeFuse);
     sessionStorage.removeItem("activeTool");
   }
 
