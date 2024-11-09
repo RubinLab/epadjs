@@ -445,8 +445,17 @@ class ToolMenu extends Component {
       else this.props.onSwitchView("search");
       return;
     } else if (tool === "Presets") {
+      window.dispatchEvent(
+        new CustomEvent("updateImageLayer", { detail: { tool: 'preset', type: 'wwwc' } })
+      );
       this.showPresets();
+      this.disableAllTools();
+      this.setState({ activeTool: "", activeToolIdx: index });
       return;
+    } else if (tool === "Wwwc") {
+      window.dispatchEvent(
+        new CustomEvent("updateImageLayer", { detail: { tool: 'wwwc', type: 'wwwc' } })
+      );
     } else if (tool === "Invert") {
       this.invert();
       return;

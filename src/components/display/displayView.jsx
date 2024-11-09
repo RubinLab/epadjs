@@ -246,6 +246,7 @@ class DisplayView extends Component {
     window.addEventListener("toggleAnnotations", this.toggleAnnotations);
     // window.addEventListener("updateWL", this.updateWL);
     window.addEventListener("updateImageStatus", this.updateImageStatus);
+    window.addEventListener("updateImageLayer", this.updateImageLayer);
     window.addEventListener(
       "deleteViewportImageStatus",
       this.deleteViewportImageStatus
@@ -744,29 +745,32 @@ class DisplayView extends Component {
     obj[type] = value;
     imgStatus[this.props.activePort] = obj;
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+  };
 
+
+  updateImageLayer = (event) => {
+    const { tool } = event.detail;
     try { 
       if (this.state.fusion) {
         const { CT, PT, petLayerId, ctLayerId } = this.state.fusion;
         const elements = cornerstone.getEnabledElements();
         const petElement = elements[PT]?.element;
         const ctElement = elements[CT]?.element;
-        console.log(" -> tool", tool);
         if (tool === 'wwwc' && this.state.fusion.tool !== 'wwwc' ) {
-          console.log(" ---> wwwc");
-          cornerstone.setActiveLayer(petElement, petLayerId);
+          cornerstone.setActiveLayer(ctElement, petLayerId);
           this.setState( {fusion: {...this.state.fusion, tool}} );
         }
         if (tool === 'preset' && this.state.fusion.tool !== 'preset') {
-          console.log(" ---> preset");
           cornerstone.setActiveLayer(ctElement, ctLayerId);
           this.setState( {fusion: {...this.state.fusion, tool}} );
         }
+        cornerstone.updateImage(ctElement);
       }
     } catch (err) {
       console.error(err);
     }
   };
+
 
   // Traverse all shapes and set visibility, if aimID is passed only sets aim's shapes
   setVisibilityOfShapes = (visibility, aimID, seriesUID) => {

@@ -205,18 +205,18 @@ class FuseSelector extends Component {
             'cornerstoneimagerendered',
             cornerstoneTools.stackImagePositionSynchronizer
         );
-        const panZoomSynchronizer = new cornerstoneTools.Synchronizer(
-            'cornerstonetoolsmousedrag',
-            cornerstoneTools.panZoomSynchronizer
-        );
+        // const panZoomSynchronizer = new cornerstoneTools.Synchronizer(
+        //     'cornerstonetoolsmousedrag',
+        //     cornerstoneTools.panZoomSynchronizer
+        // );
         cornerstone.getEnabledElements().forEach(({ element }) => {
             stackPositonSynchronizer.add(element);
-            panZoomSynchronizer.add(element)
+            // panZoomSynchronizer.add(element)
         });
         stackPositonSynchronizer.enabled = true;
-        panZoomSynchronizer.enabled = true;
+        // panZoomSynchronizer.enabled = true;
         this.synchronizers.push(stackPositonSynchronizer);
-        this.synchronizers.push(panZoomSynchronizer);
+        // this.synchronizers.push(panZoomSynchronizer);
 
     };
 

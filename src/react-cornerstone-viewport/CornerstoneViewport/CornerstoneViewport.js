@@ -602,36 +602,37 @@ class CornerstoneViewport extends Component {
     event.detail.viewport.invert = invertMap[viewportIndex];
     cornerstone.setViewport(element, viewport);
 
-    let wwwc = imgStatus[viewportIndex] && imgStatus[viewportIndex].wwwc ? imgStatus[viewportIndex].wwwc : {};
-    // let pan = imgStatus[viewportIndex] && imgStatus[viewportIndex].pan ? imgStatus[viewportIndex].pan : {};
-    let zoom = imgStatus[viewportIndex] && imgStatus[viewportIndex].zoom ? imgStatus[viewportIndex].zoom : null;
+    // let wwwc = imgStatus[viewportIndex] && imgStatus[viewportIndex].wwwc ? imgStatus[viewportIndex].wwwc : {};
+    // // let pan = imgStatus[viewportIndex] && imgStatus[viewportIndex].pan ? imgStatus[viewportIndex].pan : {};
+    // let zoom = imgStatus[viewportIndex] && imgStatus[viewportIndex].zoom ? imgStatus[viewportIndex].zoom : null;
 
-    let wc = image.windowCenter;
-    let ww = image.windowWidth;
+    // console.log('viewport', image.windowCenter,  image.windowWidth, wwwc);
+    // let wc = image.windowCenter;
+    // let ww = image.windowWidth;
 
-    if (Object.keys(wwwc).length > 0) {
-      wc = wwwc.wc;
-      ww = wwwc.ww;
-    }
-
-    // if (Object.keys(pan).length > 0) {
-    //   viewport.translation.x += pan.x;
-    //   viewport.translation.y += pan.y;
+    // if (Object.keys(wwwc).length > 0) {
+    //   wc = wwwc.wc;
+    //   ww = wwwc.ww;
     // }
 
-    if (zoom) {
-      viewport.scale = zoom;
-    }
+    // // if (Object.keys(pan).length > 0) {
+    // //   viewport.translation.x += pan.x;
+    // //   viewport.translation.y += pan.y;
+    // // }
 
-    viewport.voi.windowCenter = wc;
-    viewport.voi.windowWidth = ww;
+    // if (zoom) {
+    //   viewport.scale = zoom;
+    // }
+
+    // viewport.voi.windowCenter = wc;
+    // viewport.voi.windowWidth = ww;
 
     cornerstone.setViewport(element, viewport);
 
     this.setState({
       scale: viewport.scale,
-      windowCenter: wc,
-      windowWidth: ww,
+      windowCenter: viewport.voi.windowCenter,
+      windowWidth: viewport.voi.windowWidth,
       rotationDegrees: viewport.rotation,
       isFlippedVertically: viewport.vflip,
       isFlippedHorizontally: viewport.hflip,

@@ -77,15 +77,15 @@ function basicLevelingStrategy(evt) {
    
   console.log('eventdata', eventData);
   if (!eventData.viewport.voiRange) {
-    console.log('ww', eventData.viewport.voi.windowWidth, eventData.viewport.voi.windowCenter);
+    // console.log('ww', eventData.viewport.voi.windowWidth, eventData.viewport.voi.windowCenter);
     const range = toLowHighRange(eventData.viewport.voi.windowWidth, eventData.viewport.voi.windowCenter);
     range.lower = getCorrectedValue(eventData.image, range.lower, modality);
     range.upper = getCorrectedValue(eventData.image, range.upper, modality);
     eventData.viewport.voiRange = range;
   }
-  console.log('eventdata after', eventData);
+  // console.log('eventdata after', eventData);
   const isPreScaled = !!calculateSUV(eventData.image, 1000, true);
-  console.log('isPreScaled', isPreScaled, calculateSUV(eventData.image, 1000, true));
+  // console.log('isPreScaled', isPreScaled, calculateSUV(eventData.image, 1000, true));
   let newRange;
   if (modality === PT && isPreScaled) {
     newRange = getPTScaledNewRange(
@@ -169,11 +169,11 @@ function getPTScaledNewRange(eventData, isPreScaled) {
 
   const deltaY = eventData.deltaPoints.page.y;
   const wcDelta = deltaY * multiplier;
-  console.log('before', eventData.viewport.voiRange.lower, eventData.viewport.voiRange.upper, wcDelta, deltaY, multiplier);
+  // console.log('before', eventData.viewport.voiRange.lower, eventData.viewport.voiRange.upper, wcDelta, deltaY, multiplier);
   let upper = eventData.viewport.voiRange.upper - wcDelta;
   upper = Math.min(upper, 20);
   // upper = isPreScaled ? Math.max(upper, 0.1) : upper;
-  console.log('after', eventData.viewport.voiRange.lower, upper);
+  // console.log('after', eventData.viewport.voiRange.lower, upper);
   const range = { lower: eventData.viewport.voiRange.lower, upper };
   return {...range, ...toWindowLevel(
     reverseSUV(eventData.image, range.lower, true) || range.lower,
