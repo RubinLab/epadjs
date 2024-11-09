@@ -1,7 +1,7 @@
 import http from "./httpService";
 
-export function getWorklistsOfCreator() {
-  return http.get(http.apiUrl() + "/worklists");
+export function getWorklistsOfCreator(addValidAssignees) {
+  return http.get(http.apiUrl() + "/worklists" + (addValidAssignees ? "?addValidAssignees=true": ""));
 }
 
 // TODO update /worklists/:w/users/:u

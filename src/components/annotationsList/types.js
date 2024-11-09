@@ -75,44 +75,49 @@ export const commonLabels = {
 
 export const colors = [
   {
-    button: { background: "#f84170" },
-    label: { background: "#750e29" },
-  },
-  {
-    button: { background: "#ed679f" },
+    button: { background: "#e450a8" },
     label: { background: "#773350" },
   },
   {
-    button: { background: "#f0614a" },
-    label: { background: "#783226" },
-  },
-  {
     button: { background: "#f9a45a" },
-    label: { background: "#7d522d" },
+    label: { background: "#7d522e" },
+    // label: { background: "#7d522d" },
   },
-  {
-    button: { background: "#fff06a" },
-    label: { background: "#807835" },
-  },
+  // {
+   // button: { background: "#02c7b0" },
+   // label: { background: "#0f7569" },
+ // },
   {
     button: { background: "#72ba6f" },
     label: { background: "#395e38" },
   },
   {
-    button: { background: "#00994b" },
-    label: { background: "#004d26" },
+    button: { background: "#b03544" },
+    label: { background: "#750f29" },
   },
   {
     button: { background: "#00b7ed" },
     label: { background: "#005b76" },
   },
   {
+    button: { background: "#00994b" },
+    label: { background: "#004d26" },
+  },
+  {
     button: { background: "#066ffa" },
     label: { background: "#03387d" },
   },
   {
+    button: { background: "#ff6d00" },
+    label: { background: "#783126" },
+  },
+  {
     button: { background: "#9e5c9c" },
     label: { background: "#4f2e4e" },
+  },
+  {
+    button: { background: "#17534b" },
+    label: { background: "#083a38" },
   },
   {
     button: { background: "#872981" },
@@ -121,7 +126,7 @@ export const colors = [
   {
     button: { background: "#008484" },
     label: { background: "#004242" },
-  }
+  },
 ]
 
 // export const colors = [

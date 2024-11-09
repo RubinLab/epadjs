@@ -20,6 +20,7 @@ const annotation = (props) => {
   //conditional borderstyling
   let buttonStyle = { ...props.style.button };
   let labelStyle = template === teachingFileTempCode ? {  background: "#858585", color: "white" } : { ...props.style.label };
+  let selectedStyle = { border: '#FDD800 4px double', borderRadius: '5px' };
 
   // let borderStyle = `0.15rem solid ${props.style.button.background}`;
   // buttonStyle.border = borderStyle;
@@ -35,7 +36,12 @@ const annotation = (props) => {
     props.aim.imagingObservationEntityCollection ||
     props.aim.imagingPhysicalEntityCollection;
   const openCloseButtonStyle = !props.showLabel ? singleButtonStyle : buttonStyle; 
-  const finalButtonStyle = template ===  teachingFileTempCode ? teachingStyle : openCloseButtonStyle;
+  let finalButtonStyle = template ===  teachingFileTempCode ? teachingStyle 
+    : props.id === props.openSeriesAimID ? { ... openCloseButtonStyle, ...selectedStyle} 
+    : openCloseButtonStyle;
+ 
+  
+/*
   const className =
     props.id === props.openSeriesAimID
       ? "annotation-button__container --selected"
@@ -45,6 +51,8 @@ const annotation = (props) => {
     props.id === props.openSeriesAimID
       ? "annotation-label__container --selected"
       : "annotation-label__container";
+*/
+
   let displayEyeIcon = true;
   if (props.aim.markupType && props.aim.markupType[0])
     displayEyeIcon = true;

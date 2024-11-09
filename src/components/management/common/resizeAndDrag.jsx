@@ -15,7 +15,7 @@ class ResizeAndDrag extends React.Component {
     // width: "90%",
     // height: "90%",
     x: 50,
-    y: 50
+    y: 30
   };
 
   render() {
@@ -23,7 +23,7 @@ class ResizeAndDrag extends React.Component {
       <Rnd
         dragHandleClassName="mng-header__title"
         className="rnd-window"
-        style={style}
+        // style={style}
         // size={{ width: this.state.width, height: this.state.height }}
         position={{ x: this.state.x, y: this.state.y }}
         onDragStop={(e, d) => {
@@ -37,7 +37,9 @@ class ResizeAndDrag extends React.Component {
           });
         }}
       >
-        {this.props.children}
+         <div id="mng-wrapper">
+          {this.props.children}
+         </div>
       </Rnd>
     );
   }

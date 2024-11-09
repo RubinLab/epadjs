@@ -1,5 +1,6 @@
 import { PureComponent } from "react";
 import React from "react";
+import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import PropTypes from "prop-types";
 import cornerstone from "cornerstone-core";
 import dicomParser from "dicom-parser";
@@ -45,6 +46,36 @@ class ViewportOverlay extends PureComponent {
     stackSize: PropTypes.number.isRequired,
   };
 
+  formDate = (date, time) => {
+    const year = date.substring(0, 4);
+    const monthIndex = parseInt(date.substring(4, 6)) - 1;
+    const day = date.substring(6, 8);
+    const hour = time ? time.substring(0, 2) : '00';
+    const min = time ? time.substring(2, 4) : '00';
+    const sec = time ? time.substring(4, 6) : '00';
+    return new Date(year, monthIndex, day, hour, min, sec);
+  }
+
+  calculateAge = (studyObj, dobObj) => {
+    let age = '';
+    const studyDate = this.formDate(studyObj.date, studyObj.time);
+    const dobDate = this.formDate(dobObj.date, dobObj.time);
+    const timeDiff = studyDate.getTime() - dobDate.getTime();
+    const timeDiffDate = new Date(timeDiff);
+    const dayDiff = Math.round(timeDiff / (1000 * 3600 * 24));
+    const years = timeDiffDate.getFullYear() - 1970;
+    if (dayDiff <= 59) {
+      age = `${dayDiff}-day-old `;
+    } else if (years < 2) {
+      let months = (studyDate.getFullYear() - dobDate.getFullYear()) * 12;
+      months += studyDate.getMonth() - dobDate.getMonth();
+      age = `${months}mo `;
+    } else {
+      age = `${years}yo `;
+    }
+    return age;
+  }
+
   render() {
     const { imageId, scale, windowWidth, windowCenter } = this.props;
 
@@ -55,20 +86,26 @@ class ViewportOverlay extends PureComponent {
     const zoomPercentage = formatNumberPrecision(scale * 100, 0);
     const seriesMetadata =
       cornerstone.metaData.get("generalSeriesModule", imageId) || {};
+
     const imagePlaneModule =
       cornerstone.metaData.get("imagePlaneModule", imageId) || {};
     const { rows, columns, sliceThickness, sliceLocation } = imagePlaneModule;
     const { seriesNumber } = seriesMetadata;
-    const { seriesDescription } =
-      cornerstone.metaData.get("specialSeriesModule", imageId) || {};
+    // const { seriesDescription } =
+    //   cornerstone.metaData.get("specialSeriesModule", imageId) || {};
 
+    const metadata = cornerstoneWADOImageLoader.wadors.metaDataManager.get(imageId);
+    const seriesDescription = metadata['0008103E'] && metadata['0008103E'].Value && metadata['0008103E'].Value[0]
+      ? metadata['0008103E'].Value[0] : '';
     const generalStudyModule =
       cornerstone.metaData.get("generalStudyModule", imageId) || {};
     const { studyDate, studyTime, studyDescription } = generalStudyModule;
 
     const patientModule =
       cornerstone.metaData.get("patientModule", imageId) || {};
-    const { patientId, patientName } = patientModule;
+    const { patientId, patientName, patientSex, patientBirthDate } = patientModule;
+
+    const age = this.calculateAge({ date: studyDate, time: studyTime }, { date: patientBirthDate });
 
     const generalImageModule =
       cornerstone.metaData.get("generalImageModule", imageId) || {};
@@ -89,6 +126,7 @@ class ViewportOverlay extends PureComponent {
         <div className="top-left overlay-element">
           <div>{formatPN(patientName)}</div>
           <div>{patientId}</div>
+          <div>{`${patientSex} / ${age}`}</div>
         </div>
         <div className="top-right overlay-element">
           <div>{studyDescription}</div>

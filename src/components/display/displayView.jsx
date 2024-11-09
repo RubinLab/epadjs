@@ -163,6 +163,7 @@ const mapStateToProps = (state) => {
     multiFrameAimJumpData: state.annotationsListReducer.multiFrameAimJumpData,
     otherSeriesAimsList: state.annotationsListReducer.otherSeriesAimsList,
     templates: state.annotationsListReducer.templates,
+    showAnnotations: state.annotationsListReducer.showAnnotations,
     lastLocation: state.annotationsListReducer.lastLocation,
   };
 };
@@ -311,7 +312,8 @@ class DisplayView extends Component {
       multiFrameAimJumpData,
       seriesAddition,
       loading,
-      otherSeriesAimsList
+      otherSeriesAimsList,
+      showAnnotations
     } = this.props;
     const {
       series: prevSeries,
@@ -360,7 +362,7 @@ class DisplayView extends Component {
     const aimEditSaved = this.state.aimEdited && prevLoading && !loading;
     const imgAnnsLoaded = this.checkImgAnnsFilled(prevSeriesAddition, seriesAddition);
     const rerenderAims =
-      newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved || studyAimsLengthChanged || imgAnnsLoaded;
+      newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved || studyAimsLengthChanged || imgAnnsLoaded || (showAnnotations && !prevProps.showAnnotations);
 
     // TODO: check if loading/true-false control is required for the first condition
 
@@ -454,6 +456,9 @@ class DisplayView extends Component {
   };
 
   handleKeyPressed = (event) => {
+    if (event.keyCode === 88) {
+      this.hideShow(this.props.activePort)
+    }
     if (event.key === "Enter") {
       event.preventDefault();
     }
@@ -952,7 +957,7 @@ class DisplayView extends Component {
             },
             () => {
               this.jumpToAims();
-              this.renderAims();
+              if (this.props.showAnnotations) this.renderAims();
             }
           );
           // if teaching and aim is a study aim
@@ -976,7 +981,7 @@ class DisplayView extends Component {
           },
           () => {
             this.jumpToAims();
-            this.renderAims();
+            if (this.props.showAnnotations) this.renderAims();
           }
         );
       }
