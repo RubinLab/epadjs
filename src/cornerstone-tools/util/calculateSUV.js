@@ -11,7 +11,7 @@ import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
  * @param  {bool} [skipRescale=false]
  * @returns {number}                  The SUV.
  */
-export default function(image, storedPixelValue, skipRescale = false) {
+function calculateSUV(image, storedPixelValue, skipRescale = false) {
   // const cornerstone = external.cornerstoneWADOImageLoader;
   const metadata = cornerstoneWADOImageLoader.wadors.metaDataManager.get(image.imageId);
   
@@ -82,47 +82,36 @@ export default function(image, storedPixelValue, skipRescale = false) {
  * @returns {number}       The raw pixel value.
  */
 export function reverseSUV(image, suv, skipRescale = false) {
-  const cornerstone = external.cornerstone;
-  const patientStudyModule = cornerstone.metaData.get(
-    'patientStudyModule',
-    image.imageId
-  );
-  const seriesModule = cornerstone.metaData.get(
-    'generalSeriesModule',
-    image.imageId
-  );
-
-  if (!patientStudyModule || !seriesModule) {
+  const metadata = cornerstoneWADOImageLoader.wadors.metaDataManager.get(image.imageId);
+  
+  if (!metadata) {
     return;
   }
-
-  const modality = seriesModule.modality;
+  const modality = metadata['00080060'].Value[0];
 
   // Image must be PET
   if (modality !== 'PT') {
     return;
   }
 
-  const patientWeight = patientStudyModule.patientWeight; // In kg
-
-  if (!patientWeight) {
+  if (!metadata['00101030']) {
+    return;
+  }
+  const patientWeight = metadata['00101030'].Value[0]; // In kg
+    
+  if (!metadata['00540016']) {
+    return;
+  }
+  const radiopharmaceuticalInfo = metadata['00540016'].Value[0];
+  if (!radiopharmaceuticalInfo['00181072'] || !radiopharmaceuticalInfo['00181074'] || !radiopharmaceuticalInfo['00181075']) {
     return;
   }
 
-  const petSequenceModule = cornerstone.metaData.get(
-    'petIsotopeModule',
-    image.imageId
-  );
-
-  if (!petSequenceModule) {
-    return;
-  }
-
-  const radiopharmaceuticalInfo = petSequenceModule.radiopharmaceuticalInfo;
-  const startTime = radiopharmaceuticalInfo.radiopharmaceuticalStartTime;
-  const totalDose = radiopharmaceuticalInfo.radionuclideTotalDose;
-  const halfLife = radiopharmaceuticalInfo.radionuclideHalfLife;
-  const seriesAcquisitionTime = seriesModule.seriesTime;
+  const startTime = parseTime(radiopharmaceuticalInfo['00181072'].Value[0]);
+  const totalDose = radiopharmaceuticalInfo['00181074'].Value[0];
+  const halfLife = radiopharmaceuticalInfo['00181075'].Value[0];
+  
+  const seriesAcquisitionTime = parseTime(metadata['00080031'].Value[0]); 
 
   if (!startTime || !totalDose || !halfLife || !seriesAcquisitionTime) {
     return;
