@@ -603,8 +603,8 @@ class CornerstoneViewport extends Component {
     cornerstone.setViewport(element, viewport);
 
     // let wwwc = imgStatus[viewportIndex] && imgStatus[viewportIndex].wwwc ? imgStatus[viewportIndex].wwwc : {};
-    // // let pan = imgStatus[viewportIndex] && imgStatus[viewportIndex].pan ? imgStatus[viewportIndex].pan : {};
-    // let zoom = imgStatus[viewportIndex] && imgStatus[viewportIndex].zoom ? imgStatus[viewportIndex].zoom : null;
+    // let pan = imgStatus[viewportIndex] && imgStatus[viewportIndex].pan ? imgStatus[viewportIndex].pan : {};
+    let zoom = imgStatus[viewportIndex] && imgStatus[viewportIndex].zoom ? imgStatus[viewportIndex].zoom : null;
 
     // console.log('viewport', image.windowCenter,  image.windowWidth, wwwc);
     // let wc = image.windowCenter;
@@ -615,14 +615,14 @@ class CornerstoneViewport extends Component {
     //   ww = wwwc.ww;
     // }
 
-    // // if (Object.keys(pan).length > 0) {
-    // //   viewport.translation.x += pan.x;
-    // //   viewport.translation.y += pan.y;
-    // // }
-
-    // if (zoom) {
-    //   viewport.scale = zoom;
+    // if (Object.keys(pan).length > 0) {
+    //   viewport.translation.x += pan.x;
+    //   viewport.translation.y += pan.y;
     // }
+
+    if (zoom) {
+      viewport.scale = zoom;
+    }
 
     // viewport.voi.windowCenter = wc;
     // viewport.voi.windowWidth = ww;
