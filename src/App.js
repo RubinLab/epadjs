@@ -564,6 +564,8 @@ class App extends Component {
   };
 
   switchView = (viewType, force) => {
+    window.dispatchEvent(new CustomEvent("unfuse"));
+
     this.props.dispatch(clearSelection());
     this.props.dispatch(storeAimSelectionAll(null, null, null, true));
 
@@ -1697,7 +1699,8 @@ const mapStateToProps = (state) => {
     lastEventId,
     notificationAction,
     isSegUploaded,
-    seriesData
+    seriesData,
+    fusion
   } = state.annotationsListReducer;
   return {
     showGridFullAlert,
@@ -1713,6 +1716,7 @@ const mapStateToProps = (state) => {
     notificationAction,
     isSegUploaded,
     seriesData,
+    fusion,
     selection: state.managementReducer.selection,
   };
 };
