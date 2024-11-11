@@ -430,6 +430,7 @@ class DisplayView extends Component {
     window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
     // window.removeEventListener("updateWL", this.updateWL);
     window.removeEventListener("updateImageStatus", this.updateImageStatus);
+    window.removeEventListener("updateImageLayer", this.updateImageLayer);
     window.removeEventListener(
       "resetViewportImageStatus",
       this.resetViewportImageStatus
