@@ -588,8 +588,6 @@ class CornerstoneViewport extends Component {
   onImageRendered = (event) => {
     const { viewport, element, image } = event.detail;
     const { viewportIndex } = this.props;
-    // console.log('eventdetail', event.detail);
-    // const elements = cornerstone.getEnabledElements();
     
     // let wwwc = sessionStorage.getItem('wwwc');
     let imgStatus = sessionStorage.getItem('imgStatus');
@@ -624,35 +622,15 @@ class CornerstoneViewport extends Component {
       viewport.scale = zoom;
     }
 
-    // if (wwwc.petwc && wwwc.petww && elements[viewportIndex].length === 2) {
-    //   cornerstone.setViewport(element, viewport);
-    //   if (wwwc.ww && wwwc.wc) {
-    //     // CT
-    //     element.layers[0].viewport.voi.windowCenter = wwwc.wc;
-    //     element.layers[0].viewport.voi.windowWidth = wwwc.ww;
-    //   }
-
-    //   // cornerstone.setViewport(element, element.layers[0].viewport);
-
-    //   // PET
-    //   element.layers[1].viewport.voi.windowCenter = wwwc.petwc;
-    //   element.layers[1].viewport.voi.windowWidth = wwwc.petww;
-
-    //   // cornerstone.setViewport(element, element.layers[1].viewport);
-
-    // } else {
-
     if (event.detail.enabledElement.layers.length===0) {
       viewport.voi.windowCenter = wc;
       viewport.voi.windowWidth = ww;
 
       cornerstone.setViewport(element, viewport);
     } else {
-      // console.log('layers', event.detail.enabledElement.layers);
       wc = viewport.voi.windowCenter;
       ww = viewport.voi.windowWidth;
     }
-    // }
 
     this.setState({
       scale: viewport.scale,
