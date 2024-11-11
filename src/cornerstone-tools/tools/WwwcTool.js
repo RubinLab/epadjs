@@ -75,7 +75,7 @@ function basicLevelingStrategy(evt) {
     modality = seriesModule.modality;
   }
    
-  console.log('eventdata', eventData);
+  // console.log('eventdata', eventData);
   if (!eventData.viewport.voiRange) {
     // console.log('ww', eventData.viewport.voi.windowWidth, eventData.viewport.voi.windowCenter);
     const range = toLowHighRange(eventData.viewport.voi.windowWidth, eventData.viewport.voi.windowCenter);
