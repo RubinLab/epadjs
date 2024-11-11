@@ -567,6 +567,7 @@ class DisplayView extends Component {
   };
 
   unFuseBeforeClose = (evt) => {
+    // console.log('unfuse', this.state.fusion);
     if (!!this.state.fusion) {
       // window.removeEventListener("newImage");
       window.removeEventListener("newImage", this.state.fusion.func);
@@ -575,6 +576,7 @@ class DisplayView extends Component {
       const elements = cornerstone.getEnabledElements();
       const ctElement = elements[CT]?.element;
       const petElement = elements[PT]?.element;
+      // console.log('ct', elements[CT]);
       try { 
         cornerstone.setActiveLayer(ctElement, ctLayerId);
         cornerstone.purgeLayers(ctElement);
@@ -585,16 +587,16 @@ class DisplayView extends Component {
       // cornerstone.removeLayer(ctElement, ctLayerId);
       this.teleportAnnotations(true, ctElement, petElement);
       this.getFuseUnfuseState(false);
-      if (evt.detail.source === 'open' || evt.detail.source === 'close') {
-        toast.info("Only two viewports of PET and CT modalities should be open for fusion. Disabling fusion!", {
-          position: "top-right",
-          autoClose: false,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-      }
+      
+      toast.info("Deactivating fusion!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      
       return 1;
     }
     return 0;
@@ -605,6 +607,8 @@ class DisplayView extends Component {
       this.setState({ fusion: { CT, PT, ctLayerId, petLayerId, synchronizers, func }});
     else 
       this.setState({ fusion: false });
+    // console.log('unfuse after set', this.state.fusion);
+    // console.log('unfuse after set2', this.state.fusion);
   }
 
   setSubComponentHeights = (e) => {
@@ -742,6 +746,8 @@ class DisplayView extends Component {
   updateImageStatus = (event) => {
     const { type, value, tool } = event.detail;
     // const { ww, wc } = event.detail;
+    // do not update session for pet in fusion
+    if (this.state.fusion && tool === 'wwwc' && this.props.activePort === this.state.fusion.CT) return;
     let imgStatus = sessionStorage.getItem("imgStatus");
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
@@ -756,6 +762,7 @@ class DisplayView extends Component {
   updateImageLayer = (event) => {
     const { tool } = event.detail;
     try { 
+      // console.log('fusin', this.state.fusion, event);
       if (this.state.fusion) {
         const { CT, PT, petLayerId, ctLayerId } = this.state.fusion;
         const elements = cornerstone.getEnabledElements();
@@ -763,10 +770,12 @@ class DisplayView extends Component {
         const ctElement = elements[CT]?.element;
         if (tool === 'wwwc' && this.state.fusion.tool !== 'wwwc' ) {
           cornerstone.setActiveLayer(ctElement, petLayerId);
+          // console.log('setting fusion', tool);
           this.setState( {fusion: {...this.state.fusion, tool}} );
         }
         if (tool === 'preset' && this.state.fusion.tool !== 'preset') {
           cornerstone.setActiveLayer(ctElement, ctLayerId);
+          // console.log('setting fusion', tool);
           this.setState( {fusion: {...this.state.fusion, tool}} );
         }
         cornerstone.updateImage(ctElement);
