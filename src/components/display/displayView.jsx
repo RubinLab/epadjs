@@ -31,8 +31,7 @@ import {
   clearSelection,
   updateGridWithMultiFrameInfo,
   clearMultiFrameAimJumpFlags,
-  setSeriesData,
-  storeFuseUnfuseState
+  setSeriesData
   // fillSeriesDescfullData
 } from "../annotationsList/action";
 import { deleteAnnotation, getAnnotation } from "../../services/annotationServices";
@@ -166,7 +165,6 @@ const mapStateToProps = (state) => {
     templates: state.annotationsListReducer.templates,
     showAnnotations: state.annotationsListReducer.showAnnotations,
     lastLocation: state.annotationsListReducer.lastLocation,
-    fusion: state.annotationsListReducer.fusion
   };
 };
 
@@ -421,7 +419,7 @@ class DisplayView extends Component {
       // if chanes sever that data from openseries
       // refresh only cornerstone by calling this.renderAims();
     } 
-    if (this.props.fusion && prevSeries.length < series.length) {
+    if (this.state.fusion && prevSeries.length < series.length) {
       window.dispatchEvent(new CustomEvent("unfuse", { detail: { source: 'open' } }));
     }
   }
@@ -522,7 +520,7 @@ class DisplayView extends Component {
 
   removeSynchronizers = () => {
     cornerstone.getEnabledElements().forEach(({ element }) => {
-        this.props.fusion.synchronizers.forEach(synchronizer => {
+        this.state.fusion.synchronizers.forEach(synchronizer => {
             synchronizer.remove(element);
             synchronizer.enabled = false;
         })
@@ -556,7 +554,7 @@ class DisplayView extends Component {
   newImageFuse = (event, close) => {
     try {
         const newImageElement = event.detail.element;
-        const { PT, CT } = this.props.fusion;
+        const { PT, CT } = this.state.fusion;
         const petElement = cornerstone.getEnabledElements()[PT]?.element;
         const ctElement = cornerstone.getEnabledElements()[CT]?.element;
         if (ctElement && petElement) {
@@ -569,11 +567,11 @@ class DisplayView extends Component {
   };
 
   unFuseBeforeClose = (evt) => {
-    if (!!this.props.fusion) {
+    if (!!this.state.fusion) {
       // window.removeEventListener("newImage");
-      window.removeEventListener("newImage", this.props.fusion.evtFunc);
+      window.removeEventListener("newImage", this.state.fusion.func);
       window.dispatchEvent(new CustomEvent("closeFuseMenu"));
-      const { CT, PT, ctLayerId, petLayerId } = this.props.fusion;
+      const { CT, PT, ctLayerId, petLayerId } = this.state.fusion;
       const elements = cornerstone.getEnabledElements();
       const ctElement = elements[CT]?.element;
       const petElement = elements[PT]?.element;
@@ -603,7 +601,10 @@ class DisplayView extends Component {
   }
 
   getFuseUnfuseState = (fused, CT, PT, ctLayerId, petLayerId, synchronizers, func) => {
-    this.props.dispatch(storeFuseUnfuseState(fused, CT, PT, ctLayerId, petLayerId, synchronizers, func))
+    if (fused) 
+      this.setState({ fusion: { CT, PT, ctLayerId, petLayerId, synchronizers, func }});
+    else 
+      this.setState({ fusion: false });
   }
 
   setSubComponentHeights = (e) => {
@@ -755,18 +756,18 @@ class DisplayView extends Component {
   updateImageLayer = (event) => {
     const { tool } = event.detail;
     try { 
-      if (this.props.fusion) {
-        const { CT, PT, petLayerId, ctLayerId } = this.props.fusion;
+      if (this.state.fusion) {
+        const { CT, PT, petLayerId, ctLayerId } = this.state.fusion;
         const elements = cornerstone.getEnabledElements();
         const petElement = elements[PT]?.element;
         const ctElement = elements[CT]?.element;
-        if (tool === 'wwwc' && this.state.fusionTool !== 'wwwc' ) {
+        if (tool === 'wwwc' && this.state.fusion.tool !== 'wwwc' ) {
           cornerstone.setActiveLayer(ctElement, petLayerId);
-          this.setState( {fusionTool: 'wwwc'} );
+          this.setState( {fusion: {...this.state.fusion, tool}} );
         }
-        if (tool === 'preset' && this.state.fusionTool !== 'preset') {
+        if (tool === 'preset' && this.state.fusion.tool !== 'preset') {
           cornerstone.setActiveLayer(ctElement, ctLayerId);
-          this.setState( {fusionTool: 'preset'} );
+          this.setState( {fusion: {...this.state.fusion, tool}} );
         }
         cornerstone.updateImage(ctElement);
       }
