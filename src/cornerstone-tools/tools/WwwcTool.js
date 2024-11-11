@@ -83,9 +83,6 @@ function basicLevelingStrategy(evt) {
     range.upper = getCorrectedValue(eventData.image, range.upper, modality);
     eventData.viewport.voiRange = range;
   }
-  // console.log('eventdata after', eventData);
-  const isPreScaled = !!calculateSUV(eventData.image, 1000, true);
-  // console.log('isPreScaled', isPreScaled, calculateSUV(eventData.image, 1000, true));
   let newRange;
   if (modality === PT && isPreScaled) {
     newRange = getPTScaledNewRange(
