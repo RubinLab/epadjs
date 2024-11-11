@@ -55,7 +55,6 @@ import {
   STORE_AIM_SELECTION_ALL,
   TOGGLE_ALL_CALCULATIONS,
   SET_LAST_LOCATION,
-  FUSE_STATE,
   colors,
   commonLabels,
 } from "./types";
@@ -79,9 +78,6 @@ export const fillSeriesDescfullData = (data) => {
   return { type: FILL_DESC, data };
 }
 
-export const storeFuseUnfuseState = (fused, CT, PT, ctLayerId, petLayerId, synchronizers, evtFunc) => {
-  return { type: FUSE_STATE, fused, CT, PT, ctLayerId, petLayerId, synchronizers, evtFunc };
-}
 export const setLastLocation = (lastLocation) => {
   return { type: SET_LAST_LOCATION, lastLocation }
 }
