@@ -48,7 +48,7 @@ function getCorrectedValue(image, val, modality) {
   if (modality === 'PT'){
     return calculateSUV(image, val, true) || val;
   }
-  return image.maxPixelValue;
+  return val;
 }
 
 /**
