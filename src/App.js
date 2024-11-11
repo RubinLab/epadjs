@@ -1699,8 +1699,7 @@ const mapStateToProps = (state) => {
     lastEventId,
     notificationAction,
     isSegUploaded,
-    seriesData,
-    fusion
+    seriesData
   } = state.annotationsListReducer;
   return {
     showGridFullAlert,
@@ -1716,7 +1715,6 @@ const mapStateToProps = (state) => {
     notificationAction,
     isSegUploaded,
     seriesData,
-    fusion,
     selection: state.managementReducer.selection,
   };
 };
