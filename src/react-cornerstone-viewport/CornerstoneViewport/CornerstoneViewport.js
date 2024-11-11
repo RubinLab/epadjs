@@ -588,8 +588,9 @@ class CornerstoneViewport extends Component {
   onImageRendered = (event) => {
     const { viewport, element, image } = event.detail;
     const { viewportIndex } = this.props;
-
-
+    // console.log('eventdetail', event.detail);
+    // const elements = cornerstone.getEnabledElements();
+    
     // let wwwc = sessionStorage.getItem('wwwc');
     let imgStatus = sessionStorage.getItem('imgStatus');
     imgStatus = JSON.parse(imgStatus);
@@ -602,37 +603,61 @@ class CornerstoneViewport extends Component {
     event.detail.viewport.invert = invertMap[viewportIndex];
     cornerstone.setViewport(element, viewport);
 
-    // let wwwc = imgStatus[viewportIndex] && imgStatus[viewportIndex].wwwc ? imgStatus[viewportIndex].wwwc : {};
-    // let pan = imgStatus[viewportIndex] && imgStatus[viewportIndex].pan ? imgStatus[viewportIndex].pan : {};
+    let wwwc = imgStatus[viewportIndex] && imgStatus[viewportIndex].wwwc ? imgStatus[viewportIndex].wwwc : {};
+    let pan = imgStatus[viewportIndex] && imgStatus[viewportIndex].pan ? imgStatus[viewportIndex].pan : {};
     let zoom = imgStatus[viewportIndex] && imgStatus[viewportIndex].zoom ? imgStatus[viewportIndex].zoom : null;
 
-    // console.log('viewport', image.windowCenter,  image.windowWidth, wwwc);
-    // let wc = image.windowCenter;
-    // let ww = image.windowWidth;
+    let wc = image.windowCenter;
+    let ww = image.windowWidth;
 
-    // if (Object.keys(wwwc).length > 0) {
-    //   wc = wwwc.wc;
-    //   ww = wwwc.ww;
-    // }
+    if (Object.keys(wwwc).length > 0) {
+      wc = wwwc.wc;
+      ww = wwwc.ww;
+    }
 
-    // if (Object.keys(pan).length > 0) {
-    //   viewport.translation.x += pan.x;
-    //   viewport.translation.y += pan.y;
-    // }
+    if (Object.keys(pan).length > 0) {
+      viewport.translation.x += pan.x;
+      viewport.translation.y += pan.y;
+    }
 
     if (zoom) {
       viewport.scale = zoom;
     }
 
-    // viewport.voi.windowCenter = wc;
-    // viewport.voi.windowWidth = ww;
+    // if (wwwc.petwc && wwwc.petww && elements[viewportIndex].length === 2) {
+    //   cornerstone.setViewport(element, viewport);
+    //   if (wwwc.ww && wwwc.wc) {
+    //     // CT
+    //     element.layers[0].viewport.voi.windowCenter = wwwc.wc;
+    //     element.layers[0].viewport.voi.windowWidth = wwwc.ww;
+    //   }
 
-    cornerstone.setViewport(element, viewport);
+    //   // cornerstone.setViewport(element, element.layers[0].viewport);
+
+    //   // PET
+    //   element.layers[1].viewport.voi.windowCenter = wwwc.petwc;
+    //   element.layers[1].viewport.voi.windowWidth = wwwc.petww;
+
+    //   // cornerstone.setViewport(element, element.layers[1].viewport);
+
+    // } else {
+
+    if (event.detail.enabledElement.layers.length===0) {
+      viewport.voi.windowCenter = wc;
+      viewport.voi.windowWidth = ww;
+
+      cornerstone.setViewport(element, viewport);
+    } else {
+      // console.log('layers', event.detail.enabledElement.layers);
+      wc = viewport.voi.windowCenter;
+      ww = viewport.voi.windowWidth;
+    }
+    // }
 
     this.setState({
       scale: viewport.scale,
-      windowCenter: viewport.voi.windowCenter,
-      windowWidth: viewport.voi.windowWidth,
+      windowCenter: wc,
+      windowWidth: ww,
       rotationDegrees: viewport.rotation,
       isFlippedVertically: viewport.vflip,
       isFlippedHorizontally: viewport.hflip,
