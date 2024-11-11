@@ -335,7 +335,7 @@ class FuseSelector extends Component {
                     </div>)} */}
                     
                     {isFused && (<div className="colormap">
-                        <label htmlFor="opacity">Colormap</label>
+                        <label htmlFor="opacity" style={{color:"#f8f9fa"}}>Colormap</label>
                         <select value={colormap} onChange={this.handleColormapChange}>
                             {this.createColormapOptions(colormapsList)}
                         </select>
