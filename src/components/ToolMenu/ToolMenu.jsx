@@ -464,7 +464,24 @@ class ToolMenu extends Component {
   }
 
   handleToolClicked = (index, tool) => {
-    sessionStorage.setItem("activeTool", tool);
+    const notActiveTools = {
+      Presets: true,
+      Invert: true,
+      Reset: true,
+      MetaData: true,
+      fuse: true,
+      order: true,
+      keys: true
+    };
+    
+    if (!notActiveTools[tool]) sessionStorage.setItem("activeTool", tool);
+    
+    if (sessionStorage.getItem("activeTool") === 'DragProbe') {
+      cornerstoneTools.toolColors.setActiveColor("rgb(255, 132, 0)");
+    } else cornerstoneTools.toolColors.setActiveColor("rgb(255, 255, 0)");
+
+    
+
     if (tool === "Noop") {
       this.disableAllTools();
       this.setState({ activeTool: "", activeToolIdx: index });
@@ -559,7 +576,7 @@ class ToolMenu extends Component {
     } else if (tool === 'keys') {
       this.showHotkeyInfo();
       return;
-    }
+    } 
     // else if (tool === "FreehandRoiTool") {
     //   this.selectFreehand();
     // }
