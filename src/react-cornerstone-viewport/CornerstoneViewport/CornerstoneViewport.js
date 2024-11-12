@@ -16,6 +16,7 @@ import areStringArraysEqual from "./../helpers/areStringArraysEqual.js";
 import "./CornerstoneViewport.css";
 
 const scrollToIndex = cornerstoneTools.importInternal("util/scrollToIndex");
+const calculateSUV = cornerstoneTools.importInternal("util/calculateSUV");
 const { loadHandlerManager } = cornerstoneTools;
 
 class CornerstoneViewport extends Component {
@@ -630,6 +631,11 @@ class CornerstoneViewport extends Component {
     } else {
       wc = viewport.voi.windowCenter;
       ww = viewport.voi.windowWidth;
+    }
+    // compute SUV if PET
+    if (!!calculateSUV(image, ww, true)) {
+      ww = calculateSUV(image, ww, true);
+      wc = calculateSUV(image, wc, true);
     }
 
     this.setState({
