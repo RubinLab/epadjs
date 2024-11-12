@@ -116,7 +116,8 @@ class ViewportOverlay extends PureComponent {
 
     const frameRate = formatNumberPrecision(1000 / frameTime, 1);
     const compression = getCompression(imageId);
-    const wwwc = `W: ${windowWidth.toFixed(0)} L: ${windowCenter.toFixed(0)}`;
+    const precision = Math.abs(windowWidth) <= 20 ? 2 : 0;
+    const wwwc = `W: ${windowWidth.toFixed(precision)} L: ${windowCenter.toFixed(precision)}`;
     const imageDimensions = `${columns} x ${rows}`;
 
     const { imageIndex, stackSize } = this.props;
