@@ -247,6 +247,7 @@ class DisplayView extends Component {
     window.addEventListener("toggleAnnotations", this.toggleAnnotations);
     // window.addEventListener("updateWL", this.updateWL);
     window.addEventListener("updateImageStatus", this.updateImageStatus);
+    window.addEventListener("updateImageLayer", this.updateImageLayer);
     window.addEventListener(
       "deleteViewportImageStatus",
       this.deleteViewportImageStatus
@@ -260,6 +261,7 @@ class DisplayView extends Component {
     window.addEventListener("deleteAim", this.deleteAimHandler);
     window.addEventListener("keydown", this.handleKeyPressed);
     window.addEventListener("saveTemplateType", this.saveTemplateType);
+    window.addEventListener("unfuse", this.unFuseBeforeClose);
 
     if (this.props.keycloak && series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
@@ -417,6 +419,9 @@ class DisplayView extends Component {
       // if chanes sever that data from openseries
       // refresh only cornerstone by calling this.renderAims();
     } 
+    if (this.state.fusion && prevSeries.length < series.length) {
+      window.dispatchEvent(new CustomEvent("unfuse", { detail: { source: 'open' } }));
+    }
   }
 
   componentWillUnmount() {
@@ -425,6 +430,7 @@ class DisplayView extends Component {
     window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
     // window.removeEventListener("updateWL", this.updateWL);
     window.removeEventListener("updateImageStatus", this.updateImageStatus);
+    window.removeEventListener("updateImageLayer", this.updateImageLayer);
     window.removeEventListener(
       "resetViewportImageStatus",
       this.resetViewportImageStatus
@@ -439,6 +445,8 @@ class DisplayView extends Component {
     window.removeEventListener("resize", this.setSubComponentHeights);
     window.removeEventListener("keydown", this.handleKeyPressed);
     window.removeEventListener("getTemplateType", this.saveTemplateType);
+    window.removeEventListener("unfuse", this.unFuseBeforeClose);
+
     // clear all aimID of openseries so aim editor doesn't open next time
     this.props.dispatch(clearAimId());
     clearInterval(this.state.tokenRefresh);
@@ -510,6 +518,99 @@ class DisplayView extends Component {
       console.error(err);
     }
   };
+
+  removeSynchronizers = () => {
+    cornerstone.getEnabledElements().forEach(({ element }) => {
+        this.state.fusion.synchronizers.forEach(synchronizer => {
+            synchronizer.remove(element);
+            synchronizer.enabled = false;
+        })
+    });
+  };
+  
+  teleportAnnotations = (unfuse, ctElement, petElement) => {
+    try {
+      const stackToolState = cornerstoneTools.getToolState(ctElement, "stack");
+      const petStackToolState = cornerstoneTools.getToolState(petElement, "stack");
+
+      const ctImageIds = stackToolState.data[0].imageIds;
+      const petImageIds = petStackToolState.data[0].imageIds;
+
+      const ctImage = ctImageIds[0];
+      const petImage = petImageIds[0];
+
+      let segMod = cornerstoneTools.getModule("segmentation");
+      const petSeg = segMod.state.series[petImage];
+      if (petSeg && !unfuse) {
+          segMod.state.series = { ...segMod.state.series, [ctImage]: petSeg };
+      }
+      else {
+          delete segMod.state.series.ctImage; //its unfuse and delete the seg from pet
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  newImageFuse = (event, close) => {
+    try {
+        const newImageElement = event.detail.element;
+        const { PT, CT } = this.state.fusion;
+        const petElement = cornerstone.getEnabledElements()[PT]?.element;
+        const ctElement = cornerstone.getEnabledElements()[CT]?.element;
+        if (ctElement && petElement) {
+            if (newImageElement === ctElement) this.fuse(petElement, ctElement);
+            else if (newImageElement === petElement) this.teleportAnnotations(true, ctElement, petElement);
+        }
+    } catch (error) {
+        console.error(error);
+    }
+  };
+
+  unFuseBeforeClose = (evt) => {
+    // console.log('unfuse', this.state.fusion);
+    if (!!this.state.fusion) {
+      // window.removeEventListener("newImage");
+      window.removeEventListener("newImage", this.state.fusion.func);
+      window.dispatchEvent(new CustomEvent("closeFuseMenu"));
+      const { CT, PT, ctLayerId, petLayerId } = this.state.fusion;
+      const elements = cornerstone.getEnabledElements();
+      const ctElement = elements[CT]?.element;
+      const petElement = elements[PT]?.element;
+      // console.log('ct', elements[CT]);
+      try { 
+        cornerstone.setActiveLayer(ctElement, ctLayerId);
+        cornerstone.purgeLayers(ctElement);
+      } catch (err) {
+        console.error(err);
+      }
+      this.removeSynchronizers();
+      // cornerstone.removeLayer(ctElement, ctLayerId);
+      this.teleportAnnotations(true, ctElement, petElement);
+      this.getFuseUnfuseState(false);
+      
+      toast.info("Deactivating fusion!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      
+      return 1;
+    }
+    return 0;
+  }
+
+  getFuseUnfuseState = (fused, CT, PT, ctLayerId, petLayerId, synchronizers, func) => {
+    if (fused) 
+      this.setState({ fusion: { CT, PT, ctLayerId, petLayerId, synchronizers, func }});
+    else 
+      this.setState({ fusion: false });
+    // console.log('unfuse after set', this.state.fusion);
+    // console.log('unfuse after set2', this.state.fusion);
+  }
 
   setSubComponentHeights = (e) => {
     try {
@@ -644,8 +745,10 @@ class DisplayView extends Component {
   };
 
   updateImageStatus = (event) => {
-    const { type, value } = event.detail;
+    const { type, value, tool } = event.detail;
     // const { ww, wc } = event.detail;
+    // do not update session for pet in fusion
+    if (this.state.fusion && tool === 'wwwc' && this.props.activePort === this.state.fusion.CT) return;
     let imgStatus = sessionStorage.getItem("imgStatus");
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
@@ -655,6 +758,34 @@ class DisplayView extends Component {
     imgStatus[this.props.activePort] = obj;
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
   };
+
+
+  updateImageLayer = (event) => {
+    const { tool } = event.detail;
+    try { 
+      // console.log('fusin', this.state.fusion, event);
+      if (this.state.fusion) {
+        const { CT, PT, petLayerId, ctLayerId } = this.state.fusion;
+        const elements = cornerstone.getEnabledElements();
+        const petElement = elements[PT]?.element;
+        const ctElement = elements[CT]?.element;
+        if (tool === 'wwwc' && this.state.fusion.tool !== 'wwwc' ) {
+          cornerstone.setActiveLayer(ctElement, petLayerId);
+          // console.log('setting fusion', tool);
+          this.setState( {fusion: {...this.state.fusion, tool}} );
+        }
+        if (tool === 'preset' && this.state.fusion.tool !== 'preset') {
+          cornerstone.setActiveLayer(ctElement, ctLayerId);
+          // console.log('setting fusion', tool);
+          this.setState( {fusion: {...this.state.fusion, tool}} );
+        }
+        cornerstone.updateImage(ctElement);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 
   // Traverse all shapes and set visibility, if aimID is passed only sets aim's shapes
   setVisibilityOfShapes = (visibility, aimID, seriesUID) => {
@@ -2381,6 +2512,7 @@ class DisplayView extends Component {
   };
 
   closeViewport = (index) => {
+    this.unFuseBeforeClose({detail: {source: 'close'}});
     const { showAimEditor, dirty } = this.state;
     const { series, seriesAddition } = this.props;
     const { projectID, patientID, studyUID, seriesUID } = series[index];
@@ -2417,6 +2549,7 @@ class DisplayView extends Component {
       // this.jumpToAims(" close viewport - jumpToAims");
       // this.renderAims(false, " close viewport - renderaimr");
       // this.props.onSwitchView("search");
+      window.dispatchEvent(new CustomEvent("unfuse"));
     } catch (err) {
       console.error(err);
     }
@@ -2590,6 +2723,8 @@ class DisplayView extends Component {
           <ToolMenu
             onSwitchView={this.props.onSwitchView}
             onInvertClick={this.formInvertMap}
+            onFuseUnfuse={this.getFuseUnfuseState}
+            onFuseNewImage={this.newImageFuse}
           />
           {this.state.isLoading && (
             <div style={{ marginTop: "30%", marginLeft: "50%" }}>

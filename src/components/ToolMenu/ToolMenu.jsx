@@ -297,10 +297,12 @@ class ToolMenu extends Component {
 
   componentDidMount() {
     window.addEventListener("keydown", this.handleKeyPressed);
+    window.addEventListener("closeFuseMenu", this.closeFuse);
   }
 
   componentWillUnmount() {
     window.removeEventListener("keydown", this.handleKeyPressed);
+    window.removeEventListener("closeFuseMenu", this.closeFuse);
     sessionStorage.removeItem("activeTool");
   }
 
@@ -469,6 +471,7 @@ class ToolMenu extends Component {
       return;
     } else if (tool === "ClearGrid") {
       this.props.dispatch(clearGrid());
+      window.dispatchEvent(new CustomEvent("unfuse"));
       sessionStorage.removeItem("wwwc");
       const max = parseInt(maxPort);
       const imgStatus = new Array(max);
@@ -478,8 +481,17 @@ class ToolMenu extends Component {
       else this.props.onSwitchView("search");
       return;
     } else if (tool === "Presets") {
+      window.dispatchEvent(
+        new CustomEvent("updateImageLayer", { detail: { tool: 'preset', type: 'wwwc' } })
+      );
       this.showPresets();
+      this.disableAllTools();
+      this.setState({ activeTool: "", activeToolIdx: index });
       return;
+    } else if (tool === "Wwwc") {
+      window.dispatchEvent(
+        new CustomEvent("updateImageLayer", { detail: { tool: 'wwwc', type: 'wwwc' } })
+      );
     } else if (tool === "Invert") {
       this.invert();
       return;
@@ -1029,7 +1041,7 @@ class ToolMenu extends Component {
             onClose={this.closeColormap}
           />
         )}
-        {this.state.showFuse && <FuseSelector onClose={this.closeFuse} />}
+        {this.state.showFuse && <FuseSelector onClose={this.closeFuse} onFuseUnfuse={this.props.onFuseUnfuse} onFuseNewImage={this.props.onFuseNewImage} />}
         {this.state.showMetaData && (<MetaData onClose={this.showMetaData} imageData={this.props.imageData} />)}
         {this.state.keys && (<HotKeysList onClose={() => this.setState({keys: null})} list={this.state.keys} />)}
       </div>

@@ -47,9 +47,9 @@ class ViewportOverlay extends PureComponent {
   };
 
   formDate = (date, time) => {
-    const year = date.substring(0, 4);
-    const monthIndex = parseInt(date.substring(4, 6)) - 1;
-    const day = date.substring(6, 8);
+    const year = date ? date.substring(0, 4): '1900';
+    const monthIndex = date ? parseInt(date.substring(4, 6)) - 1: '01';
+    const day = date ? date.substring(6, 8) : '01';
     const hour = time ? time.substring(0, 2) : '00';
     const min = time ? time.substring(2, 4) : '00';
     const sec = time ? time.substring(4, 6) : '00';

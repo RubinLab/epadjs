@@ -564,6 +564,8 @@ class App extends Component {
   };
 
   switchView = (viewType, force) => {
+    window.dispatchEvent(new CustomEvent("unfuse"));
+
     this.props.dispatch(clearSelection());
     this.props.dispatch(storeAimSelectionAll(null, null, null, true));
 

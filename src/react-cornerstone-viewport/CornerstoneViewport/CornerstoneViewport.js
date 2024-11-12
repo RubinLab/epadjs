@@ -588,8 +588,7 @@ class CornerstoneViewport extends Component {
   onImageRendered = (event) => {
     const { viewport, element, image } = event.detail;
     const { viewportIndex } = this.props;
-
-
+    
     // let wwwc = sessionStorage.getItem('wwwc');
     let imgStatus = sessionStorage.getItem('imgStatus');
     imgStatus = JSON.parse(imgStatus);
@@ -603,7 +602,7 @@ class CornerstoneViewport extends Component {
     cornerstone.setViewport(element, viewport);
 
     let wwwc = imgStatus[viewportIndex] && imgStatus[viewportIndex].wwwc ? imgStatus[viewportIndex].wwwc : {};
-    // let pan = imgStatus[viewportIndex] && imgStatus[viewportIndex].pan ? imgStatus[viewportIndex].pan : {};
+    let pan = imgStatus[viewportIndex] && imgStatus[viewportIndex].pan ? imgStatus[viewportIndex].pan : {};
     let zoom = imgStatus[viewportIndex] && imgStatus[viewportIndex].zoom ? imgStatus[viewportIndex].zoom : null;
 
     let wc = image.windowCenter;
@@ -614,19 +613,24 @@ class CornerstoneViewport extends Component {
       ww = wwwc.ww;
     }
 
-    // if (Object.keys(pan).length > 0) {
-    //   viewport.translation.x += pan.x;
-    //   viewport.translation.y += pan.y;
-    // }
+    if (Object.keys(pan).length > 0) {
+      viewport.translation.x += pan.x;
+      viewport.translation.y += pan.y;
+    }
 
     if (zoom) {
       viewport.scale = zoom;
     }
 
-    viewport.voi.windowCenter = wc;
-    viewport.voi.windowWidth = ww;
+    if (event.detail.enabledElement.layers.length===0) {
+      viewport.voi.windowCenter = wc;
+      viewport.voi.windowWidth = ww;
 
-    cornerstone.setViewport(element, viewport);
+      cornerstone.setViewport(element, viewport);
+    } else {
+      wc = viewport.voi.windowCenter;
+      ww = viewport.voi.windowWidth;
+    }
 
     this.setState({
       scale: viewport.scale,
