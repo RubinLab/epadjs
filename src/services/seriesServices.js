@@ -11,7 +11,7 @@ export function getSignificantSeries(projectId, subjectId, studyId) {
 }
 
 export function getSeries(projectId, subjectId, studyId, forceDicomweb, fm) {
-  console.log(" ---> ", fm);
+  // console.log(" ---> ", fm);
   const endpointProject = http.mode() === "lite" ?
     http.apiUrl() + "/projects/lite/subjects/"
     : http.apiUrl() + "/projects/" + encodeURIComponent(projectId) + "/subjects/";

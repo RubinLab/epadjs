@@ -820,7 +820,7 @@ class App extends Component {
       if (TF.total_rows) {
         this.displaySeries(packedData);
       } else {
-        const seriesArray = await this.getSeriesData(packedData, '--> handleArgs');
+        const seriesArray = await this.getSeriesData(packedData);
         window.dispatchEvent(
           new CustomEvent("openTeachingFilesModal", {
             detail: { seriesArray, args, packedData },
@@ -838,7 +838,7 @@ class App extends Component {
   };
 
   displaySeries = async (studyData) => {
-    const rawSeriesArray = await this.getSeriesData(studyData, '--> displayseries');
+    const rawSeriesArray = await this.getSeriesData(studyData);
     if (!rawSeriesArray) return;
     let seriesArr = rawSeriesArray.filter(isSupportedModality);
     let significantSeries = seriesArr.filter(
@@ -880,8 +880,7 @@ class App extends Component {
     return true;
   };
 
-  getSeriesData = async (studyData, fm) => {
-    console.log(" data app js fm", fm);
+  getSeriesData = async (studyData) => {
     const { projectID, patientID, studyUID } = studyData;
     const { seriesData } = this.props;
     try {
@@ -890,8 +889,8 @@ class App extends Component {
         seriesData[projectID][patientID][studyUID] &&
         seriesData[projectID][patientID][studyUID].list;
       if (!dataExists) {
-        const { data: series } = await getSeries(projectID, patientID, studyUID, true, "App.js, getSeriesData");
-        this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series, false));
+        const { data: series } = await getSeries(projectID, patientID, studyUID, false, "App.js, getSeriesData");
+        this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series, true));
         this.setState({ teachingLoading: false });
         return series;
       } else return seriesData[projectID][patientID][studyUID].list;
