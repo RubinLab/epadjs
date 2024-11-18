@@ -457,9 +457,6 @@ class DisplayView extends Component {
   };
 
   handleKeyPressed = (event) => {
-    if (event.keyCode === 88) {
-      this.hideShow(this.props.activePort)
-    }
     if (event.key === "Enter") {
       event.preventDefault();
     }
@@ -476,6 +473,8 @@ class DisplayView extends Component {
     ) {
       if (event.keyCode == 73 && event.ctrlKey) {
         this.toggleOverlay();
+      } else if (event.keyCode === 88) {
+        this.hideShow(this.props.activePort)
       }
     }
   };
