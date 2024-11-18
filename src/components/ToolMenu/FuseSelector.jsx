@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import Draggable from "react-draggable";
+import { toast } from "react-toastify";
 import "./FuseSelector.css";
 
 class FuseSelector extends Component {
@@ -304,6 +305,21 @@ class FuseSelector extends Component {
         return items;
     }
 
+    closeModal = () => {
+        if (this.state.isFused) {
+            this.setFuseState();
+            toast.info("Deactivating fusion!", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
+        }
+        this.props.onClose();
+    }
+
     render() {
         const { CT, PT, isFused, ctLayerId, petLayerId, opacity = 0.7, visible = true, colormap = "pet" } = this.state;
         const colormapsList = cornerstone.colors.getColormapsList();
@@ -344,7 +360,7 @@ class FuseSelector extends Component {
                     {!isFused && (<p>Currently to be able to use Fusion functionality only two viewports of PET and CT modalities should be open!</p>)}
                     <button className="closebtn" disabled={!(CT || PT)} onClick={this.setFuseState}>{buttonLabel}</button>
 
-                    <div className="close-fuse-selector" onClick={this.props.onClose}>
+                    <div className="close-fuse-selector" onClick={this.closeModal}>
                         <a href="#">X</a>
                     </div>
                 </div>
