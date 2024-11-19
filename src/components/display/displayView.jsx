@@ -2512,6 +2512,7 @@ class DisplayView extends Component {
   };
 
   closeViewport = (index) => {
+    if (this.state.hiding) this.hideShow(index);
     this.unFuseBeforeClose({detail: {source: 'close'}});
     const { showAimEditor, dirty } = this.state;
     const { series, seriesAddition } = this.props;
