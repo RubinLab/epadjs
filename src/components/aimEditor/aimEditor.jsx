@@ -427,8 +427,10 @@ class AimEditor extends Component {
   // };
 
   createAim = async (answers) => {
+    console.log('creating aim', answers);
     const { hasSegmentation, aimId: aim } = this.props;
     const markupsToSave = this.getNewMarkups();
+    console.log('creating aim markupsToSave', markupsToSave);
     const templateType = this.semanticAnswers.getSelectedTemplateType();
     let user;
     const { isUpdate } = this.state;
@@ -600,9 +602,10 @@ class AimEditor extends Component {
 
     // get the imagesIds for active viewport
     const { element } = cornerstone.getEnabledElements()[activePort];
-    const stackToolState = cornerstoneTools.getToolState(element, 'stack');
-    const imageIds = stackToolState.data[0].imageIds;
-
+    // const stackToolState = cornerstoneTools.getToolState(element, 'stack');
+    // const imageIds = stackToolState.data[0].imageIds;
+    const imageIds = this.getElementsActiveLayerImageIds(element);
+    // TODO make sure to get PT image ids on fused image
     // check which images has markup
     const markedImageIds = imageIds.filter((imageId) => {
       if (toolState[imageId] === undefined) return false;
@@ -686,13 +689,16 @@ class AimEditor extends Component {
     const toolState =
       cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     const markedCSImageIds = this.getMarkedImageIds();
+    console.log('toolState', toolState);
+    console.log('markedCSImageIds', markedCSImageIds);
     // check for markups
     var shapeIndex = 1;
     var markupsToSave = {};
     markedCSImageIds.map((CSImageId) => {
+      console.log('id', CSImageId, toolState[CSImageId]);
       const markUps = toolState[CSImageId];
       const { imageId, frameNum } = this.parseImageUidAndFrame(CSImageId);
-
+      console.log('image', imageId, frameNum);
       Object.keys(markUps).map((tool) => {
         switch (tool) {
           case 'FreehandRoi3DTool':
