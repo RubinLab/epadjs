@@ -467,9 +467,6 @@ class DisplayView extends Component {
   };
 
   handleKeyPressed = (event) => {
-    if (event.keyCode === 88) {
-      this.hideShow(this.props.activePort)
-    }
     if (event.key === "Enter") {
       event.preventDefault();
     }
@@ -486,6 +483,8 @@ class DisplayView extends Component {
     ) {
       if (event.keyCode == 73 && event.ctrlKey) {
         this.toggleOverlay();
+      } else if (event.keyCode === 88) {
+        this.hideShow(this.props.activePort)
       }
     }
   };
@@ -2556,6 +2555,7 @@ class DisplayView extends Component {
   };
 
   closeViewport = (index) => {
+    if (this.state.hiding) this.hideShow(index);
     this.unFuseBeforeClose({detail: {source: 'close'}});
     const { showAimEditor, dirty } = this.state;
     const { series, seriesAddition } = this.props;

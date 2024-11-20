@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import cornerstone from "cornerstone-core";
@@ -71,6 +72,7 @@ const mapStateToProps = (state) => {
     patients: state.annotationsListReducer.patients,
     patientLoading: state.annotationsListReducer.patientLoading,
     activePort: state.annotationsListReducer.activePort,
+    lastLocation: state.annotationsListReducer.lastLocation
   };
 };
 
@@ -494,8 +496,9 @@ class ToolMenu extends Component {
       const imgStatus = new Array(max);
       sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
       this.props.onInvertClick(false, null, null, true);
-      if (mode === "thick") this.props.onSwitchView("list");
-      else this.props.onSwitchView("search");
+      this.props.history.push(this.props.lastLocation);
+      // if (mode === "thick") this.props.onSwitchView("list");
+      // else this.props.onSwitchView("search");
       return;
     } else if (tool === "Presets") {
       window.dispatchEvent(
@@ -1066,4 +1069,4 @@ class ToolMenu extends Component {
   }
 }
 
-export default connect(mapStateToProps)(ToolMenu);
+export default withRouter(connect(mapStateToProps)(ToolMenu));
