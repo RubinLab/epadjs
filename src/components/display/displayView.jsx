@@ -538,23 +538,24 @@ class DisplayView extends Component {
     });
   };
   
-  fuse = (petElement, ctElement) => {
-    const { ctOptions, petOptions } = this.getOptions();
-    cornerstone.purgeLayers(ctElement);
-    const petImage = cornerstone.getImage(petElement);
-    const ctImage = cornerstone.getImage(ctElement);
-    if (!ctImage || !petImage)
-        return false;
-    const ctLayerId = cornerstone.addLayer(ctElement, ctImage, ctOptions);
-    const petLayerId = cornerstone.addLayer(ctElement, petImage, petOptions);
-    cornerstone.updateImage(ctElement);
-    if (this.state.selectedLayer === "PET")
-        cornerstone.setActiveLayer(ctElement, petLayerId);
-    else cornerstone.setActiveLayer(ctElement, ctLayerId);
-    this.setState({ ctLayerId, petLayerId });
-    this.props.onFuseUnfuse(true, this.state.CT, this.state.PT, ctLayerId, petLayerId, this.synchronizers, this.newImage);
-    return true;
-  };
+  // it is not being used
+  // fuse = (petElement, ctElement) => {
+  //   const { ctOptions, petOptions } = this.getOptions();
+  //   cornerstone.purgeLayers(ctElement);
+  //   const petImage = cornerstone.getImage(petElement);
+  //   const ctImage = cornerstone.getImage(ctElement);
+  //   if (!ctImage || !petImage)
+  //       return false;
+  //   const ctLayerId = cornerstone.addLayer(ctElement, ctImage, ctOptions);
+  //   const petLayerId = cornerstone.addLayer(ctElement, petImage, petOptions);
+  //   cornerstone.updateImage(ctElement);
+  //   if (this.state.selectedLayer === "PET")
+  //       cornerstone.setActiveLayer(ctElement, petLayerId);
+  //   else cornerstone.setActiveLayer(ctElement, ctLayerId);
+  //   this.setState({ ctLayerId, petLayerId });
+  //   this.props.onFuseUnfuse(true, this.state.CT, this.state.PT, ctLayerId, petLayerId, this.synchronizers, this.newImage);
+  //   return true;
+  // };
 
   teleportAnnotations = (unfuse, ctElement, petElement) => {
     try {
@@ -636,6 +637,7 @@ class DisplayView extends Component {
       this.setState({ fusion: { CT, PT, ctLayerId, petLayerId, synchronizers, func }});
     else 
       this.setState({ fusion: false });
+    this.setActive(0);
     // console.log('unfuse after set', this.state.fusion);
     // console.log('unfuse after set2', this.state.fusion);
   }

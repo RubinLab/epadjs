@@ -8,6 +8,7 @@ import {
   jumpToAim,
 } from "../action";
 import "../annotationsList.css";
+import cornerstone from "cornerstone-core";
 
 const handleJumpToAim = (aimId, index, imageID, frame) => {
   const frameNo = frame - 1;
@@ -18,6 +19,21 @@ const handleJumpToAim = (aimId, index, imageID, frame) => {
   );
 };
 
+const getFusedSerieInfoAndAnnotations = (props) => {
+  let {imageID} = props.openSeries[props.activePort];
+  if (cornerstone.getEnabledElements()[props.activePort]) {
+    const element = cornerstone.getEnabledElements()[props.activePort]['element'];
+    const activeLayer = cornerstone.getActiveLayer(element);
+    const isFused = !!activeLayer;
+    // it is fused get the correct imageID
+    if (isFused) {
+      imageID = activeLayer.image.imageId.split('/instances/')[1];
+      return {imageID};
+    }
+  }
+  return {imageID};
+}
+
 const annotationsLink = (props) => {
   const [presentImgID, setPresentImgID] = useState("");
   const { openSeries, activePort, aimsList, otherSeriesAimsList } = props;
@@ -26,7 +42,8 @@ const annotationsLink = (props) => {
 
   useEffect(() => {
     const { openSeries, activePort } = props;
-    setPresentImgID(openSeries[activePort].imageID);
+    const {imageID} = getFusedSerieInfoAndAnnotations(props);
+    setPresentImgID(imageID);
   }, [props.openSeries, props.aimsList]);
 
   const checkIfSerieOpen = (selectedSerie, imgIDs) => {

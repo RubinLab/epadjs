@@ -24,17 +24,19 @@ class AnnotationsList extends React.Component {
 
   componentDidUpdate = (prevProps) => {
     const { showCalculations, aimsList, activePort, openSeriesAddition } = this.props;
-    const { seriesUID } = openSeriesAddition[activePort];
-    const prevAims = prevProps.aimsList[seriesUID] ? Object.keys(prevProps.aimsList[seriesUID]) : [];
-    const curAims = aimsList[seriesUID] ? Object.keys(aimsList[seriesUID]) : [];
+    // const { seriesUID } = openSeriesAddition[activePort];
+    
+    // const prevAims = prevProps.aimsList[seriesUID] ? Object.keys(prevProps.aimsList[seriesUID]) : [];
+    // const curAims = aimsList[seriesUID] ? Object.keys(aimsList[seriesUID]) : [];
 
     state.showCalculations = showCalculations; //set the cornerstone state with componenets state
     this.refreshAllViewports();
   };
 
   handleDisplayClick = (e) => {
-    const { seriesUID, patientID, studyUID } =
+    const { patientID, studyUID } =
       this.props.openSeries[this.props.activePort];
+    const {seriesUID} = this.getFusedSerieInfoAndAnnotations();
     const aimID = e.target.id;
     if (aimID) {
       const currentDisplayStatus =
@@ -96,7 +98,7 @@ class AnnotationsList extends React.Component {
   };
 
   handleToggleSingleLabel = (e) => {
-    const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
+    const {seriesUID} = this.getFusedSerieInfoAndAnnotations();
     this.props.dispatch(toggleSingleLabel(seriesUID, e.target.dataset.id));
   };
 
@@ -117,10 +119,11 @@ class AnnotationsList extends React.Component {
     const wadors = this.wadoUrl.includes("wadors");
     try {
       const { openSeries, activePort, openSeriesAddition } = this.props;
-      const { imageID } = openSeries[activePort];
       let imageAnnotations;
-      if (openSeriesAddition[activePort].imageAnnotations) {
-        const annotations = openSeriesAddition[activePort].imageAnnotations;
+      const {imageID, aimList} = this.getFusedSerieInfoAndAnnotations();
+    
+      if (aimList) {
+        const annotations = aimList;
         imageAnnotations = annotations[imageID];
         // TODO: check frame number ??
         if (!imageAnnotations) {
@@ -153,14 +156,39 @@ class AnnotationsList extends React.Component {
     return calculations;
   };
 
+  getFusedSerieInfoAndAnnotations = () => {
+    let {seriesUID, imageID} = this.props.openSeries[this.props.activePort];
+    let aimList = this.props.openSeriesAddition[this.props.activePort].imageAnnotations;
+    if (cornerstone.getEnabledElements()[this.props.activePort]) {
+      const element = cornerstone.getEnabledElements()[this.props.activePort]['element'];
+      const activeLayer = cornerstone.getActiveLayer(element);
+      const isFused = !!activeLayer;
+      // it is fused get the correct series UID
+      if (isFused) {
+        seriesUID = activeLayer.image.imageId.split('/series/')[1].split('/')[0];
+        imageID = activeLayer.image.imageId.split('/instances/')[1];
+        for (let i=0; i<=this.props.openSeriesAddition.length; i+=1) {
+          if (this.props.openSeriesAddition[i].seriesUID === seriesUID) {
+            const aaa = this.props.openSeriesAddition[i].imageAnnotations;
+            return {seriesUID: seriesUID, imageID: imageID, aimList: aaa};
+          }
+        }
+      }
+    } 
+    return {seriesUID, imageID, aimList};
+    
+  }
+
+
   render = () => {
     // try {
     let preparing = true;  
     const { openSeries, openSeriesAddition, aimsList } = this.props;
     let { activePort } = this.props;
     activePort = activePort || activePort === 0 ? activePort : 0;
-    const { imageID } = openSeries[activePort];
-    const seriesUID = openSeries[activePort].seriesUID;
+    const {seriesUID, imageID, aimList}= this.getFusedSerieInfoAndAnnotations();
+    const openSerie = {...openSeries[activePort]};
+    openSerie.seriesUID = seriesUID;
     let annotations = {};
     let aims = aimsList[seriesUID];
     for (let aim in aims) {
@@ -173,7 +201,6 @@ class AnnotationsList extends React.Component {
     }
     const wadors = this.wadoUrl.includes("wadors");
 
-    const aimList = openSeriesAddition[activePort].imageAnnotations;
     if (aimList) {
       let imageAnnotations;
 
@@ -230,10 +257,10 @@ class AnnotationsList extends React.Component {
             showLabel={aim.showLabel}
             onSingleToggle={this.handleToggleSingleLabel}
             onEdit={this.handleEdit}
-            onDelete={() => this.handleDelete(aim, openSeries[activePort])}
+            onDelete={() => this.handleDelete(aim, openSerie)}
             serie={seriesUID}
             label={calculations[aim.id]}
-            openSeriesAimID={openSeries[activePort].aimID}
+            openSeriesAimID={openSerie.aimID}
           />
         );
       }
