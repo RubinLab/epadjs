@@ -199,7 +199,8 @@ class DisplayView extends Component {
       multiFrameAimJumped: false,
       dataIndexMap: {},
       aimEdited: false,
-      isVisible: true
+      isVisible: true,
+      eraseConfirmationDisplayed: false
     };
   }
 
@@ -1655,24 +1656,29 @@ class DisplayView extends Component {
   measurementRemoved = (event) => {
     const serie = this.getActiveSerie();
     const { aimId } = event.detail.measurementData;
-    if (aimId && this.isLastShapeInAim(aimId)) {
-      const shouldDeleteAim = window.confirm(
-        "This is the last markup in Aim. Would yo like to delete the Aim file as well?"
-      );
-      if (shouldDeleteAim) {
-        this.deleteAim(aimId, serie);
-        this.closeAimEditor(false);
-        // this.setState({
-        //   showAimEditor: false,
-        //   selectedAim: undefined,
-        //   hasSegmentation: false,
-        //   dirty: false,
-        // });
-      }
-      return;
+    if (aimId && this.isLastShapeInAim(aimId) && !this.state.eraseConfirmationDisplayed) {
+      this.setState({ eraseConfirmationDisplayed: true }, () => {
+        const shouldDeleteAim = window.confirm(
+          "This is the last markup in Aim. Would yo like to delete the Aim file as well?"
+        );
+        if (shouldDeleteAim) {
+          this.deleteAim(aimId, serie);
+          // this.closeAimEditor(false);
+          this.setState({
+            showAimEditor: false,
+            selectedAim: undefined,
+            hasSegmentation: false,
+            dirty: false,
+          });
+        } else {
+          this.setState({ eraseConfirmationDisplayed: false })
+        }
+        return;
+      })
+    } else {
+      this.handleShapes();
+      this.setDirtyFlag();
     }
-    this.handleShapes();
-    this.setDirtyFlag();
   };
 
   deleteAim = (aimId, serie) => {
@@ -1714,6 +1720,7 @@ class DisplayView extends Component {
       this.props.dispatch(
         getSingleSerie({ patientID, projectID, seriesUID, studyUID })
       );
+      this.setState({ eraseConfirmationDisplayed: false });
     }).catch(err => {
       toast.error(err.response.data.message);
     });
