@@ -427,10 +427,8 @@ class AimEditor extends Component {
   // };
 
   createAim = async (answers) => {
-    console.log('creating aim', answers);
     const { hasSegmentation, aimId: aim } = this.props;
     const markupsToSave = this.getNewMarkups();
-    console.log('creating aim markupsToSave', markupsToSave);
     const templateType = this.semanticAnswers.getSelectedTemplateType();
     let user;
     const { isUpdate } = this.state;
@@ -648,9 +646,10 @@ class AimEditor extends Component {
     // });
     const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
     const { openSeries, activePort } = this.props;
-    const { patientID, projectID, seriesUID, studyUID } =
+    const { patientID, projectID, studyUID } =
       openSeries[activePort];
-    const name =
+    let seriesUID = aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.instanceUid.root !== '' ? aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.instanceUid.root: openSeries[activePort].seriesUID;
+    const name = 
       aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
         .name.value;
     const comment =
@@ -689,16 +688,12 @@ class AimEditor extends Component {
     const toolState =
       cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     const markedCSImageIds = this.getMarkedImageIds();
-    console.log('toolState', toolState);
-    console.log('markedCSImageIds', markedCSImageIds);
     // check for markups
     var shapeIndex = 1;
     var markupsToSave = {};
     markedCSImageIds.map((CSImageId) => {
-      console.log('id', CSImageId, toolState[CSImageId]);
       const markUps = toolState[CSImageId];
       const { imageId, frameNum } = this.parseImageUidAndFrame(CSImageId);
-      console.log('image', imageId, frameNum);
       Object.keys(markUps).map((tool) => {
         switch (tool) {
           case 'FreehandRoi3DTool':
@@ -1341,8 +1336,9 @@ class AimEditor extends Component {
 
   uploadCompleted = (aimRefs) => {
     const { openSeries, activePort, seriesData } = this.props;
-    const { patientID, projectID, seriesUID, studyUID } =
+    const { patientID, projectID, studyUID } =
       openSeries[activePort];
+    const seriesUID = aimRefs.seriesUID || openSeries[activePort].seriesUID;
     const dataExists =
       seriesData[projectID] &&
       seriesData[projectID][patientID] &&
