@@ -169,8 +169,7 @@ class AnnotationsList extends React.Component {
         imageID = activeLayer.image.imageId.split('/instances/')[1];
         for (let i=0; i<=this.props.openSeriesAddition.length; i+=1) {
           if (this.props.openSeriesAddition[i].seriesUID === seriesUID) {
-            const aaa = this.props.openSeriesAddition[i].imageAnnotations;
-            return {seriesUID: seriesUID, imageID: imageID, aimList: aaa};
+            return {seriesUID: seriesUID, imageID: imageID, aimList: this.props.openSeriesAddition[i].imageAnnotations};
           }
         }
       }
