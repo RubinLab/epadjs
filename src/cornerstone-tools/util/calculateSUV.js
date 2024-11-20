@@ -14,11 +14,11 @@ import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 function calculateSUV(image, storedPixelValue, skipRescale = false) {
   // const cornerstone = external.cornerstoneWADOImageLoader;
   const metadata = cornerstoneWADOImageLoader.wadors.metaDataManager.get(image.imageId);
-  
+
   if (!metadata) {
     return;
   }
-  console.log(metadata);
+  // console.log(metadata);
   const modality = metadata['00080060'].Value[0];
 
   // Image must be PET
@@ -29,12 +29,12 @@ function calculateSUV(image, storedPixelValue, skipRescale = false) {
   const modalityPixelValue = skipRescale
     ? storedPixelValue
     : storedPixelValue * image.slope + image.intercept;
-    
+
   if (!metadata['00101030']) {
     return;
   }
   const patientWeight = metadata['00101030'].Value[0]; // In kg
-    
+
   if (!metadata['00540016']) {
     return;
   }
@@ -42,12 +42,12 @@ function calculateSUV(image, storedPixelValue, skipRescale = false) {
   if (!radiopharmaceuticalInfo['00181072'] || !radiopharmaceuticalInfo['00181074'] || !radiopharmaceuticalInfo['00181075']) {
     return;
   }
-  
+
   const startTime = parseTime(radiopharmaceuticalInfo['00181072'].Value[0]);
   const totalDose = radiopharmaceuticalInfo['00181074'].Value[0];
   const halfLife = radiopharmaceuticalInfo['00181075'].Value[0];
-  
-  const seriesAcquisitionTime = parseTime(metadata['00080031'].Value[0]); 
+
+  const seriesAcquisitionTime = parseTime(metadata['00080031'].Value[0]);
 
   if (!startTime || !totalDose || !halfLife || !seriesAcquisitionTime) {
     return;
@@ -83,7 +83,7 @@ function calculateSUV(image, storedPixelValue, skipRescale = false) {
  */
 export function reverseSUV(image, suv, skipRescale = false) {
   const metadata = cornerstoneWADOImageLoader.wadors.metaDataManager.get(image.imageId);
-  
+
   if (!metadata) {
     return;
   }
@@ -98,7 +98,7 @@ export function reverseSUV(image, suv, skipRescale = false) {
     return;
   }
   const patientWeight = metadata['00101030'].Value[0]; // In kg
-    
+
   if (!metadata['00540016']) {
     return;
   }
@@ -110,8 +110,8 @@ export function reverseSUV(image, suv, skipRescale = false) {
   const startTime = parseTime(radiopharmaceuticalInfo['00181072'].Value[0]);
   const totalDose = radiopharmaceuticalInfo['00181074'].Value[0];
   const halfLife = radiopharmaceuticalInfo['00181075'].Value[0];
-  
-  const seriesAcquisitionTime = parseTime(metadata['00080031'].Value[0]); 
+
+  const seriesAcquisitionTime = parseTime(metadata['00080031'].Value[0]);
 
   if (!startTime || !totalDose || !halfLife || !seriesAcquisitionTime) {
     return;
@@ -168,10 +168,10 @@ function parseTime(timeStr) {
 
   // Return as an object
   return {
-      hours: hours,
-      minutes: minutes,
-      seconds: seconds,
-      fractionalSeconds: fractionalSeconds
+    hours: hours,
+    minutes: minutes,
+    seconds: seconds,
+    fractionalSeconds: fractionalSeconds
   };
 }
 

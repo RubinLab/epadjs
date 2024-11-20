@@ -656,19 +656,8 @@ const asyncReducer = (state = initialState, action) => {
 
       case TOGGLE_LABEL:
         const singleLabelToggled = { ...state.aimsList };
-        // if type is study
-        if (singleLabelToggled[action.payload.serieID][action.payload.aimID].type === 'study') {
-          const allSeries = Object.values(singleLabelToggled);
-          const allSeriesIDs = Object.keys(singleLabelToggled);
-          allSeries.forEach((series, i) => {
-            const currentStatus = series[action.payload.aimID].showLabel;
-            series[action.payload.aimID].showLabel = !currentStatus;
-            singleLabelToggled[allSeriesIDs[i]] = series;
-          })
-        } else {
-          const ann = singleLabelToggled[action.payload.serieID][action.payload.aimID];
-          ann.showLabel = !ann.showLabel
-        }
+        const ann = singleLabelToggled[action.payload.serieID][action.payload.aimID];
+        ann.showLabel = !ann.showLabel
         return Object.assign({}, state, { aimsList: singleLabelToggled });
       case CLEAR_GRID:
         const clearedPatients = {};
