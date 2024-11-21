@@ -20,18 +20,19 @@ const handleJumpToAim = (aimId, index, imageID, frame) => {
 };
 
 const getFusedSerieInfoAndAnnotations = (props) => {
-  let {imageID} = props.openSeries[props.activePort];
+  let {seriesUID, imageID} = props.openSeries[props.activePort];
   if (cornerstone.getEnabledElements()[props.activePort]) {
     const element = cornerstone.getEnabledElements()[props.activePort]['element'];
     const activeLayer = cornerstone.getActiveLayer(element);
     const isFused = !!activeLayer;
     // it is fused get the correct imageID
     if (isFused) {
+      seriesUID = activeLayer.image.imageId.split('/series/')[1].split('/')[0];
       imageID = activeLayer.image.imageId.split('/instances/')[1];
-      return {imageID};
+      return {seriesUID, imageID};
     }
   }
-  return {imageID};
+  return {seriesUID, imageID};
 }
 
 const annotationsLink = (props) => {
@@ -99,10 +100,17 @@ const annotationsLink = (props) => {
       const imageUID = Object.keys(selected.imgIDs);
       const imgIDArr = imageUID[0].split("/frames/");
       props.dispatch(changeActivePort(index));
-      // No need to change
-      props.dispatch(jumpToAim(selected.seriesUID, selected.aimID, index));
-      // change the arguments to handle the multiframe
-      handleJumpToAim(selected.aimID, index, imgIDArr[0], imgIDArr[1]);
+      // if ct do not jump to aim
+      const {seriesUID} = getFusedSerieInfoAndAnnotations({...props, activePort: index});
+      const notFusionCT = seriesUID === props.openSeries[index].seriesUID;
+      if (notFusionCT) {
+        // No need to change
+        props.dispatch(jumpToAim(selected.seriesUID, selected.aimID, index));
+        // change the arguments to handle the multiframe
+        handleJumpToAim(selected.aimID, index, imgIDArr[0], imgIDArr[1]);
+      } else {
+        console.log('Cannot jump on a fused image that is not the active layer');
+      }
       props.dispatch(clearSelection());
     } else {
       if (isGridFull) {
