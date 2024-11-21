@@ -614,7 +614,7 @@ class DisplayView extends Component {
       this.removeSynchronizers();
       // cornerstone.removeLayer(ctElement, ctLayerId);
       this.teleportAnnotations(true, ctElement, petElement);
-      this.getFuseUnfuseState(false);
+      this.getFuseUnfuseState(false, CT, PT);
       
       toast.info("Deactivating fusion!", {
         position: "top-right",
@@ -635,7 +635,7 @@ class DisplayView extends Component {
       this.setState({ fusion: { CT, PT, ctLayerId, petLayerId, synchronizers, func }});
     else 
       this.setState({ fusion: false });
-    this.setActive(0);
+    this.setActive(PT);
   }
 
   setSubComponentHeights = (e) => {
