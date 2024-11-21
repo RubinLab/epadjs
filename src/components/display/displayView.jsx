@@ -1653,32 +1653,40 @@ class DisplayView extends Component {
     return series[activePort];
   };
 
-  measurementRemoved = (event) => {
-    const serie = this.getActiveSerie();
-    const { aimId } = event.detail.measurementData;
-    if (aimId && this.isLastShapeInAim(aimId) && !this.state.eraseConfirmationDisplayed) {
-      this.setState({ eraseConfirmationDisplayed: true }, () => {
-        const shouldDeleteAim = window.confirm(
-          "This is the last markup in Aim. Would yo like to delete the Aim file as well?"
-        );
-        if (shouldDeleteAim) {
-          this.deleteAim(aimId, serie);
-          // this.closeAimEditor(false);
-          this.setState({
-            showAimEditor: false,
-            selectedAim: undefined,
-            hasSegmentation: false,
-            dirty: false,
-          });
-        } else {
-          this.setState({ eraseConfirmationDisplayed: false })
-        }
-        return;
-      })
-    } else {
-      this.handleShapes();
-      this.setDirtyFlag();
+  getActiveLayerSeries = (aimId, series, aimList) => {
+    for (let i = 0; i<series.length; i+=1) {
+      if (aimList[series[i].seriesUID][aimId]) {
+        return series[i].seriesUID;
+      }
     }
+  }
+
+  measurementRemoved = (event, uid) => {
+    const serie = this.getActiveSerie();
+    const { series, aimList } = this.props;
+    const { aimId } = event.detail.measurementData;
+    const serUID = this.getActiveLayerSeries(aimId, series, aimList);
+    if (aimId && this.isLastShapeInAim(aimId) && serUID === uid) {
+          const shouldDeleteAim = window.confirm(
+            "This is the last markup in Aim. Would yo like to delete the Aim file as well?"
+          );
+          if (shouldDeleteAim) {
+            this.deleteAim(aimId, serie);
+            // this.closeAimEditor(false);
+            this.setState({
+              showAimEditor: false,
+              selectedAim: undefined,
+              hasSegmentation: false,
+              dirty: false,
+            });
+          } else {
+            this.setState({ eraseConfirmationDisplayed: false })
+          }
+          return;  
+      } else {
+        this.handleShapes();
+        this.setDirtyFlag();
+      }
   };
 
   deleteAim = (aimId, serie) => {
@@ -2868,7 +2876,7 @@ class DisplayView extends Component {
                       {
                         target: "element",
                         eventName: "cornerstonetoolsmeasurementremoved",
-                        handler: this.measurementRemoved,
+                        handler: (e) => this.measurementRemoved(e, series[i].seriesUID),
                       },
                       {
                         target: "element",
