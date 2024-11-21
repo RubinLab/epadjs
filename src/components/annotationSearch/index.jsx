@@ -666,10 +666,7 @@ const AnnotationSearch = (props) => {
     const fields = {};
     body["fields"] = fields;
     if (props.pid) fields["project"] = props.pid;
-    if (props.pid && props.projectToRole) { 
-      const prRole = props.projectToRole.find(el => el.includes(props.pid));
-      if (prRole) fields["role"] = prRole.split(':')[1];
-    }
+   
     if (query.length) fields["query"] = query;
     if (selectedSubs.length) fields["subSpecialty"] = selectedSubs;
     if (selectedMods.length) fields["modality"] = selectedMods;
@@ -679,6 +676,10 @@ const AnnotationSearch = (props) => {
     if (myCases) fields["myCases"] = myCases;
     if (sort.length) body["sort"] = sort;
     if (Object.keys(filters).length) body["filter"] = newFilters;
+
+    if (props.pid && props.projectToRole) { 
+      body["collaborator"] = !props.admin && props.projectToRole.includes(`${props.pid}:Collaborator`) ? props.username: false;
+    }
     
     searchAnnotations(body, bm)
       .then((res) => {
