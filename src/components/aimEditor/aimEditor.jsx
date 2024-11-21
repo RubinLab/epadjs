@@ -600,9 +600,10 @@ class AimEditor extends Component {
 
     // get the imagesIds for active viewport
     const { element } = cornerstone.getEnabledElements()[activePort];
-    const stackToolState = cornerstoneTools.getToolState(element, 'stack');
-    const imageIds = stackToolState.data[0].imageIds;
-
+    // const stackToolState = cornerstoneTools.getToolState(element, 'stack');
+    // const imageIds = stackToolState.data[0].imageIds;
+    const imageIds = this.getElementsActiveLayerImageIds(element);
+    // TODO make sure to get PT image ids on fused image
     // check which images has markup
     const markedImageIds = imageIds.filter((imageId) => {
       if (toolState[imageId] === undefined) return false;
@@ -645,9 +646,10 @@ class AimEditor extends Component {
     // });
     const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
     const { openSeries, activePort } = this.props;
-    const { patientID, projectID, seriesUID, studyUID } =
+    const { patientID, projectID, studyUID } =
       openSeries[activePort];
-    const name =
+    let seriesUID = aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.instanceUid.root !== '' ? aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.instanceUid.root: openSeries[activePort].seriesUID;
+    const name = 
       aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
         .name.value;
     const comment =
@@ -692,7 +694,6 @@ class AimEditor extends Component {
     markedCSImageIds.map((CSImageId) => {
       const markUps = toolState[CSImageId];
       const { imageId, frameNum } = this.parseImageUidAndFrame(CSImageId);
-
       Object.keys(markUps).map((tool) => {
         switch (tool) {
           case 'FreehandRoi3DTool':
@@ -1335,8 +1336,9 @@ class AimEditor extends Component {
 
   uploadCompleted = (aimRefs) => {
     const { openSeries, activePort, seriesData } = this.props;
-    const { patientID, projectID, seriesUID, studyUID } =
+    const { patientID, projectID, studyUID } =
       openSeries[activePort];
+    const seriesUID = aimRefs.seriesUID || openSeries[activePort].seriesUID;
     const dataExists =
       seriesData[projectID] &&
       seriesData[projectID][patientID] &&
