@@ -176,7 +176,7 @@ class FuseSelector extends Component {
         this.removeSynchronizers();
         this.teleportAnnotations(true);
         this.props.onClose();
-        this.props.onFuseUnfuse(false);
+        this.props.onFuseUnfuse(false, this.state.CT, this.state.PT);
     };
 
     getOptions = () => {
@@ -210,10 +210,13 @@ class FuseSelector extends Component {
         //     'cornerstonetoolsmousedrag',
         //     cornerstoneTools.panZoomSynchronizer
         // );
-        cornerstone.getEnabledElements().forEach(({ element }) => {
-            stackPositonSynchronizer.add(element);
-            // panZoomSynchronizer.add(element)
-        });
+        // cornerstone.getEnabledElements().forEach(({ element }) => {
+        //     stackPositonSynchronizer.add(element);
+        //     // panZoomSynchronizer.add(element)
+        // });
+        stackPositonSynchronizer.addSource(this.getPetElement());
+        stackPositonSynchronizer.addTarget(this.getCtElement());
+
         stackPositonSynchronizer.enabled = true;
         // panZoomSynchronizer.enabled = true;
         this.synchronizers.push(stackPositonSynchronizer);

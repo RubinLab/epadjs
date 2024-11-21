@@ -18,7 +18,6 @@ function calculateSUV(image, storedPixelValue, skipRescale = false) {
   if (!metadata) {
     return;
   }
-  // console.log(metadata);
   const modality = metadata['00080060'].Value[0];
 
   // Image must be PET

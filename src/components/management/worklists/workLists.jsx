@@ -240,19 +240,14 @@ class WorkList extends React.Component {
 
   handleKeyboardEvent = e => {
     const {
-      name,
-      description,
-      // duedate,
       worklistId,
       cellDoubleClicked
     } = this.state;
-    const nameNotEmpty = name && name.trim().length > 0;
     const fieldUpdateValidation = worklistId && cellDoubleClicked;
-    if (e.key === 'Escape') {
+    if (e.key === 'Escape') 
       this.handleUpdateField(null, null);
-    } else if (e.key === 'Enter' && fieldUpdateValidation) {
-      if (nameNotEmpty) this.updateWorklist();
-    }
+     else if (e.key === 'Enter' && fieldUpdateValidation) 
+      this.updateWorklist();
   };
 
   setWrapperRef = (node, id) => {
@@ -275,9 +270,10 @@ class WorkList extends React.Component {
     const body = name
       ? { name }
       : description === '' || description
-        ? { description }
-        : { duedate };
-    updateWorklist(worklistId, body)
+        ? { description } 
+        : duedate ? { duedate } : null;
+    if (body) { 
+      updateWorklist(worklistId, body)
       .then(() => this.getWorkListData())
       .catch(error =>
         toast.error(
@@ -287,6 +283,7 @@ class WorkList extends React.Component {
           }
         )
       );
+    }
     this.handleCancel();
   };
 

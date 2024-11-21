@@ -329,8 +329,18 @@ class DisplayView extends Component {
       return;
     }
 
-    const { projectID, studyUID, seriesUID } = series[activePort];
-
+    const { projectID, studyUID } = series[activePort];
+    let { seriesUID } = series[activePort];
+    if (cornerstone.getEnabledElements()[activePort]) {
+      const element = cornerstone.getEnabledElements()[activePort]['element'];
+      const activeLayer = cornerstone.getActiveLayer(element);
+      const isFused = !!activeLayer;
+      // it is fused get the correct series UID
+      if (isFused) {
+        seriesUID = activeLayer.image.imageId.split('/series/')[1].split('/')[0];
+      }
+    }
+    
     const oldAimsExist = prevOther[projectID] && prevOther[projectID][studyUID];
     const newAimsExist = otherSeriesAimsList[projectID] && otherSeriesAimsList[projectID][studyUID];
 
@@ -527,6 +537,25 @@ class DisplayView extends Component {
     });
   };
   
+  // it is not being used
+  // fuse = (petElement, ctElement) => {
+  //   const { ctOptions, petOptions } = this.getOptions();
+  //   cornerstone.purgeLayers(ctElement);
+  //   const petImage = cornerstone.getImage(petElement);
+  //   const ctImage = cornerstone.getImage(ctElement);
+  //   if (!ctImage || !petImage)
+  //       return false;
+  //   const ctLayerId = cornerstone.addLayer(ctElement, ctImage, ctOptions);
+  //   const petLayerId = cornerstone.addLayer(ctElement, petImage, petOptions);
+  //   cornerstone.updateImage(ctElement);
+  //   if (this.state.selectedLayer === "PET")
+  //       cornerstone.setActiveLayer(ctElement, petLayerId);
+  //   else cornerstone.setActiveLayer(ctElement, ctLayerId);
+  //   this.setState({ ctLayerId, petLayerId });
+  //   this.props.onFuseUnfuse(true, this.state.CT, this.state.PT, ctLayerId, petLayerId, this.synchronizers, this.newImage);
+  //   return true;
+  // };
+
   teleportAnnotations = (unfuse, ctElement, petElement) => {
     try {
       const stackToolState = cornerstoneTools.getToolState(ctElement, "stack");
@@ -576,7 +605,6 @@ class DisplayView extends Component {
       const elements = cornerstone.getEnabledElements();
       const ctElement = elements[CT]?.element;
       const petElement = elements[PT]?.element;
-      // console.log('ct', elements[CT]);
       try { 
         cornerstone.setActiveLayer(ctElement, ctLayerId);
         cornerstone.purgeLayers(ctElement);
@@ -586,7 +614,7 @@ class DisplayView extends Component {
       this.removeSynchronizers();
       // cornerstone.removeLayer(ctElement, ctLayerId);
       this.teleportAnnotations(true, ctElement, petElement);
-      this.getFuseUnfuseState(false);
+      this.getFuseUnfuseState(false, CT, PT);
       
       toast.info("Deactivating fusion!", {
         position: "top-right",
@@ -607,8 +635,7 @@ class DisplayView extends Component {
       this.setState({ fusion: { CT, PT, ctLayerId, petLayerId, synchronizers, func }});
     else 
       this.setState({ fusion: false });
-    // console.log('unfuse after set', this.state.fusion);
-    // console.log('unfuse after set2', this.state.fusion);
+    this.setActive(PT);
   }
 
   setSubComponentHeights = (e) => {
@@ -762,7 +789,6 @@ class DisplayView extends Component {
   updateImageLayer = (event) => {
     const { tool } = event.detail;
     try { 
-      // console.log('fusin', this.state.fusion, event);
       if (this.state.fusion) {
         const { CT, PT, petLayerId, ctLayerId } = this.state.fusion;
         const elements = cornerstone.getEnabledElements();
@@ -770,12 +796,10 @@ class DisplayView extends Component {
         const ctElement = elements[CT]?.element;
         if (tool === 'wwwc' && this.state.fusion.tool !== 'wwwc' ) {
           cornerstone.setActiveLayer(ctElement, petLayerId);
-          // console.log('setting fusion', tool);
           this.setState( {fusion: {...this.state.fusion, tool}} );
         }
         if (tool === 'preset' && this.state.fusion.tool !== 'preset') {
           cornerstone.setActiveLayer(ctElement, ctLayerId);
-          // console.log('setting fusion', tool);
           this.setState( {fusion: {...this.state.fusion, tool}} );
         }
         cornerstone.updateImage(ctElement);
@@ -1479,8 +1503,6 @@ class DisplayView extends Component {
   // };
 
   setActiveLabelMapIndex = (index) => {
-    // console.log("Parameter element", element);
-    // console.log("Element", cornerstone.getEnabledElements());
     const { setters } = cornerstoneTools.getModule("segmentation");
     const element = this.getActiveElement();
     setters.activeLabelmapIndex(element, index);
@@ -1630,7 +1652,6 @@ class DisplayView extends Component {
 
   // TODO: Can this be done without checking the tools of interest?
   measurementCompleted = (event, action) => {
-    // console.log("Measurement completed", event);
     const { toolName, toolType } = event.detail;
 
     const toolsOfInterest = [
@@ -1763,19 +1784,34 @@ class DisplayView extends Component {
   setDirtyFlag = () => {
     if (!this.state.dirty) this.setState({ dirty: true });
   };
+  
+  getActiveLayerSeries = (aimId, series, aimList) => {
+    for (let i = 0; i<series.length; i+=1) {
+      if (aimList[series[i].seriesUID][aimId]) {
+        return series[i].seriesUID;
+      }
+    }
+  }
 
   handleMarkupSelected = (event) => {
     const { aimList, series, activePort } = this.props;
-    const { seriesUID } = series[activePort];
+    let { seriesUID } = series[activePort];
     const { aimId, ancestorEvent } = event.detail;
-    if (!aimList[seriesUID][aimId]) {
+    const { element, data } = ancestorEvent;
+    const activeLayer = cornerstone.getActiveLayer(element);
+    const isFused = !!activeLayer;
+    // it is fused get the correct series UID
+    if (isFused) {
+      seriesUID = this.getActiveLayerSeries(aimId, series, aimList);
+      console.log(`Using series ${seriesUID} as it is fused image`);
+    }
+    if (!aimList[seriesUID][aimId] ) {
       return;
     } //Eraser might have already delete the aim}
-    const { element, data } = ancestorEvent;
 
     if (aimList[seriesUID][aimId]) {
       const aimJson = aimList[seriesUID][aimId].json;
-      const markupTypes = this.getMarkupTypesForAim(aimId);
+      const markupTypes = this.getMarkupTypesForAim(aimId, !!isFused);
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimId;
 
@@ -2559,13 +2595,19 @@ class DisplayView extends Component {
     this.setState({ showAnnDetails: false });
   };
 
-  getMarkupTypesForAim = (aimUid) => {
+  getMarkupTypesForAim = (aimUid, isFused) => {
     let markupTypes = [];
     try {
-      const imageAnnotations =
+      let imageAnnotations =
         this.props.seriesAddition[this.props.activePort].imageAnnotations;
       if (!imageAnnotations) {
-        return undefined;
+        // if isfused, get all image annotations
+        if (isFused) {
+          imageAnnotations = {};
+          this.props.seriesAddition.forEach((serie) => {
+            imageAnnotations = { ...imageAnnotations, ...serie.imageAnnotations};
+          })
+        } else return undefined;
       }
       Object.entries(imageAnnotations).forEach(([key, values]) => {
         values.forEach((value) => {
