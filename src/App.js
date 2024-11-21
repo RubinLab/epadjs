@@ -121,7 +121,9 @@ class App extends Component {
       savedData: {},
       loading: true,
       freeze: "auto",
-      teachingLoading: false
+      teachingLoading: false,
+      projectToRole: null,
+      username: null
     };
   }
 
@@ -982,7 +984,7 @@ class App extends Component {
               // if teaching "User doesn't exist, you should login from Sectra first."
               // "User doesn't exist, contact your administrator."
               userData = userData.data;
-              this.setState({ admin: userData.admin });
+              this.setState({ admin: userData.admin, projectToRole: userData.projectToRole, username: userData.username });
             } catch (err) {
               // console.log("Error in catch", err);
               // // if(err.statusCode === 401){
@@ -1519,6 +1521,9 @@ class App extends Component {
                       teachingLoading={this.state.teachingLoading}
                       forceUpdatePage={() => this.setState(state => ({ update: state.update + 1 }))}
                       getPidUpdate={this.getPidUpdate}
+                      projectToRole={this.state.projectToRole}
+                      admin={this.state.admin}
+                      username={this.state.username}
                     />
                   )}
                 />
@@ -1641,6 +1646,9 @@ class App extends Component {
                     loading={this.state.loading}
                     forceUpdatePage={() => this.setState(state => ({ update: state.update + 1 }))}
                     getPidUpdate={this.getPidUpdate}
+                    projectToRole={this.state.projectToRole}
+                    admin={this.state.admin}
+                    username={this.state.username}
                   />
                 )}
               />
