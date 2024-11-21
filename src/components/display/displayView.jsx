@@ -1795,14 +1795,6 @@ class DisplayView extends Component {
   setDirtyFlag = () => {
     if (!this.state.dirty) this.setState({ dirty: true });
   };
-  
-  getActiveLayerSeries = (aimId, series, aimList) => {
-    for (let i = 0; i<series.length; i+=1) {
-      if (aimList[series[i].seriesUID][aimId]) {
-        return series[i].seriesUID;
-      }
-    }
-  }
 
   handleMarkupSelected = (event) => {
     const { aimList, series, activePort } = this.props;
