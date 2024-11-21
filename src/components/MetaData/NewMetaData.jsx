@@ -91,7 +91,7 @@ const NewMetaData = (props) => {
                   text = '';
                 } else {
                   if (text) display.push(text);
-                  text = `-- ${getTagName(key)}: ${val.Value.join(', ')}`
+                  text = `-- ${getTagName(key)}: ${val.Value && Array.isArray(val.Value) ? val.Value.join(', ') : val}`
                   display.push(text);
                   text = '';
                 }}
