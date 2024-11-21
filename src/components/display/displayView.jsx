@@ -605,7 +605,6 @@ class DisplayView extends Component {
       const elements = cornerstone.getEnabledElements();
       const ctElement = elements[CT]?.element;
       const petElement = elements[PT]?.element;
-      // console.log('ct', elements[CT]);
       try { 
         cornerstone.setActiveLayer(ctElement, ctLayerId);
         cornerstone.purgeLayers(ctElement);
@@ -637,8 +636,6 @@ class DisplayView extends Component {
     else 
       this.setState({ fusion: false });
     this.setActive(0);
-    // console.log('unfuse after set', this.state.fusion);
-    // console.log('unfuse after set2', this.state.fusion);
   }
 
   setSubComponentHeights = (e) => {
@@ -792,7 +789,6 @@ class DisplayView extends Component {
   updateImageLayer = (event) => {
     const { tool } = event.detail;
     try { 
-      // console.log('fusin', this.state.fusion, event);
       if (this.state.fusion) {
         const { CT, PT, petLayerId, ctLayerId } = this.state.fusion;
         const elements = cornerstone.getEnabledElements();
@@ -800,12 +796,10 @@ class DisplayView extends Component {
         const ctElement = elements[CT]?.element;
         if (tool === 'wwwc' && this.state.fusion.tool !== 'wwwc' ) {
           cornerstone.setActiveLayer(ctElement, petLayerId);
-          // console.log('setting fusion', tool);
           this.setState( {fusion: {...this.state.fusion, tool}} );
         }
         if (tool === 'preset' && this.state.fusion.tool !== 'preset') {
           cornerstone.setActiveLayer(ctElement, ctLayerId);
-          // console.log('setting fusion', tool);
           this.setState( {fusion: {...this.state.fusion, tool}} );
         }
         cornerstone.updateImage(ctElement);
@@ -1509,8 +1503,6 @@ class DisplayView extends Component {
   // };
 
   setActiveLabelMapIndex = (index) => {
-    // console.log("Parameter element", element);
-    // console.log("Element", cornerstone.getEnabledElements());
     const { setters } = cornerstoneTools.getModule("segmentation");
     const element = this.getActiveElement();
     setters.activeLabelmapIndex(element, index);
