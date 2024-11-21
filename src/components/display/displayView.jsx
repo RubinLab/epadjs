@@ -199,8 +199,7 @@ class DisplayView extends Component {
       multiFrameAimJumped: false,
       dataIndexMap: {},
       aimEdited: false,
-      isVisible: true,
-      eraseConfirmationDisplayed: false
+      isVisible: true
     };
   }
 
@@ -1679,8 +1678,6 @@ class DisplayView extends Component {
               hasSegmentation: false,
               dirty: false,
             });
-          } else {
-            this.setState({ eraseConfirmationDisplayed: false })
           }
           return;  
       } else {
@@ -1728,7 +1725,6 @@ class DisplayView extends Component {
       this.props.dispatch(
         getSingleSerie({ patientID, projectID, seriesUID, studyUID })
       );
-      this.setState({ eraseConfirmationDisplayed: false });
     }).catch(err => {
       toast.error(err.response.data.message);
     });
