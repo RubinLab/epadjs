@@ -284,9 +284,15 @@
 }
 
 .annList-container {
-  height: 66%;
+  height: calc(66% - 25px);
   overflow: auto;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start
+  justify-content: flex-start;
+  margin-bottom: 1rem
+}
+
+.other-annotations-cont {
+  height: calc(33% - 15px);
+  overflow: auto;
 }
