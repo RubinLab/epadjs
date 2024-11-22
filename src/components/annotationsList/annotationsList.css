@@ -574,17 +574,17 @@ th {
 
 .other-annotations-cont {
   height: 90%;
-  /* overflow: auto; */
+  overflow: auto;
 }
 
-.annotation-back {
+/* .annotation-back {
   height: calc(33% - 45px);
   overflow: auto;
   background-color: #555;
   display: block;
   padding: 7px;
   margin: 0px 7px;
-}
+} */
 
 .img-label {
   display: block;
@@ -619,9 +619,4 @@ th {
   border: 1px solid #777;
   color: #ccc;
   font-size: 10px;
-}
-
-.annList-container {
-  height: 66%;
-  overflow: auto;
 }

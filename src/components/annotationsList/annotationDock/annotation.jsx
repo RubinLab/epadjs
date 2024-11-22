@@ -69,7 +69,7 @@ const annotation = (props) => {
   </li>)
 
   return (
-    <>
+    <div className="annotation-wrapper">
       {/* <div className={className} style={finalButtonStyle}> */}
       <div
         className="annotation-header" 
@@ -116,14 +116,10 @@ const annotation = (props) => {
 
               {mode === "teaching" && narrativeElement}
             </ul>
-
-
-
-
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
