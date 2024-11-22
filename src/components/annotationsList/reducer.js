@@ -544,12 +544,13 @@ const asyncReducer = (state = initialState, action) => {
               colors
             );
 
-        if (!state.showAnnotations || state.showLabels) {
-          for (let aim in colorAimsList) {
-            colorAimsList[aim].isDisplayed = state.showAnnotations;
-            colorAimsList[aim].showLabel = state.showLabels;
-          }
+        // if (!state.showAnnotations || state.showLabels) {
+        for (let aim in colorAimsList) {
+          const aimExists = state.aimsList[serUIDFromRef] && state.aimsList[serUIDFromRef][aim];
+          colorAimsList[aim].isDisplayed = aimExists ? state.aimsList[serUIDFromRef][aim].isDisplayed : state.showAnnotations;
+          colorAimsList[aim].showLabel = aimExists ? state.aimsList[serUIDFromRef][aim].showLabels : state.showLabels;
         }
+        // }
         // check if openSeries[activeport] is significant and teaching file 
         // if so check if seriesData is filled  // if not fill the data
         const { significanceOrder: order, template: tempCode } = state.openSeries[state.activePort];
