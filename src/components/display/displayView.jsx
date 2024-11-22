@@ -990,7 +990,7 @@ class DisplayView extends Component {
             },
             () => {
               this.jumpToAims();
-              if (this.props.showAnnotations) this.renderAims();
+              this.renderAims();
             }
           );
           // if teaching and aim is a study aim
@@ -1014,7 +1014,7 @@ class DisplayView extends Component {
           },
           () => {
             this.jumpToAims();
-            if (this.props.showAnnotations) this.renderAims();
+            this.renderAims();
           }
         );
       }
@@ -1930,7 +1930,7 @@ class DisplayView extends Component {
         //   //image is not multiframe so strip the frame number from the imageId
         //   imageId = imageId.split("&frame=")[0];
         // }
-        this.renderMarkup(imageId, value, color);
+        this.renderMarkup(imageId, value, color, seriesUid);
         if (!this.state.isVisible) this.toggleAnnotations({ detail: { isVisible: this.state.isVisible }});
       });
     });
@@ -2314,7 +2314,7 @@ class DisplayView extends Component {
       toolState[imageId] = { ...toolState[imageId], [tool]: { data: [] } };
   };
 
-  renderBidirectional = (imageId, markup, color) => {
+  renderBidirectional = (imageId, markup, color, seriesUID) => {
     const data = JSON.parse(JSON.stringify(bidirectional));
     data.color = markup.color ? markup.color : color;
     data.aimId = markup.aimUid;
@@ -2327,6 +2327,9 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
+    const aimExists = this.props.aimList[seriesUID] && this.props.aimList[seriesUID][data.aimId];
+    const visibility = aimExists ? this.props.aimList[seriesUID][data.aimId].isDisplayed : false;
+    if (aimExists) this.setVisibilityOfShapes(visibility, data.aimId, seriesUID);
   };
 
   createBidirectionalPoints = (data, points) => {
@@ -2343,7 +2346,7 @@ class DisplayView extends Component {
     data.handles.textBox.y = points[0].y.value;
   };
 
-  renderArrow = (imageId, markup, color) => {
+  renderArrow = (imageId, markup, color, seriesUID) => {
     const data = JSON.parse(JSON.stringify(arrow));
     data.color = markup.color ? markup.color : color;
     data.aimId = markup.aimUid;
@@ -2356,9 +2359,13 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
+
+    const aimExists = this.props.aimList[seriesUID] && this.props.aimList[seriesUID][data.aimId];
+    const visibility = aimExists ? this.props.aimList[seriesUID][data.aimId].isDisplayed : false;
+    if (aimExists) this.setVisibilityOfShapes(visibility, data.aimId, seriesUID);
   };
 
-  renderLine = (imageId, markup, color) => {
+  renderLine = (imageId, markup, color, seriesUID) => {
     const data = JSON.parse(JSON.stringify(line));
     data.color = markup.color ? markup.color : color;
     data.aimId = markup.aimUid;
@@ -2371,6 +2378,10 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
+
+    const aimExists = this.props.aimList[seriesUID] && this.props.aimList[seriesUID][data.aimId];
+    const visibility = aimExists ? this.props.aimList[seriesUID][data.aimId].isDisplayed : false;
+    if (aimExists) this.setVisibilityOfShapes(visibility, data.aimId, seriesUID);
   };
 
   createLinePoints = (data, points) => {
@@ -2380,7 +2391,7 @@ class DisplayView extends Component {
     data.handles.end.y = points[1].y.value;
   };
 
-  renderPolygon = (imageId, markup, color) => {
+  renderPolygon = (imageId, markup, color, seriesUID) => {
     const data = JSON.parse(JSON.stringify(freehand));
     data.color = markup.color ? markup.color : color;
     data.aimId = markup.aimUid;
@@ -2393,6 +2404,10 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
+
+    const aimExists = this.props.aimList[seriesUID] && this.props.aimList[seriesUID][data.aimId];
+    const visibility = aimExists ? this.props.aimList[seriesUID][data.aimId].isDisplayed : false;
+    if (aimExists) this.setVisibilityOfShapes(visibility, data.aimId, seriesUID);
   };
 
   createPolygonPoints = (data, points) => {
@@ -2413,7 +2428,7 @@ class DisplayView extends Component {
     data.handles.points = [...freehandPoints];
   };
 
-  renderPoint = (imageId, markup, color) => {
+  renderPoint = (imageId, markup, color, seriesUID) => {
     const data = JSON.parse(JSON.stringify(probe));
     data.color = markup.color ? markup.color : color;
     data.aimId = markup.aimUid;
@@ -2426,9 +2441,13 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
+
+    const aimExists = this.props.aimList[seriesUID] && this.props.aimList[seriesUID][data.aimId];
+    const visibility = aimExists ? this.props.aimList[seriesUID][data.aimId].isDisplayed : false;
+    if (aimExists) this.setVisibilityOfShapes(visibility, data.aimId, seriesUID);
   };
 
-  renderCircle = (imageId, markup, color) => {
+  renderCircle = (imageId, markup, color, seriesUID) => {
     const data = JSON.parse(JSON.stringify(circle));
     data.invalidated = true; //so it calculates the stats
     data.color = markup.color ? markup.color : color;
@@ -2444,6 +2463,10 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
+
+    const aimExists = this.props.aimList[seriesUID] && this.props.aimList[seriesUID][data.aimId];
+    const visibility = aimExists ? this.props.aimList[seriesUID][data.aimId].isDisplayed : false;
+    if (aimExists) this.setVisibilityOfShapes(visibility, data.aimId, seriesUID);
   };
 
   checkUnsavedData = (isCancel, message = "") => {
