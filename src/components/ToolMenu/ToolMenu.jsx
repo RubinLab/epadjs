@@ -310,6 +310,7 @@ class ToolMenu extends Component {
 
   showHotkeyInfo = () => {
     const keyMap = {
+      'ctrl + y' : 'Aim save',
       f: 'Arrow',
       r: 'Circle',
       x: 'Expand view',
