@@ -210,7 +210,7 @@ const annotationsLink = (props) => {
           <div className="other-annotations-cont">
             <div className="other-annotations"> Other Annotations</div>
             <div className="annotation-back">
-              <p className="img-label">Image / Series</p>
+              <p id="img-label">Image / Series</p>
               {renderUI()}
             </div>
           </div>

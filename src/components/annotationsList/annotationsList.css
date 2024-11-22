@@ -569,12 +569,9 @@ th {
   padding: 7px;
   color: #ccc;
   text-shadow: 1px 0px 1px rgba(0, 0, 0, 0.25);
-  margin: 0.5rem 0.5rem 0rem 0.5rem;
-}
-
-.other-annotations-cont {
-  height: 90%;
-  overflow: auto;
+  margin: 0rem 0.5rem 0rem 0.5rem;
+  position: fixed;
+  width: 397px;
 }
 
 /* .annotation-back {
@@ -586,9 +583,10 @@ th {
   margin: 0px 7px;
 } */
 
-.img-label {
+#img-label {
   display: block;
   text-align: right;
+  margin: 2rem 0.5rem 0.5rem 0.5rem;
 }
 
 .series {
