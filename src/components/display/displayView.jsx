@@ -1807,6 +1807,9 @@ class DisplayView extends Component {
     const { aimList, series, activePort } = this.props;
     let { seriesUID } = series[activePort];
     const { aimId, ancestorEvent } = event.detail;
+    if (aimList[seriesUID] && aimList[seriesUID][aimId] && !aimList[seriesUID][aimId].isDisplayed) {
+      return;
+    }
     const { element, data } = ancestorEvent;
     const activeLayer = cornerstone.getActiveLayer(element);
     const isFused = !!activeLayer;
