@@ -922,16 +922,6 @@ const asyncReducer = (state = initialState, action) => {
           activePort: index,
           openSeries: updatedGrid,
           openSeriesAddition: updatedOpenSeriesAddition,
-          aimsList: {
-            ...state.aimsList,
-            [serUID]: {
-              ...state.aimsList[serUID],
-              [aimID]: {
-                ...state.aimsList[serUID][aimID],
-                isDisplayed: true,
-              },
-            },
-          },
         });
       case GET_PROJECT_MAP:
         return {

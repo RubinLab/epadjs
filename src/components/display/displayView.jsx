@@ -875,7 +875,7 @@ class DisplayView extends Component {
 
   getSegmentationAimsOfSerie = (seriesUID) => {
     const { aimList } = this.props;
-    const seriesAims = aimList[seriesUID];
+    const seriesAims = aimList[seriesUID] || {};
     const segAims = [];
     Object.entries(seriesAims).forEach(([key, value]) => {
       if (value.json && value.json.segmentationEntityCollection) {
