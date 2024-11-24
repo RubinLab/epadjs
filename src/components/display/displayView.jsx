@@ -680,7 +680,14 @@ class DisplayView extends Component {
     const { aimList, activePort } = this.props;
     const { showAimEditor, selectedAim } = this.state;
 
+
     if (aimList[seriesUID][aimID]) {
+      if (!aimList[seriesUID][aimID].isDisplayed) {
+        alert(
+          "Before editing, you should make the aim visible by clicking the eye icon or selecting the Show Markups checkbox."
+        );
+        return;
+      }
       const aimJson = aimList[seriesUID][aimID].json;
       const markupTypes = this.getMarkupTypesForAim(aimID);
       aimJson["markupType"] = markupTypes ? [...markupTypes] : undefined;
@@ -1800,6 +1807,9 @@ class DisplayView extends Component {
     const { aimList, series, activePort } = this.props;
     let { seriesUID } = series[activePort];
     const { aimId, ancestorEvent } = event.detail;
+    if (aimList[seriesUID] && aimList[seriesUID][aimId] && !aimList[seriesUID][aimId].isDisplayed) {
+      return;
+    }
     const { element, data } = ancestorEvent;
     const activeLayer = cornerstone.getActiveLayer(element);
     const isFused = !!activeLayer;
