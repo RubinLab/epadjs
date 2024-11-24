@@ -1338,7 +1338,7 @@ class AimEditor extends Component {
     const { openSeries, activePort, seriesData } = this.props;
     const { patientID, projectID, studyUID } =
       openSeries[activePort];
-    const seriesUID = aimRefs.seriesUID || openSeries[activePort].seriesUID;
+    const seriesUID = aimRefs?.seriesUID || openSeries[activePort]?.seriesUID;
     const dataExists =
       seriesData[projectID] &&
       seriesData[projectID][patientID] &&
