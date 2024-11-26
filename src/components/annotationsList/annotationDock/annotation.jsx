@@ -20,6 +20,7 @@ const annotation = (props) => {
   //conditional borderstyling
   let buttonStyle = { ...props.style.button };
   let labelStyle = template === teachingFileTempCode ? {  background: "#858585", color: "white" } : { ...props.style.label };
+  let selectedStyle = { border: '#FDD800 4px double', borderRadius: '5px' };
 
   // let borderStyle = `0.15rem solid ${props.style.button.background}`;
   // buttonStyle.border = borderStyle;
@@ -35,7 +36,12 @@ const annotation = (props) => {
     props.aim.imagingObservationEntityCollection ||
     props.aim.imagingPhysicalEntityCollection;
   const openCloseButtonStyle = !props.showLabel ? singleButtonStyle : buttonStyle; 
-  const finalButtonStyle = template ===  teachingFileTempCode ? teachingStyle : openCloseButtonStyle;
+  let finalButtonStyle = template ===  teachingFileTempCode ? teachingStyle 
+    : props.id === props.openSeriesAimID ? { ... openCloseButtonStyle, ...selectedStyle} 
+    : openCloseButtonStyle;
+ 
+  
+/*
   const className =
     props.id === props.openSeriesAimID
       ? "annotation-button__container --selected"
@@ -45,6 +51,8 @@ const annotation = (props) => {
     props.id === props.openSeriesAimID
       ? "annotation-label__container --selected"
       : "annotation-label__container";
+*/
+
   let displayEyeIcon = true;
   if (props.aim.markupType && props.aim.markupType[0])
     displayEyeIcon = true;
@@ -61,7 +69,7 @@ const annotation = (props) => {
   </li>)
 
   return (
-    <>
+    <div className="annotation-wrapper">
       {/* <div className={className} style={finalButtonStyle}> */}
       <div
         className="annotation-header" 
@@ -92,7 +100,7 @@ const annotation = (props) => {
       {props.showLabel && (
         <div className={'annotation-back'} style={labelStyle}>
           <div className="annotation-text">
-            {props.user} - {props.aim.typeCode[0].code}
+            {`${props.user} ${mode !== 'teaching' ? `- ${props.aim.typeCode[0].code}` : ''}`}
             <ul>
 
               {hasEntityData && (
@@ -108,14 +116,10 @@ const annotation = (props) => {
 
               {mode === "teaching" && narrativeElement}
             </ul>
-
-
-
-
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

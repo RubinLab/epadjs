@@ -48,6 +48,7 @@ class AnnnotationDownloadModal extends React.Component {
         this.props.dispatch(storeAimSelectionAll(null, null, null, true));
         this.props.dispatch(clearSelection());
         this.props.onSubmit();
+        this.setState({summary: false, aim: false, seg: false});
       })
       .catch(err => {
         console.error(err);
@@ -56,6 +57,7 @@ class AnnnotationDownloadModal extends React.Component {
         if (err.response && err.response.status === 503) {
           toast.error("Select a download format!", { autoClose: false });
         }
+        this.setState({summary: false, aim: false, seg: false});
       });
     this.props.onCancel();
   };
@@ -70,6 +72,11 @@ class AnnnotationDownloadModal extends React.Component {
     link.click();
     window.URL.revokeObjectURL(url);
   };
+
+  handleCancel = () => {
+    this.setState({summary: false, aim: false, seg: false});
+    this.props.onCancel();
+  }
 
   render = () => {
     let className = "alert-annDownload";
@@ -158,7 +165,7 @@ class AnnnotationDownloadModal extends React.Component {
             <Button variant="secondary" onClick={this.onDownload}>Submit</Button>
           )}
 
-          <Button variant="secondary" onClick={this.props.onCancel}>Cancel</Button>
+          <Button variant="secondary" onClick={this.handleCancel}>Cancel</Button>
         </Modal.Footer>
       </Modal>
     );

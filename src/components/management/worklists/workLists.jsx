@@ -57,7 +57,7 @@ class WorkList extends React.Component {
       : lastname ? `${lastname}`
         : firstname ? `${firstname}`
           : null;
-    const name = fullName || displayname || username;
+    const name = fullName ?  fullName : !!displayname && !displayname.includes('null') ? displayname : username;
     return name;
   }
 
@@ -84,7 +84,7 @@ class WorkList extends React.Component {
   };
 
   getWorkListData = async () => {
-    let { data: worklists } = await getWorklistsOfCreator();
+    let { data: worklists } = await getWorklistsOfCreator(true);
     for (let wl of worklists) {
       let display = wl.requirements.reduce((all, item, i) => {
         const { level, numOfAims, template } = item;
@@ -240,22 +240,14 @@ class WorkList extends React.Component {
 
   handleKeyboardEvent = e => {
     const {
-      name,
-      description,
-      // duedate,
       worklistId,
       cellDoubleClicked
     } = this.state;
-    const nameNotEmpty = name && name.trim().length > 0;
     const fieldUpdateValidation = worklistId && cellDoubleClicked;
-    if (e.key === 'Escape') {
+    if (e.key === 'Escape') 
       this.handleUpdateField(null, null);
-    } else if (e.key === 'Enter' && fieldUpdateValidation) {
-      if (cellDoubleClicked === 'name') {
-        if (nameNotEmpty) this.updateWorklist();
-      }
+     else if (e.key === 'Enter' && fieldUpdateValidation) 
       this.updateWorklist();
-    }
   };
 
   setWrapperRef = (node, id) => {
@@ -278,9 +270,10 @@ class WorkList extends React.Component {
     const body = name
       ? { name }
       : description === '' || description
-        ? { description }
-        : { duedate };
-    updateWorklist(worklistId, body)
+        ? { description } 
+        : duedate ? { duedate } : null;
+    if (body) { 
+      updateWorklist(worklistId, body)
       .then(() => this.getWorkListData())
       .catch(error =>
         toast.error(
@@ -290,6 +283,7 @@ class WorkList extends React.Component {
           }
         )
       );
+    }
     this.handleCancel();
   };
 
@@ -748,6 +742,7 @@ class WorkList extends React.Component {
             users={this.state.userList}
             onSubmit={this.submitUpdateAssignees}
             initialAssignees={this.state.initialAssignees}
+            userNameMap={this.state.userNameMap}
           />
         )}
         {this.state.updateDueDate && (

@@ -57,6 +57,7 @@ import { errorMonitor } from "events";
 import FreehandRoiSculptorTool from "../../cornerstone-tools/tools/FreehandRoiSculptorTool";
 import getVPDimensions from "./ViewportCalculations";
 import SeriesDropDown from "./SeriesDropDown";
+import { toast } from "react-toastify";
 
 let mode;
 let wadoUrl;
@@ -161,7 +162,9 @@ const mapStateToProps = (state) => {
     subpath: state.annotationsListReducer.subpath,
     multiFrameAimJumpData: state.annotationsListReducer.multiFrameAimJumpData,
     otherSeriesAimsList: state.annotationsListReducer.otherSeriesAimsList,
-    templates: state.annotationsListReducer.templates
+    templates: state.annotationsListReducer.templates,
+    showAnnotations: state.annotationsListReducer.showAnnotations,
+    lastLocation: state.annotationsListReducer.lastLocation,
   };
 };
 
@@ -201,13 +204,17 @@ class DisplayView extends Component {
   }
 
   formInvertMap = (buttonClicked, index, reset, clearGrid) => {
-    const { series, seriesAddition } = this.props;
+    const { series, seriesAddition, activePort } = this.props;
     let invertMap = sessionStorage.getItem("invertMap");
     invertMap = invertMap ? JSON.parse(invertMap) : {};
     if (buttonClicked) invertMap[index] = !invertMap[index];
     else if (clearGrid) invertMap = {};
-    else {    
-      if (reset) invertMap = {};
+    else if (reset) {
+        const isPET = series[activePort].examType === 'PET' || seriesAddition[activePort].examType === 'PET';
+        const isNM = series[activePort].examType === 'NM' || seriesAddition[activePort].examType === 'NM';
+        const isPT = series[activePort].examType === 'PT' || seriesAddition[activePort].examType === 'PT';
+        invertMap[activePort] = isPET || isNM || isPT;
+    } else {
       series.forEach((el, i) => {
         const isPET = el.examType === 'PET' || seriesAddition[i].examType === 'PET';
         const isNM = el.examType === 'NM' || seriesAddition[i].examType === 'NM';
@@ -240,6 +247,7 @@ class DisplayView extends Component {
     window.addEventListener("toggleAnnotations", this.toggleAnnotations);
     // window.addEventListener("updateWL", this.updateWL);
     window.addEventListener("updateImageStatus", this.updateImageStatus);
+    window.addEventListener("updateImageLayer", this.updateImageLayer);
     window.addEventListener(
       "deleteViewportImageStatus",
       this.deleteViewportImageStatus
@@ -252,8 +260,8 @@ class DisplayView extends Component {
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
     window.addEventListener("keydown", this.handleKeyPressed);
-    window.addEventListener("serieReplaced", this.handleSerieReplace);
     window.addEventListener("saveTemplateType", this.saveTemplateType);
+    window.addEventListener("unfuse", this.unFuseBeforeClose);
 
     if (this.props.keycloak && series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
@@ -304,7 +312,8 @@ class DisplayView extends Component {
       multiFrameAimJumpData,
       seriesAddition,
       loading,
-      otherSeriesAimsList
+      otherSeriesAimsList,
+      showAnnotations
     } = this.props;
     const {
       series: prevSeries,
@@ -316,14 +325,22 @@ class DisplayView extends Component {
     } = prevProps;
 
     if (this.props.series.length < 1) {
-      if (mode === "teaching") this.props.history.push("/search");
-      else if (pid) this.props.history.push(`/list/${pid}`);
-      else return;
+      this.props.history.push(this.props.lastLocation);
       return;
     }
 
-    const { projectID, studyUID, seriesUID } = series[activePort];
-
+    const { projectID, studyUID } = series[activePort];
+    let { seriesUID } = series[activePort];
+    if (cornerstone.getEnabledElements()[activePort]) {
+      const element = cornerstone.getEnabledElements()[activePort]['element'];
+      const activeLayer = cornerstone.getActiveLayer(element);
+      const isFused = !!activeLayer;
+      // it is fused get the correct series UID
+      if (isFused) {
+        seriesUID = activeLayer.image.imageId.split('/series/')[1].split('/')[0];
+      }
+    }
+    
     const oldAimsExist = prevOther[projectID] && prevOther[projectID][studyUID];
     const newAimsExist = otherSeriesAimsList[projectID] && otherSeriesAimsList[projectID][studyUID];
 
@@ -355,7 +372,7 @@ class DisplayView extends Component {
     const aimEditSaved = this.state.aimEdited && prevLoading && !loading;
     const imgAnnsLoaded = this.checkImgAnnsFilled(prevSeriesAddition, seriesAddition);
     const rerenderAims =
-      newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved || studyAimsLengthChanged || imgAnnsLoaded;
+      newAimsListLen !== oldAimsListLen || aimsDeletedOrSaved || aimEditSaved || studyAimsLengthChanged || imgAnnsLoaded || (showAnnotations && !prevProps.showAnnotations);
 
     // TODO: check if loading/true-false control is required for the first condition
 
@@ -412,6 +429,9 @@ class DisplayView extends Component {
       // if chanes sever that data from openseries
       // refresh only cornerstone by calling this.renderAims();
     } 
+    if (this.state.fusion && prevSeries.length < series.length) {
+      window.dispatchEvent(new CustomEvent("unfuse", { detail: { source: 'open' } }));
+    }
   }
 
   componentWillUnmount() {
@@ -420,6 +440,7 @@ class DisplayView extends Component {
     window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
     // window.removeEventListener("updateWL", this.updateWL);
     window.removeEventListener("updateImageStatus", this.updateImageStatus);
+    window.removeEventListener("updateImageLayer", this.updateImageLayer);
     window.removeEventListener(
       "resetViewportImageStatus",
       this.resetViewportImageStatus
@@ -433,8 +454,9 @@ class DisplayView extends Component {
     window.removeEventListener("deleteAim", this.deleteAimHandler);
     window.removeEventListener("resize", this.setSubComponentHeights);
     window.removeEventListener("keydown", this.handleKeyPressed);
-    window.removeEventListener("serieReplaced", this.handleSerieReplace);
     window.removeEventListener("getTemplateType", this.saveTemplateType);
+    window.removeEventListener("unfuse", this.unFuseBeforeClose);
+
     // clear all aimID of openseries so aim editor doesn't open next time
     this.props.dispatch(clearAimId());
     clearInterval(this.state.tokenRefresh);
@@ -461,6 +483,8 @@ class DisplayView extends Component {
     ) {
       if (event.keyCode == 73 && event.ctrlKey) {
         this.toggleOverlay();
+      } else if (event.keyCode === 88) {
+        this.hideShow(this.props.activePort)
       }
     }
   };
@@ -504,6 +528,116 @@ class DisplayView extends Component {
     }
   };
 
+  removeSynchronizers = () => {
+    cornerstone.getEnabledElements().forEach(({ element }) => {
+        this.state.fusion.synchronizers.forEach(synchronizer => {
+            synchronizer.remove(element);
+            synchronizer.enabled = false;
+        })
+    });
+  };
+  
+  // it is not being used
+  // fuse = (petElement, ctElement) => {
+  //   const { ctOptions, petOptions } = this.getOptions();
+  //   cornerstone.purgeLayers(ctElement);
+  //   const petImage = cornerstone.getImage(petElement);
+  //   const ctImage = cornerstone.getImage(ctElement);
+  //   if (!ctImage || !petImage)
+  //       return false;
+  //   const ctLayerId = cornerstone.addLayer(ctElement, ctImage, ctOptions);
+  //   const petLayerId = cornerstone.addLayer(ctElement, petImage, petOptions);
+  //   cornerstone.updateImage(ctElement);
+  //   if (this.state.selectedLayer === "PET")
+  //       cornerstone.setActiveLayer(ctElement, petLayerId);
+  //   else cornerstone.setActiveLayer(ctElement, ctLayerId);
+  //   this.setState({ ctLayerId, petLayerId });
+  //   this.props.onFuseUnfuse(true, this.state.CT, this.state.PT, ctLayerId, petLayerId, this.synchronizers, this.newImage);
+  //   return true;
+  // };
+
+  teleportAnnotations = (unfuse, ctElement, petElement) => {
+    try {
+      const stackToolState = cornerstoneTools.getToolState(ctElement, "stack");
+      const petStackToolState = cornerstoneTools.getToolState(petElement, "stack");
+
+      const ctImageIds = stackToolState.data[0].imageIds;
+      const petImageIds = petStackToolState.data[0].imageIds;
+
+      const ctImage = ctImageIds[0];
+      const petImage = petImageIds[0];
+
+      let segMod = cornerstoneTools.getModule("segmentation");
+      const petSeg = segMod.state.series[petImage];
+      if (petSeg && !unfuse) {
+          segMod.state.series = { ...segMod.state.series, [ctImage]: petSeg };
+      }
+      else {
+          delete segMod.state.series.ctImage; //its unfuse and delete the seg from pet
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  newImageFuse = (event, close) => {
+    try {
+        const newImageElement = event.detail.element;
+        const { PT, CT } = this.state.fusion;
+        const petElement = cornerstone.getEnabledElements()[PT]?.element;
+        const ctElement = cornerstone.getEnabledElements()[CT]?.element;
+        if (ctElement && petElement) {
+            if (newImageElement === ctElement) this.fuse(petElement, ctElement);
+            else if (newImageElement === petElement) this.teleportAnnotations(true, ctElement, petElement);
+        }
+    } catch (error) {
+        console.error(error);
+    }
+  };
+
+  unFuseBeforeClose = (evt) => {
+    // console.log('unfuse', this.state.fusion);
+    if (!!this.state.fusion) {
+      // window.removeEventListener("newImage");
+      window.removeEventListener("newImage", this.state.fusion.func);
+      window.dispatchEvent(new CustomEvent("closeFuseMenu"));
+      const { CT, PT, ctLayerId, petLayerId } = this.state.fusion;
+      const elements = cornerstone.getEnabledElements();
+      const ctElement = elements[CT]?.element;
+      const petElement = elements[PT]?.element;
+      try { 
+        cornerstone.setActiveLayer(ctElement, ctLayerId);
+        cornerstone.purgeLayers(ctElement);
+      } catch (err) {
+        console.error(err);
+      }
+      this.removeSynchronizers();
+      // cornerstone.removeLayer(ctElement, ctLayerId);
+      this.teleportAnnotations(true, ctElement, petElement);
+      this.getFuseUnfuseState(false, CT, PT);
+      
+      toast.info("Deactivating fusion!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      
+      return 1;
+    }
+    return 0;
+  }
+
+  getFuseUnfuseState = (fused, CT, PT, ctLayerId, petLayerId, synchronizers, func) => {
+    if (fused) 
+      this.setState({ fusion: { CT, PT, ctLayerId, petLayerId, synchronizers, func }});
+    else 
+      this.setState({ fusion: false });
+    this.setActive(PT);
+  }
+
   setSubComponentHeights = (e) => {
     try {
       if (e && e.detail) var { isMaximize } = e.detail;
@@ -546,7 +680,14 @@ class DisplayView extends Component {
     const { aimList, activePort } = this.props;
     const { showAimEditor, selectedAim } = this.state;
 
+
     if (aimList[seriesUID][aimID]) {
+      if (!aimList[seriesUID][aimID].isDisplayed) {
+        alert(
+          "Before editing, you should make the aim visible by clicking the eye icon or selecting the Show Markups checkbox."
+        );
+        return;
+      }
       const aimJson = aimList[seriesUID][aimID].json;
       const markupTypes = this.getMarkupTypesForAim(aimID);
       aimJson["markupType"] = markupTypes ? [...markupTypes] : undefined;
@@ -637,8 +778,10 @@ class DisplayView extends Component {
   };
 
   updateImageStatus = (event) => {
-    const { type, value } = event.detail;
+    const { type, value, tool } = event.detail;
     // const { ww, wc } = event.detail;
+    // do not update session for pet in fusion
+    if (this.state.fusion && tool === 'wwwc' && this.props.activePort === this.state.fusion.CT) return;
     let imgStatus = sessionStorage.getItem("imgStatus");
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
@@ -648,6 +791,31 @@ class DisplayView extends Component {
     imgStatus[this.props.activePort] = obj;
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
   };
+
+
+  updateImageLayer = (event) => {
+    const { tool } = event.detail;
+    try { 
+      if (this.state.fusion) {
+        const { CT, PT, petLayerId, ctLayerId } = this.state.fusion;
+        const elements = cornerstone.getEnabledElements();
+        const petElement = elements[PT]?.element;
+        const ctElement = elements[CT]?.element;
+        if (tool === 'wwwc' && this.state.fusion.tool !== 'wwwc' ) {
+          cornerstone.setActiveLayer(ctElement, petLayerId);
+          this.setState( {fusion: {...this.state.fusion, tool}} );
+        }
+        if (tool === 'preset' && this.state.fusion.tool !== 'preset') {
+          cornerstone.setActiveLayer(ctElement, ctLayerId);
+          this.setState( {fusion: {...this.state.fusion, tool}} );
+        }
+        cornerstone.updateImage(ctElement);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 
   // Traverse all shapes and set visibility, if aimID is passed only sets aim's shapes
   setVisibilityOfShapes = (visibility, aimID, seriesUID) => {
@@ -714,7 +882,7 @@ class DisplayView extends Component {
 
   getSegmentationAimsOfSerie = (seriesUID) => {
     const { aimList } = this.props;
-    const seriesAims = aimList[seriesUID];
+    const seriesAims = aimList[seriesUID] || {};
     const segAims = [];
     Object.entries(seriesAims).forEach(([key, value]) => {
       if (value.json && value.json.segmentationEntityCollection) {
@@ -863,36 +1031,6 @@ class DisplayView extends Component {
     }
   }
 
-  handleSerieReplace = (e) => {
-    const { seriesAddition, activePort } = this.props;
-    var promises = [];
-    const { viewportId, id, multiFrameIndex } = e.detail;
-    // const promise = this.getImageStack(
-    //   series[viewportId],
-    //   viewportId,
-    //   multiFrameIndex,
-    //   undefined,
-    //   "handleSerieReplace"
-    // );
-    let mfIndex = multiFrameIndex ? `${multiFrameIndex}-${activePort}` : null;
-    const serUID = id.split('_')[0];
-    mfIndex = serUID === seriesAddition[activePort].seriesUID && !mfIndex ? `${serUID}-${activePort}` : mfIndex;
-    this.getData(
-      mfIndex,
-      undefined,
-      "handleSerieReplace"
-    );
-    // promises.push(promise);
-    // Promise.all(promises).then((res) => {
-    //   console.log(" ====-> handleSerieReplace resolved", viewportId);
-    //   console.log(res);
-    //   const newData = [...this.state.data];
-    //   newData[viewportId] = res[0];
-    //   newData[viewportId].stack.currentImageIdIndex = 0; 
-    //   this.setState({ data: newData, isLoading: false });
-    // });
-  };
-
   // Remove this function to disable openning aim editor by default
   // once user clecked on an aim
 
@@ -921,7 +1059,7 @@ class DisplayView extends Component {
     });
     // markups will be rendered so clear all previously renders
     this.clearAllMarkups();
-
+    const uids = {};
     seriesAddition.forEach((serie, serieIndex) => {
       // Remove this part to disable openning aim editor by default
       // once user clecked on an aim
@@ -931,7 +1069,7 @@ class DisplayView extends Component {
       // this.openAimEditor(aimID, seriesUID);
       // }
 
-      if (serie.imageAnnotations) {
+      if (serie.imageAnnotations && !uids[serie.seriesUID]) {
         this.parseAims(
           serie.imageAnnotations,
           serie.seriesUID,
@@ -940,6 +1078,7 @@ class DisplayView extends Component {
           serie
         );
       }
+      uids[serie.seriesUID] = true;
     });
 
     this.refreshAllViewports();
@@ -1371,8 +1510,6 @@ class DisplayView extends Component {
   // };
 
   setActiveLabelMapIndex = (index) => {
-    // console.log("Parameter element", element);
-    // console.log("Element", cornerstone.getEnabledElements());
     const { setters } = cornerstoneTools.getModule("segmentation");
     const element = this.getActiveElement();
     setters.activeLabelmapIndex(element, index);
@@ -1522,7 +1659,6 @@ class DisplayView extends Component {
 
   // TODO: Can this be done without checking the tools of interest?
   measurementCompleted = (event, action) => {
-    // console.log("Measurement completed", event);
     const { toolName, toolType } = event.detail;
 
     const toolsOfInterest = [
@@ -1544,27 +1680,38 @@ class DisplayView extends Component {
     return series[activePort];
   };
 
-  measurementRemoved = (event) => {
-    const serie = this.getActiveSerie();
-    const { aimId } = event.detail.measurementData;
-    if (aimId && this.isLastShapeInAim(aimId)) {
-      const shouldDeleteAim = window.confirm(
-        "This is the last markup in Aim. Would yo like to delete the Aim file as well?"
-      );
-      if (shouldDeleteAim) {
-        this.deleteAim(aimId, serie);
-        this.closeAimEditor(false);
-        // this.setState({
-        //   showAimEditor: false,
-        //   selectedAim: undefined,
-        //   hasSegmentation: false,
-        //   dirty: false,
-        // });
+  getActiveLayerSeries = (aimId, series, aimList) => {
+    for (let i = 0; i<series.length; i+=1) {
+      if (aimList[series[i].seriesUID][aimId]) {
+        return series[i].seriesUID;
       }
-      return;
     }
-    this.handleShapes();
-    this.setDirtyFlag();
+  }
+
+  measurementRemoved = (event, uid) => {
+    const serie = this.getActiveSerie();
+    const { series, aimList } = this.props;
+    const { aimId } = event.detail.measurementData;
+    const serUID = this.getActiveLayerSeries(aimId, series, aimList);
+    if (aimId && this.isLastShapeInAim(aimId) && serUID === uid) {
+          const shouldDeleteAim = window.confirm(
+            "This is the last markup in Aim. Would yo like to delete the Aim file as well?"
+          );
+          if (shouldDeleteAim) {
+            this.deleteAim(aimId, serie);
+            // this.closeAimEditor(false);
+            this.setState({
+              showAimEditor: false,
+              selectedAim: undefined,
+              hasSegmentation: false,
+              dirty: false,
+            });
+          }
+          return;  
+      } else {
+        this.handleShapes();
+        this.setDirtyFlag();
+      }
   };
 
   deleteAim = (aimId, serie) => {
@@ -1606,6 +1753,8 @@ class DisplayView extends Component {
       this.props.dispatch(
         getSingleSerie({ patientID, projectID, seriesUID, studyUID })
       );
+    }).catch(err => {
+      toast.error(err.response.data.message);
     });
   };
 
@@ -1656,16 +1805,26 @@ class DisplayView extends Component {
 
   handleMarkupSelected = (event) => {
     const { aimList, series, activePort } = this.props;
-    const { seriesUID } = series[activePort];
+    let { seriesUID } = series[activePort];
     const { aimId, ancestorEvent } = event.detail;
-    if (!aimList[seriesUID][aimId]) {
+    if (aimList[seriesUID] && aimList[seriesUID][aimId] && !aimList[seriesUID][aimId].isDisplayed) {
+      return;
+    }
+    const { element, data } = ancestorEvent;
+    const activeLayer = cornerstone.getActiveLayer(element);
+    const isFused = !!activeLayer;
+    // it is fused get the correct series UID
+    if (isFused) {
+      seriesUID = this.getActiveLayerSeries(aimId, series, aimList);
+      console.log(`Using series ${seriesUID} as it is fused image`);
+    }
+    if (!aimList[seriesUID][aimId] ) {
       return;
     } //Eraser might have already delete the aim}
-    const { element, data } = ancestorEvent;
 
     if (aimList[seriesUID][aimId]) {
       const aimJson = aimList[seriesUID][aimId].json;
-      const markupTypes = this.getMarkupTypesForAim(aimId);
+      const markupTypes = this.getMarkupTypesForAim(aimId, !!isFused);
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimId;
 
@@ -1781,7 +1940,7 @@ class DisplayView extends Component {
         //   //image is not multiframe so strip the frame number from the imageId
         //   imageId = imageId.split("&frame=")[0];
         // }
-        this.renderMarkup(imageId, value, color);
+        this.renderMarkup(imageId, value, color, seriesUid);
         if (!this.state.isVisible) this.toggleAnnotations({ detail: { isVisible: this.state.isVisible }});
       });
     });
@@ -2165,7 +2324,7 @@ class DisplayView extends Component {
       toolState[imageId] = { ...toolState[imageId], [tool]: { data: [] } };
   };
 
-  renderBidirectional = (imageId, markup, color) => {
+  renderBidirectional = (imageId, markup, color, seriesUID) => {
     const data = JSON.parse(JSON.stringify(bidirectional));
     data.color = markup.color ? markup.color : color;
     data.aimId = markup.aimUid;
@@ -2178,6 +2337,9 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
+    const aimExists = this.props.aimList[seriesUID] && this.props.aimList[seriesUID][data.aimId];
+    const visibility = aimExists ? this.props.aimList[seriesUID][data.aimId].isDisplayed : false;
+    if (aimExists) this.setVisibilityOfShapes(visibility, data.aimId, seriesUID);
   };
 
   createBidirectionalPoints = (data, points) => {
@@ -2194,7 +2356,7 @@ class DisplayView extends Component {
     data.handles.textBox.y = points[0].y.value;
   };
 
-  renderArrow = (imageId, markup, color) => {
+  renderArrow = (imageId, markup, color, seriesUID) => {
     const data = JSON.parse(JSON.stringify(arrow));
     data.color = markup.color ? markup.color : color;
     data.aimId = markup.aimUid;
@@ -2207,9 +2369,13 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
+
+    const aimExists = this.props.aimList[seriesUID] && this.props.aimList[seriesUID][data.aimId];
+    const visibility = aimExists ? this.props.aimList[seriesUID][data.aimId].isDisplayed : false;
+    if (aimExists) this.setVisibilityOfShapes(visibility, data.aimId, seriesUID);
   };
 
-  renderLine = (imageId, markup, color) => {
+  renderLine = (imageId, markup, color, seriesUID) => {
     const data = JSON.parse(JSON.stringify(line));
     data.color = markup.color ? markup.color : color;
     data.aimId = markup.aimUid;
@@ -2222,6 +2388,10 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
+
+    const aimExists = this.props.aimList[seriesUID] && this.props.aimList[seriesUID][data.aimId];
+    const visibility = aimExists ? this.props.aimList[seriesUID][data.aimId].isDisplayed : false;
+    if (aimExists) this.setVisibilityOfShapes(visibility, data.aimId, seriesUID);
   };
 
   createLinePoints = (data, points) => {
@@ -2231,7 +2401,7 @@ class DisplayView extends Component {
     data.handles.end.y = points[1].y.value;
   };
 
-  renderPolygon = (imageId, markup, color) => {
+  renderPolygon = (imageId, markup, color, seriesUID) => {
     const data = JSON.parse(JSON.stringify(freehand));
     data.color = markup.color ? markup.color : color;
     data.aimId = markup.aimUid;
@@ -2244,6 +2414,10 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
+
+    const aimExists = this.props.aimList[seriesUID] && this.props.aimList[seriesUID][data.aimId];
+    const visibility = aimExists ? this.props.aimList[seriesUID][data.aimId].isDisplayed : false;
+    if (aimExists) this.setVisibilityOfShapes(visibility, data.aimId, seriesUID);
   };
 
   createPolygonPoints = (data, points) => {
@@ -2264,7 +2438,7 @@ class DisplayView extends Component {
     data.handles.points = [...freehandPoints];
   };
 
-  renderPoint = (imageId, markup, color) => {
+  renderPoint = (imageId, markup, color, seriesUID) => {
     const data = JSON.parse(JSON.stringify(probe));
     data.color = markup.color ? markup.color : color;
     data.aimId = markup.aimUid;
@@ -2277,9 +2451,13 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
+
+    const aimExists = this.props.aimList[seriesUID] && this.props.aimList[seriesUID][data.aimId];
+    const visibility = aimExists ? this.props.aimList[seriesUID][data.aimId].isDisplayed : false;
+    if (aimExists) this.setVisibilityOfShapes(visibility, data.aimId, seriesUID);
   };
 
-  renderCircle = (imageId, markup, color) => {
+  renderCircle = (imageId, markup, color, seriesUID) => {
     const data = JSON.parse(JSON.stringify(circle));
     data.invalidated = true; //so it calculates the stats
     data.color = markup.color ? markup.color : color;
@@ -2295,6 +2473,10 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
+
+    const aimExists = this.props.aimList[seriesUID] && this.props.aimList[seriesUID][data.aimId];
+    const visibility = aimExists ? this.props.aimList[seriesUID][data.aimId].isDisplayed : false;
+    if (aimExists) this.setVisibilityOfShapes(visibility, data.aimId, seriesUID);
   };
 
   checkUnsavedData = (isCancel, message = "") => {
@@ -2401,6 +2583,8 @@ class DisplayView extends Component {
   };
 
   closeViewport = (index) => {
+    if (this.state.hiding) this.hideShow(index);
+    this.unFuseBeforeClose({detail: {source: 'close'}});
     const { showAimEditor, dirty } = this.state;
     const { series, seriesAddition } = this.props;
     const { projectID, patientID, studyUID, seriesUID } = series[index];
@@ -2437,6 +2621,7 @@ class DisplayView extends Component {
       // this.jumpToAims(" close viewport - jumpToAims");
       // this.renderAims(false, " close viewport - renderaimr");
       // this.props.onSwitchView("search");
+      window.dispatchEvent(new CustomEvent("unfuse"));
     } catch (err) {
       console.error(err);
     }
@@ -2446,13 +2631,19 @@ class DisplayView extends Component {
     this.setState({ showAnnDetails: false });
   };
 
-  getMarkupTypesForAim = (aimUid) => {
+  getMarkupTypesForAim = (aimUid, isFused) => {
     let markupTypes = [];
     try {
-      const imageAnnotations =
+      let imageAnnotations =
         this.props.seriesAddition[this.props.activePort].imageAnnotations;
       if (!imageAnnotations) {
-        return undefined;
+        // if isfused, get all image annotations
+        if (isFused) {
+          imageAnnotations = {};
+          this.props.seriesAddition.forEach((serie) => {
+            imageAnnotations = { ...imageAnnotations, ...serie.imageAnnotations};
+          })
+        } else return undefined;
       }
       Object.entries(imageAnnotations).forEach(([key, values]) => {
         values.forEach((value) => {
@@ -2610,6 +2801,8 @@ class DisplayView extends Component {
           <ToolMenu
             onSwitchView={this.props.onSwitchView}
             onInvertClick={this.formInvertMap}
+            onFuseUnfuse={this.getFuseUnfuseState}
+            onFuseNewImage={this.newImageFuse}
           />
           {this.state.isLoading && (
             <div style={{ marginTop: "30%", marginLeft: "50%" }}>
@@ -2746,7 +2939,7 @@ class DisplayView extends Component {
                       {
                         target: "element",
                         eventName: "cornerstonetoolsmeasurementremoved",
-                        handler: this.measurementRemoved,
+                        handler: (e) => this.measurementRemoved(e, series[i].seriesUID),
                       },
                       {
                         target: "element",

@@ -216,7 +216,8 @@ class AimEditor extends Component {
   };
 
   handleUserKeyPress = (e) => {
-    if (e.key === "Enter") {
+    // save shortcut ctrl + y
+    if (e.keyCode == 89 && e.ctrlKey) {
       this.save();
     }
   };
@@ -599,9 +600,10 @@ class AimEditor extends Component {
 
     // get the imagesIds for active viewport
     const { element } = cornerstone.getEnabledElements()[activePort];
-    const stackToolState = cornerstoneTools.getToolState(element, 'stack');
-    const imageIds = stackToolState.data[0].imageIds;
-
+    // const stackToolState = cornerstoneTools.getToolState(element, 'stack');
+    // const imageIds = stackToolState.data[0].imageIds;
+    const imageIds = this.getElementsActiveLayerImageIds(element);
+    // TODO make sure to get PT image ids on fused image
     // check which images has markup
     const markedImageIds = imageIds.filter((imageId) => {
       if (toolState[imageId] === undefined) return false;
@@ -644,9 +646,10 @@ class AimEditor extends Component {
     // });
     const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
     const { openSeries, activePort } = this.props;
-    const { patientID, projectID, seriesUID, studyUID } =
+    const { patientID, projectID, studyUID } =
       openSeries[activePort];
-    const name =
+    let seriesUID = aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.instanceUid.root !== '' ? aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.instanceUid.root: openSeries[activePort].seriesUID;
+    const name = 
       aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
         .name.value;
     const comment =
@@ -691,7 +694,6 @@ class AimEditor extends Component {
     markedCSImageIds.map((CSImageId) => {
       const markUps = toolState[CSImageId];
       const { imageId, frameNum } = this.parseImageUidAndFrame(CSImageId);
-
       Object.keys(markUps).map((tool) => {
         switch (tool) {
           case 'FreehandRoi3DTool':
@@ -949,17 +951,15 @@ class AimEditor extends Component {
       imageId,
       frameNum
     );
-
     // find out the unit about statistics to write to aim
     let unit, mean, stdDev, min, max;
-    if (polygon.meanStdDev) {
+    if (polygon.meanStdDevSUV) {
+      ({ mean, stdDev, min, max } = polygon.meanStdDevSUV);
+      unit = 'suv';
+    } else if (polygon.meanStdDev) {
       ({ mean, stdDev, min, max } = polygon.meanStdDev);
       unit = 'hu';
-    } else if (polygon.meanStdDevSUV) {
-      ({ mean, stdDev, min, max } = polygon.meanStdDev);
-      unit = 'suv';
-    }
-
+    } 
     const meanId = aim.createMeanCalcEntity({ mean, unit });
     aim.createImageAnnotationStatement(1, markupId, meanId);
 
@@ -993,8 +993,13 @@ class AimEditor extends Component {
       imageId,
       frameNum
     );
-
-    const { unit, calcUnit, length, min, max, mean, stdDev } = line;
+    const { unit, calcUnit, length } = line;
+    let mean, stdDev, min, max;
+    if (line.meanStdDevSUV) {
+      ({ mean, stdDev, min, max } = line.meanStdDevSUV);
+    } else {
+      ({ mean, stdDev, min, max } = line);
+    }
 
     const lengthId = aim.createLengthCalcEntity({ value: length, unit });
     aim.createImageAnnotationStatement(1, markupId, lengthId);
@@ -1042,7 +1047,12 @@ class AimEditor extends Component {
     if (circle.unit === 'HU') unit = 'hu';
     else if (circle.unit === 'SUV') unit = 'suv';
 
-    const { mean, stdDev, min, max } = circle.cachedStats;
+    let mean, stdDev, min, max;
+    if (circle.cachedStats.meanStdDevSUV) {
+      ({ mean, stdDev, min, max } = circle.cachedStats.meanStdDevSUV);
+    } else {
+      ({ mean, stdDev, min, max } = circle.cachedStats);
+    } 
 
     const meanId = aim.createMeanCalcEntity({ mean, unit });
     aim.createImageAnnotationStatement(1, markupId, meanId);
@@ -1326,8 +1336,9 @@ class AimEditor extends Component {
 
   uploadCompleted = (aimRefs) => {
     const { openSeries, activePort, seriesData } = this.props;
-    const { patientID, projectID, seriesUID, studyUID } =
+    const { patientID, projectID, studyUID } =
       openSeries[activePort];
+    const seriesUID = aimRefs?.seriesUID || openSeries[activePort]?.seriesUID;
     const dataExists =
       seriesData[projectID] &&
       seriesData[projectID][patientID] &&

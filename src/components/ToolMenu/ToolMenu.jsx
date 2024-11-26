@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import cornerstone from "cornerstone-core";
@@ -12,7 +13,8 @@ import ColormapSelector from "./ColormapSelector";
 import FuseSelector from "./FuseSelector";
 import cornerstoneTools from "cornerstone-tools";
 import { setSignificantSeries } from "../../services/seriesServices";
-
+// import Modal from "../common/warningModal";
+import HotKeysList from "./HotKeysList";
 import {
   FaLocationArrow,
   FaEraser,
@@ -39,7 +41,7 @@ import {
 import { BsArrowUpLeft } from "react-icons/bs";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
-import { MdLoop, MdPanTool, MdMyLocation } from "react-icons/md";
+import { MdLoop, MdPanTool, MdMyLocation, MdOutlineKeyboardCommandKey } from "react-icons/md";
 import { TbReplace } from "react-icons/tb";
 import {
   TiDeleteOutline,
@@ -70,6 +72,7 @@ const mapStateToProps = (state) => {
     patients: state.annotationsListReducer.patients,
     patientLoading: state.annotationsListReducer.patientLoading,
     activePort: state.annotationsListReducer.activePort,
+    lastLocation: state.annotationsListReducer.lastLocation
   };
 };
 
@@ -144,6 +147,7 @@ class ToolMenu extends Component {
       activeTool: "",
       activeToolIdx: 1,
       fuse: false,
+      keys: null
     };
 
     this.imagingTools = [
@@ -247,6 +251,7 @@ class ToolMenu extends Component {
 
     this.managementTools = [
       { name: "Save order", icon: <TbReplace />, tool: "order", teaching: true },
+      { name: "Hot Keys", icon: <MdOutlineKeyboardCommandKey />, tool: "keys", teaching: true },
     ]
 
     this.segmentationTools = [
@@ -294,11 +299,47 @@ class ToolMenu extends Component {
 
   componentDidMount() {
     window.addEventListener("keydown", this.handleKeyPressed);
+    window.addEventListener("closeFuseMenu", this.closeFuse);
   }
 
   componentWillUnmount() {
     window.removeEventListener("keydown", this.handleKeyPressed);
+    window.removeEventListener("closeFuseMenu", this.closeFuse);
     sessionStorage.removeItem("activeTool");
+  }
+
+  showHotkeyInfo = () => {
+    const keyMap = {
+      'ctrl + y' : 'Aim save',
+      f: 'Arrow',
+      r: 'Circle',
+      x: 'Expand view',
+      i: 'Invert',
+      d: 'Length',
+      p: 'Pan',
+      o: 'Perpendicular',
+      space: 'Reset',
+      s: 'Select',
+      w: 'Window-Level',
+      z: 'Zoom',
+    }
+    const hotKeys = Object.keys(keyMap);
+    const tools = Object.values(keyMap);
+    const rows = hotKeys.reduce((all, item, index) => {
+      all.push(<tr scope="row"><td className="hotkeys-cell">{`${tools[index]}`}</td><td className="hotkeys-cell">{`${item}`}</td></tr>)
+      return all;
+    }, [])
+    const keys = (
+      <table style={{width: "100%", background: 'unset'}}>
+        <thead>
+          <tr style={{paddingLeft:"0.3rem"}}>
+            <th scope="col" style={{paddingLeft:"0.3rem"}} >Tool</th>
+            <th scope="col">Hot key</th>
+          </tr>
+        </thead>
+          {rows}
+      </table>); 
+    this.setState({ keys });
   }
 
   handleKeyPressed = (event) => {
@@ -426,24 +467,52 @@ class ToolMenu extends Component {
   }
 
   handleToolClicked = (index, tool) => {
-    sessionStorage.setItem("activeTool", tool);
+    const notActiveTools = {
+      Presets: true,
+      Invert: true,
+      Reset: true,
+      MetaData: true,
+      fuse: true,
+      order: true,
+      keys: true
+    };
+    
+    if (!notActiveTools[tool]) sessionStorage.setItem("activeTool", tool);
+    
+    if (sessionStorage.getItem("activeTool") === 'DragProbe') {
+      cornerstoneTools.toolColors.setActiveColor("rgb(255, 132, 0)");
+    } else cornerstoneTools.toolColors.setActiveColor("rgb(255, 255, 0)");
+
+    
+
     if (tool === "Noop") {
       this.disableAllTools();
       this.setState({ activeTool: "", activeToolIdx: index });
       return;
     } else if (tool === "ClearGrid") {
       this.props.dispatch(clearGrid());
+      window.dispatchEvent(new CustomEvent("unfuse"));
       sessionStorage.removeItem("wwwc");
       const max = parseInt(maxPort);
       const imgStatus = new Array(max);
       sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
       this.props.onInvertClick(false, null, null, true);
-      if (mode === "thick") this.props.onSwitchView("list");
-      else this.props.onSwitchView("search");
+      this.props.history.push(this.props.lastLocation);
+      // if (mode === "thick") this.props.onSwitchView("list");
+      // else this.props.onSwitchView("search");
       return;
     } else if (tool === "Presets") {
+      window.dispatchEvent(
+        new CustomEvent("updateImageLayer", { detail: { tool: 'preset', type: 'wwwc' } })
+      );
       this.showPresets();
+      this.disableAllTools();
+      this.setState({ activeTool: "", activeToolIdx: index });
       return;
+    } else if (tool === "Wwwc") {
+      window.dispatchEvent(
+        new CustomEvent("updateImageLayer", { detail: { tool: 'wwwc', type: 'wwwc' } })
+      );
     } else if (tool === "Invert") {
       this.invert();
       return;
@@ -508,7 +577,10 @@ class ToolMenu extends Component {
     } else if (tool === 'order') {
       this.saveSignificantOrder();
       return;
-    }
+    } else if (tool === 'keys') {
+      this.showHotkeyInfo();
+      return;
+    } 
     // else if (tool === "FreehandRoiTool") {
     //   this.selectFreehand();
     // }
@@ -990,11 +1062,12 @@ class ToolMenu extends Component {
             onClose={this.closeColormap}
           />
         )}
-        {this.state.showFuse && <FuseSelector onClose={this.closeFuse} />}
+        {this.state.showFuse && <FuseSelector onClose={this.closeFuse} onFuseUnfuse={this.props.onFuseUnfuse} onFuseNewImage={this.props.onFuseNewImage} />}
         {this.state.showMetaData && (<MetaData onClose={this.showMetaData} imageData={this.props.imageData} />)}
+        {this.state.keys && (<HotKeysList onClose={() => this.setState({keys: null})} list={this.state.keys} />)}
       </div>
     );
   }
 }
 
-export default connect(mapStateToProps)(ToolMenu);
+export default withRouter(connect(mapStateToProps)(ToolMenu));

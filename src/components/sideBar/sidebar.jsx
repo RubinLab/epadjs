@@ -17,7 +17,8 @@ import {
 import {
   getProjectMap,
   clearSelection,
-  getTemplates
+  getTemplates,
+  setLastLocation
 } from "../annotationsList/action";
 import "./style.css";
 import Tabs from "react-bootstrap/Tabs";
@@ -272,22 +273,27 @@ class Sidebar extends Component {
       this.setState({ index: 0 });
       this.props.getPidUpdate(id);
       this.props.history.push(`/search/${id}`);
+      this.props.dispatch(setLastLocation(`/search/${id}`));
     } else if (type === "project" && this.props.type === "list" && mode !== 'teaching') {
       this.setState({ index: 0 });
       this.props.getPidUpdate(id);
       this.props.clearTreeExpand();
       this.props.history.push(`/list/${id}`);
+      this.props.dispatch(setLastLocation(`/list/${id}`));
     } else if (type === "project" && this.props.type === "search" && mode !== 'teaching') {
       this.setState({ index: 0 });
       this.props.getPidUpdate(id);
       this.props.history.push(`/search/${id}`);
+      this.props.dispatch(setLastLocation(`/search/${id}`));
     } else if (type === "project" && this.props.type === "flex") {
       this.props.history.push(`/flex/${id}`);
       this.setState({ index: 0 });
+      this.props.dispatch(setLastLocation(`/flex/${id}`));
     } else if (type === "worklist") {
       this.props.history.push(`/worklist/${id}`);
       index = isThick ? 1 : 0;
       this.setState({ index });
+      this.props.dispatch(setLastLocation(`/worklist/${id}`));
     } else if (type === "progress") {
       this.props.history.push(`/progress/${id}`);
       index = isThick ? 2 : 1;

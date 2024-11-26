@@ -559,10 +559,9 @@ th {
 }
 
 #stella-beta-warning {
-  color: #DB2828;
+  color: #ccc;
   font-size: 1rem;
-  font-weight: bold;
-  margin: 0.3rem;
+  margin: 0.3rem 0.3rem 0.9rem 0.3rem;
 }
 
 .other-annotations {
@@ -570,19 +569,24 @@ th {
   padding: 7px;
   color: #ccc;
   text-shadow: 1px 0px 1px rgba(0, 0, 0, 0.25);
-  margin: 0.5rem 0.5rem 0rem 0.5rem;
+  margin: 0rem 0.5rem 0rem 0.5rem;
+  position: fixed;
+  width: 397px;
 }
 
-.annotation-back {
+/* .annotation-back {
+  height: calc(33% - 45px);
+  overflow: auto;
   background-color: #555;
   display: block;
   padding: 7px;
   margin: 0px 7px;
-}
+} */
 
-.img-label {
+#img-label {
   display: block;
   text-align: right;
+  margin: 2rem 0.5rem 0.5rem 0.5rem;
 }
 
 .series {
@@ -613,9 +617,4 @@ th {
   border: 1px solid #777;
   color: #ccc;
   font-size: 10px;
-}
-
-.annList-container {
-  height: 15rem;
-  overflow: auto;
 }

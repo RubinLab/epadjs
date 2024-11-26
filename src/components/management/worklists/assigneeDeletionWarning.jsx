@@ -8,7 +8,7 @@ const assigneeDeletionWarning = props => {
     <Modal.Dialog id="modal-fix" className="in-modal mini-modal assigneeDeletionWarning"> 
       <Modal.Body>
         <div>
-          <p>Worklist is going to removed from the following assignee(s)!</p>
+          <p>{`Worklist is going to removed from ${props.allSelected ? "all of the assigned users!" : "the following assignee(s)!"}`}</p>
           <p>This can not be undone!</p>
           <div>{props.warningList.join(",")}</div>
         </div>

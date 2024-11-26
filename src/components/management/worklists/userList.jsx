@@ -16,7 +16,7 @@ const userList = props => {
       : lastname ? `${lastname}`
         : firstname ? `${firstname}`
           : null;
-    const name = fullName || displayname || username;
+    const name = fullName ?  fullName : !!displayname && !displayname.includes('null') ? displayname : username;
     return name;
   }
 
@@ -73,7 +73,7 @@ const userList = props => {
   return (
     <div>
       <Table
-        className="__table"
+        className="mng__table"
         data={props.users}
         columns={columns}
         pageSize={props.users.length}

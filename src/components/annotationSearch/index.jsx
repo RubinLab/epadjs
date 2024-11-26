@@ -40,7 +40,8 @@ import {
   updateSearchTableIndex,
   refreshPage,
   storeAimSelection,
-  storeAimSelectionAll
+  storeAimSelectionAll,
+  setLastLocation
 } from "../annotationsList/action";
 import AnnotationDownloadModal from "../searchView/annotationDownloadModal";
 import UploadModal from "../searchView/uploadModal";
@@ -211,6 +212,8 @@ const AnnotationSearch = (props) => {
   };
 
   useEffect(() => {
+    const lastLocation = props && props.location && props.location.pathname ? props.location.pathname : '/'
+    props.dispatch(setLastLocation(lastLocation));
     props.dispatch(storeAimSelectionAll(null, null, null, true));
     if (mode === "teaching") return;
     setSelectedProject(props.pid);
@@ -663,6 +666,7 @@ const AnnotationSearch = (props) => {
     const fields = {};
     body["fields"] = fields;
     if (props.pid) fields["project"] = props.pid;
+   
     if (query.length) fields["query"] = query;
     if (selectedSubs.length) fields["subSpecialty"] = selectedSubs;
     if (selectedMods.length) fields["modality"] = selectedMods;
@@ -672,6 +676,11 @@ const AnnotationSearch = (props) => {
     if (myCases) fields["myCases"] = myCases;
     if (sort.length) body["sort"] = sort;
     if (Object.keys(filters).length) body["filter"] = newFilters;
+
+    if (props.pid && props.projectToRole) { 
+      body["collaborator"] = !props.admin && props.projectToRole.includes(`${props.pid}:Collaborator`) ? props.username: false;
+    }
+    
     searchAnnotations(body, bm)
       .then((res) => {
         populateSearchResult(res, pageIndex, afterDelete);
@@ -1050,9 +1059,12 @@ const AnnotationSearch = (props) => {
     let newSelected = formSelectedAnnotationsData();
     const toBeDeleted = {};
     const promiseArr = [];
+    let isOpen = [];
     for (let annotation in newSelected) {
+      const aimIsOpen  = checkIfSerieOpen(newSelected[annotation], props.openSeries).isOpen;
+      isOpen.push(aimIsOpen);
       const { projectID } = newSelected[annotation];
-      if (checkIfSerieOpen(newSelected[annotation], props.openSeries).isOpen) {
+      if (aimIsOpen) {
         notDeleted[annotation] = newSelected[annotation];
         delete newSelected[annotation];
       } else {
@@ -1068,22 +1080,30 @@ const AnnotationSearch = (props) => {
       promiseArr.push(deleteAnnotationsList(pid, aims[i]));
     });
 
-    Promise.all(promiseArr)
-      .then(() => {
-        getNewData(props.searchTableIndex, true);
-        props.dispatch(storeAimSelectionAll(null, null, null, true));
-        props.dispatch(storeAimSelection({}, -1));
-      })
-      .catch((error) => {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.message
-        )
+    const aimsNotDeleted = isOpen.filter(el => el === true);
+    if (promiseArr.length === 0) {
+      toast.error(`Couldn't delete any of the selected aims, because series is open in display view. Please close the series to delete aims.`, { autoClose: false });
+    } else {
+      Promise.all(promiseArr)
+        .then(() => {
+          if (aimsNotDeleted.length > 0) 
+            toast.error(`Couldn't delete ${aimsNotDeleted.length} ${aimsNotDeleted.length > 1 ? 'aims' : 'aim'} because Series is open in display view. Please close the series to delete aims.`, { autoClose: false });
+          getNewData(props.searchTableIndex, true);
+          props.dispatch(storeAimSelectionAll(null, null, null, true));
+          props.dispatch(storeAimSelection({}, -1));
+        })
+        .catch((error) => {
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.message
+          )
           toast.error(error.response.data.message, { autoClose: false });
-        getNewData(props.searchTableIndex, true);
-        props.dispatch(storeAimSelectionAll(null, null, null, true));
-      });
+            getNewData(props.searchTableIndex, true);
+            props.dispatch(storeAimSelectionAll(null, null, null, true));
+          });
+    }
+
     setShowDeleteModal(false);
     props.dispatch(clearSelection());
   };
@@ -1522,7 +1542,6 @@ const AnnotationSearch = (props) => {
               Delete
             </button>
           </div>
-        </div>
         {showPlugins && mode !== "teaching" && (
           <div
             style={{
@@ -1590,6 +1609,10 @@ const AnnotationSearch = (props) => {
             </button>
           </div>
         )}
+          <div style={{ alignContent: 'end', fontSize: '0.8rem', padding: '3.5px 7px'}}>
+            {`Showing ${rows} results`}
+          </div>
+        </div>
       </div>
       <table
         className="table table-dark table-striped table-hover title-case"

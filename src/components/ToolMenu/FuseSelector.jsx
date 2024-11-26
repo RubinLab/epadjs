@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import Draggable from "react-draggable";
+import { toast } from "react-toastify";
 import "./FuseSelector.css";
 
 class FuseSelector extends Component {
@@ -13,7 +14,7 @@ class FuseSelector extends Component {
             CT: undefined, //Ct viewport index
             PT: undefined, //PET viewport index
             opacity: 0.7,
-            colormap: 'hotIron',
+            colormap: 'pet',
         }
         this.synchronizers = [];
         this.defaultCtOptions = {
@@ -25,7 +26,7 @@ class FuseSelector extends Component {
         this.defaultPetOptions = {
             name: "PET",
             opacity: 0.7,
-            viewport: { colormap: "hotIron" },
+            viewport: { colormap: "pet" },
             visibile: true
         };
     }
@@ -65,10 +66,12 @@ class FuseSelector extends Component {
                     else
                         evt.target = { selectedIndex: 1, value: petLayerId };
                     this.handleLayerChange(evt);
+
                 });
             }
         });
     }
+
 
     getModality = (element) => {
         // if image has already layers it should be the CT 
@@ -84,7 +87,7 @@ class FuseSelector extends Component {
 
     // 
     setFuseState = () => {
-        const { isFused, CT, PT } = this.state;
+        const { isFused, CT, PT, ctLayerId, petLayerId } = this.state;
         const petElement = cornerstone.getEnabledElements()[PT].element;
         const ctElement = cornerstone.getEnabledElements()[CT].element;
         if (!ctElement || !petElement) return;
@@ -162,6 +165,7 @@ class FuseSelector extends Component {
             cornerstone.setActiveLayer(ctElement, petLayerId);
         else cornerstone.setActiveLayer(ctElement, ctLayerId);
         this.setState({ ctLayerId, petLayerId });
+        this.props.onFuseUnfuse(true, this.state.CT, this.state.PT, ctLayerId, petLayerId, this.synchronizers, this.newImage);
         return true;
     };
 
@@ -172,6 +176,7 @@ class FuseSelector extends Component {
         this.removeSynchronizers();
         this.teleportAnnotations(true);
         this.props.onClose();
+        this.props.onFuseUnfuse(false, this.state.CT, this.state.PT);
     };
 
     getOptions = () => {
@@ -201,18 +206,21 @@ class FuseSelector extends Component {
             'cornerstoneimagerendered',
             cornerstoneTools.stackImagePositionSynchronizer
         );
-        const panZoomSynchronizer = new cornerstoneTools.Synchronizer(
-            'cornerstonetoolsmousedrag',
-            cornerstoneTools.panZoomSynchronizer
-        );
-        cornerstone.getEnabledElements().forEach(({ element }) => {
-            stackPositonSynchronizer.add(element);
-            panZoomSynchronizer.add(element)
-        });
+        // const panZoomSynchronizer = new cornerstoneTools.Synchronizer(
+        //     'cornerstonetoolsmousedrag',
+        //     cornerstoneTools.panZoomSynchronizer
+        // );
+        // cornerstone.getEnabledElements().forEach(({ element }) => {
+        //     stackPositonSynchronizer.add(element);
+        //     // panZoomSynchronizer.add(element)
+        // });
+        stackPositonSynchronizer.addSource(this.getPetElement());
+        stackPositonSynchronizer.addTarget(this.getCtElement());
+
         stackPositonSynchronizer.enabled = true;
-        panZoomSynchronizer.enabled = true;
+        // panZoomSynchronizer.enabled = true;
         this.synchronizers.push(stackPositonSynchronizer);
-        this.synchronizers.push(panZoomSynchronizer);
+        // this.synchronizers.push(panZoomSynchronizer);
 
     };
 
@@ -300,8 +308,23 @@ class FuseSelector extends Component {
         return items;
     }
 
+    closeModal = () => {
+        if (this.state.isFused) {
+            this.setFuseState();
+            toast.info("Deactivating fusion!", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
+        }
+        this.props.onClose();
+    }
+
     render() {
-        const { CT, PT, isFused, ctLayerId, petLayerId, opacity = 0.7, visible = true, colormap = "hotIron" } = this.state;
+        const { CT, PT, isFused, ctLayerId, petLayerId, opacity = 0.7, visible = true, colormap = "pet" } = this.state;
         const colormapsList = cornerstone.colors.getColormapsList();
         const buttonLabel = isFused ? "Unfuse" : "Fuse PET and CT";
         return (
@@ -310,7 +333,8 @@ class FuseSelector extends Component {
                     <span>Fusion Menu</span>
                     <hr />
                     {!isFused && (<b>Note:This is a beta functionality and may have bugs!</b>)}
-                    {isFused && (<div className="layers">
+                    
+                    {/* {isFused && (<div className="layers">
                         <label htmlFor="layers">Active Layer</label>
                         <select className="opt-select" name={"layers"} value={this.getActiveLayer()?.layerId} onChange={this.handleLayerChange}>
                             <option value={ctLayerId}>CT</option>
@@ -327,9 +351,10 @@ class FuseSelector extends Component {
                     {isFused && (<div className="opacity">
                         <label htmlFor="opacity">Opacity</label>
                         <input type="range" name={"opacity"} min={0} max={1} step={0.1} onChange={this.handleOpacityChange} value={opacity} />
-                    </div>)}
+                    </div>)} */}
+                    
                     {isFused && (<div className="colormap">
-                        <label htmlFor="opacity">Colormap</label>
+                        <label htmlFor="opacity" style={{color:"#f8f9fa"}}>Colormap</label>
                         <select value={colormap} onChange={this.handleColormapChange}>
                             {this.createColormapOptions(colormapsList)}
                         </select>
@@ -338,7 +363,7 @@ class FuseSelector extends Component {
                     {!isFused && (<p>Currently to be able to use Fusion functionality only two viewports of PET and CT modalities should be open!</p>)}
                     <button className="closebtn" disabled={!(CT || PT)} onClick={this.setFuseState}>{buttonLabel}</button>
 
-                    <div className="close-fuse-selector" onClick={this.props.onClose}>
+                    <div className="close-fuse-selector" onClick={this.closeModal}>
                         <a href="#">X</a>
                     </div>
                 </div>

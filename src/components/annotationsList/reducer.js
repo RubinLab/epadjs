@@ -55,6 +55,7 @@ import {
   STORE_AIM_SELECTION,
   STORE_AIM_SELECTION_ALL,
   TOGGLE_ALL_CALCULATIONS,
+  SET_LAST_LOCATION,
   colors,
   commonLabels,
 } from "./types";
@@ -63,6 +64,9 @@ import {
   persistColorInDeleteAim,
 } from "../../Utils/aid";
 import { teachingFileTempCode } from "../../constants";
+
+let mode = sessionStorage.getItem('mode');
+
 const initialState = {
   openSeries: [],
   openSeriesAddition: [],
@@ -98,7 +102,8 @@ const initialState = {
   multipageAimSelection: {},
   showCalculations: false,
   showLabels: false,
-  showAnnotations: true,
+  showAnnotations: mode === 'teaching' ? false : true,
+  lastLocation: '',
 };
 
 const checkLastAnnotationDeleted = (seriesList) => {
@@ -113,6 +118,7 @@ const seriesUIDCounter = (arr) => {
   return uidCountMap;
 }
 const asyncReducer = (state = initialState, action) => {
+  mode = sessionStorage.getItem('mode');
   try {
     let aimRefs = {};
     switch (action.type) {
@@ -126,6 +132,8 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case SET_LAST_LOCATION:
+        return { ...state, lastLocation: action.lastLocation };
       case TOGGLE_ALL_CALCULATIONS:
         return { ...state, showCalculations: action.payload.checked };
       case STORE_AIM_SELECTION_ALL:
@@ -409,7 +417,7 @@ const asyncReducer = (state = initialState, action) => {
           delSeriesData = {};
           delShowCalculations = false;
           delShowLabels = false;
-          delShowAnnotations = true;
+          delShowAnnotations = mode === 'teaching' ? false : true;
         } else {
           delActivePort = delGrid.length - 1;
         }
@@ -536,12 +544,13 @@ const asyncReducer = (state = initialState, action) => {
               colors
             );
 
-        if (!state.showAnnotations || state.showLabels) {
-          for (let aim in colorAimsList) {
-            colorAimsList[aim].isDisplayed = state.showAnnotations;
-            colorAimsList[aim].showLabel = state.showLabels;
-          }
+        // if (!state.showAnnotations || state.showLabels) {
+        for (let aim in colorAimsList) {
+          const aimExists = state.aimsList[serUIDFromRef] && state.aimsList[serUIDFromRef][aim];
+          colorAimsList[aim].isDisplayed = aimExists ? state.aimsList[serUIDFromRef][aim].isDisplayed : state.showAnnotations;
+          colorAimsList[aim].showLabel = aimExists ? state.aimsList[serUIDFromRef][aim].showLabels : state.showLabels;
         }
+        // }
         // check if openSeries[activeport] is significant and teaching file 
         // if so check if seriesData is filled  // if not fill the data
         const { significanceOrder: order, template: tempCode } = state.openSeries[state.activePort];
@@ -638,7 +647,7 @@ const asyncReducer = (state = initialState, action) => {
           for (let series in toggledLabeAimList) {
             if (series !== action.payload.serieID) {
               for (let id of ids) {
-                toggledLabeAimList[series][id].showLabel = action.payload.checked;
+                if (toggledLabeAimList[series] && toggledLabeAimList[series][id]) toggledLabeAimList[series][id].showLabel = action.payload.checked;
               }
             }
           }
@@ -648,15 +657,12 @@ const asyncReducer = (state = initialState, action) => {
 
       case TOGGLE_LABEL:
         const singleLabelToggled = { ...state.aimsList };
-        // if type is study
         if (singleLabelToggled[action.payload.serieID][action.payload.aimID].type === 'study') {
-          const allSeries = Object.values(singleLabelToggled);
-          const allSeriesIDs = Object.keys(singleLabelToggled);
-          allSeries.forEach((series, i) => {
-            const currentStatus = series[action.payload.aimID].showLabel;
-            series[action.payload.aimID].showLabel = !currentStatus;
-            singleLabelToggled[allSeriesIDs[i]] = series;
-          })
+          const currentStatus = singleLabelToggled[action.payload.serieID][action.payload.aimID].showLabel;
+          for (let seriesUIDToToggle in singleLabelToggled) {
+            if (singleLabelToggled[seriesUIDToToggle][action.payload.aimID])
+              singleLabelToggled[seriesUIDToToggle][action.payload.aimID].showLabel = !currentStatus;
+          }
         } else {
           const ann = singleLabelToggled[action.payload.serieID][action.payload.aimID];
           ann.showLabel = !ann.showLabel
@@ -703,7 +709,7 @@ const asyncReducer = (state = initialState, action) => {
           openSeriesAddition: [],
           showCalculations: false,
           showLabels: false,
-          showAnnotations: true,
+          showAnnotations: mode === 'teaching' ? false : true,
         };
       case CLEAR_SELECTION:
         let selectionState = { ...state };
@@ -916,16 +922,6 @@ const asyncReducer = (state = initialState, action) => {
           activePort: index,
           openSeries: updatedGrid,
           openSeriesAddition: updatedOpenSeriesAddition,
-          aimsList: {
-            ...state.aimsList,
-            [serUID]: {
-              ...state.aimsList[serUID],
-              [aimID]: {
-                ...state.aimsList[serUID][aimID],
-                isDisplayed: true,
-              },
-            },
-          },
         });
       case GET_PROJECT_MAP:
         return {

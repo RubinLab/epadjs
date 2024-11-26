@@ -7,7 +7,6 @@ const editField = props => {
     <input
       onMouseDown={e => e.stopPropagation()}
       type={type}
-      className='--commentField'
       className='edit-user__modal--input'
       name={props.name}
       onChange={props.onType}

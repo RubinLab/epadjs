@@ -189,15 +189,6 @@ const SeriesDropDown = (props) => {
         props.dispatch(replaceInGrid(serie));
         const list = seriesList.length > 0 ? seriesList : null;
         props.dispatch(getSingleSerie(serie, null, null, list));
-        window.dispatchEvent(
-          new CustomEvent("serieReplaced", {
-            detail: {
-              viewportId: props.activePort,
-              id: e,
-              multiFrameIndex: parseInt(multiFrameIndex)              
-            },
-          })
-        );
       }
         window.dispatchEvent(new CustomEvent("deleteViewportWL"));
       } else {

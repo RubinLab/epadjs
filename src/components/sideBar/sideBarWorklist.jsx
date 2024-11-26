@@ -34,6 +34,7 @@ import {
   changeActivePort,
   selectPatient,
   setSeriesData,
+  setLastLocation
 } from "../annotationsList/action";
 import { isSupportedModality } from "../../Utils/aid.js";
 
@@ -66,6 +67,8 @@ class WorkList extends React.Component {
 
   componentDidMount = async () => {
     mode = sessionStorage.getItem("mode");
+    const lastLocation = this.props.location && this.props.location.pathname ? this.props.location.pathname : '/'
+    this.props.dispatch(setLastLocation(lastLocation));
     this.getWorkListData(true);
   };
 
@@ -84,9 +87,10 @@ class WorkList extends React.Component {
     const filteredWorklists = [];
     const notAuthorized = [];
     const { projectMap } = this.props;
+    const projectsFilled = Object.keys(projectMap).length > 0;
     worklists.forEach((el, i) => {
-      if (!projectMap[el.projectID]) notAuthorized.push(el.projectID);
-      else filteredWorklists.push(el);
+      if (projectsFilled && !projectMap[el.projectID]) notAuthorized.push(el.projectID);
+      else if (projectsFilled) filteredWorklists.push(el);
     });
     return { notAuthorized, filteredWorklists };
   };
