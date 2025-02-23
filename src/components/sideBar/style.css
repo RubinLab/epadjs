@@ -32,7 +32,6 @@ body {
   text-align: right;
   padding-top: 20px;
   /* text-shadow: 1px 2px 0px rgba(0, 0, 0, 0.25); */
-
 }
 
 .left-tabs {
@@ -61,6 +60,26 @@ body {
 #worklists-tab__cont,
 #progress-tab__cont {
   /* width: 7.5rem; */
+}
+
+@supports (-ms-ime-align: auto) {
+  #projects-tab__cont,
+  #worklists-tab__cont,
+  #progress-tab__cont {
+    transform: rotate(90deg);
+  }
+
+  #projects-tab,
+  #worklists-tab,
+  #progress-tab {
+    padding: 1rem 0.25rem;
+    margin: 0.5rem 0rem 0.5rem 0rem;
+    border-radius: 0px 5px 5px 0px;
+    /* height: 2.2rem;
+  width: 7rem;
+  left: 25px;
+  top: 30px; */
+  }
 }
 
 #projects-tab,
@@ -112,7 +131,6 @@ body {
   --bs-nav-tabs-link-active-border-color: #222 #222 #222 !important;
   border-bottom: var(--bs-nav-tabs-border-width) solid transparent !important;
   /* text-shadow: 1px 2px 0px rgb(0 0 0 / 25%) !important; */
-
 }
 
 .nav {
@@ -129,15 +147,12 @@ body {
   list-style: none;
 }
 
-
-
 .nav-tabs .nav-item.show .nav-link,
 .nav-tabs .nav-link.active {
   color: var(--bs-nav-tabs-link-active-color);
   background-color: var(--bs-nav-tabs-link-active-bg);
   border-color: #222222;
   /* text-shadow: 1px 2px 0px rgb(0 0 0 / 25%) !important; */
-
 }
 
 .nav-tabs .nav-link {
@@ -159,9 +174,10 @@ body {
   font-weight: var(--bs-nav-link-font-weight);
   color: var(--bs-nav-link-color);
   text-decoration: none;
-  transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out;
   /* text-shadow: 1px 2px 0px rgb(0 0 0 / 25%) !important; */
-  margin-right: .5em;
+  margin-right: 0.5em;
 }
 
 .element {
@@ -186,7 +202,7 @@ body {
 }
 
 .element_de_selected {
-  background-color: '';
+  background-color: "";
 }
 
 .element_de_selected:hover {
@@ -258,7 +274,6 @@ body {
   color: #ffffff;
   text-align: right;
   text-shadow: 1px 2px 0px rgba(0, 0, 0, 0.25);
-
 }
 
 .left-tabs-closed {
