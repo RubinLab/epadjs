@@ -43,3 +43,33 @@ export const formatDates = (timeStamp) => {
 export const teachingFileTempUid =
   "2.25.182468981370271895711046628549377576999";
 export const teachingFileTempCode = "99EPAD_947";
+
+export const keyMap = {
+  'ctrl + y': 'Aim save',
+  f: 'Arrow',
+  r: 'Circle',
+  x: 'Expand view',
+  i: 'Invert',
+  d: 'Length',
+  p: 'Pan',
+  o: 'Perpendicular',
+  space: 'Reset',
+  s: 'Select',
+  w: 'Window-Level',
+  z: 'Zoom',
+}
+
+export const reverseKeyMap = {
+  'Aim save': 'ctrl + y',
+  'Arrow': 'f',
+  'Circle': 'r',
+  'Expand view': 'x',
+  'Invert': 'i',
+  'Length': 'd',
+  'Pan': 'p',
+  'Perpendicular': 'o',
+  'Reset': 'space',
+  'Select': 's',
+  'Window-Level': 'w',
+  'Zoom': 'z',
+}
