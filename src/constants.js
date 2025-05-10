@@ -65,11 +65,11 @@ export const reverseKeyMap = {
   'Circle': 'r',
   'Expand view': 'x',
   'Invert': 'i',
-  'Length': 'd',
+  'Line': 'd',
   'Pan': 'p',
   'Perpendicular': 'o',
   'Reset': 'space',
   'Select': 's',
-  'Window-Level': 'w',
+  'Levels': 'w',
   'Zoom': 'z',
 }
