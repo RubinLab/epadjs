@@ -6,6 +6,7 @@ import { FaRegEye } from "react-icons/fa";
 import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
 import ReactTooltip from "react-tooltip";
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import {
   GrDocumentMissing,
   GrDocumentVerified,
@@ -278,7 +279,8 @@ class WorkList extends React.Component {
     return [
       {
         id: "open",
-        // Header: "Open",
+        // Header: "",
+        accessor:"open",
         width: 30,
         resizable: true,
         Cell: (original) => {
@@ -306,9 +308,11 @@ class WorkList extends React.Component {
       },
       {
         width: 30,
+        accessor:"remove",
         Cell: (original) => {
+          console.log(" --> ", original);
           const { workListID, projectID, subjectID, studyUID } =
-            original.row._original;
+            original.row;
           return (
             <div>
               <Button
@@ -336,10 +340,11 @@ class WorkList extends React.Component {
         // Header: "%",
         width: 25,
         resizable: false,
+        accessor:"progress_by",
         // style={{ 'fontSize': '0.9rem', 'filter': 'invert(100%) sepia(0%) saturate(7472%) hue-rotate(280deg) brightness(83%) contrast(91%)' }}
         // style={{ 'fontSize': '0.9rem', 'filter': 'invert(100%) sepia(0%) saturate(7472%) hue-rotate(280deg) brightness(83%) contrast(91%)' }}
         Cell: (original) => {
-          const isAuto = original.row._original.progressType === "AUTO";
+          const isAuto = original.row.progressType === "AUTO";
           const variant = isAuto ? "light" : "info";
           const text = isAuto ? <GrCalculator /> : <GrManual />;
           const tooltipText = isAuto
@@ -379,7 +384,7 @@ class WorkList extends React.Component {
         accessor: "completeness",
         sortMethod: (a, b) => a - b,
         Cell: (original) => {
-          const { completeness } = original.row._original;
+          const { completeness } = original.row;
           let variant;
           let text;
           let tooltipText;
@@ -430,12 +435,13 @@ class WorkList extends React.Component {
       {
         id: "desc",
         Header: "Study Description",
+        accessor: "study_desc",
         width: 240,
         sortable: true,
         resizable: true,
         Cell: (original) => {
           let studyDesc = this.clearCarets(
-            original.row._original.studyDescription
+            original.row.studyDescription
           );
           studyDesc = studyDesc ? studyDesc : "Unnamed Study";
           return <div>{studyDesc}</div>;
@@ -444,11 +450,12 @@ class WorkList extends React.Component {
       {
         id: "graph",
         Header: "Report",
+        accessor: "report",
         width: 55,
         sortable: false,
         resizable: false,
         Cell: (original) => {
-          const { subjectID, projectID } = original.row._original;
+          const { subjectID, projectID } = original.row;
           const pairExists = this.checkPairExist(subjectID, projectID);
           const newMap = { ...this.state.patientsProjectMap };
           return (
@@ -461,45 +468,63 @@ class WorkList extends React.Component {
                 else newMap[`${subjectID}-${projectID}`] = true;
                 this.setState({ patientsProjectMap: newMap });
                 this.props.getWorklistPatient(newMap);
-                this.props.dispatch(selectPatient(original.row._original));
+                this.props.dispatch(selectPatient(original.row));
               }}
               id={original.id}
             />
           );
         },
       },
-
       {
         id: "sb_name",
         Header: "Subject Name",
+        accessor:"subject_name", 
         width: 160,
         sortable: true,
         resizable: true,
 
         Cell: (original) => {
           let subjectName = this.clearCarets(
-            original.row._original.subjectName
+            original.row.subjectName
           );
           subjectName = subjectName ? subjectName : "Unnamed Subject";
           return <div>{subjectName}</div>;
         },
       },
+      // {
+      //   id: "pr_name",
+      //   Header: "Project Name",
+      //   width: 200,
+      //   accessor: "projectName",
+      //   sortable: true,
+      //   resizable: true,
+      //   show: mode === "thick",
+      //   Cell: (original) => {
+      //     const { projectMap } = this.props;
+      //     const { projectID } = original.row;
+      //     if (!projectMap[projectID]) {
+      //       return null;
+      //     } else {
+      //       let { projectName } =
+      //         this.props.projectMap[original.row.projectID];
+      //       return <div>{projectName}</div>;
+      //     }
+      //   },
+      // },
       {
         id: "pr_name",
         Header: "Project Name",
         width: 200,
-        accessor: "projectName",
-        sortable: true,
-        resizable: true,
-        show: mode === "thick",
+        accessor: "projectName", // Accessor points to your data field
         Cell: (original) => {
           const { projectMap } = this.props;
-          const { projectID } = original.row._original;
+          const { projectID } = original.row;
+
+          // Custom logic to render the project name
           if (!projectMap[projectID]) {
             return null;
           } else {
-            let { projectName } =
-              this.props.projectMap[original.row._original.projectID];
+            let { projectName } = this.props.projectMap[original.row.projectID];
             return <div>{projectName}</div>;
           }
         },
@@ -530,10 +555,10 @@ class WorkList extends React.Component {
       },
       {
         width: 30,
+        accessor:'done_bt',
         Cell: (original) => {
           const { workListID, projectID, subjectID, studyUID } =
-            original.row._original;
-
+            original.row;
           return (
             <div>
               <Button
@@ -567,9 +592,10 @@ class WorkList extends React.Component {
       },
       {
         width: 30,
+        accessor:'progress_bt',
         Cell: (original) => {
           const { workListID, projectID, subjectID, studyUID } =
-            original.row._original;
+            original.row;
           return (
             <div>
               <Button
@@ -603,9 +629,10 @@ class WorkList extends React.Component {
       },
       {
         width: 30,
+        accessor:'not_started_bt',
         Cell: (original) => {
           const { workListID, projectID, subjectID, studyUID } =
-            original.row._original;
+            original.row;
           return (
             <div>
               <Button
@@ -639,9 +666,10 @@ class WorkList extends React.Component {
       },
       {
         width: 30,
+        accessor:'auto_calc',
         Cell: (original) => {
           const { workListID, projectID, subjectID, studyUID, progressType } =
-            original.row._original;
+            original.row;
           return (
             <div>
               <Button
@@ -776,20 +804,72 @@ class WorkList extends React.Component {
     }
   };
 
+  handleDragEnd = (result) => {
+    const { destination, source } = result;
+
+    if (!destination) return; // Dropped outside the list
+
+    const reorderedWorklists = Array.from(this.state.worklists);
+    const [removed] = reorderedWorklists.splice(source.index, 1);
+    reorderedWorklists.splice(destination.index, 0, removed);
+
+    this.setState({ worklists: reorderedWorklists });
+  };
+
   render = () => {
     const selected = this.state.selectAll < 2;
     const openSeriesUIDs = this.props.openSeries.map((el) => el.seriesUID);
+    const { worklists } = this.state;
 
     return (
       <div className="worklist-page">
-        <Table
-          className="__table"
-          data={this.state.worklists}
-          columns={this.defineColumns()}
-          pageSize={this.state.worklists.length}
-          showPagination={false}
-          NoDataComponent={() => null}
-        />
+<DragDropContext onDragEnd={this.handleDragEnd}>
+          <Droppable droppableId="droppable" type="row">
+            {(provided) => (
+              <table
+                className="__table"
+                {...provided.droppableProps}
+                ref={provided.innerRef} // Ensure this is applied to the table element
+              >
+                <thead>
+                  <tr>
+                    {/* Add your table headers here */}
+                    {this.defineColumns().map((column, index) => (
+                      <th key={index}>{column.Header}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {worklists.map((row, index) => {
+                    const { studyUID } = row; // Use row data here
+                    return (
+                      <Draggable key={studyUID} draggableId={studyUID} index={index}>
+                        {(provided) => (
+                          <tr
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                          >
+                            {this.defineColumns().map((column, idx) => {
+                              const cellData = row[column.accessor] || ''; // Get cell data from row
+                              return (
+                                <td key={idx}>
+                                  {column.Cell
+                                    ? column.Cell({ row, column, value: cellData }) // Call Cell directly if defined
+                                    : cellData} 
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        )}
+                      </Draggable>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </Droppable>
+        </DragDropContext>
         {this.state.deleteSingleClicked && (
           <DeleteAlert
             message={messages.deleteSingle}

@@ -34,6 +34,7 @@
     "process": "^0.11.10",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
+    "react-beautiful-dnd": "^13.1.1",
     "react-bootstrap": "^1.6.4",
     "react-bootstrap-sweetalert": "^4.4.1",
     "react-collapsible": "^2.8.0",
