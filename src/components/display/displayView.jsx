@@ -393,7 +393,8 @@ class DisplayView extends Component {
     const isInitialIndex = prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].multiFrameIndex === undefined && this.props.seriesAddition[activePort].multiFrameIndex === null;
     const mfChanged = samePortControl && (prevProps.seriesAddition[activePort].multiFrameIndex !== this.props.seriesAddition[activePort].multiFrameIndex && !isInitialIndex) && this.props.seriesAddition[activePort].multiFrameIndex === null;
 
-    if ( (mfAimJumpDataFilled && newMFAimToJump) || (prevActiveFrameDataMissing && frameDataFilled && multiFrameAimJumpData && multiFrameAimJumpData[0]) || mfChanged) {
+    console.log(" ----> mfChanged", mfChanged)
+    if ( (mfAimJumpDataFilled && newMFAimToJump) || (prevActiveFrameDataMissing && frameDataFilled && multiFrameAimJumpData && multiFrameAimJumpData[0])) {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], `didupdate 1`);
@@ -407,13 +408,13 @@ class DisplayView extends Component {
       //   (prevProps.series.length !== this.props.series.length &&
       //     this.props.loading === false)
       // ) {
-    } else if (prevProps.series.length < series.length || refreshPage || seriesReplaced || (prevActiveFrameDataMissing && frameDataFilled)) {
+    } else if (prevProps.series.length < series.length || refreshPage || seriesReplaced || (prevActiveFrameDataMissing && frameDataFilled) || mfChanged) {
       await this.setState({ isLoading: true });
       this.getViewports();
       let mfIndex = null;
       let frame = null;
       const seriesAdded = !!(!prevProps.seriesAddition[activePort] && seriesAddition[activePort]);
-      if ( active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex) {
+      if ( active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex || mfChanged) {
         mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
         frame = 0;
       }
@@ -2736,6 +2737,7 @@ class DisplayView extends Component {
   // Don't take the activePort Index from props because store updates late so
   // activePort may be null while the event is triggered
   jumpToImage = (imageIndex, activePortIndex) => {
+    console.log(" ---> imageIndex, activePortIndex", imageIndex, activePortIndex);
     const newData = [...this.state.data];
     newData[activePortIndex].stack.currentImageIdIndex = parseInt(
       imageIndex,
