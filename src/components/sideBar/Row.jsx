@@ -2,6 +2,7 @@ import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GrDrag } from "react-icons/gr";
+import "./style.css";
 
 export const Row = ({ row, activeId }) => {
   const {
@@ -28,7 +29,7 @@ export const Row = ({ row, activeId }) => {
           if (i === 0) {
             return (
               <>
-                <td style={{paddingRight: '6px'}} {...attributes} {...listeners} >
+                <td {...attributes} {...listeners} >
                     <GrDrag />
                 </td>
                 <td {...cell.getCellProps()}>

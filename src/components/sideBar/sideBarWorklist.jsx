@@ -265,7 +265,6 @@ import "./style.css";
         sortable: true,
         resizable: true,
         Cell: ({ row }) => {
-          console.log("--> original", row)  
           let studyDesc = clearCarets(
             row.original.studyDescription
           );
@@ -390,7 +389,7 @@ import "./style.css";
               <Button
                 variant="success"
                 data-tip
-                data-for={`progress-verified-button${row.original.index}`}
+                data-for={`progress-verified-button${row.index}`}
                 style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
                 onClick={() =>
                   handleClickProgresButton(
@@ -405,7 +404,7 @@ import "./style.css";
                 <GrDocumentVerified />
               </Button>
               <ReactTooltip
-                id={`progress-verified-button${row.original.index}`}
+                id={`progress-verified-button${row.index}`}
                 place="left"
                 type="light"
                 delayShow={1000}
@@ -427,7 +426,7 @@ import "./style.css";
               <Button
                 variant="warning"
                 data-tip
-                data-for={`progress-inprogress-button${row.original.index}`}
+                data-for={`progress-inprogress-button${row.index}`}
                 style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
                 onClick={() =>
                   handleClickProgresButton(
@@ -441,7 +440,7 @@ import "./style.css";
               >
                 <GrDocumentPerformance />
                 <ReactTooltip
-                  id={`progress-inprogress-button${row.original.index}`}
+                  id={`progress-inprogress-button${row.index}`}
                   place="left"
                   type="light"
                   delayShow={1000}
@@ -464,7 +463,7 @@ import "./style.css";
               <Button
                 variant="danger"
                 data-tip
-                data-for={`progress-notStarted-button${row.original.index}`}
+                data-for={`progress-notStarted-button${row.index}`}
                 style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
                 onClick={() =>
                   handleClickProgresButton(
@@ -478,7 +477,7 @@ import "./style.css";
               >
                 <GrDocumentMissing />
                 <ReactTooltip
-                  id={`progress-notStarted-button${row.original.index}`}
+                  id={`progress-notStarted-button${row.index}`}
                   place="left"
                   type="light"
                   delayShow={1000}
@@ -496,13 +495,14 @@ import "./style.css";
         Cell: ({ row }) => {
           const { workListID, projectID, subjectID, studyUID, progressType } =
           row.original;
+          console.log(' ---> ow.index', row.index)
           return (
             <div>
               <Button
                 disabled={progressType === "AUTO"}
                 variant={progressType === "AUTO" ? "secondary" : "info"}
                 data-tip
-                data-for={`progress-auto-button${row.original.index}`}
+                data-for={`progress-auto-button${row.index}`}
                 style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
                 onClick={() =>
                   handleClickProgresButton(
@@ -516,7 +516,7 @@ import "./style.css";
               >
                 <GrPowerReset />
                 <ReactTooltip
-                  id={`progress-auto-button${row.original.index}`}
+                  id={`progress-auto-button${row.index}`}
                   place="left"
                   type="light"
                   delayShow={1000}

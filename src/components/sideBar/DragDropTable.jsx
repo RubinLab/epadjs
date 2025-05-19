@@ -17,6 +17,7 @@ import {
 } from "@dnd-kit/sortable";
 import { useTable } from "react-table";
 import { Row, DraggableRow } from "./Row";
+import "./style.css"
 
 export function DragDropTable({ columns, data, setData }) {
   const [activeId, setActiveId] = useState();
