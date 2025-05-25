@@ -22,6 +22,7 @@ import { getSeries } from "../../services/seriesServices";
 import DeleteAlert from "../management/common/alertDeletionModal";
 import SelectSeriesModal from "../annotationsList/selectSerieModal";
 import { addToGrid, getSingleSerie, alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData } from "../annotationsList/action";
+import { isSupportedModality } from "../../Utils/aid.js";
 
 // CSS import
 import "./style.css";
@@ -81,41 +82,25 @@ import "./style.css";
         .catch((err) => setError(err.response.data.message));
     };
 
+    // Handle the cancel of delete confirmation
+    const handleCancel = () => {
+      setDeleteSingleClicked(false);
+      setError(null);
+    };
 
-  // Handle single deletion of a study
-//   const deleteStudyfromWorklist = async () => {
-//     const { worklist, projectID, subjectID, studyUID } = singleDeleteData;
-//     const body = [{ projectID, subjectID, studyUID }];
-//     deleteStudyFromWorklist(worklist, body)
-//       .then(() => {
-//         setSingleDeleteData({});
-//         setDeleteSingleClicked(false);
-//         getWorkListData();
-//       })
-//       .catch((err) => {
-//         setError(err.response.data.message);
-//       });
-//   };
-
-  // Handle the cancel of delete confirmation
-  const handleCancel = () => {
-    setDeleteSingleClicked(false);
-    setError(null);
-  };
-
-  const clearCarets = (string) => {
-    if (string) {
-      for (let i = 0; i < string.length; i++) {
-        string = string.replace("^", " ");
+    const clearCarets = (string) => {
+      if (string) {
+        for (let i = 0; i < string.length; i++) {
+          string = string.replace("^", " ");
+        }
+        return string.trim();
       }
-      return string.trim();
-    }
-  };
+    };
 
-  const handleSingleDelete = (worklist, projectID, subjectID, studyUID) => {
-    setSingleDeleteData({ worklist, projectID, subjectID, studyUID });
-    setDeleteSingleClicked(true);
-  };
+    const handleSingleDelete = (worklist, projectID, subjectID, studyUID) => {
+      setSingleDeleteData({ worklist, projectID, subjectID, studyUID });
+      setDeleteSingleClicked(true);
+    };
 
   const handleClickProgresButton = (
     workListID,
@@ -149,6 +134,111 @@ import "./style.css";
     patientsProjectMap[`${subjectID}-${projectID}`]
       ? true
       : false;
+  };
+
+  const checkIfSerieOpen = (selectedSerie) => {
+    let isOpen = false;
+    let index;
+    props.openSeries.forEach((serie, i) => {
+      if (serie.seriesUID === selectedSerie) {
+        isOpen = true;
+        index = i;
+      }
+    });
+    return { isOpen, index };
+  };
+
+  const getExistingSeriesData = (serie) => {
+    const { projectID, patientID, studyUID } = serie;
+    const { seriesData } = props;
+    const dataExists =
+        seriesData[projectID] &&
+        seriesData[projectID][patientID] &&
+        seriesData[projectID][patientID][studyUID] &&
+        seriesData[projectID][patientID][studyUID].list;
+
+    const existingData = dataExists
+      ? seriesData[projectID][patientID][studyUID].list
+      : null;
+    return existingData;
+  }
+
+  const viewSelection = async (seriesArr) => {
+    const { seriesData } = props;
+    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
+    const notOpenSeries = [];
+    // const selectedSeries = Object.values(seriesObj);
+    const selectedSeries = seriesArr;
+    if (selectedSeries.length > 0) {
+      //check if enough room to display selection
+      for (let serie of selectedSeries) {
+        if (!checkIfSerieOpen(serie.seriesUID).isOpen) {
+          notOpenSeries.push(serie);
+        }
+      }
+      //if all ports are full
+      if (
+        notOpenSeries.length > 0 &&
+        props.openSeries.length === maxPort
+      ) {
+        props.dispatch(alertViewPortFull());
+      } else {
+        //if all series already open update active port
+        if (notOpenSeries.length === 0) {
+          let index = checkIfSerieOpen(selectedSeries[0].seriesUID).index;
+          props.dispatch(changeActivePort(index));
+          props.history.push("/display");
+          props.dispatch(clearSelection());
+        } else {
+          if (selectedSeries.length + props.openSeries.length > maxPort) {
+            // alert user about the num of open series a the moment and told only maxPort is allowed
+            const openPorts = props.openSeries.length;
+            setError(`Already ${openPorts} viewers open. You can open ${maxPort} at a time`);
+          } else {
+            //else get data for each serie for display
+            selectedSeries.forEach((serie) => {
+              const list = getExistingSeriesData(serie);
+              props.dispatch(addToGrid(serie));
+              props.dispatch(getSingleSerie(serie, null, null, list));
+            });
+            props.history.push("/display");
+            props.dispatch(clearSelection());
+          }
+        }
+      }
+    }
+  };
+
+  const handleOpenClick = async (study) => {
+    const { seriesData } = props;
+    const { projectID, subjectID, studyUID, studyDescription } = study;
+    let series;
+    const dataExists =
+      seriesData[projectID] &&
+      seriesData[projectID][subjectID] &&
+      seriesData[projectID][subjectID][studyUID] &&
+      seriesData[projectID][subjectID][studyUID].list;
+
+    try {
+      if (!dataExists) {
+        ({ data: series } = await getSeries(projectID, subjectID, studyUID));
+        props.dispatch(setSeriesData(projectID, subjectID, studyUID, series, true));
+      } else series = seriesData[projectID][subjectID][studyUID].list;
+      series = series.filter(isSupportedModality);
+      const maxPort = parseInt(sessionStorage.getItem("maxPort"));
+
+      const { openSeries } = props;
+      if (series.length + openSeries.length <= maxPort) {
+        setSeries(series);
+        viewSelection(series);
+      } else {
+        setSeries(series);
+        setShowSeries(!showSeries);
+        setStudyName(studyDescription)
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Define columns for the table
@@ -283,7 +373,6 @@ import "./style.css";
           const { subjectID, projectID } = row.original;
           const pairExists = checkPairExist(subjectID, projectID);
           const newMap = { patientsProjectMap };
-          console.log('--> Report', row.original)
           return (
             <input
               type="checkbox"
@@ -495,7 +584,6 @@ import "./style.css";
         Cell: ({ row }) => {
           const { workListID, projectID, subjectID, studyUID, progressType } =
           row.original;
-          console.log(' ---> ow.index', row.index)
           return (
             <div>
               <Button
@@ -545,11 +633,11 @@ import "./style.css";
                 error={error}
                 />
             )}
-            {showSeries && (
+            {showSeries && series.length > 0 && (
                 <SelectSeriesModal
-                seriesPassed={series}
-                onCancel={() => setShowSeries(false)}
-                studyName={studyName}
+                  seriesPassed={[series]}
+                  onCancel={() => setShowSeries(false)}
+                  studyName={studyName}
                 />
             )}
         </div>
