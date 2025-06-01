@@ -248,6 +248,7 @@ import "./style.css";
       {
         id: "open",
         accessor: "open",
+        sortable: false,
         width: 30,
         resizable: true,
         Cell: ({ row }) => {
@@ -272,6 +273,7 @@ import "./style.css";
       {
         width: 30,
         accessor: "remove",
+        sortable: false,
         Cell: ({ row }) => {
           const { workListID, projectID, subjectID, studyUID } = row.original;
           return (
@@ -295,9 +297,8 @@ import "./style.css";
         // Header: "%",
         width: 25,
         resizable: false,
-        sortable: true,
+        sortable: false,
         accessor: "completeness",
-        sortMethod: (a, b) => a - b,
         Cell: ({ row }) => {
           const { completeness } = row.original;
           let variant;
@@ -429,6 +430,7 @@ import "./style.css";
         id: "pr_name",
         Header: "Project Name",
         width: 200,
+        sortable: true,
         accessor: "projectName", // Accessor points to your data field
         Cell: ({ row }) => {
           const { projectMap } = props;
@@ -470,6 +472,7 @@ import "./style.css";
       {
         width: 30,
         accessor:'done_bt',
+        sortable: false,
         Cell: ({ row }) => {
           const { workListID, projectID, subjectID, studyUID } =
             row.original;
@@ -507,6 +510,7 @@ import "./style.css";
       {
         width: 30,
         accessor:'progress_bt',
+        sortable: false,
         Cell: ({ row }) => {
           const { workListID, projectID, subjectID, studyUID } =
           row.original;
@@ -544,6 +548,7 @@ import "./style.css";
       {
         width: 30,
         accessor:'not_started_bt',
+        sortable: false,
         Cell: ({ row }) => {
           const { workListID, projectID, subjectID, studyUID } =
           row.original;
@@ -581,6 +586,7 @@ import "./style.css";
       {
         width: 30,
         accessor:'auto_calc',
+        sortable: false,
         Cell: ({ row }) => {
           const { workListID, projectID, subjectID, studyUID, progressType } =
           row.original;
@@ -624,7 +630,6 @@ import "./style.css";
   return (
         <div className="worklist-page">
             <DragDropTable columns={columns} data={worklists} setData={setWorklists} />
-
             {deleteSingleClicked && (
                 <DeleteAlert
                 message={messages.deleteSingle}

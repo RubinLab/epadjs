@@ -73,6 +73,7 @@ class WorkList extends React.Component {
     this.getWorkListData(true);
   };
 
+  //need to be moved
   componentDidUpdate = (prevProps) => {
     if (prevProps.match.params.wid !== this.props.match.params.wid) {
       this.getWorkListData(true);
@@ -823,7 +824,7 @@ class WorkList extends React.Component {
 
     return (
       <div className="worklist-page">
-<DragDropContext onDragEnd={this.handleDragEnd}>
+        <DragDropContext onDragEnd={this.handleDragEnd}>
           <Droppable droppableId="droppable" type="row">
             {(provided) => (
               <table
@@ -835,7 +836,7 @@ class WorkList extends React.Component {
                   <tr>
                     {/* Add your table headers here */}
                     {this.defineColumns().map((column, index) => (
-                      <th key={index}>{column.Header}</th>
+                      <th key={`col-index-${index}`}>{column.Header}</th>
                     ))}
                   </tr>
                 </thead>
@@ -853,7 +854,7 @@ class WorkList extends React.Component {
                             {this.defineColumns().map((column, idx) => {
                               const cellData = row[column.accessor] || ''; // Get cell data from row
                               return (
-                                <td key={idx}>
+                                <td key={`cell-${idx}`}>
                                   {column.Cell
                                     ? column.Cell({ row, column, value: cellData }) // Call Cell directly if defined
                                     : cellData} 
