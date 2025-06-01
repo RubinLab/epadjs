@@ -394,7 +394,7 @@ class selectSerieModal extends React.Component {
         innerList.push(item);
       }
       selectionList.push(
-        <div key={keys[i]}>
+        <div key={`sl-list-${keys[i]}`}>
           {this.mode !== "teaching" && (
             <div className="serieSelection-title">
               {this.getTitle(series[i][0])}
@@ -408,7 +408,7 @@ class selectSerieModal extends React.Component {
     }
     if (significantExplanation)
       selectionList.push(
-        <div key={"explanation"} className={"significant-series"}>
+        <div key={`explanation${i}`} className={"significant-series"}>
           <br />
           (S): Significant series
         </div>
