@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import { Button } from "react-bootstrap";
 import { FaRegEye } from "react-icons/fa";
 import ReactTooltip from "react-tooltip";
+import { toast } from "react-toastify";
 import { GrDocumentMissing,
     GrDocumentVerified,
     GrDocumentPerformance,
@@ -15,6 +16,7 @@ import { DragDropTable } from "./DragDropTable";
 import {
   getStudiesOfWorklist,
   deleteStudyFromWorklist,
+  updateWorklistProgressManually
 } from "../../services/worklistServices";
 import { getSeries } from "../../services/seriesServices";
 
@@ -23,10 +25,19 @@ import DeleteAlert from "../management/common/alertDeletionModal";
 import SelectSeriesModal from "../annotationsList/selectSerieModal";
 import { addToGrid, getSingleSerie, alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData } from "../annotationsList/action";
 import { isSupportedModality } from "../../Utils/aid.js";
-
 // CSS import
 import "./style.css";
-  
+
+const messages = {
+  deleteSingle: "Remove study from the worklist? This cannot be undone.",
+  deleteSelected:
+    "Delete selected studies from the worklist? This cannot be undone.",
+  notAuthorizedProjects:
+    "You do not have access to all of the projects of the worklist. Please contact to your admin about projects:",
+};
+
+let mode;
+
   const WorkList = (props) => {
     const [worklists, setWorklists] = useState([]);
     const [singleDeleteData, setSingleDeleteData] = useState({});
@@ -39,6 +50,7 @@ import "./style.css";
     const [patientsProjectMap, setPatientsProjectMap] = useState({});
     const [studyName, setStudyName] = useState("");
 
+    mode = sessionStorage.getItem("mode");
   
     useEffect(() => {
       getWorkListData(true);
@@ -626,16 +638,15 @@ import "./style.css";
     [props.match.params.wid]
   );
 
-
   return (
         <div className="worklist-page">
-            <DragDropTable columns={columns} data={worklists} setData={setWorklists} />
+            <DragDropTable columns={columns} data={worklists} setData={setWorklists} wid={props.match.params.wid}/>
             {deleteSingleClicked && (
                 <DeleteAlert
-                message={messages.deleteSingle}
-                onCancel={handleCancel}
-                onDelete={deleteStudyfromWorklist}
-                error={error}
+                  message={messages.deleteSingle}
+                  onCancel={handleCancel}
+                  onDelete={deleteStudyfromWorklist}
+                  error={error}
                 />
             )}
             {showSeries && series.length > 0 && (
