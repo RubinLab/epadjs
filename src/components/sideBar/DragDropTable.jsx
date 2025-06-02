@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   closestCenter,
   DndContext,
@@ -19,24 +19,38 @@ import { useTable, useSortBy, useRowSelect } from "react-table";
 import { Row, DraggableRow } from "./Row";
 import "./style.css"
 
+let savedSortByMap;
 
-export function DragDropTable({ columns, data, setData }) {
+export function DragDropTable({ columns, data, setData, wid }) {
   const [activeId, setActiveId] = useState();
   const items = useMemo(() => data?.map(({ studyUID }) => studyUID), [data]);
+  savedSortByMap = sessionStorage.getItem("sortBy");
+  savedSortByMap = savedSortByMap ? new Map(Object.entries(JSON.parse(savedSortByMap))) : new Map();
+  let savedSortByList = savedSortByMap.get(wid) || [];
+
   // Use the state and functions returned from useTable to build your UI
   const {
     getTableProps,
     getTableBodyProps,
     headerGroups,
     rows,
-    prepareRow
+    prepareRow,
+    state: { sortBy }
   } = useTable({
     columns,
-    data
+    data,
+    initialState: { sortBy: savedSortByList }
   },
     useSortBy,  // this hook is required for sorting
     useRowSelect,
   );
+
+    useEffect(() => {
+      if (sortBy.length > 0) {
+        savedSortByMap.set(wid, sortBy);
+        sessionStorage.setItem("sortBy", JSON.stringify(Object.fromEntries(savedSortByMap)));
+      }
+    }, [sortBy]);
 
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
@@ -91,20 +105,20 @@ export function DragDropTable({ columns, data, setData }) {
         <thead>
           {headerGroups.map((headerGroup, inx) => {
             return (
-            <tr key={`hdr-r-${inx}`} {...headerGroup.getHeaderGroupProps()}>
+            <tr key={`header-row-${headerGroup.id || inx}`} {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map((column, i) => {
                  return (i === 0 ?  
                         <>
-                            <th {...column.getHeaderProps()}></th>
-                            {column.sortable ? <th {...column.getHeaderProps(column.getSortByToggleProps())}>{column.render("Header")}</th> 
-                            : <th {...column.getHeaderProps()}>{column.render("Header")}</th>}
+                            <th key={`sort-i-${i}`} {...column.getHeaderProps()}></th>
+                            {column.sortable ? <th key={`i-${i}`} {...column.getHeaderProps(column.getSortByToggleProps())}>{column.render("Header")}</th> 
+                            : <th key={`i-${i}`} {...column.getHeaderProps()}>{column.render("Header")}</th>}
                         </>
                      :     
                       column.sortable ?
-                        (<th {...column.getHeaderProps(column.getSortByToggleProps())}>{column.render("Header")}
+                        (<th key={`i-${i}`} {...column.getHeaderProps(column.getSortByToggleProps())}>{column.render("Header")}
                             {column.isSorted ? (column.isSortedDesc ? " 🔽" : " 🔼") : ""}
                         </th> )
-                        : <th {...column.getHeaderProps()}>{column.render("Header")}</th>      
+                        : <th key={`i-${i}`} {...column.getHeaderProps()}>{column.render("Header")}</th>      
           )})}
             </tr>
           )})}
@@ -112,7 +126,6 @@ export function DragDropTable({ columns, data, setData }) {
         <tbody {...getTableBodyProps()}>
           <SortableContext items={items} strategy={verticalListSortingStrategy}>
             {rows.map((row, k) => {
-            //   console.log('-->', row);  
               prepareRow(row);
               return <Row key={`${k}-${row.original.StudyUID}`} row={row} activeId={activeId}/>;
             })}
