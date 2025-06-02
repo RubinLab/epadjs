@@ -2,9 +2,10 @@ import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GrDrag } from "react-icons/gr";
+import { toast } from "react-toastify";
 import "./style.css";
 
-export const Row = ({ row, activeId }) => {
+export const Row = ({ row, activeId, notDraggable }) => {
   const {
     attributes,
     listeners,
@@ -20,6 +21,20 @@ export const Row = ({ row, activeId }) => {
     transition: transition,
     background: activeId === row.original.studyUID ? '#343a40' : null
   };
+
+  const showWarning = () => {
+    const message = "Can't drag-drop on a sorted table!";
+    const setting = { 
+      position: "top-right", 
+      autoClose: 5000, 
+      hideProgressBar: false, 
+      closeOnClick: true,
+      pauseOnHover: true, 
+      draggable: true
+    }
+    toast.error(message, setting);
+  }
+
   return (
     <tr ref={setNodeRef} style={style} {...row.getRowProps()}>
       {isDragging ? (
@@ -29,9 +44,13 @@ export const Row = ({ row, activeId }) => {
           if (i === 0) {
             return (
               <>
+                {notDraggable ? 
+                <td onClick={showWarning}>
+                  <GrDrag />
+                </td> :
                 <td {...attributes} {...listeners} >
                     <GrDrag />
-                </td>
+                </td>}
                 <td {...cell.getCellProps()}>
                     {cell.render("Cell")}
                 </td>

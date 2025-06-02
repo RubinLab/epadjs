@@ -127,7 +127,7 @@ export function DragDropTable({ columns, data, setData, wid }) {
           <SortableContext items={items} strategy={verticalListSortingStrategy}>
             {rows.map((row, k) => {
               prepareRow(row);
-              return <Row key={`${k}-${row.original.StudyUID}`} row={row} activeId={activeId}/>;
+              return <Row key={`${k}-${row.original.StudyUID}`} row={row} activeId={activeId} notDraggable={savedSortByList.length > 0}/>;
             })}
           </SortableContext>
         </tbody>
@@ -136,7 +136,7 @@ export function DragDropTable({ columns, data, setData, wid }) {
         {activeId && (
           <table style={{ width: "100%" }}>
             <tbody>
-              <Row row={selectedRow} activeId={activeId}/>
+              <Row row={selectedRow} activeId={activeId} notDraggable={savedSortByList.length > 0}/>
             </tbody>
           </table>
         )}
