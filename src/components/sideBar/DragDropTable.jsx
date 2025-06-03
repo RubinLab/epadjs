@@ -46,10 +46,9 @@ export function DragDropTable({ columns, data, setData, wid }) {
   );
 
     useEffect(() => {
-      if (sortBy.length > 0) {
-        savedSortByMap.set(wid, sortBy);
-        sessionStorage.setItem("sortBy", JSON.stringify(Object.fromEntries(savedSortByMap)));
-      }
+      if (sortBy.length > 0) savedSortByMap.set(wid, sortBy);
+      else savedSortByMap.delete(wid);
+      sessionStorage.setItem("sortBy", JSON.stringify(Object.fromEntries(savedSortByMap)));
     }, [sortBy]);
 
   const sensors = useSensors(
