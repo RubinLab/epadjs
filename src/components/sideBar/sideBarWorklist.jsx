@@ -210,7 +210,7 @@ let mode;
             //else get data for each serie for display
             selectedSeries.forEach((serie) => {
               const list = getExistingSeriesData(serie);
-              props.dispatch(addToGrid(serie));
+              props.dispatch(addToGrid(serie, null, null, props.match.params.wid));
               props.dispatch(getSingleSerie(serie, null, null, list));
             });
             props.history.push("/display");
@@ -222,6 +222,7 @@ let mode;
   };
 
   const handleOpenClick = async (study) => {
+    console.log(" ---> clicked last");
     const { seriesData } = props;
     const { projectID, subjectID, studyUID, studyDescription } = study;
     let series;
