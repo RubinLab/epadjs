@@ -12,6 +12,7 @@ import {
   getSeries
 } from "../../services/seriesServices";
 import { getImageMetadata } from "../../services/imageServices";
+import { getStudiesOfWorklist } from "../../services/worklistServices";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
@@ -46,7 +47,7 @@ import { circle } from "./Circle";
 import { bidirectional } from "./Bidirectional";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
-import { FaTimes, FaPen, FaExpandArrowsAlt, FaTag } from "react-icons/fa";
+import { FaTimes, FaPen, FaExpandArrowsAlt, FaTag, FaArrowRight } from "react-icons/fa";
 import Form from "react-bootstrap/Form";
 import ToolMenu from "../ToolMenu/ToolMenu";
 import { getMarkups, setMarkupsOfAimActive } from "../aimEditor/Helpers";
@@ -57,6 +58,7 @@ import { errorMonitor } from "events";
 import FreehandRoiSculptorTool from "../../cornerstone-tools/tools/FreehandRoiSculptorTool";
 import getVPDimensions from "./ViewportCalculations";
 import SeriesDropDown from "./SeriesDropDown";
+import { filterProjects } from "../../Utils/aid";
 import { toast } from "react-toastify";
 
 let mode;
@@ -165,6 +167,7 @@ const mapStateToProps = (state) => {
     templates: state.annotationsListReducer.templates,
     showAnnotations: state.annotationsListReducer.showAnnotations,
     lastLocation: state.annotationsListReducer.lastLocation,
+    projectMap: state.annotationsListReducer.projectMap,
   };
 };
 
@@ -231,6 +234,7 @@ class DisplayView extends Component {
 
   componentDidMount() {
     const { series, onSwitchView } = this.props;
+
     // if (series.length < 1) {
     //   onSwitchView('search');
     // }
@@ -2767,6 +2771,23 @@ class DisplayView extends Component {
     this.setState({ isOverlayVisible: showHide });
   };
 
+  openNextWLStudy = async (worklistID, studyUID) => {
+    const { data: wls } = await getStudiesOfWorklist(sessionStorage.getItem("username"), worklistID);
+    const { filteredWorklists } = filterProjects(wls, this.props.projectMap);
+    console.log(" ---> filteredWorklists", filteredWorklists);
+    const currentWLIndex = filteredWorklists.findIndex(st => st.studyUID === studyUID);
+    if (currentWLIndex === filteredWorklists.length - 1) 
+      toast.info("You reached the end of the worklist", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    else this.props.displayNextStudy(filteredWorklists[currentWLIndex + 1]);
+  }
+
   render() {
     const { series, activePort, updateProgress, updateTreeDataOnSave } =
       this.props;
@@ -2805,6 +2826,7 @@ class DisplayView extends Component {
             onInvertClick={this.formInvertMap}
             onFuseUnfuse={this.getFuseUnfuseState}
             onFuseNewImage={this.newImageFuse}
+            onOpenSeries={this.props.openSeries}
           />
           {this.state.isLoading && (
             <div style={{ marginTop: "30%", marginLeft: "50%" }}>
@@ -2857,6 +2879,13 @@ class DisplayView extends Component {
                       >
                         <FaTag />
                       </span>
+                      {series[i].worklistID && (<span
+                        className={"dot"}
+                        style={{ background: "orange"}}
+                        onClick={() => this.openNextWLStudy(series[i].worklistID, series[i].studyUID)}
+                      >
+                        <FaArrowRight />
+                      </span>)}
                     </div>
                     {/* <div className={"column middle"}>
                     <label>{series[i].seriesUID}</label>

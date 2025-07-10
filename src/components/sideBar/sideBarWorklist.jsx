@@ -24,7 +24,7 @@ import { getSeries } from "../../services/seriesServices";
 import DeleteAlert from "../management/common/alertDeletionModal";
 import SelectSeriesModal from "../annotationsList/selectSerieModal";
 import { addToGrid, getSingleSerie, alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData } from "../annotationsList/action";
-import { isSupportedModality } from "../../Utils/aid.js";
+import { isSupportedModality, filterProjects } from "../../Utils/aid.js";
 // CSS import
 import "./style.css";
 
@@ -59,7 +59,7 @@ let mode;
     // Fetch the worklist data
     const getWorkListData = async (showError) => {
       const { data: wls } = await getStudiesOfWorklist(sessionStorage.getItem("username"), props.match.params.wid);
-      const { notAuthorized, filteredWorklists } = filterProjects(wls);
+      const { notAuthorized, filteredWorklists } = filterProjects(wls, props.projectMap);
       setWorklists(filteredWorklists);
   
       if (showError && Array.isArray(notAuthorized) && notAuthorized.length > 0) {
@@ -70,16 +70,16 @@ let mode;
     };
   
     // Filter worklist projects
-    const filterProjects = (worklists) => {
-      const filteredWorklists = [];
-      const notAuthorized = [];
-      const projectsFilled = Object.keys(props.projectMap).length > 0;
-      worklists.forEach((el) => {
-        if (projectsFilled && !props.projectMap[el.projectID]) notAuthorized.push(el.projectID);
-        else if (projectsFilled) filteredWorklists.push(el);
-      });
-      return { notAuthorized, filteredWorklists };
-    };
+    // const filterProjects = (worklists) => {
+    //   const filteredWorklists = [];
+    //   const notAuthorized = [];
+    //   const projectsFilled = Object.keys(props.projectMap).length > 0;
+    //   worklists.forEach((el) => {
+    //     if (projectsFilled && !props.projectMap[el.projectID]) notAuthorized.push(el.projectID);
+    //     else if (projectsFilled) filteredWorklists.push(el);
+    //   });
+    //   return { notAuthorized, filteredWorklists };
+    // };
   
     // Delete study from worklist
     const deleteStudyfromWorklist = async () => {

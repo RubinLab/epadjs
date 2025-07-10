@@ -839,7 +839,7 @@ class App extends Component {
     });
   };
 
-  displaySeries = async (studyData) => {
+  displaySeries = async (studyData, worklistID) => {
     const rawSeriesArray = await this.getSeriesData(studyData);
     if (!rawSeriesArray) return;
     let seriesArr = rawSeriesArray.filter(isSupportedModality);
@@ -1340,6 +1340,31 @@ class App extends Component {
     this.setState({ leftMenuState: "closed" });
   }
 
+  displayNextStudy = async (study, worklist) => {
+    console.log(" this is called succesfullyy @@@", study);
+    const { studyDescription } = study;
+    let series = await this.getSeriesData(study);
+    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
+
+    const { openSeries } = this.props;
+
+    console.log(series);
+    console.log(openSeries);
+
+    console.log(" ---> clicked last", series.length + openSeries.length - 1, maxPort);
+    if (series.length + openSeries.length - 1 <= maxPort) {
+      // viewSelection(series);
+      // add - 1 logic if there is a worklist
+      this.displaySeries(study, worklist);
+    } else {
+      console.log(" ----> in else")
+      // setShowSeries(!showSeries);
+      // setStudyName(studyDescription)
+    }
+    // setSeries(series);
+  }
+
+
   render() {
     const {
       notifications,
@@ -1460,6 +1485,7 @@ class App extends Component {
                       closeLeftMenu={this.closeLeftMenu}
                       savedData={this.state.savedData}
                       saveData={(data) => { this.state.savedData = data }}
+                      displayNextStudy={this.displayNextStudy}
                     />
                   )}
                 />
@@ -1614,6 +1640,7 @@ class App extends Component {
                     closeLeftMenu={this.closeLeftMenu}
                     savedData={this.state.savedData}
                     saveData={(data) => { this.state.savedData = data }}
+                    displayNextStudy={this.displayNextStudy}
                   />
                 )}
               />
