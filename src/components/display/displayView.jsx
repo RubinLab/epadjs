@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import _ from "lodash";
+import _, { sortBy } from "lodash";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
@@ -2771,9 +2771,64 @@ class DisplayView extends Component {
     this.setState({ isOverlayVisible: showHide });
   };
 
+  reorderStudyList = (list, worklistID) => {
+    try {
+      const map = {
+        desc: 'studyDescription',
+        sb_name: 'subjectName',
+        pr_name: 'projectID',
+        study_date: 'studyDate',
+        due: 'worklistDuedate',
+        studyUID: 'studyUID',
+        completeness: 'completeness'
+      };
+  
+      const sorts = JSON.parse(sessionStorage.getItem('sortBy'));
+      if (!sorts || !sorts[worklistID]) return list;
+  
+      const filters = sorts[worklistID];
+  
+      // Apply sorting
+      list.sort((a, b) => {
+        for (const filter of filters) {
+          const field = map[filter.id];
+          if (!field) continue;
+  
+          let aValue = a[field];
+          let bValue = b[field];
+  
+          // Normalize nulls
+          if (aValue === null || aValue === undefined) aValue = '';
+          if (bValue === null || bValue === undefined) bValue = '';
+  
+          // Convert dates if applicable
+          if (field.toLowerCase().includes('date')) {
+            aValue = aValue ? new Date(aValue) : new Date(0);
+            bValue = bValue ? new Date(bValue) : new Date(0);
+          }
+  
+          let result;
+          if (typeof aValue === 'string' && typeof bValue === 'string') {
+            result = aValue.localeCompare(bValue);
+          } else {
+            result = aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+          }
+  
+          if (result !== 0) return filter.desc ? -result : result;
+        }
+        return 0; // fallback if all filters are equal
+      });
+      return list;
+    } catch (err) {
+      console.error(err);
+      return list;
+    }
+  };
+
   openNextWLStudy = async (worklistID, studyUID) => {
     const { data: wls } = await getStudiesOfWorklist(sessionStorage.getItem("username"), worklistID);
-    const { filteredWorklists } = filterProjects(wls, this.props.projectMap);
+    let { filteredWorklists } = filterProjects(wls, this.props.projectMap);
+    this.reorderStudyList(filteredWorklists, worklistID);
     console.log(" ---> filteredWorklists", filteredWorklists);
     const currentWLIndex = filteredWorklists.findIndex(st => st.studyUID === studyUID);
     if (currentWLIndex === filteredWorklists.length - 1) 

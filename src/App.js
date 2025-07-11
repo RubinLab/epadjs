@@ -851,11 +851,13 @@ class App extends Component {
     );
     // If there are significant series use them to display
     // if not display modality filtered series
-    if (significantSeries.length) seriesArr = significantSeries;
+    if (significantSeries.length && !worklistID) seriesArr = significantSeries;
     //if check if there is enough available viewports
-    if (!this.hasEnoughViewports(seriesArr)) return;
+    if (!this.hasEnoughViewports(seriesArr) && !worklistID) return;
     //add serie to the grid
     const promiseArr = [];
+    console.log(" --> seriesArr", seriesArr);
+    if (worklistID) this.props.dispatch(clearGrid());
     for (let serie of seriesArr) {
       // optional clear grid
       // if (worklistID) this.props.dispatch(clearGrid());
@@ -1353,8 +1355,7 @@ class App extends Component {
 
     const { openSeries } = this.props;
 
-    console.log(series);
-    console.log(openSeries);
+    console.log(series, maxPort);
 
     console.log(" ---> clicked last", worklist);
     if (series.length <= maxPort) {
