@@ -65,11 +65,8 @@ export function DragDropTable({ columns, data, setData, wid }) {
   function handleDragEnd(event) {
     const { active, over } = event;
     if (active.id !== over.id) {
-      setData((data) => {
-        const oldIndex = items.indexOf(active.id);
-        const newIndex = items.indexOf(over.id);
-        return arrayMove(data, oldIndex, newIndex);
-      });
+      const newOrder = arrayMove(data, items.indexOf(active.id), items.indexOf(over.id));
+      setData(newOrder);
     }
     setActiveId(null);
   }

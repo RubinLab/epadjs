@@ -16,7 +16,8 @@ import { DragDropTable } from "./DragDropTable";
 import {
   getStudiesOfWorklist,
   deleteStudyFromWorklist,
-  updateWorklistProgressManually
+  updateWorklistProgressManually,
+  updateWorklistStudyOrder
 } from "../../services/worklistServices";
 import { getSeries } from "../../services/seriesServices";
 
@@ -639,9 +640,27 @@ let mode;
     [props.match.params.wid]
   );
 
+  const setNewListOrder = async(list) => {
+    try {
+      setWorklists(list)
+      console.log(' new list =====> ');
+      console.log(list);
+      const body = list.map((item) => ({
+        projectID: item.projectID,
+        subjectID: item.subjectID,
+        studyUID: item.studyUID,
+        sortOrder: item.sortOrder,
+      }));
+      console.log(body);
+      await updateWorklistStudyOrder(props.match.params.wid, body)
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   return (
         <div className="worklist-page">
-            <DragDropTable columns={columns} data={worklists} setData={setWorklists} wid={props.match.params.wid}/>
+            <DragDropTable columns={columns} data={worklists} setData={setNewListOrder} wid={props.match.params.wid}/>
             {deleteSingleClicked && (
                 <DeleteAlert
                   message={messages.deleteSingle}

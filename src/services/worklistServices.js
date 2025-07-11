@@ -1,7 +1,7 @@
 import http from "./httpService";
 
 export function getWorklistsOfCreator(addValidAssignees) {
-  return http.get(http.apiUrl() + "/worklists" + (addValidAssignees ? "?addValidAssignees=true": ""));
+  return http.get(http.apiUrl() + "/worklists" + (addValidAssignees ? "?addValidAssignees=true" : ""));
 }
 
 // TODO update /worklists/:w/users/:u
@@ -199,6 +199,16 @@ export function addAimsToWorklist(worklist, body) {
     "/worklists/" +
     encodeURIComponent(worklist) +
     "/aims",
+    body
+  );
+}
+
+export function updateWorklistStudyOrder(worklist, body) {
+  return http.post(
+    http.apiUrl() +
+    "/worklists/" +
+    encodeURIComponent(worklist) +
+    "/studies",
     body
   );
 }
