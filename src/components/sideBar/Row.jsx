@@ -14,7 +14,8 @@ export const Row = ({ row, activeId, notDraggable }) => {
     setNodeRef,
     isDragging
   } = useSortable({
-    id: row.original.studyUID
+    id: row.original.studyUID,
+    disabled: notDraggable
   });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -45,12 +46,12 @@ export const Row = ({ row, activeId, notDraggable }) => {
             return (
               <>
                 {notDraggable ? 
-                <td onClick={showWarning}>
-                  <GrDrag />
-                </td> :
-                <td {...attributes} {...listeners} >
+                  <td onMouseDown={showWarning}>
                     <GrDrag />
-                </td>}
+                  </td> :
+                  <td {...attributes} {...listeners} >
+                      <GrDrag />
+                  </td>}
                 <td {...cell.getCellProps()}>
                     {cell.render("Cell")}
                 </td>
