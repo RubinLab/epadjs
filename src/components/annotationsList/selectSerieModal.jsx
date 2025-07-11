@@ -219,11 +219,14 @@ class selectSerieModal extends React.Component {
     const seriesArr = await this.saveSignificantSeries(series);
     //concatanete all arrays to getther
     // for (let key of Object.keys(selectedToDisplay)) {
+    console.log(' ----> seriesArr');  
+    console.log(seriesArr); 
+    if (this.props.worklistID) this.props.dispatch(clearGrid()); 
     for (let el of seriesArr) {  
       let serie = this.findSerieFromSeries(el.seriesUID, series);
       const existingData = this.getExistingSeriesData(serie);
       if (aimID) this.props.dispatch(addToGrid(serie, aimID));
-      else this.props.dispatch(addToGrid(serie, serie.aimID));
+      else this.props.dispatch(addToGrid(serie, serie.aimID, null, this.props.worklistID ));
       if (this.state.selectionType === "aim") {
         this.props.dispatch(getSingleSerie(serie, serie.aimID, this.wadoUrl, existingData));
       } else {
@@ -408,7 +411,7 @@ class selectSerieModal extends React.Component {
     }
     if (significantExplanation)
       selectionList.push(
-        <div key={`explanation${i}`} className={"significant-series"}>
+        <div key={`explanation-sig`} className={"significant-series"}>
           <br />
           (S): Significant series
         </div>

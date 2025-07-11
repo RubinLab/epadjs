@@ -202,7 +202,7 @@ class DisplayView extends Component {
       multiFrameAimJumped: false,
       dataIndexMap: {},
       aimEdited: false,
-      isVisible: true
+      isVisible: true,
     };
   }
 
@@ -2785,7 +2785,7 @@ class DisplayView extends Component {
         pauseOnHover: true,
         draggable: true,
       });
-    else this.props.displayNextStudy(filteredWorklists[currentWLIndex + 1]);
+    else this.props.displayNextStudy(filteredWorklists[currentWLIndex + 1], worklistID);
   }
 
   render() {

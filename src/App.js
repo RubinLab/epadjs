@@ -34,6 +34,7 @@ import {
   getNotificationsData,
   getSingleSerie,
   addToGrid,
+  clearGrid,
   clearSelection,
   selectProject,
   getTemplates,
@@ -58,7 +59,7 @@ import MinimizedReport from "./components/searchView/MinimizedReport";
 import { FaJoint } from "react-icons/fa";
 import { isSupportedModality } from "./Utils/aid.js";
 import { teachingFileTempCode } from './constants';
-import { render } from 'react-dom';
+import SelectSeriesModal from './components/annotationsList/selectSerieModal';
 
 const messages = {
   noPatient: {
@@ -123,7 +124,9 @@ class App extends Component {
       freeze: "auto",
       teachingLoading: false,
       projectToRole: null,
-      username: null
+      username: null,
+      showSeries: false,
+      openSeriesData: { series: [], studyName: '', worklistID: '' }
     };
   }
 
@@ -854,7 +857,9 @@ class App extends Component {
     //add serie to the grid
     const promiseArr = [];
     for (let serie of seriesArr) {
-      this.props.dispatch(addToGrid(serie));
+      // optional clear grid
+      // if (worklistID) this.props.dispatch(clearGrid());
+      this.props.dispatch(addToGrid(serie, null, null, worklistID));
       promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
     }
     Promise.all(promiseArr)
@@ -1351,14 +1356,15 @@ class App extends Component {
     console.log(series);
     console.log(openSeries);
 
-    console.log(" ---> clicked last", series.length + openSeries.length - 1, maxPort);
-    if (series.length + openSeries.length - 1 <= maxPort) {
+    console.log(" ---> clicked last", worklist);
+    if (series.length <= maxPort) {
       // viewSelection(series);
       // add - 1 logic if there is a worklist
       this.displaySeries(study, worklist);
     } else {
       console.log(" ----> in else")
-      // setShowSeries(!showSeries);
+      const openSeriesData = { series, studyName: studyDescription, worklistID: worklist }
+      this.setState({ showSeries: true, openSeriesData })
       // setStudyName(studyDescription)
     }
     // setSeries(series);
@@ -1715,6 +1721,14 @@ class App extends Component {
         {/* {this.props.selection && (
           <ManagementItemModal selection={this.props.selection} />
         )} */}
+        {this.state.showSeries && this.state.openSeriesData.series.length > 0 && (
+          <SelectSeriesModal
+            seriesPassed={[this.state.openSeriesData.series]}
+            onCancel={() => this.setState({ showSeries: false })}
+            studyName={this.state.openSeriesData.studyName}
+            worklistID={this.state.openSeriesData.worklistID}
+          />
+        )}
       </ErrorBoundary>
     );
   }
