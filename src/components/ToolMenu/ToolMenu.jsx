@@ -298,6 +298,12 @@ class ToolMenu extends Component {
   }
 
   componentDidMount() {
+    // if the lastlocation includeWorklist and it is in teaching mode show next button
+    if (this.props.lastLocation.includes('worklist') && mode === "teaching") {
+      const nextButton = { name: "Next Study", icon: <FaAngleRight />, tool: "next", teaching: true };
+      this.managementTools.push(nextButton);
+    }
+
     window.addEventListener("keydown", this.handleKeyPressed);
     window.addEventListener("closeFuseMenu", this.closeFuse);
   }
@@ -483,7 +489,7 @@ class ToolMenu extends Component {
       cornerstoneTools.toolColors.setActiveColor("rgb(255, 132, 0)");
     } else cornerstoneTools.toolColors.setActiveColor("rgb(255, 255, 0)");
 
-    
+    const { worklistID, studyUID } = this.props.openSeries[this.props.activePort];
 
     if (tool === "Noop") {
       this.disableAllTools();
@@ -580,7 +586,9 @@ class ToolMenu extends Component {
     } else if (tool === 'keys') {
       this.showHotkeyInfo();
       return;
-    } 
+    } else if (tool === 'next') {
+      this.props.openNextWLStudy(worklistID, studyUID);
+    }
     // else if (tool === "FreehandRoiTool") {
     //   this.selectFreehand();
     // }

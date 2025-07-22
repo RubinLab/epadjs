@@ -2826,6 +2826,7 @@ class DisplayView extends Component {
   };
 
   openNextWLStudy = async (worklistID, studyUID) => {
+    console.log(" ---> worklistID, studyUID ");
     const { data: wls } = await getStudiesOfWorklist(sessionStorage.getItem("username"), worklistID);
     let { filteredWorklists } = filterProjects(wls, this.props.projectMap);
     this.reorderStudyList(filteredWorklists, worklistID);
@@ -2882,6 +2883,7 @@ class DisplayView extends Component {
             onFuseUnfuse={this.getFuseUnfuseState}
             onFuseNewImage={this.newImageFuse}
             onOpenSeries={this.props.openSeries}
+            openNextWLStudy={this.openNextWLStudy}
           />
           {this.state.isLoading && (
             <div style={{ marginTop: "30%", marginLeft: "50%" }}>
@@ -2934,13 +2936,13 @@ class DisplayView extends Component {
                       >
                         <FaTag />
                       </span>
-                      {series[i].worklistID && (<span
+                      {/* {series[i].worklistID && (<span
                         className={"dot"}
                         style={{ background: "orange"}}
                         onClick={() => this.openNextWLStudy(series[i].worklistID, series[i].studyUID)}
                       >
                         <FaArrowRight />
-                      </span>)}
+                      </span>)} */}
                     </div>
                     {/* <div className={"column middle"}>
                     <label>{series[i].seriesUID}</label>
