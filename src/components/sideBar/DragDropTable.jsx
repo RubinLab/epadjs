@@ -27,6 +27,7 @@ export function DragDropTable({ columns, data, setData, wid }) {
   savedSortByMap = sessionStorage.getItem("sortBy");
   savedSortByMap = savedSortByMap ? new Map(Object.entries(JSON.parse(savedSortByMap))) : new Map();
   let savedSortByList = savedSortByMap.get(wid) || [];
+  console.log(' ---> savedSortByList', savedSortByList);
 
   // Use the state and functions returned from useTable to build your UI
   const {
@@ -100,7 +101,7 @@ export function DragDropTable({ columns, data, setData, wid }) {
         <thead>
           {headerGroups.map((headerGroup, inx) => {
             return (
-            <tr key={`header-row-${headerGroup.id || inx}`} {...headerGroup.getHeaderGroupProps()}>
+            <tr key={`header-row-${inx}`} {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map((column, i) => {
                  return (i === 0 ?  
                         <>

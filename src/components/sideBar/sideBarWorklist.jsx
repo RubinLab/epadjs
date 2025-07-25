@@ -24,7 +24,7 @@ import { getSeries } from "../../services/seriesServices";
 // Component imports
 import DeleteAlert from "../management/common/alertDeletionModal";
 import SelectSeriesModal from "../annotationsList/selectSerieModal";
-import { addToGrid, getSingleSerie, alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData } from "../annotationsList/action";
+import { addToGrid, getSingleSerie, alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData, clearGrid } from "../annotationsList/action";
 import { isSupportedModality, filterProjects } from "../../Utils/aid.js";
 // CSS import
 import "./style.css";
@@ -223,6 +223,7 @@ let mode;
   };
 
   const handleOpenClick = async (study) => {
+    if (mode === 'teaching') props.dispatch(clearGrid());
     console.log(" ---> clicked last");
     const { seriesData } = props;
     const { projectID, subjectID, studyUID, studyDescription } = study;
@@ -240,9 +241,9 @@ let mode;
       } else series = seriesData[projectID][subjectID][studyUID].list;
       series = series.filter(isSupportedModality);
       const maxPort = parseInt(sessionStorage.getItem("maxPort"));
-
       const { openSeries } = props;
-      if (series.length + openSeries.length <= maxPort) {
+      const alreadyOpenViews = mode === 'teaching' ? 0 : series.length;
+      if (alreadyOpenViews + openSeries.length <= maxPort) {
         setSeries(series);
         viewSelection(series);
       } else {
@@ -674,6 +675,7 @@ let mode;
                   seriesPassed={[series]}
                   onCancel={() => setShowSeries(false)}
                   studyName={studyName}
+                  worklistID={props.match.params.wid}
                 />
             )}
         </div>
