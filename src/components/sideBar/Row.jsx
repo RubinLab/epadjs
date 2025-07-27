@@ -20,7 +20,8 @@ export const Row = ({ row, activeId, notDraggable }) => {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition: transition,
-    background: activeId === row.original.studyUID ? '#343a40' : null
+    background: activeId === row.original.studyUID ? '#343a40' : null,
+    color: activeId === row.original.studyUID ? 'red' : null
   };
 
   const showWarning = () => {

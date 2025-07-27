@@ -1718,7 +1718,7 @@ class App extends Component {
             </Switch>
           </Sidebar>
         )}
-        {this.props.showGridFullAlert && <MaxViewAlert />}
+        {/* {this.props.showGridFullAlert && <MaxViewAlert />} */}
         {/* {this.props.selection && (
           <ManagementItemModal selection={this.props.selection} />
         )} */}

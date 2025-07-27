@@ -2784,19 +2784,26 @@ class DisplayView extends Component {
       };
   
       const sorts = JSON.parse(sessionStorage.getItem('sortBy'));
-      if (!sorts || !sorts[worklistID]) return list;
+      if (!sorts || !sorts[worklistID]) {
+        console.log(" #########>>>>> returning before reordering");
+        return list;
+      }
   
       const filters = sorts[worklistID];
-  
+      console.log(" ---> filters", filters);
       // Apply sorting
       list.sort((a, b) => {
         for (const filter of filters) {
           const field = map[filter.id];
+          console.log("---> field", field);
+
           if (!field) continue;
   
           let aValue = a[field];
           let bValue = b[field];
   
+          console.log("---> aValue, bValue", aValue, bValue);
+
           // Normalize nulls
           if (aValue === null || aValue === undefined) aValue = '';
           if (bValue === null || bValue === undefined) bValue = '';
@@ -2818,6 +2825,7 @@ class DisplayView extends Component {
         }
         return 0; // fallback if all filters are equal
       });
+      console.log(" ---< list after sort", list);
       return list;
     } catch (err) {
       console.error(err);
@@ -2825,24 +2833,61 @@ class DisplayView extends Component {
     }
   };
 
+  // openNextWLStudy = async (worklistID, studyUID) => {
+  //   console.log(" ---> worklistID, studyUID ");
+  //   const sorts = JSON.parse(sessionStorage.getItem('sortBy'));
+  //   const filteredWorklists = sorts[worklistID] || [];
+  //   const currentWLIndex = filteredWorklists.findIndex(st => st.studyUID === studyUID);
+  //   if (currentWLIndex === filteredWorklists.length - 1 || currentWLIndex < 0) 
+  //     toast.info("You reached the end of the worklist", {
+  //       position: "top-right",
+  //       autoClose: 5000,
+  //       hideProgressBar: false,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //     });
+  //   else this.props.displayNextStudy(filteredWorklists[currentWLIndex + 1], worklistID);
+  // }
+
   openNextWLStudy = async (worklistID, studyUID) => {
-    console.log(" ---> worklistID, studyUID ");
-    const { data: wls } = await getStudiesOfWorklist(sessionStorage.getItem("username"), worklistID);
-    let { filteredWorklists } = filterProjects(wls, this.props.projectMap);
-    this.reorderStudyList(filteredWorklists, worklistID);
-    console.log(" ---> filteredWorklists", filteredWorklists);
-    const currentWLIndex = filteredWorklists.findIndex(st => st.studyUID === studyUID);
-    if (currentWLIndex === filteredWorklists.length - 1) 
-      toast.info("You reached the end of the worklist", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    else this.props.displayNextStudy(filteredWorklists[currentWLIndex + 1], worklistID);
-  }
+    try {
+      const sortedData = JSON.parse(sessionStorage.getItem("sortedListMap")) || {};
+      const filteredWorklist = sortedData[worklistID] || [];
+      console.log(" -----> filteredWorklist", worklistID, filteredWorklist);
+      
+      if (!filteredWorklist.length) {
+        toast.info("No sorted order found for this worklist", {
+          position: "top-right",
+          autoClose: 5000
+        });
+        return;
+      }
+  
+      const currentIndex = filteredWorklist.findIndex(st => st.studyUID === studyUID);
+  
+      if (currentIndex === -1) {
+        toast.error("Current study not found in saved order", {
+          position: "top-right",
+          autoClose: 5000
+        });
+        return;
+      }
+  
+      if (currentIndex === filteredWorklist.length - 1) {
+        toast.info("You reached the end of the worklist", {
+          position: "top-right",
+          autoClose: 5000
+        });
+        return;
+      }
+  
+      // Move to next study
+      this.props.displayNextStudy(filteredWorklist[currentIndex + 1], worklistID);
+    } catch (error) {
+      console.error("Error opening next study:", error);
+    }
+  };
 
   render() {
     const { series, activePort, updateProgress, updateTreeDataOnSave } =

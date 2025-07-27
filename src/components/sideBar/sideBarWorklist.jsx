@@ -242,8 +242,9 @@ let mode;
       series = series.filter(isSupportedModality);
       const maxPort = parseInt(sessionStorage.getItem("maxPort"));
       const { openSeries } = props;
-      const alreadyOpenViews = mode === 'teaching' ? 0 : series.length;
-      if (alreadyOpenViews + openSeries.length <= maxPort) {
+      const alreadyOpenViews = mode === 'teaching' ? 0 : openSeries.length;
+      console.log(" --> series", series);
+      if (alreadyOpenViews + series.length <= maxPort) {
         setSeries(series);
         viewSelection(series);
       } else {
@@ -260,6 +261,16 @@ let mode;
   const columns = React.useMemo(
     () =>
      [
+      // {
+      //   id: 'drag',
+      //   Header: '', // No title
+      //   disableSortBy: true,
+      //   Cell: ({ row }) => (
+      //     <span className="drag-handle" {...row.getToggleRowSelectedProps()}>
+      //       ☰
+      //     </span>
+      //   )
+      // },
       {
         id: "open",
         accessor: "open",
