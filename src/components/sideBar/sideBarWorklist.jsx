@@ -50,11 +50,21 @@ let mode;
     const [error, setError] = useState(null);
     const [patientsProjectMap, setPatientsProjectMap] = useState({});
     const [studyName, setStudyName] = useState("");
+    const [sameStudyUID, setSameStudyUID] = useState(null);
 
     mode = sessionStorage.getItem("mode");
   
+    const openWLStudy = () => {
+      const { openSeries } = props;
+      const allSameStudy =  openSeries && openSeries.length > 0 
+        ? openSeries.every((el) => el.studyUID === openSeries[0].studyUID) 
+        : false;
+      if (allSameStudy) setSameStudyUID(openSeries[0].studyUID);
+    }
+
     useEffect(() => {
       getWorkListData(true);
+      openWLStudy();
     }, [props.match.params.wid]);
   
     // Fetch the worklist data
@@ -261,16 +271,6 @@ let mode;
   const columns = React.useMemo(
     () =>
      [
-      // {
-      //   id: 'drag',
-      //   Header: '', // No title
-      //   disableSortBy: true,
-      //   Cell: ({ row }) => (
-      //     <span className="drag-handle" {...row.getToggleRowSelectedProps()}>
-      //       ☰
-      //     </span>
-      //   )
-      // },
       {
         id: "open",
         accessor: "open",
@@ -672,7 +672,7 @@ let mode;
 
   return (
         <div className="worklist-page">
-            <DragDropTable columns={columns} data={worklists} setData={setNewListOrder} wid={props.match.params.wid}/>
+            <DragDropTable columns={columns} data={worklists} setData={setNewListOrder} wid={props.match.params.wid} sameStudy={sameStudyUID}/>
             {deleteSingleClicked && (
                 <DeleteAlert
                   message={messages.deleteSingle}

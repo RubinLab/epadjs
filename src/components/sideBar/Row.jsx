@@ -5,7 +5,7 @@ import { GrDrag } from "react-icons/gr";
 import { toast } from "react-toastify";
 import "./style.css";
 
-export const Row = ({ row, activeId, notDraggable }) => {
+export const Row = ({ row, activeId, notDraggable, sameStudy }) => {
   const {
     attributes,
     listeners,
@@ -21,8 +21,9 @@ export const Row = ({ row, activeId, notDraggable }) => {
     transform: CSS.Transform.toString(transform),
     transition: transition,
     background: activeId === row.original.studyUID ? '#343a40' : null,
-    color: activeId === row.original.studyUID ? 'red' : null
   };
+
+  const sameStudyStyle = sameStudy &&  row.original.studyUID ===  sameStudy? {background:'#495057'} : {background: null }
 
   const showWarning = () => {
     const message = "Can't drag-drop on a sorted table!";
@@ -47,20 +48,20 @@ export const Row = ({ row, activeId, notDraggable }) => {
             return (
               <>
                 {notDraggable ? 
-                  <td onMouseDown={showWarning}>
+                  <td onMouseDown={showWarning} style={sameStudyStyle}>
                     <GrDrag />
                   </td> :
-                  <td {...attributes} {...listeners} >
+                  <td {...attributes} {...listeners} style={sameStudyStyle}>
                       <GrDrag />
                   </td>}
-                <td {...cell.getCellProps()}>
+                <td {...cell.getCellProps()} style={sameStudyStyle}>
                     {cell.render("Cell")}
                 </td>
               </>  
             );
           }
           return (
-            <td {...cell.getCellProps()}>
+            <td {...cell.getCellProps()} style={sameStudyStyle}>
               {cell.render("Cell")}
             </td>
           );
