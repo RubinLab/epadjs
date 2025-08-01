@@ -234,7 +234,6 @@ let mode;
 
   const handleOpenClick = async (study) => {
     if (mode === 'teaching') props.dispatch(clearGrid());
-    console.log(" ---> clicked last");
     const { seriesData } = props;
     const { projectID, subjectID, studyUID, studyDescription } = study;
     let series;
@@ -253,7 +252,6 @@ let mode;
       const maxPort = parseInt(sessionStorage.getItem("maxPort"));
       const { openSeries } = props;
       const alreadyOpenViews = mode === 'teaching' ? 0 : openSeries.length;
-      console.log(" --> series", series);
       if (alreadyOpenViews + series.length <= maxPort) {
         setSeries(series);
         viewSelection(series);
@@ -655,15 +653,12 @@ let mode;
   const setNewListOrder = async(list) => {
     try {
       setWorklists(list)
-      console.log(' new list =====> ');
-      console.log(list);
       const body = list.map((item, i) => ({
         projectID: item.projectID,
         subjectID: item.subjectID,
         studyUID: item.studyUID,
         sortOrder: i,
       }));
-      console.log(body);
       await updateWorklistStudyOrder(props.match.params.wid, body)
     } catch (err) {
       console.error(err);

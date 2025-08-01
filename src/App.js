@@ -856,7 +856,6 @@ class App extends Component {
     if (!this.hasEnoughViewports(seriesArr) && !worklistID) return;
     //add serie to the grid
     const promiseArr = [];
-    console.log(" --> seriesArr", seriesArr);
     if (worklistID) this.props.dispatch(clearGrid());
     for (let serie of seriesArr) {
       // optional clear grid
@@ -1348,25 +1347,16 @@ class App extends Component {
   }
 
   displayNextStudy = async (study, worklist) => {
-    console.log(" this is called succesfullyy @@@", study);
     const { studyDescription } = study;
     let series = await this.getSeriesData(study);
     const maxPort = parseInt(sessionStorage.getItem("maxPort"));
-
-    const { openSeries } = this.props;
-
-    console.log(series, maxPort);
-
-    console.log(" ---> clicked last", worklist);
     if (series.length <= maxPort) {
       // viewSelection(series);
       // add - 1 logic if there is a worklist
       this.displaySeries(study, worklist);
     } else {
-      console.log(" ----> in else")
       const openSeriesData = { series, studyName: studyDescription, worklistID: worklist }
       this.setState({ showSeries: true, openSeriesData })
-      // setStudyName(studyDescription)
     }
     // setSeries(series);
   }

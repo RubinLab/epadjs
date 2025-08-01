@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import _, { sortBy } from "lodash";
+import _ from "lodash";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
@@ -397,7 +397,6 @@ class DisplayView extends Component {
     const isInitialIndex = prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].multiFrameIndex === undefined && this.props.seriesAddition[activePort].multiFrameIndex === null;
     const mfChanged = samePortControl && (prevProps.seriesAddition[activePort].multiFrameIndex !== this.props.seriesAddition[activePort].multiFrameIndex && !isInitialIndex) && this.props.seriesAddition[activePort].multiFrameIndex === null;
 
-    console.log(" ----> mfChanged", mfChanged)
     if ( (mfAimJumpDataFilled && newMFAimToJump) || (prevActiveFrameDataMissing && frameDataFilled && multiFrameAimJumpData && multiFrameAimJumpData[0])) {
       await this.setState({ isLoading: true });
       this.getViewports();
@@ -2741,7 +2740,6 @@ class DisplayView extends Component {
   // Don't take the activePort Index from props because store updates late so
   // activePort may be null while the event is triggered
   jumpToImage = (imageIndex, activePortIndex) => {
-    console.log(" ---> imageIndex, activePortIndex", imageIndex, activePortIndex);
     const newData = [...this.state.data];
     newData[activePortIndex].stack.currentImageIdIndex = parseInt(
       imageIndex,
@@ -2784,26 +2782,19 @@ class DisplayView extends Component {
       };
   
       const sorts = JSON.parse(sessionStorage.getItem('sortBy'));
-      if (!sorts || !sorts[worklistID]) {
-        console.log(" #########>>>>> returning before reordering");
-        return list;
-      }
+      if (!sorts || !sorts[worklistID]) return list;
   
       const filters = sorts[worklistID];
-      console.log(" ---> filters", filters);
       // Apply sorting
       list.sort((a, b) => {
         for (const filter of filters) {
           const field = map[filter.id];
-          console.log("---> field", field);
 
           if (!field) continue;
   
           let aValue = a[field];
           let bValue = b[field];
   
-          console.log("---> aValue, bValue", aValue, bValue);
-
           // Normalize nulls
           if (aValue === null || aValue === undefined) aValue = '';
           if (bValue === null || bValue === undefined) bValue = '';
@@ -2825,7 +2816,6 @@ class DisplayView extends Component {
         }
         return 0; // fallback if all filters are equal
       });
-      console.log(" ---< list after sort", list);
       return list;
     } catch (err) {
       console.error(err);
@@ -2833,28 +2823,10 @@ class DisplayView extends Component {
     }
   };
 
-  // openNextWLStudy = async (worklistID, studyUID) => {
-  //   console.log(" ---> worklistID, studyUID ");
-  //   const sorts = JSON.parse(sessionStorage.getItem('sortBy'));
-  //   const filteredWorklists = sorts[worklistID] || [];
-  //   const currentWLIndex = filteredWorklists.findIndex(st => st.studyUID === studyUID);
-  //   if (currentWLIndex === filteredWorklists.length - 1 || currentWLIndex < 0) 
-  //     toast.info("You reached the end of the worklist", {
-  //       position: "top-right",
-  //       autoClose: 5000,
-  //       hideProgressBar: false,
-  //       closeOnClick: true,
-  //       pauseOnHover: true,
-  //       draggable: true,
-  //     });
-  //   else this.props.displayNextStudy(filteredWorklists[currentWLIndex + 1], worklistID);
-  // }
-
   openNextWLStudy = async (worklistID, studyUID) => {
     try {
       const sortedData = JSON.parse(sessionStorage.getItem("sortedListMap")) || {};
       const filteredWorklist = sortedData[worklistID] || [];
-      console.log(" -----> filteredWorklist", worklistID, filteredWorklist);
       
       if (!filteredWorklist.length) {
         toast.info("No sorted order found for this worklist", {

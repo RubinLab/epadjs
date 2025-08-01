@@ -51,7 +51,6 @@ class selectSerieModal extends React.Component {
 
   //get the serie list
   componentDidMount = async () => {
-    console.log(" ----> this.mode ", this.mode);
     if (this.props.worklistID && this.mode === "teaching") this.props.dispatch(clearGrid()); 
     let selectionType = "";
     let { selectedStudies, selectedSeries, selectedAnnotations } = this.props;
@@ -221,8 +220,6 @@ class selectSerieModal extends React.Component {
     const seriesArr = await this.saveSignificantSeries(series);
     //concatanete all arrays to getther
     // for (let key of Object.keys(selectedToDisplay)) {
-    console.log(' ----> seriesArr');  
-    console.log(seriesArr); 
     for (let el of seriesArr) {  
       let serie = this.findSerieFromSeries(el.seriesUID, series);
       const existingData = this.getExistingSeriesData(serie);
