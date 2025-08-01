@@ -657,11 +657,11 @@ let mode;
       setWorklists(list)
       console.log(' new list =====> ');
       console.log(list);
-      const body = list.map((item) => ({
+      const body = list.map((item, i) => ({
         projectID: item.projectID,
         subjectID: item.subjectID,
         studyUID: item.studyUID,
-        sortOrder: item.sortOrder,
+        sortOrder: i,
       }));
       console.log(body);
       await updateWorklistStudyOrder(props.match.params.wid, body)
