@@ -80,6 +80,7 @@ const SeriesDropDown = (props) => {
   }
 
   useEffect(() => {
+    console.log(" in seriesdropdown")
     let studyUID;
     let projectID;
     let patientID;
@@ -112,6 +113,7 @@ const SeriesDropDown = (props) => {
     }
 
     if (checkMultiframe() && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
+      console.log(" in if 1")
       if (!studyInGrid) {
         getSeries(projectID, patientID, studyUID).then(res => {
           const newList = mergeLists(data[projectID][patientID][studyUID], res.data);
@@ -120,16 +122,21 @@ const SeriesDropDown = (props) => {
         }).catch((err) => console.error(err));
       }
     } if (studyExist && hasDescription) {
+      console.log(" in if 2")
       let series = data[projectID][patientID][studyUID].list;
       series = series?.filter(isSupportedModality);
       setSeriesList(series);
     } else {
+      console.log(" in else 3")
       setLoading(true);
       const shouldFill = props.index === 0 || !hasDescription ? true : !otherSeriesOpened(props.openSeries, props.index);
       if (studyExist && shouldFill && studyUID && projectID && patientID && !studyInGrid) {
+        console.log(" in else other")
         props.dispatch(getSeriesAdditional({studyUID, projectID, patientID}))
       } else {
+        console.log(" in else other else")
         if (!studyInGrid) {
+          console.log(" in else other else and if again")
           getSeries(projectID, patientID, studyUID).then(res => {
             props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
             setLoading(false);
