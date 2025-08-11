@@ -662,7 +662,7 @@ let mode;
         studyUID: item.studyUID,
         sortOrder: i,
       }));
-      await updateWorklistStudyOrder(props.match.params.wid, body)
+      if (body.length > 0) await updateWorklistStudyOrder(props.match.params.wid, body)
     } catch (err) {
       console.error(err);
     }

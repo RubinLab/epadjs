@@ -29,13 +29,18 @@ export function DragDropTable({ columns, data, setData, wid, sameStudy }) {
 
   // ---- Apply previous order before rendering ----
   useEffect(() => {
-    const savedOrder = savedOrderMap[wid];
-    if (savedOrder && savedOrder.length) {
-      const orderMap = new Map(savedOrder.map((item, index) => [item.studyUID, index]));
-      const reordered = [...data].sort(
-        (a, b) => (orderMap.get(a.studyUID) ?? Infinity) - (orderMap.get(b.studyUID) ?? Infinity)
-      );
-      setData(reordered);
+    try {
+      const savedOrder = savedOrderMap[wid];
+      if (savedOrder && savedOrder.length) {
+        const orderMap = new Map(savedOrder.map((item, index) => [item.studyUID, index]));
+        const reordered = [...data].sort(
+          (a, b) => (orderMap.get(a.studyUID) ?? Infinity) - (orderMap.get(b.studyUID) ?? Infinity)
+        );
+        console.log(" ----> setData reorder")
+        setData(reordered);
+      } 
+    } catch (err) {
+      console.error(err);
     }
   }, [wid]);
 
