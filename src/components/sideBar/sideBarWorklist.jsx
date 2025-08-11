@@ -244,14 +244,17 @@ let mode;
       seriesData[projectID][subjectID][studyUID].list;
 
     try {
+      const isTeaching =  mode === 'teaching';
       if (!dataExists) {
         ({ data: series } = await getSeries(projectID, subjectID, studyUID));
+        if (series.length === 0 && isTeaching) 
+          ({ data: series } = await getSeries(projectID, subjectID, studyUID, isTeaching));
         props.dispatch(setSeriesData(projectID, subjectID, studyUID, series, true));
       } else series = seriesData[projectID][subjectID][studyUID].list;
       series = series.filter(isSupportedModality);
       const maxPort = parseInt(sessionStorage.getItem("maxPort"));
       const { openSeries } = props;
-      const alreadyOpenViews = mode === 'teaching' ? 0 : openSeries.length;
+      const alreadyOpenViews = isTeaching ? 0 : openSeries.length;
       if (alreadyOpenViews + series.length <= maxPort) {
         setSeries(series);
         viewSelection(series);
