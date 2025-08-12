@@ -892,6 +892,7 @@ class App extends Component {
     const { projectID, patientID, studyUID } = studyData;
     const { seriesData } = this.props;
     let series;
+    const mode = this.state.mode ? this.state.mode : sessionStorage.getItem("mode");
     try {
       const dataExists = seriesData[projectID] &&
         seriesData[projectID][patientID] &&
@@ -899,7 +900,7 @@ class App extends Component {
         seriesData[projectID][patientID][studyUID].list;
       if (!dataExists) {
         ({ data: series } = await getSeries(projectID, patientID, studyUID, false, "App.js, getSeriesData"));
-        if (series.length === 0 && mode === "teaching") ({ data: series } = await getSeries(projectID, patientID, studyUID, true, "App.js, getSeriesData"));
+        if (series && series.length === 0 && mode === "teaching") ({ data: series } = await getSeries(projectID, patientID, studyUID, true, "App.js, getSeriesData"));
         this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series, true));
         this.setState({ teachingLoading: false });
         return series;
