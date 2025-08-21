@@ -188,8 +188,11 @@ class AnnotationsList extends React.Component {
     const {seriesUID, imageID, aimList}= this.getFusedSerieInfoAndAnnotations();
     const openSerie = {...openSeries[activePort]};
     openSerie.seriesUID = seriesUID;
+    console.log(' --> openSerie.seriesUID', openSerie.seriesUID);
     let annotations = {};
     let aims = aimsList[seriesUID];
+    console.log('--> aimsList', aimsList)
+    console.log('aims', aims);
     for (let aim in aims) {
       if (aims[aim].type === "study" || aims[aim].type === "serie") {
         let { id } = aims[aim];
