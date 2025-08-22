@@ -1039,10 +1039,12 @@ const getSingleSerieData = (serie, annotation, wadoUrl, seriesData) => {
 
     Promise.all(promises)
       .then(async (result) => {
+        console.log(' ++++++ result', result);
         const { studyAims, serieAims, otherSeriesAims } = extractNonMarkupAims(
           result[0].data.rows,
           seriesUID
         );
+        console.log(" ----> extracted", studyAims, serieAims, otherSeriesAims);
         aimsData = serieAims.concat(studyAims);
         let imageAimMap = getImageIdAnnotations(serieAims);
         const url = wadoUrl ? wadoUrl : sessionStorage.getItem('wadoUrl');
