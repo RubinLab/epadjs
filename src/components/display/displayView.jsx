@@ -1009,7 +1009,7 @@ class DisplayView extends Component {
             const isStudyAim = series[activePort].aimID && aimList[seriesUID] && aimList[seriesUID][aimID] && aimList[seriesUID][aimID].type === 'study';
   
             if (mode === 'teaching' && isStudyAim) {
-              getSeries(projectID, patientID, studyUID).then((res) => {
+              getSeries(projectID, patientID, studyUID, false, 'if teaching and aim is a study aim').then((res) => {
                 this.props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
               }).catch(err => console.error(err));
             }

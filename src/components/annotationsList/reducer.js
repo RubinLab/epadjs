@@ -570,6 +570,7 @@ const asyncReducer = (state = initialState, action) => {
           if (!el.examType && el.seriesUID === serUIDFromRef) el.examType = action.payload.ref.examType;
         });
 
+        console.log(" -----> colorAimsList", colorAimsList);
         const result = Object.assign({}, state, {
           loading: false,
           error: false,

@@ -517,6 +517,7 @@ export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann, otherSer
 
 // helper method internal use in action
 const getAimListFields = (aims, ann) => {
+  console.log(' ----> getAimListFields', aims);
   try {
     if (!Array.isArray(aims)) aims = [aims];
     const result = {};
@@ -782,7 +783,7 @@ export const getSingleSerie = (serie, annotation, wadoUrl, seriesData) => {
   };
 };
 
-
+// HERE
 const getSeriesAdditionalInfo = (uids) => {
   return new Promise(async (resolve, reject) => {
     try {

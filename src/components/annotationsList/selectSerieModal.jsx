@@ -118,7 +118,9 @@ class selectSerieModal extends React.Component {
         const { data: series } = await getSeries(
           projectID,
           patientID,
-          studyUID
+          studyUID, 
+          false,
+          'select series, data collecting !dataExists'
         );
         this.props.dispatch(
           setSeriesData(projectID, patientID, studyUID, series, true)

@@ -115,7 +115,7 @@ const SeriesDropDown = (props) => {
     if (checkMultiframe() && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
       console.log(" in if 1")
       if (!studyInGrid) {
-        getSeries(projectID, patientID, studyUID).then(res => {
+        getSeries(projectID, patientID, studyUID, false, 'seriesdropdown, checkMultiframe').then(res => {
           const newList = mergeLists(data[projectID][patientID][studyUID], res.data);
           props.dispatch(setSeriesData(projectID, patientID, studyUID, newList, true, true));
           setLoading(false);
@@ -137,7 +137,7 @@ const SeriesDropDown = (props) => {
         console.log(" in else other else")
         if (!studyInGrid) {
           console.log(" in else other else and if again")
-          getSeries(projectID, patientID, studyUID).then(res => {
+          getSeries(projectID, patientID, studyUID, false, 'series dropdown, 2').then(res => {
             props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
             setLoading(false);
           }).catch((err) => console.error(err));
