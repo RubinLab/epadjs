@@ -860,6 +860,7 @@ class App extends Component {
     for (let serie of seriesArr) {
       // optional clear grid
       // if (worklistID) this.props.dispatch(clearGrid());
+      console.log(" $$$$ serie", serie);
       this.props.dispatch(addToGrid(serie, null, null, worklistID));
       promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
     }
@@ -889,8 +890,12 @@ class App extends Component {
   };
 
   getSeriesData = async (studyData) => {
-    const { projectID, patientID, studyUID } = studyData;
+    const { projectID, studyUID } = studyData;
     const { seriesData } = this.props;
+    let { patientID, subjectID } = studyData;
+    patientID = patientID || subjectID;
+    console.log(" @@@@ patientID", patientID);
+    console.log("$$$ studydata", studyData);
     let series;
     const mode = this.state.mode ? this.state.mode : sessionStorage.getItem("mode");
     try {
