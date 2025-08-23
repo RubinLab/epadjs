@@ -517,7 +517,6 @@ export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann, otherSer
 
 // helper method internal use in action
 const getAimListFields = (aims, ann) => {
-  console.log(' ----> getAimListFields', aims);
   try {
     if (!Array.isArray(aims)) aims = [aims];
     const result = {};
@@ -783,7 +782,6 @@ export const getSingleSerie = (serie, annotation, wadoUrl, seriesData) => {
   };
 };
 
-// HERE
 const getSeriesAdditionalInfo = (uids) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -1039,12 +1037,10 @@ const getSingleSerieData = (serie, annotation, wadoUrl, seriesData) => {
 
     Promise.all(promises)
       .then(async (result) => {
-        console.log(' ++++++ result', result);
         const { studyAims, serieAims, otherSeriesAims } = extractNonMarkupAims(
           result[0].data.rows,
           seriesUID
         );
-        console.log(" ----> extracted", studyAims, serieAims, otherSeriesAims);
         aimsData = serieAims.concat(studyAims);
         let imageAimMap = getImageIdAnnotations(serieAims);
         const url = wadoUrl ? wadoUrl : sessionStorage.getItem('wadoUrl');
