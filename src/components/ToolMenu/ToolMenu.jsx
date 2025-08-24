@@ -8,6 +8,7 @@ import MetaData from "../MetaData/NewMetaData";
 import SmartBrushMenu from "../SmartBrushMenu/SmartBrushMenu";
 import AddToWorklist from "../searchView/addWorklist";
 import BrushSizeSelector from "./BrushSizeSelector";
+import { keyMap } from '../../constants';
 import { WindowLevel } from "../WindowLevel/WindowLevel";
 import ColormapSelector from "./ColormapSelector";
 import FuseSelector from "./FuseSelector";
@@ -309,20 +310,6 @@ class ToolMenu extends Component {
   }
 
   showHotkeyInfo = () => {
-    const keyMap = {
-      'ctrl + y' : 'Aim save',
-      f: 'Arrow',
-      r: 'Circle',
-      x: 'Expand view',
-      i: 'Invert',
-      d: 'Length',
-      p: 'Pan',
-      o: 'Perpendicular',
-      space: 'Reset',
-      s: 'Select',
-      w: 'Window-Level',
-      z: 'Zoom',
-    }
     const hotKeys = Object.keys(keyMap);
     const tools = Object.values(keyMap);
     const rows = hotKeys.reduce((all, item, index) => {
