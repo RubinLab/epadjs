@@ -51,6 +51,7 @@ class selectSerieModal extends React.Component {
 
   //get the serie list
   componentDidMount = async () => {
+    if (this.props.worklistID && this.mode === "teaching") this.props.dispatch(clearGrid()); 
     let selectionType = "";
     let { selectedStudies, selectedSeries, selectedAnnotations } = this.props;
     selectedStudies = Object.values(selectedStudies);
@@ -117,7 +118,9 @@ class selectSerieModal extends React.Component {
         const { data: series } = await getSeries(
           projectID,
           patientID,
-          studyUID
+          studyUID, 
+          false,
+          'select series, data collecting !dataExists'
         );
         this.props.dispatch(
           setSeriesData(projectID, patientID, studyUID, series, true)
@@ -223,7 +226,7 @@ class selectSerieModal extends React.Component {
       let serie = this.findSerieFromSeries(el.seriesUID, series);
       const existingData = this.getExistingSeriesData(serie);
       if (aimID) this.props.dispatch(addToGrid(serie, aimID));
-      else this.props.dispatch(addToGrid(serie, serie.aimID));
+      else this.props.dispatch(addToGrid(serie, serie.aimID, null, this.props.worklistID ));
       if (this.state.selectionType === "aim") {
         this.props.dispatch(getSingleSerie(serie, serie.aimID, this.wadoUrl, existingData));
       } else {
@@ -394,7 +397,7 @@ class selectSerieModal extends React.Component {
         innerList.push(item);
       }
       selectionList.push(
-        <div key={keys[i]}>
+        <div key={`sl-list-${keys[i]}`}>
           {this.mode !== "teaching" && (
             <div className="serieSelection-title">
               {this.getTitle(series[i][0])}
@@ -408,7 +411,7 @@ class selectSerieModal extends React.Component {
     }
     if (significantExplanation)
       selectionList.push(
-        <div key={"explanation"} className={"significant-series"}>
+        <div key={`explanation-sig`} className={"significant-series"}>
           <br />
           (S): Significant series
         </div>

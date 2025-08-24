@@ -34,6 +34,7 @@ import {
   getNotificationsData,
   getSingleSerie,
   addToGrid,
+  clearGrid,
   clearSelection,
   selectProject,
   getTemplates,
@@ -58,7 +59,7 @@ import MinimizedReport from "./components/searchView/MinimizedReport";
 import { FaJoint } from "react-icons/fa";
 import { isSupportedModality } from "./Utils/aid.js";
 import { teachingFileTempCode } from './constants';
-import { render } from 'react-dom';
+import SelectSeriesModal from './components/annotationsList/selectSerieModal';
 
 const messages = {
   noPatient: {
@@ -123,7 +124,9 @@ class App extends Component {
       freeze: "auto",
       teachingLoading: false,
       projectToRole: null,
-      username: null
+      username: null,
+      showSeries: false,
+      openSeriesData: { series: [], studyName: '', worklistID: '' }
     };
   }
 
@@ -839,7 +842,7 @@ class App extends Component {
     });
   };
 
-  displaySeries = async (studyData) => {
+  displaySeries = async (studyData, worklistID) => {
     const rawSeriesArray = await this.getSeriesData(studyData);
     if (!rawSeriesArray) return;
     let seriesArr = rawSeriesArray.filter(isSupportedModality);
@@ -848,13 +851,16 @@ class App extends Component {
     );
     // If there are significant series use them to display
     // if not display modality filtered series
-    if (significantSeries.length) seriesArr = significantSeries;
+    if (significantSeries.length && !worklistID) seriesArr = significantSeries;
     //if check if there is enough available viewports
-    if (!this.hasEnoughViewports(seriesArr)) return;
+    if (!this.hasEnoughViewports(seriesArr) && !worklistID) return;
     //add serie to the grid
     const promiseArr = [];
+    if (worklistID) this.props.dispatch(clearGrid());
     for (let serie of seriesArr) {
-      this.props.dispatch(addToGrid(serie));
+      // optional clear grid
+      // if (worklistID) this.props.dispatch(clearGrid());
+      this.props.dispatch(addToGrid(serie, null, null, worklistID));
       promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
     }
     Promise.all(promiseArr)
@@ -883,15 +889,20 @@ class App extends Component {
   };
 
   getSeriesData = async (studyData) => {
-    const { projectID, patientID, studyUID } = studyData;
+    const { projectID, studyUID } = studyData;
     const { seriesData } = this.props;
+    let { patientID, subjectID } = studyData;
+    patientID = patientID || subjectID;
+    let series;
+    const mode = this.state.mode ? this.state.mode : sessionStorage.getItem("mode");
     try {
       const dataExists = seriesData[projectID] &&
         seriesData[projectID][patientID] &&
         seriesData[projectID][patientID][studyUID] &&
         seriesData[projectID][patientID][studyUID].list;
       if (!dataExists) {
-        const { data: series } = await getSeries(projectID, patientID, studyUID, false, "App.js, getSeriesData");
+        ({ data: series } = await getSeries(projectID, patientID, studyUID, false, "App.js, getSeriesData"));
+        if (series && series.length === 0 && mode === "teaching") ({ data: series } = await getSeries(projectID, patientID, studyUID, true, "App.js, getSeriesData"));
         this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series, true));
         this.setState({ teachingLoading: false });
         return series;
@@ -1340,6 +1351,22 @@ class App extends Component {
     this.setState({ leftMenuState: "closed" });
   }
 
+  displayNextStudy = async (study, worklist) => {
+    const { studyDescription } = study;
+    let series = await this.getSeriesData(study);
+    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
+    if (series.length <= maxPort) {
+      // viewSelection(series);
+      // add - 1 logic if there is a worklist
+      this.displaySeries(study, worklist);
+    } else {
+      const openSeriesData = { series, studyName: studyDescription, worklistID: worklist }
+      this.setState({ showSeries: true, openSeriesData })
+    }
+    // setSeries(series);
+  }
+
+
   render() {
     const {
       notifications,
@@ -1460,6 +1487,7 @@ class App extends Component {
                       closeLeftMenu={this.closeLeftMenu}
                       savedData={this.state.savedData}
                       saveData={(data) => { this.state.savedData = data }}
+                      displayNextStudy={this.displayNextStudy}
                     />
                   )}
                 />
@@ -1614,6 +1642,7 @@ class App extends Component {
                     closeLeftMenu={this.closeLeftMenu}
                     savedData={this.state.savedData}
                     saveData={(data) => { this.state.savedData = data }}
+                    displayNextStudy={this.displayNextStudy}
                   />
                 )}
               />
@@ -1684,10 +1713,18 @@ class App extends Component {
             </Switch>
           </Sidebar>
         )}
-        {this.props.showGridFullAlert && <MaxViewAlert />}
+        {/* {this.props.showGridFullAlert && <MaxViewAlert />} */}
         {/* {this.props.selection && (
           <ManagementItemModal selection={this.props.selection} />
         )} */}
+        {this.state.showSeries && this.state.openSeriesData.series.length > 0 && (
+          <SelectSeriesModal
+            seriesPassed={[this.state.openSeriesData.series]}
+            onCancel={() => this.setState({ showSeries: false })}
+            studyName={this.state.openSeriesData.studyName}
+            worklistID={this.state.openSeriesData.worklistID}
+          />
+        )}
       </ErrorBoundary>
     );
   }

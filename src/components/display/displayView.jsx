@@ -12,6 +12,7 @@ import {
   getSeries
 } from "../../services/seriesServices";
 import { getImageMetadata } from "../../services/imageServices";
+import { getStudiesOfWorklist } from "../../services/worklistServices";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
@@ -46,7 +47,7 @@ import { circle } from "./Circle";
 import { bidirectional } from "./Bidirectional";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
-import { FaTimes, FaPen, FaExpandArrowsAlt, FaTag } from "react-icons/fa";
+import { FaTimes, FaPen, FaExpandArrowsAlt, FaTag, FaArrowRight } from "react-icons/fa";
 import Form from "react-bootstrap/Form";
 import ToolMenu from "../ToolMenu/ToolMenu";
 import { getMarkups, setMarkupsOfAimActive } from "../aimEditor/Helpers";
@@ -57,6 +58,7 @@ import { errorMonitor } from "events";
 import FreehandRoiSculptorTool from "../../cornerstone-tools/tools/FreehandRoiSculptorTool";
 import getVPDimensions from "./ViewportCalculations";
 import SeriesDropDown from "./SeriesDropDown";
+import { filterProjects } from "../../Utils/aid";
 import { toast } from "react-toastify";
 
 let mode;
@@ -165,6 +167,7 @@ const mapStateToProps = (state) => {
     templates: state.annotationsListReducer.templates,
     showAnnotations: state.annotationsListReducer.showAnnotations,
     lastLocation: state.annotationsListReducer.lastLocation,
+    projectMap: state.annotationsListReducer.projectMap,
   };
 };
 
@@ -199,7 +202,7 @@ class DisplayView extends Component {
       multiFrameAimJumped: false,
       dataIndexMap: {},
       aimEdited: false,
-      isVisible: true
+      isVisible: true,
     };
   }
 
@@ -231,6 +234,7 @@ class DisplayView extends Component {
 
   componentDidMount() {
     const { series, onSwitchView } = this.props;
+
     // if (series.length < 1) {
     //   onSwitchView('search');
     // }
@@ -393,7 +397,7 @@ class DisplayView extends Component {
     const isInitialIndex = prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].multiFrameIndex === undefined && this.props.seriesAddition[activePort].multiFrameIndex === null;
     const mfChanged = samePortControl && (prevProps.seriesAddition[activePort].multiFrameIndex !== this.props.seriesAddition[activePort].multiFrameIndex && !isInitialIndex) && this.props.seriesAddition[activePort].multiFrameIndex === null;
 
-    if ( (mfAimJumpDataFilled && newMFAimToJump) || (prevActiveFrameDataMissing && frameDataFilled && multiFrameAimJumpData && multiFrameAimJumpData[0]) || mfChanged) {
+    if ( (mfAimJumpDataFilled && newMFAimToJump) || (prevActiveFrameDataMissing && frameDataFilled && multiFrameAimJumpData && multiFrameAimJumpData[0])) {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], `didupdate 1`);
@@ -407,13 +411,13 @@ class DisplayView extends Component {
       //   (prevProps.series.length !== this.props.series.length &&
       //     this.props.loading === false)
       // ) {
-    } else if (prevProps.series.length < series.length || refreshPage || seriesReplaced || (prevActiveFrameDataMissing && frameDataFilled)) {
+    } else if (prevProps.series.length < series.length || refreshPage || seriesReplaced || (prevActiveFrameDataMissing && frameDataFilled) || mfChanged) {
       await this.setState({ isLoading: true });
       this.getViewports();
       let mfIndex = null;
       let frame = null;
       const seriesAdded = !!(!prevProps.seriesAddition[activePort] && seriesAddition[activePort]);
-      if ( active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex) {
+      if ( active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex || mfChanged) {
         mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
         frame = 0;
       }
@@ -1005,7 +1009,7 @@ class DisplayView extends Component {
             const isStudyAim = series[activePort].aimID && aimList[seriesUID] && aimList[seriesUID][aimID] && aimList[seriesUID][aimID].type === 'study';
   
             if (mode === 'teaching' && isStudyAim) {
-              getSeries(projectID, patientID, studyUID).then((res) => {
+              getSeries(projectID, patientID, studyUID, false, 'if teaching and aim is a study aim').then((res) => {
                 this.props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
               }).catch(err => console.error(err));
             }
@@ -2765,6 +2769,98 @@ class DisplayView extends Component {
     this.setState({ isOverlayVisible: showHide });
   };
 
+  reorderStudyList = (list, worklistID) => {
+    try {
+      const map = {
+        desc: 'studyDescription',
+        sb_name: 'subjectName',
+        pr_name: 'projectID',
+        study_date: 'studyDate',
+        due: 'worklistDuedate',
+        studyUID: 'studyUID',
+        completeness: 'completeness'
+      };
+  
+      const sorts = JSON.parse(sessionStorage.getItem('sortBy'));
+      if (!sorts || !sorts[worklistID]) return list;
+  
+      const filters = sorts[worklistID];
+      // Apply sorting
+      list.sort((a, b) => {
+        for (const filter of filters) {
+          const field = map[filter.id];
+
+          if (!field) continue;
+  
+          let aValue = a[field];
+          let bValue = b[field];
+  
+          // Normalize nulls
+          if (aValue === null || aValue === undefined) aValue = '';
+          if (bValue === null || bValue === undefined) bValue = '';
+  
+          // Convert dates if applicable
+          if (field.toLowerCase().includes('date')) {
+            aValue = aValue ? new Date(aValue) : new Date(0);
+            bValue = bValue ? new Date(bValue) : new Date(0);
+          }
+  
+          let result;
+          if (typeof aValue === 'string' && typeof bValue === 'string') {
+            result = aValue.localeCompare(bValue);
+          } else {
+            result = aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+          }
+  
+          if (result !== 0) return filter.desc ? -result : result;
+        }
+        return 0; // fallback if all filters are equal
+      });
+      return list;
+    } catch (err) {
+      console.error(err);
+      return list;
+    }
+  };
+
+  openNextWLStudy = async (worklistID, studyUID) => {
+    try {
+      const sortedData = JSON.parse(sessionStorage.getItem("sortedListMap")) || {};
+      const filteredWorklist = sortedData[worklistID] || [];
+      
+      if (!filteredWorklist.length) {
+        toast.info("No sorted order found for this worklist", {
+          position: "top-right",
+          autoClose: 5000
+        });
+        return;
+      }
+  
+      const currentIndex = filteredWorklist.findIndex(st => st.studyUID === studyUID);
+  
+      if (currentIndex === -1) {
+        toast.error("Current study not found in saved order", {
+          position: "top-right",
+          autoClose: 5000
+        });
+        return;
+      }
+  
+      if (currentIndex === filteredWorklist.length - 1) {
+        toast.info("You reached the end of the worklist", {
+          position: "top-right",
+          autoClose: 5000
+        });
+        return;
+      }
+  
+      // Move to next study
+      this.props.displayNextStudy(filteredWorklist[currentIndex + 1], worklistID);
+    } catch (error) {
+      console.error("Error opening next study:", error);
+    }
+  };
+
   render() {
     const { series, activePort, updateProgress, updateTreeDataOnSave } =
       this.props;
@@ -2803,6 +2899,8 @@ class DisplayView extends Component {
             onInvertClick={this.formInvertMap}
             onFuseUnfuse={this.getFuseUnfuseState}
             onFuseNewImage={this.newImageFuse}
+            onOpenSeries={this.props.openSeries}
+            openNextWLStudy={this.openNextWLStudy}
           />
           {this.state.isLoading && (
             <div style={{ marginTop: "30%", marginLeft: "50%" }}>
@@ -2855,6 +2953,13 @@ class DisplayView extends Component {
                       >
                         <FaTag />
                       </span>
+                      {/* {series[i].worklistID && (<span
+                        className={"dot"}
+                        style={{ background: "orange"}}
+                        onClick={() => this.openNextWLStudy(series[i].worklistID, series[i].studyUID)}
+                      >
+                        <FaArrowRight />
+                      </span>)} */}
                     </div>
                     {/* <div className={"column middle"}>
                     <label>{series[i].seriesUID}</label>

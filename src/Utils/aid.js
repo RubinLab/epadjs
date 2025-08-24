@@ -6,6 +6,17 @@ import { DISP_MODALITIES } from "../constants";
  * https://github.com/dcmjs-org/dcmjs/blob/master/src/DicomMetaDictionary.js#L5
  */
 
+export const filterProjects = (worklists, projectMap) => {
+  const filteredWorklists = [];
+  const notAuthorized = [];
+  const projectsFilled = Object.keys(projectMap).length > 0;
+  worklists.forEach((el) => {
+    if (projectsFilled && !projectMap[el.projectID]) notAuthorized.push(el.projectID);
+    else if (projectsFilled) filteredWorklists.push(el);
+  });
+  return { notAuthorized, filteredWorklists };
+};
+
 export const findSelectedCheckboxes = () => {
   let checkboxes = document.getElementsByClassName('__search-checkbox');
   checkboxes = Array.from(checkboxes);
