@@ -310,20 +310,6 @@ class ToolMenu extends Component {
   }
 
   showHotkeyInfo = () => {
-    // const keyMap = {
-    //   'ctrl + y' : 'Aim save',
-    //   f: 'Arrow',
-    //   r: 'Circle',
-    //   x: 'Expand view',
-    //   i: 'Invert',
-    //   d: 'Length',
-    //   p: 'Pan',
-    //   o: 'Perpendicular',
-    //   space: 'Reset',
-    //   s: 'Select',
-    //   w: 'Window-Level',
-    //   z: 'Zoom',
-    // }
     const hotKeys = Object.keys(keyMap);
     const tools = Object.values(keyMap);
     const rows = hotKeys.reduce((all, item, index) => {
