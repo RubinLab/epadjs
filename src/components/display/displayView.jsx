@@ -471,6 +471,8 @@ class DisplayView extends Component {
   };
 
   handleKeyPressed = (event) => {
+    const { activePort } = this.props;
+    const { currentImageIdIndex, imageIds } = this.state.data[activePort]?.stack;
     if (event.key === "Enter") {
       event.preventDefault();
     }
@@ -490,6 +492,16 @@ class DisplayView extends Component {
       } else if (event.keyCode === 88) {
         this.hideShow(this.props.activePort)
       }
+    }
+    if (event.keyCode === 38) {
+      const imageIndex = currentImageIdIndex === 0 
+        ? currentImageIdIndex : currentImageIdIndex - 1;
+      this.jumpToImage(imageIndex, activePort);      
+    }
+    if (event.keyCode === 40) {
+      const imageIndex = imageIds.length - 1 === currentImageIdIndex 
+        ? currentImageIdIndex : currentImageIdIndex + 1;
+      this.jumpToImage(imageIndex, activePort);      
     }
   };
 
