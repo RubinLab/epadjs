@@ -48,7 +48,8 @@ class WorkList extends React.Component {
     updateRequirement: false,
     requirements: [],
     newRequirement: {},
-    userNameMap: {}
+    userNameMap: {},
+    popupAnchorEl: null,
   };
 
   createName = (user) => {
@@ -503,10 +504,12 @@ class WorkList extends React.Component {
                 data-for="worklist-assignee"
                 variant="primary"
                 className="btn btn-sm btn-outline-light"
-                onClick={() => {
+                onClick={(e) => {
+                  console.log(e.currentTarget);
                   this.handleUpdateAssignee(assignees, workListID);
                   this.setState({
-                    initialAssignees: [...assignees]
+                    initialAssignees: [...assignees],
+                    popupAnchorEl: e.currentTarget
                   });
                 }}
                 id={`assignees-${original.row.checkbox.workListID}`}
@@ -736,6 +739,7 @@ class WorkList extends React.Component {
         />
         {this.state.updateAssignee && (
           <UpdateAssignee
+            anchorEl={this.state.popupAnchorEl}
             onCancel={this.handleCancel}
             selectAssignee={this.selectAssignee}
             assigneeList={this.state.assigneeMap}
