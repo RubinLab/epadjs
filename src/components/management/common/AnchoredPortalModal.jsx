@@ -69,7 +69,7 @@ class AnchoredPortalModal extends React.Component {
       style: {
         position: "fixed",
         top: 0,
-        left: 0,
+        left: 0 + this,
         visibility: "hidden",
         zIndex: props.zIndex,
         minWidth: props.minWidth,
@@ -151,6 +151,7 @@ class AnchoredPortalModal extends React.Component {
   measureAndPosition() {
     if (!this.props.open) return;
 
+
     // measure
     if (this.containerRef.current) {
       const r = this.containerRef.current.getBoundingClientRect();
@@ -160,7 +161,7 @@ class AnchoredPortalModal extends React.Component {
     // anchor mode
     if (this.props.anchorEl) {
       const rect = this.props.anchorEl.getBoundingClientRect();
-      const { top, left } = computePosition(
+      let { top, left } = computePosition(
         rect,
         this._dims.w,
         this._dims.h,
@@ -178,7 +179,10 @@ class AnchoredPortalModal extends React.Component {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const top = clamp((vh - this._dims.h) / 2, 8, vh - this._dims.h - 8);
-    const left = clamp((vw - this._dims.w) / 2, 8, vw - this._dims.w - 8);
+    let left = clamp((vw - this._dims.w) / 2, 8, vw - this._dims.w - 8);
+    console.log(" ---> left", left);
+    if (this.props.minusLeft) left = left - this.props.minusLeft;
+    console.log(" ---> left", left);
     this.setState((s) => ({
       visible: true,
       style: { ...s.style, top, left, visibility: "visible" },
@@ -206,7 +210,10 @@ class AnchoredPortalModal extends React.Component {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const top = clamp((vh - this._dims.h) / 2, 8, vh - this._dims.h - 8);
-    const left = clamp((vw - this._dims.w) / 2, 8, vw - this._dims.w - 8);
+    let left = clamp((vw - this._dims.w) / 2, 8, vw - this._dims.w - 8);
+    console.log(" ---> left", left);
+    if (this.props.minusLeft) left = left - this.props.minusLeft;
+    console.log(" ---> left", left);
     this.setState((s) => ({
       style: { ...s.style, top, left, visibility: "visible" },
     }));
