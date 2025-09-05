@@ -8,10 +8,19 @@ import AnchoredPortalModal from "../common/AnchoredPortalModal";
 import "../menuStyle.css";
 
 const buttonStyle = {
-  width: "80%",
-  margin: "0.5rem",
+  // width: "80%",
+  margin: "0.2rem 1rem",
   fontSize: "1.1rem",
 };
+
+const divStyle = {
+  display: "flex",
+  justifyContent: "center",   /* <- center; use flex-end for right-align */
+  flexDirection: "column",
+  gap: "8px",               /* space between buttons (Bootstrap 4: remove and add ml-2 on 2nd btn) */
+  margin: "8px 0 12px",
+};
+
 class UpdateRequirement extends React.Component {
   state = { requirements: [], page: 0 };
 
@@ -101,7 +110,7 @@ class UpdateRequirement extends React.Component {
       minusLeft={150}
     >
           {page === 0 && (
-            <>
+            <div style={divStyle} >
               <Button
                 variant="light"
                 name="addNew"
@@ -120,7 +129,7 @@ class UpdateRequirement extends React.Component {
               >
                 Delete Requirement
               </Button>
-            </>
+            </div>
           )}
           {page === 1 && (
             <>
