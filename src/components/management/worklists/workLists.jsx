@@ -89,7 +89,7 @@ class WorkList extends React.Component {
     for (let wl of worklists) {
       let display = wl.requirements.reduce((all, item, i) => {
         const { level, numOfAims, template } = item;
-        const templateName = template === 'any'? 'Any' : this.props.templateMap[template];
+        const templateName = template === 'any'? 'Any' : this.props.templateMap[template] ? this.props.templateMap[template] : template;
         all.push(`${numOfAims}:${templateName}:${level}`);
         return all;
       }, []);
@@ -166,7 +166,8 @@ class WorkList extends React.Component {
       initialAssignees: [],
       updateDueDate: false,
       updateRequirement: false,
-      requirements: []
+      requirements: [],
+      popupAnchorEl: null
     });
   };
 
@@ -585,11 +586,12 @@ class WorkList extends React.Component {
                 className={`--commentCont ${className}`}
                 data-tip
                 data-for="worklist-requirement"
-                onClick={() => {
+                onClick={(e) => {
                   this.setState({
                     worklistId: workListID,
                     requirements,
-                    updateRequirement: true
+                    updateRequirement: true,
+                    popupAnchorEl: e.currentTarget
                   });
                 }}
                 id={`req-${workListID}`}
@@ -768,6 +770,7 @@ class WorkList extends React.Component {
             onNewReqInfo={this.handleRequirementFormInput}
             error={this.state.error}
             templateMap={this.props.templateMap}
+            // anchorEl={this.state.popupAnchorEl}
           />
         )}
       </div>
