@@ -26,7 +26,7 @@ class UpdateRequirement extends React.Component {
 
   componentDidMount = () => {
     const requirements = this.props.requirements.reduce((all, item, i) => {
-      item.template = item.template === 'any' ? 'Any' : this.props.templateMap[item.template];
+      item.template = item.template === 'any' ? 'Any' : this.props.templateMap[item.template] ? this.props.templateMap[item.template] : item.template;
       all.push(item);
       return all;
     }, []);
