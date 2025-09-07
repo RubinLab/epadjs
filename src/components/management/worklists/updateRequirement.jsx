@@ -98,17 +98,17 @@ class UpdateRequirement extends React.Component {
     return (
       // <Modal.Dialog dialogClassName="updateReq__modal">
       <AnchoredPortalModal
-      open={true}
-      onClose={this.props.onCancel}
-      anchorEl={this.props.anchorEl}
-      placement="bottom-start"
-      title="Update Requirement"
-      minWidth={360}
-      backdrop={false}            // set true if you want dim behind
-      showCloseButton={true}
-      footer={this.renderFooter()}
-      minusLeft={150}
-    >
+        open={true}
+        onClose={this.props.onCancel}
+        anchorEl={this.props.anchorEl}
+        placement="bottom-start"
+        title="Update Requirement"
+        minWidth={360}
+        backdrop={false}            // set true if you want dim behind
+        showCloseButton={true}
+        footer={this.renderFooter()}
+        minusLeft={150}
+      >
           {page === 0 && (
             <div style={divStyle} >
               <Button
