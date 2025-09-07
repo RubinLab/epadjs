@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
 import "../menuStyle.css";
+import AnchoredPortalModal from "../common/AnchoredPortalModal";
 import ProjectTable from "./projectTable";
 
 const userRoleEdit = ({
@@ -10,20 +10,11 @@ const userRoleEdit = ({
   error,
   onSelect,
   projectToRole,
+  anchorEl
 }) => {
-  return (
-    // <Modal.Dialog dialogClassName="edit-userRole__modal project_user">
-    <Modal.Dialog id="modal-fix" className="in-modal big-table">
-      <Modal.Header>
-        <Modal.Title>Modify User Roles</Modal.Title>
-      </Modal.Header>
-      <Modal.Body className="edit-userRole project_user">
-        <ProjectTable
-          onSelect={onSelect}
-          projectToRole={projectToRole}
-        />
-      </Modal.Body>
-      <Modal.Footer className="edit-userRole__modal--footer">
+  const renderFooter = () => {
+    return (
+      <>
         {error && (
           <div className="err-message userRole-edit__error">{error}</div>
         )}
@@ -43,8 +34,30 @@ const userRoleEdit = ({
             Cancel
           </button>
         </div>
-      </Modal.Footer>
-    </Modal.Dialog>
+      </>
+    );
+  }
+  
+  return (
+    // <Modal.Dialog dialogClassName="edit-userRole__modal project_user">
+    <AnchoredPortalModal
+      open={true}
+      onClose={onCancel}
+      anchorEl={anchorEl}
+      placement="bottom-start"
+      title="Modify User Roles"
+      minWidth={260}
+      backdrop={false}            // set true if you want dim behind
+      showCloseButton={true}
+      // minusLeft={150}
+      footer={renderFooter()}
+      bodyClassName="user-project-table"
+      >
+      <ProjectTable
+        onSelect={onSelect}
+        projectToRole={projectToRole}
+      />
+    </AnchoredPortalModal>
   );
 };
 

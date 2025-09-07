@@ -735,6 +735,8 @@
   font-weight: 250;
   padding: 0.3rem;
   font-size: 0.9rem;
+  background: #444;
+  color:#fff
 }
 
 .centeredCell {
@@ -1009,6 +1011,11 @@
 
 .project-table {
   width: 100%;
+}
+
+.user-project-table {
+  height: 300px;
+  overflow: auto;
 }
 
 .project-table.__header,

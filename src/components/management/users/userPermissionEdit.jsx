@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
+import AnchoredPortalModal from "../common/AnchoredPortalModal";
 import "../menuStyle.css";
 import PermissionTable from "./permissionTable.jsx";
 
@@ -9,41 +9,51 @@ const userPermissionEdit = ({
   onSubmit,
   error,
   onSelect,
-  userPermission
+  userPermission,
+  anchorEl
 }) => {
   // users = users || projects;
+  const renderFooter = () => {
+    return (
+      <div className="edit-permission__modal--buttons">
+        <button
+          className="edit-permission__modal--button"
+          variant="primary"
+          onClick={onSubmit}
+          id="user-permission-submit"
+        >
+          Submit
+        </button>
+        <button
+          className="edit-permission__modal--button"
+          variant="secondary"
+          onClick={onCancel}
+        >
+          Cancel
+        </button>
+      </div>);
+  }
+
   return (
     // <Modal.Dialog dialogClassName="edit-permission__modal">
-    <Modal.Dialog id="modal-fix">
-      <Modal.Header>
-        <Modal.Title>Modify User Permissions</Modal.Title>
-      </Modal.Header>
-      <Modal.Body className="edit-userRole project_user">
-        <PermissionTable onSelect={onSelect} userPermission={userPermission} />
-      </Modal.Body>
-      <Modal.Footer className="edit-permission__modal--footer">
-        {error && (
+    <AnchoredPortalModal
+      open={true}
+      onClose={onCancel}
+      anchorEl={anchorEl}
+      placement="bottom-start"
+      title="Modify User Permission"
+      minWidth={260}
+      backdrop={false}            // set true if you want dim behind
+      showCloseButton={true}
+      // minusLeft={-250}
+      footer={renderFooter()}
+    >
+      {error && (
           <div className="err-message userRole-edit__error">{error}</div>
-        )}
-        <div className="edit-permission__modal--buttons">
-          <button
-            className="edit-permission__modal--button"
-            variant="primary"
-            onClick={onSubmit}
-            id="user-permission-submit"
-          >
-            Submit
-          </button>
-          <button
-            className="edit-permission__modal--button"
-            variant="secondary"
-            onClick={onCancel}
-          >
-            Cancel
-          </button>
-        </div>
-      </Modal.Footer>
-    </Modal.Dialog>
+      )}
+      <PermissionTable onSelect={onSelect} userPermission={userPermission} />
+
+    </AnchoredPortalModal>
   );
 };
 
