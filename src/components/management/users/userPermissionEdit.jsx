@@ -45,7 +45,7 @@ const userPermissionEdit = ({
       minWidth={260}
       backdrop={false}            // set true if you want dim behind
       showCloseButton={true}
-      // minusLeft={-250}
+      minusLeft={200}
       footer={renderFooter()}
     >
       {error && (

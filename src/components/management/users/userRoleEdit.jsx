@@ -49,7 +49,7 @@ const userRoleEdit = ({
       minWidth={260}
       backdrop={false}            // set true if you want dim behind
       showCloseButton={true}
-      // minusLeft={150}
+      minusLeft={200}
       footer={renderFooter()}
       bodyClassName="user-project-table"
       >
