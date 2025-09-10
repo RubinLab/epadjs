@@ -69,9 +69,9 @@ class AnchoredPortalModal extends React.Component {
       style: {
         position: "fixed",
         top: 0,
-        left: 0 + this,
+        left: 0,
         visibility: "hidden",
-        zIndex: props.zIndex,
+        // zIndex: props.zIndex,
         minWidth: props.minWidth,
         maxWidth: props.maxWidth,
         // maxHeight: props.maxHeight,
@@ -122,14 +122,14 @@ class AnchoredPortalModal extends React.Component {
   addListeners() {
     window.addEventListener("resize", this.reposition);
     window.addEventListener("scroll", this.reposition, true);
-    document.addEventListener("mousedown", this.onDocClick);
+    document.addEventListener("click", this.onDocClick);
     document.addEventListener("keydown", this.onKey);
   }
 
   removeListeners() {
     window.removeEventListener("resize", this.reposition);
     window.removeEventListener("scroll", this.reposition, true);
-    document.removeEventListener("mousedown", this.onDocClick);
+    document.removeEventListener("click", this.onDocClick);
     document.removeEventListener("keydown", this.onKey);
   }
 
@@ -232,13 +232,17 @@ class AnchoredPortalModal extends React.Component {
       onClose,
     } = this.props;
 
+    const liveStyle = { ...this.state.style, zIndex: this.props.zIndex };
+
     return (
       <div
         ref={this.containerRef}
-        style={this.state.style}
+        style={liveStyle}
         role="dialog"
         aria-modal="true"
         className={className || "apm-container"}
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
       >
         {(title || showCloseButton) && (
           <div
@@ -300,7 +304,7 @@ class AnchoredPortalModal extends React.Component {
               position: "fixed",
               inset: 0,
               background: `rgba(0,0,0,${backdropOpacity})`,
-              zIndex: (zIndex || 2000) - 1,
+              zIndex: (this.props.zIndex ?? 1000) - 1
             }}
           />
         )}

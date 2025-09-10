@@ -506,7 +506,6 @@ class WorkList extends React.Component {
                 variant="primary"
                 className="btn btn-sm btn-outline-light"
                 onClick={(e) => {
-                  console.log(e.currentTarget);
                   this.handleUpdateAssignee(assignees, workListID);
                   this.setState({
                     initialAssignees: [...assignees],

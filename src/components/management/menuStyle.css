@@ -1136,3 +1136,7 @@
   overflow: auto;
   background: #444;
 }
+
+/* Make sure this sits above your anchored modal */
+.assigneeWarning { z-index: 3000;}           /* Modal root */
+.assigneeWarning__bd { z-index: 2999;  background-color: #5bc0de;}       /* Backdrop, just below it */

@@ -99,6 +99,7 @@ class UpdateAssignee extends React.Component {
           backdrop={false}            // set true if you want dim behind
           showCloseButton={true}
           footer={this.renderFooter()}
+          zIndex={1000}
         >
         <UserList
           users={this.props.users}
