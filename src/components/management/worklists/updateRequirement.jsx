@@ -3,20 +3,30 @@ import PropTypes from "prop-types";
 import { Modal, Button } from "react-bootstrap";
 import RequirementForm from "./requirementForm";
 import RequirementEdit from "./requirementEditTable";
+import AnchoredPortalModal from "../common/AnchoredPortalModal";
 
 import "../menuStyle.css";
 
 const buttonStyle = {
-  width: "80%",
-  margin: "0.5rem",
+  // width: "80%",
+  margin: "0.2rem 1rem",
   fontSize: "1.1rem",
 };
+
+const divStyle = {
+  display: "flex",
+  justifyContent: "center",   /* <- center; use flex-end for right-align */
+  flexDirection: "column",
+  gap: "8px",               /* space between buttons (Bootstrap 4: remove and add ml-2 on 2nd btn) */
+  margin: "8px 0 12px",
+};
+
 class UpdateRequirement extends React.Component {
   state = { requirements: [], page: 0 };
 
   componentDidMount = () => {
     const requirements = this.props.requirements.reduce((all, item, i) => {
-      item.template = item.template === 'any' ? 'Any' : this.props.templateMap[item.template];
+      item.template = item.template === 'any' ? 'Any' : this.props.templateMap[item.template] ? this.props.templateMap[item.template] : item.template;
       all.push(item);
       return all;
     }, []);
@@ -54,6 +64,32 @@ class UpdateRequirement extends React.Component {
     }
   };
 
+  renderFooter = () => {
+    const { page } = this.state;
+    const changeStarted = page === 1 || page === 2;
+    const secondButton = changeStarted ? "Back" : "Cancel";
+    return (
+      <div className="updateReq__modal--buttons">
+        {changeStarted && (
+          <button
+            className="updateReq__modal--button"
+            variant="secondary"
+            onClick={this.onSubmit}
+          >
+            Submit
+          </button>
+        )}
+          <button
+            className="edit-permission__modal--button"
+            variant="secondary"
+            onClick={this.onClose}
+          >
+            {secondButton}
+          </button>
+        </div>
+    );
+  }
+
   render = () => {
     const { page, requirements } = this.state;
     const { error } = this.props;
@@ -61,13 +97,20 @@ class UpdateRequirement extends React.Component {
     const secondButton = changeStarted ? "Back" : "Cancel";
     return (
       // <Modal.Dialog dialogClassName="updateReq__modal">
-      <Modal.Dialog id="modal-fix" className="in-modal">
-        <Modal.Header>
-          <Modal.Title>Update Requirements</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="updateReq__mbody">
+      <AnchoredPortalModal
+        open={true}
+        onClose={this.props.onCancel}
+        anchorEl={this.props.anchorEl}
+        placement="bottom-start"
+        title="Update Requirement"
+        minWidth={360}
+        backdrop={false}            // set true if you want dim behind
+        showCloseButton={true}
+        footer={this.renderFooter()}
+        minusLeft={150}
+      >
           {page === 0 && (
-            <>
+            <div style={divStyle} >
               <Button
                 variant="light"
                 name="addNew"
@@ -86,7 +129,7 @@ class UpdateRequirement extends React.Component {
               >
                 Delete Requirement
               </Button>
-            </>
+            </div>
           )}
           {page === 1 && (
             <>
@@ -104,28 +147,7 @@ class UpdateRequirement extends React.Component {
               onDelete={this.props.onDelete}
             />
           )}
-        </Modal.Body>
-        <Modal.Footer className="modal-footer__buttons">
-          <div className="updateReq__modal--buttons">
-            {changeStarted && (
-              <button
-                className="updateReq__modal--button"
-                variant="secondary"
-                onClick={this.onSubmit}
-              >
-                Submit
-              </button>
-            )}
-            <button
-              className="edit-permission__modal--button"
-              variant="secondary"
-              onClick={this.onClose}
-            >
-              {secondButton}
-            </button>
-          </div>
-        </Modal.Footer>
-      </Modal.Dialog>
+        </AnchoredPortalModal>
     );
   };
 }

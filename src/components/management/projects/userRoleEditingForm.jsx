@@ -1,26 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
 import "../menuStyle.css";
+import AnchoredPortalModal from "../common/AnchoredPortalModal";
 import UserTable from "./userTable";
 
 const style = { minWidth: "fit-content", left: "10%" };
-const userRoleEditingForm = ({ onCancel, onSubmit, onType, error, users }) => {
+const userRoleEditingForm = ({ onCancel, onSubmit, onType, error, users, anchorEl }) => {
   // users = users || projects;
-  return (
-    // <Modal.Dialog dialogClassName="edit-userRole__modal">
-    <Modal.Dialog
-      id="modal-fix"
-      className="in-modal edit-userrole"
-      style={style}
-    >
-      <Modal.Header>
-        <Modal.Title>Modify User Roles</Modal.Title>
-      </Modal.Header>
-      <Modal.Body className="edit-userRole">
-        <UserTable onSelect={onType} users={users} />
-      </Modal.Body>
-      <Modal.Footer className="edit-userRole__modal--footer">
+  const renderFooter = () => {
+    return (
+      <>
         {error && (
           <div className="err-message userRole-edit__error">{error}</div>
         )}
@@ -40,8 +29,26 @@ const userRoleEditingForm = ({ onCancel, onSubmit, onType, error, users }) => {
             Cancel
           </button>
         </div>
-      </Modal.Footer>
-    </Modal.Dialog>
+      </>
+    );
+  }
+  return (
+    <AnchoredPortalModal
+      open={true}
+      onClose={onCancel}
+      anchorEl={anchorEl}
+      placement="bottom-start"
+      title="Modify User Roles"
+      minWidth={260}
+      backdrop={false}            // set true if you want dim behind
+      showCloseButton={true}
+      minusLeft={100}
+      footer={renderFooter()}
+      bodyClassName="user-project-table"
+    > 
+      <UserTable onSelect={onType} users={users} />
+    </AnchoredPortalModal>
+  
   );
 };
 

@@ -1,8 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
-import UserList from "./userList";
-import AssgineeDeletetionWarning from "./assigneeDeletionWarning";
+import AnchoredPortalModal from "../common/AnchoredPortalModal";
 import "../menuStyle.css";
 
 const updateDueDate = props => {
@@ -15,39 +13,49 @@ const updateDueDate = props => {
     today = `${year}-${month + 1}-${day}`;
   }
   const defaultDate = props.duedate || today;
+
+  const renderFooter = () => {
+    return (
+      <div className="updateDueDate__modal--buttons">
+      <button
+        className="updateDueDate__modal--button"
+        variant="secondary"
+        onClick={props.onSubmit}
+      >
+        Submit
+      </button>
+      <button
+        className="edit-permission__modal--button"
+        variant="secondary"
+        onClick={props.onCancel}
+      >
+        Cancel
+      </button>
+    </div>
+    )
+  }
   return (
     // <Modal.Dialog dialogClassName="updateDueDate__modal">
-    <Modal.Dialog id="modal-fix">
-      <Modal.Header>
-        <Modal.Title>Update Due Date</Modal.Title>
-      </Modal.Header>
-      <Modal.Body className="updateDueDate__mbody">
-        <input
-          type="date"
-          name="duedate"
-          onChange={props.onChange}
-          defaultValue={defaultDate}
-        />
-      </Modal.Body>
-      <Modal.Footer className="modal-footer__buttons">
-        <div className="updateDueDate__modal--buttons">
-          <button
-            className="updateDueDate__modal--button"
-            variant="secondary"
-            onClick={props.onSubmit}
-          >
-            Submit
-          </button>
-          <button
-            className="edit-permission__modal--button"
-            variant="secondary"
-            onClick={props.onCancel}
-          >
-            Cancel
-          </button>
-        </div>
-      </Modal.Footer>
-    </Modal.Dialog>
+    <AnchoredPortalModal
+    open={true}
+    onClose={props.onCancel}
+    anchorEl={props.anchorEl}
+    placement="bottom-start"
+    title="Update Due Date"
+    minWidth={260}
+    backdrop={false}            // set true if you want dim behind
+    showCloseButton={true}
+    footer={renderFooter()}
+    minusLeft={100}
+  >
+    <input
+      type="date"
+      name="duedate"
+      onChange={props.onChange}
+      defaultValue={defaultDate}
+      style={{"width": "100%"}}
+    />
+    </AnchoredPortalModal>
   );
 };
 

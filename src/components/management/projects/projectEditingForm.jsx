@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
+import AnchoredPortalModal from "../common/AnchoredPortalModal";
 import "../menuStyle.css";
 
 let mode;
@@ -14,6 +14,7 @@ const projectEditingForm = ({
   type,
   defaultTemplate,
   templates,
+  anchorEl
 }) => {
   mode = sessionStorage.getItem('mode');
 
@@ -31,13 +32,32 @@ const projectEditingForm = ({
       </option>
     );
   });
+  const renderFooter = () => {
+    return (
+      <>
+        <button variant="primary" onClick={onSubmit}>
+          Submit
+        </button>
+        <button variant="secondary" onClick={onCancel}>
+          Cancel
+        </button>
+      </>
+    )
+  }
+
   return (
-    // <Modal.Dialog dialogClassName="edit-project__modal">
-    <Modal.Dialog id="modal-fix" className="in-modal edit-project">
-      <Modal.Header>
-        <Modal.Title>Edit Project</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
+    <AnchoredPortalModal
+      open={true}
+      onClose={onCancel}
+      anchorEl={anchorEl}
+      placement="bottom-start"
+      title="Edit Project"
+      minWidth={260}
+      backdrop={false}            // set true if you want dim behind
+      showCloseButton={true}
+      minusLeft={100}
+      footer={renderFooter()}
+    > 
         <form className="edit-project__modal--form">
           <h5 className="edit-project__modal--label">Name</h5>
           <input
@@ -87,16 +107,7 @@ const projectEditingForm = ({
             <div className="err-message project-edit__error">{error}</div>
           )}
         </form>
-      </Modal.Body>
-      <Modal.Footer className="modal-footer__buttons">
-        <button variant="primary" onClick={onSubmit}>
-          Submit
-        </button>
-        <button variant="secondary" onClick={onCancel}>
-          Cancel
-        </button>
-      </Modal.Footer>
-    </Modal.Dialog>
+        </AnchoredPortalModal>
   );
 };
 
