@@ -68,6 +68,8 @@ export const STORE_AIM_SELECTION = 'epadjs/annotationList/STORE_AIM_SELECTION';
 export const STORE_AIM_SELECTION_ALL = 'epadjs/annotationList/STORE_AIM_SELECTION_ALL';
 export const TOGGLE_ALL_CALCULATIONS = 'epadjs/annotationList/TOGGLE_ALL_CALCULATIONS';
 export const SET_LAST_LOCATION = 'epadjs/annotationList/SET_LAST_LOCATION';
+export const SHOW_PHI = 'epadjs/annotationList/SHOW_PHI';
+
 export const commonLabels = {
   button: { background: "#6c757d", color: "#ECECEC", border: "#acacac solid 1px" },
   label: { background: "#616970", color: "white" },
@@ -84,9 +86,9 @@ export const colors = [
     // label: { background: "#7d522d" },
   },
   // {
-   // button: { background: "#02c7b0" },
-   // label: { background: "#0f7569" },
- // },
+  // button: { background: "#02c7b0" },
+  // label: { background: "#0f7569" },
+  // },
   {
     button: { background: "#72ba6f" },
     label: { background: "#395e38" },
