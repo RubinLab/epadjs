@@ -595,7 +595,8 @@ function AnnotationTable(props) {
 
   const { multipageAimSelection, searchTableIndex } = props;
   let columns = [];
-  if (true) {
+  if ((mode === "teaching") ) {
+    if (!props.showingPHI) {
     columns = React.useMemo(
       () => [
         {
@@ -795,9 +796,9 @@ function AnnotationTable(props) {
         },
       ],
       // [data, listOfSelecteds, props.selectedAnnotations]
-      [data, props.multipageAimSelection]
+      [data, props.multipageAimSelection, props.showingPHI]
     );
-  } else if (mode === "teaching") {
+  } else {
     columns = React.useMemo(
       () => [
         {
@@ -972,9 +973,9 @@ function AnnotationTable(props) {
         },
       ],
       // [data, listOfSelecteds, props.selectedAnnotations]
-      [data, props.multipageAimSelection]
+      [data, props.multipageAimSelection, props.showingPHI]
     );
-  } else {
+  } } else {
     columns = React.useMemo(
       () => [
         {
@@ -1197,7 +1198,9 @@ const mapsStateToProps = (state) => {
     searchTableIndex: state.annotationsListReducer.searchTableIndex,
     seriesData: state.annotationsListReducer.seriesData,
     openSeriesAddition: state.annotationsListReducer.openSeriesAddition,
-    multipageAimSelection: state.annotationsListReducer.multipageAimSelection
+    multipageAimSelection: state.annotationsListReducer.multipageAimSelection,
+    showingPHI: state.annotationsListReducer.showingPHI
+
   };
 };
 
