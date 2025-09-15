@@ -16,14 +16,15 @@ import {
 
 const nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
-const StudyTable = ({ data, order, displaySeries }) => {
+const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
   const [sortedCol, setSortedCol] = useState(null);
   const [sortOrder, setSortOrder] = useState(null);
 
   const defineColumns = () => {
     const tableColumns = [];
     for (let item of order) {
-      tableColumns.push(columnsPseudo[item]);
+      if (showingPHI) tableColumns.push(columns[item])
+      else tableColumns.push(columnsPseudo[item]);
     }
     return tableColumns;
   };

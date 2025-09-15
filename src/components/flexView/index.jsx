@@ -286,6 +286,7 @@ class FlexView extends React.Component {
               data={data}
               order={order}
               displaySeries={this.displaySeries}
+              showingPHI={this.props.showingPHI}
             />
           )}
         </div>
@@ -307,6 +308,7 @@ const mapStateToProps = (state) => {
     lastEventId: state.annotationsListReducer.lastEventId,
     refresh: state.annotationsListReducer.refresh,
     seriesData: state.annotationsListReducer.seriesData,
+    showingPHI: state.annotationsListReducer.showingPHI,
   };
 };
 
