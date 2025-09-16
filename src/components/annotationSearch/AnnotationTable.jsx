@@ -25,7 +25,7 @@ import {
 import { formatDate } from "../flexView/helperMethods";
 import { getSeries, getSignificantSeries } from "../../services/seriesServices";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
-import { isSupportedModality, pseudo, generalizeDate } from "../../Utils/aid.js";
+import { isSupportedModality, pseudo } from "../../Utils/aid.js";
 import { COMP_MODALITIES as compModality, teachingFileTempCode } from "../../constants.js";
 const defaultPageSize = 50;
 

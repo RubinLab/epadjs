@@ -25,7 +25,7 @@ import { getSeries } from "../../services/seriesServices";
 import DeleteAlert from "../management/common/alertDeletionModal";
 import SelectSeriesModal from "../annotationsList/selectSerieModal";
 import { addToGrid, getSingleSerie, alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData, clearGrid } from "../annotationsList/action";
-import { isSupportedModality, filterProjects } from "../../Utils/aid.js";
+import { isSupportedModality, filterProjects, pseudo, generalizeDate } from "../../Utils/aid.js";
 // CSS import
 import "./style.css";
 
@@ -386,8 +386,9 @@ let mode;
           let studyDesc = clearCarets(
             row.original.studyDescription
           );
-          studyDesc = studyDesc ? studyDesc : "Unnamed Study";
-          return <div>{studyDesc}</div>;
+          studyDesc = !studyDesc ? "Unnamed Study" 
+          : props.showingPHI ? studyDesc : pseudo(studyDesc);
+          return (<div>{studyDesc}</div> );
         },
       },
       {
@@ -429,7 +430,8 @@ let mode;
           let subjectName = clearCarets(
             row.original.subjectName
           );
-          subjectName = subjectName ? subjectName : "Unnamed Subject";
+          subjectName = !subjectName ? "Unnamed Subject" 
+          : props.showingPHI ? subjectName : pseudo(subjectName);
           return <div>{subjectName}</div>;
         },
       },
@@ -479,6 +481,7 @@ let mode;
         sortable: true,
         resizable: true,
         accessor: "studyDate",
+        Cell: ({ row }) => ( <div>{generalizeDate(row.original.studyDate)}</div>)
       },
       {
         id: "due",
@@ -495,6 +498,8 @@ let mode;
         sortable: true,
         resizable: true,
         accessor: "studyUID",
+        Cell: ({ row }) => ( <div>{pseudo(row.original.studyUID)}</div>)
+
       },
       {
         width: 30,
@@ -650,7 +655,7 @@ let mode;
         },
       },
     ],
-    [props.match.params.wid]
+    [props.match.params.wid, props.showingPHI]
   );
 
   const setNewListOrder = async(list) => {
@@ -697,6 +702,7 @@ const mapStateToProps = (state) => {
       patients: state.annotationsListReducer.patients,
       projectMap: state.annotationsListReducer.projectMap,
       seriesData: state.annotationsListReducer.seriesData,
+      showingPHI: state.annotationsListReducer.showingPHI,
     };
   };
   
