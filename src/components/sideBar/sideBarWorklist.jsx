@@ -481,7 +481,7 @@ let mode;
         sortable: true,
         resizable: true,
         accessor: "studyDate",
-        Cell: ({ row }) => ( <div>{generalizeDate(row.original.studyDate)}</div>)
+        Cell: ({ row }) => ( <div>{ props.showingPHI ? row.original.studyDate : generalizeDate(row.original.studyDate)}</div>)
       },
       {
         id: "due",
@@ -498,7 +498,7 @@ let mode;
         sortable: true,
         resizable: true,
         accessor: "studyUID",
-        Cell: ({ row }) => ( <div>{pseudo(row.original.studyUID)}</div>)
+        Cell: ({ row }) => ( <div>{props.showingPHI ? row.original.studyUID : pseudo(row.original.studyUID)}</div>)
 
       },
       {
