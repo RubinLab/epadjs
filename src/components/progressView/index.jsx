@@ -25,7 +25,12 @@ class ProgressView extends React.Component {
   };
 
   getWorkListData = async () => {
-    const { data } = await getWorklistProgress(this.props.match.params.wid);
+    let { data } = await getWorklistProgress(this.props.match.params.wid);
+    data = data.map(el => {
+      el.subject_name = this.clearCarets(el.subject_name);
+      el.assignee_name = el.assignee_name.includes("null") ? el.assignee : el.assignee_name;
+      return el;
+    })
     data.forEach(el => (el.subject_name = this.clearCarets(el.subject_name)));
     this.setState({ data });
   };
