@@ -2763,7 +2763,7 @@ class DisplayView extends Component {
   };
 
   toggleOverlay = (e, i) => {
-    if (!this.props.showingPHI) return;
+    if (!this.props.showingPHI && mode === 'teaching') return;
     const showHide = { ...this.state.isOverlayVisible };
     const index = i || i === 0 ? i : this.props.activePort;
     if (showHide[index]) delete showHide[index];
@@ -3061,7 +3061,7 @@ class DisplayView extends Component {
                     isStackPrefetchEnabled={true}
                     style={{ height: "calc(100% - 26px)" }}
                     activeTool={activeTool}
-                    showingPHI={this.props.showingPHI}
+                    showingPHI={this.props.showingPHI && mode === 'teaching'}
                     isOverlayVisible={this.state.isOverlayVisible[i] || false}
                     jumpToImage={() => this.jumpToImage(0, i)}
                   />}

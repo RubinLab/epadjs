@@ -387,7 +387,7 @@ let mode;
             row.original.studyDescription
           );
           studyDesc = !studyDesc ? "Unnamed Study" 
-          : props.showingPHI ? studyDesc : pseudo(studyDesc);
+          : props.showingPHI || mode !== 'teaching' ? studyDesc : pseudo(studyDesc);
           return (<div>{studyDesc}</div> );
         },
       },
@@ -431,7 +431,7 @@ let mode;
             row.original.subjectName
           );
           subjectName = !subjectName ? "Unnamed Subject" 
-          : props.showingPHI ? subjectName : pseudo(subjectName);
+          : props.showingPHI || mode !== 'teaching' ? subjectName : pseudo(subjectName);
           return <div>{subjectName}</div>;
         },
       },
@@ -481,7 +481,7 @@ let mode;
         sortable: true,
         resizable: true,
         accessor: "studyDate",
-        Cell: ({ row }) => ( <div>{ props.showingPHI ? row.original.studyDate : generalizeDate(row.original.studyDate)}</div>)
+        Cell: ({ row }) => ( <div>{ props.showingPHI || mode !== 'teaching' ? row.original.studyDate : generalizeDate(row.original.studyDate)}</div>)
       },
       {
         id: "due",
@@ -498,7 +498,7 @@ let mode;
         sortable: true,
         resizable: true,
         accessor: "studyUID",
-        Cell: ({ row }) => ( <div>{props.showingPHI ? row.original.studyUID : pseudo(row.original.studyUID)}</div>)
+        Cell: ({ row }) => ( <div>{props.showingPHI || mode !== 'teaching' ? row.original.studyUID : pseudo(row.original.studyUID)}</div>)
 
       },
       {

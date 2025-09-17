@@ -6,7 +6,6 @@ import { generalizeDate, pseudo } from "../../Utils/aid.js";
 import find from "lodash/find";
 // import "./flexView.css";
 import '../annotationSearch/annotationSearch.css';
-
 import {
   clearCarets,
   formatTime,
@@ -14,16 +13,19 @@ import {
   reverseCarets
 } from "./helperMethods";
 
+let mode;
+
 const nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
   const [sortedCol, setSortedCol] = useState(null);
   const [sortOrder, setSortOrder] = useState(null);
+  mode = sessionStorage.getItem('mode');
 
   const defineColumns = () => {
     const tableColumns = [];
     for (let item of order) {
-      if (showingPHI) tableColumns.push(columns[item])
+      if (showingPHI || mode !== 'teaching') tableColumns.push(columns[item])
       else tableColumns.push(columnsPseudo[item]);
     }
     return tableColumns;

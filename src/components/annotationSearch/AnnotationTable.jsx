@@ -596,7 +596,7 @@ function AnnotationTable(props) {
   const { multipageAimSelection, searchTableIndex } = props;
   let columns = [];
   if ((mode === "teaching") ) {
-    if (!props.showingPHI) {
+    if (!props.showingPHI && mode === 'teaching') {
     columns = React.useMemo(
       () => [
         {

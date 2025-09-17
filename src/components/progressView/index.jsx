@@ -9,8 +9,12 @@ import { getWorklistProgress } from "../../services/worklistServices";
 import { pseudo, generalizeDate } from "Utils/aid";
 import "./proView.css";
 
+let mode;
+
 class ProgressView extends React.Component {
   state = { data: [], view: "Patient" };
+  mode = sessionStorage.getItem("mode");
+  
   componentDidMount = async () => {
     this.getWorkListData();
   };
@@ -204,7 +208,7 @@ class ProgressView extends React.Component {
   getDisplayData = () => {
     const { data } = this.state;
     const { showingPHI } = this.props;
-    if (showingPHI) return data;
+    if (showingPHI || mode !== 'teaching') return data;
     return data.map(r => ({
       ...r,
       subject_name: r.subject_name ? pseudo(this.clearCarets(r.subject_name)) : r.subject_name,
