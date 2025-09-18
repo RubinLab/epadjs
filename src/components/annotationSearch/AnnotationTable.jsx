@@ -661,7 +661,7 @@ function AnnotationTable(props) {
           accessor: "accessionNumber",
           Cell: ({ row }) => {
             return (
-              <div> {pseudo(clearCarets(row.original.accessionNumber), 'Acc #-')}</div>
+              <div> {clearCarets(row.original.accessionNumber)}</div>
             );
           }
         },
