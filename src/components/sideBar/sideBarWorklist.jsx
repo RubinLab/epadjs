@@ -386,8 +386,7 @@ let mode;
           let studyDesc = clearCarets(
             row.original.studyDescription
           );
-          studyDesc = !studyDesc ? "Unnamed Study" 
-          : props.showingPHI || mode !== 'teaching' ? studyDesc : pseudo(studyDesc, "DESC-");
+          studyDesc = !studyDesc ? "Unnamed Study" : studyDesc ;
           return (<div>{studyDesc}</div> );
         },
       },

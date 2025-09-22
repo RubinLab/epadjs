@@ -201,7 +201,7 @@ const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
         let desc = row.original.studyDescription
           ? row.original.studyDescription
           : "Unnamed Study";
-        return <div>{pseudo(clearCarets(desc), "DESC-")}</div>;
+        return <div>{clearCarets(desc)}</div>;
       }
     },
     // {
