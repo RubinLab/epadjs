@@ -339,8 +339,7 @@ class CornerstoneViewport extends Component {
     const imageId = imageIds[imageIdIndex];
     return (
       imageId &&
-      windowWidth &&
-      this.props.showingPHI && isOverlayVisible && (
+      windowWidth && isOverlayVisible && (
         <Component
           imageIndex={imageIdIndex + 1}
           stackSize={imageIds.length}
@@ -348,6 +347,7 @@ class CornerstoneViewport extends Component {
           windowWidth={windowWidth}
           windowCenter={windowCenter}
           imageId={imageId}
+          showingPHI={this.props.showingPHI}
         />
       )
     );

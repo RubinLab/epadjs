@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import cornerstone from "cornerstone-core";
 import dicomParser from "dicom-parser";
 import { helpers } from "../helpers/index.js";
+import { generalizeDate } from "Utils/aid.js";
 import "./ViewportOverlay.css";
 
 const {
@@ -47,8 +48,8 @@ class ViewportOverlay extends PureComponent {
   };
 
   formDate = (date, time) => {
-    const year = date ? date.substring(0, 4): '1900';
-    const monthIndex = date ? parseInt(date.substring(4, 6)) - 1: '01';
+    const year = date ? date.substring(0, 4) : '1900';
+    const monthIndex = date ? parseInt(date.substring(4, 6)) - 1 : '01';
     const day = date ? date.substring(6, 8) : '01';
     const hour = time ? time.substring(0, 2) : '00';
     const min = time ? time.substring(2, 4) : '00';
@@ -106,7 +107,7 @@ class ViewportOverlay extends PureComponent {
     const { patientId, patientName, patientSex, patientBirthDate } = patientModule;
 
     const age = this.calculateAge({ date: studyDate, time: studyTime }, { date: patientBirthDate });
-
+    const hiddenAge = age > 90 ? '90+' : age;
     const generalImageModule =
       cornerstone.metaData.get("generalImageModule", imageId) || {};
     const { instanceNumber } = generalImageModule;
@@ -120,19 +121,19 @@ class ViewportOverlay extends PureComponent {
     const wwwc = `W: ${windowWidth.toFixed(precision)} L: ${windowCenter.toFixed(precision)}`;
     const imageDimensions = `${columns} x ${rows}`;
 
-    const { imageIndex, stackSize } = this.props;
+    const { imageIndex, stackSize, showingPHI } = this.props;
 
     const normal = (
       <React.Fragment>
         <div className="top-left overlay-element">
-          <div>{formatPN(patientName)}</div>
-          <div>{patientId}</div>
-          <div>{`${patientSex} / ${age}`}</div>
+          {showingPHI && <div>{formatPN(patientName)}</div>}
+          {showingPHI && <div>{patientId}</div>}
+          <div>{patientSex ? `${patientSex} /` : ''} {showingPHI ? age : hiddenAge}</div>
         </div>
         <div className="top-right overlay-element">
           <div>{studyDescription}</div>
           <div>
-            {formatDA(studyDate)} {formatTM(studyTime)}
+            {showingPHI ? `${formatDA(studyDate)} ${studyTime && formatTM(studyTime) ? formatTM(studyTime) : ''}` : generalizeDate(studyDate)}
           </div>
         </div>
         <div className="bottom-right overlay-element">
