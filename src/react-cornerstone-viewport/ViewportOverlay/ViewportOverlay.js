@@ -5,7 +5,6 @@ import PropTypes from "prop-types";
 import cornerstone from "cornerstone-core";
 import dicomParser from "dicom-parser";
 import { helpers } from "../helpers/index.js";
-import { generalizeDate } from "Utils/aid.js";
 import "./ViewportOverlay.css";
 
 const {
@@ -133,7 +132,7 @@ class ViewportOverlay extends PureComponent {
         <div className="top-right overlay-element">
           <div>{studyDescription}</div>
           <div>
-            {showingPHI ? `${formatDA(studyDate)} ${studyTime && formatTM(studyTime) ? formatTM(studyTime) : ''}` : generalizeDate(studyDate)}
+            {`${formatDA(studyDate)} ${studyTime && formatTM(studyTime) ? formatTM(studyTime) : ''}`}
           </div>
         </div>
         <div className="bottom-right overlay-element">

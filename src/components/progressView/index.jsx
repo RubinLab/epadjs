@@ -6,7 +6,7 @@ import Badge from "react-bootstrap/Badge";
 import ReactTooltip from "react-tooltip";
 import { GrCalculator, GrManual } from "react-icons/gr";
 import { getWorklistProgress } from "../../services/worklistServices";
-import { pseudo, generalizeDate } from "Utils/aid";
+import { pseudo } from "Utils/aid";
 import "./proView.css";
 
 let mode;
@@ -220,7 +220,6 @@ class ProgressView extends React.Component {
       ...r,
       subject_name: r.subject_name ? pseudo(this.clearCarets(r.subject_name)) : r.subject_name,
       study_uid: r.study_uid ? pseudo(r.study_uid) : r.study_uid,
-      study_date: r.study_date ? generalizeDate(r.study_date) : r.study_date,
     }));
   };
 

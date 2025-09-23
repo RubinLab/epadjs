@@ -480,7 +480,7 @@ let mode;
         sortable: true,
         resizable: true,
         accessor: "studyDate",
-        Cell: ({ row }) => ( <div>{ props.showingPHI || mode !== 'teaching' ? row.original.studyDate : generalizeDate(row.original.studyDate)}</div>)
+        // Cell: ({ row }) => ( <div>{ props.showingPHI || mode !== 'teaching' ? row.original.studyDate : generalizeDate(row.original.studyDate)}</div>)
       },
       {
         id: "due",

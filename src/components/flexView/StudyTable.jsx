@@ -235,11 +235,11 @@ const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
           backgroundColor: sortedCol === "studyDate-id" ? "#3a3f44" : null
         }
       }),
-      Cell: row => {
-        // return <div>{formatDate(row.original.studyDate)}</div>;
-        return <div>{generalizeDate(row.original.studyDate)}</div>;
+      // Cell: row => {
+      //   // return <div>{formatDate(row.original.studyDate)}</div>;
+      //   return <div>{generalizeDate(row.original.studyDate)}</div>;
         
-      }
+      // }
     },
     {
       // Header: "Study Time",
@@ -337,10 +337,10 @@ const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
           backgroundColor: sortedCol === "createdTime-id" ? "#3a3f44" : null
         }
       }),
-      Cell: row => {
-        // return <div>{formatDate(row.original.birthdate)}</div>;
-        return <div>{generalizeDate(row.original.createdTime)}</div>;  
-      }
+      // Cell: row => {
+      //   // return <div>{formatDate(row.original.birthdate)}</div>;
+      //   return <div>{generalizeDate(row.original.createdTime)}</div>;  
+      // }
     },
     {
       // Header: "Birth date",
