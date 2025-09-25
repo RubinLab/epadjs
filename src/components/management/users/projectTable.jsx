@@ -27,7 +27,7 @@ const projectTable = ({ onSelect, projectToRole, projectMap }) => {
   }
   return (
     <table className="project-table">
-      <thead>
+      <thead className="sticky-header">
         <tr>
           <th className="project-table __header --project">Project</th>
           {mode !== "lite" && <th className="project-table __header">Owner</th>}

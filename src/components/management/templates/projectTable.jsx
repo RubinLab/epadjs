@@ -35,6 +35,7 @@ const projectTable = ({
             id={id}
             onClick={onSelect}
             defaultChecked={checked}
+            style={{marginLeft: "2rem"}}
           />
         );
       },
