@@ -11,7 +11,7 @@ const userTable = ({ onSelect, users }) => {
   });
   return (
     <table>
-      <thead>
+      <thead className="sticky-header">
         <tr>
           <th className="user-table__header--user">User</th>
           <th className="user-table__header">Owner</th>

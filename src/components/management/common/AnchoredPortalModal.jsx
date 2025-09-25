@@ -265,7 +265,7 @@ class AnchoredPortalModal extends React.Component {
           </div>
         )}
 
-        <div className={bodyClassName || "apm-body"} style={{ padding: 8 }}>
+        <div className={bodyClassName || "apm-body"} style={{ padding: "0px 8px" }}>
           {children}
         </div>
 
