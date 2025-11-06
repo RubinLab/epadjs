@@ -25,7 +25,7 @@ import {
 import { formatDate } from "../flexView/helperMethods";
 import { getSeries, getSignificantSeries } from "../../services/seriesServices";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
-import { isSupportedModality } from "../../Utils/aid.js";
+import { isSupportedModality, pseudo } from "../../Utils/aid.js";
 import { COMP_MODALITIES as compModality, teachingFileTempCode } from "../../constants.js";
 const defaultPageSize = 50;
 
@@ -595,7 +595,210 @@ function AnnotationTable(props) {
 
   const { multipageAimSelection, searchTableIndex } = props;
   let columns = [];
-  if (mode === "teaching") {
+  if ((mode === "teaching") ) {
+    if (!props.showingPHI && mode === 'teaching') {
+    columns = React.useMemo(
+      () => [
+        {
+          Header: "Select",
+          id: "select",
+          class: "select_row",
+          Cell: ({ row }) => {
+            // const { multipageAimSelection, searchTableIndex } = props;
+            const checked = !!multipageAimSelection[searchTableIndex] ? !!multipageAimSelection[searchTableIndex][row.original.aimID] : false;
+            return (
+              <input
+                type="checkbox"
+                className="form-check-input __search-checkbox"
+                id={row.original.aimID}
+                value={row.original.name}
+                data-subjectid={row.original.subjectID}
+                data-studyuid={row.original.studyUID}
+                data-seriesuid={row.original.seriesUID}
+                onClick={updateStoredAims}
+                checked={checked}
+              />
+            );
+          },
+        },
+        {
+          Header: "Patient Name",
+          accessor: "patientName",
+          Cell: ({ row }) => {
+            return (
+              <div
+              onClick={() => {
+                  setShowSpinner(true);
+                  if (
+                    row.original.seriesUID === "noseries" ||
+                    !row.original.seriesUID
+                  ) {
+                    // study aim opening
+                    displaySeries(row.original);
+                  } else {
+                    // series opening
+                    openAnnotation(row.original);
+                  }
+                }}
+                style={{ textDecoration: "underline", cursor: "pointer" }}
+              >
+                {pseudo(clearCarets(row.original.patientName), 'Anon-')}
+              </div>
+            );
+          },
+        },
+        {
+          Header: "MRN",
+          accessor: "subjectID",
+          Cell: ({ row }) => {
+            return (
+              <div> {pseudo(clearCarets(row.original.subjectID), 'ID-')}</div>
+            );
+          }
+        },
+        {
+          Header: "Acc No",
+          accessor: "accessionNumber",
+          Cell: ({ row }) => {
+            return (
+              <div> {clearCarets(row.original.accessionNumber)}</div>
+            );
+          }
+        },
+        {
+          accessor: "name",
+        },
+        {
+          Header: "Age",
+          accessor: "age",
+          Cell: ({ row }) => {
+            const age = !row.original.age ? '-' : row.original.age.includes('m') 
+              ? row.original.age : parseInt(row.original.age);
+            let ageDisplay = age;
+            if (age && !isNaN(age) && age > 90) {
+              ageDisplay = "90+";
+            }
+            return (
+              <div> {ageDisplay}</div>
+            );
+          }
+        },
+        // {
+        //   Header: "Age",
+        //   accessor: "age",
+        // },
+        {
+          Header: "Sex",
+          accessor: "sex",
+        },
+        {
+          Header: "Modality",
+          accessor: "modality",
+          Cell: ({
+            row: {
+              original: { modality },
+            },
+          }) => {
+            if (modality && compModality[modality])
+              return (
+                <div className={"modality-capital"}>
+                  {compModality[modality]}
+                </div>
+              );
+            else return <div className={"modality-capital"}>{modality}</div>;
+          },
+        },
+        {
+          Header: "Study Date",
+          accessor: "studyDate",
+          Cell: ({ row }) => {
+            if (!row.original.studyDate) return <div></div>;
+            const studyDateArr = convertDateFormat(
+              row.original.studyDate,
+              "studyDate"
+            ).split(" ");
+            return <div>{formatDate(studyDateArr[0])}</div>;
+          },
+        },
+        {
+          Header: "Anatomy",
+          accessor: "anatomy",
+          Cell: ({ row }) => {
+            return (
+              <div>
+                {Array.isArray(row.original.anatomy)
+                  ? row.original.anatomy.join(", ")
+                  : row.original.anatomy}
+              </div>
+            );
+          },
+        },
+        {
+          Header: "Observation",
+          accessor: "observation",
+          style: { whiteSpace: "nowrap" },
+          Cell: ({ row }) => {
+            return (
+              <div>
+                {Array.isArray(row.original.observation)
+                  ? row.original.observation.join(", ")
+                  : row.original.observation}
+              </div>
+            );
+          },
+        },
+        {
+          Header: "Created",
+          id: "date",
+          accessor: "date",
+          Cell: ({ row }) => {
+            const studyDateArr = convertDateFormat(
+              row.original.date,
+              "date"
+            ).split(" ");
+            return <div>{formatDate(studyDateArr[0])}</div>;
+          },
+        },
+        {
+          Header: "Template",
+          accessor: "templateType",
+        },
+        {
+          Header: "User",
+          accessor: "fullName",
+          style: { whiteSpace: "normal" },
+        },
+        {
+          Header: "Narrative",
+          // accessor: 'userComment',
+          Cell: ({ row }) => {
+            const text = row.original.userComment;
+            const subText =
+              text || text?.length >= 100 ? text.substring(0, 100) + "..." : "";
+            return (
+              <>
+                <div data-tip data-for="narrative">
+                  {subText}
+                </div>
+                <ReactTooltip
+                  id="narrative"
+                  place="left"
+                  type="info"
+                  delayShow={500}
+                >
+                  <span className="filter-label">
+                    Please open aim to see the narrative!
+                  </span>
+                </ReactTooltip>
+              </>
+            );
+          },
+        },
+      ],
+      // [data, listOfSelecteds, props.selectedAnnotations]
+      [data, props.multipageAimSelection, props.showingPHI]
+    );
+  } else {
     columns = React.useMemo(
       () => [
         {
@@ -770,9 +973,9 @@ function AnnotationTable(props) {
         },
       ],
       // [data, listOfSelecteds, props.selectedAnnotations]
-      [data, props.multipageAimSelection]
+      [data, props.multipageAimSelection, props.showingPHI]
     );
-  } else {
+  } } else {
     columns = React.useMemo(
       () => [
         {
@@ -995,7 +1198,9 @@ const mapsStateToProps = (state) => {
     searchTableIndex: state.annotationsListReducer.searchTableIndex,
     seriesData: state.annotationsListReducer.seriesData,
     openSeriesAddition: state.annotationsListReducer.openSeriesAddition,
-    multipageAimSelection: state.annotationsListReducer.multipageAimSelection
+    multipageAimSelection: state.annotationsListReducer.multipageAimSelection,
+    showingPHI: state.annotationsListReducer.showingPHI
+
   };
 };
 

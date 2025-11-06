@@ -472,3 +472,27 @@ export const otherSeriesOpened = (seriesList, index) => {
   const key = `${projectID}-${patientID}-${studyUID}`;
   return map[key];
 }
+
+export const generalizeDate = (value) => {
+  if (!value) return "—";
+  const s = String(value).trim();
+
+  const dicom = s.match(/\b(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\b/);
+  if (dicom) return `${dicom[0].slice(0, 4)}-XX-XX`;
+
+  const y = s.match(/\b(19|20)\d{2}\b/);
+  return y ? `${y[0]}-XX-XX` : "YYYY-XX-XX";
+}
+
+function djb2(str) {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
+  return hash >>> 0;
+}
+
+export const pseudo = (value, prefix = "") => {
+  if (!value) return `—`;
+  const h = djb2(String(value));
+  const tag = h.toString(36).toUpperCase().padStart(6, "0").slice(-6);
+  return `${prefix}${tag}`;
+}

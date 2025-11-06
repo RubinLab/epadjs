@@ -55,6 +55,7 @@ import {
   STORE_AIM_SELECTION_ALL,
   TOGGLE_ALL_CALCULATIONS,
   SET_LAST_LOCATION,
+  SHOW_PHI,
   colors,
   commonLabels,
 } from "./types";
@@ -74,6 +75,9 @@ import { setToolOptionsForElement } from 'cornerstone-tools';
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
 
+export const togglePHI = () => {
+  return { type: SHOW_PHI };
+}
 export const fillSeriesDescfullData = (data) => {
   return { type: FILL_DESC, data };
 }

@@ -168,6 +168,7 @@ const mapStateToProps = (state) => {
     showAnnotations: state.annotationsListReducer.showAnnotations,
     lastLocation: state.annotationsListReducer.lastLocation,
     projectMap: state.annotationsListReducer.projectMap,
+    showingPHI: state.annotationsListReducer.showingPHI,
   };
 };
 
@@ -2762,6 +2763,7 @@ class DisplayView extends Component {
   };
 
   toggleOverlay = (e, i) => {
+    if (!this.props.showingPHI && mode === 'teaching') return;
     const showHide = { ...this.state.isOverlayVisible };
     const index = i || i === 0 ? i : this.props.activePort;
     if (showHide[index]) delete showHide[index];
@@ -2878,6 +2880,7 @@ class DisplayView extends Component {
     const redirect = mode === "teaching" ? "search" : "list";
     let invertMap = sessionStorage.getItem("invertMap");
     invertMap = invertMap ? JSON.parse(invertMap) : {};
+
     return !Object.entries(series).length ? (
       <Redirect to={`/${redirect}`} />
     ) : (
@@ -3058,6 +3061,7 @@ class DisplayView extends Component {
                     isStackPrefetchEnabled={true}
                     style={{ height: "calc(100% - 26px)" }}
                     activeTool={activeTool}
+                    showingPHI={this.props.showingPHI && mode === 'teaching'}
                     isOverlayVisible={this.state.isOverlayVisible[i] || false}
                     jumpToImage={() => this.jumpToImage(0, i)}
                   />}

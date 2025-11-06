@@ -1,14 +1,19 @@
 import React from "react";
 import ReactTable from "react-table-v6";
+import { connect } from "react-redux";
 import _ from "lodash";
 import Badge from "react-bootstrap/Badge";
 import ReactTooltip from "react-tooltip";
 import { GrCalculator, GrManual } from "react-icons/gr";
 import { getWorklistProgress } from "../../services/worklistServices";
+import { pseudo } from "Utils/aid";
 import "./proView.css";
+
+let mode;
 
 class ProgressView extends React.Component {
   state = { data: [], view: "Patient" };
+  
   componentDidMount = async () => {
     this.getWorkListData();
   };
@@ -20,7 +25,12 @@ class ProgressView extends React.Component {
   };
 
   getWorkListData = async () => {
-    const { data } = await getWorklistProgress(this.props.match.params.wid);
+    let { data } = await getWorklistProgress(this.props.match.params.wid);
+    data = data.map(el => {
+      el.subject_name = this.clearCarets(el.subject_name);
+      el.assignee_name = el.assignee_name.includes("null") ? el.assignee : el.assignee_name;
+      return el;
+    })
     data.forEach(el => (el.subject_name = this.clearCarets(el.subject_name)));
     this.setState({ data });
   };
@@ -188,7 +198,6 @@ class ProgressView extends React.Component {
     } else {
       columns[1] = { ...columns[1], width: 300 };
     }
-
     return columns;
   };
 
@@ -199,8 +208,24 @@ class ProgressView extends React.Component {
       this.setState({ view: "User" });
     }
   };
+
+  getDisplayData = () => {
+    const { data } = this.state;
+    const { showingPHI } = this.props;
+    mode = sessionStorage.getItem("mode");
+    if (showingPHI ||(mode && mode !== 'teaching')) {
+      return data;
+    }
+    return data.map(r => ({
+      ...r,
+      subject_name: r.subject_name ? pseudo(this.clearCarets(r.subject_name)) : r.subject_name,
+      study_uid: r.study_uid ? pseudo(r.study_uid) : r.study_uid,
+    }));
+  };
+
   render = () => {
     const { view } = this.state;
+    const tableData = this.getDisplayData();
     return (
       <>
         <button onClick={this.switchTableView} style={{ color: "black" }}>
@@ -209,7 +234,7 @@ class ProgressView extends React.Component {
         <ReactTable
           NoDataComponent={() => null}
           className="progressView"
-          data={this.state.data}
+          data={tableData}
           columns={this.defineColumns()}
           // pageSize={this.defineColumns().length}
           pivotBy={view === "User" ? ["assignee_name"] : ["subject_name"]}
@@ -220,4 +245,10 @@ class ProgressView extends React.Component {
   };
 }
 
-export default ProgressView;
+const mapStateToProps = (state) => {
+  return {
+    showingPHI: state.annotationsListReducer.showingPHI,
+  };
+};
+
+export default connect(mapStateToProps)(ProgressView)
