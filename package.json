@@ -79,6 +79,9 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "@babel/helpers": "7.28.4",
+    "@babel/runtime": "7.28.4",
+    "@babel/runtime-corejs3": "7.28.4",
     "babel-preset-stage-2": "^6.24.1",
     "chai": "^4.3.4",
     "chromedriver": "^92.0.1",
