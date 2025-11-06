@@ -16,7 +16,7 @@
     "date-fns": "^2.21.1",
     "dcmjs": "github:emelalkim/dcmjs#fix/wadorsSegCreation",
     "dicom-parser": "^1.8.5",
-    "dompurify": "^2.4.3",
+    "dompurify": "3.3.0",
     "event-source-polyfill": "^1.0.15",
     "font-awesome": "^4.7.0",
     "fs": "^0.0.1-security",
