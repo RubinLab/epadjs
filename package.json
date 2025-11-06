@@ -93,7 +93,7 @@
     "selenium-webdriver": "^4.0.0-beta.3",
     "stylus": "^0.54.7",
     "stylus-loader": "^3.0.2",
-    "webpack": "^5.75.0"
+    "webpack": "5.102.1"
   },
   "resolutions": {
     "webpack": "^5.75.0"
