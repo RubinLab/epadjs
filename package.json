@@ -16,7 +16,7 @@
     "date-fns": "^2.21.1",
     "dcmjs": "github:emelalkim/dcmjs#fix/wadorsSegCreation",
     "dicom-parser": "^1.8.5",
-    "dompurify": "^2.4.3",
+    "dompurify": "3.3.0",
     "event-source-polyfill": "^1.0.15",
     "font-awesome": "^4.7.0",
     "fs": "^0.0.1-security",
@@ -79,6 +79,9 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "@babel/helpers": "7.28.4",
+    "@babel/runtime": "7.28.4",
+    "@babel/runtime-corejs3": "7.28.4",
     "babel-preset-stage-2": "^6.24.1",
     "chai": "^4.3.4",
     "chromedriver": "^92.0.1",
@@ -90,12 +93,19 @@
     "selenium-webdriver": "^4.0.0-beta.3",
     "stylus": "^0.54.7",
     "stylus-loader": "^3.0.2",
-    "webpack": "^5.75.0"
+    "webpack": "5.102.1"
   },
   "resolutions": {
     "webpack": "^5.75.0"
   },
   "overrides": {
-    "istanbul-lib-report@>3.0.0": "3.0.0"
+    "istanbul-lib-report@>3.0.0": "3.0.0",
+    "pbkdf2": "3.1.5",
+    "sha.js": "2.4.12",
+    "cipher-base": "1.0.5",
+    "elliptic": "6.6.1",
+    "cross-spawn": "7.0.5",
+    "image-size": "1.2.1",
+    "brace-expansion": "2.0.1"
   }
 }
