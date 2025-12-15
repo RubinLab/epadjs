@@ -172,6 +172,7 @@ class DisplayView extends Component {
     wadoUrl = sessionStorage.getItem("wadoUrl");
     maxPort = sessionStorage.getItem("maxPort");
     this.viewportRefs = {};
+    this.viewportListenersAttached = {};
     // internal state for scrolling
     this.isScrolling = false;
     this.activeButtons = null; // 1 = left, 2 = right
@@ -233,11 +234,7 @@ class DisplayView extends Component {
   };
 
   componentDidMount() {
-    // const el = this.viewportRef.current;
-    // console.log(" el ref", el);
-    // console.log(el);
     const { series, onSwitchView } = this.props;
-
     // if (series.length < 1) {
     //   onSwitchView('search');
     // }
@@ -269,20 +266,7 @@ class DisplayView extends Component {
     window.addEventListener("keydown", this.handleKeyPressed);
     window.addEventListener("saveTemplateType", this.saveTemplateType);
     window.addEventListener("unfuse", this.unFuseBeforeClose);
-    // if (el) {    
-    //   el.addEventListener("mousedown", this.mousedownAndScroll);
-    //   el.addEventListener("mousemove", this.handleMouseMove);
-    //   el.addEventListener("mouseup", this.mouseupStopScroll);
-    //   el.addEventListener("mouseleave", this.mouseupStopScroll);
-    //   el.addEventListener("contextmenu", (e) => e.preventDefault());
-    // }
-    window.addEventListener("mousedown", this.mousedownAndScroll);
-    window.addEventListener("mousemove", this.handleMouseMove);
-    window.addEventListener("mouseup", this.mouseupStopScroll);
-    window.addEventListener("mouseleave", this.mouseupStopScroll);
-    window.addEventListener("contextmenu", (e) => e.preventDefault());
     
-
     if (this.props.keycloak && series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh });
@@ -461,11 +445,73 @@ class DisplayView extends Component {
     if (this.state.fusion && prevSeries.length < series.length) {
       window.dispatchEvent(new CustomEvent("unfuse", { detail: { source: 'open' } }));
     }
+
+    // 1. Check if loading just finished
+    if (prevState.isLoading && !this.state.isLoading) {
+      // All DOM for viewports now exists
+      this.attachScrollListeners(activePort);
+    }
+
+    // 2. If active viewport changed, attach to new viewport if needed
+    if (prevProps.activePort !== activePort && !this.state.isLoading) {
+      this.attachScrollListeners(activePort);
+    }
   }
 
-  componentWillUnmount() {
-    // const el = this.viewportRef.current;
+  attachScrollListeners = (index) => {
+    // Prevent duplicate listener attachments
+    if (this.viewportListenersAttached[index]) return;
 
+    const container = this.viewportRefs[index]?.current;
+    if (!container) return; // still not mounted
+
+    // second child = cornerstone viewport
+    const el = container.children[1];
+    if (!el) return;
+
+    el.addEventListener("mousedown", this.mousedownAndScroll);
+    el.addEventListener("mousemove", this.handleMouseMove);
+    el.addEventListener("mouseup", this.mouseupStopScroll);
+    el.addEventListener("mouseleave", this.mouseupStopScroll);
+    el.addEventListener("contextmenu", this.preventContextMenu);
+    // mark it attached
+    this.viewportListenersAttached[index] = true;
+    console.log("✓ Scroll listeners attached to viewport:", index);
+  }
+
+  preventContextMenu = (e) => {
+    e.preventDefault();
+  }
+
+  detachScrollListeners = () => {
+    if (!this.viewportRefs) return;
+
+    Object.keys(this.viewportRefs).forEach((key) => {
+      const ref = this.viewportRefs[key];
+      if (!ref || !ref.current) return;
+  
+      const container = ref.current;
+  
+      // Cornerstone element is the second child
+      const el = container.children[1];
+      if (!el) return;
+  
+      // Remove all listeners we added
+      el.removeEventListener("mousedown", this.mousedownAndScroll);
+      el.removeEventListener("mousemove", this.handleMouseMove);
+      el.removeEventListener("mouseup", this.mouseupStopScroll);
+      el.removeEventListener("mouseleave", this.mouseupStopScroll);
+      el.removeEventListener("contextmenu", this.preventContextMenu);
+  
+      // Clear flag so they can be re-attached later if needed
+      this.viewportListenersAttached[key] = false;
+    });
+  
+    console.log("✓ All scroll listeners detached from all viewportRefs");
+  };
+  
+
+  componentWillUnmount() {
     window.removeEventListener("markupSelected", this.handleMarkupSelected);
     window.removeEventListener("markupCreated", this.handleMarkupCreated);
     window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
@@ -487,18 +533,8 @@ class DisplayView extends Component {
     window.removeEventListener("keydown", this.handleKeyPressed);
     window.removeEventListener("getTemplateType", this.saveTemplateType);
     window.removeEventListener("unfuse", this.unFuseBeforeClose);
-    // if (el) {    
-    //   el.removeEventListener("mousedown", this.mousedownAndScroll);
-    //   el.removeEventListener("mousemove", this.handleMouseMove);
-    //   el.removeEventListener("mouseup", this.mouseupStopScroll);
-    //   el.removeEventListener("mouseleave", this.mouseupStopScroll);
-    // }
- 
-    window.removeEventListener("mousedown", this.mousedownAndScroll);
-    window.removeEventListener("mousemove", this.handleMouseMove);
-    window.removeEventListener("mouseup", this.mouseupStopScroll);
-    window.removeEventListener("mouseleave", this.mouseupStopScroll);
-
+    
+    this.detachScrollListeners();
 
     // clear all aimID of openseries so aim editor doesn't open next time
     this.props.dispatch(clearAimId());
