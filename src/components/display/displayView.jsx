@@ -1,10 +1,10 @@
+import React, { Component } from "react";
+import Form from "react-bootstrap/Form";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import * as dcmjs from "dcmjs";
 import _ from "lodash";
-import React, { Component } from "react";
-import Form from "react-bootstrap/Form";
 import CornerstoneViewport from "react-cornerstone-viewport";
 import { FaExpandArrowsAlt, FaPen, FaTag, FaTimes } from "react-icons/fa";
 import { connect } from "react-redux";
@@ -276,11 +276,6 @@ class DisplayView extends Component {
     // cornerstone.enable(element);
     // this.props.closeLeftMenu();
   }
-
-  // handleContextMenu = (evt) => {
-  //   // disable browser context menu so right button can be used for scrolling
-  //   evt.preventDefault();
-  // };
 
   mouseupStopScroll = () => {
     this.isScrolling = false;
