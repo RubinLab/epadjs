@@ -447,7 +447,7 @@ class DisplayView extends Component {
       return;
     }
 
-    const dataChanged = seriesReplaced || series.length > prevSeries.length;
+    const dataChanged = seriesReplaced || series.length !== prevSeries.length;
 
     if (!this.state.isLoading && dataChanged) {
       this.attachListenersToAllViewports();
@@ -491,6 +491,7 @@ class DisplayView extends Component {
     el.removeEventListener("mouseup", this.mouseupStopScroll);
     el.removeEventListener("mouseleave", this.mouseupStopScroll);
     el.removeEventListener("contextmenu", this.preventContextMenu);
+    console.log("✓ listeners detached from viewport", i);
   };
 
   preventContextMenu = (e) => {
@@ -2843,6 +2844,7 @@ class DisplayView extends Component {
       this.setActive(i);
       return;
     }
+    this.detachScrollListenersFor(i);
     this.closeViewport(i);
   };
 
