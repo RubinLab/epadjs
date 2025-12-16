@@ -1,65 +1,58 @@
 import React, { Component } from "react";
-import _ from "lodash";
+import Form from "react-bootstrap/Form";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
-import PropagateLoader from "react-spinners/PropagateLoader";
-import {
-  getImageIds,
-  getWadoImagePath,
-  getSegmentation,
-  getMetadata,
-  getSeries
-} from "../../services/seriesServices";
-import { getImageMetadata } from "../../services/imageServices";
-import { getStudiesOfWorklist } from "../../services/worklistServices";
+import * as dcmjs from "dcmjs";
+import _ from "lodash";
+import CornerstoneViewport from "react-cornerstone-viewport";
+import { FaExpandArrowsAlt, FaPen, FaTag, FaTimes } from "react-icons/fa";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
-import "./flex.css";
-import "./viewport.css";
-import {
-  changeActivePort,
-  updateImageId,
-  closeSerie,
-  jumpToAim,
-  setSegLabelMapIndex,
-  updateSingleSerie,
-  getSingleSerie,
-  aimDelete,
-  clearAimId,
-  updateSubpath,
-  clearSelection,
-  updateGridWithMultiFrameInfo,
-  clearMultiFrameAimJumpFlags,
-  setSeriesData
-  // fillSeriesDescfullData
-} from "../annotationsList/action";
+import PropagateLoader from "react-spinners/PropagateLoader";
 import { deleteAnnotation, getAnnotation } from "../../services/annotationServices";
-import ContextMenu from "./contextMenu";
-import { MenuProvider } from "react-contexify";
-import CornerstoneViewport from "react-cornerstone-viewport";
-import { freehand } from "./Freehand";
-import { line } from "./Line";
-import { arrow } from "./Arrow";
-import { probe } from "./Probe";
-import { circle } from "./Circle";
-import { bidirectional } from "./Bidirectional";
+import { refreshToken } from "../../services/authService";
+import { getImageMetadata } from "../../services/imageServices";
+import {
+  getImageIds,
+  getMetadata,
+  getSegmentation,
+  getSeries,
+  getWadoImagePath
+} from "../../services/seriesServices";
 import RightsideBar from "../RightsideBar/RightsideBar";
-import * as dcmjs from "dcmjs";
-import { FaTimes, FaPen, FaExpandArrowsAlt, FaTag, FaArrowRight } from "react-icons/fa";
-import Form from "react-bootstrap/Form";
 import ToolMenu from "../ToolMenu/ToolMenu";
 import { getMarkups, setMarkupsOfAimActive } from "../aimEditor/Helpers";
-import { refreshToken } from "../../services/authService";
+import {
+  aimDelete,
+  changeActivePort,
+  clearAimId,
+  clearMultiFrameAimJumpFlags,
+  clearSelection,
+  closeSerie,
+  getSingleSerie,
+  jumpToAim,
+  setSegLabelMapIndex,
+  setSeriesData
+  // fillSeriesDescfullData
+  ,
+  updateGridWithMultiFrameInfo,
+  updateImageId,
+  updateSubpath
+} from "../annotationsList/action";
+import { arrow } from "./Arrow";
+import { bidirectional } from "./Bidirectional";
+import { circle } from "./Circle";
+import { freehand } from "./Freehand";
+import { line } from "./Line";
+import { probe } from "./Probe";
+import "./flex.css";
+import "./viewport.css";
 // import { isThisSecond } from "date-fns/esm";
-import { FiMessageSquare } from "react-icons/fi";
-import { errorMonitor } from "events";
-import FreehandRoiSculptorTool from "../../cornerstone-tools/tools/FreehandRoiSculptorTool";
-import getVPDimensions from "./ViewportCalculations";
-import SeriesDropDown from "./SeriesDropDown";
-import { filterProjects } from "../../Utils/aid";
 import { toast } from "react-toastify";
+import SeriesDropDown from "./SeriesDropDown";
+import getVPDimensions from "./ViewportCalculations";
 
 let mode;
 let wadoUrl;
@@ -178,6 +171,13 @@ class DisplayView extends Component {
     mode = sessionStorage.getItem("mode");
     wadoUrl = sessionStorage.getItem("wadoUrl");
     maxPort = sessionStorage.getItem("maxPort");
+    this.viewportRefs = {};
+    // this.viewportListenersAttached = {};
+    // internal state for scrolling
+    this.isScrolling = false;
+    this.activeButtons = null; // 1 = left, 2 = right
+    this.lastY = 0;
+
     this.state = {
       width: "100%",
       height: "100%",
@@ -235,7 +235,6 @@ class DisplayView extends Component {
 
   componentDidMount() {
     const { series, onSwitchView } = this.props;
-
     // if (series.length < 1) {
     //   onSwitchView('search');
     // }
@@ -267,7 +266,7 @@ class DisplayView extends Component {
     window.addEventListener("keydown", this.handleKeyPressed);
     window.addEventListener("saveTemplateType", this.saveTemplateType);
     window.addEventListener("unfuse", this.unFuseBeforeClose);
-
+    
     if (this.props.keycloak && series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh });
@@ -277,6 +276,10 @@ class DisplayView extends Component {
     // cornerstone.enable(element);
     // this.props.closeLeftMenu();
   }
+
+  mouseupStopScroll = () => {
+    this.isScrolling = false;
+  };
 
   handleEditedAimSaved = () => {
     // check if the state 
@@ -437,7 +440,99 @@ class DisplayView extends Component {
     if (this.state.fusion && prevSeries.length < series.length) {
       window.dispatchEvent(new CustomEvent("unfuse", { detail: { source: 'open' } }));
     }
+
+    // 1. Check if loading just finished
+    if (prevState.isLoading && !this.state.isLoading) {
+      // All DOM for viewports now exists
+      this.attachListenersToAllViewports();
+    }
+
+    // 1. When loading finishes → viewports first appear
+    if (prevState.isLoading && !this.state.isLoading) {
+      this.attachListenersToAllViewports();
+      return;
+    }
+
+    // 2. When viewport count changes OR viewport content changes
+    const dataChanged =
+      this.state.data !== prevState.data || 
+      this.state.data.length !== prevState.data.length;
+
+    if (!this.state.isLoading && dataChanged) {
+      this.attachListenersToAllViewports();
+    }
   }
+
+  attachListenersToAllViewports = () => {
+    const count = this.state.data.length;
+    // console.log("attaching listeners to:", count, "viewports");
+    for (let i = 0; i < count; i++) {
+      this.attachScrollListeners(i);
+    }
+  };
+
+  attachScrollListeners = (i) => {
+    const container = this.viewportRefs[i]?.current;
+    if (!container) return;
+  
+    const el = container.children[1];
+    if (!el) return;
+  
+    this.detachScrollListenersFor(i);
+
+    el.addEventListener("mousedown", this.mousedownAndScroll);
+    el.addEventListener("mousemove", this.handleMouseMove);
+    el.addEventListener("mouseup", this.mouseupStopScroll);
+    el.addEventListener("mouseleave", this.mouseupStopScroll);
+    el.addEventListener("contextmenu", this.preventContextMenu);  
+    console.log("✓ listeners attached to viewport", i);
+  }
+
+  detachScrollListenersFor = (i) => {
+    const container = this.viewportRefs[i]?.current;
+    if (!container) return;
+  
+    const el = container.children[1];
+    if (!el) return;
+  
+    el.removeEventListener("mousedown", this.mousedownAndScroll);
+    el.removeEventListener("mousemove", this.mousemoveScroll);
+    el.removeEventListener("mouseup", this.mouseupStopScroll);
+    el.removeEventListener("mouseleave", this.mouseupStopScroll);
+    el.removeEventListener("contextmenu", this.preventContextMenu);
+  };
+
+  preventContextMenu = (e) => {
+    e.preventDefault();
+  }
+
+  detachScrollListeners = () => {
+    if (!this.viewportRefs) return;
+
+    Object.keys(this.viewportRefs).forEach((key) => {
+      const ref = this.viewportRefs[key];
+      if (!ref || !ref.current) return;
+  
+      const container = ref.current;
+  
+      // Cornerstone element is the second child
+      const el = container.children[1];
+      if (!el) return;
+  
+      // Remove all listeners we added
+      el.removeEventListener("mousedown", this.mousedownAndScroll);
+      el.removeEventListener("mousemove", this.handleMouseMove);
+      el.removeEventListener("mouseup", this.mouseupStopScroll);
+      el.removeEventListener("mouseleave", this.mouseupStopScroll);
+      el.removeEventListener("contextmenu", this.preventContextMenu);
+  
+      // Clear flag so they can be re-attached later if needed
+      // this.viewportListenersAttached[key] = false;
+    });
+  
+    console.log("✓ All scroll listeners detached from all viewportRefs");
+  };
+  
 
   componentWillUnmount() {
     window.removeEventListener("markupSelected", this.handleMarkupSelected);
@@ -461,6 +556,8 @@ class DisplayView extends Component {
     window.removeEventListener("keydown", this.handleKeyPressed);
     window.removeEventListener("getTemplateType", this.saveTemplateType);
     window.removeEventListener("unfuse", this.unFuseBeforeClose);
+    
+    this.detachScrollListeners();
 
     // clear all aimID of openseries so aim editor doesn't open next time
     this.props.dispatch(clearAimId());
@@ -493,6 +590,56 @@ class DisplayView extends Component {
       }
     }
   };
+
+  mousedownAndScroll = (event) => {
+    const element = this.getActiveElement();
+
+    // Ensure click is inside active viewport
+    if (!element || !element.contains(event.target)) {
+      return;
+    }
+    const activeTool = sessionStorage.getItem("activeTool");
+    if (activeTool && activeTool !== 'Noop') {
+      console.log("Tool is active, scrolling not allowed");
+      return; 
+    }
+    if (event.buttons === 3) {
+      event.preventDefault(); // prevent context menu for right-click  
+      this.isScrolling = true;
+      this.lastY = event.clientY;  
+      this.activeButtons = event.buttons;
+    }
+  }
+
+  handleMouseMove = (evt) => {
+    const { activePort } = this.props;
+    const viewport = this.state.data[activePort];
+    const imageIndex = viewport?.stack?.currentImageIdIndex ?? null;
+    const limit = viewport?.stack?.imageIds?.length ?? 0;
+    if (!this.isScrolling || imageIndex === null || limit === 0) return;
+
+    // If user released button, stop
+    if (evt.buttons !== this.activeButtons) {
+      this.isScrolling = false;
+      this.activeButtons = null;
+      return;
+    }
+
+    const deltaY = evt.clientY - this.lastY;
+
+    // small threshold so tiny jitters don't spam scroll
+    if (Math.abs(deltaY) < 3) return;
+
+    const isMovingDown = deltaY > 0;
+  
+    if (isMovingDown) {  
+      if (imageIndex >= 0 && imageIndex < limit - 1) this.jumpToImage(imageIndex + 1, activePort);
+    } else if (imageIndex > 0) 
+      this.jumpToImage(imageIndex - 1, activePort);
+
+    this.lastY = evt.clientY;
+  };
+
 
   // Sets the activeTool state getting it from session storage
   handleActiveTool = () => {
@@ -2919,6 +3066,7 @@ class DisplayView extends Component {
             data.map((data, i) => {
               return (
                 <div
+                  ref={this.viewportRefs[i] || (this.viewportRefs[i] = React.createRef())}
                   className={
                     "viewportContainer" + (activePort == i ? " selected" : "")
                   }
