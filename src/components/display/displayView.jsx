@@ -451,7 +451,7 @@ class DisplayView extends Component {
       // All DOM for viewports now exists
       this.attachListenersToAllViewports();
     }
-    
+
     // 1. When loading finishes → viewports first appear
     if (prevState.isLoading && !this.state.isLoading) {
       this.attachListenersToAllViewports();
@@ -596,32 +596,9 @@ class DisplayView extends Component {
     }
   };
 
-  //Mousescroll
-  // if there is no active tool selected or selected tool is Noop
-  // implement 
-
-  // mousedownAndScroll = (event) => {
-  //   const element = this.getActiveElement();
-  //   const activeTool = sessionStorage.getItem("activeTool");
-  //   if (activeTool && activeTool !== 'Noop') {
-  //     console.log(" oluur")
-  //   }
-  //   // console.log(' ---> activeTool', activeTool);
-  //   console.log(' ---> event', event);
-  //   if (event.button === 0 || event.button === 2) {
-  //     event.preventDefault(); // prevent context menu for right-click
-  //     console.log(" mouse down captured event", event);
-  //       this.isScrolling = true;
-  //       this.lastY = event.clientY;
-  //       // scrollDirection = event.button === 0 ? "left" : "right";
-  //       this.activeButtons = event.buttons;
-  //   }
-  // }
-
   mousedownAndScroll = (event) => {
     const element = this.getActiveElement();
-    // console.log('element');
-    // console.log(element);
+
     // Ensure click is inside active viewport
     if (!element || !element.contains(event.target)) {
       return;
@@ -632,9 +609,7 @@ class DisplayView extends Component {
       return; 
     }
     if (event.buttons === 3) {
-      event.preventDefault(); // prevent context menu for right-click
-      // console.log(" mouse down captured event", event.buttons);
-  
+      event.preventDefault(); // prevent context menu for right-click  
       this.isScrolling = true;
       this.lastY = event.clientY;  
       this.activeButtons = event.buttons;
@@ -3051,7 +3026,6 @@ class DisplayView extends Component {
       data,
       activeTool,
     } = this.state;
-    // console.log(' ---> viewportRefs', this.viewportRefs, series.length);
     // if (this.state.data[0])
     // console.log(this.state.data[0].stack.imageIds.length);
     // if (this.state.redirect) return <Redirect to="/list" />;
@@ -3233,11 +3207,6 @@ class DisplayView extends Component {
                         eventName: "cornerstonenewimage",
                         handler: (e) => this.newImage(e, i)
                       },
-                      // {
-                      //   eventTarget: "element",
-                      //   eventType: "cornerstonetoolsmousedown",
-                      //   handler: (e) => this.mousedownAndScroll(e, i)
-                      // },
                     ]}
                     setViewportActive={() => {
                       this.setActive(i);
