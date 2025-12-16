@@ -172,7 +172,7 @@ class DisplayView extends Component {
     wadoUrl = sessionStorage.getItem("wadoUrl");
     maxPort = sessionStorage.getItem("maxPort");
     this.viewportRefs = {};
-    this.viewportListenersAttached = {};
+    // this.viewportListenersAttached = {};
     // internal state for scrolling
     this.isScrolling = false;
     this.activeButtons = null; // 1 = left, 2 = right
@@ -449,35 +449,63 @@ class DisplayView extends Component {
     // 1. Check if loading just finished
     if (prevState.isLoading && !this.state.isLoading) {
       // All DOM for viewports now exists
-      this.attachScrollListeners(activePort);
+      this.attachListenersToAllViewports();
+    }
+    
+    // 1. When loading finishes → viewports first appear
+    if (prevState.isLoading && !this.state.isLoading) {
+      this.attachListenersToAllViewports();
+      return;
     }
 
-    // 2. If active viewport changed, attach to new viewport if needed
-    if (prevProps.activePort !== activePort && !this.state.isLoading) {
-      this.attachScrollListeners(activePort);
+    // 2. When viewport count changes OR viewport content changes
+    const dataChanged =
+      this.state.data !== prevState.data || 
+      this.state.data.length !== prevState.data.length;
+
+    if (!this.state.isLoading && dataChanged) {
+      this.attachListenersToAllViewports();
     }
   }
 
-  attachScrollListeners = (index) => {
-    // Prevent duplicate listener attachments
-    if (this.viewportListenersAttached[index]) return;
+  attachListenersToAllViewports = () => {
+    const count = this.state.data.length;
+    // console.log("attaching listeners to:", count, "viewports");
+    for (let i = 0; i < count; i++) {
+      this.attachScrollListeners(i);
+    }
+  };
 
-    const container = this.viewportRefs[index]?.current;
-    if (!container) return; // still not mounted
-
-    // second child = cornerstone viewport
+  attachScrollListeners = (i) => {
+    const container = this.viewportRefs[i]?.current;
+    if (!container) return;
+  
     const el = container.children[1];
     if (!el) return;
+  
+    this.detachScrollListenersFor(i);
 
     el.addEventListener("mousedown", this.mousedownAndScroll);
     el.addEventListener("mousemove", this.handleMouseMove);
     el.addEventListener("mouseup", this.mouseupStopScroll);
     el.addEventListener("mouseleave", this.mouseupStopScroll);
-    el.addEventListener("contextmenu", this.preventContextMenu);
-    // mark it attached
-    this.viewportListenersAttached[index] = true;
-    console.log("✓ Scroll listeners attached to viewport:", index);
+    el.addEventListener("contextmenu", this.preventContextMenu);  
+    console.log("✓ listeners attached to viewport", i);
   }
+
+  detachScrollListenersFor = (i) => {
+    const container = this.viewportRefs[i]?.current;
+    if (!container) return;
+  
+    const el = container.children[1];
+    if (!el) return;
+  
+    el.removeEventListener("mousedown", this.mousedownAndScroll);
+    el.removeEventListener("mousemove", this.mousemoveScroll);
+    el.removeEventListener("mouseup", this.mouseupStopScroll);
+    el.removeEventListener("mouseleave", this.mouseupStopScroll);
+    el.removeEventListener("contextmenu", this.preventContextMenu);
+  };
 
   preventContextMenu = (e) => {
     e.preventDefault();
@@ -504,7 +532,7 @@ class DisplayView extends Component {
       el.removeEventListener("contextmenu", this.preventContextMenu);
   
       // Clear flag so they can be re-attached later if needed
-      this.viewportListenersAttached[key] = false;
+      // this.viewportListenersAttached[key] = false;
     });
   
     console.log("✓ All scroll listeners detached from all viewportRefs");
@@ -633,7 +661,6 @@ class DisplayView extends Component {
     if (Math.abs(deltaY) < 3) return;
 
     const isMovingDown = deltaY > 0;
-    console.log(' isMovingDown', isMovingDown);
   
     if (isMovingDown) {  
       if (imageIndex >= 0 && imageIndex < limit - 1) this.jumpToImage(imageIndex + 1, activePort);
@@ -2891,8 +2918,6 @@ class DisplayView extends Component {
   // Don't take the activePort Index from props because store updates late so
   // activePort may be null while the event is triggered
   jumpToImage = (imageIndex, activePortIndex) => {
-    console.log(" in jumptoimage", imageIndex, activePortIndex);
-    console.log(imageIndex, activePortIndex);
     const newData = [...this.state.data];
     newData[activePortIndex].stack.currentImageIdIndex = parseInt(
       imageIndex,
@@ -3026,6 +3051,7 @@ class DisplayView extends Component {
       data,
       activeTool,
     } = this.state;
+    // console.log(' ---> viewportRefs', this.viewportRefs, series.length);
     // if (this.state.data[0])
     // console.log(this.state.data[0].stack.imageIds.length);
     // if (this.state.redirect) return <Redirect to="/list" />;
