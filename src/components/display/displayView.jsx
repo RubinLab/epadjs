@@ -441,22 +441,13 @@ class DisplayView extends Component {
       window.dispatchEvent(new CustomEvent("unfuse", { detail: { source: 'open' } }));
     }
 
-    // 1. Check if loading just finished
-    if (prevState.isLoading && !this.state.isLoading) {
-      // All DOM for viewports now exists
-      this.attachListenersToAllViewports();
-    }
-
     // 1. When loading finishes → viewports first appear
     if (prevState.isLoading && !this.state.isLoading) {
       this.attachListenersToAllViewports();
       return;
     }
 
-    // 2. When viewport count changes OR viewport content changes
-    const dataChanged =
-      this.state.data !== prevState.data || 
-      this.state.data.length !== prevState.data.length;
+    const dataChanged = seriesReplaced || series.length > prevSeries.length;
 
     if (!this.state.isLoading && dataChanged) {
       this.attachListenersToAllViewports();
