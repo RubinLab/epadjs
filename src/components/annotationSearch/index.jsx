@@ -182,6 +182,7 @@ const AnnotationSearch = (props) => {
   const [encArgs, setEncArgs] = useState("");
   const [decrArgs, setDecrArgs] = useState("");
   const [allSelected, setAllSelected] = useState({});
+  const [hydrated, setHydrated] = useState(false);
 
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -289,6 +290,62 @@ const AnnotationSearch = (props) => {
     setEncArgs(args);
     setDecrArgs(packedData);
   };
+
+  useEffect(() => {
+    const raw = sessionStorage.getItem("searchState");
+    if (raw) {
+      try {
+        const s = JSON.parse(raw);
+  
+        setTfOnly(!!s.tfOnly);
+        setMyCases(!!s.myCases);
+        setSelectedSubs(s.selectedSubs || []);
+        setSelectedMods(s.selectedMods || []);
+        setSelectedAnatomies(s.selectedAnatomies || []);
+        setSelectedDiagnosis(s.selectedDiagnosis || []);
+        setQuery(s.query || "");
+        setSelectedProject(s.selectedProject || "");
+        setFilters(s.filters || {});
+        setSort(s.sort || []);
+      } catch (e) {
+        console.error("Failed to parse searchState", e);
+      }
+    }
+  
+    setHydrated(true);
+  }, []);
+  
+  useEffect(() => {
+    if (!hydrated) return;
+  
+    const searchState = {
+      tfOnly,
+      myCases,
+      selectedSubs,
+      selectedMods,
+      selectedAnatomies,
+      selectedDiagnosis,
+      query,
+      selectedProject,
+      filters,
+      sort,
+    };
+  
+    sessionStorage.setItem("searchState", JSON.stringify(searchState));
+  }, [
+    hydrated,
+    tfOnly,
+    myCases,
+    selectedSubs,
+    selectedMods,
+    selectedAnatomies,
+    selectedDiagnosis,
+    query,
+    selectedProject,
+    filters,
+    sort,
+  ]);
+  
 
   useEffect(() => {
     window.addEventListener("openTeachingFilesModal", handleTeachingFilesModal);
@@ -1462,7 +1519,7 @@ const AnnotationSearch = (props) => {
               {selectedSubs.length +
                 selectedMods.length +
                 selectedAnatomies.length +
-                selectedDiagnosis >
+                selectedDiagnosis.length >
                 1 && (
                 <button
                   type="button"
