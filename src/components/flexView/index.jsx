@@ -27,10 +27,12 @@ import "react-table-v6/react-table.css";
 const TreeTable = treeTableHOC(ReactTable);
 let mode;
 let maxPort;
+let seriesCallSent;
 
 class FlexView extends React.Component {
   mode = sessionStorage.getItem("mode");
   maxPort = sessionStorage.getItem("maxPort");
+  seriesCallSent = false;
   state = {
     columns: [],
     order:
@@ -108,10 +110,11 @@ class FlexView extends React.Component {
       : null;
 
     try {
-      if (!dataExists) {
+      if (!dataExists && !seriesCallSent) {
         this.setState({ loading: true });
         ({ data: series } = await getSeries(projectID, patientID, studyUID));
         this.setState({ loading: false });
+        seriesCallSent = true;
         this.props.dispatch(
           setSeriesData(projectID, patientID, studyUID, series, true)
         );

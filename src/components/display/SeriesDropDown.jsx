@@ -23,6 +23,7 @@ const SeriesDropDown = (props) => {
   const [seriesList, setSeriesList] = useState([]);
   const [loading, setLoading] = useState(false);
   let mfIndex = {};
+  let seriesCallSent = false;
   maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
   const checkMultiframe = () => {
@@ -112,11 +113,12 @@ const SeriesDropDown = (props) => {
     }
 
     if (checkMultiframe() && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
-      if (!studyInGrid) {
+      if (!studyInGrid && !seriesCallSent) {
         getSeries(projectID, patientID, studyUID, false, 'seriesdropdown, checkMultiframe').then(res => {
           const newList = mergeLists(data[projectID][patientID][studyUID], res.data);
           props.dispatch(setSeriesData(projectID, patientID, studyUID, newList, true, true));
           setLoading(false);
+          seriesCallSent = true;
         }).catch((err) => console.error(err));
       }
     } if (studyExist && hasDescription) {
@@ -129,10 +131,11 @@ const SeriesDropDown = (props) => {
       if (studyExist && shouldFill && studyUID && projectID && patientID && !studyInGrid) {
         props.dispatch(getSeriesAdditional({studyUID, projectID, patientID}))
       } else {
-        if (!studyInGrid) {
+        if (!studyInGrid && !seriesCallSent) {
           getSeries(projectID, patientID, studyUID, false, 'series dropdown, 2').then(res => {
             props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
             setLoading(false);
+            seriesCallSent = true;
           }).catch((err) => console.error(err));
         }
       }

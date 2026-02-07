@@ -266,6 +266,7 @@ function Table({
 function AnnotationTable(props) {
   maxPort = parseInt(sessionStorage.getItem("maxPort"));
   mode = sessionStorage.getItem("mode");
+  let seriesCallSent = false;
   const [pageCount, setPageCount] = useState(0);
   const [data, setData] = useState([]);
   const [showSelectSeriesModal, setShowSelectSeriesModal] = useState(false);
@@ -390,7 +391,7 @@ function AnnotationTable(props) {
       seriesData[projectID][patientID] &&
       seriesData[projectID][patientID][studyUID] &&
       seriesData[projectID][patientID][studyUID].list;
-      if (!dataExists) {
+      if (!dataExists && !seriesCallSent) {
         const { data: series } = await getSeries(
           projectID,
           patientID,
@@ -398,6 +399,7 @@ function AnnotationTable(props) {
           force,
           "getSeriesData, AnnotationTable"
           );
+        seriesCallSent = true;
         props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
         props.dispatch(loadCompleted());
         return series;

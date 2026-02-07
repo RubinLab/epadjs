@@ -86,6 +86,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.eventSource = null;
+    this.seriesCallSent = false;
     this.state = {
       openMng: false,
       keycloak: null,
@@ -900,9 +901,10 @@ class App extends Component {
         seriesData[projectID][patientID] &&
         seriesData[projectID][patientID][studyUID] &&
         seriesData[projectID][patientID][studyUID].list;
-      if (!dataExists) {
+      if (!dataExists && !this.seriesCallSent) {
         ({ data: series } = await getSeries(projectID, patientID, studyUID, false, "App.js, getSeriesData"));
         if (series && series.length === 0 && mode === "teaching") ({ data: series } = await getSeries(projectID, patientID, studyUID, true, "App.js, getSeriesData"));
+        this.seriesCallSent = true;
         this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series, true));
         this.setState({ teachingLoading: false });
         return series;
