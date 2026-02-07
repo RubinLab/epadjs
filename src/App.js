@@ -640,6 +640,7 @@ class App extends Component {
 
   async componentDidMount() {
     localStorage.setItem("treeData", JSON.stringify({}));
+    sessionStorage.removeItem("searchState");
     Promise.all([
       fetch(`${process.env.PUBLIC_URL}/config.json`),
       fetch(`${process.env.PUBLIC_URL}/keycloak.json`),
