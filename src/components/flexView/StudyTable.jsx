@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import ReactTable from "react-table-v6";
+import { toast } from "react-toastify";
 import { FaSortDown, FaSortUp } from "react-icons/fa";
 import { AiOutlineSortAscending, AiOutlineSortDescending } from 'react-icons/ai';
 import { generalizeDate, pseudo } from "../../Utils/aid.js";
@@ -48,6 +49,7 @@ const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
 
   const filterExam = (filter, row) => {
     try {
+      // if (checkPHIStatus(filter.id)) return;
       const keyLowercase = filter.value.toLowerCase();
       const str = Array.isArray(row[filter.id]) ? row[filter.id].join() : row[filter.id];
       return str.toLowerCase().includes(keyLowercase);
@@ -58,6 +60,7 @@ const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
 
   const filterStringIncludes = (filter, row) => {
     try {
+      // if (checkPHIStatus(filter.id)) return;
       const keyLowercase = filter.value.toLowerCase();
       const textLowercase = row[filter.id].toLowerCase();
       return textLowercase.includes(keyLowercase);        
@@ -68,6 +71,7 @@ const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
 
   const filterStartsWith = (filter, row) => {
     try {
+      // if (checkPHIStatus(filter.id)) return;
       const keyLowercase = filter.value.toLowerCase();
       let data = row[filter.id];
       data = typeof data === 'number' ? '' + data : data;
@@ -79,6 +83,7 @@ const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
 
   const filterMatch = (filter, row) => {
     try {
+      // if (checkPHIStatus(filter.id)) return;
       const keyLowercase = filter.value.toLowerCase();
       return row[filter.id].toLowerCase() === keyLowercase;
     } catch (err) {
@@ -93,6 +98,17 @@ const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
     } catch (err) {
       console.error(err);
     }
+  }
+
+  const checkPHIStatus = (column) => {
+    const phiCol = ["patientName-id", "patientID-id", "studyUID-id", "studyAccessionNumber-id", "studyID-id"];
+    const isPHI = phiCol.includes(column);
+    console.log(" ---> isPHI", isPHI);
+    if (isPHI && !showingPHI) {
+      toast.info("PHI is currently hidden!", { position: "top-right" });
+      return true;
+    }
+    return false;
   }
 
   const returnHeader = (header, id) => {
@@ -136,10 +152,10 @@ const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
       accessor: "patientName",
       id: "patientName-id",
       resizable: true,
-      sortable: true,
+      sortable: showingPHI ? true : false,
       show: true,
       style: { color: 'white' },
-      filterMethod: (filter, row) => filterStringIncludes(filter, row),
+      filterMethod: (filter, row) => showingPHI ? filterStringIncludes(filter, row) : () => {return},
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor: sortedCol === "patientName-id" ? "#3a3f44" : null
@@ -155,9 +171,9 @@ const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
       accessor: "patientID",
       id: "patientID-id",
       resizable: true,
-      sortable: true,
+      sortable: showingPHI ? true : false,
       show: true,
-      filterMethod: (filter, row) => filterStartsWith(filter, row),
+      filterMethod: (filter, row) => showingPHI ? filterStartsWith(filter, row) : () => {return},
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor: sortedCol === "patientID-id" ? "#3a3f44" : null
@@ -265,9 +281,9 @@ const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
       accessor: "studyUID",
       id: "studyUID-id",
       resizable: true,
-      sortable: true,
+      sortable: showingPHI ? true : false,
       show: true,
-      filterMethod: (filter, row) => filterStringIncludes(filter, row),
+      filterMethod: (filter, row) => showingPHI ? filterStringIncludes(filter, row) : () => {return},
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor: sortedCol === "studyUID-id" ? "#3a3f44" : null
@@ -401,7 +417,7 @@ const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
       accessor: "studyAccessionNumber",
       id: "studyAccessionNumber-id",
       resizable: true,
-      sortable: true,
+      sortable: showingPHI ? true : false,
       show: true,
       getProps: (state, rowInfo) => ({
         style: {
@@ -409,7 +425,7 @@ const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
             sortedCol === "studyAccessionNumber-id" ? "#3a3f44" : null
         }
       }),
-      filterMethod: (filter, row) => filterStartsWith(filter, row),
+      filterMethod: (filter, row) => showingPHI ? filterStartsWith(filter, row) : () => {return},
       Cell: row => {
         return <div>{pseudo(row.original.studyAccessionNumber, "Acc #-")}</div>;
       }
@@ -420,14 +436,14 @@ const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
       accessor: "studyID",
       id: "studyID-id",
       resizable: true,
-      sortable: true,
+      sortable: showingPHI ? true : false,
       show: true,
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor: sortedCol === "studyID-id" ? "#3a3f44" : null
         }
       }),
-      filterMethod: (filter, row) => filterStringIncludes(filter, row),
+      filterMethod: (filter, row) => showingPHI ? filterStringIncludes(filter, row) : () => {return},
       Cell: row => {
         return <div>{pseudo(row.original.studyID, "ID #-")}</div>;
       }

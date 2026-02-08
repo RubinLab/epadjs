@@ -400,7 +400,16 @@ const AnnotationSearch = (props) => {
     500
   );
 
+  const checkPHIStatus = (column) => {
+    if (column === "patientName" || column === "subjectID") {
+      toast.info("PHI is currently hidden!", { position: "top-right" });
+      return true;
+    }
+    return false;
+  }
+  
   const handleSort = (column) => {
+    if (checkPHIStatus(column)) return;
     if (!sort.length || (sort[0] !== column && sort[0] !== "-" + column))
       setSort([column]);
     else if (sort[0] === column) {
@@ -409,6 +418,8 @@ const AnnotationSearch = (props) => {
   };
 
   const handleFilter = (column, target) => {
+    console.log("column ", column)
+    if (checkPHIStatus(column)) return;
     const { value } = target;
     const newFilters = { ...filters };
     if (value.length) newFilters[column] = value;
