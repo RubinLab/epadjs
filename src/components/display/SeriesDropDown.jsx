@@ -24,6 +24,7 @@ const SeriesDropDown = (props) => {
   const [loading, setLoading] = useState(false);
   let mfIndex = {};
   let seriesCallSent = false;
+  let additionalInfoCallSent = false;
   maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
   const checkMultiframe = () => {
@@ -128,8 +129,9 @@ const SeriesDropDown = (props) => {
     } else {
       setLoading(true);
       const shouldFill = props.index === 0 || !hasDescription ? true : !otherSeriesOpened(props.openSeries, props.index);
-      if (studyExist && shouldFill && studyUID && projectID && patientID && !studyInGrid) {
-        props.dispatch(getSeriesAdditional({studyUID, projectID, patientID}))
+      if (studyExist && shouldFill && studyUID && projectID && patientID && !studyInGrid && !additionalInfoCallSent) {
+        props.dispatch(getSeriesAdditional({studyUID, projectID, patientID}));
+        additionalInfoCallSent = true;
       } else {
         if (!studyInGrid && !seriesCallSent) {
           getSeries(projectID, patientID, studyUID, false, 'series dropdown, 2').then(res => {
