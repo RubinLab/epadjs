@@ -78,7 +78,8 @@ const ModalityFilter = (props) => {
                             {modalities.map((modality, i) => {
                                 return (
                                     <div id='noClose' key={i} className="mb-3 col-md-4">
-                                        <input id='noClose' className="form-check-input" type="checkbox" value={compModality[modality] ? compModality[modality] : modality} checked={selecteds.includes(compModality[modality] ? compModality[modality] : modality)} onChange={handleChange} />
+                                        {/* <input id='noClose' className="form-check-input" type="checkbox" value={compModality[modality] ? compModality[modality] : modality} checked={selecteds.includes(compModality[modality] ? compModality[modality] : modality)} onChange={handleChange} /> */}
+                                        <input id='noClose' className="form-check-input" type="checkbox" value={modality} checked={selecteds.includes(modality)} onChange={handleChange} />
                                         <label id='noClose' className="form-check-label title-case" style={{ paddingLeft: '0.3em' }} htmlFor="noCLose">
                                             {modality}
                                         </label>
