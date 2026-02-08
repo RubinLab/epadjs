@@ -94,7 +94,9 @@ export const storeAimSelectionAll = (checked, map, tbPageIndex, clearAll) => {
   return { type: STORE_AIM_SELECTION_ALL, payload: { checked, map, tbPageIndex, clearAll } };
 }
 
-export const setSeriesData = (projectID, patientID, studyUID, seriesData, filled, mfMerged) => {
+export const setSeriesData = (projectID, patientID, studyUID, seriesData, filled, mfMerged, str) => {
+  console.log(mfMerged, str)
+  console.log(seriesData)
   const data = seriesData.map(el => {
     el.filled = filled;
     return el;
