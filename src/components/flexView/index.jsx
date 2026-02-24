@@ -118,9 +118,14 @@ class FlexView extends React.Component {
         this.props.dispatch(
           setSeriesData(projectID, patientID, studyUID, series, true)
         );
-      } else series = seriesData[projectID][patientID][studyUID].list;
+      } else { 
+        series = seriesData[projectID]?.[patientID]?.[studyUID]?.list;
+        console.log(" ---> before", series)
+        series = series || [];
+        console.log(" ---> after", series)
+      }
     } catch (err) {
-      console.log("Error getting series of the study", err);
+      console.log("Error => getting series of the study", err);
     }
     if (this.props.openSeries.length === this.maxPort) {
       this.setState({ showSeriesTable: true, series });
