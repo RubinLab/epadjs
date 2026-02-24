@@ -127,11 +127,13 @@ class FlexView extends React.Component {
     } catch (err) {
       console.log("Error => getting series of the study", err);
     }
+    console.log(" this.props.openSeries.length", this.props.openSeries);
     if (this.props.openSeries.length === this.maxPort) {
       this.setState({ showSeriesTable: true, series });
       return;
     }
     //get only unopen series
+    console.log(" series.length ", series);
     if (series.length > 0) series = this.excludeOpenSeries(series);
     // filter series that have displayable modality
     series = series.filter(isSupportedModality);
