@@ -105,7 +105,7 @@ const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
     const isPHI = phiCol.includes(column);
     console.log(" ---> isPHI", isPHI);
     if (isPHI && !showingPHI) {
-      toast.info("PHI is currently hidden!", { position: "top-right" });
+      toast.info("Sorting/filtering this column is disabled when PHI is hidden", { position: "top-right" });
       return true;
     }
     return false;

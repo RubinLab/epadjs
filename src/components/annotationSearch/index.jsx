@@ -401,8 +401,8 @@ const AnnotationSearch = (props) => {
   );
 
   const checkPHIStatus = (column) => {
-    if (column === "patientName" || column === "subjectID") {
-      toast.info("PHI is currently hidden!", { position: "top-right" });
+    if ((column === "patientName" || column === "subjectID") && !props.showingPHI) {
+      toast.info("Sorting/filtering this column is disabled when PHI is hidden", { position: "top-right" });
       return true;
     }
     return false;
@@ -2053,7 +2053,8 @@ const mapsStateToProps = (state) => {
     openSeries: state.annotationsListReducer.openSeries,
     searchTableIndex: state.annotationsListReducer.searchTableIndex,
     refreshMap: state.annotationsListReducer.refreshMap,
-    multipageAimSelection: state.annotationsListReducer.multipageAimSelection
+    multipageAimSelection: state.annotationsListReducer.multipageAimSelection,
+    showingPHI: state.annotationsListReducer.showingPHI
   };
 };
 
