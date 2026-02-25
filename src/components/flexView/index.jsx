@@ -108,7 +108,7 @@ class FlexView extends React.Component {
     const existingData = dataExists
       ? seriesData[projectID][patientID][studyUID].list
       : null;
-
+ 
     try {
       if (!dataExists && !seriesCallSent) {
         this.setState({ loading: true });
@@ -120,20 +120,15 @@ class FlexView extends React.Component {
         );
       } else { 
         series = seriesData[projectID]?.[patientID]?.[studyUID]?.list;
-        console.log(" ---> before", series)
-        series = series || [];
-        console.log(" ---> after", series)
       }
     } catch (err) {
       console.log("Error => getting series of the study", err);
     }
-    console.log(" this.props.openSeries.length", this.props.openSeries);
     if (this.props.openSeries.length === this.maxPort) {
       this.setState({ showSeriesTable: true, series });
       return;
     }
     //get only unopen series
-    console.log(" series.length ", series);
     if (series.length > 0) series = this.excludeOpenSeries(series);
     // filter series that have displayable modality
     series = series.filter(isSupportedModality);
@@ -182,6 +177,7 @@ class FlexView extends React.Component {
 
   closeSeriesTable = () => {
     this.setState({ showSeriesTable: false, series: [] });
+    seriesCallSent = false;
   };
 
   componentDidMount = async () => {
