@@ -67,11 +67,11 @@ import {
 import { teachingFileTempCode } from "../../constants";
 
 let mode = sessionStorage.getItem('mode');
-let isPHIVisible = sessionStorage.getItem('isPHIVisible');
+let isPHIVisible = localStorage.getItem('isPHIVisible');
 isPHIVisible = isPHIVisible ? JSON.parse(isPHIVisible) : false;
 
 const setPHIVisible = (state) => {
-  sessionStorage.setItem('isPHIVisible', String(state))
+  localStorage.setItem('isPHIVisible', String(state))
 }
 
 const initialState = {
