@@ -32,7 +32,7 @@ let seriesCallSent;
 class FlexView extends React.Component {
   mode = sessionStorage.getItem("mode");
   maxPort = sessionStorage.getItem("maxPort");
-  seriesCallSent = false;
+  seriesCallSent = null;
   state = {
     columns: [],
     order:
@@ -110,11 +110,11 @@ class FlexView extends React.Component {
       : null;
  
     try {
-      if (!dataExists && !seriesCallSent) {
+      if (!dataExists && seriesCallSent !== studyUID) {
         this.setState({ loading: true });
         ({ data: series } = await getSeries(projectID, patientID, studyUID));
         this.setState({ loading: false });
-        seriesCallSent = true;
+        seriesCallSent = studyUID;
         this.props.dispatch(
           setSeriesData(projectID, patientID, studyUID, series, true)
         );
@@ -177,7 +177,7 @@ class FlexView extends React.Component {
 
   closeSeriesTable = () => {
     this.setState({ showSeriesTable: false, series: [] });
-    seriesCallSent = false;
+    seriesCallSent = null;
   };
 
   componentDidMount = async () => {

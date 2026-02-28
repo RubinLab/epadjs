@@ -86,7 +86,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.eventSource = null;
-    this.seriesCallSent = false;
+    this.seriesCallSent = null;
     this.state = {
       openMng: false,
       keycloak: null,
@@ -827,7 +827,7 @@ class App extends Component {
       if (TF.total_rows) {
         this.displaySeries(packedData);
       } else {
-        const seriesArray = await this.getSeriesData(packedData);
+        const seriesArray = await this.getSeriesData(packedData, 'handle args');
         window.dispatchEvent(
           new CustomEvent("openTeachingFilesModal", {
             detail: { seriesArray, args, packedData },
@@ -890,7 +890,8 @@ class App extends Component {
     return true;
   };
 
-  getSeriesData = async (studyData) => {
+  getSeriesData = async (studyData, src) => {
+    console.log(' ---> getSeriesData', src);
     const { projectID, studyUID } = studyData;
     const { seriesData } = this.props;
     let { patientID, subjectID } = studyData;
@@ -902,10 +903,10 @@ class App extends Component {
         seriesData[projectID][patientID] &&
         seriesData[projectID][patientID][studyUID] &&
         seriesData[projectID][patientID][studyUID].list;
-      if (!dataExists && !this.seriesCallSent) {
+      if (!dataExists && this.seriesCallSent !== studyUID) {
         ({ data: series } = await getSeries(projectID, patientID, studyUID, false, "App.js, getSeriesData"));
         if (series && series.length === 0 && mode === "teaching") ({ data: series } = await getSeries(projectID, patientID, studyUID, true, "App.js, getSeriesData"));
-        this.seriesCallSent = true;
+        this.seriesCallSent = studyUID;
         this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series, true));
         this.setState({ teachingLoading: false });
         return series;
@@ -1356,7 +1357,7 @@ class App extends Component {
 
   displayNextStudy = async (study, worklist) => {
     const { studyDescription } = study;
-    let series = await this.getSeriesData(study);
+    let series = await this.getSeriesData(study, 'display next study');
     const maxPort = parseInt(sessionStorage.getItem("maxPort"));
     if (series.length <= maxPort) {
       // viewSelection(series);
