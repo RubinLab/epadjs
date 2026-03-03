@@ -124,6 +124,7 @@ class AnchoredPortalModal extends React.Component {
     window.addEventListener("scroll", this.reposition, true);
     document.addEventListener("click", this.onDocClick);
     document.addEventListener("keydown", this.onKey);
+    // document.addEventListener("mousedown", this.onMouseDown, true);
   }
 
   removeListeners() {
@@ -131,6 +132,7 @@ class AnchoredPortalModal extends React.Component {
     window.removeEventListener("scroll", this.reposition, true);
     document.removeEventListener("click", this.onDocClick);
     document.removeEventListener("keydown", this.onKey);
+    // document.removeEventListener("mousedown", this.onMouseDown, true);
   }
 
   onDocClick(e) {
@@ -215,6 +217,27 @@ class AnchoredPortalModal extends React.Component {
     }));
   }
 
+  /*
+  onMouseDown = (e) => {
+    const { closeOnOutsideClick, onClose } = this.props;
+    if (!closeOnOutsideClick) return;
+  
+    const pop = popoverRef.current;
+    if (!pop) return;
+  
+    // Robust inside detection (works better with portals, SVG, nested targets)
+    const path = typeof e.composedPath === "function" ? e.composedPath() : null;
+  
+    const clickedInsidePopover = path ? path.includes(pop) : pop.contains(e.target);
+    const clickedInsideAnchor =
+      anchorEl && (path ? path.includes(anchorEl) : anchorEl.contains?.(e.target));
+  
+    console.log(' clickedInsidePopover', clickedInsidePopover, 'clickedInsideAnchor', clickedInsideAnchor );
+    if (clickedInsidePopover || clickedInsideAnchor) return;
+  
+    onClose?.();
+  };
+  */
   renderBox() {
     const {
       title,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
 import PropagateLoader from "react-spinners/PropagateLoader";
@@ -23,7 +23,14 @@ const SeriesDropDown = (props) => {
   const [seriesList, setSeriesList] = useState([]);
   const [loading, setLoading] = useState(false);
   let mfIndex = {};
+  // let seriesCallSent = false;
+  // let additionalInfoCallSent = false;
+  const seriesCallSentRef = useRef(new Set());
+  const additionalInfoCallSentRef = useRef(new Set());
   maxPort = parseInt(sessionStorage.getItem("maxPort"));
+
+  const makeKey = (projectID, patientID, studyUID) =>
+  `${projectID}|${patientID}|${studyUID}`;
 
   const checkMultiframe = () => {
     const { openSeries, activePort, openSeriesAddition } = props;
@@ -80,6 +87,7 @@ const SeriesDropDown = (props) => {
   }
 
   useEffect(() => {
+    if (!props.serie) return;
     let studyUID;
     let projectID;
     let patientID;
@@ -91,7 +99,7 @@ const SeriesDropDown = (props) => {
       projectID = props.serie.projectID;
       patientID = props.serie.patientID;
     }
-
+    const key = makeKey(projectID, patientID, studyUID);
     const {list, studyExist} = findSeriesListFmStore();
     const isString = (currentValue) => currentValue.seriesDescription === '' || typeof currentValue.seriesDescription === 'string';
     const isFilled= (currentValue) => currentValue.filled || currentValue.multiFrameImage;
@@ -110,34 +118,62 @@ const SeriesDropDown = (props) => {
         break;
       }
     }
-
-    if (checkMultiframe() && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
-      if (!studyInGrid) {
-        getSeries(projectID, patientID, studyUID, false, 'seriesdropdown, checkMultiframe').then(res => {
-          const newList = mergeLists(data[projectID][patientID][studyUID], res.data);
-          props.dispatch(setSeriesData(projectID, patientID, studyUID, newList, true, true));
-          setLoading(false);
-        }).catch((err) => console.error(err));
-      }
-    } if (studyExist && hasDescription) {
-      let series = data[projectID][patientID][studyUID].list;
-      series = series?.filter(isSupportedModality);
-      setSeriesList(series);
-    } else {
-      setLoading(true);
-      const shouldFill = props.index === 0 || !hasDescription ? true : !otherSeriesOpened(props.openSeries, props.index);
-      if (studyExist && shouldFill && studyUID && projectID && patientID && !studyInGrid) {
-        props.dispatch(getSeriesAdditional({studyUID, projectID, patientID}))
-      } else {
-        if (!studyInGrid) {
-          getSeries(projectID, patientID, studyUID, false, 'series dropdown, 2').then(res => {
-            props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
+    try {
+      if (checkMultiframe() && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
+        if (!studyInGrid && !seriesCallSentRef.current.has(key)) {
+          getSeries(projectID, patientID, studyUID, false, 'seriesdropdown, checkMultiframe').then(res => {
+            const newList = mergeLists(data[projectID][patientID][studyUID], res.data);
+            props.dispatch(setSeriesData(projectID, patientID, studyUID, newList, true, true));
             setLoading(false);
+            seriesCallSentRef.current.add(key);
           }).catch((err) => console.error(err));
         }
+      } if (studyExist && hasDescription) {
+        let series = data[projectID][patientID][studyUID].list;
+        series = series?.filter(isSupportedModality);
+        setSeriesList(series);
+      } else {
+        const shouldFill = props.index === 0 || !hasDescription ? true : !otherSeriesOpened(props.openSeries, props.index);
+        if (studyExist && shouldFill && studyUID && projectID && patientID && !studyInGrid && !additionalInfoCallSentRef.current.has(key)) {
+          setLoading(true);
+          props.dispatch(getSeriesAdditional({studyUID, projectID, patientID}));
+          additionalInfoCallSentRef.current.add(key);
+          setLoading(false);
+        } else {
+          if (!studyInGrid && !seriesCallSentRef.current.has(key)) {
+            setLoading(true);
+            getSeries(projectID, patientID, studyUID, false, 'series dropdown, 2').then(res => {
+              props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true, 'here'));
+              setLoading(false);
+              seriesCallSentRef.current.add(key);
+            }).catch((err) => console.error(err));
+          }
+        }
       }
+    } catch (err) {
+      seriesCallSentRef.current.delete(key);
+      additionalInfoCallSentRef.current.delete(key);
+      console.error(e);
     }
-  }, [props.seriesData]);
+  }, [props.seriesData, props.serie, props.index, props.activePort]);
+
+  useEffect(() => {
+    if (!props.serie) return;
+    let studyUID;
+    let projectID;
+    let patientID;
+    if (props.serie) {
+      studyUID = props.serie.studyUID;
+      projectID = props.serie.projectID;
+      patientID = props.serie.patientID;
+      let series = props.seriesData?.[projectID]?.[patientID]?.[studyUID]?.list;
+      series = series?.filter(isSupportedModality);
+      setSeriesList(series);
+    }
+  }, [props.seriesData]
+  );
+
+
 
   const checkIfSerieOpen = (key) => {
     let isOpen = false;

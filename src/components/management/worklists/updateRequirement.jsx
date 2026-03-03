@@ -38,7 +38,7 @@ class UpdateRequirement extends React.Component {
   };
 
   changePage = e => {
-    const { name } = e.target;
+    const name = e.currentTarget?.name; 
     if (name === "addNew") {
       this.setState({ page: 1 });
     } else if (name === "edit") {
@@ -55,6 +55,11 @@ class UpdateRequirement extends React.Component {
     } else {
       this.setState({ page: 0 });
     }
+  };
+
+  handleModalClose = (event, reason) => {
+    if (reason === "backdropClick" || reason === "clickaway") return;
+    this.onClose();
   };
 
   onSubmit = () => {
@@ -99,7 +104,8 @@ class UpdateRequirement extends React.Component {
       // <Modal.Dialog dialogClassName="updateReq__modal">
       <AnchoredPortalModal
         open={true}
-        onClose={this.props.onCancel}
+        onClose={this.handleModalClose}
+        closeOnOutsideClick={false} 
         anchorEl={this.props.anchorEl}
         placement="bottom-start"
         title="Update Requirement"

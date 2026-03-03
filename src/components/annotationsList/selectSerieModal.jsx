@@ -47,6 +47,7 @@ class selectSerieModal extends React.Component {
     this.maxPort = parseInt(sessionStorage.getItem("maxPort"));
     this.mode = sessionStorage.getItem("mode");
     this.wadoUrl = sessionStorage.getItem("wadoUrl");
+    this.seriesCallSent = null;
   }
 
   //get the serie list
@@ -114,7 +115,7 @@ class selectSerieModal extends React.Component {
         seriesData[projectID][patientID] &&
         seriesData[projectID][patientID][studyUID] &&
         seriesData[projectID][patientID][studyUID].list;
-      if (!dataExists) {
+      if (!dataExists && this.seriesCallSent !== studyUID) {
         const { data: series } = await getSeries(
           projectID,
           patientID,
@@ -122,6 +123,7 @@ class selectSerieModal extends React.Component {
           false,
           'select series, data collecting !dataExists'
         );
+        this.seriesCallSent = studyUID;
         this.props.dispatch(
           setSeriesData(projectID, patientID, studyUID, series, true)
         );

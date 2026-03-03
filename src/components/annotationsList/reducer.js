@@ -67,6 +67,12 @@ import {
 import { teachingFileTempCode } from "../../constants";
 
 let mode = sessionStorage.getItem('mode');
+let isPHIVisible = localStorage.getItem('isPHIVisible');
+isPHIVisible = isPHIVisible ? JSON.parse(isPHIVisible) : false;
+
+const setPHIVisible = (state) => {
+  localStorage.setItem('isPHIVisible', String(state))
+}
 
 const initialState = {
   openSeries: [],
@@ -105,7 +111,7 @@ const initialState = {
   showLabels: false,
   showAnnotations: mode === 'teaching' ? false : true,
   lastLocation: '',
-  showingPHI: false,
+  showingPHI: isPHIVisible || false,
 };
 
 
@@ -136,7 +142,9 @@ const asyncReducer = (state = initialState, action) => {
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
       case SHOW_PHI:
-        return { ...state, showingPHI: !state.showingPHI };
+        const nextPHIState = !state.showingPHI;
+        setPHIVisible(nextPHIState);
+        return { ...state, showingPHI: nextPHIState };
       case SET_LAST_LOCATION:
         return { ...state, lastLocation: action.lastLocation };
       case TOGGLE_ALL_CALCULATIONS:

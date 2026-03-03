@@ -38,6 +38,7 @@ const messages = {
 };
 
 let mode;
+let seriesCallSent;
 
   const WorkList = (props) => {
     const [worklists, setWorklists] = useState([]);
@@ -53,6 +54,7 @@ let mode;
     const [sameStudyUID, setSameStudyUID] = useState(null);
 
     mode = sessionStorage.getItem("mode");
+    seriesCallSent = null;
   
     const openWLStudy = () => {
       const { openSeries } = props;
@@ -245,11 +247,12 @@ let mode;
 
     try {
       const isTeaching =  mode === 'teaching';
-      if (!dataExists) {
+      if (!dataExists && seriesCallSent !== studyUID) {
         ({ data: series } = await getSeries(projectID, subjectID, studyUID));
         if (series.length === 0 && isTeaching) 
           ({ data: series } = await getSeries(projectID, subjectID, studyUID, isTeaching));
         props.dispatch(setSeriesData(projectID, subjectID, studyUID, series, true));
+        seriesCallSent = studyUID;
       } else series = seriesData[projectID][subjectID][studyUID].list;
       series = series.filter(isSupportedModality);
       const maxPort = parseInt(sessionStorage.getItem("maxPort"));
