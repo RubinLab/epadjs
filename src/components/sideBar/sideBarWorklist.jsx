@@ -689,7 +689,11 @@ let seriesCallSent;
             {showSeries && series.length > 0 && (
                 <SelectSeriesModal
                   seriesPassed={[series]}
-                  onCancel={() => setShowSeries(false)}
+                  onCancel={() => {
+                    setShowSeries(false);
+                    seriesCallSent= null;
+                    props.setSeriesCallSent()
+                  }}
                   studyName={studyName}
                   worklistID={props.match.params.wid}
                 />

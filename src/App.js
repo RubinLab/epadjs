@@ -903,6 +903,7 @@ class App extends Component {
         seriesData[projectID][patientID] &&
         seriesData[projectID][patientID][studyUID] &&
         seriesData[projectID][patientID][studyUID].list;
+      console.log(" this.seriesCallSent !== studyUID)", this.seriesCallSent, studyUID);
       if (!dataExists && this.seriesCallSent !== studyUID) {
         ({ data: series } = await getSeries(projectID, patientID, studyUID, false, "App.js, getSeriesData"));
         if (series && series.length === 0 && mode === "teaching") ({ data: series } = await getSeries(projectID, patientID, studyUID, true, "App.js, getSeriesData"));
@@ -1658,6 +1659,11 @@ class App extends Component {
                     {...props}
                     getWorklistPatient={this.getWorklistPatient}
                     reports={this.state.reportsCompArr}
+                    setSeriesCallSent={() => {
+                      console.log(" ---> this is called")
+                      this.seriesCallSent = null
+                    }
+                    }
                   />
                 )}
               />
@@ -1724,7 +1730,11 @@ class App extends Component {
         {this.state.showSeries && this.state.openSeriesData.series.length > 0 && (
           <SelectSeriesModal
             seriesPassed={[this.state.openSeriesData.series]}
-            onCancel={() => this.setState({ showSeries: false })}
+            onCancel={() => {
+              console.log(" ++++> app");
+              this.setState({ showSeries: false });
+              this.seriesCallSent = null;
+            }}
             studyName={this.state.openSeriesData.studyName}
             worklistID={this.state.openSeriesData.worklistID}
           />
