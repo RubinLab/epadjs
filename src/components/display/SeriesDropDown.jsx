@@ -131,6 +131,7 @@ const SeriesDropDown = (props) => {
       } if (studyExist && hasDescription) {
         let series = data[projectID][patientID][studyUID].list;
         series = series?.filter(isSupportedModality);
+        series = series ? series : [];
         setSeriesList(series);
       } else {
         const shouldFill = props.index === 0 || !hasDescription ? true : !otherSeriesOpened(props.openSeries, props.index);
@@ -168,6 +169,7 @@ const SeriesDropDown = (props) => {
       patientID = props.serie.patientID;
       let series = props.seriesData?.[projectID]?.[patientID]?.[studyUID]?.list;
       series = series?.filter(isSupportedModality);
+      series = series ? series : [];
       setSeriesList(series);
     }
   }, [props.seriesData]
