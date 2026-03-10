@@ -1,8 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
 import UserList from "./userList";
 import AssgineeDeletetionWarning from "./assigneeDeletionWarning";
+import AnchoredPortalModal from "../common/AnchoredPortalModal";
 import "../menuStyle.css";
 
 class UpdateAssignee extends React.Component {
@@ -62,44 +62,53 @@ class UpdateAssignee extends React.Component {
     this.props.onCancel();
   };
 
+  renderFooter = () => {
+   return (
+    <div className="modal-footer__buttons">
+      <div className="updateAssignee__modal--buttons">
+        <button
+          className="updateAssignee__modal--button"
+          variant="secondary"
+          onClick={this.checkWorklistDeletion}
+        >
+          Submit
+        </button>
+        <button
+          className="edit-permission__modal--button"
+          variant="secondary"
+          onClick={() => { this.props.onCancel() }}
+        >
+          Cancel
+         </button>
+      </div>
+    </div>
+   );
+  }
+
   render = () => {
     return (
       // <Modal.Dialog dialogClassName="updateAssignee__modal">
       <>
-        <Modal.Dialog id="modal-fix" className="in-modal">
-          <Modal.Header>
-            <Modal.Title>Update Assignees</Modal.Title>
-          </Modal.Header>
-          <Modal.Body className="updateAssignee__mbody">
-              <UserList
-                users={this.props.users}
-                onChange={this.selectAssignee}
-                selectAll={this.toggleSelectAll}
-                assignees={this.props.assigneeList}
-                isSelectedAll={this.state.isSelectedAll}
-              />
-          </Modal.Body>
-          <Modal.Footer className="modal-footer__buttons">
-            <div className="updateAssignee__modal--buttons">
-              <button
-                className="updateAssignee__modal--button"
-                variant="secondary"
-                onClick={this.checkWorklistDeletion}
-              >
-                Submit
-              </button>
-              <button
-                className="edit-permission__modal--button"
-                variant="secondary"
-                onClick={() => {
-                  this.props.onCancel();
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </Modal.Footer>
-        </Modal.Dialog>
+        <AnchoredPortalModal
+          open={true}
+          onClose={this.props.onCancel}
+          anchorEl={this.props.anchorEl}
+          placement="bottom-start"
+          title="Update Assignees"
+          minWidth={360}
+          backdrop={false}            // set true if you want dim behind
+          showCloseButton={true}
+          footer={this.renderFooter()}
+          zIndex={1000}
+        >
+        <UserList
+          users={this.props.users}
+          onChange={this.selectAssignee}
+          selectAll={this.toggleSelectAll}
+          assignees={this.props.assigneeList}
+          isSelectedAll={this.state.isSelectedAll}
+        /> 
+        </AnchoredPortalModal>
         {this.state.showWarning && (
           <AssgineeDeletetionWarning
             warningList={this.state.warningList}

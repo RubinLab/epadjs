@@ -235,7 +235,6 @@
 .annotation-text {
   color: #fff;
   font-size: 0.9rem;
-  text-transform: capitalize;
 }
 .annotation-text ul {
   padding-left: 1.2rem !important;

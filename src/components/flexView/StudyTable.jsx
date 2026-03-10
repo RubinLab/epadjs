@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import ReactTable from "react-table-v6";
+import { toast } from "react-toastify";
 import { FaSortDown, FaSortUp } from "react-icons/fa";
 import { AiOutlineSortAscending, AiOutlineSortDescending } from 'react-icons/ai';
+import { generalizeDate, pseudo } from "../../Utils/aid.js";
 import find from "lodash/find";
 // import "./flexView.css";
 import '../annotationSearch/annotationSearch.css';
-
 import {
   clearCarets,
   formatTime,
@@ -13,16 +14,20 @@ import {
   reverseCarets
 } from "./helperMethods";
 
+let mode;
+
 const nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
-const StudyTable = ({ data, order, displaySeries }) => {
+const StudyTable = ({ data, order, displaySeries, showingPHI }) => {
   const [sortedCol, setSortedCol] = useState(null);
   const [sortOrder, setSortOrder] = useState(null);
+  mode = sessionStorage.getItem('mode');
 
   const defineColumns = () => {
     const tableColumns = [];
     for (let item of order) {
-      tableColumns.push(columns[item]);
+      if (showingPHI || mode !== 'teaching') tableColumns.push(columns[item])
+      else tableColumns.push(columnsPseudo[item]);
     }
     return tableColumns;
   };
@@ -44,6 +49,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
 
   const filterExam = (filter, row) => {
     try {
+      // if (checkPHIStatus(filter.id)) return;
       const keyLowercase = filter.value.toLowerCase();
       const str = Array.isArray(row[filter.id]) ? row[filter.id].join() : row[filter.id];
       return str.toLowerCase().includes(keyLowercase);
@@ -54,6 +60,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
 
   const filterStringIncludes = (filter, row) => {
     try {
+      // if (checkPHIStatus(filter.id)) return;
       const keyLowercase = filter.value.toLowerCase();
       const textLowercase = row[filter.id].toLowerCase();
       return textLowercase.includes(keyLowercase);        
@@ -64,6 +71,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
 
   const filterStartsWith = (filter, row) => {
     try {
+      // if (checkPHIStatus(filter.id)) return;
       const keyLowercase = filter.value.toLowerCase();
       let data = row[filter.id];
       data = typeof data === 'number' ? '' + data : data;
@@ -75,6 +83,7 @@ const StudyTable = ({ data, order, displaySeries }) => {
 
   const filterMatch = (filter, row) => {
     try {
+      // if (checkPHIStatus(filter.id)) return;
       const keyLowercase = filter.value.toLowerCase();
       return row[filter.id].toLowerCase() === keyLowercase;
     } catch (err) {
@@ -91,6 +100,17 @@ const StudyTable = ({ data, order, displaySeries }) => {
     }
   }
 
+  const checkPHIStatus = (column) => {
+    const phiCol = ["patientName-id", "patientID-id", "studyUID-id", "studyAccessionNumber-id", "studyID-id"];
+    const isPHI = phiCol.includes(column);
+    console.log(" ---> isPHI", isPHI);
+    if (isPHI && !showingPHI) {
+      toast.info("Sorting/filtering this column is disabled when PHI is hidden", { position: "top-right" });
+      return true;
+    }
+    return false;
+  }
+
   const returnHeader = (header, id) => {
     const headerParts = [];
     headerParts.push(<span>{header}</span>)
@@ -102,6 +122,333 @@ const StudyTable = ({ data, order, displaySeries }) => {
     }
     return <>{headerParts}</>
   }
+
+  const columnsPseudo = [
+    {
+      // Header: "Exam",
+      Header: () => returnHeader('Exam', 'examTypes-id'),
+      accessor: "examTypes",
+      id: "examTypes-id",
+      resizable: true,
+      sortable: true,
+      show: true,
+      filterMethod: (filter, row) => filterExam(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === "examTypes-id" ? "#3a3f44" : null
+        }
+      }),
+      Cell: row => {
+        return Array.isArray(row.original.examTypes) ? (
+          <div>{row.original.examTypes.join(", ")}</div>
+        ) : (
+          <div>{row.original.examType}</div>
+        );
+      }
+    },
+    {
+      // Header: () => <span>Patient Name</span>,
+      Header: () => returnHeader('Patient Name', 'patientName-id'),
+      accessor: "patientName",
+      id: "patientName-id",
+      resizable: true,
+      sortable: showingPHI ? true : false,
+      show: true,
+      style: { color: 'white' },
+      filterMethod: (filter, row) => showingPHI ? filterStringIncludes(filter, row) : () => {return},
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === "patientName-id" ? "#3a3f44" : null
+        }
+      }),
+      Cell: row => {
+        return <div>{pseudo(clearCarets(row.original.patientName), 'Anon-')}</div>;
+      }
+    },
+    {
+      // Header: "PatientID",
+      Header: () => returnHeader('PatientID', 'patientID-id'),
+      accessor: "patientID",
+      id: "patientID-id",
+      resizable: true,
+      sortable: showingPHI ? true : false,
+      show: true,
+      filterMethod: (filter, row) => showingPHI ? filterStartsWith(filter, row) : () => {return},
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === "patientID-id" ? "#3a3f44" : null
+        }
+      }),
+      Cell: row => {
+        return <div>{pseudo(row.original.patientID, 'ID')}</div>;
+      }
+    },
+    {
+      // Header: "Sex",
+      Header: () => returnHeader('Sex', 'sex-id'),
+      accessor: "sex",
+      id: "sex-id",
+      resizable: true,
+      sortable: true,
+      show: true,
+      filterMethod: (filter, row) => filterMatch(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === "sex-id" ? "#3a3f44" : null
+        }
+      })
+    },
+    {
+      // Header: "Description",
+      Header: () => returnHeader('Description', 'studyDescription-id'),
+      accessor: "studyDescription",
+      id: "studyDescription-id",
+      resizable: true,
+      sortable: true,
+      show: true,
+      filterMethod: (filter, row) => filterStringIncludes(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor:
+            sortedCol === "studyDescription-id" ? "#3a3f44" : null
+        }
+      }),
+      Cell: row => {
+        let desc = row.original.studyDescription
+          ? row.original.studyDescription
+          : "Unnamed Study";
+        return <div>{clearCarets(desc)}</div>;
+      }
+    },
+    // {
+    //   Header: "Insert Date",
+    //   accessor: "insertDate",
+    //   id: "insertDate-id",
+    //   resizable: true,
+    //   sortable: true,
+    //   show: true,
+    //   filterMethod: (filter, row) => filterDateAndTime(filter, row),
+    //   getProps: (state, rowInfo) => ({
+    //     style: {
+    //       backgroundColor: sortedCol === "insertDate-id" ? "#3a3f44" : null
+    //     }
+    //   }),
+    //   Cell: row => {
+    //     return <div>{formatDate(row.original.insertDate)}</div>;
+    //   }
+    // },
+    {
+      // Header: "Study Date",
+      Header: () => returnHeader('Study Date', 'studyDate-id'),
+      accessor: "studyDate",
+      id: "studyDate-id",
+      resizable: true,
+      sortable: true,
+      show: true,
+      filterMethod: (filter, row) => filterDateAndTime(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === "studyDate-id" ? "#3a3f44" : null
+        }
+      }),
+      // Cell: row => {
+      //   // return <div>{formatDate(row.original.studyDate)}</div>;
+      //   return <div>{generalizeDate(row.original.studyDate)}</div>;
+        
+      // }
+    },
+    {
+      // Header: "Study Time",
+      Header: () => returnHeader('Study Time', 'studyTime-id'),
+      accessor: "studyTime",
+      id: "studyTime-id",
+      resizable: true,
+      sortable: true,
+      show: true,
+      filterMethod: (filter, row) => filterDateAndTime(filter, row, "time"),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === "studyTime-id" ? "#3a3f44" : null
+        }
+      }),
+      Cell: row => {
+        return <div>{formatTime(row.original.studyTime)}</div>;
+      }
+    },
+    {
+      // Header: "Study UID",
+      Header: () => returnHeader('Study UID', 'studyUID-id'),
+      accessor: "studyUID",
+      id: "studyUID-id",
+      resizable: true,
+      sortable: showingPHI ? true : false,
+      show: true,
+      filterMethod: (filter, row) => showingPHI ? filterStringIncludes(filter, row) : () => {return},
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === "studyUID-id" ? "#3a3f44" : null
+        }
+      }),
+      Cell: row => {
+        return <div>{pseudo(row.original.studyUID, "UID-")}</div>;
+      }
+    },
+    {
+      // Header: "# of Aims",
+      Header: () => returnHeader('# of Aims', 'numberOfAnnotations-id'),
+      accessor: "numberOfAnnotations",
+      id: "numberOfAnnotations-id",
+      resizable: true,
+      sortable: true,
+      show: true,
+      filterMethod: (filter, row) => filterStartsWith(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor:
+            sortedCol === "numberOfAnnotations-id" ? "#3a3f44" : null
+        }
+      })
+    },
+    {
+      // Header: "# Of Img",
+      Header: () => returnHeader('# of Img', 'numberOfImages-id'),
+      accessor: "numberOfImages",
+      id: "numberOfImages-id",
+      resizable: true,
+      sortable: true,
+      show: true,
+      filterMethod: (filter, row) => filterStartsWith(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === "numberOfImages-id" ? "#3a3f44" : null
+        }
+      })
+    },
+    {
+      // Header: "# Of Series",
+      Header: () => returnHeader('# of Series', 'numberOfSeries-id'),
+      accessor: "numberOfSeries",
+      id: "numberOfSeries-id",
+      resizable: true,
+      sortable: true,
+      show: true,
+      filterMethod: (filter, row) => filterStartsWith(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === "numberOfSeries-id" ? "#3a3f44" : null
+        }
+      })
+    },
+    {
+      // Header: "Created Time",
+      Header: () => returnHeader('Created Time', 'createdTime-id'),
+      accessor: "createdTime",
+      id: "createdTime-id",
+      resizable: true,
+      sortable: true,
+      show: true,
+      filterMethod: (filter, row) => filterDateAndTime(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === "createdTime-id" ? "#3a3f44" : null
+        }
+      }),
+      // Cell: row => {
+      //   // return <div>{formatDate(row.original.birthdate)}</div>;
+      //   return <div>{generalizeDate(row.original.createdTime)}</div>;  
+      // }
+    },
+    {
+      // Header: "Birth date",
+      Header: () => returnHeader('Birth date', 'birthdate-id'),
+      accessor: "birthdate",
+      id: "birthdate-id",
+      resizable: true,
+      sortable: true,
+      show: true,
+      filterMethod: (filter, row) => filterDateAndTime(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === "birthdate-id" ? "#3a3f44" : null
+        }
+      }),
+      Cell: row => {
+        // return <div>{formatDate(row.original.birthdate)}</div>;
+        return <div>{generalizeDate(row.original.birthdate)}</div>;  
+      }
+    },
+    {
+      // Header: "Project ID",
+      Header: () => returnHeader('Project ID', 'projectID-id'),
+      accessor: "projectID",
+      id: "projectID-id",
+      resizable: true,
+      sortable: true,
+      show: true,
+      filterMethod: (filter, row) => filterStringIncludes(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === "projectID-id" ? "#3a3f44" : null
+        }
+      })
+    },
+    {
+      // Header: "Referring Physician Name",
+      Header: () => returnHeader('Referring Physician Name', 'referringPhysicianName-id'),
+      accessor: "referringPhysicianName",
+      id: "referringPhysicianName-id",
+      resizable: true,
+      sortable: true,
+      show: true,
+      filterMethod: (filter, row) => filterStringIncludes(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor:
+            sortedCol === "referringPhysicianName-id" ? "#3a3f44" : null
+        }
+      }),
+      Cell: row => {
+        return <div>{"REDACT"}</div>;
+      }
+    },
+    {
+      // Header: `Study Accession Number`,
+      Header: () => returnHeader('Study Accession Number', 'studyAccessionNumber-id'),
+      accessor: "studyAccessionNumber",
+      id: "studyAccessionNumber-id",
+      resizable: true,
+      sortable: showingPHI ? true : false,
+      show: true,
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor:
+            sortedCol === "studyAccessionNumber-id" ? "#3a3f44" : null
+        }
+      }),
+      filterMethod: (filter, row) => showingPHI ? filterStartsWith(filter, row) : () => {return},
+      Cell: row => {
+        return <div>{pseudo(row.original.studyAccessionNumber, "Acc #-")}</div>;
+      }
+    },
+    {
+      // Header: "Study ID",
+      Header: () => returnHeader('Study ID', 'studyID-id'),
+      accessor: "studyID",
+      id: "studyID-id",
+      resizable: true,
+      sortable: showingPHI ? true : false,
+      show: true,
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === "studyID-id" ? "#3a3f44" : null
+        }
+      }),
+      filterMethod: (filter, row) => showingPHI ? filterStringIncludes(filter, row) : () => {return},
+      Cell: row => {
+        return <div>{pseudo(row.original.studyID, "ID #-")}</div>;
+      }
+    }
+  ];
 
   const columns = [
     {

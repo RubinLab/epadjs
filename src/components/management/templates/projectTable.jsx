@@ -1,7 +1,6 @@
 import React from "react";
-import { Modal } from "react-bootstrap";
+import AnchoredPortalModal from "../common/AnchoredPortalModal";
 import Table from "react-table-v6";
-import { FaTimes } from "react-icons/fa";
 
 const projectTable = ({
   projectList,
@@ -12,6 +11,7 @@ const projectTable = ({
   templateProjects = [],
   selected = {},
   templateName,
+  anchorEl
 }) => {
   const columns = [
     {
@@ -35,32 +35,17 @@ const projectTable = ({
             id={id}
             onClick={onSelect}
             defaultChecked={checked}
+            style={{marginLeft: "2rem"}}
           />
         );
       },
     },
   ];
 
-  return (
-    // <Modal.Dialog dialogClassName="projectTable-modal">
-    <Modal.Dialog id="modal-fix" className="in-modal">
-      <Modal.Header>
-        <Modal.Title className="projectTable-modal__header">
-          Add {templateName} to a project
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body id="proModal-content">
-        <Table
-          className="pro-edit_table"
-          data={projectList}
-          columns={columns}
-          defaultPageSize={projectList.length}
-          showPagination={false}
-        />
-        {error && <div>{error}</div>}
-      </Modal.Body>
-      <Modal.Footer className="modal-footer__buttons">
-        {!error && (
+  const renderFooter = () => {
+    return (
+      <>
+         {!error && (
           <button variant="primary" onClick={onSubmit}>
             Submit
           </button>
@@ -68,8 +53,33 @@ const projectTable = ({
         <button variant="secondary" onClick={onCancel}>
           Cancel
         </button>
-      </Modal.Footer>
-    </Modal.Dialog>
+      </>
+    );
+  }
+
+  return (
+    // <Modal.Dialog dialogClassName="projectTable-modal">
+    <AnchoredPortalModal
+      open={true}
+      onClose={onCancel}
+      anchorEl={anchorEl}
+      placement="bottom-start"
+      title={`Add ${templateName} to a project`}
+      minWidth={260}
+      backdrop={false}            // set true if you want dim behind
+      showCloseButton={true}
+      minusLeft={120}
+      footer={renderFooter()}
+    >
+      <Table
+        className="pro-edit_table"
+        data={projectList}
+        columns={columns}
+        defaultPageSize={projectList.length}
+        showPagination={false}
+      />
+      {error && <div>{error}</div>}
+    </AnchoredPortalModal>
   );
 };
 

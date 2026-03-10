@@ -55,6 +55,7 @@ import {
   STORE_AIM_SELECTION_ALL,
   TOGGLE_ALL_CALCULATIONS,
   SET_LAST_LOCATION,
+  SHOW_PHI,
   colors,
   commonLabels,
 } from "./types";
@@ -74,6 +75,9 @@ import { setToolOptionsForElement } from 'cornerstone-tools';
 
 const wadoUrl = sessionStorage.getItem('wadoUrl');
 
+export const togglePHI = () => {
+  return { type: SHOW_PHI };
+}
 export const fillSeriesDescfullData = (data) => {
   return { type: FILL_DESC, data };
 }
@@ -90,7 +94,9 @@ export const storeAimSelectionAll = (checked, map, tbPageIndex, clearAll) => {
   return { type: STORE_AIM_SELECTION_ALL, payload: { checked, map, tbPageIndex, clearAll } };
 }
 
-export const setSeriesData = (projectID, patientID, studyUID, seriesData, filled, mfMerged) => {
+export const setSeriesData = (projectID, patientID, studyUID, seriesData, filled, mfMerged, str) => {
+  console.log(mfMerged, str)
+  console.log(seriesData)
   const data = seriesData.map(el => {
     el.filled = filled;
     return el;
@@ -377,7 +383,7 @@ export const selectAnnotation = (
 
 // opens a new port to display series
 // adds series details to the array
-export const addToGrid = (serie, annotation, port) => {
+export const addToGrid = (serie, annotation, port, worklistID) => {
   let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment, seriesDescription, numberOfAnnotations, numberOfImages, seriesNo, template, significanceOrder, multiFrameIndex } = serie;
   const modFmComment = comment ? comment.split('/')[0].trim() : '';
   examType = examType ? examType.toUpperCase() : modality ? modality.toUpperCase() : modFmComment.toUpperCase();
@@ -399,7 +405,8 @@ export const addToGrid = (serie, annotation, port) => {
     numberOfImages,
     seriesNo,
     template,
-    significanceOrder
+    significanceOrder,
+    worklistID
     // imageIndex: 0
   };
   if (multiFrameIndex) reference.multiFrameIndex = multiFrameIndex;
@@ -780,7 +787,6 @@ export const getSingleSerie = (serie, annotation, wadoUrl, seriesData) => {
     }
   };
 };
-
 
 const getSeriesAdditionalInfo = (uids) => {
   return new Promise(async (resolve, reject) => {

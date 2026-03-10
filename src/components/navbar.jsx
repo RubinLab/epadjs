@@ -1,27 +1,45 @@
-import React from 'react';
+import React, { useCallback } from "react";
+import { connect } from "react-redux";
 import { Link, NavLink } from 'react-router-dom';
 import { BsFillGearFill, BsInfoCircleFill, BsBoxArrowInRight } from 'react-icons/bs';
 import { FaBell } from 'react-icons/fa';
+import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { usePhiHotkey } from "./usePhiHotkey";
 import logo from '../images/logo.png';
 // import stella from '../images/stella-logo-temp-02.png';
 import stella from '../images/stella-epad.png';
 import stanford from '../images/stanford-rad-allwhite.png';
-import { connect } from 'react-redux';
+import { togglePHI } from './annotationsList/action';
 
-const NavBar = ({
-  user,
-  openGearMenu,
-  openInfoMenu,
-  openUser,
-  onReports,
-  logout,
-  onSearchViewClick,
-  onSwitchView,
-  notificationWarning,
-  pid,
-  path
-}) => {
+const NavBar = (props) => {
+  const {
+    user,
+    openGearMenu,
+    openInfoMenu,
+    openUser,
+    onReports,
+    logout,
+    onSearchViewClick,
+    onSwitchView,
+    notificationWarning,
+    pid,
+    path, 
+    showingPHI
+  } = props;
   const mode = sessionStorage.getItem('mode');
+
+  const renderTooltip = (props) => (
+    <Tooltip id="button-tooltip" {...props}>
+     Hotkey: Cmd/Ctrl + Shift + H
+    </Tooltip>
+  );
+
+  const changeShowHide = useCallback(() => {
+    props.dispatch(togglePHI());
+  }, [props.dispatch]);
+
+  usePhiHotkey(changeShowHide);
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container-fluid">
@@ -138,6 +156,15 @@ const NavBar = ({
                 </NavLink>
               </li>
             )}
+            {user && mode === 'teaching' && (
+              <OverlayTrigger
+                placement="bottom"
+                delay={{ show: 250, hide: 50 }}
+                overlay={renderTooltip}
+              >
+                <Button variant="outline-light" size="sm" onClick={changeShowHide}>{`${showingPHI ? `Hide` : `Show`} PHI`}</Button>
+              </OverlayTrigger>
+            )}
             {user && (
               <>
                 <li className="nav-item" style={{ paddingRight: '0px' }}>
@@ -172,6 +199,7 @@ const NavBar = ({
 const mapStateToProps = state => {
   return {
     loading: state.annotationsListReducer.loading,
+    showingPHI: state.annotationsListReducer.showingPHI
   };
 };
 export default connect(mapStateToProps)(NavBar);

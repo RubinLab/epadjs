@@ -328,6 +328,7 @@ class CornerstoneViewport extends Component {
    */
   getOverlay() {
     const { viewportOverlayComponent: Component, imageIds } = this.props;
+
     const {
       imageIdIndex,
       scale,
@@ -338,8 +339,7 @@ class CornerstoneViewport extends Component {
     const imageId = imageIds[imageIdIndex];
     return (
       imageId &&
-      windowWidth &&
-      isOverlayVisible && (
+      windowWidth && isOverlayVisible && (
         <Component
           imageIndex={imageIdIndex + 1}
           stackSize={imageIds.length}
@@ -347,6 +347,7 @@ class CornerstoneViewport extends Component {
           windowWidth={windowWidth}
           windowCenter={windowCenter}
           imageId={imageId}
+          showingPHI={this.props.showingPHI}
         />
       )
     );
@@ -589,7 +590,7 @@ class CornerstoneViewport extends Component {
   onImageRendered = (event) => {
     const { viewport, element, image } = event.detail;
     const { viewportIndex } = this.props;
-    
+
     // let wwwc = sessionStorage.getItem('wwwc');
     let imgStatus = sessionStorage.getItem('imgStatus');
     imgStatus = JSON.parse(imgStatus);
@@ -623,7 +624,7 @@ class CornerstoneViewport extends Component {
       viewport.scale = zoom;
     }
 
-    if (event.detail.enabledElement.layers.length===0) {
+    if (event.detail.enabledElement.layers.length === 0) {
       viewport.voi.windowCenter = wc;
       viewport.voi.windowWidth = ww;
 

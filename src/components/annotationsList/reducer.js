@@ -56,6 +56,7 @@ import {
   STORE_AIM_SELECTION_ALL,
   TOGGLE_ALL_CALCULATIONS,
   SET_LAST_LOCATION,
+  SHOW_PHI,
   colors,
   commonLabels,
 } from "./types";
@@ -66,6 +67,12 @@ import {
 import { teachingFileTempCode } from "../../constants";
 
 let mode = sessionStorage.getItem('mode');
+let isPHIVisible = localStorage.getItem('isPHIVisible');
+isPHIVisible = isPHIVisible ? JSON.parse(isPHIVisible) : false;
+
+const setPHIVisible = (state) => {
+  localStorage.setItem('isPHIVisible', String(state))
+}
 
 const initialState = {
   openSeries: [],
@@ -104,7 +111,9 @@ const initialState = {
   showLabels: false,
   showAnnotations: mode === 'teaching' ? false : true,
   lastLocation: '',
+  showingPHI: isPHIVisible || false,
 };
+
 
 const checkLastAnnotationDeleted = (seriesList) => {
   return seriesList.length === 1 && seriesList[0][2].length === 0;
@@ -132,6 +141,10 @@ const asyncReducer = (state = initialState, action) => {
       //   });
       //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       //   return { ...state, openSeries: updatedOpenSeries };
+      case SHOW_PHI:
+        const nextPHIState = !state.showingPHI;
+        setPHIVisible(nextPHIState);
+        return { ...state, showingPHI: nextPHIState };
       case SET_LAST_LOCATION:
         return { ...state, lastLocation: action.lastLocation };
       case TOGGLE_ALL_CALCULATIONS:

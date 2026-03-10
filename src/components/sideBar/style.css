@@ -377,3 +377,66 @@ body {
   background-color: #cbb700;
   color: black;
 }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+  padding: 2px 3px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+  overflow-wrap: break-word;
+  max-width: 120px
+}
+
+/* Table header styling */
+th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Hover effects for rows */
+tr:hover {
+  background-color: #373a3e;
+}
+
+/* Styling for drag handle (GrDrag icon) */
+td:first-child {
+  cursor: grab;
+  width: 50px;
+  text-align: center;
+}
+
+/* When dragging the row */
+tr.dragging {
+  background-color: #e6f7ff; /* Change background during drag */
+  opacity: 0.7;
+}
+
+/* React-tooltip styling */
+.react-tooltip {
+  font-size: 12px;
+  background-color: #333;
+  color: white;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+/* Active cell when dragging */
+td.dragging-active {
+  background-color: #f0f0f0; /* Slightly lighter background on active cell */
+}
+
+/* Table cell content */
+td span {
+  display: inline-block;
+  max-width: 300px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}

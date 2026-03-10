@@ -1,63 +1,58 @@
 import React, { Component } from "react";
-import _ from "lodash";
+import Form from "react-bootstrap/Form";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
-import PropagateLoader from "react-spinners/PropagateLoader";
-import {
-  getImageIds,
-  getWadoImagePath,
-  getSegmentation,
-  getMetadata,
-  getSeries
-} from "../../services/seriesServices";
-import { getImageMetadata } from "../../services/imageServices";
+import * as dcmjs from "dcmjs";
+import _ from "lodash";
+import CornerstoneViewport from "react-cornerstone-viewport";
+import { FaExpandArrowsAlt, FaPen, FaTag, FaTimes } from "react-icons/fa";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
-import "./flex.css";
-import "./viewport.css";
-import {
-  changeActivePort,
-  updateImageId,
-  closeSerie,
-  jumpToAim,
-  setSegLabelMapIndex,
-  updateSingleSerie,
-  getSingleSerie,
-  aimDelete,
-  clearAimId,
-  updateSubpath,
-  clearSelection,
-  updateGridWithMultiFrameInfo,
-  clearMultiFrameAimJumpFlags,
-  setSeriesData
-  // fillSeriesDescfullData
-} from "../annotationsList/action";
+import PropagateLoader from "react-spinners/PropagateLoader";
 import { deleteAnnotation, getAnnotation } from "../../services/annotationServices";
-import ContextMenu from "./contextMenu";
-import { MenuProvider } from "react-contexify";
-import CornerstoneViewport from "react-cornerstone-viewport";
-import { freehand } from "./Freehand";
-import { line } from "./Line";
-import { arrow } from "./Arrow";
-import { probe } from "./Probe";
-import { circle } from "./Circle";
-import { bidirectional } from "./Bidirectional";
+import { refreshToken } from "../../services/authService";
+import { getImageMetadata } from "../../services/imageServices";
+import {
+  getImageIds,
+  getMetadata,
+  getSegmentation,
+  getSeries,
+  getWadoImagePath
+} from "../../services/seriesServices";
 import RightsideBar from "../RightsideBar/RightsideBar";
-import * as dcmjs from "dcmjs";
-import { FaTimes, FaPen, FaExpandArrowsAlt, FaTag } from "react-icons/fa";
-import Form from "react-bootstrap/Form";
 import ToolMenu from "../ToolMenu/ToolMenu";
 import { getMarkups, setMarkupsOfAimActive } from "../aimEditor/Helpers";
-import { refreshToken } from "../../services/authService";
+import {
+  aimDelete,
+  changeActivePort,
+  clearAimId,
+  clearMultiFrameAimJumpFlags,
+  clearSelection,
+  closeSerie,
+  getSingleSerie,
+  jumpToAim,
+  setSegLabelMapIndex,
+  setSeriesData
+  // fillSeriesDescfullData
+  ,
+  updateGridWithMultiFrameInfo,
+  updateImageId,
+  updateSubpath
+} from "../annotationsList/action";
+import { arrow } from "./Arrow";
+import { bidirectional } from "./Bidirectional";
+import { circle } from "./Circle";
+import { freehand } from "./Freehand";
+import { line } from "./Line";
+import { probe } from "./Probe";
+import "./flex.css";
+import "./viewport.css";
 // import { isThisSecond } from "date-fns/esm";
-import { FiMessageSquare } from "react-icons/fi";
-import { errorMonitor } from "events";
-import FreehandRoiSculptorTool from "../../cornerstone-tools/tools/FreehandRoiSculptorTool";
-import getVPDimensions from "./ViewportCalculations";
-import SeriesDropDown from "./SeriesDropDown";
 import { toast } from "react-toastify";
+import SeriesDropDown from "./SeriesDropDown";
+import getVPDimensions from "./ViewportCalculations";
 
 let mode;
 let wadoUrl;
@@ -165,6 +160,8 @@ const mapStateToProps = (state) => {
     templates: state.annotationsListReducer.templates,
     showAnnotations: state.annotationsListReducer.showAnnotations,
     lastLocation: state.annotationsListReducer.lastLocation,
+    projectMap: state.annotationsListReducer.projectMap,
+    showingPHI: state.annotationsListReducer.showingPHI,
   };
 };
 
@@ -174,6 +171,13 @@ class DisplayView extends Component {
     mode = sessionStorage.getItem("mode");
     wadoUrl = sessionStorage.getItem("wadoUrl");
     maxPort = sessionStorage.getItem("maxPort");
+    this.viewportRefs = {};
+    // this.viewportListenersAttached = {};
+    // internal state for scrolling
+    this.isScrolling = false;
+    this.activeButtons = null; // 1 = left, 2 = right
+    this.lastY = 0;
+
     this.state = {
       width: "100%",
       height: "100%",
@@ -199,7 +203,7 @@ class DisplayView extends Component {
       multiFrameAimJumped: false,
       dataIndexMap: {},
       aimEdited: false,
-      isVisible: true
+      isVisible: true,
     };
   }
 
@@ -262,7 +266,7 @@ class DisplayView extends Component {
     window.addEventListener("keydown", this.handleKeyPressed);
     window.addEventListener("saveTemplateType", this.saveTemplateType);
     window.addEventListener("unfuse", this.unFuseBeforeClose);
-
+    
     if (this.props.keycloak && series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh });
@@ -272,6 +276,10 @@ class DisplayView extends Component {
     // cornerstone.enable(element);
     // this.props.closeLeftMenu();
   }
+
+  mouseupStopScroll = () => {
+    this.isScrolling = false;
+  };
 
   handleEditedAimSaved = () => {
     // check if the state 
@@ -393,7 +401,7 @@ class DisplayView extends Component {
     const isInitialIndex = prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].multiFrameIndex === undefined && this.props.seriesAddition[activePort].multiFrameIndex === null;
     const mfChanged = samePortControl && (prevProps.seriesAddition[activePort].multiFrameIndex !== this.props.seriesAddition[activePort].multiFrameIndex && !isInitialIndex) && this.props.seriesAddition[activePort].multiFrameIndex === null;
 
-    if ( (mfAimJumpDataFilled && newMFAimToJump) || (prevActiveFrameDataMissing && frameDataFilled && multiFrameAimJumpData && multiFrameAimJumpData[0]) || mfChanged) {
+    if ( (mfAimJumpDataFilled && newMFAimToJump) || (prevActiveFrameDataMissing && frameDataFilled && multiFrameAimJumpData && multiFrameAimJumpData[0])) {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData(`${multiFrameAimJumpData[0]}-${activePort}`, multiFrameAimJumpData[1], `didupdate 1`);
@@ -407,13 +415,13 @@ class DisplayView extends Component {
       //   (prevProps.series.length !== this.props.series.length &&
       //     this.props.loading === false)
       // ) {
-    } else if (prevProps.series.length < series.length || refreshPage || seriesReplaced || (prevActiveFrameDataMissing && frameDataFilled)) {
+    } else if (prevProps.series.length < series.length || refreshPage || seriesReplaced || (prevActiveFrameDataMissing && frameDataFilled) || mfChanged) {
       await this.setState({ isLoading: true });
       this.getViewports();
       let mfIndex = null;
       let frame = null;
       const seriesAdded = !!(!prevProps.seriesAddition[activePort] && seriesAddition[activePort]);
-      if ( active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex) {
+      if ( active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex || mfChanged) {
         mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
         frame = 0;
       }
@@ -432,7 +440,91 @@ class DisplayView extends Component {
     if (this.state.fusion && prevSeries.length < series.length) {
       window.dispatchEvent(new CustomEvent("unfuse", { detail: { source: 'open' } }));
     }
+
+    // 1. When loading finishes → viewports first appear
+    if (prevState.isLoading && !this.state.isLoading) {
+      this.attachListenersToAllViewports();
+      return;
+    }
+
+    const dataChanged = seriesReplaced || series.length !== prevSeries.length;
+
+    if (!this.state.isLoading && dataChanged) {
+      this.attachListenersToAllViewports();
+    }
   }
+
+  attachListenersToAllViewports = () => {
+    const count = this.state.data.length;
+    // console.log("attaching listeners to:", count, "viewports");
+    for (let i = 0; i < count; i++) {
+      this.attachScrollListeners(i);
+    }
+  };
+
+  attachScrollListeners = (i) => {
+    const container = this.viewportRefs[i]?.current;
+    if (!container) return;
+  
+    const el = container.children[1];
+    if (!el) return;
+  
+    this.detachScrollListenersFor(i);
+
+    el.addEventListener("mousedown", this.mousedownAndScroll);
+    el.addEventListener("mousemove", this.handleMouseMove);
+    el.addEventListener("mouseup", this.mouseupStopScroll);
+    el.addEventListener("mouseleave", this.mouseupStopScroll);
+    el.addEventListener("contextmenu", this.preventContextMenu);  
+    console.log("✓ listeners attached to viewport", i);
+  }
+
+  detachScrollListenersFor = (i) => {
+    const container = this.viewportRefs[i]?.current;
+    if (!container) return;
+  
+    const el = container.children[1];
+    if (!el) return;
+  
+    el.removeEventListener("mousedown", this.mousedownAndScroll);
+    el.removeEventListener("mousemove", this.mousemoveScroll);
+    el.removeEventListener("mouseup", this.mouseupStopScroll);
+    el.removeEventListener("mouseleave", this.mouseupStopScroll);
+    el.removeEventListener("contextmenu", this.preventContextMenu);
+    console.log("✓ listeners detached from viewport", i);
+  };
+
+  preventContextMenu = (e) => {
+    e.preventDefault();
+  }
+
+  detachScrollListeners = () => {
+    if (!this.viewportRefs) return;
+
+    Object.keys(this.viewportRefs).forEach((key) => {
+      const ref = this.viewportRefs[key];
+      if (!ref || !ref.current) return;
+  
+      const container = ref.current;
+  
+      // Cornerstone element is the second child
+      const el = container.children[1];
+      if (!el) return;
+  
+      // Remove all listeners we added
+      el.removeEventListener("mousedown", this.mousedownAndScroll);
+      el.removeEventListener("mousemove", this.handleMouseMove);
+      el.removeEventListener("mouseup", this.mouseupStopScroll);
+      el.removeEventListener("mouseleave", this.mouseupStopScroll);
+      el.removeEventListener("contextmenu", this.preventContextMenu);
+  
+      // Clear flag so they can be re-attached later if needed
+      // this.viewportListenersAttached[key] = false;
+    });
+  
+    console.log("✓ All scroll listeners detached from all viewportRefs");
+  };
+  
 
   componentWillUnmount() {
     window.removeEventListener("markupSelected", this.handleMarkupSelected);
@@ -456,6 +548,8 @@ class DisplayView extends Component {
     window.removeEventListener("keydown", this.handleKeyPressed);
     window.removeEventListener("getTemplateType", this.saveTemplateType);
     window.removeEventListener("unfuse", this.unFuseBeforeClose);
+    
+    this.detachScrollListeners();
 
     // clear all aimID of openseries so aim editor doesn't open next time
     this.props.dispatch(clearAimId());
@@ -488,6 +582,56 @@ class DisplayView extends Component {
       }
     }
   };
+
+  mousedownAndScroll = (event) => {
+    const element = this.getActiveElement();
+
+    // Ensure click is inside active viewport
+    if (!element || !element.contains(event.target)) {
+      return;
+    }
+    const activeTool = sessionStorage.getItem("activeTool");
+    if (activeTool && activeTool !== 'Noop') {
+      console.log("Tool is active, scrolling not allowed");
+      return; 
+    }
+    if (event.buttons === 3) {
+      event.preventDefault(); // prevent context menu for right-click  
+      this.isScrolling = true;
+      this.lastY = event.clientY;  
+      this.activeButtons = event.buttons;
+    }
+  }
+
+  handleMouseMove = (evt) => {
+    const { activePort } = this.props;
+    const viewport = this.state.data[activePort];
+    const imageIndex = viewport?.stack?.currentImageIdIndex ?? null;
+    const limit = viewport?.stack?.imageIds?.length ?? 0;
+    if (!this.isScrolling || imageIndex === null || limit === 0) return;
+
+    // If user released button, stop
+    if (evt.buttons !== this.activeButtons) {
+      this.isScrolling = false;
+      this.activeButtons = null;
+      return;
+    }
+
+    const deltaY = evt.clientY - this.lastY;
+
+    // small threshold so tiny jitters don't spam scroll
+    if (Math.abs(deltaY) < 3) return;
+
+    const isMovingDown = deltaY > 0;
+  
+    if (isMovingDown) {  
+      if (imageIndex >= 0 && imageIndex < limit - 1) this.jumpToImage(imageIndex + 1, activePort);
+    } else if (imageIndex > 0) 
+      this.jumpToImage(imageIndex - 1, activePort);
+
+    this.lastY = evt.clientY;
+  };
+
 
   // Sets the activeTool state getting it from session storage
   handleActiveTool = () => {
@@ -1005,7 +1149,7 @@ class DisplayView extends Component {
             const isStudyAim = series[activePort].aimID && aimList[seriesUID] && aimList[seriesUID][aimID] && aimList[seriesUID][aimID].type === 'study';
   
             if (mode === 'teaching' && isStudyAim) {
-              getSeries(projectID, patientID, studyUID).then((res) => {
+              getSeries(projectID, patientID, studyUID, false, 'if teaching and aim is a study aim').then((res) => {
                 this.props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true));
               }).catch(err => console.error(err));
             }
@@ -2700,6 +2844,7 @@ class DisplayView extends Component {
       this.setActive(i);
       return;
     }
+    this.detachScrollListenersFor(i);
     this.closeViewport(i);
   };
 
@@ -2758,11 +2903,104 @@ class DisplayView extends Component {
   };
 
   toggleOverlay = (e, i) => {
+    if (!this.props.showingPHI && mode === 'teaching') return;
     const showHide = { ...this.state.isOverlayVisible };
     const index = i || i === 0 ? i : this.props.activePort;
     if (showHide[index]) delete showHide[index];
     else showHide[index] = true;
     this.setState({ isOverlayVisible: showHide });
+  };
+
+  reorderStudyList = (list, worklistID) => {
+    try {
+      const map = {
+        desc: 'studyDescription',
+        sb_name: 'subjectName',
+        pr_name: 'projectID',
+        study_date: 'studyDate',
+        due: 'worklistDuedate',
+        studyUID: 'studyUID',
+        completeness: 'completeness'
+      };
+  
+      const sorts = JSON.parse(sessionStorage.getItem('sortBy'));
+      if (!sorts || !sorts[worklistID]) return list;
+  
+      const filters = sorts[worklistID];
+      // Apply sorting
+      list.sort((a, b) => {
+        for (const filter of filters) {
+          const field = map[filter.id];
+
+          if (!field) continue;
+  
+          let aValue = a[field];
+          let bValue = b[field];
+  
+          // Normalize nulls
+          if (aValue === null || aValue === undefined) aValue = '';
+          if (bValue === null || bValue === undefined) bValue = '';
+  
+          // Convert dates if applicable
+          if (field.toLowerCase().includes('date')) {
+            aValue = aValue ? new Date(aValue) : new Date(0);
+            bValue = bValue ? new Date(bValue) : new Date(0);
+          }
+  
+          let result;
+          if (typeof aValue === 'string' && typeof bValue === 'string') {
+            result = aValue.localeCompare(bValue);
+          } else {
+            result = aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+          }
+  
+          if (result !== 0) return filter.desc ? -result : result;
+        }
+        return 0; // fallback if all filters are equal
+      });
+      return list;
+    } catch (err) {
+      console.error(err);
+      return list;
+    }
+  };
+
+  openNextWLStudy = async (worklistID, studyUID) => {
+    try {
+      const sortedData = JSON.parse(sessionStorage.getItem("sortedListMap")) || {};
+      const filteredWorklist = sortedData[worklistID] || [];
+      
+      if (!filteredWorklist.length) {
+        toast.info("No sorted order found for this worklist", {
+          position: "top-right",
+          autoClose: 5000
+        });
+        return;
+      }
+  
+      const currentIndex = filteredWorklist.findIndex(st => st.studyUID === studyUID);
+  
+      if (currentIndex === -1) {
+        toast.error("Current study not found in saved order", {
+          position: "top-right",
+          autoClose: 5000
+        });
+        return;
+      }
+  
+      if (currentIndex === filteredWorklist.length - 1) {
+        toast.info("You reached the end of the worklist", {
+          position: "top-right",
+          autoClose: 5000
+        });
+        return;
+      }
+  
+      // Move to next study
+      this.props.displayNextStudy(filteredWorklist[currentIndex + 1], worklistID);
+    } catch (error) {
+      console.error("Error opening next study:", error);
+    }
   };
 
   render() {
@@ -2782,6 +3020,7 @@ class DisplayView extends Component {
     const redirect = mode === "teaching" ? "search" : "list";
     let invertMap = sessionStorage.getItem("invertMap");
     invertMap = invertMap ? JSON.parse(invertMap) : {};
+
     return !Object.entries(series).length ? (
       <Redirect to={`/${redirect}`} />
     ) : (
@@ -2803,6 +3042,8 @@ class DisplayView extends Component {
             onInvertClick={this.formInvertMap}
             onFuseUnfuse={this.getFuseUnfuseState}
             onFuseNewImage={this.newImageFuse}
+            onOpenSeries={this.props.openSeries}
+            openNextWLStudy={this.openNextWLStudy}
           />
           {this.state.isLoading && (
             <div style={{ marginTop: "30%", marginLeft: "50%" }}>
@@ -2818,6 +3059,7 @@ class DisplayView extends Component {
             data.map((data, i) => {
               return (
                 <div
+                  ref={this.viewportRefs[i] || (this.viewportRefs[i] = React.createRef())}
                   className={
                     "viewportContainer" + (activePort == i ? " selected" : "")
                   }
@@ -2855,6 +3097,13 @@ class DisplayView extends Component {
                       >
                         <FaTag />
                       </span>
+                      {/* {series[i].worklistID && (<span
+                        className={"dot"}
+                        style={{ background: "orange"}}
+                        onClick={() => this.openNextWLStudy(series[i].worklistID, series[i].studyUID)}
+                      >
+                        <FaArrowRight />
+                      </span>)} */}
                     </div>
                     {/* <div className={"column middle"}>
                     <label>{series[i].seriesUID}</label>
@@ -2953,6 +3202,7 @@ class DisplayView extends Component {
                     isStackPrefetchEnabled={true}
                     style={{ height: "calc(100% - 26px)" }}
                     activeTool={activeTool}
+                    showingPHI={this.props.showingPHI && mode === 'teaching'}
                     isOverlayVisible={this.state.isOverlayVisible[i] || false}
                     jumpToImage={() => this.jumpToImage(0, i)}
                   />}

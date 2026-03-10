@@ -8,6 +8,7 @@ import MetaData from "../MetaData/NewMetaData";
 import SmartBrushMenu from "../SmartBrushMenu/SmartBrushMenu";
 import AddToWorklist from "../searchView/addWorklist";
 import BrushSizeSelector from "./BrushSizeSelector";
+import { keyMap } from '../../constants';
 import { WindowLevel } from "../WindowLevel/WindowLevel";
 import ColormapSelector from "./ColormapSelector";
 import FuseSelector from "./FuseSelector";
@@ -298,6 +299,12 @@ class ToolMenu extends Component {
   }
 
   componentDidMount() {
+    // if the lastlocation includeWorklist and it is in teaching mode show next button
+    if (this.props.lastLocation.includes('worklist') && mode === "teaching") {
+      const nextButton = { name: "Next Study", icon: <FaAngleRight />, tool: "next", teaching: true };
+      this.managementTools.push(nextButton);
+    }
+
     window.addEventListener("keydown", this.handleKeyPressed);
     window.addEventListener("closeFuseMenu", this.closeFuse);
   }
@@ -309,20 +316,6 @@ class ToolMenu extends Component {
   }
 
   showHotkeyInfo = () => {
-    const keyMap = {
-      'ctrl + y' : 'Aim save',
-      f: 'Arrow',
-      r: 'Circle',
-      x: 'Expand view',
-      i: 'Invert',
-      d: 'Length',
-      p: 'Pan',
-      o: 'Perpendicular',
-      space: 'Reset',
-      s: 'Select',
-      w: 'Window-Level',
-      z: 'Zoom',
-    }
     const hotKeys = Object.keys(keyMap);
     const tools = Object.values(keyMap);
     const rows = hotKeys.reduce((all, item, index) => {
@@ -466,6 +459,16 @@ class ToolMenu extends Component {
     }
   }
 
+  closeAllActions = () => {
+    this.props.dispatch(clearGrid());
+    window.dispatchEvent(new CustomEvent("unfuse"));
+    sessionStorage.removeItem("wwwc");
+    const max = parseInt(maxPort);
+    const imgStatus = new Array(max);
+    sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+    this.props.onInvertClick(false, null, null, true);
+  }
+
   handleToolClicked = (index, tool) => {
     const notActiveTools = {
       Presets: true,
@@ -483,20 +486,14 @@ class ToolMenu extends Component {
       cornerstoneTools.toolColors.setActiveColor("rgb(255, 132, 0)");
     } else cornerstoneTools.toolColors.setActiveColor("rgb(255, 255, 0)");
 
-    
+    const { worklistID, studyUID } = this.props.openSeries[this.props.activePort];
 
     if (tool === "Noop") {
       this.disableAllTools();
       this.setState({ activeTool: "", activeToolIdx: index });
       return;
     } else if (tool === "ClearGrid") {
-      this.props.dispatch(clearGrid());
-      window.dispatchEvent(new CustomEvent("unfuse"));
-      sessionStorage.removeItem("wwwc");
-      const max = parseInt(maxPort);
-      const imgStatus = new Array(max);
-      sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
-      this.props.onInvertClick(false, null, null, true);
+      this.closeAllActions();
       this.props.history.push(this.props.lastLocation);
       // if (mode === "thick") this.props.onSwitchView("list");
       // else this.props.onSwitchView("search");
@@ -580,7 +577,10 @@ class ToolMenu extends Component {
     } else if (tool === 'keys') {
       this.showHotkeyInfo();
       return;
-    } 
+    } else if (tool === 'next') {
+      this.props.openNextWLStudy(worklistID, studyUID);
+      this.closeAllActions();
+    }
     // else if (tool === "FreehandRoiTool") {
     //   this.selectFreehand();
     // }

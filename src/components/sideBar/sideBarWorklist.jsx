@@ -1,44 +1,33 @@
-import React from "react";
-import Table from "react-table-v6";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { toast } from "react-toastify";
+import { Button } from "react-bootstrap";
 import { FaRegEye } from "react-icons/fa";
-import Badge from "react-bootstrap/Badge";
-import Button from "react-bootstrap/Button";
 import ReactTooltip from "react-tooltip";
-import {
-  GrDocumentMissing,
-  GrDocumentVerified,
-  GrDocumentPerformance,
-  GrTrash,
-  GrCalculator,
-  GrManual,
-  GrPowerReset
-} from "react-icons/gr";
-import { GoGraph, GoCheck } from "react-icons/go";
+import { toast } from "react-toastify";
+import { GrDocumentMissing,
+    GrDocumentVerified,
+    GrDocumentPerformance,
+    GrTrash,
+    GrCalculator,
+    GrManual,
+    GrPowerReset } from "react-icons/gr";
+import { DragDropTable } from "./DragDropTable";
+// Service imports
 import {
   getStudiesOfWorklist,
   deleteStudyFromWorklist,
   updateWorklistProgressManually,
+  updateWorklistStudyOrder
 } from "../../services/worklistServices";
 import { getSeries } from "../../services/seriesServices";
+
+// Component imports
 import DeleteAlert from "../management/common/alertDeletionModal";
 import SelectSeriesModal from "../annotationsList/selectSerieModal";
-import {
-  addToGrid,
-  getSingleSerie,
-  getWholeData,
-  alertViewPortFull,
-  updatePatient,
-  clearSelection,
-  changeActivePort,
-  selectPatient,
-  setSeriesData,
-  setLastLocation
-} from "../annotationsList/action";
-import { isSupportedModality } from "../../Utils/aid.js";
-
-let mode;
+import { addToGrid, getSingleSerie, alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData, clearGrid } from "../annotationsList/action";
+import { isSupportedModality, filterProjects, pseudo, generalizeDate } from "../../Utils/aid.js";
+// CSS import
+import "./style.css";
 
 const messages = {
   deleteSingle: "Remove study from the worklist? This cannot be undone.",
@@ -48,199 +37,97 @@ const messages = {
     "You do not have access to all of the projects of the worklist. Please contact to your admin about projects:",
 };
 
-class WorkList extends React.Component {
-  state = {
-    worklists: [],
-    singleDeleteData: {},
-    deleteSingleClicked: false,
-    // commentClicked: false,
-    clickedIndex: null,
-    selectAll: 0,
-    selected: {},
-    showSeries: false,
-    series: [],
-    selectedSeries: {},
-    error: null,
-    patientsProjectMap: {},
-    studyName: "",
-  };
+let mode;
+let seriesCallSent;
 
-  componentDidMount = async () => {
+  const WorkList = (props) => {
+    const [worklists, setWorklists] = useState([]);
+    const [singleDeleteData, setSingleDeleteData] = useState({});
+    const [selected, setSelected] = useState({});
+    const [selectAll, setSelectAll] = useState(0);
+    const [deleteSingleClicked, setDeleteSingleClicked] = useState(false);
+    const [showSeries, setShowSeries] = useState(false);
+    const [series, setSeries] = useState([]);
+    const [error, setError] = useState(null);
+    const [patientsProjectMap, setPatientsProjectMap] = useState({});
+    const [studyName, setStudyName] = useState("");
+    const [sameStudyUID, setSameStudyUID] = useState(null);
+
     mode = sessionStorage.getItem("mode");
-    const lastLocation = this.props.location && this.props.location.pathname ? this.props.location.pathname : '/'
-    this.props.dispatch(setLastLocation(lastLocation));
-    this.getWorkListData(true);
-  };
-
-  componentDidUpdate = (prevProps) => {
-    if (prevProps.match.params.wid !== this.props.match.params.wid) {
-      this.getWorkListData(true);
-      this.setState({ patientsProjectMap: {} });
+    seriesCallSent = null;
+  
+    const openWLStudy = () => {
+      const { openSeries } = props;
+      const allSameStudy =  openSeries && openSeries.length > 0 
+        ? openSeries.every((el) => el.studyUID === openSeries[0].studyUID) 
+        : false;
+      if (allSameStudy) setSameStudyUID(openSeries[0].studyUID);
     }
 
-    if (prevProps.reports.length !== this.props.reports.length) {
-      this.setState({ patientsProjectMap: {} });
-    }
-  };
-
-  filterProjects = (worklists) => {
-    const filteredWorklists = [];
-    const notAuthorized = [];
-    const { projectMap } = this.props;
-    const projectsFilled = Object.keys(projectMap).length > 0;
-    worklists.forEach((el, i) => {
-      if (projectsFilled && !projectMap[el.projectID]) notAuthorized.push(el.projectID);
-      else if (projectsFilled) filteredWorklists.push(el);
-    });
-    return { notAuthorized, filteredWorklists };
-  };
-
-  getWorkListData = async (showError) => {
-    const { data: worklists } = await getStudiesOfWorklist(
-      sessionStorage.getItem("username"),
-      this.props.match.params.wid
-    );
-    const { notAuthorized, filteredWorklists } = this.filterProjects(worklists);
-    this.setState({ worklists: filteredWorklists });
-    if (showError && Array.isArray(notAuthorized) && notAuthorized.length > 0) {
-      const projectList = notAuthorized.reduce((all, item, i) => {
-        return `${all} ${item}${notAuthorized.length - 1 === i ? "" : ", "}`;
-      }, "");
-      const message = `${messages.notAuthorizedProjects} ${projectList}`;
-      toast.error(message, {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    }
-  };
-
-  handleCancel = () => {
-    this.setState({
-      hasAddClicked: false,
-      error: "",
-      deleteSingleClicked: false,
-    });
-  };
-
-  deleteStudyfromWorklist = async () => {
-    const { worklist, projectID, subjectID, studyUID } =
-      this.state.singleDeleteData;
-    const body = [{ projectID, subjectID, studyUID }];
-    deleteStudyFromWorklist(worklist, body)
-      .then(() => {
-        this.setState({ deleteSingleClicked: false, singleDeleteData: {} });
-        this.getWorkListData();
-      })
-      .catch((err) => {
-        this.setState({ errorMessage: err.response.data.message });
-      });
-  };
-
-  clearCarets = (string) => {
-    if (string) {
-      for (let i = 0; i < string.length; i++) {
-        string = string.replace("^", " ");
+    useEffect(() => {
+      getWorkListData(true);
+      openWLStudy();
+    }, [props.match.params.wid]);
+  
+    // Fetch the worklist data
+    const getWorkListData = async (showError) => {
+      const { data: wls } = await getStudiesOfWorklist(sessionStorage.getItem("username"), props.match.params.wid);
+      const { notAuthorized, filteredWorklists } = filterProjects(wls, props.projectMap);
+      setWorklists(filteredWorklists);
+  
+      if (showError && Array.isArray(notAuthorized) && notAuthorized.length > 0) {
+        const projectList = notAuthorized.reduce((all, item, i) => `${all} ${item}${notAuthorized.length - 1 === i ? "" : ", "}`, "");
+        const message = `${messages.notAuthorizedProjects} ${projectList}`;
+        toast.error(message, { position: "top-right", autoClose: 5000, hideProgressBar: false, closeOnClick: true, pauseOnHover: true, draggable: true });
       }
-      return string.trim();
-    }
-  };
+    };
+  
+    // Filter worklist projects
+    // const filterProjects = (worklists) => {
+    //   const filteredWorklists = [];
+    //   const notAuthorized = [];
+    //   const projectsFilled = Object.keys(props.projectMap).length > 0;
+    //   worklists.forEach((el) => {
+    //     if (projectsFilled && !props.projectMap[el.projectID]) notAuthorized.push(el.projectID);
+    //     else if (projectsFilled) filteredWorklists.push(el);
+    //   });
+    //   return { notAuthorized, filteredWorklists };
+    // };
+  
+    // Delete study from worklist
+    const deleteStudyfromWorklist = async () => {
+      const { worklist, projectID, subjectID, studyUID } = singleDeleteData;
+      const body = [{ projectID, subjectID, studyUID }];
+      deleteStudyFromWorklist(worklist, body)
+        .then(() => {
+          setSingleDeleteData({});
+          setDeleteSingleClicked(false);
+          getWorkListData();
+        })
+        .catch((err) => setError(err.response.data.message));
+    };
 
-  handleSingleDelete = (worklist, projectID, subjectID, studyUID) => {
-    this.setState({
-      deleteSingleClicked: true,
-      singleDeleteData: { worklist, projectID, subjectID, studyUID },
-    });
-  };
+    // Handle the cancel of delete confirmation
+    const handleCancel = () => {
+      setDeleteSingleClicked(false);
+      setError(null);
+    };
 
-  setWrapperRef = (node, id) => {
-    this.wrapperRef = node;
-  };
-
-  toggleRow = async (worklist, project, subject, study) => {
-    let newSelected = Object.assign({}, this.state.selected);
-    if (newSelected[study]) {
-      delete newSelected[study];
-      let values = Object.values(newSelected);
-      if (values.length === 0) {
-        this.setState({
-          selectAll: 0,
-        });
+    const clearCarets = (string) => {
+      if (string) {
+        for (let i = 0; i < string.length; i++) {
+          string = string.replace("^", " ");
+        }
+        return string.trim();
       }
-    } else {
-      newSelected[study] = { worklist, project, subject, study };
-      await this.setState({
-        selectAll: 2,
-      });
-    }
-    this.setState({ selected: newSelected });
-  };
+    };
 
-  toggleSelectAll() {
-    let newSelected = {};
-    if (this.state.selectAll === 0) {
-      this.state.worklists.forEach((worklist) => {
-        const { workListID, projectID, subjectID, studyUID } = worklist;
-        newSelected[worklist.studyUID] = {
-          workListID,
-          projectID,
-          subjectID,
-          studyUID,
-        };
-      });
-    }
+    const handleSingleDelete = (worklist, projectID, subjectID, studyUID) => {
+      setSingleDeleteData({ worklist, projectID, subjectID, studyUID });
+      setDeleteSingleClicked(true);
+    };
 
-    this.setState({
-      selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0,
-    });
-  }
-
-  handleOpenClick = async (study) => {
-    const { seriesData } = this.props;
-    const { projectID, subjectID, studyUID, studyDescription } = study;
-    let series;
-    const dataExists =
-      seriesData[projectID] &&
-      seriesData[projectID][subjectID] &&
-      seriesData[projectID][subjectID][studyUID] &&
-      seriesData[projectID][subjectID][studyUID].list;
-
-    try {
-      if (!dataExists) {
-        ({ data: series } = await getSeries(projectID, subjectID, studyUID));
-        this.props.dispatch(setSeriesData(projectID, subjectID, studyUID, series, true));
-      } else series = seriesData[projectID][subjectID][studyUID].list;
-      series = series.filter(isSupportedModality);
-      const maxPort = parseInt(sessionStorage.getItem("maxPort"));
-
-      const { openSeries } = this.props;
-      if (series.length + openSeries.length <= maxPort) {
-        this.setState({ selectedSeries: series }, () => this.viewSelection());
-      } else {
-        this.setState((state) => ({
-          showSeries: !state.showSeries,
-          series,
-          studyName: studyDescription,
-        }));
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  handleCancelOpenSeries = () => {
-    this.setState((state) => ({
-      showSeries: !state.showSeries,
-      series: [],
-      error: null,
-    }));
-  };
-
-  handleClickProgresButton = (
+  const handleClickProgresButton = (
     workListID,
     projectID,
     subjectID,
@@ -263,40 +150,149 @@ class WorkList extends React.Component {
           pauseOnHover: true,
           draggable: true,
         });
-        this.getWorkListData();
+        getWorkListData();
       })
       .catch((err) => console.error(err));
   };
 
-  checkPairExist = (subjectID, projectID) => {
-    return this.state.patientsProjectMap[`${subjectID}-${projectID}`]
+  const checkPairExist = (subjectID, projectID) => {
+    patientsProjectMap[`${subjectID}-${projectID}`]
       ? true
       : false;
   };
 
-  defineColumns = () => {
-    return [
+  const checkIfSerieOpen = (selectedSerie) => {
+    let isOpen = false;
+    let index;
+    props.openSeries.forEach((serie, i) => {
+      if (serie.seriesUID === selectedSerie) {
+        isOpen = true;
+        index = i;
+      }
+    });
+    return { isOpen, index };
+  };
+
+  const getExistingSeriesData = (serie) => {
+    const { projectID, patientID, studyUID } = serie;
+    const { seriesData } = props;
+    const dataExists =
+        seriesData[projectID] &&
+        seriesData[projectID][patientID] &&
+        seriesData[projectID][patientID][studyUID] &&
+        seriesData[projectID][patientID][studyUID].list;
+
+    const existingData = dataExists
+      ? seriesData[projectID][patientID][studyUID].list
+      : null;
+    return existingData;
+  }
+
+  const viewSelection = async (seriesArr) => {
+    const { seriesData } = props;
+    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
+    const notOpenSeries = [];
+    // const selectedSeries = Object.values(seriesObj);
+    const selectedSeries = seriesArr;
+    if (selectedSeries.length > 0) {
+      //check if enough room to display selection
+      for (let serie of selectedSeries) {
+        if (!checkIfSerieOpen(serie.seriesUID).isOpen) {
+          notOpenSeries.push(serie);
+        }
+      }
+      //if all ports are full
+      if (
+        notOpenSeries.length > 0 &&
+        props.openSeries.length === maxPort
+      ) {
+        props.dispatch(alertViewPortFull());
+      } else {
+        //if all series already open update active port
+        if (notOpenSeries.length === 0) {
+          let index = checkIfSerieOpen(selectedSeries[0].seriesUID).index;
+          props.dispatch(changeActivePort(index));
+          props.history.push("/display");
+          props.dispatch(clearSelection());
+        } else {
+          if (selectedSeries.length + props.openSeries.length > maxPort) {
+            // alert user about the num of open series a the moment and told only maxPort is allowed
+            const openPorts = props.openSeries.length;
+            setError(`Already ${openPorts} viewers open. You can open ${maxPort} at a time`);
+          } else {
+            //else get data for each serie for display
+            selectedSeries.forEach((serie) => {
+              const list = getExistingSeriesData(serie);
+              props.dispatch(addToGrid(serie, null, null, props.match.params.wid));
+              props.dispatch(getSingleSerie(serie, null, null, list));
+            });
+            props.history.push("/display");
+            props.dispatch(clearSelection());
+          }
+        }
+      }
+    }
+  };
+
+  const handleOpenClick = async (study) => {
+    if (mode === 'teaching') props.dispatch(clearGrid());
+    const { seriesData } = props;
+    const { projectID, subjectID, studyUID, studyDescription } = study;
+    let series;
+    const dataExists =
+      seriesData[projectID] &&
+      seriesData[projectID][subjectID] &&
+      seriesData[projectID][subjectID][studyUID] &&
+      seriesData[projectID][subjectID][studyUID].list;
+
+    try {
+      const isTeaching =  mode === 'teaching';
+      if (!dataExists && seriesCallSent !== studyUID) {
+        ({ data: series } = await getSeries(projectID, subjectID, studyUID));
+        if (series.length === 0 && isTeaching) 
+          ({ data: series } = await getSeries(projectID, subjectID, studyUID, isTeaching));
+        props.dispatch(setSeriesData(projectID, subjectID, studyUID, series, true));
+        seriesCallSent = studyUID;
+      } else series = seriesData[projectID][subjectID][studyUID].list;
+      series = series.filter(isSupportedModality);
+      const maxPort = parseInt(sessionStorage.getItem("maxPort"));
+      const { openSeries } = props;
+      const alreadyOpenViews = isTeaching ? 0 : openSeries.length;
+      if (alreadyOpenViews + series.length <= maxPort) {
+        setSeries(series);
+        viewSelection(series);
+      } else {
+        setSeries(series);
+        setShowSeries(!showSeries);
+        setStudyName(studyDescription)
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Define columns for the table
+  const columns = React.useMemo(
+    () =>
+     [
       {
         id: "open",
-        // Header: "Open",
+        accessor: "open",
+        sortable: false,
         width: 30,
         resizable: true,
-        Cell: (original) => {
+        Cell: ({ row }) => {
           return (
-            <div >
-              <Button 
+            <div>
+              <Button
                 variant="dark"
                 data-tip
-                data-for={`display-${original.index}`}
+                data-for={`display-${row.index}`}
                 style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
-                onClick={() => this.handleOpenClick(original.original)}> 
+                onClick={() => handleOpenClick(row.original)}
+              >
                 <FaRegEye className="menu-clickable" />
-                <ReactTooltip
-                  id={`display-${original.index}`}
-                  place="right"
-                  type="light"
-                  delayShow={1000}
-                >
+                <ReactTooltip id={`display-${row.index}`} place="right" type="light" delayShow={1000}>
                   <span>Display study</span>
                 </ReactTooltip>
               </Button>
@@ -306,80 +302,35 @@ class WorkList extends React.Component {
       },
       {
         width: 30,
-        Cell: (original) => {
-          const { workListID, projectID, subjectID, studyUID } =
-            original.row._original;
+        accessor: "remove",
+        sortable: false,
+        Cell: ({ row }) => {
+          const { workListID, projectID, subjectID, studyUID } = row.original;
           return (
             <div>
               <Button
                 variant="dark"
                 data-tip
-                data-for={`delete-${original.index}`}
+                data-for={`delete-${row.index}`}
                 style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
-                onClick={() => this.handleSingleDelete(workListID, projectID, subjectID, studyUID)}
+                onClick={() => handleSingleDelete(workListID, projectID, subjectID, studyUID)}
               >
                 <GrTrash />
-                <ReactTooltip
-                  id={`delete-${original.index}`}
-                  place="left"
-                  type="light"
-                  delayShow={1000}
-                >
+                <ReactTooltip id={`delete-${row.index}`} place="left" type="light" delayShow={1000}>
                   <span>Remove study from worklist</span>
                 </ReactTooltip>
               </Button>
             </div>
-          );
+          )},
         },
-      },
       {
         // Header: "%",
         width: 25,
         resizable: false,
-        // style={{ 'fontSize': '0.9rem', 'filter': 'invert(100%) sepia(0%) saturate(7472%) hue-rotate(280deg) brightness(83%) contrast(91%)' }}
-        // style={{ 'fontSize': '0.9rem', 'filter': 'invert(100%) sepia(0%) saturate(7472%) hue-rotate(280deg) brightness(83%) contrast(91%)' }}
-        Cell: (original) => {
-          const isAuto = original.row._original.progressType === "AUTO";
-          const variant = isAuto ? "light" : "info";
-          const text = isAuto ? <GrCalculator /> : <GrManual />;
-          const tooltipText = isAuto
-            ? "Progress by annotations"
-            : "Progress manually";
-          return (
-            <div>
-              <Button
-                data-tip
-                data-for={`progressType-badge${original.index}`}
-                style={{
-                  padding: "0.03rem",
-                  fontSize: "1.1rem",
-                  cursor: "default",
-                }}
-                variant={variant}
-              >
-                {text}
-              </Button>
-              <ReactTooltip
-                id={`progressType-badge${original.index}`}
-                place="right"
-                type="light"
-                delayShow={1000}
-              >
-                <span>{tooltipText}</span>
-              </ReactTooltip>
-            </div>
-          );
-        },
-      },
-      {
-        // Header: "%",
-        width: 25,
-        resizable: false,
-        sortable: true,
+        sortable: false,
         accessor: "completeness",
-        sortMethod: (a, b) => a - b,
-        Cell: (original) => {
-          const { completeness } = original.row._original;
+        Cell: ({ row }) => {
+          const { completeness } = row.original;
           let variant;
           let text;
           let tooltipText;
@@ -405,7 +356,7 @@ class WorkList extends React.Component {
             <div>
               <Button
                 data-tip
-                data-for={`progress-badge${original.index}`}
+                data-for={`progress-badge${row.original.index}`}
                 variant={variant}
                 style={{
                   padding: "0.03rem",
@@ -416,7 +367,7 @@ class WorkList extends React.Component {
                 {text}
               </Button>
               <ReactTooltip
-                id={`progress-badge${original.index}`}
+                id={`progress-badge${row.original.index}`}
                 place="right"
                 type="light"
                 delayShow={1000}
@@ -430,27 +381,29 @@ class WorkList extends React.Component {
       {
         id: "desc",
         Header: "Study Description",
+        accessor: "study_desc",
         width: 240,
         sortable: true,
         resizable: true,
-        Cell: (original) => {
-          let studyDesc = this.clearCarets(
-            original.row._original.studyDescription
+        Cell: ({ row }) => {
+          let studyDesc = clearCarets(
+            row.original.studyDescription
           );
-          studyDesc = studyDesc ? studyDesc : "Unnamed Study";
-          return <div>{studyDesc}</div>;
+          studyDesc = !studyDesc ? "Unnamed Study" : studyDesc ;
+          return (<div>{studyDesc}</div> );
         },
       },
       {
         id: "graph",
         Header: "Report",
+        accessor: "report",
         width: 55,
         sortable: false,
         resizable: false,
-        Cell: (original) => {
-          const { subjectID, projectID } = original.row._original;
-          const pairExists = this.checkPairExist(subjectID, projectID);
-          const newMap = { ...this.state.patientsProjectMap };
+        Cell: ({ row }) => {
+          const { subjectID, projectID } = row.original;
+          const pairExists = checkPairExist(subjectID, projectID);
+          const newMap = { patientsProjectMap };
           return (
             <input
               type="checkbox"
@@ -459,47 +412,66 @@ class WorkList extends React.Component {
               onChange={() => {
                 if (pairExists) delete newMap[`${subjectID}-${projectID}`];
                 else newMap[`${subjectID}-${projectID}`] = true;
-                this.setState({ patientsProjectMap: newMap });
-                this.props.getWorklistPatient(newMap);
-                this.props.dispatch(selectPatient(original.row._original));
+                setPatientsProjectMap(newMap);
+                props.getWorklistPatient(newMap);
+                props.dispatch(selectPatient(row.original));
               }}
-              id={original.id}
+              id={row.original.id}
             />
           );
         },
       },
-
       {
         id: "sb_name",
         Header: "Subject Name",
+        accessor:"subject_name", 
         width: 160,
         sortable: true,
         resizable: true,
-
-        Cell: (original) => {
-          let subjectName = this.clearCarets(
-            original.row._original.subjectName
+        Cell: ({ row }) => {
+          let subjectName = clearCarets(
+            row.original.subjectName
           );
-          subjectName = subjectName ? subjectName : "Unnamed Subject";
+          subjectName = !subjectName ? "Unnamed Subject" 
+          : props.showingPHI || mode !== 'teaching' ? subjectName : pseudo(subjectName, "Anon-");
           return <div>{subjectName}</div>;
         },
       },
+      // {
+      //   id: "pr_name",
+      //   Header: "Project Name",
+      //   width: 200,
+      //   accessor: "projectName",
+      //   sortable: true,
+      //   resizable: true,
+      //   show: mode === "thick",
+      //   Cell: (original) => {
+      //     const { projectMap } = props;
+      //     const { projectID } = original.row;
+      //     if (!projectMap[projectID]) {
+      //       return null;
+      //     } else {
+      //       let { projectName } =
+      //         props.projectMap[original.row.projectID];
+      //       return <div>{projectName}</div>;
+      //     }
+      //   },
+      // },
       {
         id: "pr_name",
         Header: "Project Name",
         width: 200,
-        accessor: "projectName",
         sortable: true,
-        resizable: true,
-        show: mode === "thick",
-        Cell: (original) => {
-          const { projectMap } = this.props;
-          const { projectID } = original.row._original;
+        accessor: "projectName", // Accessor points to your data field
+        Cell: ({ row }) => {
+          const { projectMap } = props;
+          const { projectID } = row.original;
+
+          // Custom logic to render the project name
           if (!projectMap[projectID]) {
             return null;
           } else {
-            let { projectName } =
-              this.props.projectMap[original.row._original.projectID];
+            let { projectName } = props.projectMap[row.original.projectID];
             return <div>{projectName}</div>;
           }
         },
@@ -511,6 +483,7 @@ class WorkList extends React.Component {
         sortable: true,
         resizable: true,
         accessor: "studyDate",
+        // Cell: ({ row }) => ( <div>{ props.showingPHI || mode !== 'teaching' ? row.original.studyDate : generalizeDate(row.original.studyDate)}</div>)
       },
       {
         id: "due",
@@ -527,22 +500,25 @@ class WorkList extends React.Component {
         sortable: true,
         resizable: true,
         accessor: "studyUID",
+        Cell: ({ row }) => ( <div>{props.showingPHI || mode !== 'teaching' ? row.original.studyUID : pseudo(row.original.studyUID, "UID-")}</div>)
+
       },
       {
         width: 30,
-        Cell: (original) => {
+        accessor:'done_bt',
+        sortable: false,
+        Cell: ({ row }) => {
           const { workListID, projectID, subjectID, studyUID } =
-            original.row._original;
-
+            row.original;
           return (
             <div>
               <Button
                 variant="success"
                 data-tip
-                data-for={`progress-verified-button${original.index}`}
+                data-for={`progress-verified-button${row.index}`}
                 style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
                 onClick={() =>
-                  this.handleClickProgresButton(
+                  handleClickProgresButton(
                     workListID,
                     projectID,
                     subjectID,
@@ -554,7 +530,7 @@ class WorkList extends React.Component {
                 <GrDocumentVerified />
               </Button>
               <ReactTooltip
-                id={`progress-verified-button${original.index}`}
+                id={`progress-verified-button${row.index}`}
                 place="left"
                 type="light"
                 delayShow={1000}
@@ -567,18 +543,20 @@ class WorkList extends React.Component {
       },
       {
         width: 30,
-        Cell: (original) => {
+        accessor:'progress_bt',
+        sortable: false,
+        Cell: ({ row }) => {
           const { workListID, projectID, subjectID, studyUID } =
-            original.row._original;
+          row.original;
           return (
             <div>
               <Button
                 variant="warning"
                 data-tip
-                data-for={`progress-inprogress-button${original.index}`}
+                data-for={`progress-inprogress-button${row.index}`}
                 style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
                 onClick={() =>
-                  this.handleClickProgresButton(
+                  handleClickProgresButton(
                     workListID,
                     projectID,
                     subjectID,
@@ -589,7 +567,7 @@ class WorkList extends React.Component {
               >
                 <GrDocumentPerformance />
                 <ReactTooltip
-                  id={`progress-inprogress-button${original.index}`}
+                  id={`progress-inprogress-button${row.index}`}
                   place="left"
                   type="light"
                   delayShow={1000}
@@ -603,18 +581,20 @@ class WorkList extends React.Component {
       },
       {
         width: 30,
-        Cell: (original) => {
+        accessor:'not_started_bt',
+        sortable: false,
+        Cell: ({ row }) => {
           const { workListID, projectID, subjectID, studyUID } =
-            original.row._original;
+          row.original;
           return (
             <div>
               <Button
                 variant="danger"
                 data-tip
-                data-for={`progress-notStarted-button${original.index}`}
+                data-for={`progress-notStarted-button${row.index}`}
                 style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
                 onClick={() =>
-                  this.handleClickProgresButton(
+                  handleClickProgresButton(
                     workListID,
                     projectID,
                     subjectID,
@@ -625,7 +605,7 @@ class WorkList extends React.Component {
               >
                 <GrDocumentMissing />
                 <ReactTooltip
-                  id={`progress-notStarted-button${original.index}`}
+                  id={`progress-notStarted-button${row.index}`}
                   place="left"
                   type="light"
                   delayShow={1000}
@@ -639,19 +619,21 @@ class WorkList extends React.Component {
       },
       {
         width: 30,
-        Cell: (original) => {
+        accessor:'auto_calc',
+        sortable: false,
+        Cell: ({ row }) => {
           const { workListID, projectID, subjectID, studyUID, progressType } =
-            original.row._original;
+          row.original;
           return (
             <div>
               <Button
                 disabled={progressType === "AUTO"}
                 variant={progressType === "AUTO" ? "secondary" : "info"}
                 data-tip
-                data-for={`progress-auto-button${original.index}`}
+                data-for={`progress-auto-button${row.index}`}
                 style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
                 onClick={() =>
-                  this.handleClickProgresButton(
+                  handleClickProgresButton(
                     workListID,
                     projectID,
                     subjectID,
@@ -662,7 +644,7 @@ class WorkList extends React.Component {
               >
                 <GrPowerReset />
                 <ReactTooltip
-                  id={`progress-auto-button${original.index}`}
+                  id={`progress-auto-button${row.index}`}
                   place="left"
                   type="light"
                   delayShow={1000}
@@ -674,148 +656,60 @@ class WorkList extends React.Component {
           );
         },
       },
-    ];
-  };
+    ],
+    [props.match.params.wid, props.showingPHI]
+  );
 
-  selectSeries = (series) => {
-    const { selectedSeries } = this.state;
-    selectedSeries[series.seriesUID]
-      ? delete selectedSeries[series.seriesUID]
-      : (selectedSeries[series.seriesUID] = series);
-    this.setState({ selectedSeries });
-  };
-
-  checkIfSerieOpen = (selectedSerie) => {
-    let isOpen = false;
-    let index;
-    this.props.openSeries.forEach((serie, i) => {
-      if (serie.seriesUID === selectedSerie) {
-        isOpen = true;
-        index = i;
-      }
-    });
-    return { isOpen, index };
-  };
-
-  getExistingSeriesData = (serie) => {
-    const { projectID, patientID, studyUID } = serie;
-    const { seriesData } = this.props;
-    const dataExists =
-        seriesData[projectID] &&
-        seriesData[projectID][patientID] &&
-        seriesData[projectID][patientID][studyUID] &&
-        seriesData[projectID][patientID][studyUID].list;
-
-    const existingData = dataExists
-      ? seriesData[projectID][patientID][studyUID].list
-      : null;
-    return existingData;
+  const setNewListOrder = async(list) => {
+    try {
+      setWorklists(list)
+      const body = list.map((item, i) => ({
+        projectID: item.projectID,
+        subjectID: item.subjectID,
+        studyUID: item.studyUID,
+        sortOrder: i,
+      }));
+      if (body.length > 0) await updateWorklistStudyOrder(props.match.params.wid, body)
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  viewSelection = async () => {
-    const { seriesData } = this.props;
-    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
-    const notOpenSeries = [];
-    const selectedSeries = Object.values(this.state.selectedSeries);
-    if (selectedSeries.length > 0) {
-      //check if enough room to display selection
-      for (let serie of selectedSeries) {
-        if (!this.checkIfSerieOpen(serie.seriesUID).isOpen) {
-          notOpenSeries.push(serie);
-        }
-      }
-      //if all ports are full
-      if (
-        notOpenSeries.length > 0 &&
-        this.props.openSeries.length === maxPort
-      ) {
-        this.props.dispatch(alertViewPortFull());
-      } else {
-        //if all series already open update active port
-        if (notOpenSeries.length === 0) {
-          let index = this.checkIfSerieOpen(selectedSeries[0].seriesUID).index;
-          this.props.dispatch(changeActivePort(index));
-          this.props.history.push("/display");
-          this.props.dispatch(clearSelection());
-        } else {
-          if (selectedSeries.length + this.props.openSeries.length > maxPort) {
-            // alert user about the num of open series a the moment and told only maxPort is allowed
-            const openPorts = this.props.openSeries.length;
-            this.setState({
-              error: `Already ${openPorts} viewers open. You can open ${maxPort} at a time`,
-            });
-          } else {
-            //else get data for each serie for display
-            selectedSeries.forEach((serie) => {
-              const list = this.getExistingSeriesData(serie);
-              this.props.dispatch(addToGrid(serie));
-              this.props.dispatch(getSingleSerie(serie, null, null, list));
-            });
-            // -----> Delete after v1.0 <-----
-            // for (let series of selectedSeries) {
-            //   if (!this.props.patients[series.patientID]) {
-            //     // await this.props.dispatch(getWholeData(series));
-            //     getWholeData(series);
-            //   } else {
-            //     this.props.dispatch(
-            //       updatePatient(
-            //         "serie",
-            //         true,
-            //         series.patientID,
-            //         series.studyUID,
-            //         series.seriesUID
-            //       )
-            //     );
-            //   }
-            // }
-            this.props.history.push("/display");
-            this.props.dispatch(clearSelection());
-          }
-        }
-      }
-    }
-  };
-
-  render = () => {
-    const selected = this.state.selectAll < 2;
-    const openSeriesUIDs = this.props.openSeries.map((el) => el.seriesUID);
-
-    return (
-      <div className="worklist-page">
-        <Table
-          className="__table"
-          data={this.state.worklists}
-          columns={this.defineColumns()}
-          pageSize={this.state.worklists.length}
-          showPagination={false}
-          NoDataComponent={() => null}
-        />
-        {this.state.deleteSingleClicked && (
-          <DeleteAlert
-            message={messages.deleteSingle}
-            onCancel={this.handleCancel}
-            onDelete={this.deleteStudyfromWorklist}
-            error={this.state.errorMessage}
-          />
-        )}
-        {this.state.showSeries && (
-          <SelectSeriesModal
-            seriesPassed={[this.state.series]}
-            onCancel={this.handleCancelOpenSeries}
-            studyName={this.state.studyName}
-          />
-        )}
-      </div>
-    );
-  };
-}
+  return (
+        <div className="worklist-page">
+            <DragDropTable columns={columns} data={worklists} setData={setNewListOrder} wid={props.match.params.wid} sameStudy={sameStudyUID}/>
+            {deleteSingleClicked && (
+                <DeleteAlert
+                  message={messages.deleteSingle}
+                  onCancel={handleCancel}
+                  onDelete={deleteStudyfromWorklist}
+                  error={error}
+                />
+            )}
+            {showSeries && series.length > 0 && (
+                <SelectSeriesModal
+                  seriesPassed={[series]}
+                  onCancel={() => {
+                    setShowSeries(false);
+                    seriesCallSent= null;
+                    props.setSeriesCallSent()
+                  }}
+                  studyName={studyName}
+                  worklistID={props.match.params.wid}
+                />
+            )}
+        </div>
+    )
+}  
 
 const mapStateToProps = (state) => {
-  return {
-    openSeries: state.annotationsListReducer.openSeries,
-    patients: state.annotationsListReducer.patients,
-    projectMap: state.annotationsListReducer.projectMap,
-    seriesData: state.annotationsListReducer.seriesData,
+    return {
+      openSeries: state.annotationsListReducer.openSeries,
+      patients: state.annotationsListReducer.patients,
+      projectMap: state.annotationsListReducer.projectMap,
+      seriesData: state.annotationsListReducer.seriesData,
+      showingPHI: state.annotationsListReducer.showingPHI,
+    };
   };
-};
-export default connect(mapStateToProps)(WorkList);
+  
+  export default connect(mapStateToProps)(WorkList)

@@ -27,10 +27,12 @@ import "react-table-v6/react-table.css";
 const TreeTable = treeTableHOC(ReactTable);
 let mode;
 let maxPort;
+let seriesCallSent;
 
 class FlexView extends React.Component {
   mode = sessionStorage.getItem("mode");
   maxPort = sessionStorage.getItem("maxPort");
+  seriesCallSent = null;
   state = {
     columns: [],
     order:
@@ -106,18 +108,21 @@ class FlexView extends React.Component {
     const existingData = dataExists
       ? seriesData[projectID][patientID][studyUID].list
       : null;
-
+ 
     try {
-      if (!dataExists) {
+      if (!dataExists && seriesCallSent !== studyUID) {
         this.setState({ loading: true });
         ({ data: series } = await getSeries(projectID, patientID, studyUID));
         this.setState({ loading: false });
+        seriesCallSent = studyUID;
         this.props.dispatch(
           setSeriesData(projectID, patientID, studyUID, series, true)
         );
-      } else series = seriesData[projectID][patientID][studyUID].list;
+      } else { 
+        series = seriesData[projectID]?.[patientID]?.[studyUID]?.list;
+      }
     } catch (err) {
-      console.log("Error getting series of the study", err);
+      console.log("Error => getting series of the study", err);
     }
     if (this.props.openSeries.length === this.maxPort) {
       this.setState({ showSeriesTable: true, series });
@@ -172,6 +177,7 @@ class FlexView extends React.Component {
 
   closeSeriesTable = () => {
     this.setState({ showSeriesTable: false, series: [] });
+    seriesCallSent = null;
   };
 
   componentDidMount = async () => {
@@ -286,6 +292,7 @@ class FlexView extends React.Component {
               data={data}
               order={order}
               displaySeries={this.displaySeries}
+              showingPHI={this.props.showingPHI}
             />
           )}
         </div>
@@ -307,6 +314,7 @@ const mapStateToProps = (state) => {
     lastEventId: state.annotationsListReducer.lastEventId,
     refresh: state.annotationsListReducer.refresh,
     seriesData: state.annotationsListReducer.seriesData,
+    showingPHI: state.annotationsListReducer.showingPHI,
   };
 };
 
