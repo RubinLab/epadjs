@@ -459,6 +459,16 @@ class ToolMenu extends Component {
     }
   }
 
+  closeAllActions = () => {
+    this.props.dispatch(clearGrid());
+    window.dispatchEvent(new CustomEvent("unfuse"));
+    sessionStorage.removeItem("wwwc");
+    const max = parseInt(maxPort);
+    const imgStatus = new Array(max);
+    sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+    this.props.onInvertClick(false, null, null, true);
+  }
+
   handleToolClicked = (index, tool) => {
     const notActiveTools = {
       Presets: true,
@@ -483,13 +493,7 @@ class ToolMenu extends Component {
       this.setState({ activeTool: "", activeToolIdx: index });
       return;
     } else if (tool === "ClearGrid") {
-      this.props.dispatch(clearGrid());
-      window.dispatchEvent(new CustomEvent("unfuse"));
-      sessionStorage.removeItem("wwwc");
-      const max = parseInt(maxPort);
-      const imgStatus = new Array(max);
-      sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
-      this.props.onInvertClick(false, null, null, true);
+      this.closeAllActions();
       this.props.history.push(this.props.lastLocation);
       // if (mode === "thick") this.props.onSwitchView("list");
       // else this.props.onSwitchView("search");
@@ -575,6 +579,7 @@ class ToolMenu extends Component {
       return;
     } else if (tool === 'next') {
       this.props.openNextWLStudy(worklistID, studyUID);
+      this.closeAllActions();
     }
     // else if (tool === "FreehandRoiTool") {
     //   this.selectFreehand();

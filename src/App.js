@@ -910,7 +910,7 @@ class App extends Component {
         this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series, true));
         this.setState({ teachingLoading: false });
         return series;
-      } else return seriesData[projectID][patientID][studyUID].list;
+      } else return seriesData[projectID]?.[patientID]?.[studyUID]?.list;
     } catch (err) {
       console.error(err);
       this.props.dispatch(annotationsLoadingError(err));
@@ -1658,6 +1658,10 @@ class App extends Component {
                     {...props}
                     getWorklistPatient={this.getWorklistPatient}
                     reports={this.state.reportsCompArr}
+                    setSeriesCallSent={() => {
+                      this.seriesCallSent = null
+                    }
+                    }
                   />
                 )}
               />
@@ -1724,7 +1728,10 @@ class App extends Component {
         {this.state.showSeries && this.state.openSeriesData.series.length > 0 && (
           <SelectSeriesModal
             seriesPassed={[this.state.openSeriesData.series]}
-            onCancel={() => this.setState({ showSeries: false })}
+            onCancel={() => {
+              this.setState({ showSeries: false });
+              this.seriesCallSent = null;
+            }}
             studyName={this.state.openSeriesData.studyName}
             worklistID={this.state.openSeriesData.worklistID}
           />
