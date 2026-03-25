@@ -3,8 +3,6 @@ import axios from "axios";
 import auth from "./authService";
 
 // axios.defaults.withCredentials = false;
-axios.defaults.headers.common["Content-Type"] =
-  "application/json, multipart/form-data";
 
 axios.interceptors.request.use(
   async (config) => {
@@ -12,7 +10,7 @@ axios.interceptors.request.use(
     const apikey = sessionStorage.getItem("API_KEY");
     const user = sessionStorage.getItem("username");
     if (apikey && user) {
-      config.params = {};
+      config.params = { ...config.params };
       config.params["user"] = user;
     }
     const header = await auth.getAuthHeader();
@@ -60,10 +58,10 @@ function mode() {
 }
 
 export default {
-  get: axios.get,
-  post: axios.post,
-  put: axios.put,
-  delete: axios.delete,
+  get: axios.get.bind(axios),
+  post: axios.post.bind(axios),
+  put: axios.put.bind(axios),
+  delete: axios.delete.bind(axios),
   apiUrl,
   wadoUrl,
   mode,
