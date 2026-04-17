@@ -8,13 +8,11 @@ import { getAnnotations } from '../../services/annotationServices';
 import { formatDate } from '../flexView/helperMethods';
 import SelectSerieModal from '../annotationsList/selectSerieModal';
 import {
-  getSingleSerie,
   clearSelection,
   selectAnnotation,
   changeActivePort,
-  addToGrid,
-  jumpToAim
 } from '../annotationsList/action';
+import { openSeriesInDisplay } from '../common/openSeriesHelper';
 
 function Table({ columns, data }) {
   const {
@@ -97,51 +95,16 @@ function Annotations(props) {
   };
 
   const displayAnnotations = async (selected) => {
-    const { projectID, studyUID, seriesUID, aimID } = selected;
+    const { aimID } = selected;
     setSelected(selected);
-    const patientID = selected.subjectID;
-    const { openSeries } = props;
-    const maxPort = parseInt(sessionStorage.getItem('maxPort'));
-    // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
-    //check if there is enough space in the grid
-    let isGridFull = openSeries.length === maxPort;
-    //check if the serie is already open
-    if (checkIfSerieOpen(seriesUID).isOpen) {
-      const { index } = checkIfSerieOpen(seriesUID);
-      props.dispatch(changeActivePort(index));
-      props.dispatch(jumpToAim(seriesUID, aimID, index));
-      props.dispatch(clearSelection());
-      props.history.push('/display');
-    } else {
-      if (isGridFull) {
-        setShowSelectSerie(true);
-      } else {
-        props.dispatch(addToGrid(selected, aimID));
-        props
-          .dispatch(getSingleSerie(selected, aimID))
-          .then(() => { })
-          .catch(err => console.error(err));
-        //if grid is NOT full check if patient data exists
-        // -----> Delete after v1.0 <-----
-        // if (!props.patients[patientID]) {
-        //   // props.dispatch(getWholeData(null, null, selected));
-        //   getWholeData(null, null, selected);
-        // } else {
-        //   props.dispatch(
-        //     updatePatient(
-        //       'annotation',
-        //       true,
-        //       patientID,
-        //       studyUID,
-        //       seriesUID,
-        //       aimID
-        //     )
-        //   );
-        // }
-        props.dispatch(clearSelection());
-        props.history.push('/display');
-      }
-    }
+    openSeriesInDisplay({
+      dispatch: props.dispatch,
+      navigate: () => props.history.push('/display'),
+      openSeries: props.openSeries,
+      series: selected,
+      aimID,
+      onGridFull: () => setShowSelectSerie(true),
+    });
   };
 
   const selectRow = (e, data) => {

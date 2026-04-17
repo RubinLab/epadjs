@@ -14,12 +14,11 @@ import SelectSerieModal from "../annotationsList/selectSerieModal";
 import SeriesTable from "./SeriesTable";
 import { isSupportedModality } from "../../Utils/aid.js";
 import {
-  addToGrid,
-  getSingleSerie,
   clearSelection,
   setSeriesData,
   setLastLocation
 } from "../annotationsList/action";
+import { openSeriesInDisplay } from "../common/openSeriesHelper";
 import "react-table-v6/react-table.css";
 // import "../annotationSearch/annotationSearch.css";
 // import "./flexView.css";
@@ -124,38 +123,20 @@ class FlexView extends React.Component {
     } catch (err) {
       console.log("Error => getting series of the study", err);
     }
-    if (this.props.openSeries.length === this.maxPort) {
-      this.setState({ showSeriesTable: true, series });
-      return;
-    }
-    //get only unopen series
-    if (series.length > 0) series = this.excludeOpenSeries(series);
-    // filter series that have displayable modality
     series = series.filter(isSupportedModality);
     if (series.length === 0) {
       this.setState({ showWarning: true });
-    } else {
-      //check if there is enough room
-      if (series.length + this.props.openSeries.length > this.maxPort) {
-        //if there is not bring the modal
-        this.setState({ showSeriesTable: true, series });
-        // TODO show toast
-      } else {
-        //if there is enough room
-        //add serie to the grid
-        const promiseArr = [];
-        for (let i = 0; i < series.length; i++) {
-          this.props.dispatch(addToGrid(series[i]));
-          promiseArr.push(this.props.dispatch(getSingleSerie(series[i], null, null, existingData)));
-        }
-        //getsingleSerie
-        Promise.all(promiseArr)
-          .then(() => {
-            this.props.history.push("/display");
-          })
-          .catch((err) => console.error(err));
-      }
+      return;
     }
+
+    openSeriesInDisplay({
+      dispatch: this.props.dispatch,
+      navigate: () => this.props.history.push("/display"),
+      openSeries: this.props.openSeries,
+      series,
+      existingData,
+      onGridFull: pending => this.setState({ showSeriesTable: true, series: pending }),
+    });
   };
 
   excludeOpenSeries = (allSeriesArr) => {

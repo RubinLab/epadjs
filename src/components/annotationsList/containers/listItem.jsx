@@ -7,13 +7,13 @@ import {
   toggleAllAnnotations,
   changeActivePort,
   showAnnotationWindow,
-  getSingleSerie,
   alertViewPortFull,
   addToGrid,
   updatePatient,
   jumpToAim,
   showAnnotationDock
 } from "../action";
+import { openSeriesInDisplay } from "../../common/openSeriesHelper";
 
 const maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
@@ -62,134 +62,56 @@ class ListItem extends React.Component {
   };
 
   openSerie = async e => {
-    const { patientID, studyUID, seriesUID } = this.props.serie;
-    const openSeries = Object.values(this.props.openSeries);
-    let serieCheck = this.checkIfSerieOpen(this.props.serie);
-    //check if there is enough space in the grid
-    let isGridFull = openSeries.length === maxPort;
-    //check if the serie is already open
-    if (serieCheck.isOpen) {
-      this.props.dispatch(changeActivePort(serieCheck.index));
-    }
-    if (!serieCheck.isOpen) {
-      if (isGridFull) {
-        this.props.dispatch(alertViewPortFull());
-      } else {
-        this.props.dispatch(addToGrid(this.props.serie));
-        this.props
-          .dispatch(getSingleSerie(this.props.serie))
-          .then(() => {})
-          .catch(err => console.log(err));
-        // -----> Delete after v1.0 <-----
-        // this.props.dispatch(
-        //   updatePatient("serie", true, patientID, studyUID, seriesUID)
-        // );
-      }
-    }
+    openSeriesInDisplay({
+      dispatch: this.props.dispatch,
+      navigate: () => {},  // already in display view
+      openSeries: Object.values(this.props.openSeries),
+      series: this.props.serie,
+    });
   };
 
   handleAnnotationClick = async e => {
     const { seriesUID, studyUID, patientID } = this.props.serie;
     const { seriesid, aimid } = e.target.dataset;
-    const activeSeriesUID = this.props.openSeries[this.props.activePort]
-      .seriesUID;
+    const activeSeriesUID = this.props.openSeries[this.props.activePort].seriesUID;
+
     if (activeSeriesUID === seriesid) {
-      // this.checkIfSerieOpen(seriesid).index;
       this.props.dispatch(jumpToAim(seriesid, aimid, this.props.activePort));
     } else {
-      //if doesn't match check if the serie exists in the open series
-      const isOpen = this.checkIfSerieOpen(seriesid).isOpen;
-      const index = this.checkIfSerieOpen(seriesid).index;
-      if (isOpen) {
-        // if it exists in the openSeries update activeport
-        this.props.dispatch(changeActivePort(index));
-        //update the status of the clicked annotation
-        this.props.dispatch(jumpToAim(seriesid, aimid, index));
-      } else {
-        //else get single serie dispatch action
-        if (this.props.openSeries.length === maxPort) {
-          this.props.dispatch(alertViewPortFull());
-        } else {
-          // let { patientID, studyUID, seriesUID, projectID } = serie;
-          this.props.dispatch(addToGrid(this.props.serie, aimid));
-          this.props
-            .dispatch(getSingleSerie(this.props.serie, aimid))
-            .then(() => {
-              // this.props.dispatch(showAnnotationDock());
-
-              this.props.dispatch(
-                updateAnnotationDisplay(
-                  patientID,
-                  studyUID,
-                  seriesUID,
-                  aimid,
-                  true
-                )
-              );
-            })
-            .catch(err => console.log(err));
-        }
-      }
+      openSeriesInDisplay({
+        dispatch: this.props.dispatch,
+        navigate: () => {},  // already in display view
+        openSeries: this.props.openSeries,
+        series: this.props.serie,
+        aimID: aimid,
+      })?.then(() => {
+        this.props.dispatch(
+          updateAnnotationDisplay(patientID, studyUID, seriesUID, aimid, true)
+        );
+      });
     }
     this.props.dispatch(showAnnotationWindow());
   };
 
   handleToggleSerie = async (checked, e, id) => {
-    //select de select all anotations
-    const { patientID, studyUID, seriesUID } = this.props.serie;
-    // const { seriesid } = e.target.dataset;
-    // const activeSeriesUID = this.props.openSeries[this.props.activePort]
-    //   .seriesUID;
-    //check if user toggle on or off and change the state accordingly
+    const { seriesUID } = this.props.serie;
     await this.setState({ displayAnnotations: checked });
-    // if checked true
-    const isOpen = this.checkIfSerieOpen(seriesUID).isOpen;
-    const index = this.checkIfSerieOpen(seriesUID).index;
+    const { isOpen, index } = this.checkIfSerieOpen(seriesUID);
     if (checked) {
-      //check if the serie is already open
-      //if open
       if (isOpen) {
-        //update the active port
         this.props.dispatch(changeActivePort(index));
-        // change the annotations as displayed in patient and aimlist
-        // -----> Delete after v1.0 <-----
-        // this.props.dispatch(
-        //   updatePatient("serie", checked, patientID, studyUID, seriesUID)
-        // );
         this.props.dispatch(toggleAllAnnotations(seriesUID, checked));
-        //else - if not open
       } else {
-        //check if the grid is full
-        if (this.props.openSeries.length === maxPort) {
-          //if full bring modal
-          this.props.dispatch(alertViewPortFull());
-          //else - not full
-        } else {
-          //addtogrid
-          this.props.dispatch(addToGrid(this.props.serie));
-          //getsingleserie
-          this.props
-            .dispatch(getSingleSerie(this.props.serie))
-            .then(() => {})
-            .catch(err => console.log(err));
-          //update patient?? with serie
-          // -----> Delete after v1.0 <-----
-          // this.props.dispatch(
-          //   updatePatient("serie", checked, patientID, studyUID, seriesUID)
-          // );
-        }
+        openSeriesInDisplay({
+          dispatch: this.props.dispatch,
+          navigate: () => {},  // already in display view
+          openSeries: this.props.openSeries,
+          series: this.props.serie,
+        });
       }
-      // if checked false
     } else {
-      //update patients and aimlist just annotations to be false
-      // -----> Delete after v1.0 <-----
-      // this.props.dispatch(
-      //   updatePatient("serie", checked, patientID, studyUID, seriesUID)
-      // );
       this.props.dispatch(toggleAllAnnotations(seriesUID, checked));
-      if (isOpen) {
-        this.props.dispatch(changeActivePort(index));
-      }
+      if (isOpen) this.props.dispatch(changeActivePort(index));
     }
   };
 

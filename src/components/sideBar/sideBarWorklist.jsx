@@ -24,7 +24,8 @@ import { getSeries } from "../../services/seriesServices";
 // Component imports
 import DeleteAlert from "../management/common/alertDeletionModal";
 import SelectSeriesModal from "../annotationsList/selectSerieModal";
-import { addToGrid, getSingleSerie, alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData, clearGrid } from "../annotationsList/action";
+import { alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData, clearGrid } from "../annotationsList/action";
+import { openSeriesInDisplay } from "../common/openSeriesHelper";
 import { isSupportedModality, filterProjects, pseudo, generalizeDate } from "../../Utils/aid.js";
 // CSS import
 import "./style.css";
@@ -189,49 +190,21 @@ let seriesCallSent;
   }
 
   const viewSelection = async (seriesArr) => {
-    const { seriesData } = props;
+    if (!seriesArr.length) return;
     const maxPort = parseInt(sessionStorage.getItem("maxPort"));
-    const notOpenSeries = [];
-    // const selectedSeries = Object.values(seriesObj);
-    const selectedSeries = seriesArr;
-    if (selectedSeries.length > 0) {
-      //check if enough room to display selection
-      for (let serie of selectedSeries) {
-        if (!checkIfSerieOpen(serie.seriesUID).isOpen) {
-          notOpenSeries.push(serie);
-        }
-      }
-      //if all ports are full
-      if (
-        notOpenSeries.length > 0 &&
-        props.openSeries.length === maxPort
-      ) {
-        props.dispatch(alertViewPortFull());
-      } else {
-        //if all series already open update active port
-        if (notOpenSeries.length === 0) {
-          let index = checkIfSerieOpen(selectedSeries[0].seriesUID).index;
-          props.dispatch(changeActivePort(index));
-          props.history.push("/display");
-          props.dispatch(clearSelection());
-        } else {
-          if (selectedSeries.length + props.openSeries.length > maxPort) {
-            // alert user about the num of open series a the moment and told only maxPort is allowed
-            const openPorts = props.openSeries.length;
-            setError(`Already ${openPorts} viewers open. You can open ${maxPort} at a time`);
-          } else {
-            //else get data for each serie for display
-            selectedSeries.forEach((serie) => {
-              const list = getExistingSeriesData(serie);
-              props.dispatch(addToGrid(serie, null, null, props.match.params.wid));
-              props.dispatch(getSingleSerie(serie, null, null, list));
-            });
-            props.history.push("/display");
-            props.dispatch(clearSelection());
-          }
-        }
-      }
-    }
+
+    openSeriesInDisplay({
+      dispatch: props.dispatch,
+      navigate: () => props.history.push("/display"),
+      openSeries: props.openSeries,
+      series: seriesArr,
+      worklistID: props.match.params.wid,
+      existingData: serie => getExistingSeriesData(serie),
+      onGridFull: pending => {
+        const openPorts = props.openSeries.length;
+        setError(`Already ${openPorts} viewers open. You can open ${maxPort} at a time`);
+      },
+    });
   };
 
   const handleOpenClick = async (study) => {

@@ -9,11 +9,10 @@ import Button from "react-bootstrap/Button";
 import {
   clearGrid,
   getWholeData,
-  getSingleSerie,
   clearSelection,
-  addToGrid,
   setSeriesData,
 } from "./action";
+import { openSeriesInDisplay } from "../common/openSeriesHelper";
 import SelectionItem from "./containers/selectionItem";
 import { FaRegCheckSquare } from "react-icons/fa";
 import { getSeries, setSignificantSeries } from "../../services/seriesServices";
@@ -217,28 +216,29 @@ class selectSerieModal extends React.Component {
   displaySelection = async (aimID) => {
     let studies = Object.values(this.props.seriesPassed);
     let series = [];
-    // TODO: what is the logic here?
-    studies.forEach((arr) => {
-      series = series.concat(arr);
-    });
+    studies.forEach((arr) => { series = series.concat(arr); });
     const seriesArr = await this.saveSignificantSeries(series);
-    //concatanete all arrays to getther
-    // for (let key of Object.keys(selectedToDisplay)) {
-    for (let el of seriesArr) {  
-      let serie = this.findSerieFromSeries(el.seriesUID, series);
-      const existingData = this.getExistingSeriesData(serie);
-      if (aimID) this.props.dispatch(addToGrid(serie, aimID));
-      else this.props.dispatch(addToGrid(serie, serie.aimID, null, this.props.worklistID ));
-      if (this.state.selectionType === "aim") {
-        this.props.dispatch(getSingleSerie(serie, serie.aimID, this.wadoUrl, existingData));
-      } else {
-        if (aimID)
-          this.props.dispatch(getSingleSerie(serie, aimID, this.wadoUrl, existingData));
-        else this.props.dispatch(getSingleSerie(serie, null, this.wadoUrl, existingData));
-      }
-    }
-    this.props.history.push("/display");
-    this.handleCancel(true);
+
+    // Resolve each series and embed the effective aimID so the helper can use it.
+    const resolvedSeries = seriesArr.map(el => {
+      const serie = this.findSerieFromSeries(el.seriesUID, series);
+      return {
+        ...serie,
+        aimID: this.state.selectionType === "aim" ? serie.aimID : (aimID || null),
+      };
+    });
+
+    openSeriesInDisplay({
+      dispatch: this.props.dispatch,
+      navigate: () => {
+        this.props.history.push("/display");
+        this.handleCancel(true);
+      },
+      openSeries: this.props.openSeries,
+      series: resolvedSeries,
+      worklistID: this.props.worklistID,
+      existingData: serie => this.getExistingSeriesData(serie),
+    });
   };
 
   groupUnderPatient = (objArr) => {

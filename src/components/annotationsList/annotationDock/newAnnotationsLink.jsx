@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import {
-  getSingleSerie,
   clearSelection,
   changeActivePort,
   addToGrid,
   jumpToAim,
 } from "../action";
+import { openSeriesInDisplay } from "../../common/openSeriesHelper";
 import "../annotationsList.css";
 import cornerstone from "cornerstone-core";
 
@@ -90,40 +90,33 @@ const annotationsLink = (props) => {
   }
 
   const displayAnnotations = (e, selected) => {
-    const { openSeriesAddition, activePort } = props;
-    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
-
-    let isGridFull = openSeries.length === maxPort;
     const { isOpen, index } = checkIfSerieOpen(selected.seriesUID, selected.imgIDs);
 
     if (isOpen) {
+      // Fusion-aware jump: skip jump when the active layer is the fused CT companion.
       const imageUID = Object.keys(selected.imgIDs);
       const imgIDArr = imageUID[0].split("/frames/");
       props.dispatch(changeActivePort(index));
-      // if ct do not jump to aim
-      const {seriesUID} = getFusedSerieInfoAndAnnotations({...props, activePort: index});
+      const { seriesUID } = getFusedSerieInfoAndAnnotations({ ...props, activePort: index });
       const notFusionCT = seriesUID === props.openSeries[index].seriesUID;
       if (notFusionCT) {
-        // No need to change
         props.dispatch(jumpToAim(selected.seriesUID, selected.aimID, index));
-        // change the arguments to handle the multiframe
         handleJumpToAim(selected.aimID, index, imgIDArr[0], imgIDArr[1]);
       } else {
         console.log('Cannot jump on a fused image that is not the active layer');
       }
       props.dispatch(clearSelection());
     } else {
-      if (isGridFull) {
-        props.dispatch(addToGrid(selected, selected.aimID, props.activePort));
-      } else {
-        props.dispatch(addToGrid(selected, selected.aimID));
-      }
-      const list = getExistingSeriesData(selected);
-      props
-        .dispatch(getSingleSerie(selected, selected.aimID, null, list))
-        .then(() => {})
-        .catch((err) => console.error(err));
-      props.dispatch(clearSelection());
+      openSeriesInDisplay({
+        dispatch: props.dispatch,
+        navigate: () => {},  // already in display view
+        openSeries: props.openSeries,
+        series: selected,
+        aimID: selected.aimID,
+        existingData: getExistingSeriesData(selected),
+        // When grid is full, replace the active viewport instead of blocking.
+        onGridFull: () => props.dispatch(addToGrid(selected, selected.aimID, props.activePort)),
+      });
     }
   };
 

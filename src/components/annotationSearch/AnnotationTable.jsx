@@ -13,8 +13,6 @@ import { clearCarets, convertDateFormat } from "../../Utils/aid.js";
 import {
   changeActivePort,
   jumpToAim,
-  addToGrid,
-  getSingleSerie,
   startLoading,
   loadCompleted,
   annotationsLoadingError,
@@ -22,6 +20,7 @@ import {
   setSeriesData,
   storeAimSelection
 } from "../annotationsList/action";
+import { openSeriesInDisplay } from "../common/openSeriesHelper";
 import { formatDate } from "../flexView/helperMethods";
 import { getSeries, getSignificantSeries } from "../../services/seriesServices";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
@@ -559,34 +558,17 @@ function AnnotationTable(props) {
     }
 
     setSelected(seriesArr);
-    if (props.openSeries.length === maxPort) {
-      setShowSelectSeriesModal(true);
-      return;
-    }
-      //get extraction of the series (extract unopen series)
-    if (seriesArr && seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
-
-      // filter the series according to displayable modalities
     seriesArr = Array.isArray(seriesArr) ? seriesArr.filter(isSupportedModality) : [];
 
-      //check if there is enough room
-    if (seriesArr.length + props.openSeries.length > maxPort) {
-        //if there is not bring the modal
-      setShowSelectSeriesModal(true);
-        // TODO show toast
-    } else {
-        //if there is enough room
-        //add serie to the grid
-      const promiseArr = [];
-
-      existingData = getExistingData(selected);
-      for (let i = 0; i < seriesArr.length; i++) {
-        props.dispatch(addToGrid(seriesArr[i], aimID));
-        promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i], aimID, null, existingData)));
-      }
-        //getsingleSerie
-      Promise.all(promiseArr).then(() => { props.switchToDisplay(); }).catch((err) => console.error(err));
-    }
+    openSeriesInDisplay({
+      dispatch: props.dispatch,
+      navigate: props.switchToDisplay,
+      openSeries: props.openSeries,
+      series: seriesArr,
+      aimID,
+      existingData: getExistingData(selected),
+      onGridFull: () => setShowSelectSeriesModal(true),
+    });
   };
  
 
