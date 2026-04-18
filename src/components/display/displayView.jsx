@@ -3008,6 +3008,18 @@ class DisplayView extends Component {
     });
   };
 
+  /**
+   * Expands the active viewport (single-viewport view).
+   * When Feature 3 (dual-viewport dot selection) is implemented, this will
+   * also handle the two-selected-viewports case.
+   */
+  handleMammoExpand = () => {
+    const { activePort } = this.props;
+    // Feature 3: check for selected viewports via selection dot (TBD).
+    // For now, maximise the active viewport by updating the port layout.
+    this.props.dispatch({ type: 'EXPAND_VIEWPORT', payload: activePort });
+  };
+
   // --- End mammogram pagination ---
 
   openNextWLStudy = async (worklistID, studyUID) => {
@@ -3091,14 +3103,33 @@ class DisplayView extends Component {
             openNextWLStudy={this.openNextWLStudy}
           />
           {this.isMammogramOpen() && (
-            <button
-              className="btn btn-secondary mammo-next-btn"
-              onClick={this.handleMammoNext}
-              disabled={!this.hasNextMammoPage()}
-              title="Load next series group"
-            >
-              NEXT
-            </button>
+            <div className="mammo-toolbar-group">
+              <button
+                className="mammo-toolbar-btn"
+                onClick={this.handleMammoNext}
+                disabled={!this.hasNextMammoPage()}
+                title="Load next series group"
+              >
+                <div className="toolContainer" />
+                <div className="buttonLabel">NEXT</div>
+              </button>
+              <button
+                className="mammo-toolbar-btn"
+                onClick={this.handleMammoExpand}
+                title="Expand viewport(s)"
+              >
+                <div className="toolContainer" />
+                <div className="buttonLabel">EXPAND</div>
+              </button>
+              <button
+                className="mammo-toolbar-btn mammo-toolbar-btn--disabled"
+                disabled
+                title="Save worklist (coming soon)"
+              >
+                <div className="toolContainer" />
+                <div className="buttonLabel">SAVE WL</div>
+              </button>
+            </div>
           )}
           {this.state.isLoading && (
             <div style={{ marginTop: "30%", marginLeft: "50%" }}>
