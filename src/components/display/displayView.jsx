@@ -28,19 +28,21 @@ import {
   aimDelete,
   changeActivePort,
   clearAimId,
+  clearGrid,
   clearMultiFrameAimJumpFlags,
   clearSelection,
   closeSerie,
   getSingleSerie,
   jumpToAim,
   setSegLabelMapIndex,
-  setSeriesData
+  setSeriesData,
+  setMammogramPage,
   // fillSeriesDescfullData
-  ,
   updateGridWithMultiFrameInfo,
   updateImageId,
   updateSubpath
 } from "../annotationsList/action";
+import { openSeriesInDisplay } from "../common/openSeriesHelper";
 import { arrow } from "./Arrow";
 import { bidirectional } from "./Bidirectional";
 import { circle } from "./Circle";
@@ -162,6 +164,8 @@ const mapStateToProps = (state) => {
     lastLocation: state.annotationsListReducer.lastLocation,
     projectMap: state.annotationsListReducer.projectMap,
     showingPHI: state.annotationsListReducer.showingPHI,
+    mammogramSeries: state.annotationsListReducer.mammogramSeries,
+    mammogramPageIndex: state.annotationsListReducer.mammogramPageIndex,
   };
 };
 
@@ -2965,6 +2969,47 @@ class DisplayView extends Component {
     }
   };
 
+  // --- Mammogram pagination ---
+
+  /** True when the currently open series are all mammograms and there is stored page data. */
+  isMammogramOpen = () => {
+    const { series, mammogramSeries } = this.props;
+    return (
+      mammogramSeries &&
+      mammogramSeries.length > 0 &&
+      series &&
+      series.some(s => s && s.examType === 'MG')
+    );
+  };
+
+  /** True when there is at least one more page of mammogram series to load. */
+  hasNextMammoPage = () => {
+    const { mammogramSeries, mammogramPageIndex } = this.props;
+    return (mammogramPageIndex + 1) * parseInt(maxPort) < mammogramSeries.length;
+  };
+
+  /** Clears the grid and loads the next group of MAMMO_PAGE_SIZE series. */
+  handleMammoNext = () => {
+    const { mammogramSeries, mammogramPageIndex } = this.props;
+    const nextPage = mammogramPageIndex + 1;
+    const pageSize = parseInt(maxPort);
+    const start = nextPage * pageSize;
+    const nextSeries = mammogramSeries.slice(start, start + pageSize);
+    if (!nextSeries.length) return;
+
+    this.props.dispatch(clearGrid());
+    this.props.dispatch(setMammogramPage(nextPage));
+    openSeriesInDisplay({
+      dispatch: this.props.dispatch,
+      navigate: () => {},  // already in display view
+      openSeries: [],      // grid was just cleared
+      series: nextSeries,
+      existingData: mammogramSeries,
+    });
+  };
+
+  // --- End mammogram pagination ---
+
   openNextWLStudy = async (worklistID, studyUID) => {
     try {
       const sortedData = JSON.parse(sessionStorage.getItem("sortedListMap")) || {};
@@ -3045,6 +3090,16 @@ class DisplayView extends Component {
             onOpenSeries={this.props.openSeries}
             openNextWLStudy={this.openNextWLStudy}
           />
+          {this.isMammogramOpen() && (
+            <button
+              className="btn btn-secondary mammo-next-btn"
+              onClick={this.handleMammoNext}
+              disabled={!this.hasNextMammoPage()}
+              title="Load next series group"
+            >
+              NEXT
+            </button>
+          )}
           {this.state.isLoading && (
             <div style={{ marginTop: "30%", marginLeft: "50%" }}>
               <PropagateLoader

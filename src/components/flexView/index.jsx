@@ -16,9 +16,10 @@ import { isSupportedModality } from "../../Utils/aid.js";
 import {
   clearSelection,
   setSeriesData,
-  setLastLocation
+  setLastLocation,
+  setMammogramSeries,
 } from "../annotationsList/action";
-import { openSeriesInDisplay } from "../common/openSeriesHelper";
+import { openSeriesInDisplay, isMammogramStudy } from "../common/openSeriesHelper";
 import "react-table-v6/react-table.css";
 // import "../annotationSearch/annotationSearch.css";
 // import "./flexView.css";
@@ -126,6 +127,19 @@ class FlexView extends React.Component {
     series = series.filter(isSupportedModality);
     if (series.length === 0) {
       this.setState({ showWarning: true });
+      return;
+    }
+
+    // Mammogram studies load only the first page; remaining series paginate via NEXT.
+    if (isMammogramStudy(series)) {
+      this.props.dispatch(setMammogramSeries(series, studyUID));
+      openSeriesInDisplay({
+        dispatch: this.props.dispatch,
+        navigate: () => this.props.history.push("/display"),
+        openSeries: this.props.openSeries,
+        series: series.slice(0, parseInt(maxPort)),
+        existingData: series,
+      });
       return;
     }
 

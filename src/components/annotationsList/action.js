@@ -56,6 +56,9 @@ import {
   TOGGLE_ALL_CALCULATIONS,
   SET_LAST_LOCATION,
   SHOW_PHI,
+  SET_MAMMOGRAM_SERIES,
+  SET_MAMMOGRAM_PAGE,
+  CLEAR_MAMMOGRAM_SERIES,
   colors,
   commonLabels,
 } from "./types";
@@ -1201,6 +1204,20 @@ export const segUploadRemove = (segUid) => {
 export const aimDelete = (aimRefs) => {
   return { type: AIM_DELETE, payload: aimRefs };
 };
+
+export const setMammogramSeries = (allSeries, studyUID) => ({
+  type: SET_MAMMOGRAM_SERIES,
+  payload: { allSeries, studyUID },
+});
+
+export const setMammogramPage = (pageIndex) => ({
+  type: SET_MAMMOGRAM_PAGE,
+  payload: pageIndex,
+});
+
+export const clearMammogramSeries = () => ({
+  type: CLEAR_MAMMOGRAM_SERIES,
+});
 
 
 export const otherAimsUpdated = (seriesList, aimRefs) => {

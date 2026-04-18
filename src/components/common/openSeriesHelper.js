@@ -8,6 +8,16 @@ import {
 } from '../annotationsList/action';
 
 /**
+ * Returns true when the app is in lite mode AND every series in the filtered
+ * array is a mammogram (MG). Pass only the isSupportedModality-filtered list.
+ */
+export const isMammogramStudy = (seriesArray) => {
+  if (sessionStorage.getItem('mode') !== 'lite') return false;
+  if (!Array.isArray(seriesArray) || seriesArray.length === 0) return false;
+  return seriesArray.every(s => s.examType === 'MG');
+};
+
+/**
  * Finds a series by UID in the open series list.
  * @returns {{ isOpen: boolean, index: number }}
  */

@@ -22,8 +22,9 @@ import {
   selectSerie,
   selectAnnotation,
   setSeriesData,
+  setMammogramSeries,
 } from "../annotationsList/action";
-import { openSeriesInDisplay } from "../common/openSeriesHelper";
+import { openSeriesInDisplay, isMammogramStudy } from "../common/openSeriesHelper";
 
 function Table({
   columns,
@@ -217,6 +218,19 @@ function Studies(props) {
   const displaySeries = async (selected) => {
     let seriesArr = await getSeriesData(selected);
     seriesArr = seriesArr.filter(isSupportedModality);
+
+    // Mammogram studies load only the first page; remaining series paginate via NEXT.
+    if (isMammogramStudy(seriesArr)) {
+      props.dispatch(setMammogramSeries(seriesArr, selected.studyUID));
+      openSeriesInDisplay({
+        dispatch: props.dispatch,
+        navigate: () => props.history.push("/display"),
+        openSeries: props.openSeries,
+        series: seriesArr.slice(0, parseInt(sessionStorage.getItem('maxPort'))),
+        existingData: seriesArr,
+      });
+      return;
+    }
 
     openSeriesInDisplay({
       dispatch: props.dispatch,
