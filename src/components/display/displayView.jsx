@@ -6,7 +6,7 @@ import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import * as dcmjs from "dcmjs";
 import _ from "lodash";
 import CornerstoneViewport from "react-cornerstone-viewport";
-import { FaExpandArrowsAlt, FaPen, FaTag, FaTimes } from "react-icons/fa";
+import { FaExpandArrowsAlt, FaPen, FaTag, FaTimes, FaRegSquare, FaCheckSquare } from "react-icons/fa";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
@@ -208,6 +208,8 @@ class DisplayView extends Component {
       dataIndexMap: {},
       aimEdited: false,
       isVisible: true,
+      selectedPorts: new Set(),
+      mammoExpanded: false,
     };
   }
 
@@ -339,6 +341,12 @@ class DisplayView extends Component {
     if (this.props.series.length < 1) {
       this.props.history.push(this.props.lastLocation);
       return;
+    }
+
+    // Clear mammogram dot selections when a new study replaces the current one.
+    if (prevProps.mammogramSeries !== this.props.mammogramSeries &&
+        (this.state.selectedPorts.size > 0 || this.state.mammoExpanded)) {
+      this.clearMammoSelection();
     }
 
     const { projectID, studyUID } = series[activePort];
@@ -2997,6 +3005,7 @@ class DisplayView extends Component {
     const nextSeries = mammogramSeries.slice(start, start + pageSize);
     if (!nextSeries.length) return;
 
+    this.clearMammoSelection();
     this.props.dispatch(clearGrid());
     this.props.dispatch(setMammogramPage(nextPage));
     openSeriesInDisplay({
@@ -3008,16 +3017,79 @@ class DisplayView extends Component {
     });
   };
 
+  /** Toggle selection of a viewport dot. Max 2 at a time. */
+  handleMammoDotClick = (index) => {
+    const { selectedPorts } = this.state;
+    const next = new Set(selectedPorts);
+    if (next.has(index)) {
+      next.delete(index);
+    } else {
+      if (next.size >= 2) {
+        toast.warn("Only two viewports can be selected at a time.", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        return;
+      }
+      next.add(index);
+    }
+    this.setState({ selectedPorts: next });
+  };
+
   /**
-   * Expands the active viewport (single-viewport view).
-   * When Feature 3 (dual-viewport dot selection) is implemented, this will
-   * also handle the two-selected-viewports case.
+   * EXPAND: if two viewports are selected, show them side by side.
+   * Otherwise fall back to the standard single-viewport hideShow.
+   * RESTORE: return to the standard grid layout.
    */
   handleMammoExpand = () => {
     const { activePort } = this.props;
-    // Feature 3: check for selected viewports via selection dot (TBD).
-    // For now, maximise the active viewport by updating the port layout.
-    this.props.dispatch({ type: 'EXPAND_VIEWPORT', payload: activePort });
+    const { selectedPorts, mammoExpanded, containerHeight } = this.state;
+
+    if (mammoExpanded) {
+      this.restoreMammoExpand();
+      return;
+    }
+
+    if (selectedPorts.size === 2) {
+      const selectedArr = Array.from(selectedPorts);
+      const elements = document.getElementsByClassName("viewportContainer");
+      for (let i = 0; i < elements.length; i++) {
+        elements[i].style.display = selectedArr.includes(i) ? "inline-block" : "none";
+      }
+      this.setState(
+        { mammoExpanded: true, width: "50%", height: containerHeight },
+        () => window.dispatchEvent(new CustomEvent("resize", { detail: { isMaximize: true } }))
+      );
+    } else {
+      this.hideShow(activePort);
+    }
+  };
+
+  /** Restore all viewports to the standard grid layout and clear dot selections. */
+  restoreMammoExpand = () => {
+    const elements = document.getElementsByClassName("viewportContainer");
+    for (let i = 0; i < elements.length; i++) {
+      elements[i].style.display = "inline-block";
+    }
+    this.setState(
+      { mammoExpanded: false, selectedPorts: new Set() },
+      () => {
+        this.getViewports();
+        window.dispatchEvent(new CustomEvent("resize", { detail: { isMaximize: false } }));
+      }
+    );
+  };
+
+  /** Clear mammogram selection state (dots + expand). Called on NEXT and new study. */
+  clearMammoSelection = () => {
+    if (this.state.mammoExpanded) {
+      // Restore hidden viewports before clearing state
+      const elements = document.getElementsByClassName("viewportContainer");
+      for (let i = 0; i < elements.length; i++) {
+        elements[i].style.display = "inline-block";
+      }
+    }
+    this.setState({ selectedPorts: new Set(), mammoExpanded: false });
   };
 
   // --- End mammogram pagination ---
@@ -3116,10 +3188,10 @@ class DisplayView extends Component {
               <button
                 className="mammo-toolbar-btn"
                 onClick={this.handleMammoExpand}
-                title="Expand viewport(s)"
+                title={this.state.mammoExpanded ? "Restore standard layout" : "Expand viewport(s)"}
               >
                 <div className="toolContainer" />
-                <div className="buttonLabel">EXPAND</div>
+                <div className="buttonLabel">{this.state.mammoExpanded ? "RESTORE" : "EXPAND"}</div>
               </button>
               <button
                 className="mammo-toolbar-btn mammo-toolbar-btn--disabled"
@@ -3241,6 +3313,16 @@ class DisplayView extends Component {
                       </div>
                     </div>
                     <div className={"column right"}>
+                      {this.isMammogramOpen() && (
+                        <span
+                          className={"dot mammo-select-dot" + (this.state.selectedPorts.has(i) ? " mammo-select-dot--checked" : "")}
+                          style={{ float: "right", marginRight: "4px" }}
+                          onClick={(e) => { e.stopPropagation(); this.handleMammoDotClick(i); }}
+                          title={this.state.selectedPorts.has(i) ? "Deselect viewport" : "Select viewport for expand"}
+                        >
+                          {this.state.selectedPorts.has(i) ? <FaCheckSquare /> : <FaRegSquare />}
+                        </span>
+                      )}
                       <span
                         className={"dot"}
                         style={{ background: "#FDD800", float: "right" }}
