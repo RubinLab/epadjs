@@ -539,7 +539,10 @@ function AnnotationTable(props) {
 
     try {
       seriesArr = await getSeriesData(selected);
+      console.log('seriesArr before filter');
+      console.log(seriesArr);
       const filtered = Array.isArray(seriesArr) ? seriesArr.filter(isSupportedModality) : [];
+      console.log('filtered -->', filtered);
       if (isMammogramStudy(filtered)) {
         props.dispatch(setMammogramSeries(filtered, studyUID));
         const firstPage = filtered.slice(0, maxPort);
