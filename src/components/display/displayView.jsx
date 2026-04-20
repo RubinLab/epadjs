@@ -3171,36 +3171,37 @@ class DisplayView extends Component {
             onFuseNewImage={this.newImageFuse}
             onOpenSeries={this.props.openSeries}
             openNextWLStudy={this.openNextWLStudy}
-          />
-          {this.isMammogramOpen() && (
-            <div className="mammo-toolbar-group">
-              <button
-                className="mammo-toolbar-btn"
-                onClick={this.handleMammoNext}
-                disabled={!this.hasNextMammoPage()}
-                title="Load next series group"
-              >
-                <div className="toolContainer" />
-                <div className="buttonLabel">NEXT</div>
-              </button>
-              <button
-                className="mammo-toolbar-btn"
-                onClick={this.handleMammoExpand}
-                title={this.state.mammoExpanded ? "Restore standard layout" : "Expand viewport(s)"}
-              >
-                <div className="toolContainer" />
-                <div className="buttonLabel">{this.state.mammoExpanded ? "RESTORE" : "EXPAND"}</div>
-              </button>
-              <button
-                className="mammo-toolbar-btn mammo-toolbar-btn--disabled"
-                disabled
-                title="Save worklist (coming soon)"
-              >
-                <div className="toolContainer" />
-                <div className="buttonLabel">SAVE WL</div>
-              </button>
-            </div>
-          )}
+          >
+            {this.isMammogramOpen() && (
+              <div className="mammo-toolbar-group">
+                <button
+                  className="mammo-toolbar-btn"
+                  onClick={this.handleMammoNext}
+                  disabled={!this.hasNextMammoPage()}
+                  title="Load next series group"
+                >
+                  <div className="toolContainer" />
+                  <div className="buttonLabel">NEXT</div>
+                </button>
+                <button
+                  className="mammo-toolbar-btn"
+                  onClick={this.handleMammoExpand}
+                  title={this.state.mammoExpanded ? "Restore standard layout" : "Expand viewport(s)"}
+                >
+                  <div className="toolContainer" />
+                  <div className="buttonLabel">{this.state.mammoExpanded ? "RESTORE" : "EXPAND"}</div>
+                </button>
+                <button
+                  className="mammo-toolbar-btn mammo-toolbar-btn--disabled"
+                  disabled
+                  title="Save worklist (coming soon)"
+                >
+                  <div className="toolContainer" />
+                  <div className="buttonLabel">SAVE WL</div>
+                </button>
+              </div>
+            )}
+          </ToolMenu>
           {this.state.isLoading && (
             <div style={{ marginTop: "30%", marginLeft: "50%" }}>
               <PropagateLoader
@@ -3314,7 +3315,6 @@ class DisplayView extends Component {
                       {this.isMammogramOpen() && (
                         <span
                           className={"dot mammo-select-dot" + (this.state.selectedPorts.has(i) ? " mammo-select-dot--checked" : "")}
-                          style={{ float: "right", marginRight: "4px" }}
                           onClick={(e) => { e.stopPropagation(); this.handleMammoDotClick(i); }}
                           title={this.state.selectedPorts.has(i) ? "Deselect viewport" : "Select viewport for expand"}
                         >
@@ -3323,7 +3323,7 @@ class DisplayView extends Component {
                       )}
                       <span
                         className={"dot"}
-                        style={{ background: "#FDD800", float: "right" }}
+                        style={{ background: "#FDD800" }}
                         onClick={() => {
                           this.setState({ showAimEditor: true });
                         }}

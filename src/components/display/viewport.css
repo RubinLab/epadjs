@@ -107,7 +107,7 @@
 } */
 
 .column.middle-right {
-  width: 65%;
+  width: 60%;
   display: grid; 
   grid-template-columns: 10em 1fr; 
   grid-template-rows: 1fr; 
@@ -119,9 +119,14 @@
 }
 
 .column.right {
-    width: 15%;
+    width: 20%;
+    min-width: 48px;
     float: right;
     padding-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
 }
 
 /* label {

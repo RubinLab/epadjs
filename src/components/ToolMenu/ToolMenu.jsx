@@ -801,6 +801,7 @@ class ToolMenu extends Component {
             />
           );
         })}
+        {this.props.children}
         {/* <div
                         id="point"
                         tabIndex="1"
