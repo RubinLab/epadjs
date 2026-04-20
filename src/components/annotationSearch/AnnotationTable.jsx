@@ -555,7 +555,6 @@ function AnnotationTable(props) {
         });
         return;
       }
-      seriesArr = filtered;
       if (isTeachingFile) {
         seriesArr =  await getSignificantSeriesData(selected);
         if (seriesArr.length > 0){

@@ -12,9 +12,11 @@ import {
  * array is a mammogram (MG). Pass only the isSupportedModality-filtered list.
  */
 export const isMammogramStudy = (seriesArray) => {
-  console.log(" ------ Checking mammogram ------");
+  console.log(" ------ Checking mammogram ------", seriesArray);
   if (sessionStorage.getItem('mode') !== 'teaching') return false;
+  console.log('after mode check')
   if (!Array.isArray(seriesArray) || seriesArray.length === 0) return false;
+  console.log('after Array check')
   const mGVerified = seriesArray.every(s => s.examType?.toUpperCase() === 'MG');
   console.log(' ---> mGVerified', mGVerified)
   return mGVerified;
