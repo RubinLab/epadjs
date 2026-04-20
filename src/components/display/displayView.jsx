@@ -2983,7 +2983,7 @@ class DisplayView extends Component {
   isMammogramOpen = () => {
     const { series, mammogramSeries } = this.props;
     const hasMammoSeries = !!(mammogramSeries && mammogramSeries.length > 0);
-    const hasOpenMG = !!(series && series.some(s => s && s.examType === 'MG'));
+    const hasOpenMG = !!(series && series.some(s => s && s.examType?.toUpperCase() === 'MG'));
     console.log('[MG Debug] isMammogramOpen — mammogramSeries.length:', mammogramSeries?.length, '| hasOpenMG:', hasOpenMG, '| result:', hasMammoSeries && hasOpenMG);
     return hasMammoSeries && hasOpenMG;
   };

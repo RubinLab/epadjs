@@ -532,6 +532,7 @@ function AnnotationTable(props) {
   // CHECK
   const displaySeries = async (selected) => {
     const { subjectID: patientID, studyUID, aimID, projectID, template } = selected;
+    console.log(selected);
     let isTeachingFile = teachingFileTempCode === template;
     let seriesArr = [];
     let existingData = getExistingData(selected);
@@ -539,7 +540,7 @@ function AnnotationTable(props) {
     try {
       // Mammogram studies bypass significant-series and teaching-file logic entirely.
       // Always fetch all series and load the first MAMMO_PAGE_SIZE into viewports.
-      if (selected.modality === 'MG' || selected.examType === 'MG') {
+      if (selected.modality?.toUpperCase() === 'MG' || selected.examType?.toUpperCase() === 'MG') {
         seriesArr = await getSeriesData(selected);
         const filtered = Array.isArray(seriesArr) ? seriesArr.filter(isSupportedModality) : [];
         if (isMammogramStudy(filtered)) {

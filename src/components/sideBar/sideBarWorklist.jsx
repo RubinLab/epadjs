@@ -24,8 +24,8 @@ import { getSeries } from "../../services/seriesServices";
 // Component imports
 import DeleteAlert from "../management/common/alertDeletionModal";
 import SelectSeriesModal from "../annotationsList/selectSerieModal";
-import { alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData, clearGrid } from "../annotationsList/action";
-import { openSeriesInDisplay } from "../common/openSeriesHelper";
+import { alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData, clearGrid, setMammogramSeries } from "../annotationsList/action";
+import { openSeriesInDisplay, isMammogramStudy } from "../common/openSeriesHelper";
 import { isSupportedModality, filterProjects, pseudo, generalizeDate } from "../../Utils/aid.js";
 // CSS import
 import "./style.css";
@@ -230,6 +230,20 @@ let seriesCallSent;
       series = series.filter(isSupportedModality);
       const maxPort = parseInt(sessionStorage.getItem("maxPort"));
       const { openSeries } = props;
+
+      if (isMammogramStudy(series)) {
+        props.dispatch(setMammogramSeries(series, studyUID));
+        openSeriesInDisplay({
+          dispatch: props.dispatch,
+          navigate: () => props.history.push("/display"),
+          openSeries: props.openSeries,
+          series: series.slice(0, maxPort),
+          worklistID: props.match.params.wid,
+          existingData: series,
+        });
+        return;
+      }
+
       const alreadyOpenViews = isTeaching ? 0 : openSeries.length;
       if (alreadyOpenViews + series.length <= maxPort) {
         setSeries(series);

@@ -217,16 +217,10 @@ function Studies(props) {
 
   const displaySeries = async (selected) => {
     let seriesArr = await getSeriesData(selected);
-    console.log('[MG Debug] raw seriesArr before filter:', seriesArr?.map(s => ({ uid: s.seriesUID, examType: s.examType })));
     seriesArr = seriesArr.filter(isSupportedModality);
-    console.log('[MG Debug] after isSupportedModality filter:', seriesArr?.map(s => ({ uid: s.seriesUID, examType: s.examType })));
-    console.log('[MG Debug] mode in sessionStorage:', sessionStorage.getItem('mode'));
-    console.log('[MG Debug] maxPort in sessionStorage:', sessionStorage.getItem('maxPort'));
 
     // Mammogram studies load only the first page; remaining series paginate via NEXT.
-    const isMammo = isMammogramStudy(seriesArr);
-    console.log('[MG Debug] isMammogramStudy result:', isMammo);
-    if (isMammo) {
+    if (isMammogramStudy(seriesArr)) {
       props.dispatch(setMammogramSeries(seriesArr, selected.studyUID));
       openSeriesInDisplay({
         dispatch: props.dispatch,
