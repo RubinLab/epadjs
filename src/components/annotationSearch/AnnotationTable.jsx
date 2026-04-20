@@ -538,29 +538,25 @@ function AnnotationTable(props) {
     let existingData = getExistingData(selected);
 
     try {
-      // Mammogram studies bypass significant-series and teaching-file logic entirely.
-      // Always fetch all series and load the first MAMMO_PAGE_SIZE into viewports.
-      if (selected.modality?.toUpperCase() === 'MG' || selected.examType?.toUpperCase() === 'MG') {
-        seriesArr = await getSeriesData(selected);
-        const filtered = Array.isArray(seriesArr) ? seriesArr.filter(isSupportedModality) : [];
-        if (isMammogramStudy(filtered)) {
-          props.dispatch(setMammogramSeries(filtered, studyUID));
-          const firstPage = filtered.slice(0, maxPort);
-          setSelected(firstPage);
-          openSeriesInDisplay({
-            dispatch: props.dispatch,
-            navigate: props.switchToDisplay,
-            openSeries: props.openSeries,
-            series: firstPage,
-            aimID,
-            existingData: filtered,
-            onGridFull: () => setShowSelectSeriesModal(true),
-          });
-          return;
-        }
-        // Fell through: modality field was MG but series say otherwise — use fetched data as-is
-        seriesArr = filtered;
-      } else if (isTeachingFile) {
+      seriesArr = await getSeriesData(selected);
+      const filtered = Array.isArray(seriesArr) ? seriesArr.filter(isSupportedModality) : [];
+      if (isMammogramStudy(filtered)) {
+        props.dispatch(setMammogramSeries(filtered, studyUID));
+        const firstPage = filtered.slice(0, maxPort);
+        setSelected(firstPage);
+        openSeriesInDisplay({
+          dispatch: props.dispatch,
+          navigate: props.switchToDisplay,
+          openSeries: props.openSeries,
+          series: firstPage,
+          aimID,
+          existingData: filtered,
+          onGridFull: () => setShowSelectSeriesModal(true),
+        });
+        return;
+      }
+      seriesArr = filtered;
+      if (isTeachingFile) {
         seriesArr =  await getSignificantSeriesData(selected);
         if (seriesArr.length > 0){
           seriesArr = seriesArr.map( el => ({...el, patientID, studyUID, projectID, template }));}
@@ -572,8 +568,6 @@ function AnnotationTable(props) {
           seriesArr = await getSeriesData(selected, true);
           seriesArr = seriesArr.slice(0,maxPort);
         }
-      } else {
-        seriesArr = await getSeriesData(selected);
       }
     } catch (err) {
         setShowSpinner(false);

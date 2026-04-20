@@ -13,7 +13,7 @@ import {
  */
 export const isMammogramStudy = (seriesArray) => {
   console.log(" ------ Checking mammogram ------");
-  if (sessionStorage.getItem('mode') !== 'lite') return false;
+  if (sessionStorage.getItem('mode') !== 'teaching') return false;
   if (!Array.isArray(seriesArray) || seriesArray.length === 0) return false;
   const mGVerified = seriesArray.every(s => s.examType?.toUpperCase() === 'MG');
   console.log(' ---> mGVerified', mGVerified)
