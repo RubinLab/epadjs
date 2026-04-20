@@ -15,7 +15,9 @@ export const isMammogramStudy = (seriesArray) => {
   console.log(" ------ Checking mammogram ------");
   if (sessionStorage.getItem('mode') !== 'lite') return false;
   if (!Array.isArray(seriesArray) || seriesArray.length === 0) return false;
-  return seriesArray.every(s => s.examType === 'MG');
+  const mGVerified = seriesArray.every(s => s.examType === 'MG');
+  console.log(mGVerified)
+  return mGVerified;
 };
 
 /**

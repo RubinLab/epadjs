@@ -2982,12 +2982,10 @@ class DisplayView extends Component {
   /** True when the currently open series are all mammograms and there is stored page data. */
   isMammogramOpen = () => {
     const { series, mammogramSeries } = this.props;
-    return (
-      mammogramSeries &&
-      mammogramSeries.length > 0 &&
-      series &&
-      series.some(s => s && s.examType === 'MG')
-    );
+    const hasMammoSeries = !!(mammogramSeries && mammogramSeries.length > 0);
+    const hasOpenMG = !!(series && series.some(s => s && s.examType === 'MG'));
+    console.log('[MG Debug] isMammogramOpen — mammogramSeries.length:', mammogramSeries?.length, '| hasOpenMG:', hasOpenMG, '| result:', hasMammoSeries && hasOpenMG);
+    return hasMammoSeries && hasOpenMG;
   };
 
   /** True when there is at least one more page of mammogram series to load. */
