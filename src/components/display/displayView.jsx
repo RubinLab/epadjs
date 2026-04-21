@@ -2994,6 +2994,11 @@ class DisplayView extends Component {
     return (mammogramPageIndex + 1) * parseInt(maxPort) < mammogramSeries.length;
   };
 
+  /** True when the user is past the first page and can go back. */
+  hasPrevMammoPage = () => {
+    return this.props.mammogramPageIndex > 0;
+  };
+
   /** Clears the grid and loads the next group of MAMMO_PAGE_SIZE series. */
   handleMammoNext = () => {
     const { mammogramSeries, mammogramPageIndex } = this.props;
@@ -3011,6 +3016,28 @@ class DisplayView extends Component {
       navigate: () => {},  // already in display view
       openSeries: [],      // grid was just cleared
       series: nextSeries,
+      existingData: mammogramSeries,
+    });
+  };
+
+  /** Clears the grid and loads the previous group of MAMMO_PAGE_SIZE series. */
+  handleMammoPrev = () => {
+    const { mammogramSeries, mammogramPageIndex } = this.props;
+    const prevPage = mammogramPageIndex - 1;
+    if (prevPage < 0) return;
+
+    const pageSize = parseInt(maxPort);
+    const start = prevPage * pageSize;
+    const prevSeries = mammogramSeries.slice(start, start + pageSize);
+
+    this.clearMammoSelection();
+    this.props.dispatch(clearGrid());
+    this.props.dispatch(setMammogramPage(prevPage));
+    openSeriesInDisplay({
+      dispatch: this.props.dispatch,
+      navigate: () => {},  // already in display view
+      openSeries: [],      // grid was just cleared
+      series: prevSeries,
       existingData: mammogramSeries,
     });
   };
@@ -3176,6 +3203,15 @@ class DisplayView extends Component {
               <div className="mammo-toolbar-group">
                 <button
                   className="mammo-toolbar-btn"
+                  onClick={this.handleMammoPrev}
+                  disabled={!this.hasPrevMammoPage()}
+                  title="Load previous series group"
+                >
+                  <div className="toolContainer" />
+                  <div className="buttonLabel">PREVIOUS</div>
+                </button>
+                <button
+                  className="mammo-toolbar-btn"
                   onClick={this.handleMammoNext}
                   disabled={!this.hasNextMammoPage()}
                   title="Load next series group"
@@ -3312,24 +3348,25 @@ class DisplayView extends Component {
                       </div>
                     </div>
                     <div className={"column right"}>
-                      {this.isMammogramOpen() && (
-                        <span
-                          className={"dot mammo-select-dot" + (this.state.selectedPorts.has(i) ? " mammo-select-dot--checked" : "")}
-                          onClick={(e) => { e.stopPropagation(); this.handleMammoDotClick(i); }}
-                          title={this.state.selectedPorts.has(i) ? "Deselect viewport" : "Select viewport for expand"}
-                        >
-                          {this.state.selectedPorts.has(i) ? <FaCheckSquare /> : <FaRegSquare />}
-                        </span>
-                      )}
                       <span
                         className={"dot"}
-                        style={{ background: "#FDD800" }}
+                        style={{ background: "#FDD800", float: "right" }}
                         onClick={() => {
                           this.setState({ showAimEditor: true });
                         }}
                       >
                         <FaPen />
                       </span>
+                      {this.isMammogramOpen() && (
+                        <span
+                          className={"dot mammo-select-dot" + (this.state.selectedPorts.has(i) ? " mammo-select-dot--checked" : "")}
+                          style={{ float: "right" }}
+                          onClick={(e) => { e.stopPropagation(); this.handleMammoDotClick(i); }}
+                          title={this.state.selectedPorts.has(i) ? "Deselect viewport" : "Select viewport for expand"}
+                        >
+                          {this.state.selectedPorts.has(i) ? <FaCheckSquare /> : <FaRegSquare />}
+                        </span>
+                      )}
                     </div>
                   </div>
                   {data.stack && data.stack.imageIds && <CornerstoneViewport
