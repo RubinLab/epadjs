@@ -801,7 +801,6 @@ class ToolMenu extends Component {
             />
           );
         })}
-        {this.props.children}
         {/* <div
                         id="point"
                         tabIndex="1"
@@ -1066,6 +1065,7 @@ class ToolMenu extends Component {
         {this.state.showFuse && <FuseSelector onClose={this.closeFuse} onFuseUnfuse={this.props.onFuseUnfuse} onFuseNewImage={this.props.onFuseNewImage} />}
         {this.state.showMetaData && (<MetaData onClose={this.showMetaData} imageData={this.props.imageData} />)}
         {this.state.keys && (<HotKeysList onClose={() => this.setState({keys: null})} list={this.state.keys} />)}
+        {this.props.children}
       </div>
     );
   }
