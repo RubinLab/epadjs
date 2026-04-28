@@ -278,6 +278,11 @@ class selectSerieModal extends React.Component {
     let selectedCount = 0;
     let series = Object.values(seriesPassed);
     let count = 0;
+
+    // If any series carry pageOrder, only pre-select page 1 series.
+    const allSeries = series.flat();
+    const hasPageOrder = allSeries.some(s => s.pageOrder != null);
+
     for (let i = 0; i < series.length; i++) {
       for (let k = 0; k < series[i].length; k++) {
         if (openSeries.length + selectedCount >= this.maxPort) {
@@ -286,17 +291,10 @@ class selectSerieModal extends React.Component {
           });
           return;
         }
-        // if (!this.isSerieOpen(series[i][k].seriesUID)) {
-        //   selectedToDisplay[series[i][k].seriesUID] = series[i][k].significanceOrder
-        //     ? true
-        //     : false;
-        //   selectedCount++;
-        // }
-        if (
-          series[i][k].significanceOrder &&
-          !this.isSerieOpen(series[i][k].seriesUID)
-        ) {
-          selectedToDisplay[series[i][k].seriesUID] = true;
+        const s = series[i][k];
+        const isPageOneOrLegacy = !hasPageOrder || s.pageOrder === 1;
+        if (s.significanceOrder && !this.isSerieOpen(s.seriesUID) && isPageOneOrLegacy) {
+          selectedToDisplay[s.seriesUID] = true;
           selectedCount++;
         }
       }

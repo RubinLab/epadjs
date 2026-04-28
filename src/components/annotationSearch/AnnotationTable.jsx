@@ -558,17 +558,39 @@ function AnnotationTable(props) {
         });
         return;
       }
+      // Saved ordering: load page-1 significant series directly, never show modal.
+      const significant = filtered.filter(s => s.significanceOrder != null);
+      if (significant.length > 0) {
+        const hasPageOrder = significant.some(s => s.pageOrder != null);
+        let toDisplay = hasPageOrder
+          ? significant.filter(s => s.pageOrder === 1)   // new ordering: page 1 only
+          : significant;                                  // legacy: all significant (≤4)
+        if (toDisplay.length > 0) {
+          toDisplay = toDisplay.sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+          setSelected(toDisplay);
+          openSeriesInDisplay({
+            dispatch: props.dispatch,
+            navigate: props.switchToDisplay,
+            openSeries: props.openSeries,
+            series: toDisplay,
+            aimID,
+            existingData: getExistingData(selected),
+          });
+          return;
+        }
+      }
+
       if (isTeachingFile) {
-        seriesArr =  await getSignificantSeriesData(selected);
-        if (seriesArr.length > 0){
-          seriesArr = seriesArr.map( el => ({...el, patientID, studyUID, projectID, template }));}
-        else if (existingData && existingData.length <= maxPort) {
+        seriesArr = await getSignificantSeriesData(selected);
+        if (seriesArr.length > 0) {
+          seriesArr = seriesArr.map(el => ({ ...el, patientID, studyUID, projectID, template }));
+        } else if (existingData && existingData.length <= maxPort) {
           seriesArr = existingData;
         } else if (existingData && existingData.length > maxPort) {
-          seriesArr = existingData.slice(0,maxPort);
+          seriesArr = existingData.slice(0, maxPort);
         } else {
           seriesArr = await getSeriesData(selected, true);
-          seriesArr = seriesArr.slice(0,maxPort);
+          seriesArr = seriesArr.slice(0, maxPort);
         }
       }
     } catch (err) {
