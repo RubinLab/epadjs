@@ -24,7 +24,7 @@ import { getSeries } from "../../services/seriesServices";
 // Component imports
 import DeleteAlert from "../management/common/alertDeletionModal";
 import SelectSeriesModal from "../annotationsList/selectSerieModal";
-import { alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData, clearGrid, setMammogramSeries, setPageOrderSeries, clearPageOrderSeries } from "../annotationsList/action";
+import { alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData, clearGrid, setMammogramSeries, clearMammogramSeries, setPageOrderSeries, clearPageOrderSeries } from "../annotationsList/action";
 import { openSeriesInDisplay, isMammogramStudy } from "../common/openSeriesHelper";
 import { isSupportedModality, filterProjects, pseudo, generalizeDate } from "../../Utils/aid.js";
 // CSS import
@@ -209,6 +209,8 @@ let seriesCallSent;
 
   const handleOpenClick = async (study) => {
     if (mode === 'teaching') props.dispatch(clearGrid());
+    props.dispatch(clearPageOrderSeries());
+    props.dispatch(clearMammogramSeries());
     const { seriesData } = props;
     const { projectID, subjectID, studyUID, studyDescription } = study;
     let series;

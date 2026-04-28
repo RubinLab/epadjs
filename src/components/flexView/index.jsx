@@ -18,6 +18,9 @@ import {
   setSeriesData,
   setLastLocation,
   setMammogramSeries,
+  clearMammogramSeries,
+  setPageOrderSeries,
+  clearPageOrderSeries,
 } from "../annotationsList/action";
 import { openSeriesInDisplay, isMammogramStudy } from "../common/openSeriesHelper";
 import "react-table-v6/react-table.css";
@@ -110,6 +113,8 @@ class FlexView extends React.Component {
       : null;
  
     try {
+      this.props.dispatch(clearPageOrderSeries());
+      this.props.dispatch(clearMammogramSeries());
       if (!dataExists && seriesCallSent !== studyUID) {
         this.setState({ loading: true });
         ({ data: series } = await getSeries(projectID, patientID, studyUID));
@@ -141,6 +146,12 @@ class FlexView extends React.Component {
         existingData: series,
       });
       return;
+    }
+
+    // If the study has pageOrder series, store them now so NEXT/PREV work after the modal confirms.
+    const significant = series.filter(s => s.significanceOrder != null);
+    if (significant.length > 0 && significant.some(s => s.pageOrder != null)) {
+      this.props.dispatch(setPageOrderSeries(significant));
     }
 
     openSeriesInDisplay({

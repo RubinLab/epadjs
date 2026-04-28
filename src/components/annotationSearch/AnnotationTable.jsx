@@ -20,6 +20,7 @@ import {
   setSeriesData,
   storeAimSelection,
   setMammogramSeries,
+  clearMammogramSeries,
   setPageOrderSeries,
   clearPageOrderSeries,
 } from "../annotationsList/action";
@@ -540,6 +541,8 @@ function AnnotationTable(props) {
     let existingData = getExistingData(selected);
 
     try {
+      props.dispatch(clearPageOrderSeries());
+      props.dispatch(clearMammogramSeries());
       seriesArr = await getSeriesData(selected);
       console.log('seriesArr before filter');
       console.log(seriesArr);

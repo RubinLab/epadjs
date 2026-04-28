@@ -23,6 +23,8 @@ import {
   selectAnnotation,
   setSeriesData,
   setMammogramSeries,
+  clearMammogramSeries,
+  clearPageOrderSeries,
 } from "../annotationsList/action";
 import { openSeriesInDisplay, isMammogramStudy } from "../common/openSeriesHelper";
 
@@ -216,6 +218,8 @@ function Studies(props) {
   };
 
   const displaySeries = async (selected) => {
+    props.dispatch(clearPageOrderSeries());
+    props.dispatch(clearMammogramSeries());
     let seriesArr = await getSeriesData(selected);
     seriesArr = seriesArr.filter(isSupportedModality);
 
