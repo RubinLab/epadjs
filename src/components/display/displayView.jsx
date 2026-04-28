@@ -55,6 +55,7 @@ import "./viewport.css";
 import { toast } from "react-toastify";
 import SeriesDropDown from "./SeriesDropDown";
 import getVPDimensions from "./ViewportCalculations";
+import SeriesOrderModal from "./SeriesOrderModal";
 
 let mode;
 let wadoUrl;
@@ -210,6 +211,7 @@ class DisplayView extends Component {
       isVisible: true,
       selectedPorts: new Set(),
       mammoExpanded: false,
+      showReorderModal: false,
     };
   }
 
@@ -3197,6 +3199,7 @@ class DisplayView extends Component {
             onFuseNewImage={this.newImageFuse}
             onOpenSeries={this.props.openSeries}
             openNextWLStudy={this.openNextWLStudy}
+            onReorder={() => this.setState({ showReorderModal: true })}
           >
             {this.isMammogramOpen() && (
               <div className="mammo-toolbar-group">
@@ -3416,6 +3419,18 @@ class DisplayView extends Component {
             closeViewport={this.closeViewport}
           /> */}
         </RightsideBar>
+        {this.state.showReorderModal && (() => {
+          const active = this.props.series[this.props.activePort] || {};
+          return (
+            <SeriesOrderModal
+              show
+              onClose={() => this.setState({ showReorderModal: false })}
+              projectID={active.projectID}
+              subjectUID={active.patientID}
+              studyUID={active.studyUID}
+            />
+          );
+        })()}
       </React.Fragment>
     );
     // </div>

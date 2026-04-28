@@ -43,7 +43,7 @@ import { BsArrowUpLeft } from "react-icons/bs";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
 import { MdLoop, MdPanTool, MdMyLocation, MdOutlineKeyboardCommandKey } from "react-icons/md";
-import { TbReplace } from "react-icons/tb";
+import { TbReplace, TbReorder } from "react-icons/tb";
 import {
   TiDeleteOutline,
   TiPencil,
@@ -253,6 +253,7 @@ class ToolMenu extends Component {
     this.managementTools = [
       { name: "Save order", icon: <TbReplace />, tool: "order", teaching: true },
       { name: "Hot Keys", icon: <MdOutlineKeyboardCommandKey />, tool: "keys", teaching: true },
+      { name: "Reorder", icon: <TbReorder />, tool: "reorder", teaching: true },
     ]
 
     this.segmentationTools = [
@@ -477,7 +478,8 @@ class ToolMenu extends Component {
       MetaData: true,
       fuse: true,
       order: true,
-      keys: true
+      keys: true,
+      reorder: true
     };
     
     if (!notActiveTools[tool]) sessionStorage.setItem("activeTool", tool);
@@ -576,6 +578,9 @@ class ToolMenu extends Component {
       return;
     } else if (tool === 'keys') {
       this.showHotkeyInfo();
+      return;
+    } else if (tool === 'reorder') {
+      if (this.props.onReorder) this.props.onReorder();
       return;
     } else if (tool === 'next') {
       this.props.openNextWLStudy(worklistID, studyUID);

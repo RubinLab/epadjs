@@ -1,0 +1,248 @@
+/* ── Bootstrap Modal overrides ─────────────────────────────── */
+.series-order-modal .modal-content,
+.som-warn-modal .modal-content {
+  background-color: #1a2035;
+  border: 1px solid #2e3a50;
+  color: #d0d8e8;
+}
+
+.series-order-modal .modal-header,
+.som-warn-modal .modal-header {
+  background-color: #1a2035;
+  border-bottom: 1px solid #2e3a50;
+  color: #d0d8e8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.series-order-modal .modal-title,
+.som-warn-modal .modal-title {
+  color: #d0d8e8;
+  font-size: 1rem;
+}
+
+.series-order-modal .modal-header .btn-close,
+.som-warn-modal .modal-header .btn-close {
+  filter: invert(1) grayscale(1) brightness(1.5);
+  opacity: 0.7;
+}
+
+.series-order-modal .modal-header .btn-close:hover,
+.som-warn-modal .modal-header .btn-close:hover {
+  opacity: 1;
+}
+
+.series-order-modal .modal-body,
+.som-warn-modal .modal-body {
+  background-color: #1a2035;
+  color: #d0d8e8;
+}
+
+.series-order-modal .modal-footer,
+.som-warn-modal .modal-footer {
+  background-color: #1a2035;
+  border-top: 1px solid #2e3a50;
+}
+
+/* ── Loading ──────────────────────────────────────────────── */
+.som-loading {
+  text-align: center;
+  padding: 2rem;
+  color: #aaa;
+}
+
+/* ── Grid + actions row ───────────────────────────────────── */
+.som-grid-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.som-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+  flex: 0 0 auto;
+  width: 360px;
+}
+
+.som-slot {
+  height: 72px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #3a4a5e;
+  transition: border-color 0.15s;
+}
+
+.som-slot--empty {
+  background: #151d2e;
+}
+
+.som-slot--filled {
+  border-style: solid;
+  border-color: #4a7ab5;
+  background: #1e2a3a;
+}
+
+.som-slot--droptarget:hover {
+  border-color: #aadcff;
+}
+
+.som-slot-number {
+  font-size: 1.4rem;
+  color: #3a4a5e;
+  font-weight: bold;
+}
+
+/* ── Series chip ──────────────────────────────────────────── */
+.som-chip {
+  display: inline-block;
+  background: #2d4a6e;
+  color: #cce0ff;
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  cursor: grab;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.som-chip:active {
+  cursor: grabbing;
+}
+
+.som-chip--list {
+  margin: 4px;
+  max-width: 100%;
+}
+
+/* ── Grid action buttons ──────────────────────────────────── */
+.som-grid-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+/* ── Page navigation ──────────────────────────────────────── */
+.som-pagination {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.som-page-nav,
+.som-page-num {
+  background: #222c3e;
+  border: 1px solid #3a4a5e;
+  color: #aab8cc;
+  border-radius: 3px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.15s;
+}
+
+.som-page-nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.som-page-nav:not(:disabled):hover,
+.som-page-num:hover {
+  background: #4a7ab5;
+  color: #fff;
+}
+
+.som-page-num--active {
+  background: #4a7ab5;
+  color: #fff;
+  border-color: #4a7ab5;
+}
+
+/* ── Separator between grid area and unordered panel ─────── */
+.som-divider {
+  border: none;
+  border-top: 1px solid #2e3a50;
+  margin: 12px 0;
+}
+
+/* ── Unordered list ───────────────────────────────────────── */
+.som-unordered {
+  border: 1px solid #2e3a50;
+  border-radius: 4px;
+  min-height: 80px;
+  padding: 8px;
+  background: #151d2e;
+}
+
+.som-unordered-label {
+  font-size: 0.85rem;
+  color: #5a6a80;
+  margin-bottom: 8px;
+}
+
+.som-unordered-empty {
+  font-size: 0.85rem;
+  color: #4a5a6e;
+  padding: 8px 0;
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+.som-btn {
+  padding: 6px 16px;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.som-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.som-btn--primary {
+  background: #4a7ab5;
+  color: #fff;
+}
+
+.som-btn--primary:hover:not(:disabled) {
+  background: #5a8ac5;
+}
+
+.som-btn--secondary {
+  background: #1e2a3a;
+  color: #aab8cc;
+  border: 1px solid #3a4a5e;
+}
+
+.som-btn--secondary:hover:not(:disabled) {
+  background: #283a52;
+}
+
+/* ── Warning modal body text ──────────────────────────────── */
+.som-warn-modal .modal-body p {
+  color: #c0cce0;
+  font-size: 0.9rem;
+}
+
+.som-warn-check {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  color: #aab8cc;
+  cursor: pointer;
+  margin-top: 8px;
+  gap: 6px;
+}
