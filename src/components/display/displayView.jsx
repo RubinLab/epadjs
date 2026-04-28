@@ -37,6 +37,7 @@ import {
   setSegLabelMapIndex,
   setSeriesData,
   setMammogramPage,
+  setPageOrder,
   // fillSeriesDescfullData
   updateGridWithMultiFrameInfo,
   updateImageId,
@@ -167,6 +168,8 @@ const mapStateToProps = (state) => {
     showingPHI: state.annotationsListReducer.showingPHI,
     mammogramSeries: state.annotationsListReducer.mammogramSeries,
     mammogramPageIndex: state.annotationsListReducer.mammogramPageIndex,
+    pageOrderSeries: state.annotationsListReducer.pageOrderSeries,
+    currentPageOrder: state.annotationsListReducer.currentPageOrder,
   };
 };
 
@@ -1111,9 +1114,10 @@ class DisplayView extends Component {
           indexKey = `${indexKey}-${mfIndexFinal}`
         }
 
-        const dataExistsInState = parseInt(dataIndexMap[indexKey]) >= 0;
+        const cachedIdx = parseInt(dataIndexMap[indexKey]);
+        const dataExistsInState = cachedIdx >= 0 && cachedIdx < this.state.data.length && !!this.state.data[cachedIdx];
 
-        if (!dataExistsInState || force) { 
+        if (!dataExistsInState || force) {
             const promise = this.getImageStack(
               series[i],
               i,
@@ -2989,15 +2993,74 @@ class DisplayView extends Component {
     return hasMammoSeries && hasOpenMG;
   };
 
+  /** True when pageOrder navigation is active (Case 1). */
+  isPageOrderNav = () => this.props.pageOrderSeries && this.props.pageOrderSeries.length > 0;
+
   /** True when there is at least one more page of mammogram series to load. */
   hasNextMammoPage = () => {
+    if (this.isPageOrderNav()) return false;
     const { mammogramSeries, mammogramPageIndex } = this.props;
     return (mammogramPageIndex + 1) * parseInt(maxPort) < mammogramSeries.length;
   };
 
   /** True when the user is past the first page and can go back. */
   hasPrevMammoPage = () => {
+    if (this.isPageOrderNav()) return false;
     return this.props.mammogramPageIndex > 0;
+  };
+
+  /** True when there is a higher pageOrder page available. */
+  hasNextPageOrderPage = () => {
+    const { pageOrderSeries, currentPageOrder } = this.props;
+    return pageOrderSeries.some(s => s.pageOrder === currentPageOrder + 1);
+  };
+
+  /** True when the user is past page 1 in pageOrder navigation. */
+  hasPrevPageOrderPage = () => {
+    return this.props.currentPageOrder > 1;
+  };
+
+  /** Clears the grid and loads the next pageOrder page. */
+  handlePageOrderNext = () => {
+    const { pageOrderSeries, currentPageOrder } = this.props;
+    const nextPage = currentPageOrder + 1;
+    const nextSeries = pageOrderSeries
+      .filter(s => s.pageOrder === nextPage)
+      .sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+    if (!nextSeries.length) return;
+
+    this.clearMammoSelection();
+    this.props.dispatch(clearGrid());
+    this.props.dispatch(setPageOrder(nextPage));
+    openSeriesInDisplay({
+      dispatch: this.props.dispatch,
+      navigate: () => {},
+      openSeries: [],
+      series: nextSeries,
+      existingData: pageOrderSeries,
+    });
+  };
+
+  /** Clears the grid and loads the previous pageOrder page. */
+  handlePageOrderPrev = () => {
+    const { pageOrderSeries, currentPageOrder } = this.props;
+    const prevPage = currentPageOrder - 1;
+    if (prevPage < 1) return;
+
+    const prevSeries = pageOrderSeries
+      .filter(s => s.pageOrder === prevPage)
+      .sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+
+    this.clearMammoSelection();
+    this.props.dispatch(clearGrid());
+    this.props.dispatch(setPageOrder(prevPage));
+    openSeriesInDisplay({
+      dispatch: this.props.dispatch,
+      navigate: () => {},
+      openSeries: [],
+      series: prevSeries,
+      existingData: pageOrderSeries,
+    });
   };
 
   /** Clears the grid and loads the next group of MAMMO_PAGE_SIZE series. */
@@ -3204,8 +3267,8 @@ class DisplayView extends Component {
             <div className="mammo-toolbar-group">
               <button
                 className="mammo-toolbar-btn"
-                onClick={this.handleMammoPrev}
-                disabled={!this.hasPrevMammoPage()}
+                onClick={this.isPageOrderNav() ? this.handlePageOrderPrev : this.handleMammoPrev}
+                disabled={this.isPageOrderNav() ? !this.hasPrevPageOrderPage() : !this.hasPrevMammoPage()}
                 title="Load previous series group"
               >
                 <div className="toolContainer" />
@@ -3213,8 +3276,8 @@ class DisplayView extends Component {
               </button>
               <button
                 className="mammo-toolbar-btn"
-                onClick={this.handleMammoNext}
-                disabled={!this.hasNextMammoPage()}
+                onClick={this.isPageOrderNav() ? this.handlePageOrderNext : this.handleMammoNext}
+                disabled={this.isPageOrderNav() ? !this.hasNextPageOrderPage() : !this.hasNextMammoPage()}
                 title="Load next series group"
               >
                 <div className="toolContainer" />

@@ -20,6 +20,8 @@ import {
   setSeriesData,
   storeAimSelection,
   setMammogramSeries,
+  setPageOrderSeries,
+  clearPageOrderSeries,
 } from "../annotationsList/action";
 import { openSeriesInDisplay, isMammogramStudy } from "../common/openSeriesHelper";
 import { formatDate } from "../flexView/helperMethods";
@@ -543,41 +545,63 @@ function AnnotationTable(props) {
       console.log(seriesArr);
       const filtered = Array.isArray(seriesArr) ? seriesArr.filter(isSupportedModality) : [];
       console.log('filtered -->', filtered);
-      if (isMammogramStudy(filtered)) {
-        props.dispatch(setMammogramSeries(filtered, studyUID));
-        const firstPage = filtered.slice(0, maxPort);
-        setSelected(firstPage);
+
+      // Decision tree: significant series take priority over mammogram fallback.
+      const significant = filtered.filter(s => s.significanceOrder != null);
+      const hasPageOrder = significant.length > 0 && significant.some(s => s.pageOrder != null);
+
+      if (significant.length > 0 && hasPageOrder) {
+        // Case 1: pageOrder navigation — load page 1, enable Next/Prev by pageOrder.
+        props.dispatch(setPageOrderSeries(significant));
+        let toDisplay = significant
+          .filter(s => s.pageOrder === 1)
+          .sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+        if (toDisplay.length === 0) toDisplay = significant.slice(0, maxPort);
+        setSelected(toDisplay);
         openSeriesInDisplay({
           dispatch: props.dispatch,
           navigate: props.switchToDisplay,
           openSeries: props.openSeries,
-          series: firstPage,
+          series: toDisplay,
           aimID,
           existingData: filtered,
-          onGridFull: () => setShowSelectSeriesModal(true),
         });
         return;
       }
-      // Saved ordering: load page-1 significant series directly, never show modal.
-      const significant = filtered.filter(s => s.significanceOrder != null);
+
+      if (isMammogramStudy(filtered)) {
+        // Case 3 (no significant) or Case 6 (significant, no pageOrder, MG).
+        props.dispatch(clearPageOrderSeries());
+        props.dispatch(setMammogramSeries(filtered, studyUID));
+        const toDisplay = significant.length > 0
+          ? significant.sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0)) // Case 6
+          : filtered.slice(0, maxPort); // Case 3
+        setSelected(toDisplay);
+        openSeriesInDisplay({
+          dispatch: props.dispatch,
+          navigate: props.switchToDisplay,
+          openSeries: props.openSeries,
+          series: toDisplay,
+          aimID,
+          existingData: filtered,
+        });
+        return;
+      }
+
       if (significant.length > 0) {
-        const hasPageOrder = significant.some(s => s.pageOrder != null);
-        let toDisplay = hasPageOrder
-          ? significant.filter(s => s.pageOrder === 1)   // new ordering: page 1 only
-          : significant;                                  // legacy: all significant (≤4)
-        if (toDisplay.length > 0) {
-          toDisplay = toDisplay.sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
-          setSelected(toDisplay);
-          openSeriesInDisplay({
-            dispatch: props.dispatch,
-            navigate: props.switchToDisplay,
-            openSeries: props.openSeries,
-            series: toDisplay,
-            aimID,
-            existingData: getExistingData(selected),
-          });
-          return;
-        }
+        // Case 2: significant series, no pageOrder, non-mammogram — load directly, no Next/Prev.
+        props.dispatch(clearPageOrderSeries());
+        const toDisplay = significant.sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+        setSelected(toDisplay);
+        openSeriesInDisplay({
+          dispatch: props.dispatch,
+          navigate: props.switchToDisplay,
+          openSeries: props.openSeries,
+          series: toDisplay,
+          aimID,
+          existingData: getExistingData(selected),
+        });
+        return;
       }
 
       if (isTeachingFile) {

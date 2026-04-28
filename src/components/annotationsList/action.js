@@ -59,6 +59,9 @@ import {
   SET_MAMMOGRAM_SERIES,
   SET_MAMMOGRAM_PAGE,
   CLEAR_MAMMOGRAM_SERIES,
+  SET_PAGE_ORDER_SERIES,
+  SET_PAGE_ORDER,
+  CLEAR_PAGE_ORDER_SERIES,
   colors,
   commonLabels,
 } from "./types";
@@ -1217,6 +1220,20 @@ export const setMammogramPage = (pageIndex) => ({
 
 export const clearMammogramSeries = () => ({
   type: CLEAR_MAMMOGRAM_SERIES,
+});
+
+export const setPageOrderSeries = (allSeries) => ({
+  type: SET_PAGE_ORDER_SERIES,
+  payload: allSeries,
+});
+
+export const setPageOrder = (pageOrder) => ({
+  type: SET_PAGE_ORDER,
+  payload: pageOrder,
+});
+
+export const clearPageOrderSeries = () => ({
+  type: CLEAR_PAGE_ORDER_SERIES,
 });
 
 

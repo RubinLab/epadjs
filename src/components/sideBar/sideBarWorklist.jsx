@@ -24,7 +24,7 @@ import { getSeries } from "../../services/seriesServices";
 // Component imports
 import DeleteAlert from "../management/common/alertDeletionModal";
 import SelectSeriesModal from "../annotationsList/selectSerieModal";
-import { alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData, clearGrid, setMammogramSeries } from "../annotationsList/action";
+import { alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData, clearGrid, setMammogramSeries, setPageOrderSeries, clearPageOrderSeries } from "../annotationsList/action";
 import { openSeriesInDisplay, isMammogramStudy } from "../common/openSeriesHelper";
 import { isSupportedModality, filterProjects, pseudo, generalizeDate } from "../../Utils/aid.js";
 // CSS import
@@ -231,13 +231,53 @@ let seriesCallSent;
       const maxPort = parseInt(sessionStorage.getItem("maxPort"));
       const { openSeries } = props;
 
-      if (isMammogramStudy(series)) {
-        props.dispatch(setMammogramSeries(series, studyUID));
+      const significant = series.filter(s => s.significanceOrder != null);
+      const hasPageOrder = significant.length > 0 && significant.some(s => s.pageOrder != null);
+
+      if (significant.length > 0 && hasPageOrder) {
+        // Case 1: pageOrder navigation.
+        props.dispatch(setPageOrderSeries(significant));
+        const toDisplay = significant
+          .filter(s => s.pageOrder === 1)
+          .sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
         openSeriesInDisplay({
           dispatch: props.dispatch,
           navigate: () => props.history.push("/display"),
           openSeries: props.openSeries,
-          series: series.slice(0, maxPort),
+          series: toDisplay.length > 0 ? toDisplay : significant.slice(0, maxPort),
+          worklistID: props.match.params.wid,
+          existingData: series,
+        });
+        return;
+      }
+
+      if (isMammogramStudy(series)) {
+        // Case 3 (no significant) or Case 6 (significant, no pageOrder, MG).
+        props.dispatch(clearPageOrderSeries());
+        props.dispatch(setMammogramSeries(series, studyUID));
+        const toDisplay = significant.length > 0
+          ? significant.sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0)) // Case 6
+          : series.slice(0, maxPort); // Case 3
+        openSeriesInDisplay({
+          dispatch: props.dispatch,
+          navigate: () => props.history.push("/display"),
+          openSeries: props.openSeries,
+          series: toDisplay,
+          worklistID: props.match.params.wid,
+          existingData: series,
+        });
+        return;
+      }
+
+      if (significant.length > 0) {
+        // Case 2: significant, no pageOrder, non-MG — load directly, no Next/Prev.
+        props.dispatch(clearPageOrderSeries());
+        const toDisplay = significant.sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+        openSeriesInDisplay({
+          dispatch: props.dispatch,
+          navigate: () => props.history.push("/display"),
+          openSeries: props.openSeries,
+          series: toDisplay,
           worklistID: props.match.params.wid,
           existingData: series,
         });
