@@ -3201,44 +3201,42 @@ class DisplayView extends Component {
             openNextWLStudy={this.openNextWLStudy}
             onReorder={() => this.setState({ showReorderModal: true })}
           >
-            {this.isMammogramOpen() && (
-              <div className="mammo-toolbar-group">
-                <button
-                  className="mammo-toolbar-btn"
-                  onClick={this.handleMammoPrev}
-                  disabled={!this.hasPrevMammoPage()}
-                  title="Load previous series group"
-                >
-                  <div className="toolContainer" />
-                  <div className="buttonLabel">PREVIOUS</div>
-                </button>
-                <button
-                  className="mammo-toolbar-btn"
-                  onClick={this.handleMammoNext}
-                  disabled={!this.hasNextMammoPage()}
-                  title="Load next series group"
-                >
-                  <div className="toolContainer" />
-                  <div className="buttonLabel">NEXT</div>
-                </button>
-                <button
-                  className="mammo-toolbar-btn"
-                  onClick={this.handleMammoExpand}
-                  title={this.state.mammoExpanded ? "Restore standard layout" : "Expand viewport(s)"}
-                >
-                  <div className="toolContainer" />
-                  <div className="buttonLabel">{this.state.mammoExpanded ? "RESTORE" : "EXPAND"}</div>
-                </button>
-                <button
-                  className="mammo-toolbar-btn mammo-toolbar-btn--disabled"
-                  disabled
-                  title="Save worklist (coming soon)"
-                >
-                  <div className="toolContainer" />
-                  <div className="buttonLabel">SAVE WL</div>
-                </button>
-              </div>
-            )}
+            <div className="mammo-toolbar-group">
+              <button
+                className="mammo-toolbar-btn"
+                onClick={this.handleMammoPrev}
+                disabled={!this.hasPrevMammoPage()}
+                title="Load previous series group"
+              >
+                <div className="toolContainer" />
+                <div className="buttonLabel">PREVIOUS</div>
+              </button>
+              <button
+                className="mammo-toolbar-btn"
+                onClick={this.handleMammoNext}
+                disabled={!this.hasNextMammoPage()}
+                title="Load next series group"
+              >
+                <div className="toolContainer" />
+                <div className="buttonLabel">NEXT</div>
+              </button>
+              <button
+                className="mammo-toolbar-btn"
+                onClick={this.handleMammoExpand}
+                title={this.state.mammoExpanded ? "Restore standard layout" : "Expand viewport(s)"}
+              >
+                <div className="toolContainer" />
+                <div className="buttonLabel">{this.state.mammoExpanded ? "RESTORE" : "EXPAND"}</div>
+              </button>
+              <button
+                className="mammo-toolbar-btn mammo-toolbar-btn--disabled"
+                disabled
+                title="Save worklist (coming soon)"
+              >
+                <div className="toolContainer" />
+                <div className="buttonLabel">SAVE WL</div>
+              </button>
+            </div>
           </ToolMenu>
           {this.state.isLoading && (
             <div style={{ marginTop: "30%", marginLeft: "50%" }}>
