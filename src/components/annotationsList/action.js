@@ -390,7 +390,7 @@ export const selectAnnotation = (
 // opens a new port to display series
 // adds series details to the array
 export const addToGrid = (serie, annotation, port, worklistID) => {
-  let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment, seriesDescription, numberOfAnnotations, numberOfImages, seriesNo, template, significanceOrder, multiFrameIndex } = serie;
+  let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment, seriesDescription, numberOfAnnotations, numberOfImages, seriesNo, template, significanceOrder, multiFrameIndex, displayState } = serie;
   const modFmComment = comment ? comment.split('/')[0].trim() : '';
   examType = examType ? examType.toUpperCase() : modality ? modality.toUpperCase() : modFmComment.toUpperCase();
 
@@ -412,7 +412,8 @@ export const addToGrid = (serie, annotation, port, worklistID) => {
     seriesNo,
     template,
     significanceOrder,
-    worklistID
+    worklistID,
+    displayState,
     // imageIndex: 0
   };
   if (multiFrameIndex) reference.multiFrameIndex = multiFrameIndex;

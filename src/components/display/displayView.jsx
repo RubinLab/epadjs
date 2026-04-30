@@ -12,6 +12,7 @@ import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
 import PropagateLoader from "react-spinners/PropagateLoader";
 import { deleteAnnotation, getAnnotation } from "../../services/annotationServices";
+import { getSignificantSeries, setSignificantSeries } from "../../services/seriesServices";
 import { refreshToken } from "../../services/authService";
 import { getImageMetadata } from "../../services/imageServices";
 import {
@@ -215,6 +216,8 @@ class DisplayView extends Component {
       selectedPorts: new Set(),
       mammoExpanded: false,
       showReorderModal: false,
+      showSaveStatusWarning: false,
+      pendingSaveStatusData: null,
     };
   }
 
@@ -244,6 +247,8 @@ class DisplayView extends Component {
     this.setState({ wwwc: { ww, wc } });
   };
 
+  _explicitlyReset = new Set();
+
   componentDidMount() {
     const { series, onSwitchView } = this.props;
     // if (series.length < 1) {
@@ -251,6 +256,10 @@ class DisplayView extends Component {
     // }
     this.props.dispatch(clearSelection());
     this.getViewports();
+    this._explicitlyReset.clear();
+    sessionStorage.setItem('invertMap', JSON.stringify({}));
+    sessionStorage.setItem('imgStatus', JSON.stringify([]));
+    this.applyDisplayStateToSession();
     this.getData(undefined, undefined, "componentDidMount");
     this.formInvertMap();
     if (series.length > 0) {
@@ -442,6 +451,7 @@ class DisplayView extends Component {
         mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
         frame = 0;
       }
+      this.applyDisplayStateToSession();
       this.getData(mfIndex, frame, "didupdated 2", refreshPage);
       this.formInvertMap();
     }
@@ -2713,6 +2723,7 @@ class DisplayView extends Component {
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
     imgStatus[this.props.activePort] = null;
+    this._explicitlyReset.add(this.props.activePort);
     this.formInvertMap(null, null, true);
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
   };
@@ -3021,6 +3032,12 @@ class DisplayView extends Component {
   };
 
   /** Clears the grid and loads the next pageOrder page. */
+  clearPageSessionStorage = () => {
+    this._explicitlyReset.clear();
+    sessionStorage.setItem('invertMap', JSON.stringify({}));
+    sessionStorage.setItem('imgStatus', JSON.stringify([]));
+  };
+
   handlePageOrderNext = () => {
     const { pageOrderSeries, currentPageOrder } = this.props;
     const nextPage = currentPageOrder + 1;
@@ -3030,6 +3047,7 @@ class DisplayView extends Component {
     if (!nextSeries.length) return;
 
     this.clearMammoSelection();
+    this.clearPageSessionStorage();
     this.props.dispatch(clearGrid());
     this.props.dispatch(setPageOrder(nextPage));
     openSeriesInDisplay({
@@ -3052,6 +3070,7 @@ class DisplayView extends Component {
       .sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
 
     this.clearMammoSelection();
+    this.clearPageSessionStorage();
     this.props.dispatch(clearGrid());
     this.props.dispatch(setPageOrder(prevPage));
     openSeriesInDisplay({
@@ -3073,12 +3092,13 @@ class DisplayView extends Component {
     if (!nextSeries.length) return;
 
     this.clearMammoSelection();
+    this.clearPageSessionStorage();
     this.props.dispatch(clearGrid());
     this.props.dispatch(setMammogramPage(nextPage));
     openSeriesInDisplay({
       dispatch: this.props.dispatch,
-      navigate: () => {},  // already in display view
-      openSeries: [],      // grid was just cleared
+      navigate: () => {},
+      openSeries: [],
       series: nextSeries,
       existingData: mammogramSeries,
     });
@@ -3095,12 +3115,13 @@ class DisplayView extends Component {
     const prevSeries = mammogramSeries.slice(start, start + pageSize);
 
     this.clearMammoSelection();
+    this.clearPageSessionStorage();
     this.props.dispatch(clearGrid());
     this.props.dispatch(setMammogramPage(prevPage));
     openSeriesInDisplay({
       dispatch: this.props.dispatch,
-      navigate: () => {},  // already in display view
-      openSeries: [],      // grid was just cleared
+      navigate: () => {},
+      openSeries: [],
       series: prevSeries,
       existingData: mammogramSeries,
     });
@@ -3183,6 +3204,175 @@ class DisplayView extends Component {
 
   // --- End mammogram pagination ---
 
+  // --- Display State Restore ---
+
+  applyDisplayStateToSession = () => {
+    const { series, pageOrderSeries } = this.props;
+    if (!series || series.length === 0) return;
+
+    // Build seriesUID → displayState map. pageOrderSeries carries the full
+    // significant-series records from the backend (including displayState).
+    // openSeries entries (series[i]) may also carry it if addToGrid preserved it.
+    const displayStateMap = {};
+    (pageOrderSeries || []).forEach(s => {
+      if (s && s.displayState) displayStateMap[s.seriesUID] = s.displayState;
+    });
+    series.forEach(s => {
+      if (s && s.displayState) displayStateMap[s.seriesUID] = s.displayState;
+    });
+
+    if (Object.keys(displayStateMap).length === 0) return;
+
+    const invertMap = JSON.parse(sessionStorage.getItem('invertMap') || '{}');
+    const imgStatus = JSON.parse(sessionStorage.getItem('imgStatus') || '[]');
+    let changed = false;
+
+    for (let i = 0; i < series.length; i++) {
+      const s = series[i];
+      if (!s) continue;
+      const displayState = displayStateMap[s.seriesUID];
+      if (!displayState) continue;
+      // Only apply saved state if no live session value exists for this viewport
+      if (displayState.invertMap !== undefined && invertMap[i] == null && !this._explicitlyReset.has(i)) {
+        invertMap[i] = displayState.invertMap;
+        changed = true;
+      }
+      if (displayState.imageStatus && imgStatus[i] == null && !this._explicitlyReset.has(i)) {
+        imgStatus[i] = displayState.imageStatus;
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      sessionStorage.setItem('invertMap', JSON.stringify(invertMap));
+      sessionStorage.setItem('imgStatus', JSON.stringify(imgStatus));
+    }
+  };
+
+  // --- End Display State Restore ---
+
+  // --- Save Image Status ---
+
+  handleSaveState = async () => {
+    const { series } = this.props;
+    if (!series || series.length === 0) return;
+
+    const invertMap = JSON.parse(sessionStorage.getItem('invertMap') || '{}');
+    const imgStatus = JSON.parse(sessionStorage.getItem('imgStatus') || '[]');
+
+    // Collect series with any modified state
+    const modifiedSeries = [];
+    for (let i = 0; i < series.length; i++) {
+      if (!series[i]) continue;
+      const hasInvert = invertMap[i] !== undefined;
+      const hasImgStatus = imgStatus[i] !== undefined && imgStatus[i] !== null;
+      if (hasInvert || hasImgStatus) {
+        modifiedSeries.push({
+          ...series[i],
+          viewportIndex: i,
+          displayState: {
+            invertMap: invertMap[i] || false,
+            imageStatus: imgStatus[i] || {},
+          },
+        });
+      }
+    }
+
+    if (modifiedSeries.length === 0) return;
+
+    const ref = series.find(s => s) || {};
+    const projectID = ref.projectID;
+    const patientID = ref.patientID || ref.subjectID;
+    const studyUID = ref.studyUID;
+
+    try {
+      const { data: currentSigSeries } = await getSignificantSeries(projectID, patientID, studyUID);
+      const sigUIDs = new Set((currentSigSeries || []).map(s => s.seriesUID));
+      const notYetSignificant = modifiedSeries.filter(s => !sigUIDs.has(s.seriesUID));
+      const saveData = { modifiedSeries, currentSigSeries: currentSigSeries || [], projectID, patientID, studyUID };
+
+      if (notYetSignificant.length > 0) {
+        this.setState({ showSaveStatusWarning: true, pendingSaveStatusData: saveData });
+      } else {
+        await this.executeSaveStatus(saveData);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to fetch significant series.');
+    }
+  };
+
+  executeSaveStatus = async ({ modifiedSeries, currentSigSeries, projectID, patientID, studyUID }) => {
+    // Build a map of existing significant series to preserve their order/pageOrder
+    const sigMap = {};
+    currentSigSeries.forEach(s => { sigMap[s.seriesUID] = { ...s }; });
+
+    const maxSigOrder = currentSigSeries.reduce((m, s) => Math.max(m, s.significanceOrder || 0), 0);
+    const maxPage = currentSigSeries.reduce((m, s) => Math.max(m, s.pageOrder || 0), 0);
+    let nextSigOrder = maxSigOrder + 1;
+
+    modifiedSeries.forEach(s => {
+      if (sigMap[s.seriesUID]) {
+        sigMap[s.seriesUID] = { ...sigMap[s.seriesUID], displayState: s.displayState };
+      } else {
+        sigMap[s.seriesUID] = {
+          seriesUID: s.seriesUID,
+          significanceOrder: nextSigOrder++,
+          pageOrder: maxPage > 0 ? maxPage : 1,
+          displayState: s.displayState,
+        };
+      }
+    });
+
+    try {
+      await setSignificantSeries(projectID, patientID, studyUID, Object.values(sigMap), true);
+
+      // Clear saved entries from session storage
+      const invertMap = JSON.parse(sessionStorage.getItem('invertMap') || '{}');
+      const imgStatus = JSON.parse(sessionStorage.getItem('imgStatus') || '[]');
+      const savedUIDs = new Set(modifiedSeries.map(s => s.seriesUID));
+      const { series } = this.props;
+      for (let i = 0; i < series.length; i++) {
+        if (series[i] && savedUIDs.has(series[i].seriesUID)) {
+          delete invertMap[i];
+          imgStatus[i] = null;
+        }
+      }
+      sessionStorage.setItem('invertMap', JSON.stringify(invertMap));
+      sessionStorage.setItem('imgStatus', JSON.stringify(imgStatus));
+
+      // Fetch updated state and reconstruct session storage
+      const { data: updatedSigSeries } = await getSignificantSeries(projectID, patientID, studyUID);
+      const newInvertMap = { ...invertMap };
+      const newImgStatus = [...imgStatus];
+
+      (updatedSigSeries || []).forEach(sig => {
+        if (!sig.displayState) return;
+        const vpIndex = series.findIndex(s => s && s.seriesUID === sig.seriesUID);
+        if (vpIndex === -1) return;
+        if (sig.displayState.invertMap !== undefined) newInvertMap[vpIndex] = sig.displayState.invertMap;
+        if (sig.displayState.imageStatus) newImgStatus[vpIndex] = sig.displayState.imageStatus;
+      });
+
+      sessionStorage.setItem('invertMap', JSON.stringify(newInvertMap));
+      sessionStorage.setItem('imgStatus', JSON.stringify(newImgStatus));
+
+      // Trigger Cornerstone re-render to reflect saved state
+      const elements = cornerstone.getEnabledElements();
+      elements.forEach(({ element }) => {
+        try { cornerstone.updateImage(element); } catch (e) {}
+      });
+
+      toast.success('Image status saved.');
+      this.setState({ showSaveStatusWarning: false, pendingSaveStatusData: null });
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to save image status.');
+    }
+  };
+
+  // --- End Save Image Status ---
+
   openNextWLStudy = async (worklistID, studyUID) => {
     try {
       const sortedData = JSON.parse(sessionStorage.getItem("sortedListMap")) || {};
@@ -3263,6 +3453,7 @@ class DisplayView extends Component {
             onOpenSeries={this.props.openSeries}
             openNextWLStudy={this.openNextWLStudy}
             onReorder={() => this.setState({ showReorderModal: true })}
+            onSaveState={this.handleSaveState}
           >
             <div className="mammo-toolbar-group">
               <button
@@ -3291,14 +3482,14 @@ class DisplayView extends Component {
                 <div className="toolContainer" />
                 <div className="buttonLabel">{this.state.mammoExpanded ? "RESTORE" : "EXPAND"}</div>
               </button>
-              <button
+              {/* <button
                 className="mammo-toolbar-btn mammo-toolbar-btn--disabled"
                 disabled
                 title="Save worklist (coming soon)"
               >
                 <div className="toolContainer" />
                 <div className="buttonLabel">SAVE WL</div>
-              </button>
+              </button> */}
             </div>
           </ToolMenu>
           {this.state.isLoading && (
@@ -3492,6 +3683,30 @@ class DisplayView extends Component {
             />
           );
         })()}
+        {this.state.showSaveStatusWarning && (
+          <div className="som-warn-modal" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)' }}>
+            <div style={{ background: '#1a2035', border: '1px solid #2e3a50', borderRadius: '6px', padding: '24px', maxWidth: '420px', width: '90%', color: '#cdd3e0' }}>
+              <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>⚠ Series Will Be Added to Significant Series</div>
+              <p style={{ fontSize: '13px', marginBottom: '20px', lineHeight: 1.5 }}>
+                One or more series with saved states are not yet in your display order. Saving will add them as significant series.
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button
+                  className="modal-button btn btn-secondary btn-sm"
+                  onClick={() => this.setState({ showSaveStatusWarning: false, pendingSaveStatusData: null })}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="modal-button btn btn-secondary btn-sm"
+                  onClick={() => this.executeSaveStatus(this.state.pendingSaveStatusData)}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </React.Fragment>
     );
     // </div>
