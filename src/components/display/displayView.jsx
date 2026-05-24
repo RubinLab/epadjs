@@ -3000,7 +3000,6 @@ class DisplayView extends Component {
     const { series, mammogramSeries } = this.props;
     const hasMammoSeries = !!(mammogramSeries && mammogramSeries.length > 0);
     const hasOpenMG = !!(series && series.some(s => s && s.examType?.toUpperCase() === 'MG'));
-    console.log('[MG Debug] isMammogramOpen — mammogramSeries.length:', mammogramSeries?.length, '| hasOpenMG:', hasOpenMG, '| result:', hasMammoSeries && hasOpenMG);
     return hasMammoSeries && hasOpenMG;
   };
 
@@ -3611,7 +3610,7 @@ class DisplayView extends Component {
                       >
                         <FaPen />
                       </span>
-                      {this.isMammogramOpen() && (
+                      {this.props.series && this.props.series[i] && this.props.series[i].examType?.toUpperCase() === 'MG' && (
                         <span
                           className={"dot mammo-select-dot" + (this.state.selectedPorts.has(i) ? " mammo-select-dot--checked" : "")}
                           style={{ float: "right" }}
