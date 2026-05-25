@@ -65,6 +65,16 @@ class selectSerieModal extends React.Component {
       selectionType = "aim";
     }
     this.setState({ selectionType });
+
+    // For mammogram studies (all series have examType MG), allow up to 8 significant series
+    const allSeriesFlat = (Array.isArray(this.props.seriesPassed)
+      ? this.props.seriesPassed
+      : Object.values(this.props.seriesPassed)
+    ).flat();
+    if (allSeriesFlat.length > 0 && allSeriesFlat.every(s => (s.examType || s.modality)?.toUpperCase() === 'MG')) {
+      this.maxPort = 8;
+    }
+
     this.setPreSelecteds();
     const limit = this.updateLimit();
     this.setState({ limit });
