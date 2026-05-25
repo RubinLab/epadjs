@@ -215,6 +215,8 @@ class DisplayView extends Component {
       isVisible: true,
       selectedPorts: new Set(),
       mammoExpanded: false,
+      hiddenPorts: new Set(),
+      expandedOrder: null,
       showReorderModal: false,
       showSaveStatusWarning: false,
       pendingSaveStatusData: null,
@@ -3152,7 +3154,7 @@ class DisplayView extends Component {
    */
   handleMammoExpand = () => {
     const { activePort } = this.props;
-    const { selectedPorts, mammoExpanded, containerHeight } = this.state;
+    const { selectedPorts, mammoExpanded, containerHeight, data } = this.state;
 
     if (mammoExpanded) {
       this.restoreMammoExpand();
@@ -3160,13 +3162,11 @@ class DisplayView extends Component {
     }
 
     if (selectedPorts.size === 2) {
+      // selectedArr preserves insertion order: [firstSelected, secondSelected]
       const selectedArr = Array.from(selectedPorts);
-      const elements = document.getElementsByClassName("viewportContainer");
-      for (let i = 0; i < elements.length; i++) {
-        elements[i].style.display = selectedArr.includes(i) ? "inline-block" : "none";
-      }
+      const hidden = new Set(data.map((_, i) => i).filter(i => !selectedArr.includes(i)));
       this.setState(
-        { mammoExpanded: true, width: "50%", height: containerHeight },
+        { mammoExpanded: true, width: "50%", height: containerHeight, hiddenPorts: hidden, expandedOrder: selectedArr },
         () => window.dispatchEvent(new CustomEvent("resize", { detail: { isMaximize: true } }))
       );
     } else {
@@ -3176,12 +3176,8 @@ class DisplayView extends Component {
 
   /** Restore all viewports to the standard grid layout and clear dot selections. */
   restoreMammoExpand = () => {
-    const elements = document.getElementsByClassName("viewportContainer");
-    for (let i = 0; i < elements.length; i++) {
-      elements[i].style.display = "inline-block";
-    }
     this.setState(
-      { mammoExpanded: false, selectedPorts: new Set() },
+      { mammoExpanded: false, selectedPorts: new Set(), hiddenPorts: new Set(), expandedOrder: null },
       () => {
         this.getViewports();
         window.dispatchEvent(new CustomEvent("resize", { detail: { isMaximize: false } }));
@@ -3191,14 +3187,7 @@ class DisplayView extends Component {
 
   /** Clear mammogram selection state (dots + expand). Called on NEXT and new study. */
   clearMammoSelection = () => {
-    if (this.state.mammoExpanded) {
-      // Restore hidden viewports before clearing state
-      const elements = document.getElementsByClassName("viewportContainer");
-      for (let i = 0; i < elements.length; i++) {
-        elements[i].style.display = "inline-block";
-      }
-    }
-    this.setState({ selectedPorts: new Set(), mammoExpanded: false });
+    this.setState({ selectedPorts: new Set(), mammoExpanded: false, hiddenPorts: new Set(), expandedOrder: null });
   };
 
   // --- End mammogram pagination ---
@@ -3502,7 +3491,9 @@ class DisplayView extends Component {
           )}
           {!this.state.isLoading &&
             Object.entries(series).length &&
-            data.map((data, i) => {
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignContent: 'flex-start' }}>
+            {data.map((data, i) => {
+              const { hiddenPorts, expandedOrder } = this.state;
               return (
                 <div
                   ref={this.viewportRefs[i] || (this.viewportRefs[i] = React.createRef())}
@@ -3514,7 +3505,8 @@ class DisplayView extends Component {
                   style={{
                     width: this.state.width,
                     height: this.state.height,
-                    display: "inline-block",
+                    display: hiddenPorts.has(i) ? "none" : "inline-block",
+                    order: expandedOrder ? expandedOrder.indexOf(i) : undefined,
                   }}
                   onClick={() => this.setActive(i)}
                 >
@@ -3665,6 +3657,7 @@ class DisplayView extends Component {
                 </div>
               );
             })}
+            </div>}
           {/* <ContextMenu
             onAnnotate={this.onAnnotate}
             closeViewport={this.closeViewport}
