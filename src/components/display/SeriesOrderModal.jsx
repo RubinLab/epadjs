@@ -49,13 +49,16 @@ export default function SeriesOrderModal({ show, onClose, projectID, subjectUID,
       // Track which initially-ordered series have a displayState
       ordered.forEach(s => { if (hasDisplayState(s)) initialWithState.current.add(s.seriesUID); });
 
-      // Build page grid
+      // Build page grid. Series whose significanceOrder overflows a page (e.g. legacy MG
+      // data with significanceOrder 1–8 and no pageOrder) wrap to the next page automatically.
       const pageMap = {};
       ordered.forEach(s => {
-        const pageIdx = (s.pageOrder != null ? s.pageOrder : 1) - 1;
+        const basePage = Math.max((s.pageOrder != null ? s.pageOrder : 1) - 1, 0);
         const slotIdx = (s.significanceOrder || 1) - 1;
+        const pageIdx = basePage + Math.floor(slotIdx / SLOTS);
+        const effectiveSlot = slotIdx % SLOTS;
         if (!pageMap[pageIdx]) pageMap[pageIdx] = Array(SLOTS).fill(null);
-        pageMap[pageIdx][Math.min(slotIdx, SLOTS - 1)] = s;
+        pageMap[pageIdx][effectiveSlot] = s;
       });
 
       const maxPage = ordered.length > 0 ? Math.max(...Object.keys(pageMap).map(Number)) : 0;
