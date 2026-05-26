@@ -217,6 +217,8 @@ class DisplayView extends Component {
       mammoExpanded: false,
       hiddenPorts: new Set(),
       expandedOrder: null,
+      trimMode: false,
+      trimmedDimensions: {},
       showReorderModal: false,
       showSaveStatusWarning: false,
       pendingSaveStatusData: null,
@@ -3177,7 +3179,7 @@ class DisplayView extends Component {
   /** Restore all viewports to the standard grid layout and clear dot selections. */
   restoreMammoExpand = () => {
     this.setState(
-      { mammoExpanded: false, selectedPorts: new Set(), hiddenPorts: new Set(), expandedOrder: null },
+      { mammoExpanded: false, selectedPorts: new Set(), hiddenPorts: new Set(), expandedOrder: null, trimMode: false, trimmedDimensions: {} },
       () => {
         this.getViewports();
         window.dispatchEvent(new CustomEvent("resize", { detail: { isMaximize: false } }));
@@ -3187,7 +3189,59 @@ class DisplayView extends Component {
 
   /** Clear mammogram selection state (dots + expand). Called on NEXT and new study. */
   clearMammoSelection = () => {
-    this.setState({ selectedPorts: new Set(), mammoExpanded: false, hiddenPorts: new Set(), expandedOrder: null });
+    this.setState({ selectedPorts: new Set(), mammoExpanded: false, hiddenPorts: new Set(), expandedOrder: null, trimMode: false, trimmedDimensions: {} });
+  };
+
+  handleTrimMode = () => {
+    const next = !this.state.trimMode;
+    const { expandedOrder, hiddenPorts, data } = this.state;
+    // When expanded: trim only the 2 visible expanded viewports.
+    // When not expanded: trim all visible viewports.
+    const targetIndices = expandedOrder
+      ? expandedOrder
+      : data.map((_, i) => i).filter(i => !hiddenPorts.has(i));
+
+    const resizeTargets = () => {
+      setTimeout(() => {
+        targetIndices.forEach(i => {
+          try {
+            const elements = cornerstone.getEnabledElements();
+            const el = elements[i] && elements[i].element;
+            if (el) cornerstone.resize(el, true);
+          } catch (e) {}
+        });
+      }, 50);
+    };
+
+    if (!next) {
+      this.setState({ trimMode: false, trimmedDimensions: {} }, resizeTargets);
+      return;
+    }
+
+    const trimmedDimensions = {};
+    targetIndices.forEach(i => {
+      try {
+        const containerEl = this.viewportRefs[i] && this.viewportRefs[i].current;
+        const elements = cornerstone.getEnabledElements();
+        const el = elements[i] && elements[i].element;
+        if (!containerEl || !el) return;
+        const enabledEl = cornerstone.getEnabledElement(el);
+        const image = enabledEl && enabledEl.image;
+        if (!image) return;
+        const imageAspect = image.columns / image.rows;
+        const containerW = containerEl.clientWidth;
+        const containerH = containerEl.clientHeight;
+        if (imageAspect < containerW / containerH) {
+          // Portrait image: black bars on sides → shrink width
+          trimmedDimensions[i] = { width: Math.round(containerH * imageAspect) + 'px', height: null };
+        } else {
+          // Landscape image: black bars top/bottom → shrink height
+          trimmedDimensions[i] = { width: null, height: Math.round(containerW / imageAspect) + 'px' };
+        }
+      } catch (e) {}
+    });
+
+    this.setState({ trimMode: true, trimmedDimensions }, resizeTargets);
   };
 
   // --- End mammogram pagination ---
@@ -3416,6 +3470,11 @@ class DisplayView extends Component {
     const redirect = mode === "teaching" ? "search" : "list";
     let invertMap = sessionStorage.getItem("invertMap");
     invertMap = invertMap ? JSON.parse(invertMap) : {};
+    const { trimMode, width: stateWidth } = this.state;
+    const vpGridCols = trimMode ? (Math.round(100 / parseFloat(stateWidth)) || 2) : undefined;
+    const vpWrapperStyle = trimMode
+      ? { display: 'grid', gridTemplateColumns: `repeat(${vpGridCols}, 1fr)`, alignContent: 'start' }
+      : { display: 'flex', flexWrap: 'wrap', alignContent: 'flex-start' };
 
     return !Object.entries(series).length ? (
       <Redirect to={`/${redirect}`} />
@@ -3470,6 +3529,14 @@ class DisplayView extends Component {
                 <div className="toolContainer" />
                 <div className="buttonLabel">{this.state.mammoExpanded ? "RESTORE" : "EXPAND"}</div>
               </button>
+              <button
+                className={"mammo-toolbar-btn" + (this.state.trimMode ? " mammo-toolbar-btn--active" : "")}
+                onClick={this.handleTrimMode}
+                title={this.state.trimMode ? "Restore original viewport size" : "Trim black bars to fit image"}
+              >
+                <div className="toolContainer" />
+                <div className="buttonLabel">{this.state.trimMode ? "UNTRIM" : "TRIM"}</div>
+              </button>
               {/* <button
                 className="mammo-toolbar-btn mammo-toolbar-btn--disabled"
                 disabled
@@ -3491,9 +3558,15 @@ class DisplayView extends Component {
           )}
           {!this.state.isLoading &&
             Object.entries(series).length &&
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignContent: 'flex-start' }}>
+            <div style={vpWrapperStyle}>
             {data.map((data, i) => {
-              const { hiddenPorts, expandedOrder } = this.state;
+              const { hiddenPorts, expandedOrder, trimMode, trimmedDimensions } = this.state;
+              const trimDim = trimMode && trimmedDimensions && trimmedDimensions[i];
+              // In trim/grid mode, align paired viewports toward each other (no gap between them)
+              const visualCol = trimMode
+                ? (expandedOrder ? expandedOrder.indexOf(i) : i) % vpGridCols
+                : -1;
+              const justifySelf = visualCol >= 0 ? (visualCol % 2 === 0 ? 'end' : 'start') : undefined;
               return (
                 <div
                   ref={this.viewportRefs[i] || (this.viewportRefs[i] = React.createRef())}
@@ -3503,10 +3576,11 @@ class DisplayView extends Component {
                   key={i}
                   id={"viewportContainer" + i}
                   style={{
-                    width: this.state.width,
-                    height: this.state.height,
+                    width: (trimDim && trimDim.width) ? trimDim.width : (trimMode ? '100%' : this.state.width),
+                    height: (trimDim && trimDim.height) ? trimDim.height : this.state.height,
                     display: hiddenPorts.has(i) ? "none" : "inline-block",
                     order: expandedOrder ? expandedOrder.indexOf(i) : undefined,
+                    justifySelf,
                   }}
                   onClick={() => this.setActive(i)}
                 >
