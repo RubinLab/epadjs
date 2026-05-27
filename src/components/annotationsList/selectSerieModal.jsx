@@ -67,23 +67,13 @@ class selectSerieModal extends React.Component {
     this.setState({ selectionType });
 
     // For mammogram studies, allow up to 8 significant series.
-    // Exclude PR (presentation state) files before checking — they are supplementary
-    // and should not prevent a study from being identified as mammogram.
-    const allSeriesFlat = (Array.isArray(this.props.seriesPassed)
-      ? this.props.seriesPassed
-      : Object.values(this.props.seriesPassed)
-    ).flat();
-    const primarySeries = allSeriesFlat.filter(s => (s.examType || s.modality)?.toUpperCase() !== 'PR');
-    if (primarySeries.some(s => (s.examType || s.modality)?.toUpperCase() === 'MG')) {
-      this.maxPort = 8;
-    }
-
     this.setPreSelecteds();
     const limit = this.updateLimit();
     this.setState({ limit });
 
     // teaching file save related
     const { isTeachingFile } = this.props;
+    if (isTeachingFile) this.maxPort = 8;
     if (isTeachingFile) {
       const element = document.getElementById("questionaire");
       const speciality = document.getElementById("speciality");
