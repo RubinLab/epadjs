@@ -74,7 +74,7 @@ class selectSerieModal extends React.Component {
       : Object.values(this.props.seriesPassed)
     ).flat();
     const primarySeries = allSeriesFlat.filter(s => (s.examType || s.modality)?.toUpperCase() !== 'PR');
-    if (primarySeries.length > 0 && primarySeries.every(s => (s.examType || s.modality)?.toUpperCase() === 'MG')) {
+    if (primarySeries.some(s => (s.examType || s.modality)?.toUpperCase() === 'MG')) {
       this.maxPort = 8;
     }
 
