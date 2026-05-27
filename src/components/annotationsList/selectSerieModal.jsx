@@ -222,8 +222,15 @@ class selectSerieModal extends React.Component {
     studies.forEach((arr) => { series = series.concat(arr); });
     const seriesArr = await this.saveSignificantSeries(series);
 
+    // Only open the first page of significant series (up to maxPort).
+    // Additional pages are navigated via PREV/NEXT in the display view.
+    const viewportLimit = parseInt(sessionStorage.getItem('maxPort')) || 4;
+    const pageOneArr = seriesArr
+      .filter(el => el.pageOrder == null || el.pageOrder === 1)
+      .slice(0, viewportLimit);
+
     // Resolve each series and embed the effective aimID so the helper can use it.
-    const resolvedSeries = seriesArr.map(el => {
+    const resolvedSeries = pageOneArr.map(el => {
       const serie = this.findSerieFromSeries(el.seriesUID, series);
       return {
         ...serie,
