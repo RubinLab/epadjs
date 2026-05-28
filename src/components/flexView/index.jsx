@@ -117,7 +117,10 @@ class FlexView extends React.Component {
       this.props.dispatch(clearMammogramSeries());
       if (!dataExists && seriesCallSent !== studyUID) {
         this.setState({ loading: true });
-        ({ data: series } = await getSeries(projectID, patientID, studyUID));
+        ({ data: series } = await getSeries(projectID, patientID, studyUID, false));
+        if (!series || series.length === 0) {
+          ({ data: series } = await getSeries(projectID, patientID, studyUID, true));
+        }
         this.setState({ loading: false });
         seriesCallSent = studyUID;
         this.props.dispatch(

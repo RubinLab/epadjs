@@ -395,13 +395,16 @@ function AnnotationTable(props) {
       seriesData[projectID][patientID][studyUID] &&
       seriesData[projectID][patientID][studyUID].list;
       if (!dataExists && seriesCallSent !== studyUID) {
-        const { data: series } = await getSeries(
+        let { data: series } = await getSeries(
           projectID,
           patientID,
-          studyUID, 
+          studyUID,
           force,
           "getSeriesData, AnnotationTable"
           );
+        if ((!series || series.length === 0) && !force) {
+          ({ data: series } = await getSeries(projectID, patientID, studyUID, true, "getSeriesData, AnnotationTable [retry]"));
+        }
         seriesCallSent = studyUID;
         props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
         props.dispatch(loadCompleted());

@@ -223,9 +223,9 @@ let seriesCallSent;
     try {
       const isTeaching =  mode === 'teaching';
       if (!dataExists && seriesCallSent !== studyUID) {
-        ({ data: series } = await getSeries(projectID, subjectID, studyUID));
-        if (series.length === 0 && isTeaching) 
-          ({ data: series } = await getSeries(projectID, subjectID, studyUID, isTeaching));
+        ({ data: series } = await getSeries(projectID, subjectID, studyUID, false));
+        if (!series || series.length === 0)
+          ({ data: series } = await getSeries(projectID, subjectID, studyUID, true));
         props.dispatch(setSeriesData(projectID, subjectID, studyUID, series, true));
         seriesCallSent = studyUID;
       } else series = seriesData[projectID][subjectID][studyUID].list;

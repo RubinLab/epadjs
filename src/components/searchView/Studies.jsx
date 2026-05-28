@@ -201,11 +201,10 @@ function Studies(props) {
 
     try {
       if (!dataExists) {
-        const { data: series } = await getSeries(
-          projectID,
-          patientID,
-          studyUID
-        );
+        let { data: series } = await getSeries(projectID, patientID, studyUID, false);
+        if (!series || series.length === 0) {
+          ({ data: series } = await getSeries(projectID, patientID, studyUID, true));
+        }
         props.dispatch(loadCompleted());
         props.dispatch(
           setSeriesData(projectID, patientID, studyUID, series, true)

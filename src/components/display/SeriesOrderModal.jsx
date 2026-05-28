@@ -41,7 +41,10 @@ export default function SeriesOrderModal({ show, onClose, projectID, subjectUID,
   const loadData = async () => {
     setLoading(true);
     try {
-      const { data: seriesArr } = await getSeries(projectID, subjectUID, studyUID);
+      let { data: seriesArr } = await getSeries(projectID, subjectUID, studyUID, false);
+      if (!seriesArr || seriesArr.length === 0) {
+        ({ data: seriesArr } = await getSeries(projectID, subjectUID, studyUID, true));
+      }
 
       const ordered = seriesArr.filter(s => s.significanceOrder != null);
       const unorderedArr = seriesArr.filter(s => s.significanceOrder == null);
