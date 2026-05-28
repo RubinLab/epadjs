@@ -402,8 +402,9 @@ function AnnotationTable(props) {
           force,
           "getSeriesData, AnnotationTable"
           );
-        if ((!series || series.length === 0) && !force) {
-          ({ data: series } = await getSeries(projectID, patientID, studyUID, true, "getSeriesData, AnnotationTable [retry]"));
+        if (!series || series.length === 0) {
+          // Test server has 2 DBs behind forceDicomweb=false vs true; retry with opposite.
+          ({ data: series } = await getSeries(projectID, patientID, studyUID, !force, "getSeriesData, AnnotationTable [retry]"));
         }
         seriesCallSent = studyUID;
         props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
