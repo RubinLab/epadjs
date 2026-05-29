@@ -7,6 +7,7 @@ import * as dcmjs from "dcmjs";
 import _ from "lodash";
 import CornerstoneViewport from "react-cornerstone-viewport";
 import { FaExpandArrowsAlt, FaPen, FaTag, FaTimes, FaRegSquare, FaCheckSquare } from "react-icons/fa";
+import { unstable_batchedUpdates } from "react-dom";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
@@ -38,13 +39,16 @@ import {
   setSegLabelMapIndex,
   setSeriesData,
   setMammogramPage,
+  setMammogramSeries,
   setPageOrder,
+  setPageOrderSeries,
   // fillSeriesDescfullData
   updateGridWithMultiFrameInfo,
   updateImageId,
   updateSubpath
 } from "../annotationsList/action";
 import { openSeriesInDisplay } from "../common/openSeriesHelper";
+import { isSupportedModality } from "../../Utils/aid.js";
 import { arrow } from "./Arrow";
 import { bidirectional } from "./Bidirectional";
 import { circle } from "./Circle";
@@ -3246,6 +3250,70 @@ class DisplayView extends Component {
 
   // --- End mammogram pagination ---
 
+  /** Re-fetch series after reorder save and reload the display with page 1. */
+  refreshAfterReorder = async () => {
+    const active = this.props.series[this.props.activePort] || {};
+    const { projectID, patientID, studyUID } = active;
+    if (!projectID || !patientID || !studyUID) return;
+    try {
+      let { data: series } = await getSeries(projectID, patientID, studyUID, false);
+      if (!series || series.length === 0) {
+        ({ data: series } = await getSeries(projectID, patientID, studyUID, true));
+      }
+      series = (series || []).filter(isSupportedModality);
+      if (series.length === 0) return;
+
+      const significant = series.filter(s => s.significanceOrder != null);
+      const hasPageOrder = significant.length > 0 && significant.some(s => s.pageOrder != null);
+      const maxPort = parseInt(sessionStorage.getItem('maxPort'));
+
+      // Batch dispatches so React doesn't render the transient empty-openSeries state
+      // (which would trigger <Redirect> back to the search/list view).
+      unstable_batchedUpdates(() => {
+        this.clearMammoSelection();
+        this.clearPageSessionStorage();
+        this.props.dispatch(clearGrid());
+        this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series, true));
+
+        if (hasPageOrder) {
+          this.props.dispatch(setPageOrderSeries(significant));
+          const pageOne = significant
+            .filter(s => s.pageOrder === 1)
+            .sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+          openSeriesInDisplay({
+            dispatch: this.props.dispatch,
+            navigate: () => {},
+            openSeries: [],
+            series: pageOne.length ? pageOne : significant.slice(0, maxPort),
+            existingData: series,
+          });
+        } else {
+          this.props.dispatch(setMammogramSeries(series, studyUID));
+          const toDisplay = significant.length > 0
+            ? significant.sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0))
+            : series.slice(0, maxPort);
+          openSeriesInDisplay({
+            dispatch: this.props.dispatch,
+            navigate: () => {},
+            openSeries: [],
+            series: toDisplay,
+            existingData: series,
+          });
+        }
+      });
+      // After React commits the batched dispatches, force the local viewport
+      // data state to reload the new series' image stacks.
+      setTimeout(() => {
+        this.setState({ isLoading: true, data: [], dataIndexMap: {} }, () => {
+          this.getViewports();
+          this.getData(null, null, 'afterReorder', true);
+        });
+      }, 0);
+    } catch (err) {
+      console.error('refreshAfterReorder error', err);
+    }
+  };
+
   // --- Display State Restore ---
 
   applyDisplayStateToSession = () => {
@@ -3743,6 +3811,7 @@ class DisplayView extends Component {
             <SeriesOrderModal
               show
               onClose={() => this.setState({ showReorderModal: false })}
+              onSaved={this.refreshAfterReorder}
               projectID={active.projectID}
               subjectUID={active.patientID}
               studyUID={active.studyUID}

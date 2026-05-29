@@ -557,6 +557,7 @@ function AnnotationTable(props) {
       const significant = filtered.filter(s => s.significanceOrder != null);
       const hasPageOrder = significant.length > 0 && significant.some(s => s.pageOrder != null);
 
+      console.log(significant, hasPageOrder);
       if (significant.length > 0 && hasPageOrder) {
         // Case 1: pageOrder navigation — load page 1, enable Next/Prev by pageOrder.
         props.dispatch(setPageOrderSeries(significant));

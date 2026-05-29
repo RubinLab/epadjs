@@ -12,7 +12,7 @@ const hasDisplayState = (serie) =>
   serie.displayState &&
   Object.values(serie.displayState).some(v => v !== null && v !== '' && v !== undefined);
 
-export default function SeriesOrderModal({ show, onClose, projectID, subjectUID, studyUID }) {
+export default function SeriesOrderModal({ show, onClose, onSaved, projectID, subjectUID, studyUID }) {
   const [pages, setPages] = useState([Array(SLOTS).fill(null)]);
   const [unordered, setUnordered] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -185,7 +185,11 @@ export default function SeriesOrderModal({ show, onClose, projectID, subjectUID,
       });
     });
     setSignificantSeries(projectID, subjectUID, studyUID, payload, true)
-      .then(() => { toast.success('Series order saved!'); onClose(); })
+      .then(() => {
+        toast.success('Series order saved!');
+        if (onSaved) onSaved();
+        onClose();
+      })
       .catch(() => toast.error('Could not save series order'));
   };
 
