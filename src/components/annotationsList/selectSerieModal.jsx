@@ -367,7 +367,9 @@ class selectSerieModal extends React.Component {
         let seriesNo = series[i][k].seriesNo || "";
         let desc = series[i][k].seriesDescription;
         let description = desc ? desc : !desc && series[i][k].significanceOrder ? `Sig Series ${series[i][k].significanceOrder}` :  "Unnamed Series";
-        desc = `${seriesNo} - ${description}`;
+        const modality = series[i][k].examType || series[i][k].modality;
+        const modalityLabel = modality ? ` [${modality.toUpperCase()}]` : "";
+        desc = `${seriesNo} - ${description}${modalityLabel}`;
         if (series[i][k].significanceOrder) {
           desc = desc + " (S)";
           isSignificant = true;
