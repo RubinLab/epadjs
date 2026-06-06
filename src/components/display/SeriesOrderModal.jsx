@@ -3,6 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 import { toast } from 'react-toastify';
 import { getSeries } from '../../services/seriesServices';
 import { setSignificantSeries } from '../../services/seriesServices';
+import { DISP_MODALITIES } from '../../constants';
 import './SeriesOrderModal.css';
 
 const SLOTS = 4;
@@ -45,6 +46,11 @@ export default function SeriesOrderModal({ show, onClose, onSaved, projectID, su
       if (!seriesArr || seriesArr.length === 0) {
         ({ data: seriesArr } = await getSeries(projectID, subjectUID, studyUID, true));
       }
+
+      seriesArr = (seriesArr || []).filter(s => {
+        const m = (s.examType || s.modality || '').toUpperCase();
+        return DISP_MODALITIES.includes(m);
+      });
 
       const ordered = seriesArr.filter(s => s.significanceOrder != null);
       const unorderedArr = seriesArr.filter(s => s.significanceOrder == null);
