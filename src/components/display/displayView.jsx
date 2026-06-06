@@ -3045,6 +3045,21 @@ class DisplayView extends Component {
     sessionStorage.setItem('imgStatus', JSON.stringify([]));
   };
 
+  /**
+   * Force reload local viewport image stacks after a page navigation that
+   * changes the open series. componentDidUpdate's branch that calls getData
+   * relies on series length increasing or activePort UID changing, so it
+   * misses the case where a page has fewer series than before.
+   */
+  forceViewportRefresh = () => {
+    setTimeout(() => {
+      this.setState({ isLoading: true, data: [], dataIndexMap: {} }, () => {
+        this.getViewports();
+        this.getData(null, null, 'forceViewportRefresh', true);
+      });
+    }, 0);
+  };
+
   handlePageOrderNext = () => {
     const { pageOrderSeries, currentPageOrder } = this.props;
     const nextPage = currentPageOrder + 1;
@@ -3064,6 +3079,7 @@ class DisplayView extends Component {
       series: nextSeries,
       existingData: pageOrderSeries,
     });
+    this.forceViewportRefresh();
   };
 
   /** Clears the grid and loads the previous pageOrder page. */
@@ -3087,6 +3103,7 @@ class DisplayView extends Component {
       series: prevSeries,
       existingData: pageOrderSeries,
     });
+    this.forceViewportRefresh();
   };
 
   /** Clears the grid and loads the next group of MAMMO_PAGE_SIZE series. */
@@ -3109,6 +3126,7 @@ class DisplayView extends Component {
       series: nextSeries,
       existingData: mammogramSeries,
     });
+    this.forceViewportRefresh();
   };
 
   /** Clears the grid and loads the previous group of MAMMO_PAGE_SIZE series. */
@@ -3132,6 +3150,7 @@ class DisplayView extends Component {
       series: prevSeries,
       existingData: mammogramSeries,
     });
+    this.forceViewportRefresh();
   };
 
   /** Toggle selection of a viewport dot. Max 2 at a time. */
@@ -3160,10 +3179,15 @@ class DisplayView extends Component {
    */
   handleMammoExpand = () => {
     const { activePort } = this.props;
-    const { selectedPorts, mammoExpanded, containerHeight, data } = this.state;
+    const { selectedPorts, mammoExpanded, hiding, containerHeight, data } = this.state;
 
     if (mammoExpanded) {
       this.restoreMammoExpand();
+      return;
+    }
+
+    if (hiding) {
+      this.hideShow(activePort);
       return;
     }
 
@@ -3301,14 +3325,7 @@ class DisplayView extends Component {
           });
         }
       });
-      // After React commits the batched dispatches, force the local viewport
-      // data state to reload the new series' image stacks.
-      setTimeout(() => {
-        this.setState({ isLoading: true, data: [], dataIndexMap: {} }, () => {
-          this.getViewports();
-          this.getData(null, null, 'afterReorder', true);
-        });
-      }, 0);
+      this.forceViewportRefresh();
     } catch (err) {
       console.error('refreshAfterReorder error', err);
     }
@@ -3592,10 +3609,10 @@ class DisplayView extends Component {
               <button
                 className="mammo-toolbar-btn"
                 onClick={this.handleMammoExpand}
-                title={this.state.mammoExpanded ? "Restore standard layout" : "Expand viewport(s)"}
+                title={(this.state.mammoExpanded || this.state.hiding) ? "Restore standard layout" : "Expand viewport(s)"}
               >
                 <div className="toolContainer" />
-                <div className="buttonLabel">{this.state.mammoExpanded ? "RESTORE" : "EXPAND"}</div>
+                <div className="buttonLabel">{(this.state.mammoExpanded || this.state.hiding) ? "RESTORE" : "EXPAND"}</div>
               </button>
               <button
                 className={"mammo-toolbar-btn" + (this.state.trimMode ? " mammo-toolbar-btn--active" : "")}
