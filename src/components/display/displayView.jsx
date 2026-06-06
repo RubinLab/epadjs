@@ -256,6 +256,7 @@ class DisplayView extends Component {
   };
 
   _explicitlyReset = new Set();
+  _savedDisplayStates = new Map();
 
   componentDidMount() {
     const { series, onSwitchView } = this.props;
@@ -265,6 +266,7 @@ class DisplayView extends Component {
     this.props.dispatch(clearSelection());
     this.getViewports();
     this._explicitlyReset.clear();
+    this._savedDisplayStates.clear();
     sessionStorage.setItem('invertMap', JSON.stringify({}));
     sessionStorage.setItem('imgStatus', JSON.stringify([]));
     this.applyDisplayStateToSession();
@@ -3340,12 +3342,17 @@ class DisplayView extends Component {
     // Build seriesUID → displayState map. pageOrderSeries carries the full
     // significant-series records from the backend (including displayState).
     // openSeries entries (series[i]) may also carry it if addToGrid preserved it.
+    // _savedDisplayStates holds in-session saves so they survive prev/next
+    // navigation before the backend data is refetched.
     const displayStateMap = {};
     (pageOrderSeries || []).forEach(s => {
       if (s && s.displayState) displayStateMap[s.seriesUID] = s.displayState;
     });
     series.forEach(s => {
       if (s && s.displayState) displayStateMap[s.seriesUID] = s.displayState;
+    });
+    this._savedDisplayStates.forEach((displayState, seriesUID) => {
+      displayStateMap[seriesUID] = displayState;
     });
 
     if (Object.keys(displayStateMap).length === 0) return;
@@ -3483,6 +3490,14 @@ class DisplayView extends Component {
 
       sessionStorage.setItem('invertMap', JSON.stringify(newInvertMap));
       sessionStorage.setItem('imgStatus', JSON.stringify(newImgStatus));
+
+      // Cache the freshly-saved displayState by seriesUID so navigating away and
+      // back can re-apply it. This avoids re-fetching from the backend mid-session.
+      (updatedSigSeries || []).forEach(sig => {
+        if (sig && sig.seriesUID && sig.displayState) {
+          this._savedDisplayStates.set(sig.seriesUID, sig.displayState);
+        }
+      });
 
       // Trigger Cornerstone re-render to reflect saved state
       const elements = cornerstone.getEnabledElements();
