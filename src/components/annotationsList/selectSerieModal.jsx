@@ -11,6 +11,7 @@ import {
   getWholeData,
   clearSelection,
   setSeriesData,
+  setPageOrderSeries,
 } from "./action";
 import { openSeriesInDisplay } from "../common/openSeriesHelper";
 import SelectionItem from "./containers/selectionItem";
@@ -174,19 +175,25 @@ class selectSerieModal extends React.Component {
   saveSignificantSeries = async (series) => {
     const { selectedToDisplay } = this.state;
     let significantSeries = [];
-    let significanceOrder = 1;
+    let globalOrder = 1;
+    // Split teaching-file significant series into pages of displayMaxPort so the
+    // display view can open page 1 and paginate the rest via PREV/NEXT.
+    const displayMaxPort = parseInt(sessionStorage.getItem("maxPort")) || 4;
     let significanceSet = series.some((serie) => serie.significanceOrder > 0);
     const seriesInDetail = [];
     for (let key of Object.keys(selectedToDisplay)) {
       const ser = series.filter(el => el.seriesUID === key);
       const seriesDescription = ser.length > 0 ? ser[0].seriesDescription : null;
       if (!significanceSet && this.mode === "teaching") {
+        const pageOrder = Math.ceil(globalOrder / displayMaxPort);
+        const slotOrder = ((globalOrder - 1) % displayMaxPort) + 1;
         significantSeries.push({
           seriesUID: key,
-          significanceOrder,
+          significanceOrder: slotOrder,
+          pageOrder,
           seriesDescription
         });
-        significanceOrder++;
+        globalOrder++;
       } else {
         seriesInDetail.push(ser[0]);
       }
@@ -228,6 +235,13 @@ class selectSerieModal extends React.Component {
     const pageOneArr = seriesArr
       .filter(el => el.pageOrder == null || el.pageOrder === 1)
       .slice(0, viewportLimit);
+
+    // Populate Redux pageOrderSeries so PREV/NEXT in the display view can
+    // paginate the remaining series (page 2+).
+    const hasMultiplePages = seriesArr.some(el => el.pageOrder != null && el.pageOrder > 1);
+    if (hasMultiplePages) {
+      this.props.dispatch(setPageOrderSeries(seriesArr));
+    }
 
     // Resolve each series and embed the effective aimID so the helper can use it.
     const resolvedSeries = pageOneArr.map(el => {
