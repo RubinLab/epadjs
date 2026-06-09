@@ -237,10 +237,16 @@ class selectSerieModal extends React.Component {
       .slice(0, viewportLimit);
 
     // Populate Redux pageOrderSeries so PREV/NEXT in the display view can
-    // paginate the remaining series (page 2+).
+    // paginate the remaining series (page 2+). The API response carries only
+    // minimal fields, so merge each entry with its full record from `series`
+    // (which has projectID/patientID/studyUID/etc. needed by addToGrid).
     const hasMultiplePages = seriesArr.some(el => el.pageOrder != null && el.pageOrder > 1);
     if (hasMultiplePages) {
-      this.props.dispatch(setPageOrderSeries(seriesArr));
+      const enrichedPageOrderSeries = seriesArr.map(el => {
+        const full = this.findSerieFromSeries(el.seriesUID, series) || {};
+        return { ...full, ...el };
+      });
+      this.props.dispatch(setPageOrderSeries(enrichedPageOrderSeries));
     }
 
     // Resolve each series and embed the effective aimID so the helper can use it.
