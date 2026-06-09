@@ -3057,6 +3057,10 @@ class DisplayView extends Component {
     setTimeout(() => {
       this.setState({ isLoading: true, data: [], dataIndexMap: {} }, () => {
         this.getViewports();
+        // Re-apply saved displayState (from pageOrderSeries + _savedDisplayStates)
+        // into sessionStorage so Cornerstone picks up window/level, zoom, etc.
+        // componentDidUpdate skips this when series count changes between pages.
+        this.applyDisplayStateToSession();
         this.getData(null, null, 'forceViewportRefresh', true);
       });
     }, 0);
