@@ -41,6 +41,7 @@ import {
   segUploadCompleted,
   annotationsLoadingError,
   setSeriesData,
+  setPageOrderSeries,
   storeAimSelectionAll
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
@@ -854,6 +855,21 @@ class App extends Component {
     // If there are significant series use them to display
     // if not display modality filtered series
     if (significantSeries.length && !worklistID) seriesArr = significantSeries;
+
+    // Multi-page teaching files: load page 1, populate pageOrderSeries so the
+    // display view's PREV/NEXT can paginate the remaining pages.
+    const hasPageOrder = significantSeries.length > 0 &&
+      significantSeries.some(s => s.pageOrder != null);
+    if (hasPageOrder && !worklistID) {
+      this.props.dispatch(setPageOrderSeries(significantSeries));
+      const pageOne = significantSeries
+        .filter(s => s.pageOrder === 1)
+        .sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+      seriesArr = pageOne.length > 0
+        ? pageOne
+        : significantSeries.slice(0, parseInt(sessionStorage.getItem("maxPort")) || 4);
+    }
+
     //if check if there is enough available viewports
     if (!this.hasEnoughViewports(seriesArr) && !worklistID) return;
     //add serie to the grid
