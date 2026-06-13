@@ -13,15 +13,18 @@ import { clearCarets, convertDateFormat } from "../../Utils/aid.js";
 import {
   changeActivePort,
   jumpToAim,
-  addToGrid,
-  getSingleSerie,
   startLoading,
   loadCompleted,
   annotationsLoadingError,
   updateSearchTableIndex,
   setSeriesData,
-  storeAimSelection
+  storeAimSelection,
+  setMammogramSeries,
+  clearMammogramSeries,
+  setPageOrderSeries,
+  clearPageOrderSeries,
 } from "../annotationsList/action";
+import { openSeriesInDisplay, isMammogramStudy } from "../common/openSeriesHelper";
 import { formatDate } from "../flexView/helperMethods";
 import { getSeries, getSignificantSeries } from "../../services/seriesServices";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
@@ -392,13 +395,17 @@ function AnnotationTable(props) {
       seriesData[projectID][patientID][studyUID] &&
       seriesData[projectID][patientID][studyUID].list;
       if (!dataExists && seriesCallSent !== studyUID) {
-        const { data: series } = await getSeries(
+        let { data: series } = await getSeries(
           projectID,
           patientID,
-          studyUID, 
+          studyUID,
           force,
           "getSeriesData, AnnotationTable"
           );
+        if (!series || series.length === 0) {
+          // Test server has 2 DBs behind forceDicomweb=false vs true; retry with opposite.
+          ({ data: series } = await getSeries(projectID, patientID, studyUID, !force, "getSeriesData, AnnotationTable [retry]"));
+        }
         seriesCallSent = studyUID;
         props.dispatch(setSeriesData(projectID, patientID, studyUID, series));
         props.dispatch(loadCompleted());
@@ -532,61 +539,108 @@ function AnnotationTable(props) {
   // CHECK
   const displaySeries = async (selected) => {
     const { subjectID: patientID, studyUID, aimID, projectID, template } = selected;
+    console.log(selected);
     let isTeachingFile = teachingFileTempCode === template;
-    let seriesArr = [];   
+    let seriesArr = [];
     let existingData = getExistingData(selected);
-    
+
     try {
+      props.dispatch(clearPageOrderSeries());
+      props.dispatch(clearMammogramSeries());
+      seriesArr = await getSeriesData(selected);
+      console.log('seriesArr before filter');
+      console.log(seriesArr);
+      const filtered = Array.isArray(seriesArr) ? seriesArr.filter(isSupportedModality) : [];
+      console.log('filtered -->', filtered);
+
+      // Decision tree: significant series take priority over mammogram fallback.
+      const significant = filtered.filter(s => s.significanceOrder != null);
+      const hasPageOrder = significant.length > 0 && significant.some(s => s.pageOrder != null);
+
+      console.log(significant, hasPageOrder);
+      if (significant.length > 0 && hasPageOrder) {
+        // Case 1: pageOrder navigation — load page 1, enable Next/Prev by pageOrder.
+        props.dispatch(setPageOrderSeries(significant));
+        let toDisplay = significant
+          .filter(s => s.pageOrder === 1)
+          .sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+        if (toDisplay.length === 0) toDisplay = significant.slice(0, maxPort);
+        setSelected(toDisplay);
+        openSeriesInDisplay({
+          dispatch: props.dispatch,
+          navigate: props.switchToDisplay,
+          openSeries: props.openSeries,
+          series: toDisplay,
+          aimID,
+          existingData: filtered,
+        });
+        return;
+      }
+
+      if (isMammogramStudy(filtered)) {
+        // Case 3 (no significant) or Case 6 (significant, no pageOrder, MG).
+        props.dispatch(clearPageOrderSeries());
+        props.dispatch(setMammogramSeries(filtered, studyUID));
+        const toDisplay = significant.length > 0
+          ? significant.sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0)) // Case 6
+          : filtered.slice(0, maxPort); // Case 3
+        setSelected(toDisplay);
+        openSeriesInDisplay({
+          dispatch: props.dispatch,
+          navigate: props.switchToDisplay,
+          openSeries: props.openSeries,
+          series: toDisplay,
+          aimID,
+          existingData: filtered,
+        });
+        return;
+      }
+
+      if (significant.length > 0) {
+        // Case 2: significant series, no pageOrder, non-mammogram — load directly, no Next/Prev.
+        props.dispatch(clearPageOrderSeries());
+        const toDisplay = significant.sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+        setSelected(toDisplay);
+        openSeriesInDisplay({
+          dispatch: props.dispatch,
+          navigate: props.switchToDisplay,
+          openSeries: props.openSeries,
+          series: toDisplay,
+          aimID,
+          existingData: getExistingData(selected),
+        });
+        return;
+      }
+
       if (isTeachingFile) {
-        seriesArr =  await getSignificantSeriesData(selected);
-        if (seriesArr.length > 0){
-          seriesArr = seriesArr.map( el => ({...el, patientID, studyUID, projectID, template }));}
-        else if (existingData && existingData.length <= maxPort) {
+        seriesArr = await getSignificantSeriesData(selected);
+        if (seriesArr.length > 0) {
+          seriesArr = seriesArr.map(el => ({ ...el, patientID, studyUID, projectID, template }));
+        } else if (existingData && existingData.length <= maxPort) {
           seriesArr = existingData;
         } else if (existingData && existingData.length > maxPort) {
-          seriesArr = existingData.slice(0,maxPort);
-          // setSelected(seriesArr);
-          // setShowSelectSeriesModal(true);
+          seriesArr = existingData.slice(0, maxPort);
         } else {
           seriesArr = await getSeriesData(selected, true);
-          seriesArr = seriesArr.slice(0,maxPort);
+          seriesArr = seriesArr.slice(0, maxPort);
         }
-      } else 
-        seriesArr = await getSeriesData(selected);
-      
+      }
     } catch (err) {
         setShowSpinner(false);
     }
 
     setSelected(seriesArr);
-    if (props.openSeries.length === maxPort) {
-      setShowSelectSeriesModal(true);
-      return;
-    }
-      //get extraction of the series (extract unopen series)
-    if (seriesArr && seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
-
-      // filter the series according to displayable modalities
     seriesArr = Array.isArray(seriesArr) ? seriesArr.filter(isSupportedModality) : [];
 
-      //check if there is enough room
-    if (seriesArr.length + props.openSeries.length > maxPort) {
-        //if there is not bring the modal
-      setShowSelectSeriesModal(true);
-        // TODO show toast
-    } else {
-        //if there is enough room
-        //add serie to the grid
-      const promiseArr = [];
-
-      existingData = getExistingData(selected);
-      for (let i = 0; i < seriesArr.length; i++) {
-        props.dispatch(addToGrid(seriesArr[i], aimID));
-        promiseArr.push(props.dispatch(getSingleSerie(seriesArr[i], aimID, null, existingData)));
-      }
-        //getsingleSerie
-      Promise.all(promiseArr).then(() => { props.switchToDisplay(); }).catch((err) => console.error(err));
-    }
+    openSeriesInDisplay({
+      dispatch: props.dispatch,
+      navigate: props.switchToDisplay,
+      openSeries: props.openSeries,
+      series: seriesArr,
+      aimID,
+      existingData: getExistingData(selected),
+      onGridFull: () => setShowSelectSeriesModal(true),
+    });
   };
  
 

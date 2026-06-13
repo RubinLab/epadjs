@@ -107,7 +107,7 @@
 } */
 
 .column.middle-right {
-  width: 65%;
+  width: 60%;
   display: grid; 
   grid-template-columns: 10em 1fr; 
   grid-template-rows: 1fr; 
@@ -119,9 +119,11 @@
 }
 
 .column.right {
-    width: 15%;
+    width: 20%;
+    min-width: 48px;
     float: right;
     padding-top: 2px;
+    white-space: nowrap;
 }
 
 /* label {
@@ -140,6 +142,25 @@
     display: inline-block;
     margin-top: 3px;
     margin-left: 5px;
+}
+
+/* Mammogram viewport selection dot */
+.mammo-select-dot {
+    background: transparent;
+    border-radius: 0;
+    color: #aaa;
+    font-size: 14px;
+    cursor: pointer;
+    line-height: 14px;
+    transition: color 0.15s ease-in-out;
+}
+
+.mammo-select-dot--checked {
+    color: #4a7ab5;
+}
+
+.mammo-select-dot:hover {
+    color: #aadcff;
 }
 
 .slice-number {

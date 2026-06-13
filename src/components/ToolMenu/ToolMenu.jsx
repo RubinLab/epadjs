@@ -43,7 +43,7 @@ import { BsArrowUpLeft } from "react-icons/bs";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
 import { MdLoop, MdPanTool, MdMyLocation, MdOutlineKeyboardCommandKey } from "react-icons/md";
-import { TbReplace } from "react-icons/tb";
+import { TbReplace, TbReorder, TbContrast2 } from "react-icons/tb";
 import {
   TiDeleteOutline,
   TiPencil,
@@ -253,6 +253,8 @@ class ToolMenu extends Component {
     this.managementTools = [
       { name: "Save order", icon: <TbReplace />, tool: "order", teaching: true },
       { name: "Hot Keys", icon: <MdOutlineKeyboardCommandKey />, tool: "keys", teaching: true },
+      { name: "Reorder", icon: <TbReorder />, tool: "reorder", teaching: true },
+      { name: "Save State", icon: <TbContrast2 />, tool: "saveState", teaching: true },
     ]
 
     this.segmentationTools = [
@@ -477,7 +479,9 @@ class ToolMenu extends Component {
       MetaData: true,
       fuse: true,
       order: true,
-      keys: true
+      keys: true,
+      reorder: true,
+      saveState: true,
     };
     
     if (!notActiveTools[tool]) sessionStorage.setItem("activeTool", tool);
@@ -576,6 +580,12 @@ class ToolMenu extends Component {
       return;
     } else if (tool === 'keys') {
       this.showHotkeyInfo();
+      return;
+    } else if (tool === 'reorder') {
+      if (this.props.onReorder) this.props.onReorder();
+      return;
+    } else if (tool === 'saveState') {
+      if (this.props.onSaveState) this.props.onSaveState();
       return;
     } else if (tool === 'next') {
       this.props.openNextWLStudy(worklistID, studyUID);
@@ -1065,6 +1075,7 @@ class ToolMenu extends Component {
         {this.state.showFuse && <FuseSelector onClose={this.closeFuse} onFuseUnfuse={this.props.onFuseUnfuse} onFuseNewImage={this.props.onFuseNewImage} />}
         {this.state.showMetaData && (<MetaData onClose={this.showMetaData} imageData={this.props.imageData} />)}
         {this.state.keys && (<HotKeysList onClose={() => this.setState({keys: null})} list={this.state.keys} />)}
+        {this.props.children}
       </div>
     );
   }

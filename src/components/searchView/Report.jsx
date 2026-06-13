@@ -13,10 +13,9 @@ import {
   changeActivePort,
   clearGrid,
   jumpToAim,
-  addToGrid,
-  getSingleSerie,
   updateImageId
 } from '../annotationsList/action';
+import { openSeriesInDisplay } from '../common/openSeriesHelper';
 
 const maxPort = parseInt(sessionStorage.getItem('maxPort'));
 // let waterfallOptions = sessionStorage.getItem('waterfallOptions');
@@ -374,15 +373,16 @@ const Report = props => {
   const openAims = (seriesToOpen, projectID, patientID) => {
     try {
       setSelectedSeries(seriesToOpen);
-      const array =
+      const series =
         projectID && patientID
           ? seriesToOpen.map(el => ({ ...el, projectID, patientID }))
           : seriesToOpen;
-      for (let series of array) {
-        props.dispatch(addToGrid(series, series.aimID || series.aimUID));
-        props.dispatch(getSingleSerie(series, series.aimID || series.aimUID));
-      }
-      props.history.push('/display');
+      openSeriesInDisplay({
+        dispatch: props.dispatch,
+        navigate: () => props.history.push('/display'),
+        openSeries: props.openSeries,
+        series,
+      });
     } catch (err) {
       console.error(err);
     }

@@ -69,6 +69,12 @@ export const STORE_AIM_SELECTION_ALL = 'epadjs/annotationList/STORE_AIM_SELECTIO
 export const TOGGLE_ALL_CALCULATIONS = 'epadjs/annotationList/TOGGLE_ALL_CALCULATIONS';
 export const SET_LAST_LOCATION = 'epadjs/annotationList/SET_LAST_LOCATION';
 export const SHOW_PHI = 'epadjs/annotationList/SHOW_PHI';
+export const SET_MAMMOGRAM_SERIES = 'epadjs/annotationList/SET_MAMMOGRAM_SERIES';
+export const SET_MAMMOGRAM_PAGE = 'epadjs/annotationList/SET_MAMMOGRAM_PAGE';
+export const CLEAR_MAMMOGRAM_SERIES = 'epadjs/annotationList/CLEAR_MAMMOGRAM_SERIES';
+export const SET_PAGE_ORDER_SERIES = 'epadjs/annotationList/SET_PAGE_ORDER_SERIES';
+export const SET_PAGE_ORDER = 'epadjs/annotationList/SET_PAGE_ORDER';
+export const CLEAR_PAGE_ORDER_SERIES = 'epadjs/annotationList/CLEAR_PAGE_ORDER_SERIES';
 
 export const commonLabels = {
   button: { background: "#6c757d", color: "#ECECEC", border: "#acacac solid 1px" },

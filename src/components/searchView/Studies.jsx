@@ -11,20 +11,22 @@ import { formatDate } from "../flexView/helperMethods";
 import { getSeries } from "../../services/seriesServices";
 import { clearCarets, isSupportedModality } from "../../Utils/aid.js";
 import {
-  getSingleSerie,
   selectStudy,
   clearSelection,
   startLoading,
   loadCompleted,
   annotationsLoadingError,
-  addToGrid,
   getWholeData,
   alertViewPortFull,
   updatePatient,
   selectSerie,
   selectAnnotation,
   setSeriesData,
+  setMammogramSeries,
+  clearMammogramSeries,
+  clearPageOrderSeries,
 } from "../annotationsList/action";
+import { openSeriesInDisplay, isMammogramStudy } from "../common/openSeriesHelper";
 
 function Table({
   columns,
@@ -199,11 +201,10 @@ function Studies(props) {
 
     try {
       if (!dataExists) {
-        const { data: series } = await getSeries(
-          projectID,
-          patientID,
-          studyUID
-        );
+        let { data: series } = await getSeries(projectID, patientID, studyUID, false);
+        if (!series || series.length === 0) {
+          ({ data: series } = await getSeries(projectID, patientID, studyUID, true));
+        }
         props.dispatch(loadCompleted());
         props.dispatch(
           setSeriesData(projectID, patientID, studyUID, series, true)
@@ -216,61 +217,36 @@ function Studies(props) {
   };
 
   const displaySeries = async (selected) => {
-    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
-    const { patientID, studyUID } = selected;
+    props.dispatch(clearPageOrderSeries());
+    props.dispatch(clearMammogramSeries());
     let seriesArr = await getSeriesData(selected);
-    const list = seriesArr.length > 0 ? seriesArr : null;
-    //check if the patient is there (create a patient exist flag)
-    // const patientExists = props.patients[patientID];
-    //if there is patient iterate over the series object of the study (form an array of series)
-    // if (patientExists) {
-    //   seriesArr = Object.values(
-    //     props.patients[patientID].studies[studyUID].series
-    //   );
-    //   //if there is not a patient get series data of the study and (form an array of series)
-    // } else {
-
-    // }
-    // filter the nondisplayable modalities
     seriesArr = seriesArr.filter(isSupportedModality);
-    //get extraction of the series (extract unopen series)
-    // if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
-    //check if there is enough room
-    if (seriesArr.length + props.openSeries.length > maxPort) {
-      //if there is not bring the modal
-      // await setState({
-      //   isSerieSelectionOpen: true,
-      //   selectedStudy: [seriesArr],
-      //   studyName: selected.studyDescription
-      // });
-      setIsSerieSelectionOpen(true);
-      setSelectedStudy([seriesArr]);
-      setStudyName(selected.studyDescription);
-    } else {
-      //if there is enough room
-      //add serie to the grid
-      const promiseArr = [];
-      for (let serie of seriesArr) {
-        props.dispatch(addToGrid(serie));
-        promiseArr.push(props.dispatch(getSingleSerie(serie, null, null, list)));
-      }
-      //getsingleSerie
-      Promise.all(promiseArr)
-        .then(() => {})
-        .catch((err) => console.error(err));
 
-      //if patient doesnot exist get patient
-      // -----> Delete after v1.0 <-----
-      // if (!patientExists) {
-      //   // props.dispatch(getWholeData(null, selected));
-      //   getWholeData(null, selected);
-      // } else {
-      //   //check if study exist
-      //   props.dispatch(updatePatient('study', true, patientID, studyUID));
-      // }
-      props.history.push("/display");
+    // Mammogram studies load only the first page; remaining series paginate via NEXT.
+    if (isMammogramStudy(seriesArr)) {
+      props.dispatch(setMammogramSeries(seriesArr, selected.studyUID));
+      openSeriesInDisplay({
+        dispatch: props.dispatch,
+        navigate: () => props.history.push("/display"),
+        openSeries: props.openSeries,
+        series: seriesArr.slice(0, parseInt(sessionStorage.getItem('maxPort'))),
+        existingData: seriesArr,
+      });
+      return;
     }
-    props.dispatch(clearSelection());
+
+    openSeriesInDisplay({
+      dispatch: props.dispatch,
+      navigate: () => props.history.push("/display"),
+      openSeries: props.openSeries,
+      series: seriesArr,
+      existingData: seriesArr.length > 0 ? seriesArr : null,
+      onGridFull: pending => {
+        setIsSerieSelectionOpen(true);
+        setSelectedStudy([pending]);
+        setStudyName(selected.studyDescription);
+      },
+    });
   };
 
   const columns = React.useMemo(

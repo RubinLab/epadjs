@@ -24,7 +24,8 @@ import { getSeries } from "../../services/seriesServices";
 // Component imports
 import DeleteAlert from "../management/common/alertDeletionModal";
 import SelectSeriesModal from "../annotationsList/selectSerieModal";
-import { addToGrid, getSingleSerie, alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData, clearGrid } from "../annotationsList/action";
+import { alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData, clearGrid, setMammogramSeries, clearMammogramSeries, setPageOrderSeries, clearPageOrderSeries } from "../annotationsList/action";
+import { openSeriesInDisplay, isMammogramStudy } from "../common/openSeriesHelper";
 import { isSupportedModality, filterProjects, pseudo, generalizeDate } from "../../Utils/aid.js";
 // CSS import
 import "./style.css";
@@ -189,53 +190,27 @@ let seriesCallSent;
   }
 
   const viewSelection = async (seriesArr) => {
-    const { seriesData } = props;
+    if (!seriesArr.length) return;
     const maxPort = parseInt(sessionStorage.getItem("maxPort"));
-    const notOpenSeries = [];
-    // const selectedSeries = Object.values(seriesObj);
-    const selectedSeries = seriesArr;
-    if (selectedSeries.length > 0) {
-      //check if enough room to display selection
-      for (let serie of selectedSeries) {
-        if (!checkIfSerieOpen(serie.seriesUID).isOpen) {
-          notOpenSeries.push(serie);
-        }
-      }
-      //if all ports are full
-      if (
-        notOpenSeries.length > 0 &&
-        props.openSeries.length === maxPort
-      ) {
-        props.dispatch(alertViewPortFull());
-      } else {
-        //if all series already open update active port
-        if (notOpenSeries.length === 0) {
-          let index = checkIfSerieOpen(selectedSeries[0].seriesUID).index;
-          props.dispatch(changeActivePort(index));
-          props.history.push("/display");
-          props.dispatch(clearSelection());
-        } else {
-          if (selectedSeries.length + props.openSeries.length > maxPort) {
-            // alert user about the num of open series a the moment and told only maxPort is allowed
-            const openPorts = props.openSeries.length;
-            setError(`Already ${openPorts} viewers open. You can open ${maxPort} at a time`);
-          } else {
-            //else get data for each serie for display
-            selectedSeries.forEach((serie) => {
-              const list = getExistingSeriesData(serie);
-              props.dispatch(addToGrid(serie, null, null, props.match.params.wid));
-              props.dispatch(getSingleSerie(serie, null, null, list));
-            });
-            props.history.push("/display");
-            props.dispatch(clearSelection());
-          }
-        }
-      }
-    }
+
+    openSeriesInDisplay({
+      dispatch: props.dispatch,
+      navigate: () => props.history.push("/display"),
+      openSeries: props.openSeries,
+      series: seriesArr,
+      worklistID: props.match.params.wid,
+      existingData: serie => getExistingSeriesData(serie),
+      onGridFull: pending => {
+        const openPorts = props.openSeries.length;
+        setError(`Already ${openPorts} viewers open. You can open ${maxPort} at a time`);
+      },
+    });
   };
 
   const handleOpenClick = async (study) => {
     if (mode === 'teaching') props.dispatch(clearGrid());
+    props.dispatch(clearPageOrderSeries());
+    props.dispatch(clearMammogramSeries());
     const { seriesData } = props;
     const { projectID, subjectID, studyUID, studyDescription } = study;
     let series;
@@ -248,15 +223,69 @@ let seriesCallSent;
     try {
       const isTeaching =  mode === 'teaching';
       if (!dataExists && seriesCallSent !== studyUID) {
-        ({ data: series } = await getSeries(projectID, subjectID, studyUID));
-        if (series.length === 0 && isTeaching) 
-          ({ data: series } = await getSeries(projectID, subjectID, studyUID, isTeaching));
+        ({ data: series } = await getSeries(projectID, subjectID, studyUID, false));
+        if (!series || series.length === 0)
+          ({ data: series } = await getSeries(projectID, subjectID, studyUID, true));
         props.dispatch(setSeriesData(projectID, subjectID, studyUID, series, true));
         seriesCallSent = studyUID;
       } else series = seriesData[projectID][subjectID][studyUID].list;
       series = series.filter(isSupportedModality);
       const maxPort = parseInt(sessionStorage.getItem("maxPort"));
       const { openSeries } = props;
+
+      const significant = series.filter(s => s.significanceOrder != null);
+      const hasPageOrder = significant.length > 0 && significant.some(s => s.pageOrder != null);
+
+      if (significant.length > 0 && hasPageOrder) {
+        // Case 1: pageOrder navigation.
+        props.dispatch(setPageOrderSeries(significant));
+        const toDisplay = significant
+          .filter(s => s.pageOrder === 1)
+          .sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+        openSeriesInDisplay({
+          dispatch: props.dispatch,
+          navigate: () => props.history.push("/display"),
+          openSeries: props.openSeries,
+          series: toDisplay.length > 0 ? toDisplay : significant.slice(0, maxPort),
+          worklistID: props.match.params.wid,
+          existingData: series,
+        });
+        return;
+      }
+
+      if (isMammogramStudy(series)) {
+        // Case 3 (no significant) or Case 6 (significant, no pageOrder, MG).
+        props.dispatch(clearPageOrderSeries());
+        props.dispatch(setMammogramSeries(series, studyUID));
+        const toDisplay = significant.length > 0
+          ? significant.sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0)) // Case 6
+          : series.slice(0, maxPort); // Case 3
+        openSeriesInDisplay({
+          dispatch: props.dispatch,
+          navigate: () => props.history.push("/display"),
+          openSeries: props.openSeries,
+          series: toDisplay,
+          worklistID: props.match.params.wid,
+          existingData: series,
+        });
+        return;
+      }
+
+      if (significant.length > 0) {
+        // Case 2: significant, no pageOrder, non-MG — load directly, no Next/Prev.
+        props.dispatch(clearPageOrderSeries());
+        const toDisplay = significant.sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+        openSeriesInDisplay({
+          dispatch: props.dispatch,
+          navigate: () => props.history.push("/display"),
+          openSeries: props.openSeries,
+          series: toDisplay,
+          worklistID: props.match.params.wid,
+          existingData: series,
+        });
+        return;
+      }
+
       const alreadyOpenViews = isTeaching ? 0 : openSeries.length;
       if (alreadyOpenViews + series.length <= maxPort) {
         setSeries(series);

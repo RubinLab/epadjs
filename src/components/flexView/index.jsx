@@ -14,12 +14,15 @@ import SelectSerieModal from "../annotationsList/selectSerieModal";
 import SeriesTable from "./SeriesTable";
 import { isSupportedModality } from "../../Utils/aid.js";
 import {
-  addToGrid,
-  getSingleSerie,
   clearSelection,
   setSeriesData,
-  setLastLocation
+  setLastLocation,
+  setMammogramSeries,
+  clearMammogramSeries,
+  setPageOrderSeries,
+  clearPageOrderSeries,
 } from "../annotationsList/action";
+import { openSeriesInDisplay, isMammogramStudy } from "../common/openSeriesHelper";
 import "react-table-v6/react-table.css";
 // import "../annotationSearch/annotationSearch.css";
 // import "./flexView.css";
@@ -110,9 +113,14 @@ class FlexView extends React.Component {
       : null;
  
     try {
+      this.props.dispatch(clearPageOrderSeries());
+      this.props.dispatch(clearMammogramSeries());
       if (!dataExists && seriesCallSent !== studyUID) {
         this.setState({ loading: true });
-        ({ data: series } = await getSeries(projectID, patientID, studyUID));
+        ({ data: series } = await getSeries(projectID, patientID, studyUID, false));
+        if (!series || series.length === 0) {
+          ({ data: series } = await getSeries(projectID, patientID, studyUID, true));
+        }
         this.setState({ loading: false });
         seriesCallSent = studyUID;
         this.props.dispatch(
@@ -124,38 +132,39 @@ class FlexView extends React.Component {
     } catch (err) {
       console.log("Error => getting series of the study", err);
     }
-    if (this.props.openSeries.length === this.maxPort) {
-      this.setState({ showSeriesTable: true, series });
-      return;
-    }
-    //get only unopen series
-    if (series.length > 0) series = this.excludeOpenSeries(series);
-    // filter series that have displayable modality
     series = series.filter(isSupportedModality);
     if (series.length === 0) {
       this.setState({ showWarning: true });
-    } else {
-      //check if there is enough room
-      if (series.length + this.props.openSeries.length > this.maxPort) {
-        //if there is not bring the modal
-        this.setState({ showSeriesTable: true, series });
-        // TODO show toast
-      } else {
-        //if there is enough room
-        //add serie to the grid
-        const promiseArr = [];
-        for (let i = 0; i < series.length; i++) {
-          this.props.dispatch(addToGrid(series[i]));
-          promiseArr.push(this.props.dispatch(getSingleSerie(series[i], null, null, existingData)));
-        }
-        //getsingleSerie
-        Promise.all(promiseArr)
-          .then(() => {
-            this.props.history.push("/display");
-          })
-          .catch((err) => console.error(err));
-      }
+      return;
     }
+
+    // Mammogram studies load only the first page; remaining series paginate via NEXT.
+    if (isMammogramStudy(series)) {
+      this.props.dispatch(setMammogramSeries(series, studyUID));
+      openSeriesInDisplay({
+        dispatch: this.props.dispatch,
+        navigate: () => this.props.history.push("/display"),
+        openSeries: this.props.openSeries,
+        series: series.slice(0, parseInt(maxPort)),
+        existingData: series,
+      });
+      return;
+    }
+
+    // If the study has pageOrder series, store them now so NEXT/PREV work after the modal confirms.
+    const significant = series.filter(s => s.significanceOrder != null);
+    if (significant.length > 0 && significant.some(s => s.pageOrder != null)) {
+      this.props.dispatch(setPageOrderSeries(significant));
+    }
+
+    openSeriesInDisplay({
+      dispatch: this.props.dispatch,
+      navigate: () => this.props.history.push("/display"),
+      openSeries: this.props.openSeries,
+      series,
+      existingData,
+      onGridFull: pending => this.setState({ showSeriesTable: true, series: pending }),
+    });
   };
 
   excludeOpenSeries = (allSeriesArr) => {

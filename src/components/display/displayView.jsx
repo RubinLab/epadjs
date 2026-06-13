@@ -6,12 +6,14 @@ import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import * as dcmjs from "dcmjs";
 import _ from "lodash";
 import CornerstoneViewport from "react-cornerstone-viewport";
-import { FaExpandArrowsAlt, FaPen, FaTag, FaTimes } from "react-icons/fa";
+import { FaExpandArrowsAlt, FaPen, FaTag, FaTimes, FaRegSquare, FaCheckSquare } from "react-icons/fa";
+import { unstable_batchedUpdates } from "react-dom";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
 import PropagateLoader from "react-spinners/PropagateLoader";
 import { deleteAnnotation, getAnnotation } from "../../services/annotationServices";
+import { getSignificantSeries, setSignificantSeries } from "../../services/seriesServices";
 import { refreshToken } from "../../services/authService";
 import { getImageMetadata } from "../../services/imageServices";
 import {
@@ -28,19 +30,25 @@ import {
   aimDelete,
   changeActivePort,
   clearAimId,
+  clearGrid,
   clearMultiFrameAimJumpFlags,
   clearSelection,
   closeSerie,
   getSingleSerie,
   jumpToAim,
   setSegLabelMapIndex,
-  setSeriesData
+  setSeriesData,
+  setMammogramPage,
+  setMammogramSeries,
+  setPageOrder,
+  setPageOrderSeries,
   // fillSeriesDescfullData
-  ,
   updateGridWithMultiFrameInfo,
   updateImageId,
   updateSubpath
 } from "../annotationsList/action";
+import { openSeriesInDisplay } from "../common/openSeriesHelper";
+import { isSupportedModality } from "../../Utils/aid.js";
 import { arrow } from "./Arrow";
 import { bidirectional } from "./Bidirectional";
 import { circle } from "./Circle";
@@ -53,6 +61,7 @@ import "./viewport.css";
 import { toast } from "react-toastify";
 import SeriesDropDown from "./SeriesDropDown";
 import getVPDimensions from "./ViewportCalculations";
+import SeriesOrderModal from "./SeriesOrderModal";
 
 let mode;
 let wadoUrl;
@@ -162,6 +171,10 @@ const mapStateToProps = (state) => {
     lastLocation: state.annotationsListReducer.lastLocation,
     projectMap: state.annotationsListReducer.projectMap,
     showingPHI: state.annotationsListReducer.showingPHI,
+    mammogramSeries: state.annotationsListReducer.mammogramSeries,
+    mammogramPageIndex: state.annotationsListReducer.mammogramPageIndex,
+    pageOrderSeries: state.annotationsListReducer.pageOrderSeries,
+    currentPageOrder: state.annotationsListReducer.currentPageOrder,
   };
 };
 
@@ -204,6 +217,15 @@ class DisplayView extends Component {
       dataIndexMap: {},
       aimEdited: false,
       isVisible: true,
+      selectedPorts: new Set(),
+      mammoExpanded: false,
+      hiddenPorts: new Set(),
+      expandedOrder: null,
+      trimMode: false,
+      trimmedDimensions: {},
+      showReorderModal: false,
+      showSaveStatusWarning: false,
+      pendingSaveStatusData: null,
     };
   }
 
@@ -233,6 +255,9 @@ class DisplayView extends Component {
     this.setState({ wwwc: { ww, wc } });
   };
 
+  _explicitlyReset = new Set();
+  _savedDisplayStates = new Map();
+
   componentDidMount() {
     const { series, onSwitchView } = this.props;
     // if (series.length < 1) {
@@ -240,6 +265,11 @@ class DisplayView extends Component {
     // }
     this.props.dispatch(clearSelection());
     this.getViewports();
+    this._explicitlyReset.clear();
+    this._savedDisplayStates.clear();
+    sessionStorage.setItem('invertMap', JSON.stringify({}));
+    sessionStorage.setItem('imgStatus', JSON.stringify([]));
+    this.applyDisplayStateToSession();
     this.getData(undefined, undefined, "componentDidMount");
     this.formInvertMap();
     if (series.length > 0) {
@@ -337,6 +367,12 @@ class DisplayView extends Component {
       return;
     }
 
+    // Clear mammogram dot selections when a new study replaces the current one.
+    if (prevProps.mammogramSeries !== this.props.mammogramSeries &&
+        (this.state.selectedPorts.size > 0 || this.state.mammoExpanded)) {
+      this.clearMammoSelection();
+    }
+
     const { projectID, studyUID } = series[activePort];
     let { seriesUID } = series[activePort];
     if (cornerstone.getEnabledElements()[activePort]) {
@@ -425,6 +461,7 @@ class DisplayView extends Component {
         mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
         frame = 0;
       }
+      this.applyDisplayStateToSession();
       this.getData(mfIndex, frame, "didupdated 2", refreshPage);
       this.formInvertMap();
     }
@@ -1097,9 +1134,10 @@ class DisplayView extends Component {
           indexKey = `${indexKey}-${mfIndexFinal}`
         }
 
-        const dataExistsInState = parseInt(dataIndexMap[indexKey]) >= 0;
+        const cachedIdx = parseInt(dataIndexMap[indexKey]);
+        const dataExistsInState = cachedIdx >= 0 && cachedIdx < this.state.data.length && !!this.state.data[cachedIdx];
 
-        if (!dataExistsInState || force) { 
+        if (!dataExistsInState || force) {
             const promise = this.getImageStack(
               series[i],
               i,
@@ -2695,6 +2733,7 @@ class DisplayView extends Component {
     const max = parseInt(maxPort);
     imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
     imgStatus[this.props.activePort] = null;
+    this._explicitlyReset.add(this.props.activePort);
     this.formInvertMap(null, null, true);
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
   };
@@ -2903,7 +2942,6 @@ class DisplayView extends Component {
   };
 
   toggleOverlay = (e, i) => {
-    if (!this.props.showingPHI && mode === 'teaching') return;
     const showHide = { ...this.state.isOverlayVisible };
     const index = i || i === 0 ? i : this.props.activePort;
     if (showHide[index]) delete showHide[index];
@@ -2965,6 +3003,522 @@ class DisplayView extends Component {
     }
   };
 
+  // --- Mammogram pagination ---
+
+  /** True when the currently open series are all mammograms and there is stored page data. */
+  isMammogramOpen = () => {
+    const { series, mammogramSeries } = this.props;
+    const hasMammoSeries = !!(mammogramSeries && mammogramSeries.length > 0);
+    const hasOpenMG = !!(series && series.some(s => s && (s.examType || s.modality)?.toUpperCase() === 'MG'));
+    return hasMammoSeries && hasOpenMG;
+  };
+
+  /** True when pageOrder navigation is active (Case 1). */
+  isPageOrderNav = () => this.props.pageOrderSeries && this.props.pageOrderSeries.length > 0;
+
+  /** True when there is at least one more page of mammogram series to load. */
+  hasNextMammoPage = () => {
+    if (this.isPageOrderNav()) return false;
+    const { mammogramSeries, mammogramPageIndex } = this.props;
+    return (mammogramPageIndex + 1) * parseInt(maxPort) < mammogramSeries.length;
+  };
+
+  /** True when the user is past the first page and can go back. */
+  hasPrevMammoPage = () => {
+    if (this.isPageOrderNav()) return false;
+    return this.props.mammogramPageIndex > 0;
+  };
+
+  /** True when there is a higher pageOrder page available. */
+  hasNextPageOrderPage = () => {
+    const { pageOrderSeries, currentPageOrder } = this.props;
+    return pageOrderSeries.some(s => s.pageOrder === currentPageOrder + 1);
+  };
+
+  /** True when the user is past page 1 in pageOrder navigation. */
+  hasPrevPageOrderPage = () => {
+    return this.props.currentPageOrder > 1;
+  };
+
+  /** Clears the grid and loads the next pageOrder page. */
+  clearPageSessionStorage = () => {
+    this._explicitlyReset.clear();
+    sessionStorage.setItem('invertMap', JSON.stringify({}));
+    sessionStorage.setItem('imgStatus', JSON.stringify([]));
+  };
+
+  /**
+   * Force reload local viewport image stacks after a page navigation that
+   * changes the open series. componentDidUpdate's branch that calls getData
+   * relies on series length increasing or activePort UID changing, so it
+   * misses the case where a page has fewer series than before.
+   */
+  forceViewportRefresh = () => {
+    setTimeout(() => {
+      this.setState({ isLoading: true, data: [], dataIndexMap: {} }, () => {
+        this.getViewports();
+        // Re-apply saved displayState (from pageOrderSeries + _savedDisplayStates)
+        // into sessionStorage so Cornerstone picks up window/level, zoom, etc.
+        // componentDidUpdate skips this when series count changes between pages.
+        this.applyDisplayStateToSession();
+        this.getData(null, null, 'forceViewportRefresh', true);
+      });
+    }, 0);
+  };
+
+  handlePageOrderNext = () => {
+    const { pageOrderSeries, currentPageOrder } = this.props;
+    const nextPage = currentPageOrder + 1;
+    const nextSeries = pageOrderSeries
+      .filter(s => s.pageOrder === nextPage)
+      .sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+    if (!nextSeries.length) return;
+
+    this.clearMammoSelection();
+    this.clearPageSessionStorage();
+    this.props.dispatch(clearGrid());
+    this.props.dispatch(setPageOrder(nextPage));
+    openSeriesInDisplay({
+      dispatch: this.props.dispatch,
+      navigate: () => {},
+      openSeries: [],
+      series: nextSeries,
+      existingData: pageOrderSeries,
+    });
+    this.forceViewportRefresh();
+  };
+
+  /** Clears the grid and loads the previous pageOrder page. */
+  handlePageOrderPrev = () => {
+    const { pageOrderSeries, currentPageOrder } = this.props;
+    const prevPage = currentPageOrder - 1;
+    if (prevPage < 1) return;
+
+    const prevSeries = pageOrderSeries
+      .filter(s => s.pageOrder === prevPage)
+      .sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+
+    this.clearMammoSelection();
+    this.clearPageSessionStorage();
+    this.props.dispatch(clearGrid());
+    this.props.dispatch(setPageOrder(prevPage));
+    openSeriesInDisplay({
+      dispatch: this.props.dispatch,
+      navigate: () => {},
+      openSeries: [],
+      series: prevSeries,
+      existingData: pageOrderSeries,
+    });
+    this.forceViewportRefresh();
+  };
+
+  /** Clears the grid and loads the next group of MAMMO_PAGE_SIZE series. */
+  handleMammoNext = () => {
+    const { mammogramSeries, mammogramPageIndex } = this.props;
+    const nextPage = mammogramPageIndex + 1;
+    const pageSize = parseInt(maxPort);
+    const start = nextPage * pageSize;
+    const nextSeries = mammogramSeries.slice(start, start + pageSize);
+    if (!nextSeries.length) return;
+
+    this.clearMammoSelection();
+    this.clearPageSessionStorage();
+    this.props.dispatch(clearGrid());
+    this.props.dispatch(setMammogramPage(nextPage));
+    openSeriesInDisplay({
+      dispatch: this.props.dispatch,
+      navigate: () => {},
+      openSeries: [],
+      series: nextSeries,
+      existingData: mammogramSeries,
+    });
+    this.forceViewportRefresh();
+  };
+
+  /** Clears the grid and loads the previous group of MAMMO_PAGE_SIZE series. */
+  handleMammoPrev = () => {
+    const { mammogramSeries, mammogramPageIndex } = this.props;
+    const prevPage = mammogramPageIndex - 1;
+    if (prevPage < 0) return;
+
+    const pageSize = parseInt(maxPort);
+    const start = prevPage * pageSize;
+    const prevSeries = mammogramSeries.slice(start, start + pageSize);
+
+    this.clearMammoSelection();
+    this.clearPageSessionStorage();
+    this.props.dispatch(clearGrid());
+    this.props.dispatch(setMammogramPage(prevPage));
+    openSeriesInDisplay({
+      dispatch: this.props.dispatch,
+      navigate: () => {},
+      openSeries: [],
+      series: prevSeries,
+      existingData: mammogramSeries,
+    });
+    this.forceViewportRefresh();
+  };
+
+  /** Toggle selection of a viewport dot. Max 2 at a time. */
+  handleMammoDotClick = (index) => {
+    const { selectedPorts } = this.state;
+    const next = new Set(selectedPorts);
+    if (next.has(index)) {
+      next.delete(index);
+    } else {
+      if (next.size >= 2) {
+        toast.warn("Only two viewports can be selected at a time.", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        return;
+      }
+      next.add(index);
+    }
+    this.setState({ selectedPorts: next });
+  };
+
+  /**
+   * EXPAND: if two viewports are selected, show them side by side.
+   * Otherwise fall back to the standard single-viewport hideShow.
+   * RESTORE: return to the standard grid layout.
+   */
+  handleMammoExpand = () => {
+    const { activePort } = this.props;
+    const { selectedPorts, mammoExpanded, hiding, containerHeight, data } = this.state;
+
+    if (mammoExpanded) {
+      this.restoreMammoExpand();
+      return;
+    }
+
+    if (hiding) {
+      this.hideShow(activePort);
+      return;
+    }
+
+    if (selectedPorts.size === 2) {
+      // selectedArr preserves insertion order: [firstSelected, secondSelected]
+      const selectedArr = Array.from(selectedPorts);
+      const hidden = new Set(data.map((_, i) => i).filter(i => !selectedArr.includes(i)));
+      this.setState(
+        { mammoExpanded: true, width: "50%", height: containerHeight, hiddenPorts: hidden, expandedOrder: selectedArr },
+        () => window.dispatchEvent(new CustomEvent("resize", { detail: { isMaximize: true } }))
+      );
+    } else {
+      this.hideShow(activePort);
+    }
+  };
+
+  /** Restore all viewports to the standard grid layout and clear dot selections. */
+  restoreMammoExpand = () => {
+    this.setState(
+      { mammoExpanded: false, selectedPorts: new Set(), hiddenPorts: new Set(), expandedOrder: null, trimMode: false, trimmedDimensions: {} },
+      () => {
+        this.getViewports();
+        window.dispatchEvent(new CustomEvent("resize", { detail: { isMaximize: false } }));
+      }
+    );
+  };
+
+  /** Clear mammogram selection state (dots + expand). Called on NEXT and new study. */
+  clearMammoSelection = () => {
+    this.setState({ selectedPorts: new Set(), mammoExpanded: false, hiddenPorts: new Set(), expandedOrder: null, trimMode: false, trimmedDimensions: {} });
+  };
+
+  handleTrimMode = () => {
+    const next = !this.state.trimMode;
+    const { expandedOrder, hiddenPorts, data } = this.state;
+    // When expanded: trim only the 2 visible expanded viewports.
+    // When not expanded: trim all visible viewports.
+    const targetIndices = expandedOrder
+      ? expandedOrder
+      : data.map((_, i) => i).filter(i => !hiddenPorts.has(i));
+
+    const resizeTargets = () => {
+      setTimeout(() => {
+        targetIndices.forEach(i => {
+          try {
+            const elements = cornerstone.getEnabledElements();
+            const el = elements[i] && elements[i].element;
+            if (el) cornerstone.resize(el, true);
+          } catch (e) {}
+        });
+      }, 50);
+    };
+
+    if (!next) {
+      this.setState({ trimMode: false, trimmedDimensions: {} }, resizeTargets);
+      return;
+    }
+
+    const trimmedDimensions = {};
+    targetIndices.forEach(i => {
+      try {
+        const containerEl = this.viewportRefs[i] && this.viewportRefs[i].current;
+        const elements = cornerstone.getEnabledElements();
+        const el = elements[i] && elements[i].element;
+        if (!containerEl || !el) return;
+        const enabledEl = cornerstone.getEnabledElement(el);
+        const image = enabledEl && enabledEl.image;
+        if (!image) return;
+        const imageAspect = image.columns / image.rows;
+        const containerW = containerEl.clientWidth;
+        const containerH = containerEl.clientHeight;
+        if (imageAspect < containerW / containerH) {
+          // Portrait image: black bars on sides → shrink width
+          trimmedDimensions[i] = { width: Math.round(containerH * imageAspect) + 'px', height: null };
+        } else {
+          // Landscape image: black bars top/bottom → shrink height
+          trimmedDimensions[i] = { width: null, height: Math.round(containerW / imageAspect) + 'px' };
+        }
+      } catch (e) {}
+    });
+
+    this.setState({ trimMode: true, trimmedDimensions }, resizeTargets);
+  };
+
+  // --- End mammogram pagination ---
+
+  /** Re-fetch series after reorder save and reload the display with page 1. */
+  refreshAfterReorder = async () => {
+    const active = this.props.series[this.props.activePort] || {};
+    const { projectID, patientID, studyUID } = active;
+    if (!projectID || !patientID || !studyUID) return;
+    try {
+      let { data: series } = await getSeries(projectID, patientID, studyUID, false);
+      if (!series || series.length === 0) {
+        ({ data: series } = await getSeries(projectID, patientID, studyUID, true));
+      }
+      series = (series || []).filter(isSupportedModality);
+      if (series.length === 0) return;
+
+      const significant = series.filter(s => s.significanceOrder != null);
+      const hasPageOrder = significant.length > 0 && significant.some(s => s.pageOrder != null);
+      const maxPort = parseInt(sessionStorage.getItem('maxPort'));
+
+      // Batch dispatches so React doesn't render the transient empty-openSeries state
+      // (which would trigger <Redirect> back to the search/list view).
+      unstable_batchedUpdates(() => {
+        this.clearMammoSelection();
+        this.clearPageSessionStorage();
+        this.props.dispatch(clearGrid());
+        this.props.dispatch(setSeriesData(projectID, patientID, studyUID, series, true));
+
+        if (hasPageOrder) {
+          this.props.dispatch(setPageOrderSeries(significant));
+          const pageOne = significant
+            .filter(s => s.pageOrder === 1)
+            .sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+          openSeriesInDisplay({
+            dispatch: this.props.dispatch,
+            navigate: () => {},
+            openSeries: [],
+            series: pageOne.length ? pageOne : significant.slice(0, maxPort),
+            existingData: series,
+          });
+        } else {
+          this.props.dispatch(setMammogramSeries(series, studyUID));
+          const toDisplay = significant.length > 0
+            ? significant.sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0))
+            : series.slice(0, maxPort);
+          openSeriesInDisplay({
+            dispatch: this.props.dispatch,
+            navigate: () => {},
+            openSeries: [],
+            series: toDisplay,
+            existingData: series,
+          });
+        }
+      });
+      this.forceViewportRefresh();
+    } catch (err) {
+      console.error('refreshAfterReorder error', err);
+    }
+  };
+
+  // --- Display State Restore ---
+
+  applyDisplayStateToSession = () => {
+    const { series, pageOrderSeries } = this.props;
+    if (!series || series.length === 0) return;
+
+    // Build seriesUID → displayState map. pageOrderSeries carries the full
+    // significant-series records from the backend (including displayState).
+    // openSeries entries (series[i]) may also carry it if addToGrid preserved it.
+    // _savedDisplayStates holds in-session saves so they survive prev/next
+    // navigation before the backend data is refetched.
+    const displayStateMap = {};
+    (pageOrderSeries || []).forEach(s => {
+      if (s && s.displayState) displayStateMap[s.seriesUID] = s.displayState;
+    });
+    series.forEach(s => {
+      if (s && s.displayState) displayStateMap[s.seriesUID] = s.displayState;
+    });
+    this._savedDisplayStates.forEach((displayState, seriesUID) => {
+      displayStateMap[seriesUID] = displayState;
+    });
+
+    if (Object.keys(displayStateMap).length === 0) return;
+
+    const invertMap = JSON.parse(sessionStorage.getItem('invertMap') || '{}');
+    const imgStatus = JSON.parse(sessionStorage.getItem('imgStatus') || '[]');
+    let changed = false;
+
+    for (let i = 0; i < series.length; i++) {
+      const s = series[i];
+      if (!s) continue;
+      const displayState = displayStateMap[s.seriesUID];
+      if (!displayState) continue;
+      // Only apply saved state if no live session value exists for this viewport
+      if (displayState.invertMap !== undefined && invertMap[i] == null && !this._explicitlyReset.has(i)) {
+        invertMap[i] = displayState.invertMap;
+        changed = true;
+      }
+      if (displayState.imageStatus && imgStatus[i] == null && !this._explicitlyReset.has(i)) {
+        imgStatus[i] = displayState.imageStatus;
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      sessionStorage.setItem('invertMap', JSON.stringify(invertMap));
+      sessionStorage.setItem('imgStatus', JSON.stringify(imgStatus));
+    }
+  };
+
+  // --- End Display State Restore ---
+
+  // --- Save Image Status ---
+
+  handleSaveState = async () => {
+    const { series } = this.props;
+    if (!series || series.length === 0) return;
+
+    const invertMap = JSON.parse(sessionStorage.getItem('invertMap') || '{}');
+    const imgStatus = JSON.parse(sessionStorage.getItem('imgStatus') || '[]');
+
+    // Collect series with any modified state
+    const modifiedSeries = [];
+    for (let i = 0; i < series.length; i++) {
+      if (!series[i]) continue;
+      const hasInvert = invertMap[i] !== undefined;
+      const hasImgStatus = imgStatus[i] !== undefined && imgStatus[i] !== null;
+      if (hasInvert || hasImgStatus) {
+        modifiedSeries.push({
+          ...series[i],
+          viewportIndex: i,
+          displayState: {
+            invertMap: invertMap[i] || false,
+            imageStatus: imgStatus[i] || {},
+          },
+        });
+      }
+    }
+
+    if (modifiedSeries.length === 0) return;
+
+    const ref = series.find(s => s) || {};
+    const projectID = ref.projectID;
+    const patientID = ref.patientID || ref.subjectID;
+    const studyUID = ref.studyUID;
+
+    try {
+      const { data: currentSigSeries } = await getSignificantSeries(projectID, patientID, studyUID);
+      const sigUIDs = new Set((currentSigSeries || []).map(s => s.seriesUID));
+      const notYetSignificant = modifiedSeries.filter(s => !sigUIDs.has(s.seriesUID));
+      const saveData = { modifiedSeries, currentSigSeries: currentSigSeries || [], projectID, patientID, studyUID };
+
+      if (notYetSignificant.length > 0) {
+        this.setState({ showSaveStatusWarning: true, pendingSaveStatusData: saveData });
+      } else {
+        await this.executeSaveStatus(saveData);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to fetch significant series.');
+    }
+  };
+
+  executeSaveStatus = async ({ modifiedSeries, currentSigSeries, projectID, patientID, studyUID }) => {
+    // Build a map of existing significant series to preserve their order/pageOrder
+    const sigMap = {};
+    currentSigSeries.forEach(s => { sigMap[s.seriesUID] = { ...s }; });
+
+    const maxSigOrder = currentSigSeries.reduce((m, s) => Math.max(m, s.significanceOrder || 0), 0);
+    const maxPage = currentSigSeries.reduce((m, s) => Math.max(m, s.pageOrder || 0), 0);
+    let nextSigOrder = maxSigOrder + 1;
+
+    modifiedSeries.forEach(s => {
+      if (sigMap[s.seriesUID]) {
+        sigMap[s.seriesUID] = { ...sigMap[s.seriesUID], displayState: s.displayState };
+      } else {
+        sigMap[s.seriesUID] = {
+          seriesUID: s.seriesUID,
+          significanceOrder: nextSigOrder++,
+          pageOrder: maxPage > 0 ? maxPage : 1,
+          displayState: s.displayState,
+        };
+      }
+    });
+
+    try {
+      await setSignificantSeries(projectID, patientID, studyUID, Object.values(sigMap), true);
+
+      // Clear saved entries from session storage
+      const invertMap = JSON.parse(sessionStorage.getItem('invertMap') || '{}');
+      const imgStatus = JSON.parse(sessionStorage.getItem('imgStatus') || '[]');
+      const savedUIDs = new Set(modifiedSeries.map(s => s.seriesUID));
+      const { series } = this.props;
+      for (let i = 0; i < series.length; i++) {
+        if (series[i] && savedUIDs.has(series[i].seriesUID)) {
+          delete invertMap[i];
+          imgStatus[i] = null;
+        }
+      }
+      sessionStorage.setItem('invertMap', JSON.stringify(invertMap));
+      sessionStorage.setItem('imgStatus', JSON.stringify(imgStatus));
+
+      // Fetch updated state and reconstruct session storage
+      const { data: updatedSigSeries } = await getSignificantSeries(projectID, patientID, studyUID);
+      const newInvertMap = { ...invertMap };
+      const newImgStatus = [...imgStatus];
+
+      (updatedSigSeries || []).forEach(sig => {
+        if (!sig.displayState) return;
+        const vpIndex = series.findIndex(s => s && s.seriesUID === sig.seriesUID);
+        if (vpIndex === -1) return;
+        if (sig.displayState.invertMap !== undefined) newInvertMap[vpIndex] = sig.displayState.invertMap;
+        if (sig.displayState.imageStatus) newImgStatus[vpIndex] = sig.displayState.imageStatus;
+      });
+
+      sessionStorage.setItem('invertMap', JSON.stringify(newInvertMap));
+      sessionStorage.setItem('imgStatus', JSON.stringify(newImgStatus));
+
+      // Cache the freshly-saved displayState by seriesUID so navigating away and
+      // back can re-apply it. This avoids re-fetching from the backend mid-session.
+      (updatedSigSeries || []).forEach(sig => {
+        if (sig && sig.seriesUID && sig.displayState) {
+          this._savedDisplayStates.set(sig.seriesUID, sig.displayState);
+        }
+      });
+
+      // Trigger Cornerstone re-render to reflect saved state
+      const elements = cornerstone.getEnabledElements();
+      elements.forEach(({ element }) => {
+        try { cornerstone.updateImage(element); } catch (e) {}
+      });
+
+      toast.success('Image status saved.');
+      this.setState({ showSaveStatusWarning: false, pendingSaveStatusData: null });
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to save image status.');
+    }
+  };
+
+  // --- End Save Image Status ---
+
   openNextWLStudy = async (worklistID, studyUID) => {
     try {
       const sortedData = JSON.parse(sessionStorage.getItem("sortedListMap")) || {};
@@ -3020,6 +3574,11 @@ class DisplayView extends Component {
     const redirect = mode === "teaching" ? "search" : "list";
     let invertMap = sessionStorage.getItem("invertMap");
     invertMap = invertMap ? JSON.parse(invertMap) : {};
+    const { trimMode, width: stateWidth } = this.state;
+    const vpGridCols = trimMode ? (Math.round(100 / parseFloat(stateWidth)) || 2) : undefined;
+    const vpWrapperStyle = trimMode
+      ? { display: 'grid', gridTemplateColumns: `repeat(${vpGridCols}, 1fr)`, alignContent: 'start' }
+      : { display: 'flex', flexWrap: 'wrap', alignContent: 'flex-start' };
 
     return !Object.entries(series).length ? (
       <Redirect to={`/${redirect}`} />
@@ -3044,7 +3603,54 @@ class DisplayView extends Component {
             onFuseNewImage={this.newImageFuse}
             onOpenSeries={this.props.openSeries}
             openNextWLStudy={this.openNextWLStudy}
-          />
+            onReorder={() => this.setState({ showReorderModal: true })}
+            onSaveState={this.handleSaveState}
+          >
+            <div className="mammo-toolbar-group">
+              <button
+                className="mammo-toolbar-btn"
+                onClick={this.isPageOrderNav() ? this.handlePageOrderPrev : this.handleMammoPrev}
+                disabled={this.isPageOrderNav() ? !this.hasPrevPageOrderPage() : !this.hasPrevMammoPage()}
+                title="Load previous series group"
+              >
+                <div className="toolContainer" />
+                <div className="buttonLabel">PREVIOUS</div>
+              </button>
+              <button
+                className="mammo-toolbar-btn"
+                onClick={this.isPageOrderNav() ? this.handlePageOrderNext : this.handleMammoNext}
+                disabled={this.isPageOrderNav() ? !this.hasNextPageOrderPage() : !this.hasNextMammoPage()}
+                title="Load next series group"
+              >
+                <div className="toolContainer" />
+                <div className="buttonLabel">NEXT</div>
+              </button>
+              <button
+                className="mammo-toolbar-btn"
+                onClick={this.handleMammoExpand}
+                title={(this.state.mammoExpanded || this.state.hiding) ? "Restore standard layout" : "Expand viewport(s)"}
+              >
+                <div className="toolContainer" />
+                <div className="buttonLabel">{(this.state.mammoExpanded || this.state.hiding) ? "RESTORE" : "EXPAND"}</div>
+              </button>
+              <button
+                className={"mammo-toolbar-btn" + (this.state.trimMode ? " mammo-toolbar-btn--active" : "")}
+                onClick={this.handleTrimMode}
+                title={this.state.trimMode ? "Restore original viewport size" : "Trim black bars to fit image"}
+              >
+                <div className="toolContainer" />
+                <div className="buttonLabel">{this.state.trimMode ? "UNTRIM" : "TRIM"}</div>
+              </button>
+              {/* <button
+                className="mammo-toolbar-btn mammo-toolbar-btn--disabled"
+                disabled
+                title="Save worklist (coming soon)"
+              >
+                <div className="toolContainer" />
+                <div className="buttonLabel">SAVE WL</div>
+              </button> */}
+            </div>
+          </ToolMenu>
           {this.state.isLoading && (
             <div style={{ marginTop: "30%", marginLeft: "50%" }}>
               <PropagateLoader
@@ -3056,7 +3662,15 @@ class DisplayView extends Component {
           )}
           {!this.state.isLoading &&
             Object.entries(series).length &&
-            data.map((data, i) => {
+            <div style={vpWrapperStyle}>
+            {data.map((data, i) => {
+              const { hiddenPorts, expandedOrder, trimMode, trimmedDimensions } = this.state;
+              const trimDim = trimMode && trimmedDimensions && trimmedDimensions[i];
+              // In trim/grid mode, align paired viewports toward each other (no gap between them)
+              const visualCol = trimMode
+                ? (expandedOrder ? expandedOrder.indexOf(i) : i) % vpGridCols
+                : -1;
+              const justifySelf = visualCol >= 0 ? (visualCol % 2 === 0 ? 'end' : 'start') : undefined;
               return (
                 <div
                   ref={this.viewportRefs[i] || (this.viewportRefs[i] = React.createRef())}
@@ -3066,9 +3680,11 @@ class DisplayView extends Component {
                   key={i}
                   id={"viewportContainer" + i}
                   style={{
-                    width: this.state.width,
-                    height: this.state.height,
-                    display: "inline-block",
+                    width: (trimDim && trimDim.width) ? trimDim.width : (trimMode ? '100%' : this.state.width),
+                    height: (trimDim && trimDim.height) ? trimDim.height : this.state.height,
+                    display: hiddenPorts.has(i) ? "none" : "inline-block",
+                    order: expandedOrder ? expandedOrder.indexOf(i) : undefined,
+                    justifySelf,
                   }}
                   onClick={() => this.setActive(i)}
                 >
@@ -3164,6 +3780,16 @@ class DisplayView extends Component {
                       >
                         <FaPen />
                       </span>
+                      {this.props.series && this.props.series[i] && (this.props.series[i].examType || this.props.series[i].modality)?.toUpperCase() === 'MG' && (
+                        <span
+                          className={"dot mammo-select-dot" + (this.state.selectedPorts.has(i) ? " mammo-select-dot--checked" : "")}
+                          style={{ float: "right" }}
+                          onClick={(e) => { e.stopPropagation(); this.handleMammoDotClick(i); }}
+                          title={this.state.selectedPorts.has(i) ? "Deselect viewport" : "Select viewport for expand"}
+                        >
+                          {this.state.selectedPorts.has(i) ? <FaCheckSquare /> : <FaRegSquare />}
+                        </span>
+                      )}
                     </div>
                   </div>
                   {data.stack && data.stack.imageIds && <CornerstoneViewport
@@ -3209,11 +3835,49 @@ class DisplayView extends Component {
                 </div>
               );
             })}
+            </div>}
           {/* <ContextMenu
             onAnnotate={this.onAnnotate}
             closeViewport={this.closeViewport}
           /> */}
         </RightsideBar>
+        {this.state.showReorderModal && (() => {
+          const active = this.props.series[this.props.activePort] || {};
+          return (
+            <SeriesOrderModal
+              show
+              onClose={() => this.setState({ showReorderModal: false })}
+              onSaved={this.refreshAfterReorder}
+              projectID={active.projectID}
+              subjectUID={active.patientID}
+              studyUID={active.studyUID}
+            />
+          );
+        })()}
+        {this.state.showSaveStatusWarning && (
+          <div className="som-warn-modal" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)' }}>
+            <div style={{ background: '#1a2035', border: '1px solid #2e3a50', borderRadius: '6px', padding: '24px', maxWidth: '420px', width: '90%', color: '#cdd3e0' }}>
+              <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>⚠ Series Will Be Added to Significant Series</div>
+              <p style={{ fontSize: '13px', marginBottom: '20px', lineHeight: 1.5 }}>
+                One or more series with saved states are not yet in your display order. Saving will add them as significant series.
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button
+                  className="modal-button btn btn-secondary btn-sm"
+                  onClick={() => this.setState({ showSaveStatusWarning: false, pendingSaveStatusData: null })}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="modal-button btn btn-secondary btn-sm"
+                  onClick={() => this.executeSaveStatus(this.state.pendingSaveStatusData)}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </React.Fragment>
     );
     // </div>
