@@ -63,6 +63,7 @@ import {
   SET_PAGE_ORDER_SERIES,
   SET_PAGE_ORDER,
   CLEAR_PAGE_ORDER_SERIES,
+  TOGGLE_ALL_OVERLAYS,
   colors,
   commonLabels,
 } from "./types";
@@ -123,6 +124,7 @@ const initialState = {
   mammogramPageIndex: 0,
   pageOrderSeries: [],
   currentPageOrder: 1,
+  isAllOverlayHidden: false,
 };
 
 
@@ -160,6 +162,8 @@ const asyncReducer = (state = initialState, action) => {
         return { ...state, lastLocation: action.lastLocation };
       case TOGGLE_ALL_CALCULATIONS:
         return { ...state, showCalculations: action.payload.checked };
+      case TOGGLE_ALL_OVERLAYS:
+        return { ...state, isAllOverlayHidden: !state.isAllOverlayHidden };
       case STORE_AIM_SELECTION_ALL:
         const { checked, map, tbPageIndex, clearAll } = action.payload;
         let newMultipageAimSelectionAll = _.cloneDeep(state.multipageAimSelection);
@@ -734,6 +738,7 @@ const asyncReducer = (state = initialState, action) => {
           showCalculations: false,
           showLabels: false,
           showAnnotations: mode === 'teaching' ? false : true,
+          isAllOverlayHidden: false,
         };
       case CLEAR_SELECTION:
         let selectionState = { ...state };
