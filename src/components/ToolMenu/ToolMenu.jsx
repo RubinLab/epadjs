@@ -42,7 +42,7 @@ import {
 import { BsArrowUpLeft } from "react-icons/bs";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
-import { MdLoop, MdPanTool, MdMyLocation, MdOutlineKeyboardCommandKey } from "react-icons/md";
+import { MdLoop, MdPanTool, MdMyLocation, MdOutlineKeyboardCommandKey, MdOutlineLayersClear, MdOutlineLayers } from "react-icons/md";
 import { TbReplace, TbReorder, TbContrast2 } from "react-icons/tb";
 import {
   TiDeleteOutline,
@@ -54,7 +54,7 @@ import { MdWbIridescent } from "react-icons/md";
 import AnnotationList from "../annotationsList";
 import ResizeAndDrag from "../management/common/resizeAndDrag";
 import CustomModal from "../management/common/resizeAndDrag";
-import { clearGrid } from "../annotationsList/action";
+import { clearGrid, toggleAllOverlays } from "../annotationsList/action";
 import Spinner from "../common/circleSpinner";
 import "../../font-icons/styles.css";
 import "react-input-range/lib/css/index.css";
@@ -73,7 +73,8 @@ const mapStateToProps = (state) => {
     patients: state.annotationsListReducer.patients,
     patientLoading: state.annotationsListReducer.patientLoading,
     activePort: state.annotationsListReducer.activePort,
-    lastLocation: state.annotationsListReducer.lastLocation
+    lastLocation: state.annotationsListReducer.lastLocation,
+    isAllOverlayHidden: state.annotationsListReducer.isAllOverlayHidden,
   };
 };
 
@@ -811,6 +812,20 @@ class ToolMenu extends Component {
             />
           );
         })}
+        <div
+          id="toggleAllOverlays"
+          tabIndex="12"
+          className={this.props.isAllOverlayHidden ? "toolbarSectionButton_Active" : "toolbarSectionButton"}
+          onClick={() => this.props.dispatch(toggleAllOverlays())}
+          title={this.props.isAllOverlayHidden ? "Show overlays on all viewports" : "Hide overlays on all viewports"}
+        >
+          <div className="toolContainer">
+            {this.props.isAllOverlayHidden ? <MdOutlineLayers /> : <MdOutlineLayersClear />}
+          </div>
+          <div className="buttonLabel">
+            <span>{this.props.isAllOverlayHidden ? "Show Info" : "Hide Info"}</span>
+          </div>
+        </div>
         {/* <div
                         id="point"
                         tabIndex="1"

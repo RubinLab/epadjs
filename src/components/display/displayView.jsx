@@ -175,6 +175,7 @@ const mapStateToProps = (state) => {
     mammogramPageIndex: state.annotationsListReducer.mammogramPageIndex,
     pageOrderSeries: state.annotationsListReducer.pageOrderSeries,
     currentPageOrder: state.annotationsListReducer.currentPageOrder,
+    isAllOverlayHidden: state.annotationsListReducer.isAllOverlayHidden,
   };
 };
 
@@ -2944,8 +2945,8 @@ class DisplayView extends Component {
   toggleOverlay = (e, i) => {
     const showHide = { ...this.state.isOverlayVisible };
     const index = i || i === 0 ? i : this.props.activePort;
-    if (showHide[index]) delete showHide[index];
-    else showHide[index] = true;
+    if (showHide[index] === false) delete showHide[index];
+    else showHide[index] = false;
     this.setState({ isOverlayVisible: showHide });
   };
 
@@ -3829,7 +3830,7 @@ class DisplayView extends Component {
                     style={{ height: "calc(100% - 26px)" }}
                     activeTool={activeTool}
                     showingPHI={this.props.showingPHI && mode === 'teaching'}
-                    isOverlayVisible={this.state.isOverlayVisible[i] || false}
+                    isOverlayVisible={!this.props.isAllOverlayHidden && (this.state.isOverlayVisible[i] !== false)}
                     jumpToImage={() => this.jumpToImage(0, i)}
                   />}
                 </div>

@@ -62,6 +62,7 @@ import {
   SET_PAGE_ORDER_SERIES,
   SET_PAGE_ORDER,
   CLEAR_PAGE_ORDER_SERIES,
+  TOGGLE_ALL_OVERLAYS,
   colors,
   commonLabels,
 } from "./types";
@@ -497,6 +498,8 @@ export const toggleAllCalculations = (checked) => {
     payload: { checked },
   };
 };
+
+export const toggleAllOverlays = () => ({ type: TOGGLE_ALL_OVERLAYS });
 
 // invoked at display view right bar
 export const toggleSingleLabel = (serieID, aimID) => {
