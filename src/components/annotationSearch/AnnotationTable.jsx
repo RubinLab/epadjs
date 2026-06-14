@@ -11,7 +11,9 @@ import {
 } from "react-table";
 import { clearCarets, convertDateFormat } from "../../Utils/aid.js";
 import {
+  addToGrid,
   changeActivePort,
+  getSingleSerie,
   jumpToAim,
   startLoading,
   loadCompleted,
