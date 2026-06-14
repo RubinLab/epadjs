@@ -3194,6 +3194,7 @@ class DisplayView extends Component {
     }
 
     if (hiding) {
+      this.setState({ trimMode: false, trimmedDimensions: {} });
       this.hideShow(activePort);
       return;
     }
@@ -3204,7 +3205,10 @@ class DisplayView extends Component {
       const hidden = new Set(data.map((_, i) => i).filter(i => !selectedArr.includes(i)));
       this.setState(
         { mammoExpanded: true, width: "50%", height: containerHeight, hiddenPorts: hidden, expandedOrder: selectedArr },
-        () => window.dispatchEvent(new CustomEvent("resize", { detail: { isMaximize: true } }))
+        () => {
+          window.dispatchEvent(new CustomEvent("resize", { detail: { isMaximize: true } }));
+          setTimeout(this.handleTrimMode, 150);
+        }
       );
     } else {
       this.hideShow(activePort);
