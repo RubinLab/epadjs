@@ -54,7 +54,7 @@ import { MdWbIridescent } from "react-icons/md";
 import AnnotationList from "../annotationsList";
 import ResizeAndDrag from "../management/common/resizeAndDrag";
 import CustomModal from "../management/common/resizeAndDrag";
-import { clearGrid, toggleAllOverlays } from "../annotationsList/action";
+import { clearGrid, toggleAllOverlays, setAllOverlays } from "../annotationsList/action";
 import Spinner from "../common/circleSpinner";
 import "../../font-icons/styles.css";
 import "react-input-range/lib/css/index.css";
@@ -464,6 +464,10 @@ class ToolMenu extends Component {
 
   closeAllActions = () => {
     this.props.dispatch(clearGrid());
+    // Overlay visibility is a global, study-independent toggle that survives
+    // page (prev/next) navigation; closing all viewports is the only action
+    // that resets it back to the default (overlays shown).
+    this.props.dispatch(setAllOverlays(false));
     window.dispatchEvent(new CustomEvent("unfuse"));
     sessionStorage.removeItem("wwwc");
     const max = parseInt(maxPort);

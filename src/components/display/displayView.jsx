@@ -42,6 +42,8 @@ import {
   setMammogramSeries,
   setPageOrder,
   setPageOrderSeries,
+  toggleAllOverlays,
+  setAllOverlays,
   // fillSeriesDescfullData
   updateGridWithMultiFrameInfo,
   updateImageId,
@@ -210,7 +212,6 @@ class DisplayView extends Component {
       containerHeight: 0,
       tokenRefresh: null,
       activeTool: "",
-      isOverlayVisible: {},
       wwwc: {},
       multiFrameData: {},
       templateType: "",
@@ -271,6 +272,7 @@ class DisplayView extends Component {
     sessionStorage.setItem('invertMap', JSON.stringify({}));
     sessionStorage.setItem('imgStatus', JSON.stringify([]));
     this.applyDisplayStateToSession();
+    this.restoreGlobalOverlay();
     this.getData(undefined, undefined, "componentDidMount");
     this.formInvertMap();
     if (series.length > 0) {
@@ -366,6 +368,13 @@ class DisplayView extends Component {
     if (this.props.series.length < 1) {
       this.props.history.push(this.props.lastLocation);
       return;
+    }
+
+    // Restore the global overlay flag when a study's significant series load
+    // (or change). pageOrderSeries is stable across prev/next, so this does not
+    // override an in-session overlay toggle while paging.
+    if (prevProps.pageOrderSeries !== this.props.pageOrderSeries) {
+      this.restoreGlobalOverlay();
     }
 
     // Clear mammogram dot selections when a new study replaces the current one.
@@ -2942,12 +2951,11 @@ class DisplayView extends Component {
     this.jumpToImage(imageIndex, i);
   };
 
-  toggleOverlay = (e, i) => {
-    const showHide = { ...this.state.isOverlayVisible };
-    const index = i || i === 0 ? i : this.props.activePort;
-    if (showHide[index] === false) delete showHide[index];
-    else showHide[index] = false;
-    this.setState({ isOverlayVisible: showHide });
+  // Overlay (info) visibility is a single global toggle that applies to every
+  // viewport in the grid. It survives prev/next navigation and is reset only by
+  // "Close All". The per-viewport dot and Ctrl+I both drive the same flag.
+  toggleOverlay = () => {
+    this.props.dispatch(toggleAllOverlays());
   };
 
   reorderStudyList = (list, worklistID) => {
@@ -3388,6 +3396,22 @@ class DisplayView extends Component {
     }
   };
 
+  /**
+   * Restore the global overlay (info) visibility flag from the saved per-series
+   * displayState. The flag is global, but it's persisted onto every saved
+   * series (see handleSaveState), so "any series hidden ⇒ hidden". This runs on
+   * study load (mount + when pageOrderSeries changes), NOT on prev/next, so an
+   * in-session toggle is preserved while paging through a study.
+   */
+  restoreGlobalOverlay = () => {
+    const { pageOrderSeries, series } = this.props;
+    const records = [...(pageOrderSeries || []), ...(series || [])];
+    const anyHidden = records.some(s => s && s.displayState && s.displayState.hideOverlay);
+    if (anyHidden !== this.props.isAllOverlayHidden) {
+      this.props.dispatch(setAllOverlays(anyHidden));
+    }
+  };
+
   // --- End Display State Restore ---
 
   // --- Save Image Status ---
@@ -3398,8 +3422,12 @@ class DisplayView extends Component {
 
     const invertMap = JSON.parse(sessionStorage.getItem('invertMap') || '{}');
     const imgStatus = JSON.parse(sessionStorage.getItem('imgStatus') || '[]');
+    // Overlay visibility is a single global flag, persisted onto every
+    // significant series (see executeSaveStatus).
+    const hideOverlay = !!this.props.isAllOverlayHidden;
 
-    // Collect series with any modified state
+    // Collect series with modified per-viewport image state (window/level,
+    // zoom, invert).
     const modifiedSeries = [];
     for (let i = 0; i < series.length; i++) {
       if (!series[i]) continue;
@@ -3417,8 +3445,6 @@ class DisplayView extends Component {
       }
     }
 
-    if (modifiedSeries.length === 0) return;
-
     const ref = series.find(s => s) || {};
     const projectID = ref.projectID;
     const patientID = ref.patientID || ref.subjectID;
@@ -3426,9 +3452,15 @@ class DisplayView extends Component {
 
     try {
       const { data: currentSigSeries } = await getSignificantSeries(projectID, patientID, studyUID);
+      // An overlay-only change (no window/level/zoom edits) should still save.
+      const savedHidden = (currentSigSeries || []).some(s => s.displayState && s.displayState.hideOverlay);
+      const overlayChanged = hideOverlay !== savedHidden;
+
+      if (modifiedSeries.length === 0 && !overlayChanged) return;
+
       const sigUIDs = new Set((currentSigSeries || []).map(s => s.seriesUID));
       const notYetSignificant = modifiedSeries.filter(s => !sigUIDs.has(s.seriesUID));
-      const saveData = { modifiedSeries, currentSigSeries: currentSigSeries || [], projectID, patientID, studyUID };
+      const saveData = { modifiedSeries, currentSigSeries: currentSigSeries || [], projectID, patientID, studyUID, hideOverlay };
 
       if (notYetSignificant.length > 0) {
         this.setState({ showSaveStatusWarning: true, pendingSaveStatusData: saveData });
@@ -3441,7 +3473,7 @@ class DisplayView extends Component {
     }
   };
 
-  executeSaveStatus = async ({ modifiedSeries, currentSigSeries, projectID, patientID, studyUID }) => {
+  executeSaveStatus = async ({ modifiedSeries, currentSigSeries, projectID, patientID, studyUID, hideOverlay }) => {
     // Build a map of existing significant series to preserve their order/pageOrder
     const sigMap = {};
     currentSigSeries.forEach(s => { sigMap[s.seriesUID] = { ...s }; });
@@ -3462,6 +3494,23 @@ class DisplayView extends Component {
         };
       }
     });
+
+    // The overlay flag is global: stamp the current value onto every
+    // significant series so restore is consistent regardless of which series
+    // the user reopens.
+    Object.keys(sigMap).forEach(uid => {
+      sigMap[uid] = {
+        ...sigMap[uid],
+        displayState: { ...(sigMap[uid].displayState || {}), hideOverlay: !!hideOverlay },
+      };
+    });
+
+    if (Object.keys(sigMap).length === 0) {
+      // No significant series to attach state to (nothing saved server-side).
+      this.setState({ showSaveStatusWarning: false, pendingSaveStatusData: null });
+      toast.info('No series state to save.');
+      return;
+    }
 
     try {
       await setSignificantSeries(projectID, patientID, studyUID, Object.values(sigMap), true);
@@ -3830,7 +3879,7 @@ class DisplayView extends Component {
                     style={{ height: "calc(100% - 26px)" }}
                     activeTool={activeTool}
                     showingPHI={this.props.showingPHI && mode === 'teaching'}
-                    isOverlayVisible={!this.props.isAllOverlayHidden && (this.state.isOverlayVisible[i] !== false)}
+                    isOverlayVisible={!this.props.isAllOverlayHidden}
                     jumpToImage={() => this.jumpToImage(0, i)}
                   />}
                 </div>
