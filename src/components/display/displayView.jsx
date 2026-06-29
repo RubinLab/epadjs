@@ -3754,15 +3754,6 @@ class DisplayView extends Component {
                       >
                         <FaExpandArrowsAlt />
                       </span>
-                      <span
-                        className={"dot"}
-                        style={{ background: "deepskyblue" }}
-                        onClick={(e) => {
-                          this.toggleOverlay(e, i);
-                        }}
-                      >
-                        <FaTag />
-                      </span>
                       {/* {series[i].worklistID && (<span
                         className={"dot"}
                         style={{ background: "orange"}}
