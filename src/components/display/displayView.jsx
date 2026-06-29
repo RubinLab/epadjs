@@ -3168,6 +3168,25 @@ class DisplayView extends Component {
     this.forceViewportRefresh();
   };
 
+  /** True when the series in viewport `i` is a mammogram (MG). */
+  isMGViewport = (i) => {
+    const s = this.props.series && this.props.series[i];
+    return !!s && (s.examType || s.modality)?.toUpperCase() === 'MG';
+  };
+
+  /**
+   * Viewport click handler. Shift+click an MG viewport toggles its
+   * expand-selection (same as clicking the mammo-select dot); a plain click
+   * just makes the viewport active.
+   */
+  handleViewportClick = (e, i) => {
+    if (e.shiftKey && this.isMGViewport(i)) {
+      this.handleMammoDotClick(i);
+      return;
+    }
+    this.setActive(i);
+  };
+
   /** Toggle selection of a viewport dot. Max 2 at a time. */
   handleMammoDotClick = (index) => {
     const { selectedPorts } = this.state;
@@ -3736,7 +3755,7 @@ class DisplayView extends Component {
                     order: expandedOrder ? expandedOrder.indexOf(i) : undefined,
                     justifySelf,
                   }}
-                  onClick={() => this.setActive(i)}
+                  onClick={(e) => this.handleViewportClick(e, i)}
                 >
                   <div className={"row"}>
                     <div className={"column left"}>
