@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
-import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import cornerstone from "cornerstone-core";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
@@ -13,7 +12,6 @@ import { WindowLevel } from "../WindowLevel/WindowLevel";
 import ColormapSelector from "./ColormapSelector";
 import FuseSelector from "./FuseSelector";
 import cornerstoneTools from "cornerstone-tools";
-import { setSignificantSeries } from "../../services/seriesServices";
 // import Modal from "../common/warningModal";
 import HotKeysList from "./HotKeysList";
 import {
@@ -43,7 +41,7 @@ import { BsArrowUpLeft } from "react-icons/bs";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
 import { MdLoop, MdPanTool, MdMyLocation, MdOutlineKeyboardCommandKey, MdOutlineLayersClear, MdOutlineLayers } from "react-icons/md";
-import { TbReplace, TbReorder, TbContrast2 } from "react-icons/tb";
+import { TbReorder, TbContrast2 } from "react-icons/tb";
 import {
   TiDeleteOutline,
   TiPencil,
@@ -252,7 +250,6 @@ class ToolMenu extends Component {
     ];
 
     this.managementTools = [
-      { name: "Save order", icon: <TbReplace />, tool: "order", teaching: true },
       { name: "Hot Keys", icon: <MdOutlineKeyboardCommandKey />, tool: "keys", teaching: true },
       { name: "Reorder", icon: <TbReorder />, tool: "reorder", teaching: true },
       { name: "Save State", icon: <TbContrast2 />, tool: "saveState", teaching: true },
@@ -437,31 +434,6 @@ class ToolMenu extends Component {
     });
   };
 
-  saveSignificantOrder = () => {
-    let projectID, subjectUID, studyUID = null;
-    const significantSeries = [];
-    let differentStudy = false;
-    for (let i = 0; i < this.props.openSeries.length; i++) {
-      if (i === 0) {
-        ({projectID, subjectUID, studyUID } = this.props.openSeries[i]);
-        subjectUID = subjectUID ? subjectUID : this.props.openSeries[i].patientID
-        significantSeries.push({seriesUID: this.props.openSeries[i].seriesUID, significanceOrder: i + 1});
-      } else {
-        if (studyUID !== this.props.openSeries[i].studyUID) {
-          differentStudy = studyUID !== this.props.openSeries[i].studyUID;
-          toast.warning(`All series should be from the same study`);
-        } else {
-          significantSeries.push({seriesUID: this.props.openSeries[i].seriesUID, significanceOrder: i + 1});
-        }
-      } 
-    }
-    if (!differentStudy) {
-      setSignificantSeries(projectID, subjectUID, studyUID, significantSeries, true).then(res => {
-        toast.success('Significant Series and Layout Saved!');
-      }).catch((err) => toast.error('Could not save the signifance order'));
-    }
-  }
-
   closeAllActions = () => {
     this.props.dispatch(clearGrid());
     // Overlay visibility is a global, study-independent toggle that survives
@@ -580,9 +552,6 @@ class ToolMenu extends Component {
       this.setState({ showFuse: true });
       return;
       this.selectFreehand();
-    } else if (tool === 'order') {
-      this.saveSignificantOrder();
-      return;
     } else if (tool === 'keys') {
       this.showHotkeyInfo();
       return;
