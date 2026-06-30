@@ -223,7 +223,8 @@ export default function SeriesOrderModal({ show, onClose, onSaved, projectID, su
             <div className="som-loading">Loading series…</div>
           ) : (
             <>
-              {/* Grid + action buttons */}
+             <div className="som-layout">
+              {/* Left: grid + action buttons */}
               <div className="som-grid-row">
                 <div className="som-grid">
                   {currentSlots.map((serie, slotIdx) => (
@@ -249,52 +250,52 @@ export default function SeriesOrderModal({ show, onClose, onSaved, projectID, su
                 </div>
                 <div className="som-grid-actions">
                   <button className="som-btn som-btn--secondary" onClick={handleClearGrid}>Clear Grid</button>
+                  {/* Page navigation */}
+                  <div className="som-pagination">
+                    <button
+                      className="som-page-nav"
+                      disabled={currentPage === 0}
+                      onClick={() => setCurrentPage(p => p - 1)}
+                    >&lt;</button>
+                    {pages.map((_, i) => (
+                      <button
+                        key={i}
+                        className={`som-page-num${currentPage === i ? ' som-page-num--active' : ''}`}
+                        onClick={() => setCurrentPage(i)}
+                      >{i + 1}</button>
+                    ))}
+                    <button
+                      className="som-page-nav"
+                      disabled={currentPage === pages.length - 1}
+                      onClick={() => setCurrentPage(p => p + 1)}
+                    >&gt;</button>
+                  </div>
                   <button className="som-btn som-btn--secondary" onClick={handleAddPage}>+ New Page</button>
                 </div>
               </div>
 
-              {/* Page navigation */}
-              <div className="som-pagination">
-                <button
-                  className="som-page-nav"
-                  disabled={currentPage === 0}
-                  onClick={() => setCurrentPage(p => p - 1)}
-                >&lt;</button>
-                {pages.map((_, i) => (
-                  <button
-                    key={i}
-                    className={`som-page-num${currentPage === i ? ' som-page-num--active' : ''}`}
-                    onClick={() => setCurrentPage(i)}
-                  >{i + 1}</button>
-                ))}
-                <button
-                  className="som-page-nav"
-                  disabled={currentPage === pages.length - 1}
-                  onClick={() => setCurrentPage(p => p + 1)}
-                >&gt;</button>
-              </div>
-
-              <hr className="som-divider" />
-
-              {/* Unordered list */}
+              {/* Right: unordered list */}
               <div
                 className="som-unordered"
                 onDragOver={e => e.preventDefault()}
                 onDrop={handleDropOnList}
               >
-                <div className="som-unordered-label">── Unordered Series ──</div>
-                {unordered.length === 0 && <div className="som-unordered-empty">All series are assigned to pages.</div>}
-                {unordered.map((serie, idx) => (
-                  <span
-                    key={serie.seriesUID}
-                    className="som-chip som-chip--list"
-                    draggable
-                    onDragStart={() => handleDragStart({ type: 'list', index: idx, serie })}
-                  >
-                    {seriesLabel(serie)}
-                  </span>
-                ))}
+                <div className="som-unordered-scroll">
+                  <div className="som-unordered-label">Unordered Series</div>
+                  {unordered.length === 0 && <div className="som-unordered-empty">All series are assigned to pages.</div>}
+                  {unordered.map((serie, idx) => (
+                    <span
+                      key={serie.seriesUID}
+                      className="som-chip som-chip--list"
+                      draggable
+                      onDragStart={() => handleDragStart({ type: 'list', index: idx, serie })}
+                    >
+                      {seriesLabel(serie)}
+                    </span>
+                  ))}
+                </div>
               </div>
+             </div>
             </>
           )}
         </Modal.Body>
@@ -308,7 +309,7 @@ export default function SeriesOrderModal({ show, onClose, onSaved, projectID, su
       {showStateWarn && (
         <Modal show onHide={() => setShowStateWarn(false)} size="sm" className="som-warn-modal">
           <Modal.Header>
-            <Modal.Title>⚠ Saved State Will Be Lost</Modal.Title>
+            <Modal.Title><span className="warn">⚠</span> Saved State Will Be Lost</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <p>Moving a series out of the order permanently removes its saved display state (window/level, zoom, invert). This cannot be undone.</p>
@@ -334,7 +335,7 @@ export default function SeriesOrderModal({ show, onClose, onSaved, projectID, su
       {showEmptyWarn && (
         <Modal show onHide={() => setShowEmptyWarn(false)} size="sm" className="som-warn-modal">
           <Modal.Header>
-            <Modal.Title>⚠ Page {emptyPages[0]} is Empty</Modal.Title>
+            <Modal.Title><span className="warn">⚠</span> Page {emptyPages[0]} is Empty</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <p>
