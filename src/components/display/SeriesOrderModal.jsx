@@ -13,7 +13,7 @@ const hasDisplayState = (serie) =>
   serie.displayState &&
   Object.values(serie.displayState).some(v => v !== null && v !== '' && v !== undefined);
 
-export default function SeriesOrderModal({ show, onClose, onSaved, projectID, subjectUID, studyUID }) {
+export default function SeriesOrderModal({ show, onClose, onSaved, projectID, subjectUID, studyUID, liveDisplayStates }) {
   const [pages, setPages] = useState([Array(SLOTS).fill(null)]);
   const [unordered, setUnordered] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -186,13 +186,19 @@ export default function SeriesOrderModal({ show, onClose, onSaved, projectID, su
       page.forEach((serie, slotIdx) => {
         if (!serie) return;
         const record = { seriesUID: serie.seriesUID, significanceOrder: slotIdx + 1, pageOrder: pageIdx + 1 };
-        if (hasDisplayState(serie)) record.displayState = serie.displayState;
+        // Save the image status along with the order: for series currently open
+        // in the viewer, the live in-session adjustments (window/level, zoom,
+        // invert, overlay) override the stored state; others keep what they had.
+        const stored = hasDisplayState(serie) ? serie.displayState : null;
+        const live = liveDisplayStates && liveDisplayStates[serie.seriesUID];
+        const merged = { ...(stored || {}), ...(live || {}) };
+        if (Object.keys(merged).length > 0) record.displayState = merged;
         payload.push(record);
       });
     });
     setSignificantSeries(projectID, subjectUID, studyUID, payload, true)
       .then(() => {
-        toast.success('Series order saved!');
+        toast.success('Series order and image status saved!');
         if (onSaved) onSaved();
         onClose();
       })

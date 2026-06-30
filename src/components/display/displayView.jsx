@@ -3471,14 +3471,10 @@ class DisplayView extends Component {
 
     try {
       const { data: currentSigSeries } = await getSignificantSeries(projectID, patientID, studyUID);
-      // An overlay-only change (no window/level/zoom edits) should still save.
-      const savedHidden = (currentSigSeries || []).some(s => s.displayState && s.displayState.hideOverlay);
-      const overlayChanged = hideOverlay !== savedHidden;
-
-      if (modifiedSeries.length === 0 && !overlayChanged) return;
-
       const sigUIDs = new Set((currentSigSeries || []).map(s => s.seriesUID));
-      const notYetSignificant = modifiedSeries.filter(s => !sigUIDs.has(s.seriesUID));
+      // Save State now persists the current grid layout as well, so every open
+      // series becomes significant. Warn when that adds new ones.
+      const notYetSignificant = series.filter(s => s && !sigUIDs.has(s.seriesUID));
       const saveData = { modifiedSeries, currentSigSeries: currentSigSeries || [], projectID, patientID, studyUID, hideOverlay };
 
       if (notYetSignificant.length > 0) {
@@ -3493,25 +3489,41 @@ class DisplayView extends Component {
   };
 
   executeSaveStatus = async ({ modifiedSeries, currentSigSeries, projectID, patientID, studyUID, hideOverlay }) => {
-    // Build a map of existing significant series to preserve their order/pageOrder
+    const { series, currentPageOrder } = this.props;
+    const pageOrder = currentPageOrder || 1;
+
+    // Preserve significant series on OTHER pages only. Drop the current page's
+    // stored occupants (the on-screen grid below becomes this page's
+    // authoritative layout) and any stale entry for a series that is now open
+    // here (e.g. opened/swapped in via the series dropdown — it moves to this
+    // page). Without this, swapping or closing a viewport leaves the old series
+    // in the same page/slot, producing a duplicate slot or a series on two
+    // pages, which corrupts page navigation.
+    const openUIDs = new Set(series.filter(Boolean).map(s => s.seriesUID));
     const sigMap = {};
-    currentSigSeries.forEach(s => { sigMap[s.seriesUID] = { ...s }; });
+    currentSigSeries.forEach(s => {
+      const samePage = Number(s.pageOrder != null ? s.pageOrder : 1) === pageOrder;
+      if (samePage || openUIDs.has(s.seriesUID)) return;
+      sigMap[s.seriesUID] = { ...s };
+    });
 
-    const maxSigOrder = currentSigSeries.reduce((m, s) => Math.max(m, s.significanceOrder || 0), 0);
-    const maxPage = currentSigSeries.reduce((m, s) => Math.max(m, s.pageOrder || 0), 0);
-    let nextSigOrder = maxSigOrder + 1;
+    // Capture the current on-screen grid as this page's layout: viewport index
+    // -> significanceOrder, current page -> pageOrder. Preserve each series'
+    // stored displayState (live edits are merged in below).
+    series.forEach((s, i) => {
+      if (!s) return;
+      const uid = s.seriesUID;
+      const prev = currentSigSeries.find(c => c.seriesUID === uid);
+      sigMap[uid] = { ...(prev || {}), seriesUID: uid, significanceOrder: i + 1, pageOrder };
+    });
 
+    // Apply live image status for the series the user adjusted (merge so we
+    // don't drop any other displayState keys already stored).
     modifiedSeries.forEach(s => {
-      if (sigMap[s.seriesUID]) {
-        sigMap[s.seriesUID] = { ...sigMap[s.seriesUID], displayState: s.displayState };
-      } else {
-        sigMap[s.seriesUID] = {
-          seriesUID: s.seriesUID,
-          significanceOrder: nextSigOrder++,
-          pageOrder: maxPage > 0 ? maxPage : 1,
-          displayState: s.displayState,
-        };
-      }
+      sigMap[s.seriesUID] = {
+        ...(sigMap[s.seriesUID] || {}),
+        displayState: { ...((sigMap[s.seriesUID] || {}).displayState || {}), ...s.displayState },
+      };
     });
 
     // The overlay flag is global: stamp the current value onto every
@@ -3538,7 +3550,6 @@ class DisplayView extends Component {
       const invertMap = JSON.parse(sessionStorage.getItem('invertMap') || '{}');
       const imgStatus = JSON.parse(sessionStorage.getItem('imgStatus') || '[]');
       const savedUIDs = new Set(modifiedSeries.map(s => s.seriesUID));
-      const { series } = this.props;
       for (let i = 0; i < series.length; i++) {
         if (series[i] && savedUIDs.has(series[i].seriesUID)) {
           delete invertMap[i];
@@ -3578,12 +3589,35 @@ class DisplayView extends Component {
         try { cornerstone.updateImage(element); } catch (e) {}
       });
 
-      toast.success('Image status saved.');
+      toast.success('Image status and layout saved.');
       this.setState({ showSaveStatusWarning: false, pendingSaveStatusData: null });
     } catch (err) {
       console.error(err);
       toast.error('Failed to save image status.');
     }
+  };
+
+  /**
+   * Live per-series displayState (window/level, zoom, invert, overlay) for the
+   * series currently open in the viewer, keyed by seriesUID. Passed to the
+   * Series Order modal so saving order also persists the user's in-session
+   * image adjustments. Only includes keys that have a live value so it merges
+   * onto stored displayState without wiping it.
+   */
+  buildLiveDisplayStateMap = () => {
+    const { series } = this.props;
+    const invertMap = JSON.parse(sessionStorage.getItem('invertMap') || '{}');
+    const imgStatus = JSON.parse(sessionStorage.getItem('imgStatus') || '[]');
+    const hideOverlay = !!this.props.isAllOverlayHidden;
+    const map = {};
+    (series || []).forEach((s, i) => {
+      if (!s) return;
+      const override = { hideOverlay };
+      if (invertMap[i] !== undefined) override.invertMap = invertMap[i];
+      if (imgStatus[i] != null) override.imageStatus = imgStatus[i];
+      map[s.seriesUID] = override;
+    });
+    return map;
   };
 
   // --- End Save Image Status ---
@@ -3911,6 +3945,7 @@ class DisplayView extends Component {
               projectID={active.projectID}
               subjectUID={active.patientID}
               studyUID={active.studyUID}
+              liveDisplayStates={this.buildLiveDisplayStateMap()}
             />
           );
         })()}
@@ -3919,7 +3954,7 @@ class DisplayView extends Component {
             <div style={{ background: '#1a2035', border: '1px solid #2e3a50', borderRadius: '6px', padding: '24px', maxWidth: '420px', width: '90%', color: '#cdd3e0' }}>
               <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>⚠ Series Will Be Added to Significant Series</div>
               <p style={{ fontSize: '13px', marginBottom: '20px', lineHeight: 1.5 }}>
-                One or more series with saved states are not yet in your display order. Saving will add them as significant series.
+                Saving the current image status and layout will add one or more open series to your display order as significant series.
               </p>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button
