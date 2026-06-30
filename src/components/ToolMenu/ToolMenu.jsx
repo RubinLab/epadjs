@@ -543,17 +543,25 @@ class ToolMenu extends Component {
         isSpherical: false,
       });
     } else if (tool === "FreehandRoi3DTool") {
+      // Re-clicking the button toggles the interpolation modal closed.
+      if (this.state.showInterpolation) {
+        this.setState({ showInterpolation: false });
+        return;
+      }
       this.selectFreehand();
       this.setState({ showInterpolation: true });
     } else if (tool === "colorLut") {
       this.setState({ showColormap: true });
       return;
     } else if (tool === "fuse") {
-      this.setState({ showFuse: true });
+      // Re-clicking the button toggles the modal closed.
+      if (this.state.showFuse) this.closeFuse();
+      else this.setState({ showFuse: true });
       return;
-      this.selectFreehand();
     } else if (tool === 'keys') {
-      this.showHotkeyInfo();
+      // Re-clicking the button toggles the modal closed.
+      if (this.state.keys) this.setState({ keys: null });
+      else this.showHotkeyInfo();
       return;
     } else if (tool === 'reorder') {
       if (this.props.onReorder) this.props.onReorder();
