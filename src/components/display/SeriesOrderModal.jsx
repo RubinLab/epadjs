@@ -13,6 +13,16 @@ const hasDisplayState = (serie) =>
   serie.displayState &&
   Object.values(serie.displayState).some(v => v !== null && v !== '' && v !== undefined);
 
+// Unordered series are sorted by series number (numeric, ascending); ties are
+// broken by series description alphabetically. Series with no number sort last.
+const sortUnordered = (arr) =>
+  [...arr].sort((a, b) => {
+    const an = a.seriesNo != null && a.seriesNo !== '' ? Number(a.seriesNo) : Infinity;
+    const bn = b.seriesNo != null && b.seriesNo !== '' ? Number(b.seriesNo) : Infinity;
+    if (an !== bn) return an - bn;
+    return (a.seriesDescription || '').localeCompare(b.seriesDescription || '');
+  });
+
 export default function SeriesOrderModal({ show, onClose, onSaved, projectID, subjectUID, studyUID, liveDisplayStates }) {
   const [pages, setPages] = useState([Array(SLOTS).fill(null)]);
   const [unordered, setUnordered] = useState([]);
@@ -77,7 +87,7 @@ export default function SeriesOrderModal({ show, onClose, onSaved, projectID, su
       }
 
       setPages(pagesArr);
-      setUnordered(unorderedArr);
+      setUnordered(sortUnordered(unorderedArr));
     } catch (err) {
       toast.error('Could not load series data');
     } finally {
@@ -115,7 +125,7 @@ export default function SeriesOrderModal({ show, onClose, onSaved, projectID, su
     }
 
     setPages(newPages);
-    setUnordered(newUnordered);
+    setUnordered(sortUnordered(newUnordered));
     setDragSource(null);
   };
 
@@ -128,7 +138,7 @@ export default function SeriesOrderModal({ show, onClose, onSaved, projectID, su
     newPages[dragSource.page][dragSource.slot] = null;
     maybeShowStateWarn(draggedSerie);
     setPages(newPages);
-    setUnordered(prev => [...prev, draggedSerie]);
+    setUnordered(prev => sortUnordered([...prev, draggedSerie]));
     setDragSource(null);
   };
 
@@ -149,7 +159,7 @@ export default function SeriesOrderModal({ show, onClose, onSaved, projectID, su
     newPages[currentPage] = Array(SLOTS).fill(null);
     cleared.forEach(maybeShowStateWarn);
     setPages(newPages);
-    setUnordered(prev => [...prev, ...cleared]);
+    setUnordered(prev => sortUnordered([...prev, ...cleared]));
   };
 
   const handleAddPage = () => {
