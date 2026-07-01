@@ -6,7 +6,11 @@ import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import * as dcmjs from "dcmjs";
 import _ from "lodash";
 import CornerstoneViewport from "react-cornerstone-viewport";
-import { FaExpandArrowsAlt, FaPen, FaTag, FaTimes, FaRegSquare, FaCheckSquare } from "react-icons/fa";
+import { FaExpandArrowsAlt, FaPen, FaTag, FaTimes, FaRegSquare, FaCheckSquare, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaScissors } from "react-icons/fa6";
+// NOTE: design called for RiExpandDiagonalSFill, which is only in react-icons
+// >=5. We're on 4.12, so use the closest available diagonal-expand icon.
+import { MdOpenInFull } from "react-icons/md";
 import { unstable_batchedUpdates } from "react-dom";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
@@ -3049,6 +3053,21 @@ class DisplayView extends Component {
     return this.props.currentPageOrder > 1;
   };
 
+  /** Current page number and total page count for the prev/next indicator. */
+  getPageInfo = () => {
+    if (this.isPageOrderNav()) {
+      const { pageOrderSeries, currentPageOrder } = this.props;
+      const total = (pageOrderSeries || []).reduce((m, s) => Math.max(m, s.pageOrder || 1), 1);
+      return { current: currentPageOrder || 1, total };
+    }
+    const { mammogramSeries, mammogramPageIndex } = this.props;
+    const pageSize = parseInt(maxPort) || 1;
+    const total = mammogramSeries && mammogramSeries.length
+      ? Math.ceil(mammogramSeries.length / pageSize)
+      : 1;
+    return { current: (mammogramPageIndex || 0) + 1, total };
+  };
+
   /** Clears the grid and loads the next pageOrder page. */
   clearPageSessionStorage = () => {
     this._explicitlyReset.clear();
@@ -3678,6 +3697,9 @@ class DisplayView extends Component {
     let invertMap = sessionStorage.getItem("invertMap");
     invertMap = invertMap ? JSON.parse(invertMap) : {};
     const { trimMode, width: stateWidth } = this.state;
+    const pageInfo = this.getPageInfo();
+    const prevDisabled = this.isPageOrderNav() ? !this.hasPrevPageOrderPage() : !this.hasPrevMammoPage();
+    const nextDisabled = this.isPageOrderNav() ? !this.hasNextPageOrderPage() : !this.hasNextMammoPage();
     const vpGridCols = trimMode ? (Math.round(100 / parseFloat(stateWidth)) || 2) : undefined;
     const vpWrapperStyle = trimMode
       ? { display: 'grid', gridTemplateColumns: `repeat(${vpGridCols}, 1fr)`, alignContent: 'start' }
@@ -3710,48 +3732,43 @@ class DisplayView extends Component {
             onSaveState={this.handleSaveState}
           >
             <div className="mammo-toolbar-group">
-              <button
-                className="mammo-toolbar-btn"
-                onClick={this.isPageOrderNav() ? this.handlePageOrderPrev : this.handleMammoPrev}
-                disabled={this.isPageOrderNav() ? !this.hasPrevPageOrderPage() : !this.hasPrevMammoPage()}
+              <div className="mammo-toolbar-separator" />
+              <div
+                className={"toolbarSectionButton" + (prevDisabled ? " toolbarSectionButton--disabled" : "")}
+                onClick={prevDisabled ? undefined : (this.isPageOrderNav() ? this.handlePageOrderPrev : this.handleMammoPrev)}
                 title="Load previous series group"
               >
-                <div className="toolContainer" />
-                <div className="buttonLabel">PREVIOUS</div>
-              </button>
-              <button
-                className="mammo-toolbar-btn"
-                onClick={this.isPageOrderNav() ? this.handlePageOrderNext : this.handleMammoNext}
-                disabled={this.isPageOrderNav() ? !this.hasNextPageOrderPage() : !this.hasNextMammoPage()}
+                <div className="toolContainer"><FaChevronLeft /></div>
+                <div className="buttonLabel"><span>Prev</span></div>
+              </div>
+              <div className="toolbarSectionButton mammo-page-indicator" title="Current page / total pages">
+                <div className="toolContainer">{pageInfo.current}/{pageInfo.total}</div>
+                <div className="buttonLabel"><span>Page</span></div>
+              </div>
+              <div
+                className={"toolbarSectionButton" + (nextDisabled ? " toolbarSectionButton--disabled" : "")}
+                onClick={nextDisabled ? undefined : (this.isPageOrderNav() ? this.handlePageOrderNext : this.handleMammoNext)}
                 title="Load next series group"
               >
-                <div className="toolContainer" />
-                <div className="buttonLabel">NEXT</div>
-              </button>
-              <button
-                className="mammo-toolbar-btn"
+                <div className="toolContainer"><FaChevronRight /></div>
+                <div className="buttonLabel"><span>Next</span></div>
+              </div>
+              <div
+                className={(this.state.mammoExpanded || this.state.hiding) ? "toolbarSectionButton_Active" : "toolbarSectionButton"}
                 onClick={this.handleMammoExpand}
                 title={(this.state.mammoExpanded || this.state.hiding) ? "Restore standard layout" : "Expand viewport(s)"}
               >
-                <div className="toolContainer" />
-                <div className="buttonLabel">{(this.state.mammoExpanded || this.state.hiding) ? "RESTORE" : "EXPAND"}</div>
-              </button>
-              <button
-                className={"mammo-toolbar-btn" + (this.state.trimMode ? " mammo-toolbar-btn--active" : "")}
+                <div className="toolContainer"><MdOpenInFull /></div>
+                <div className="buttonLabel"><span>{(this.state.mammoExpanded || this.state.hiding) ? "Restore" : "Expand"}</span></div>
+              </div>
+              <div
+                className={this.state.trimMode ? "toolbarSectionButton_Active" : "toolbarSectionButton"}
                 onClick={this.handleTrimMode}
                 title={this.state.trimMode ? "Restore original viewport size" : "Trim black bars to fit image"}
               >
-                <div className="toolContainer" />
-                <div className="buttonLabel">{this.state.trimMode ? "UNTRIM" : "TRIM"}</div>
-              </button>
-              {/* <button
-                className="mammo-toolbar-btn mammo-toolbar-btn--disabled"
-                disabled
-                title="Save worklist (coming soon)"
-              >
-                <div className="toolContainer" />
-                <div className="buttonLabel">SAVE WL</div>
-              </button> */}
+                <div className="toolContainer"><FaScissors /></div>
+                <div className="buttonLabel"><span>{this.state.trimMode ? "Untrim" : "Trim"}</span></div>
+              </div>
             </div>
           </ToolMenu>
           {this.state.isLoading && (

@@ -208,7 +208,7 @@ export default function SeriesOrderModal({ show, onClose, onSaved, projectID, su
     });
     setSignificantSeries(projectID, subjectUID, studyUID, payload, true)
       .then(() => {
-        toast.success('Series order and image status saved!');
+        toast.success('Layout and image status saved!');
         if (onSaved) onSaved();
         onClose();
       })
@@ -311,7 +311,7 @@ export default function SeriesOrderModal({ show, onClose, onSaved, projectID, su
         </Modal.Body>
         <Modal.Footer>
           <button className="som-btn som-btn--secondary" onClick={onClose}>Cancel</button>
-          <button className="som-btn som-btn--primary" onClick={handleSave} disabled={loading}>Save Order</button>
+          <button className="som-btn som-btn--primary" onClick={handleSave} disabled={loading}>Save Layouts</button>
         </Modal.Footer>
       </Modal>
 

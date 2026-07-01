@@ -251,7 +251,7 @@ class ToolMenu extends Component {
 
     this.managementTools = [
       { name: "Hot Keys", icon: <MdOutlineKeyboardCommandKey />, tool: "keys", teaching: true },
-      { name: "Reorder", icon: <TbReorder />, tool: "reorder", teaching: true },
+      { name: "Layouts", icon: <TbReorder />, tool: "reorder", teaching: true },
       { name: "Save State", icon: <TbContrast2 />, tool: "saveState", teaching: true },
     ]
 
