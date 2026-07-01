@@ -76,6 +76,7 @@ export const SET_PAGE_ORDER_SERIES = 'epadjs/annotationList/SET_PAGE_ORDER_SERIE
 export const SET_PAGE_ORDER = 'epadjs/annotationList/SET_PAGE_ORDER';
 export const CLEAR_PAGE_ORDER_SERIES = 'epadjs/annotationList/CLEAR_PAGE_ORDER_SERIES';
 export const TOGGLE_ALL_OVERLAYS = 'epadjs/annotationList/TOGGLE_ALL_OVERLAYS';
+export const SET_ALL_OVERLAYS = 'epadjs/annotationList/SET_ALL_OVERLAYS';
 
 export const commonLabels = {
   button: { background: "#6c757d", color: "#ECECEC", border: "#acacac solid 1px" },

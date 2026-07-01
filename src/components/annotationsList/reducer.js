@@ -64,6 +64,7 @@ import {
   SET_PAGE_ORDER,
   CLEAR_PAGE_ORDER_SERIES,
   TOGGLE_ALL_OVERLAYS,
+  SET_ALL_OVERLAYS,
   colors,
   commonLabels,
 } from "./types";
@@ -164,6 +165,8 @@ const asyncReducer = (state = initialState, action) => {
         return { ...state, showCalculations: action.payload.checked };
       case TOGGLE_ALL_OVERLAYS:
         return { ...state, isAllOverlayHidden: !state.isAllOverlayHidden };
+      case SET_ALL_OVERLAYS:
+        return { ...state, isAllOverlayHidden: action.payload };
       case STORE_AIM_SELECTION_ALL:
         const { checked, map, tbPageIndex, clearAll } = action.payload;
         let newMultipageAimSelectionAll = _.cloneDeep(state.multipageAimSelection);
@@ -738,7 +741,6 @@ const asyncReducer = (state = initialState, action) => {
           showCalculations: false,
           showLabels: false,
           showAnnotations: mode === 'teaching' ? false : true,
-          isAllOverlayHidden: false,
         };
       case CLEAR_SELECTION:
         let selectionState = { ...state };

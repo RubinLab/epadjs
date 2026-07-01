@@ -1,16 +1,25 @@
-/* ── Bootstrap Modal overrides ─────────────────────────────── */
+/* Series Display Order modal — styling per UI/UX design.
+   All rules are scoped to .series-order-modal / .som-warn-modal so they never
+   leak onto other react-bootstrap modals in the app. Positioning/sizing of the
+   dialog is left to react-bootstrap (size="lg"/"sm"). */
+
+/* ── Bootstrap Modal shell ─────────────────────────────────── */
 .series-order-modal .modal-content,
 .som-warn-modal .modal-content {
-  background-color: #1a2035;
-  border: 1px solid #2e3a50;
-  color: #d0d8e8;
+  background: #333;
+  color: #fff;
+  border: 1px solid #222;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.5);
 }
 
 .series-order-modal .modal-header,
 .som-warn-modal .modal-header {
-  background-color: #1a2035;
-  border-bottom: 1px solid #2e3a50;
-  color: #d0d8e8;
+  background-color: #555;
+  color: #ccc;
+  padding: 3px 12px;
+  font-size: 14px;
+  text-shadow: 1px 2px 0px rgba(0, 0, 0, 0.25);
+  border-bottom: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -18,10 +27,11 @@
 
 .series-order-modal .modal-title,
 .som-warn-modal .modal-title {
-  color: #d0d8e8;
-  font-size: 1rem;
+  color: #ccc;
+  font-size: 14px;
 }
 
+/* Keep react-bootstrap's auto-generated close button visible on the dark header */
 .series-order-modal .modal-header .btn-close,
 .som-warn-modal .modal-header .btn-close {
   filter: invert(1) grayscale(1) brightness(1.5);
@@ -35,14 +45,21 @@
 
 .series-order-modal .modal-body,
 .som-warn-modal .modal-body {
-  background-color: #1a2035;
-  color: #d0d8e8;
+  background: #333;
+  color: #ccc;
 }
 
 .series-order-modal .modal-footer,
 .som-warn-modal .modal-footer {
-  background-color: #1a2035;
-  border-top: 1px solid #2e3a50;
+  background-color: #555;
+  border-top: none;
+}
+
+/* Warning icon in the warning-modal titles */
+.series-order-modal .warn,
+.som-warn-modal .warn {
+  color: rgb(235, 105, 105);
+  font-size: larger;
 }
 
 /* ── Loading ──────────────────────────────────────────────── */
@@ -52,188 +69,196 @@
   color: #aaa;
 }
 
-/* ── Grid + actions row ───────────────────────────────────── */
-.som-grid-row {
+/* ── Layout: grid (left) + unordered list (right) ─────────── */
+.series-order-modal .som-layout {
   display: flex;
-  align-items: flex-start;
   gap: 16px;
-  margin-bottom: 12px;
+  align-items: stretch;
 }
 
-.som-grid {
+/* Left column: the slot grid stacked over its action row */
+.series-order-modal .som-grid-row {
+  flex: 1 1 60%;
+  min-width: 0;
+}
+
+/* ── Grid + actions ───────────────────────────────────────── */
+.series-order-modal .som-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 8px;
-  flex: 0 0 auto;
-  width: 360px;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 15px;
 }
 
-.som-slot {
-  height: 72px;
+.series-order-modal .som-slot {
+  border: 1px solid #ccc;
+  padding: 2rem 1.5rem;
+  margin-bottom: 7px;
+  text-align: center;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px dashed #3a4a5e;
-  transition: border-color 0.15s;
 }
 
-.som-slot--empty {
-  background: #151d2e;
+.series-order-modal .som-slot--empty {
+  border: 3px dotted #777;
 }
 
-.som-slot--filled {
-  border-style: solid;
-  border-color: #4a7ab5;
-  background: #1e2a3a;
+.series-order-modal .som-slot--droptarget:hover {
+  border-color: #01abd6;
 }
 
-.som-slot--droptarget:hover {
-  border-color: #aadcff;
-}
-
-.som-slot-number {
-  font-size: 1.4rem;
-  color: #3a4a5e;
-  font-weight: bold;
+.series-order-modal .som-slot-number {
+  color: #777;
+  text-align: center;
 }
 
 /* ── Series chip ──────────────────────────────────────────── */
-.som-chip {
-  display: inline-block;
-  background: #2d4a6e;
-  color: #cce0ff;
-  border-radius: 3px;
-  padding: 4px 8px;
-  font-size: 0.78rem;
+.series-order-modal .som-chip {
+  border: 1px solid #222;
+  background-color: #555;
+  color: #fff;
+  padding: 15px;
+  margin-right: 15px;
+  margin-bottom: 15px;
+  border-radius: 7px;
   cursor: grab;
-  max-width: 160px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   user-select: none;
 }
 
-.som-chip:active {
+.series-order-modal .som-chip:active {
   cursor: grabbing;
 }
 
-.som-chip--list {
-  margin: 4px;
-  max-width: 100%;
+.series-order-modal .som-slot .som-chip {
+  background-color: #555;
+  border: 1px solid #01abd6;
+  margin: 0;
 }
 
-/* ── Grid action buttons ──────────────────────────────────── */
-.som-grid-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-top: 4px;
+/* Unordered pool chips stack vertically as a readable list. Inline <span>s
+   with vertical padding overlap when they wrap, so make them block-level. */
+.series-order-modal .som-chip--list {
+  display: block;
+  margin: 0 0 10px 0;
+  padding: 10px 12px;
+  white-space: normal;
 }
 
-/* ── Page navigation ──────────────────────────────────────── */
-.som-pagination {
-  display: flex;
+/* ── Action buttons row (Clear Grid · pagination · + New Page) ── */
+.series-order-modal .som-grid-actions {
+  list-style-type: none;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  margin-bottom: 12px;
-}
-
-.som-page-nav,
-.som-page-num {
-  background: #222c3e;
-  border: 1px solid #3a4a5e;
-  color: #aab8cc;
-  border-radius: 3px;
-  padding: 2px 8px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: background 0.15s;
-}
-
-.som-page-nav:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.som-page-nav:not(:disabled):hover,
-.som-page-num:hover {
-  background: #4a7ab5;
-  color: #fff;
-}
-
-.som-page-num--active {
-  background: #4a7ab5;
-  color: #fff;
-  border-color: #4a7ab5;
-}
-
-/* ── Separator between grid area and unordered panel ─────── */
-.som-divider {
-  border: none;
-  border-top: 1px solid #2e3a50;
-  margin: 12px 0;
-}
-
-/* ── Unordered list ───────────────────────────────────────── */
-.som-unordered {
-  border: 1px solid #2e3a50;
-  border-radius: 4px;
-  min-height: 80px;
-  padding: 8px;
-  background: #151d2e;
-}
-
-.som-unordered-label {
-  font-size: 0.85rem;
-  color: #5a6a80;
-  margin-bottom: 8px;
-}
-
-.som-unordered-empty {
-  font-size: 0.85rem;
-  color: #4a5a6e;
-  padding: 8px 0;
+  margin: 15px 0 0 0;
 }
 
 /* ── Buttons ──────────────────────────────────────────────── */
-.som-btn {
-  padding: 6px 16px;
-  border-radius: 3px;
-  border: none;
+.series-order-modal .som-btn,
+.som-warn-modal .som-btn {
+  background-color: #777;
+  border: 1px solid #222;
+  color: #ccc;
+  font-size: 14px;
+  padding: 5px 11px;
+  border-radius: 7px;
+  margin: 0 12px;
   cursor: pointer;
-  font-size: 0.85rem;
-  transition: opacity 0.15s, background 0.15s;
 }
 
-.som-btn:disabled {
+.series-order-modal .som-btn:first-child,
+.som-warn-modal .som-btn:first-child {
+  margin-left: 0;
+}
+
+.series-order-modal .som-btn:hover,
+.som-warn-modal .som-btn:hover {
+  background-color: #555;
+  border: 1px solid #222;
+  color: #ccc;
+}
+
+.series-order-modal .som-btn:disabled,
+.som-warn-modal .som-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.som-btn--primary {
-  background: #4a7ab5;
+/* ── Page navigation ──────────────────────────────────────── */
+.series-order-modal .som-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.series-order-modal .som-page-num,
+.series-order-modal .som-page-nav {
+  background-color: #777;
+  border: 1px solid #222;
+  color: #ccc;
+  font-size: 14px;
+  padding: 5px 11px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.series-order-modal .som-page-nav:hover,
+.series-order-modal .som-page-num:hover {
+  background-color: #555;
+  border: 1px solid #222;
+  color: #ccc;
+}
+
+.series-order-modal .som-page-num--active {
+  background-color: #01abd6;
+  border-color: #01abd6;
   color: #fff;
 }
 
-.som-btn--primary:hover:not(:disabled) {
-  background: #5a8ac5;
+.series-order-modal button.som-page-nav:disabled {
+  background-color: #222;
+  border: 1px solid #222;
+  color: #555;
+  cursor: not-allowed;
 }
 
-.som-btn--secondary {
-  background: #1e2a3a;
-  color: #aab8cc;
-  border: 1px solid #3a4a5e;
+/* ── Unordered list (right column) ────────────────────────── */
+/* The shell stretches (align-items: stretch) to match the grid column's
+   height. Its content lives in an absolutely-positioned scroll layer so the
+   number of chips can't push the box taller than the grid — it scrolls
+   instead, keeping the two columns the same height. */
+.series-order-modal .som-unordered {
+  flex: 1 1 40%;
+  min-width: 0;
+  margin: 0;
+  background-color: #222;
+  border: 1px solid #555;
+  border-radius: 7px;
+  position: relative;
 }
 
-.som-btn--secondary:hover:not(:disabled) {
-  background: #283a52;
+.series-order-modal .som-unordered-scroll {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding: 15px 15px 30px 15px;
 }
 
-/* ── Warning modal body text ──────────────────────────────── */
+.series-order-modal .som-unordered-label {
+  color: #ccc;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #ccc;
+}
+
+.series-order-modal .som-unordered-empty {
+  font-size: 0.85rem;
+  color: #888;
+  padding: 8px 0;
+}
+
+/* ── Warning modal body ───────────────────────────────────── */
 .som-warn-modal .modal-body p {
-  color: #c0cce0;
+  color: #ccc;
   font-size: 0.9rem;
 }
 
@@ -241,7 +266,7 @@
   display: flex;
   align-items: center;
   font-size: 0.85rem;
-  color: #aab8cc;
+  color: #ccc;
   cursor: pointer;
   margin-top: 8px;
   gap: 6px;

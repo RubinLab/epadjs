@@ -6,7 +6,11 @@ import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import * as dcmjs from "dcmjs";
 import _ from "lodash";
 import CornerstoneViewport from "react-cornerstone-viewport";
-import { FaExpandArrowsAlt, FaPen, FaTag, FaTimes, FaRegSquare, FaCheckSquare } from "react-icons/fa";
+import { FaExpandArrowsAlt, FaPen, FaTag, FaTimes, FaRegSquare, FaCheckSquare, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaScissors } from "react-icons/fa6";
+// NOTE: design called for RiExpandDiagonalSFill, which is only in react-icons
+// >=5. We're on 4.12, so use the closest available diagonal-expand icon.
+import { MdOpenInFull } from "react-icons/md";
 import { unstable_batchedUpdates } from "react-dom";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
@@ -42,6 +46,8 @@ import {
   setMammogramSeries,
   setPageOrder,
   setPageOrderSeries,
+  toggleAllOverlays,
+  setAllOverlays,
   // fillSeriesDescfullData
   updateGridWithMultiFrameInfo,
   updateImageId,
@@ -210,7 +216,6 @@ class DisplayView extends Component {
       containerHeight: 0,
       tokenRefresh: null,
       activeTool: "",
-      isOverlayVisible: {},
       wwwc: {},
       multiFrameData: {},
       templateType: "",
@@ -271,6 +276,7 @@ class DisplayView extends Component {
     sessionStorage.setItem('invertMap', JSON.stringify({}));
     sessionStorage.setItem('imgStatus', JSON.stringify([]));
     this.applyDisplayStateToSession();
+    this.restoreGlobalOverlay();
     this.getData(undefined, undefined, "componentDidMount");
     this.formInvertMap();
     if (series.length > 0) {
@@ -366,6 +372,13 @@ class DisplayView extends Component {
     if (this.props.series.length < 1) {
       this.props.history.push(this.props.lastLocation);
       return;
+    }
+
+    // Restore the global overlay flag when a study's significant series load
+    // (or change). pageOrderSeries is stable across prev/next, so this does not
+    // override an in-session overlay toggle while paging.
+    if (prevProps.pageOrderSeries !== this.props.pageOrderSeries) {
+      this.restoreGlobalOverlay();
     }
 
     // Clear mammogram dot selections when a new study replaces the current one.
@@ -2942,12 +2955,11 @@ class DisplayView extends Component {
     this.jumpToImage(imageIndex, i);
   };
 
-  toggleOverlay = (e, i) => {
-    const showHide = { ...this.state.isOverlayVisible };
-    const index = i || i === 0 ? i : this.props.activePort;
-    if (showHide[index] === false) delete showHide[index];
-    else showHide[index] = false;
-    this.setState({ isOverlayVisible: showHide });
+  // Overlay (info) visibility is a single global toggle that applies to every
+  // viewport in the grid. It survives prev/next navigation and is reset only by
+  // "Close All". The per-viewport dot and Ctrl+I both drive the same flag.
+  toggleOverlay = () => {
+    this.props.dispatch(toggleAllOverlays());
   };
 
   reorderStudyList = (list, worklistID) => {
@@ -3039,6 +3051,21 @@ class DisplayView extends Component {
   /** True when the user is past page 1 in pageOrder navigation. */
   hasPrevPageOrderPage = () => {
     return this.props.currentPageOrder > 1;
+  };
+
+  /** Current page number and total page count for the prev/next indicator. */
+  getPageInfo = () => {
+    if (this.isPageOrderNav()) {
+      const { pageOrderSeries, currentPageOrder } = this.props;
+      const total = (pageOrderSeries || []).reduce((m, s) => Math.max(m, s.pageOrder || 1), 1);
+      return { current: currentPageOrder || 1, total };
+    }
+    const { mammogramSeries, mammogramPageIndex } = this.props;
+    const pageSize = parseInt(maxPort) || 1;
+    const total = mammogramSeries && mammogramSeries.length
+      ? Math.ceil(mammogramSeries.length / pageSize)
+      : 1;
+    return { current: (mammogramPageIndex || 0) + 1, total };
   };
 
   /** Clears the grid and loads the next pageOrder page. */
@@ -3158,6 +3185,25 @@ class DisplayView extends Component {
       existingData: mammogramSeries,
     });
     this.forceViewportRefresh();
+  };
+
+  /** True when the series in viewport `i` is a mammogram (MG). */
+  isMGViewport = (i) => {
+    const s = this.props.series && this.props.series[i];
+    return !!s && (s.examType || s.modality)?.toUpperCase() === 'MG';
+  };
+
+  /**
+   * Viewport click handler. Shift+click an MG viewport toggles its
+   * expand-selection (same as clicking the mammo-select dot); a plain click
+   * just makes the viewport active.
+   */
+  handleViewportClick = (e, i) => {
+    if (e.shiftKey && this.isMGViewport(i)) {
+      this.handleMammoDotClick(i);
+      return;
+    }
+    this.setActive(i);
   };
 
   /** Toggle selection of a viewport dot. Max 2 at a time. */
@@ -3388,6 +3434,22 @@ class DisplayView extends Component {
     }
   };
 
+  /**
+   * Restore the global overlay (info) visibility flag from the saved per-series
+   * displayState. The flag is global, but it's persisted onto every saved
+   * series (see handleSaveState), so "any series hidden ⇒ hidden". This runs on
+   * study load (mount + when pageOrderSeries changes), NOT on prev/next, so an
+   * in-session toggle is preserved while paging through a study.
+   */
+  restoreGlobalOverlay = () => {
+    const { pageOrderSeries, series } = this.props;
+    const records = [...(pageOrderSeries || []), ...(series || [])];
+    const anyHidden = records.some(s => s && s.displayState && s.displayState.hideOverlay);
+    if (anyHidden !== this.props.isAllOverlayHidden) {
+      this.props.dispatch(setAllOverlays(anyHidden));
+    }
+  };
+
   // --- End Display State Restore ---
 
   // --- Save Image Status ---
@@ -3398,8 +3460,12 @@ class DisplayView extends Component {
 
     const invertMap = JSON.parse(sessionStorage.getItem('invertMap') || '{}');
     const imgStatus = JSON.parse(sessionStorage.getItem('imgStatus') || '[]');
+    // Overlay visibility is a single global flag, persisted onto every
+    // significant series (see executeSaveStatus).
+    const hideOverlay = !!this.props.isAllOverlayHidden;
 
-    // Collect series with any modified state
+    // Collect series with modified per-viewport image state (window/level,
+    // zoom, invert).
     const modifiedSeries = [];
     for (let i = 0; i < series.length; i++) {
       if (!series[i]) continue;
@@ -3417,8 +3483,6 @@ class DisplayView extends Component {
       }
     }
 
-    if (modifiedSeries.length === 0) return;
-
     const ref = series.find(s => s) || {};
     const projectID = ref.projectID;
     const patientID = ref.patientID || ref.subjectID;
@@ -3427,8 +3491,10 @@ class DisplayView extends Component {
     try {
       const { data: currentSigSeries } = await getSignificantSeries(projectID, patientID, studyUID);
       const sigUIDs = new Set((currentSigSeries || []).map(s => s.seriesUID));
-      const notYetSignificant = modifiedSeries.filter(s => !sigUIDs.has(s.seriesUID));
-      const saveData = { modifiedSeries, currentSigSeries: currentSigSeries || [], projectID, patientID, studyUID };
+      // Save State now persists the current grid layout as well, so every open
+      // series becomes significant. Warn when that adds new ones.
+      const notYetSignificant = series.filter(s => s && !sigUIDs.has(s.seriesUID));
+      const saveData = { modifiedSeries, currentSigSeries: currentSigSeries || [], projectID, patientID, studyUID, hideOverlay };
 
       if (notYetSignificant.length > 0) {
         this.setState({ showSaveStatusWarning: true, pendingSaveStatusData: saveData });
@@ -3441,27 +3507,60 @@ class DisplayView extends Component {
     }
   };
 
-  executeSaveStatus = async ({ modifiedSeries, currentSigSeries, projectID, patientID, studyUID }) => {
-    // Build a map of existing significant series to preserve their order/pageOrder
+  executeSaveStatus = async ({ modifiedSeries, currentSigSeries, projectID, patientID, studyUID, hideOverlay }) => {
+    const { series, currentPageOrder } = this.props;
+    const pageOrder = currentPageOrder || 1;
+
+    // Preserve significant series on OTHER pages only. Drop the current page's
+    // stored occupants (the on-screen grid below becomes this page's
+    // authoritative layout) and any stale entry for a series that is now open
+    // here (e.g. opened/swapped in via the series dropdown — it moves to this
+    // page). Without this, swapping or closing a viewport leaves the old series
+    // in the same page/slot, producing a duplicate slot or a series on two
+    // pages, which corrupts page navigation.
+    const openUIDs = new Set(series.filter(Boolean).map(s => s.seriesUID));
     const sigMap = {};
-    currentSigSeries.forEach(s => { sigMap[s.seriesUID] = { ...s }; });
-
-    const maxSigOrder = currentSigSeries.reduce((m, s) => Math.max(m, s.significanceOrder || 0), 0);
-    const maxPage = currentSigSeries.reduce((m, s) => Math.max(m, s.pageOrder || 0), 0);
-    let nextSigOrder = maxSigOrder + 1;
-
-    modifiedSeries.forEach(s => {
-      if (sigMap[s.seriesUID]) {
-        sigMap[s.seriesUID] = { ...sigMap[s.seriesUID], displayState: s.displayState };
-      } else {
-        sigMap[s.seriesUID] = {
-          seriesUID: s.seriesUID,
-          significanceOrder: nextSigOrder++,
-          pageOrder: maxPage > 0 ? maxPage : 1,
-          displayState: s.displayState,
-        };
-      }
+    currentSigSeries.forEach(s => {
+      const samePage = Number(s.pageOrder != null ? s.pageOrder : 1) === pageOrder;
+      if (samePage || openUIDs.has(s.seriesUID)) return;
+      sigMap[s.seriesUID] = { ...s };
     });
+
+    // Capture the current on-screen grid as this page's layout: viewport index
+    // -> significanceOrder, current page -> pageOrder. Preserve each series'
+    // stored displayState (live edits are merged in below).
+    series.forEach((s, i) => {
+      if (!s) return;
+      const uid = s.seriesUID;
+      const prev = currentSigSeries.find(c => c.seriesUID === uid);
+      sigMap[uid] = { ...(prev || {}), seriesUID: uid, significanceOrder: i + 1, pageOrder };
+    });
+
+    // Apply live image status for the series the user adjusted (merge so we
+    // don't drop any other displayState keys already stored).
+    modifiedSeries.forEach(s => {
+      sigMap[s.seriesUID] = {
+        ...(sigMap[s.seriesUID] || {}),
+        displayState: { ...((sigMap[s.seriesUID] || {}).displayState || {}), ...s.displayState },
+      };
+    });
+
+    // The overlay flag is global: stamp the current value onto every
+    // significant series so restore is consistent regardless of which series
+    // the user reopens.
+    Object.keys(sigMap).forEach(uid => {
+      sigMap[uid] = {
+        ...sigMap[uid],
+        displayState: { ...(sigMap[uid].displayState || {}), hideOverlay: !!hideOverlay },
+      };
+    });
+
+    if (Object.keys(sigMap).length === 0) {
+      // No significant series to attach state to (nothing saved server-side).
+      this.setState({ showSaveStatusWarning: false, pendingSaveStatusData: null });
+      toast.info('No series state to save.');
+      return;
+    }
 
     try {
       await setSignificantSeries(projectID, patientID, studyUID, Object.values(sigMap), true);
@@ -3470,7 +3569,6 @@ class DisplayView extends Component {
       const invertMap = JSON.parse(sessionStorage.getItem('invertMap') || '{}');
       const imgStatus = JSON.parse(sessionStorage.getItem('imgStatus') || '[]');
       const savedUIDs = new Set(modifiedSeries.map(s => s.seriesUID));
-      const { series } = this.props;
       for (let i = 0; i < series.length; i++) {
         if (series[i] && savedUIDs.has(series[i].seriesUID)) {
           delete invertMap[i];
@@ -3510,12 +3608,35 @@ class DisplayView extends Component {
         try { cornerstone.updateImage(element); } catch (e) {}
       });
 
-      toast.success('Image status saved.');
+      toast.success('Image status and layout saved.');
       this.setState({ showSaveStatusWarning: false, pendingSaveStatusData: null });
     } catch (err) {
       console.error(err);
       toast.error('Failed to save image status.');
     }
+  };
+
+  /**
+   * Live per-series displayState (window/level, zoom, invert, overlay) for the
+   * series currently open in the viewer, keyed by seriesUID. Passed to the
+   * Series Order modal so saving order also persists the user's in-session
+   * image adjustments. Only includes keys that have a live value so it merges
+   * onto stored displayState without wiping it.
+   */
+  buildLiveDisplayStateMap = () => {
+    const { series } = this.props;
+    const invertMap = JSON.parse(sessionStorage.getItem('invertMap') || '{}');
+    const imgStatus = JSON.parse(sessionStorage.getItem('imgStatus') || '[]');
+    const hideOverlay = !!this.props.isAllOverlayHidden;
+    const map = {};
+    (series || []).forEach((s, i) => {
+      if (!s) return;
+      const override = { hideOverlay };
+      if (invertMap[i] !== undefined) override.invertMap = invertMap[i];
+      if (imgStatus[i] != null) override.imageStatus = imgStatus[i];
+      map[s.seriesUID] = override;
+    });
+    return map;
   };
 
   // --- End Save Image Status ---
@@ -3576,6 +3697,9 @@ class DisplayView extends Component {
     let invertMap = sessionStorage.getItem("invertMap");
     invertMap = invertMap ? JSON.parse(invertMap) : {};
     const { trimMode, width: stateWidth } = this.state;
+    const pageInfo = this.getPageInfo();
+    const prevDisabled = this.isPageOrderNav() ? !this.hasPrevPageOrderPage() : !this.hasPrevMammoPage();
+    const nextDisabled = this.isPageOrderNav() ? !this.hasNextPageOrderPage() : !this.hasNextMammoPage();
     const vpGridCols = trimMode ? (Math.round(100 / parseFloat(stateWidth)) || 2) : undefined;
     const vpWrapperStyle = trimMode
       ? { display: 'grid', gridTemplateColumns: `repeat(${vpGridCols}, 1fr)`, alignContent: 'start' }
@@ -3608,48 +3732,43 @@ class DisplayView extends Component {
             onSaveState={this.handleSaveState}
           >
             <div className="mammo-toolbar-group">
-              <button
-                className="mammo-toolbar-btn"
-                onClick={this.isPageOrderNav() ? this.handlePageOrderPrev : this.handleMammoPrev}
-                disabled={this.isPageOrderNav() ? !this.hasPrevPageOrderPage() : !this.hasPrevMammoPage()}
+              <div className="mammo-toolbar-separator" />
+              <div
+                className={"toolbarSectionButton" + (prevDisabled ? " toolbarSectionButton--disabled" : "")}
+                onClick={prevDisabled ? undefined : (this.isPageOrderNav() ? this.handlePageOrderPrev : this.handleMammoPrev)}
                 title="Load previous series group"
               >
-                <div className="toolContainer" />
-                <div className="buttonLabel">PREVIOUS</div>
-              </button>
-              <button
-                className="mammo-toolbar-btn"
-                onClick={this.isPageOrderNav() ? this.handlePageOrderNext : this.handleMammoNext}
-                disabled={this.isPageOrderNav() ? !this.hasNextPageOrderPage() : !this.hasNextMammoPage()}
+                <div className="toolContainer"><FaChevronLeft /></div>
+                <div className="buttonLabel"><span>Prev</span></div>
+              </div>
+              <div className="toolbarSectionButton mammo-page-indicator" title="Current page / total pages">
+                <div className="toolContainer">{pageInfo.current}/{pageInfo.total}</div>
+                <div className="buttonLabel"><span>Page</span></div>
+              </div>
+              <div
+                className={"toolbarSectionButton" + (nextDisabled ? " toolbarSectionButton--disabled" : "")}
+                onClick={nextDisabled ? undefined : (this.isPageOrderNav() ? this.handlePageOrderNext : this.handleMammoNext)}
                 title="Load next series group"
               >
-                <div className="toolContainer" />
-                <div className="buttonLabel">NEXT</div>
-              </button>
-              <button
-                className="mammo-toolbar-btn"
+                <div className="toolContainer"><FaChevronRight /></div>
+                <div className="buttonLabel"><span>Next</span></div>
+              </div>
+              <div
+                className={(this.state.mammoExpanded || this.state.hiding) ? "toolbarSectionButton_Active" : "toolbarSectionButton"}
                 onClick={this.handleMammoExpand}
                 title={(this.state.mammoExpanded || this.state.hiding) ? "Restore standard layout" : "Expand viewport(s)"}
               >
-                <div className="toolContainer" />
-                <div className="buttonLabel">{(this.state.mammoExpanded || this.state.hiding) ? "RESTORE" : "EXPAND"}</div>
-              </button>
-              <button
-                className={"mammo-toolbar-btn" + (this.state.trimMode ? " mammo-toolbar-btn--active" : "")}
+                <div className="toolContainer"><MdOpenInFull /></div>
+                <div className="buttonLabel"><span>{(this.state.mammoExpanded || this.state.hiding) ? "Restore" : "Expand"}</span></div>
+              </div>
+              <div
+                className={this.state.trimMode ? "toolbarSectionButton_Active" : "toolbarSectionButton"}
                 onClick={this.handleTrimMode}
                 title={this.state.trimMode ? "Restore original viewport size" : "Trim black bars to fit image"}
               >
-                <div className="toolContainer" />
-                <div className="buttonLabel">{this.state.trimMode ? "UNTRIM" : "TRIM"}</div>
-              </button>
-              {/* <button
-                className="mammo-toolbar-btn mammo-toolbar-btn--disabled"
-                disabled
-                title="Save worklist (coming soon)"
-              >
-                <div className="toolContainer" />
-                <div className="buttonLabel">SAVE WL</div>
-              </button> */}
+                <div className="toolContainer"><FaScissors /></div>
+                <div className="buttonLabel"><span>{this.state.trimMode ? "Untrim" : "Trim"}</span></div>
+              </div>
             </div>
           </ToolMenu>
           {this.state.isLoading && (
@@ -3687,7 +3806,7 @@ class DisplayView extends Component {
                     order: expandedOrder ? expandedOrder.indexOf(i) : undefined,
                     justifySelf,
                   }}
-                  onClick={() => this.setActive(i)}
+                  onClick={(e) => this.handleViewportClick(e, i)}
                 >
                   <div className={"row"}>
                     <div className={"column left"}>
@@ -3704,15 +3823,6 @@ class DisplayView extends Component {
                         onClick={() => this.hideShow(i)}
                       >
                         <FaExpandArrowsAlt />
-                      </span>
-                      <span
-                        className={"dot"}
-                        style={{ background: "deepskyblue" }}
-                        onClick={(e) => {
-                          this.toggleOverlay(e, i);
-                        }}
-                      >
-                        <FaTag />
                       </span>
                       {/* {series[i].worklistID && (<span
                         className={"dot"}
@@ -3830,7 +3940,7 @@ class DisplayView extends Component {
                     style={{ height: "calc(100% - 26px)" }}
                     activeTool={activeTool}
                     showingPHI={this.props.showingPHI && mode === 'teaching'}
-                    isOverlayVisible={!this.props.isAllOverlayHidden && (this.state.isOverlayVisible[i] !== false)}
+                    isOverlayVisible={!this.props.isAllOverlayHidden}
                     jumpToImage={() => this.jumpToImage(0, i)}
                   />}
                 </div>
@@ -3852,6 +3962,7 @@ class DisplayView extends Component {
               projectID={active.projectID}
               subjectUID={active.patientID}
               studyUID={active.studyUID}
+              liveDisplayStates={this.buildLiveDisplayStateMap()}
             />
           );
         })()}
@@ -3860,7 +3971,7 @@ class DisplayView extends Component {
             <div style={{ background: '#1a2035', border: '1px solid #2e3a50', borderRadius: '6px', padding: '24px', maxWidth: '420px', width: '90%', color: '#cdd3e0' }}>
               <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>⚠ Series Will Be Added to Significant Series</div>
               <p style={{ fontSize: '13px', marginBottom: '20px', lineHeight: 1.5 }}>
-                One or more series with saved states are not yet in your display order. Saving will add them as significant series.
+                Saving the current image status and layout will add one or more open series to your display order as significant series.
               </p>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button
