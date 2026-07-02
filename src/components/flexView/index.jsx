@@ -138,23 +138,56 @@ class FlexView extends React.Component {
       return;
     }
 
-    // Mammogram studies load only the first page; remaining series paginate via NEXT.
-    if (isMammogramStudy(series)) {
-      this.props.dispatch(setMammogramSeries(series, studyUID));
+    // Mirror the open decision tree used by the annotation table and worklist so
+    // the same study (esp. MG / significant studies) opens the same series here.
+    const significant = series.filter(s => s.significanceOrder != null);
+    const hasPageOrder = significant.length > 0 && significant.some(s => s.pageOrder != null);
+
+    // Case 1: significant series with pageOrder — open page 1, paginate via NEXT/PREV.
+    if (significant.length > 0 && hasPageOrder) {
+      this.props.dispatch(setPageOrderSeries(significant));
+      const pageOne = significant
+        .filter(s => s.pageOrder === 1)
+        .sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
       openSeriesInDisplay({
         dispatch: this.props.dispatch,
         navigate: () => this.props.history.push("/display"),
         openSeries: this.props.openSeries,
-        series: series.slice(0, parseInt(this.maxPort)),
+        series: pageOne.length > 0 ? pageOne : significant.slice(0, parseInt(this.maxPort)),
         existingData: series,
       });
       return;
     }
 
-    // If the study has pageOrder series, store them now so NEXT/PREV work after the modal confirms.
-    const significant = series.filter(s => s.significanceOrder != null);
-    if (significant.length > 0 && significant.some(s => s.pageOrder != null)) {
-      this.props.dispatch(setPageOrderSeries(significant));
+    // Case 3/6: mammogram — load significant series (sorted) if defined, otherwise
+    // the first page in acquisition order; remaining series paginate via NEXT.
+    if (isMammogramStudy(series)) {
+      this.props.dispatch(setMammogramSeries(series, studyUID));
+      const toDisplay = significant.length > 0
+        ? significant.sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0))
+        : series.slice(0, parseInt(this.maxPort));
+      openSeriesInDisplay({
+        dispatch: this.props.dispatch,
+        navigate: () => this.props.history.push("/display"),
+        openSeries: this.props.openSeries,
+        series: toDisplay,
+        existingData: series,
+      });
+      return;
+    }
+
+    // Case 2: significant series without pageOrder, non-mammogram — open directly.
+    if (significant.length > 0) {
+      const toDisplay = significant.sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+      openSeriesInDisplay({
+        dispatch: this.props.dispatch,
+        navigate: () => this.props.history.push("/display"),
+        openSeries: this.props.openSeries,
+        series: toDisplay,
+        existingData: series,
+        onGridFull: pending => this.setState({ showSeriesTable: true, series: pending }),
+      });
+      return;
     }
 
     openSeriesInDisplay({
