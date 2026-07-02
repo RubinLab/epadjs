@@ -145,7 +145,7 @@ class FlexView extends React.Component {
         dispatch: this.props.dispatch,
         navigate: () => this.props.history.push("/display"),
         openSeries: this.props.openSeries,
-        series: series.slice(0, parseInt(maxPort)),
+        series: series.slice(0, parseInt(this.maxPort)),
         existingData: series,
       });
       return;
