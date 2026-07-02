@@ -350,6 +350,7 @@ svg {
   text-align: center;
   font-size: 1.3rem;
   margin-top: 0.5rem;
+  padding: 18px 12px;
 }
 
 .-maxView__header--icon {

@@ -5,6 +5,9 @@ import {
   clearSelection,
   jumpToAim,
   alertViewPortFull,
+  clearGrid,
+  clearPageOrderSeries,
+  clearMammogramSeries,
 } from '../annotationsList/action';
 
 /**
@@ -29,6 +32,54 @@ export const isMammogramStudy = (seriesArray) => {
 export const findInOpenSeries = (seriesUID, openSeries) => {
   const index = openSeries.findIndex(s => s && s.seriesUID === seriesUID);
   return { isOpen: index !== -1, index };
+};
+
+/** The studyUID of the currently open study (first non-null port), or null. */
+export const getOpenStudyUID = (openSeries = []) => {
+  const open = (openSeries || []).find(s => s && s.studyUID);
+  return open ? open.studyUID : null;
+};
+
+/**
+ * True when a study is already open AND the incoming series belong to a
+ * different study. Only one study may be open at a time (see the one-study
+ * model); opening a different one requires closing the current one first.
+ * Incoming series are always from a single study, so the first entry decides.
+ */
+export const isDifferentStudyOpen = (seriesArr, openSeries = []) => {
+  const openStudyUID = getOpenStudyUID(openSeries);
+  if (!openStudyUID) return false;
+  const arr = Array.isArray(seriesArr) ? seriesArr : [seriesArr];
+  const incoming = arr.find(s => s && s.studyUID);
+  if (!incoming) return false;
+  return incoming.studyUID !== openStudyUID;
+};
+
+/**
+ * Fully tears down the current study before a new one is opened: clears the
+ * grid, pagination state (pageOrder + mammogram), and the per-viewport session
+ * storage (invert map, image status, window/level). Consolidates the reset that
+ * was previously duplicated in selectSerieModal.closeAllSeries and
+ * sideBarWorklist.handleOpenClick.
+ */
+export const resetForNewStudy = (dispatch) => {
+  dispatch(clearGrid());
+  dispatch(clearPageOrderSeries());
+  dispatch(clearMammogramSeries());
+  sessionStorage.setItem('invertMap', JSON.stringify({}));
+  sessionStorage.setItem('imgStatus', JSON.stringify([]));
+  sessionStorage.removeItem('wwwc');
+};
+
+/**
+ * Fires the app-level confirmation that closes the current study and opens the
+ * pending one. App.js listens for `confirmSwitchStudy` and, on approval, calls
+ * resetForNewStudy then re-invokes openSeriesInDisplay with force: true.
+ */
+export const requestStudySwitch = (pendingOpen) => {
+  window.dispatchEvent(
+    new CustomEvent('confirmSwitchStudy', { detail: { pendingOpen } })
+  );
 };
 
 /**
@@ -62,9 +113,30 @@ export const openSeriesInDisplay = ({
   worklistID = null,
   existingData = null,
   onGridFull = null,
+  onDefer = null,
+  force = false,
 }) => {
   const maxPort = parseInt(sessionStorage.getItem('maxPort'));
   const seriesArr = Array.isArray(series) ? series : [series];
+
+  // One study at a time: if the incoming series belong to a different study
+  // than the one currently open, defer to the app-level confirmation. On
+  // approval App.js resets the display and re-invokes this with force: true.
+  // onDefer lets the caller clean up (e.g. hide a loading spinner) since the
+  // open won't proceed synchronously and there's no navigation to unmount it.
+  if (!force && isDifferentStudyOpen(seriesArr, openSeries)) {
+    if (onDefer) onDefer();
+    requestStudySwitch({
+      dispatch,
+      navigate,
+      series: seriesArr,
+      aimID,
+      worklistID,
+      existingData,
+    });
+    return;
+  }
+
   const toOpen = [];
 
   // Activate already-open series and, when an aim is provided, jump to it.
