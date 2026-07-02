@@ -34,6 +34,7 @@ import WarningModal from "../../common/warningModal";
 import "../menuStyle.css";
 import { getSeries } from "../../../services/seriesServices";
 import SelectSeriesModal from "../../annotationsList/selectSerieModal";
+import { isDifferentStudyOpen, requestStudySwitch, resetForNewStudy } from "../../common/openSeriesHelper";
 
 let mode;
 const maxPort = parseInt(sessionStorage.getItem("maxPort"));
@@ -500,7 +501,18 @@ class Annotations extends React.Component {
     return { isOpen, index };
   };
 
-  openAnnotation = async (selected) => {
+  openAnnotation = async (selected, force = false) => {
+    // One study at a time: if a different study is open, confirm closing it first.
+    if (!force && selected && selected.original &&
+        isDifferentStudyOpen([selected.original], this.props.openSeries)) {
+      requestStudySwitch({
+        onConfirm: () => {
+          resetForNewStudy(this.props.dispatch);
+          this.openAnnotation(selected, true);
+        },
+      });
+      return;
+    }
     try {
       const { studyUID, seriesUID, aimID, patientName, name } =
         selected.original;
@@ -511,7 +523,9 @@ class Annotations extends React.Component {
       const { openSeries } = this.props;
       // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
       //check if there is enough space in the grid
-      let isGridFull = openSeries.length === maxPort;
+      // On a forced re-open the grid was just reset but openSeries is still the
+      // pre-reset value; treat it as not full so the open proceeds.
+      let isGridFull = !force && openSeries.length === maxPort;
       //check if the serie is already open
       if (
         this.checkIfSerieOpen(selected.original, this.props.openSeries).isOpen
@@ -853,8 +867,21 @@ class Annotations extends React.Component {
     return result;
   };
 
-  displaySeries = async (selected) => {
-    if (this.props.openSeries.length === maxPort) {
+  displaySeries = async (selected, force = false) => {
+    // One study at a time: if a different study is open, confirm closing it first.
+    if (!force && isDifferentStudyOpen([selected], this.props.openSeries)) {
+      requestStudySwitch({
+        onConfirm: () => {
+          resetForNewStudy(this.props.dispatch);
+          this.displaySeries(selected, true);
+        },
+      });
+      return;
+    }
+    // On a forced re-open the grid was just reset, but this.props.openSeries is
+    // still the pre-reset value; treat it as empty so the open proceeds.
+    const openCount = force ? 0 : this.props.openSeries.length;
+    if (openCount === maxPort) {
       this.props.dispatch(alertViewPortFull());
     } else {
       const { subjectID: patientID, studyUID } = selected;
@@ -872,7 +899,7 @@ class Annotations extends React.Component {
       //get extraction of the series (extract unopen series)
       if (seriesArr.length > 0) seriesArr = this.excludeOpenSeries(seriesArr);
       //check if there is enough room
-      if (seriesArr.length + this.props.openSeries.length > maxPort) {
+      if (seriesArr.length + openCount > maxPort) {
         //if there is not bring the modal
         await this.setState({
           isSerieSelectionOpen: true,

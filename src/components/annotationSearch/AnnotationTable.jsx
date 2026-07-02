@@ -26,7 +26,7 @@ import {
   setPageOrderSeries,
   clearPageOrderSeries,
 } from "../annotationsList/action";
-import { openSeriesInDisplay, isMammogramStudy } from "../common/openSeriesHelper";
+import { openSeriesInDisplay, isMammogramStudy, isDifferentStudyOpen, requestStudySwitch, resetForNewStudy } from "../common/openSeriesHelper";
 import { formatDate } from "../flexView/helperMethods";
 import { getSeries, getSignificantSeries } from "../../services/seriesServices";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
@@ -501,26 +501,17 @@ function AnnotationTable(props) {
           if (!selected.examType) {
             selected.examType = selected.modality;
           }
-          props.dispatch(addToGrid(selected, aimID));
-          props.dispatch(getSingleSerie(selected, aimID, null, existingData));
-          //if grid is NOT full check if patient data exists
-          // -----> Delete after v1.0 <-----
-          // if (!props.patients[patientID]) {
-          //   // this.props.dispatch(getWholeData(null, null, selected.original));
-          //   getWholeData(null, null, selected);
-          // } else {
-          //   props.dispatch(
-          //     updatePatient(
-          //       'annotation',
-          //       true,
-          //       patientID,
-          //       studyUID,
-          //       seriesUID,
-          //       aimID
-          //     )
-          //   );
-          // }
-          props.switchToDisplay();
+          // Route through the helper so opening a series from a different study
+          // than the one already open triggers the close-current-study confirm.
+          openSeriesInDisplay({
+            dispatch: props.dispatch,
+            navigate: props.switchToDisplay,
+            openSeries: props.openSeries,
+            series: selected,
+            aimID,
+            existingData,
+            onDefer: () => setShowSpinner(false),
+          });
         }
       }
     } catch (err) {
@@ -539,12 +530,33 @@ function AnnotationTable(props) {
   }
 
   // CHECK
-  const displaySeries = async (selected) => {
+  const displaySeries = async (selected, force = false) => {
     const { subjectID: patientID, studyUID, aimID, projectID, template } = selected;
     console.log(selected);
     let isTeachingFile = teachingFileTempCode === template;
     let seriesArr = [];
     let existingData = getExistingData(selected);
+
+    // One study at a time: guard before any pagination state is dispatched, so
+    // cancelling leaves the currently open study untouched. Hide the spinner
+    // while the confirmation is shown.
+    if (!force && isDifferentStudyOpen([selected], props.openSeries)) {
+      setShowSpinner(false);
+      requestStudySwitch({
+        onConfirm: () => {
+          resetForNewStudy(props.dispatch);
+          setShowSpinner(true);
+          displaySeries(selected, true);
+        },
+      });
+      return;
+    }
+
+    // On a forced re-open (after the user confirmed closing the previous study)
+    // the grid was just reset, but props.openSeries is still the pre-reset value
+    // this render. Treat it as empty so the open proceeds instead of re-firing
+    // the switch guard or a false "grid full" check.
+    const gridOpenSeries = force ? [] : props.openSeries;
 
     try {
       props.dispatch(clearPageOrderSeries());
@@ -571,10 +583,11 @@ function AnnotationTable(props) {
         openSeriesInDisplay({
           dispatch: props.dispatch,
           navigate: props.switchToDisplay,
-          openSeries: props.openSeries,
+          openSeries: gridOpenSeries,
           series: toDisplay,
           aimID,
           existingData: filtered,
+          onDefer: () => setShowSpinner(false),
         });
         return;
       }
@@ -590,10 +603,11 @@ function AnnotationTable(props) {
         openSeriesInDisplay({
           dispatch: props.dispatch,
           navigate: props.switchToDisplay,
-          openSeries: props.openSeries,
+          openSeries: gridOpenSeries,
           series: toDisplay,
           aimID,
           existingData: filtered,
+          onDefer: () => setShowSpinner(false),
         });
         return;
       }
@@ -606,10 +620,11 @@ function AnnotationTable(props) {
         openSeriesInDisplay({
           dispatch: props.dispatch,
           navigate: props.switchToDisplay,
-          openSeries: props.openSeries,
+          openSeries: gridOpenSeries,
           series: toDisplay,
           aimID,
           existingData: getExistingData(selected),
+          onDefer: () => setShowSpinner(false),
         });
         return;
       }
@@ -637,11 +652,12 @@ function AnnotationTable(props) {
     openSeriesInDisplay({
       dispatch: props.dispatch,
       navigate: props.switchToDisplay,
-      openSeries: props.openSeries,
+      openSeries: gridOpenSeries,
       series: seriesArr,
       aimID,
       existingData: getExistingData(selected),
       onGridFull: () => setShowSelectSeriesModal(true),
+      onDefer: () => setShowSpinner(false),
     });
   };
  
