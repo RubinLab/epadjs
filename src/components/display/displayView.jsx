@@ -1144,8 +1144,14 @@ class DisplayView extends Component {
         const { projectID, patientID, studyUID, seriesUID } = series[i];
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
         // if (mfIndexFinal && isMFPort && !isNaN(mfIndexFinal)) {
-        if (isLegitMFIndex) {  
+        if (isLegitMFIndex) {
           indexKey = `${indexKey}-${mfIndexFinal}`
+        } else if (seriesAddition[i].hasMultiframe) {
+          // Several multiframe series can share one seriesUID (distinguished by
+          // multiFrameIndex). When a viewport has no resolved index yet, keying by
+          // seriesUID alone makes two such viewports collide in dataIndexMap and
+          // collapse onto the same (first/still) stack. Keep them distinct by port.
+          indexKey = `${indexKey}-p${i}`
         }
 
         const cachedIdx = parseInt(dataIndexMap[indexKey]);
