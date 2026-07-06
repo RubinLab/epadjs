@@ -121,6 +121,13 @@ const annotationsLink = (props) => {
         // When the grid is full, replace the active viewport instead of blocking,
         // then load the series (mirrors the not-full path).
         onGridFull: () => {
+          // Replacing the active viewport — drop the previous series' per-port
+          // image adjustments so they don't carry over to the new series.
+          window.dispatchEvent(
+            new CustomEvent("resetReplacedViewport", {
+              detail: { port: props.activePort },
+            })
+          );
           props.dispatch(addToGrid(selected, selected.aimID, props.activePort));
           props.dispatch(
             getSingleSerie(selected, selected.aimID, null, getExistingSeriesData(selected))

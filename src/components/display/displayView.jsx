@@ -297,6 +297,7 @@ class DisplayView extends Component {
       "resetViewportImageStatus",
       this.resetViewportImageStatus
     );
+    window.addEventListener("resetReplacedViewport", this.resetReplacedViewport);
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
@@ -597,6 +598,7 @@ class DisplayView extends Component {
       "resetViewportImageStatus",
       this.resetViewportImageStatus
     );
+    window.removeEventListener("resetReplacedViewport", this.resetReplacedViewport);
     window.removeEventListener(
       "deleteViewportImageStatus",
       this.deleteViewportImageStatus
@@ -2765,6 +2767,34 @@ class DisplayView extends Component {
     this._explicitlyReset.add(this.props.activePort);
     this.formInvertMap(null, null, true);
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+  };
+
+  // When a viewport's series is replaced in place (e.g. selecting a different
+  // series from the dropdown while the grid is full), the previous series'
+  // per-port adjustments (zoom/pan/W-L in imgStatus, invert, wwwc) must not carry
+  // over to the new series. Clear them for the given port; formInvertMap on the
+  // subsequent reload restores the new series' modality default.
+  resetReplacedViewport = (event) => {
+    const port =
+      event && event.detail && typeof event.detail.port === "number"
+        ? event.detail.port
+        : this.props.activePort;
+    const max = parseInt(maxPort);
+    let imgStatus = sessionStorage.getItem("imgStatus");
+    imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
+    let invertMap = sessionStorage.getItem("invertMap");
+    invertMap = invertMap ? JSON.parse(invertMap) : {};
+    let wwwc = sessionStorage.getItem("wwwc");
+    wwwc = wwwc ? JSON.parse(wwwc) : new Array(max);
+
+    imgStatus[port] = null;
+    delete invertMap[port];
+    wwwc[port] = null;
+    this._explicitlyReset.add(port);
+
+    sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+    sessionStorage.setItem("invertMap", JSON.stringify(invertMap));
+    sessionStorage.setItem("wwwc", JSON.stringify(wwwc));
   };
 
   // deleteViewportWL = () => {
