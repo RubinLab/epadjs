@@ -26,10 +26,44 @@ export const isMammogramStudy = (seriesArray) => {
 };
 
 /**
- * Finds a series by UID in the open series list.
+ * Finds a series in the open series list.
+ *
+ * seriesUID is normally unique, but several multiframe (MF) series can share one
+ * seriesUID — they are distinguished by multiFrameIndex. When the caller provides
+ * the aim's imgIDs (via a serie object) together with openSeriesAddition (which
+ * carries multiFrameMap/multiFrameIndex/hasMultiframe per viewport), matching is
+ * multiframe-aware so the correct frame-series is found. Without that context it
+ * falls back to plain seriesUID matching (all non-MF callers).
+ *
+ * @param {string|Object} serie              seriesUID (legacy) or a serie/aim object
+ * @param {Array}         openSeries
+ * @param {Array}         [openSeriesAddition] per-port MF metadata; enables MF matching
  * @returns {{ isOpen: boolean, index: number }}
  */
-export const findInOpenSeries = (seriesUID, openSeries) => {
+export const findInOpenSeries = (serie, openSeries = [], openSeriesAddition = null) => {
+  const seriesUID = typeof serie === 'string' ? serie : (serie && serie.seriesUID);
+  const imgIDs = serie && typeof serie === 'object' ? serie.imgIDs : null;
+
+  if (imgIDs && Array.isArray(openSeriesAddition)) {
+    for (let i = 0; i < openSeriesAddition.length; i++) {
+      const s = openSeriesAddition[i];
+      if (!s || s.seriesUID !== seriesUID) continue;
+      if (s.hasMultiframe || s.multiFrameMap || s.multiFrameIndex) {
+        const keysArr = Object.keys(imgIDs);
+        for (let k = 0; k < keysArr.length; k++) {
+          const imgID = keysArr[k].split('/frames/')[0];
+          const mfIndex = s.multiFrameMap && s.multiFrameMap[imgID];
+          if ((mfIndex === true && s.hasMultiframe && !s.multiFrameIndex) || mfIndex === s.multiFrameIndex) {
+            return { isOpen: true, index: i };
+          }
+        }
+      } else {
+        return { isOpen: true, index: i };
+      }
+    }
+    return { isOpen: false, index: -1 };
+  }
+
   const index = openSeries.findIndex(s => s && s.seriesUID === seriesUID);
   return { isOpen: index !== -1, index };
 };
@@ -114,6 +148,7 @@ export const openSeriesInDisplay = ({
   existingData = null,
   onGridFull = null,
   onDefer = null,
+  openSeriesAddition = null,
   force = false,
 }) => {
   const maxPort = parseInt(sessionStorage.getItem('maxPort'));
@@ -141,7 +176,7 @@ export const openSeriesInDisplay = ({
 
   // Activate already-open series and, when an aim is provided, jump to it.
   for (const serie of seriesArr) {
-    const { isOpen, index } = findInOpenSeries(serie.seriesUID, openSeries);
+    const { isOpen, index } = findInOpenSeries(serie, openSeries, openSeriesAddition);
     if (isOpen) {
       dispatch(changeActivePort(index));
       const resolvedAimID = aimID || serie.aimID || serie.aimUID || null;
