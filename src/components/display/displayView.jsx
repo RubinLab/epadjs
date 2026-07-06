@@ -450,6 +450,15 @@ class DisplayView extends Component {
 
     const isInitialIndex = prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].multiFrameIndex === undefined && this.props.seriesAddition[activePort].multiFrameIndex === null;
     const mfChanged = samePortControl && (prevProps.seriesAddition[activePort].multiFrameIndex !== this.props.seriesAddition[activePort].multiFrameIndex && !isInitialIndex) && this.props.seriesAddition[activePort].multiFrameIndex === null;
+    // Switching between two multiframe series that share a seriesUID (e.g. via the
+    // series dropdown): seriesReplaced is false (UID unchanged) and mfChanged only
+    // covers the null case, so neither reloads. Detect a real index switch to a
+    // numeric multiFrameIndex on the same port/UID so the new stack loads.
+    const mfIndexSwitched = samePortControl &&
+      prevProps.seriesAddition[activePort].seriesUID === this.props.seriesAddition[activePort].seriesUID &&
+      prevProps.seriesAddition[activePort].multiFrameIndex !== this.props.seriesAddition[activePort].multiFrameIndex &&
+      typeof this.props.seriesAddition[activePort].multiFrameIndex === 'number' &&
+      !isNaN(this.props.seriesAddition[activePort].multiFrameIndex);
 
     if ( (mfAimJumpDataFilled && newMFAimToJump) || (prevActiveFrameDataMissing && frameDataFilled && multiFrameAimJumpData && multiFrameAimJumpData[0])) {
       await this.setState({ isLoading: true });
@@ -465,13 +474,13 @@ class DisplayView extends Component {
       //   (prevProps.series.length !== this.props.series.length &&
       //     this.props.loading === false)
       // ) {
-    } else if (prevProps.series.length < series.length || refreshPage || seriesReplaced || (prevActiveFrameDataMissing && frameDataFilled) || mfChanged) {
+    } else if (prevProps.series.length < series.length || refreshPage || seriesReplaced || (prevActiveFrameDataMissing && frameDataFilled) || mfChanged || mfIndexSwitched) {
       await this.setState({ isLoading: true });
       this.getViewports();
       let mfIndex = null;
       let frame = null;
       const seriesAdded = !!(!prevProps.seriesAddition[activePort] && seriesAddition[activePort]);
-      if ( active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex || mfChanged) {
+      if ( active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex || mfChanged || mfIndexSwitched) {
         mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
         frame = 0;
       }
