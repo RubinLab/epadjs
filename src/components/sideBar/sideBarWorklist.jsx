@@ -25,7 +25,7 @@ import { getSeries } from "../../services/seriesServices";
 import DeleteAlert from "../management/common/alertDeletionModal";
 import SelectSeriesModal from "../annotationsList/selectSerieModal";
 import { alertViewPortFull, clearSelection, changeActivePort, selectPatient, setSeriesData, clearGrid, setMammogramSeries, clearMammogramSeries, setPageOrderSeries, clearPageOrderSeries } from "../annotationsList/action";
-import { openSeriesInDisplay, isMammogramStudy } from "../common/openSeriesHelper";
+import { openSeriesInDisplay, isMammogramStudy, isDifferentStudyOpen, requestStudySwitch, resetForNewStudy } from "../common/openSeriesHelper";
 import { isSupportedModality, filterProjects, pseudo, generalizeDate } from "../../Utils/aid.js";
 // CSS import
 import "./style.css";
@@ -189,25 +189,38 @@ let seriesCallSent;
     return existingData;
   }
 
-  const viewSelection = async (seriesArr) => {
+  const viewSelection = async (seriesArr, openSeriesOverride) => {
     if (!seriesArr.length) return;
     const maxPort = parseInt(sessionStorage.getItem("maxPort"));
+    const openSeriesList = openSeriesOverride || props.openSeries;
 
     openSeriesInDisplay({
       dispatch: props.dispatch,
       navigate: () => props.history.push("/display"),
-      openSeries: props.openSeries,
+      openSeries: openSeriesList,
       series: seriesArr,
       worklistID: props.match.params.wid,
       existingData: serie => getExistingSeriesData(serie),
       onGridFull: pending => {
-        const openPorts = props.openSeries.length;
+        const openPorts = openSeriesList.length;
         setError(`Already ${openPorts} viewers open. You can open ${maxPort} at a time`);
       },
     });
   };
 
-  const handleOpenClick = async (study) => {
+  const handleOpenClick = async (study, force = false) => {
+    // One study at a time: the clears below (grid/pagination) are destructive, so
+    // the switch guard must run first — otherwise cancelling would still wipe the
+    // open viewports. On approval we reset and re-run this with force.
+    if (!force && isDifferentStudyOpen([study], props.openSeries)) {
+      requestStudySwitch({
+        onConfirm: () => {
+          resetForNewStudy(props.dispatch);
+          handleOpenClick(study, true);
+        },
+      });
+      return;
+    }
     if (mode === 'teaching') props.dispatch(clearGrid());
     props.dispatch(clearPageOrderSeries());
     props.dispatch(clearMammogramSeries());
@@ -232,6 +245,9 @@ let seriesCallSent;
       series = series.filter(isSupportedModality);
       const maxPort = parseInt(sessionStorage.getItem("maxPort"));
       const { openSeries } = props;
+      // On a forced re-open the grid was just reset, but props.openSeries is still
+      // the pre-reset value this render; treat it as empty so the open proceeds.
+      const gridOpenSeries = force ? [] : props.openSeries;
 
       const significant = series.filter(s => s.significanceOrder != null);
       const hasPageOrder = significant.length > 0 && significant.some(s => s.pageOrder != null);
@@ -245,7 +261,7 @@ let seriesCallSent;
         openSeriesInDisplay({
           dispatch: props.dispatch,
           navigate: () => props.history.push("/display"),
-          openSeries: props.openSeries,
+          openSeries: gridOpenSeries,
           series: toDisplay.length > 0 ? toDisplay : significant.slice(0, maxPort),
           worklistID: props.match.params.wid,
           existingData: series,
@@ -263,7 +279,7 @@ let seriesCallSent;
         openSeriesInDisplay({
           dispatch: props.dispatch,
           navigate: () => props.history.push("/display"),
-          openSeries: props.openSeries,
+          openSeries: gridOpenSeries,
           series: toDisplay,
           worklistID: props.match.params.wid,
           existingData: series,
@@ -278,7 +294,7 @@ let seriesCallSent;
         openSeriesInDisplay({
           dispatch: props.dispatch,
           navigate: () => props.history.push("/display"),
-          openSeries: props.openSeries,
+          openSeries: gridOpenSeries,
           series: toDisplay,
           worklistID: props.match.params.wid,
           existingData: series,
@@ -286,10 +302,10 @@ let seriesCallSent;
         return;
       }
 
-      const alreadyOpenViews = isTeaching ? 0 : openSeries.length;
+      const alreadyOpenViews = (isTeaching || force) ? 0 : openSeries.length;
       if (alreadyOpenViews + series.length <= maxPort) {
         setSeries(series);
-        viewSelection(series);
+        viewSelection(series, gridOpenSeries);
       } else {
         setSeries(series);
         setShowSeries(!showSeries);
