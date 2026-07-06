@@ -297,6 +297,7 @@ class DisplayView extends Component {
       "resetViewportImageStatus",
       this.resetViewportImageStatus
     );
+    window.addEventListener("resetReplacedViewport", this.resetReplacedViewport);
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
@@ -450,6 +451,15 @@ class DisplayView extends Component {
 
     const isInitialIndex = prevProps.seriesAddition[activePort] && prevProps.seriesAddition[activePort].multiFrameIndex === undefined && this.props.seriesAddition[activePort].multiFrameIndex === null;
     const mfChanged = samePortControl && (prevProps.seriesAddition[activePort].multiFrameIndex !== this.props.seriesAddition[activePort].multiFrameIndex && !isInitialIndex) && this.props.seriesAddition[activePort].multiFrameIndex === null;
+    // Switching between two multiframe series that share a seriesUID (e.g. via the
+    // series dropdown): seriesReplaced is false (UID unchanged) and mfChanged only
+    // covers the null case, so neither reloads. Detect a real index switch to a
+    // numeric multiFrameIndex on the same port/UID so the new stack loads.
+    const mfIndexSwitched = samePortControl &&
+      prevProps.seriesAddition[activePort].seriesUID === this.props.seriesAddition[activePort].seriesUID &&
+      prevProps.seriesAddition[activePort].multiFrameIndex !== this.props.seriesAddition[activePort].multiFrameIndex &&
+      typeof this.props.seriesAddition[activePort].multiFrameIndex === 'number' &&
+      !isNaN(this.props.seriesAddition[activePort].multiFrameIndex);
 
     if ( (mfAimJumpDataFilled && newMFAimToJump) || (prevActiveFrameDataMissing && frameDataFilled && multiFrameAimJumpData && multiFrameAimJumpData[0])) {
       await this.setState({ isLoading: true });
@@ -465,13 +475,13 @@ class DisplayView extends Component {
       //   (prevProps.series.length !== this.props.series.length &&
       //     this.props.loading === false)
       // ) {
-    } else if (prevProps.series.length < series.length || refreshPage || seriesReplaced || (prevActiveFrameDataMissing && frameDataFilled) || mfChanged) {
+    } else if (prevProps.series.length < series.length || refreshPage || seriesReplaced || (prevActiveFrameDataMissing && frameDataFilled) || mfChanged || mfIndexSwitched) {
       await this.setState({ isLoading: true });
       this.getViewports();
       let mfIndex = null;
       let frame = null;
       const seriesAdded = !!(!prevProps.seriesAddition[activePort] && seriesAddition[activePort]);
-      if ( active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex || mfChanged) {
+      if ( active && (seriesAdded || seriesReplaced) && seriesAddition[activePort].multiFrameIndex || mfChanged || mfIndexSwitched) {
         mfIndex = `${seriesAddition[activePort].multiFrameIndex}-${activePort}`;
         frame = 0;
       }
@@ -588,6 +598,7 @@ class DisplayView extends Component {
       "resetViewportImageStatus",
       this.resetViewportImageStatus
     );
+    window.removeEventListener("resetReplacedViewport", this.resetReplacedViewport);
     window.removeEventListener(
       "deleteViewportImageStatus",
       this.deleteViewportImageStatus
@@ -1144,8 +1155,14 @@ class DisplayView extends Component {
         const { projectID, patientID, studyUID, seriesUID } = series[i];
         let indexKey = `${projectID}-${patientID}-${studyUID}-${seriesUID}`;
         // if (mfIndexFinal && isMFPort && !isNaN(mfIndexFinal)) {
-        if (isLegitMFIndex) {  
+        if (isLegitMFIndex) {
           indexKey = `${indexKey}-${mfIndexFinal}`
+        } else if (seriesAddition[i].hasMultiframe) {
+          // Several multiframe series can share one seriesUID (distinguished by
+          // multiFrameIndex). When a viewport has no resolved index yet, keying by
+          // seriesUID alone makes two such viewports collide in dataIndexMap and
+          // collapse onto the same (first/still) stack. Keep them distinct by port.
+          indexKey = `${indexKey}-p${i}`
         }
 
         const cachedIdx = parseInt(dataIndexMap[indexKey]);
@@ -2750,6 +2767,34 @@ class DisplayView extends Component {
     this._explicitlyReset.add(this.props.activePort);
     this.formInvertMap(null, null, true);
     sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+  };
+
+  // When a viewport's series is replaced in place (e.g. selecting a different
+  // series from the dropdown while the grid is full), the previous series'
+  // per-port adjustments (zoom/pan/W-L in imgStatus, invert, wwwc) must not carry
+  // over to the new series. Clear them for the given port; formInvertMap on the
+  // subsequent reload restores the new series' modality default.
+  resetReplacedViewport = (event) => {
+    const port =
+      event && event.detail && typeof event.detail.port === "number"
+        ? event.detail.port
+        : this.props.activePort;
+    const max = parseInt(maxPort);
+    let imgStatus = sessionStorage.getItem("imgStatus");
+    imgStatus = imgStatus ? JSON.parse(imgStatus) : new Array(max);
+    let invertMap = sessionStorage.getItem("invertMap");
+    invertMap = invertMap ? JSON.parse(invertMap) : {};
+    let wwwc = sessionStorage.getItem("wwwc");
+    wwwc = wwwc ? JSON.parse(wwwc) : new Array(max);
+
+    imgStatus[port] = null;
+    delete invertMap[port];
+    wwwc[port] = null;
+    this._explicitlyReset.add(port);
+
+    sessionStorage.setItem("imgStatus", JSON.stringify(imgStatus));
+    sessionStorage.setItem("invertMap", JSON.stringify(invertMap));
+    sessionStorage.setItem("wwwc", JSON.stringify(wwwc));
   };
 
   // deleteViewportWL = () => {

@@ -230,6 +230,14 @@ const SeriesDropDown = (props) => {
         props.dispatch(addToGrid(serie));
         props.dispatch(getSingleSerie(serie, null, null, list));   
       } else {
+        // Replacing the series in an occupied viewport: drop the previous
+        // series' per-port adjustments (zoom/pan/W-L/invert) so they don't
+        // carry over to the newly opened series.
+        window.dispatchEvent(
+          new CustomEvent("resetReplacedViewport", {
+            detail: { port: props.activePort },
+          })
+        );
         props.onSelect(0, props.activePort, true);
         props.dispatch(replaceInGrid(serie));
         const list = seriesList.length > 0 ? seriesList : null;

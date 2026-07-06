@@ -4,6 +4,7 @@ import {
   clearSelection,
   changeActivePort,
   addToGrid,
+  getSingleSerie,
   jumpToAim,
 } from "../action";
 import { openSeriesInDisplay } from "../../common/openSeriesHelper";
@@ -111,11 +112,27 @@ const annotationsLink = (props) => {
         dispatch: props.dispatch,
         navigate: () => {},  // already in display view
         openSeries: props.openSeries,
+        // Pass per-port MF metadata so the helper disambiguates multiframe series
+        // that share a seriesUID (matching this list's own checkIfSerieOpen).
+        openSeriesAddition: props.openSeriesAddition,
         series: selected,
         aimID: selected.aimID,
         existingData: getExistingSeriesData(selected),
-        // When grid is full, replace the active viewport instead of blocking.
-        onGridFull: () => props.dispatch(addToGrid(selected, selected.aimID, props.activePort)),
+        // When the grid is full, replace the active viewport instead of blocking,
+        // then load the series (mirrors the not-full path).
+        onGridFull: () => {
+          // Replacing the active viewport — drop the previous series' per-port
+          // image adjustments so they don't carry over to the new series.
+          window.dispatchEvent(
+            new CustomEvent("resetReplacedViewport", {
+              detail: { port: props.activePort },
+            })
+          );
+          props.dispatch(addToGrid(selected, selected.aimID, props.activePort));
+          props.dispatch(
+            getSingleSerie(selected, selected.aimID, null, getExistingSeriesData(selected))
+          );
+        },
       });
     }
   };
