@@ -361,6 +361,17 @@ class DisplayView extends Component {
       otherSeriesAimsList,
       showAnnotations
     } = this.props;
+
+    // Auto-untrim if the layout drops to a single viewport while trim is active
+    // (e.g. maximizing a viewport or closing down to one open series), since trim
+    // corrupts the view with nothing to fit against.
+    if (this.state.trimMode) {
+      const openViewportCount = Array.isArray(series) ? series.filter(Boolean).length : 0;
+      if (openViewportCount <= 1 || this.state.hiding) {
+        this.setState({ trimMode: false, trimmedDimensions: {} });
+      }
+    }
+
     const {
       series: prevSeries,
       seriesAddition: prevSeriesAddition,
@@ -3319,6 +3330,10 @@ class DisplayView extends Component {
   };
 
   handleTrimMode = () => {
+    // Trim is meaningless/corrupting with a single viewport (one open series or a
+    // maximized viewport), so ignore it in those states.
+    const openViewportCount = Array.isArray(this.props.series) ? this.props.series.filter(Boolean).length : 0;
+    if (openViewportCount <= 1 || this.state.hiding) return;
     const next = !this.state.trimMode;
     const { expandedOrder, hiddenPorts, data } = this.state;
     // When expanded: trim only the 2 visible expanded viewports.
@@ -3742,6 +3757,11 @@ class DisplayView extends Component {
     let invertMap = sessionStorage.getItem("invertMap");
     invertMap = invertMap ? JSON.parse(invertMap) : {};
     const { trimMode, width: stateWidth } = this.state;
+    // Trim needs at least two side-by-side viewports to fit against. With a
+    // single open series, or a single maximized viewport (hiding), there is
+    // nothing to trim against and it corrupts the layout — so disable it.
+    const openViewportCount = Array.isArray(series) ? series.filter(Boolean).length : 0;
+    const trimDisabled = openViewportCount <= 1 || this.state.hiding;
     const pageInfo = this.getPageInfo();
     const prevDisabled = this.isPageOrderNav() ? !this.hasPrevPageOrderPage() : !this.hasPrevMammoPage();
     const nextDisabled = this.isPageOrderNav() ? !this.hasNextPageOrderPage() : !this.hasNextMammoPage();
@@ -3807,9 +3827,17 @@ class DisplayView extends Component {
                 <div className="buttonLabel"><span>{(this.state.mammoExpanded || this.state.hiding) ? "Restore" : "Expand"}</span></div>
               </div>
               <div
-                className={this.state.trimMode ? "toolbarSectionButton_Active" : "toolbarSectionButton"}
-                onClick={this.handleTrimMode}
-                title={this.state.trimMode ? "Restore original viewport size" : "Trim black bars to fit image"}
+                className={
+                  trimDisabled
+                    ? "toolbarSectionButton toolbarSectionButton--disabled"
+                    : this.state.trimMode ? "toolbarSectionButton_Active" : "toolbarSectionButton"
+                }
+                onClick={trimDisabled ? undefined : this.handleTrimMode}
+                title={
+                  trimDisabled
+                    ? "Trim is unavailable for a single viewport"
+                    : this.state.trimMode ? "Restore original viewport size" : "Trim black bars to fit image"
+                }
               >
                 <div className="toolContainer"><FaScissors /></div>
                 <div className="buttonLabel"><span>{this.state.trimMode ? "Untrim" : "Trim"}</span></div>
