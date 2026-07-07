@@ -3692,8 +3692,18 @@ class DisplayView extends Component {
     (series || []).forEach((s, i) => {
       if (!s) return;
       const override = { hideOverlay };
-      if (invertMap[i] !== undefined) override.invertMap = invertMap[i];
-      if (imgStatus[i] != null) override.imageStatus = imgStatus[i];
+      // Mirror executeSaveStatus's modifiedSeries: a viewport the user has touched
+      // (including a RESET, which sets invertMap and nulls imgStatus) must emit the
+      // full live state — crucially imageStatus: {} on reset — so it OVERRIDES the
+      // stored displayState in the modal's shallow merge. Otherwise a reset
+      // viewport keeps the old zoom/pan. Untouched viewports emit only hideOverlay
+      // so their stored state is preserved.
+      const hasInvert = invertMap[i] !== undefined;
+      const hasImgStatus = imgStatus[i] != null;
+      if (hasInvert || hasImgStatus) {
+        override.invertMap = invertMap[i] || false;
+        override.imageStatus = imgStatus[i] || {};
+      }
       map[s.seriesUID] = override;
     });
     return map;
