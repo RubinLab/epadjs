@@ -111,7 +111,11 @@ class CornerstoneViewport extends Component {
       scale: undefined,
       windowWidth: undefined,
       windowCenter: undefined,
-      isOverlayVisible: true,
+      // Honor the prop on mount so a persisted hidden state survives remounts
+      // (e.g. prev/next navigation). componentDidUpdate only reacts to prop
+      // changes, which never fire on a fresh mount.
+      isOverlayVisible:
+        props.isOverlayVisible !== undefined ? props.isOverlayVisible : true,
       // Orientation Markers
       rotationDegrees: undefined,
       isFlippedVertically: undefined,

@@ -45,6 +45,7 @@ import {
   addSubjectToProject,
 } from "../../services/subjectServices";
 import { addStudyToProject } from "../../services/studyServices";
+import { isDifferentStudyOpen, requestStudySwitch, resetForNewStudy } from "../common/openSeriesHelper";
 
 import DeleteAlert from "./deleteConfirmationModal";
 import NewMenu from "./newMenu";
@@ -486,6 +487,33 @@ class SearchView extends Component {
     const groupedAnns = this.groupUnderSerie(selectedAnnotations);
     let groupedObj;
     let notOpenSeries = [];
+
+    // One study at a time: if a different study is already open, confirm closing
+    // it first. On approval reset the display and re-run this selection.
+    const force = this._forceViewSelection === true;
+    this._forceViewSelection = false;
+    if (!force) {
+      const incoming = [
+        ...selectedStudies,
+        ...selectedSeries,
+        ...Object.values(groupedAnns),
+      ];
+      if (isDifferentStudyOpen(incoming, this.props.openSeries)) {
+        requestStudySwitch({
+          onConfirm: () => {
+            resetForNewStudy(this.props.dispatch);
+            this._forceViewSelection = true;
+            this.viewSelection();
+          },
+        });
+        return;
+      }
+    }
+
+    // On a forced re-run the grid was just reset, but this.props.openSeries is
+    // still the pre-reset value this render; treat it as empty for room checks.
+    const openCount = force ? 0 : this.props.openSeries.length;
+
     //if studies selected
     if (selectedStudies.length > 0) {
       let total = 0;
@@ -498,7 +526,7 @@ class SearchView extends Component {
       }
 
       //check if enough room to display selection
-      if (total + this.props.openSeries.length > maxPort) {
+      if (total + openCount > maxPort) {
         this.props.dispatch(startLoading());
         this.setState({ seriesList: studiesObj });
         this.props.dispatch(loadCompleted());
@@ -553,7 +581,7 @@ class SearchView extends Component {
         this.props.history.push("/display");
         this.props.dispatch(clearSelection());
       } else {
-        if (selectedSeries.length + this.props.openSeries.length > maxPort) {
+        if (selectedSeries.length + openCount > maxPort) {
           groupedObj = this.groupUnderStudy(selectedSeries);
           await this.setState({ seriesList: groupedObj });
           this.setState({ isSerieSelectionOpen: true });
@@ -604,7 +632,7 @@ class SearchView extends Component {
         this.props.dispatch(changeActivePort(index));
         this.props.dispatch(jumpToAim(serID, serieList[0].aimID, index));
       } else {
-        if (notOpenSeries.length + this.props.openSeries.length > maxPort) {
+        if (notOpenSeries.length + openCount > maxPort) {
           await this.setState({ seriesList: groupedObj });
           this.setState({ isSerieSelectionOpen: true });
           //else get data for each serie for display

@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
-import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import cornerstone from "cornerstone-core";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
@@ -13,7 +12,6 @@ import { WindowLevel } from "../WindowLevel/WindowLevel";
 import ColormapSelector from "./ColormapSelector";
 import FuseSelector from "./FuseSelector";
 import cornerstoneTools from "cornerstone-tools";
-import { setSignificantSeries } from "../../services/seriesServices";
 // import Modal from "../common/warningModal";
 import HotKeysList from "./HotKeysList";
 import {
@@ -42,8 +40,8 @@ import {
 import { BsArrowUpLeft } from "react-icons/bs";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
-import { MdLoop, MdPanTool, MdMyLocation, MdOutlineKeyboardCommandKey } from "react-icons/md";
-import { TbReplace } from "react-icons/tb";
+import { MdLoop, MdPanTool, MdMyLocation, MdOutlineKeyboardCommandKey, MdOutlineLayersClear, MdOutlineLayers } from "react-icons/md";
+import { TbReorder, TbContrast2 } from "react-icons/tb";
 import {
   TiDeleteOutline,
   TiPencil,
@@ -54,7 +52,7 @@ import { MdWbIridescent } from "react-icons/md";
 import AnnotationList from "../annotationsList";
 import ResizeAndDrag from "../management/common/resizeAndDrag";
 import CustomModal from "../management/common/resizeAndDrag";
-import { clearGrid } from "../annotationsList/action";
+import { clearGrid, toggleAllOverlays, setAllOverlays } from "../annotationsList/action";
 import Spinner from "../common/circleSpinner";
 import "../../font-icons/styles.css";
 import "react-input-range/lib/css/index.css";
@@ -73,7 +71,8 @@ const mapStateToProps = (state) => {
     patients: state.annotationsListReducer.patients,
     patientLoading: state.annotationsListReducer.patientLoading,
     activePort: state.annotationsListReducer.activePort,
-    lastLocation: state.annotationsListReducer.lastLocation
+    lastLocation: state.annotationsListReducer.lastLocation,
+    isAllOverlayHidden: state.annotationsListReducer.isAllOverlayHidden,
   };
 };
 
@@ -251,8 +250,9 @@ class ToolMenu extends Component {
     ];
 
     this.managementTools = [
-      { name: "Save order", icon: <TbReplace />, tool: "order", teaching: true },
       { name: "Hot Keys", icon: <MdOutlineKeyboardCommandKey />, tool: "keys", teaching: true },
+      { name: "Layouts", icon: <TbReorder />, tool: "reorder", teaching: true },
+      { name: "Save State", icon: <TbContrast2 />, tool: "saveState", teaching: true },
     ]
 
     this.segmentationTools = [
@@ -434,33 +434,12 @@ class ToolMenu extends Component {
     });
   };
 
-  saveSignificantOrder = () => {
-    let projectID, subjectUID, studyUID = null;
-    const significantSeries = [];
-    let differentStudy = false;
-    for (let i = 0; i < this.props.openSeries.length; i++) {
-      if (i === 0) {
-        ({projectID, subjectUID, studyUID } = this.props.openSeries[i]);
-        subjectUID = subjectUID ? subjectUID : this.props.openSeries[i].patientID
-        significantSeries.push({seriesUID: this.props.openSeries[i].seriesUID, significanceOrder: i + 1});
-      } else {
-        if (studyUID !== this.props.openSeries[i].studyUID) {
-          differentStudy = studyUID !== this.props.openSeries[i].studyUID;
-          toast.warning(`All series should be from the same study`);
-        } else {
-          significantSeries.push({seriesUID: this.props.openSeries[i].seriesUID, significanceOrder: i + 1});
-        }
-      } 
-    }
-    if (!differentStudy) {
-      setSignificantSeries(projectID, subjectUID, studyUID, significantSeries, true).then(res => {
-        toast.success('Significant Series and Layout Saved!');
-      }).catch((err) => toast.error('Could not save the signifance order'));
-    }
-  }
-
   closeAllActions = () => {
     this.props.dispatch(clearGrid());
+    // Overlay visibility is a global, study-independent toggle that survives
+    // page (prev/next) navigation; closing all viewports is the only action
+    // that resets it back to the default (overlays shown).
+    this.props.dispatch(setAllOverlays(false));
     window.dispatchEvent(new CustomEvent("unfuse"));
     sessionStorage.removeItem("wwwc");
     const max = parseInt(maxPort);
@@ -477,7 +456,9 @@ class ToolMenu extends Component {
       MetaData: true,
       fuse: true,
       order: true,
-      keys: true
+      keys: true,
+      reorder: true,
+      saveState: true,
     };
     
     if (!notActiveTools[tool]) sessionStorage.setItem("activeTool", tool);
@@ -562,20 +543,31 @@ class ToolMenu extends Component {
         isSpherical: false,
       });
     } else if (tool === "FreehandRoi3DTool") {
+      // Re-clicking the button toggles the interpolation modal closed.
+      if (this.state.showInterpolation) {
+        this.setState({ showInterpolation: false });
+        return;
+      }
       this.selectFreehand();
       this.setState({ showInterpolation: true });
     } else if (tool === "colorLut") {
       this.setState({ showColormap: true });
       return;
     } else if (tool === "fuse") {
-      this.setState({ showFuse: true });
-      return;
-      this.selectFreehand();
-    } else if (tool === 'order') {
-      this.saveSignificantOrder();
+      // Re-clicking the button toggles the modal closed.
+      if (this.state.showFuse) this.closeFuse();
+      else this.setState({ showFuse: true });
       return;
     } else if (tool === 'keys') {
-      this.showHotkeyInfo();
+      // Re-clicking the button toggles the modal closed.
+      if (this.state.keys) this.setState({ keys: null });
+      else this.showHotkeyInfo();
+      return;
+    } else if (tool === 'reorder') {
+      if (this.props.onReorder) this.props.onReorder();
+      return;
+    } else if (tool === 'saveState') {
+      if (this.props.onSaveState) this.props.onSaveState();
       return;
     } else if (tool === 'next') {
       this.props.openNextWLStudy(worklistID, studyUID);
@@ -801,6 +793,20 @@ class ToolMenu extends Component {
             />
           );
         })}
+        <div
+          id="toggleAllOverlays"
+          tabIndex="12"
+          className={this.props.isAllOverlayHidden ? "toolbarSectionButton_Active" : "toolbarSectionButton"}
+          onClick={() => this.props.dispatch(toggleAllOverlays())}
+          title={this.props.isAllOverlayHidden ? "Show overlays on all viewports" : "Hide overlays on all viewports"}
+        >
+          <div className="toolContainer">
+            {this.props.isAllOverlayHidden ? <MdOutlineLayers /> : <MdOutlineLayersClear />}
+          </div>
+          <div className="buttonLabel">
+            <span>{this.props.isAllOverlayHidden ? "Show Info" : "Hide Info"}</span>
+          </div>
+        </div>
         {/* <div
                         id="point"
                         tabIndex="1"
@@ -1065,6 +1071,7 @@ class ToolMenu extends Component {
         {this.state.showFuse && <FuseSelector onClose={this.closeFuse} onFuseUnfuse={this.props.onFuseUnfuse} onFuseNewImage={this.props.onFuseNewImage} />}
         {this.state.showMetaData && (<MetaData onClose={this.showMetaData} imageData={this.props.imageData} />)}
         {this.state.keys && (<HotKeysList onClose={() => this.setState({keys: null})} list={this.state.keys} />)}
+        {this.props.children}
       </div>
     );
   }

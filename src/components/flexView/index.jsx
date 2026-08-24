@@ -14,12 +14,15 @@ import SelectSerieModal from "../annotationsList/selectSerieModal";
 import SeriesTable from "./SeriesTable";
 import { isSupportedModality } from "../../Utils/aid.js";
 import {
-  addToGrid,
-  getSingleSerie,
   clearSelection,
   setSeriesData,
-  setLastLocation
+  setLastLocation,
+  setMammogramSeries,
+  clearMammogramSeries,
+  setPageOrderSeries,
+  clearPageOrderSeries,
 } from "../annotationsList/action";
+import { openSeriesInDisplay, isMammogramStudy } from "../common/openSeriesHelper";
 import "react-table-v6/react-table.css";
 // import "../annotationSearch/annotationSearch.css";
 // import "./flexView.css";
@@ -110,9 +113,14 @@ class FlexView extends React.Component {
       : null;
  
     try {
+      this.props.dispatch(clearPageOrderSeries());
+      this.props.dispatch(clearMammogramSeries());
       if (!dataExists && seriesCallSent !== studyUID) {
         this.setState({ loading: true });
-        ({ data: series } = await getSeries(projectID, patientID, studyUID));
+        ({ data: series } = await getSeries(projectID, patientID, studyUID, false));
+        if (!series || series.length === 0) {
+          ({ data: series } = await getSeries(projectID, patientID, studyUID, true));
+        }
         this.setState({ loading: false });
         seriesCallSent = studyUID;
         this.props.dispatch(
@@ -124,38 +132,72 @@ class FlexView extends React.Component {
     } catch (err) {
       console.log("Error => getting series of the study", err);
     }
-    if (this.props.openSeries.length === this.maxPort) {
-      this.setState({ showSeriesTable: true, series });
-      return;
-    }
-    //get only unopen series
-    if (series.length > 0) series = this.excludeOpenSeries(series);
-    // filter series that have displayable modality
     series = series.filter(isSupportedModality);
     if (series.length === 0) {
       this.setState({ showWarning: true });
-    } else {
-      //check if there is enough room
-      if (series.length + this.props.openSeries.length > this.maxPort) {
-        //if there is not bring the modal
-        this.setState({ showSeriesTable: true, series });
-        // TODO show toast
-      } else {
-        //if there is enough room
-        //add serie to the grid
-        const promiseArr = [];
-        for (let i = 0; i < series.length; i++) {
-          this.props.dispatch(addToGrid(series[i]));
-          promiseArr.push(this.props.dispatch(getSingleSerie(series[i], null, null, existingData)));
-        }
-        //getsingleSerie
-        Promise.all(promiseArr)
-          .then(() => {
-            this.props.history.push("/display");
-          })
-          .catch((err) => console.error(err));
-      }
+      return;
     }
+
+    // Mirror the open decision tree used by the annotation table and worklist so
+    // the same study (esp. MG / significant studies) opens the same series here.
+    const significant = series.filter(s => s.significanceOrder != null);
+    const hasPageOrder = significant.length > 0 && significant.some(s => s.pageOrder != null);
+
+    // Case 1: significant series with pageOrder — open page 1, paginate via NEXT/PREV.
+    if (significant.length > 0 && hasPageOrder) {
+      this.props.dispatch(setPageOrderSeries(significant));
+      const pageOne = significant
+        .filter(s => s.pageOrder === 1)
+        .sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+      openSeriesInDisplay({
+        dispatch: this.props.dispatch,
+        navigate: () => this.props.history.push("/display"),
+        openSeries: this.props.openSeries,
+        series: pageOne.length > 0 ? pageOne : significant.slice(0, parseInt(this.maxPort)),
+        existingData: series,
+      });
+      return;
+    }
+
+    // Case 3/6: mammogram — load significant series (sorted) if defined, otherwise
+    // the first page in acquisition order; remaining series paginate via NEXT.
+    if (isMammogramStudy(series)) {
+      this.props.dispatch(setMammogramSeries(series, studyUID));
+      const toDisplay = significant.length > 0
+        ? significant.sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0))
+        : series.slice(0, parseInt(this.maxPort));
+      openSeriesInDisplay({
+        dispatch: this.props.dispatch,
+        navigate: () => this.props.history.push("/display"),
+        openSeries: this.props.openSeries,
+        series: toDisplay,
+        existingData: series,
+      });
+      return;
+    }
+
+    // Case 2: significant series without pageOrder, non-mammogram — open directly.
+    if (significant.length > 0) {
+      const toDisplay = significant.sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+      openSeriesInDisplay({
+        dispatch: this.props.dispatch,
+        navigate: () => this.props.history.push("/display"),
+        openSeries: this.props.openSeries,
+        series: toDisplay,
+        existingData: series,
+        onGridFull: pending => this.setState({ showSeriesTable: true, series: pending }),
+      });
+      return;
+    }
+
+    openSeriesInDisplay({
+      dispatch: this.props.dispatch,
+      navigate: () => this.props.history.push("/display"),
+      openSeries: this.props.openSeries,
+      series,
+      existingData,
+      onGridFull: pending => this.setState({ showSeriesTable: true, series: pending }),
+    });
   };
 
   excludeOpenSeries = (allSeriesArr) => {

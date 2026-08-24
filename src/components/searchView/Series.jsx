@@ -9,16 +9,13 @@ import Annotations from "./Annotations";
 import { getSeries } from "../../services/seriesServices";
 import SelectSerieModal from "../annotationsList/selectSerieModal";
 import {
-  alertViewPortFull,
-  getSingleSerie,
-  changeActivePort,
   selectSerie,
   clearSelection,
-  addToGrid,
   getWholeData,
   updatePatient,
   selectAnnotation,
 } from "../annotationsList/action";
+import { openSeriesInDisplay } from "../common/openSeriesHelper";
 
 function Table({
   columns,
@@ -165,71 +162,21 @@ function Series(props) {
 
   const dispatchSerieDisplay = (selected) => {
     const { seriesData } = props;
-    const openSeries = Object.values(props.openSeries);
     const { patientID, studyUID, projectID } = selected;
     const dataExists =
-    seriesData[projectID] &&
-    seriesData[projectID][patientID] &&
-    seriesData[projectID][patientID][studyUID] &&
-    seriesData[projectID][patientID][studyUID].list;
+      seriesData[projectID] &&
+      seriesData[projectID][patientID] &&
+      seriesData[projectID][patientID][studyUID] &&
+      seriesData[projectID][patientID][studyUID].list;
 
-    const existingData = dataExists
-      ? seriesData[projectID][patientID][studyUID].list
-      : null;
-
-    let isSerieOpen = false;
-    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
-
-    //check if there is enough space in the grid
-    let isGridFull = openSeries.length === maxPort;
-    //check if the serie is already open
-
-    if (openSeries.length > 0) {
-      for (let i = 0; i < openSeries.length; i++) {
-        if (openSeries[i].seriesUID === selected.seriesUID) {
-          isSerieOpen = true;
-          props.dispatch(changeActivePort(i));
-          break;
-        }
-        // }
-      }
-    }
-
-    //serie is not already open;
-    if (!isSerieOpen) {
-      //if the grid is full show warning
-      if (isGridFull) {
-        setSerie(selected);
-        setShowSelectSerie(true);
-        // props.dispatch(alertViewPortFull());
-      } else {
-        props.dispatch(addToGrid(selected));
-        props
-          .dispatch(getSingleSerie(selected, null, null, existingData))
-          .then(() => {})
-          .catch((err) => console.error(err));
-        //if grid is NOT full check if patient data exists
-        // -----> Delete after v1.0 <-----
-        // if (!props.patients[selected.patientID]) {
-        //   props.dispatch(getWholeData(selected));
-        //   // getWholeData(selected);
-        // } else {
-        //   props.dispatch(
-        //     updatePatient(
-        //       'serie',
-        //       true,
-        //       patientID,
-        //       studyUID,
-        //       selected.seriesUID
-        //     )
-        //   );
-        // }
-        props.history.push("/display");
-      }
-    } else {
-      props.history.push("/display");
-    }
-    props.dispatch(clearSelection());
+    openSeriesInDisplay({
+      dispatch: props.dispatch,
+      navigate: () => props.history.push("/display"),
+      openSeries: Object.values(props.openSeries),
+      series: selected,
+      existingData: dataExists ? seriesData[projectID][patientID][studyUID].list : null,
+      onGridFull: () => { setSerie(selected); setShowSelectSerie(true); },
+    });
   };
 
   const handleCheckboxSelect = (row) => {

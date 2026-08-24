@@ -106,3 +106,51 @@
 .input-range__track {
     height: 0.5rem;
 }
+
+/* Mammogram nav group. Its buttons reuse the shared .toolbarSectionButton
+   class so they line up with the rest of the toolbar exactly; the wrapper is
+   display:inline so it doesn't introduce its own alignment box.
+   white-space:nowrap keeps the group together as a block — when the toolbar
+   wraps on resize it moves to the next line whole instead of splitting the
+   Prev/Page/Next/Expand/Trim buttons across rows. */
+.mammo-toolbar-group {
+    display: inline;
+    white-space: nowrap;
+}
+
+/* Disabled state for prev/next (rendered as toolbarSectionButton <div>s) */
+.toolbarSectionButton--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Page indicator reuses the toolbar button box but is not interactive */
+.mammo-page-indicator {
+    cursor: default;
+    white-space: nowrap;
+}
+
+.mammo-page-indicator:hover {
+    transform: none;
+    color: white;
+}
+
+/* The number sits in the icon row (.toolContainer is 16px by default). Shrink
+   it so it isn't oversized; keep a ~16px line box so the indicator's height
+   still matches the neighbouring buttons and stays aligned. */
+.mammo-page-indicator .toolContainer {
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 16px;
+}
+
+/* White vertical separator before the mammogram nav group */
+.mammo-toolbar-separator {
+    display: inline-block;
+    vertical-align: middle;
+    width: 1px;
+    height: 40px;
+    background-color: #fff;
+    margin: 0 6px 18px 6px;
+}

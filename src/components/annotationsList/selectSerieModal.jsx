@@ -9,11 +9,11 @@ import Button from "react-bootstrap/Button";
 import {
   clearGrid,
   getWholeData,
-  getSingleSerie,
   clearSelection,
-  addToGrid,
   setSeriesData,
+  setPageOrderSeries,
 } from "./action";
+import { openSeriesInDisplay } from "../common/openSeriesHelper";
 import SelectionItem from "./containers/selectionItem";
 import { FaRegCheckSquare } from "react-icons/fa";
 import { getSeries, setSignificantSeries } from "../../services/seriesServices";
@@ -66,12 +66,15 @@ class selectSerieModal extends React.Component {
       selectionType = "aim";
     }
     this.setState({ selectionType });
+
+    // For mammogram studies, allow up to 8 significant series.
     this.setPreSelecteds();
     const limit = this.updateLimit();
     this.setState({ limit });
 
     // teaching file save related
     const { isTeachingFile } = this.props;
+    if (isTeachingFile) this.maxPort = 8;
     if (isTeachingFile) {
       const element = document.getElementById("questionaire");
       const speciality = document.getElementById("speciality");
@@ -172,19 +175,25 @@ class selectSerieModal extends React.Component {
   saveSignificantSeries = async (series) => {
     const { selectedToDisplay } = this.state;
     let significantSeries = [];
-    let significanceOrder = 1;
+    let globalOrder = 1;
+    // Split teaching-file significant series into pages of displayMaxPort so the
+    // display view can open page 1 and paginate the rest via PREV/NEXT.
+    const displayMaxPort = parseInt(sessionStorage.getItem("maxPort")) || 4;
     let significanceSet = series.some((serie) => serie.significanceOrder > 0);
     const seriesInDetail = [];
     for (let key of Object.keys(selectedToDisplay)) {
       const ser = series.filter(el => el.seriesUID === key);
       const seriesDescription = ser.length > 0 ? ser[0].seriesDescription : null;
       if (!significanceSet && this.mode === "teaching") {
+        const pageOrder = Math.ceil(globalOrder / displayMaxPort);
+        const slotOrder = ((globalOrder - 1) % displayMaxPort) + 1;
         significantSeries.push({
           seriesUID: key,
-          significanceOrder,
+          significanceOrder: slotOrder,
+          pageOrder,
           seriesDescription
         });
-        significanceOrder++;
+        globalOrder++;
       } else {
         seriesInDetail.push(ser[0]);
       }
@@ -217,28 +226,49 @@ class selectSerieModal extends React.Component {
   displaySelection = async (aimID) => {
     let studies = Object.values(this.props.seriesPassed);
     let series = [];
-    // TODO: what is the logic here?
-    studies.forEach((arr) => {
-      series = series.concat(arr);
-    });
+    studies.forEach((arr) => { series = series.concat(arr); });
     const seriesArr = await this.saveSignificantSeries(series);
-    //concatanete all arrays to getther
-    // for (let key of Object.keys(selectedToDisplay)) {
-    for (let el of seriesArr) {  
-      let serie = this.findSerieFromSeries(el.seriesUID, series);
-      const existingData = this.getExistingSeriesData(serie);
-      if (aimID) this.props.dispatch(addToGrid(serie, aimID));
-      else this.props.dispatch(addToGrid(serie, serie.aimID, null, this.props.worklistID ));
-      if (this.state.selectionType === "aim") {
-        this.props.dispatch(getSingleSerie(serie, serie.aimID, this.wadoUrl, existingData));
-      } else {
-        if (aimID)
-          this.props.dispatch(getSingleSerie(serie, aimID, this.wadoUrl, existingData));
-        else this.props.dispatch(getSingleSerie(serie, null, this.wadoUrl, existingData));
-      }
+
+    // Only open the first page of significant series (up to maxPort).
+    // Additional pages are navigated via PREV/NEXT in the display view.
+    const viewportLimit = parseInt(sessionStorage.getItem('maxPort')) || 4;
+    const pageOneArr = seriesArr
+      .filter(el => el.pageOrder == null || el.pageOrder === 1)
+      .slice(0, viewportLimit);
+
+    // Populate Redux pageOrderSeries so PREV/NEXT in the display view can
+    // paginate the remaining series (page 2+). The API response carries only
+    // minimal fields, so merge each entry with its full record from `series`
+    // (which has projectID/patientID/studyUID/etc. needed by addToGrid).
+    const hasMultiplePages = seriesArr.some(el => el.pageOrder != null && el.pageOrder > 1);
+    if (hasMultiplePages) {
+      const enrichedPageOrderSeries = seriesArr.map(el => {
+        const full = this.findSerieFromSeries(el.seriesUID, series) || {};
+        return { ...full, ...el };
+      });
+      this.props.dispatch(setPageOrderSeries(enrichedPageOrderSeries));
     }
-    this.props.history.push("/display");
-    this.handleCancel(true);
+
+    // Resolve each series and embed the effective aimID so the helper can use it.
+    const resolvedSeries = pageOneArr.map(el => {
+      const serie = this.findSerieFromSeries(el.seriesUID, series);
+      return {
+        ...serie,
+        aimID: this.state.selectionType === "aim" ? serie.aimID : (aimID || null),
+      };
+    });
+
+    openSeriesInDisplay({
+      dispatch: this.props.dispatch,
+      navigate: () => {
+        this.props.history.push("/display");
+        this.handleCancel(true);
+      },
+      openSeries: this.props.openSeries,
+      series: resolvedSeries,
+      worklistID: this.props.worklistID,
+      existingData: serie => this.getExistingSeriesData(serie),
+    });
   };
 
   groupUnderPatient = (objArr) => {
@@ -278,6 +308,11 @@ class selectSerieModal extends React.Component {
     let selectedCount = 0;
     let series = Object.values(seriesPassed);
     let count = 0;
+
+    // If any series carry pageOrder, only pre-select page 1 series.
+    const allSeries = series.flat();
+    const hasPageOrder = allSeries.some(s => s.pageOrder != null);
+
     for (let i = 0; i < series.length; i++) {
       for (let k = 0; k < series[i].length; k++) {
         if (openSeries.length + selectedCount >= this.maxPort) {
@@ -286,17 +321,10 @@ class selectSerieModal extends React.Component {
           });
           return;
         }
-        // if (!this.isSerieOpen(series[i][k].seriesUID)) {
-        //   selectedToDisplay[series[i][k].seriesUID] = series[i][k].significanceOrder
-        //     ? true
-        //     : false;
-        //   selectedCount++;
-        // }
-        if (
-          series[i][k].significanceOrder &&
-          !this.isSerieOpen(series[i][k].seriesUID)
-        ) {
-          selectedToDisplay[series[i][k].seriesUID] = true;
+        const s = series[i][k];
+        const isPageOneOrLegacy = !hasPageOrder || s.pageOrder === 1;
+        if (s.significanceOrder && !this.isSerieOpen(s.seriesUID) && isPageOneOrLegacy) {
+          selectedToDisplay[s.seriesUID] = true;
           selectedCount++;
         }
       }
@@ -359,7 +387,9 @@ class selectSerieModal extends React.Component {
         let seriesNo = series[i][k].seriesNo || "";
         let desc = series[i][k].seriesDescription;
         let description = desc ? desc : !desc && series[i][k].significanceOrder ? `Sig Series ${series[i][k].significanceOrder}` :  "Unnamed Series";
-        desc = `${seriesNo} - ${description}`;
+        const modality = series[i][k].examType || series[i][k].modality;
+        const modalityLabel = modality ? ` [${modality.toUpperCase()}]` : "";
+        desc = `${seriesNo} - ${description}${modalityLabel}`;
         if (series[i][k].significanceOrder) {
           desc = desc + " (S)";
           isSignificant = true;

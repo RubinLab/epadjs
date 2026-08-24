@@ -57,6 +57,14 @@ import {
   TOGGLE_ALL_CALCULATIONS,
   SET_LAST_LOCATION,
   SHOW_PHI,
+  SET_MAMMOGRAM_SERIES,
+  SET_MAMMOGRAM_PAGE,
+  CLEAR_MAMMOGRAM_SERIES,
+  SET_PAGE_ORDER_SERIES,
+  SET_PAGE_ORDER,
+  CLEAR_PAGE_ORDER_SERIES,
+  TOGGLE_ALL_OVERLAYS,
+  SET_ALL_OVERLAYS,
   colors,
   commonLabels,
 } from "./types";
@@ -112,6 +120,12 @@ const initialState = {
   showAnnotations: mode === 'teaching' ? false : true,
   lastLocation: '',
   showingPHI: isPHIVisible || false,
+  mammogramSeries: [],
+  mammogramStudyUID: null,
+  mammogramPageIndex: 0,
+  pageOrderSeries: [],
+  currentPageOrder: 1,
+  isAllOverlayHidden: false,
 };
 
 
@@ -149,6 +163,10 @@ const asyncReducer = (state = initialState, action) => {
         return { ...state, lastLocation: action.lastLocation };
       case TOGGLE_ALL_CALCULATIONS:
         return { ...state, showCalculations: action.payload.checked };
+      case TOGGLE_ALL_OVERLAYS:
+        return { ...state, isAllOverlayHidden: !state.isAllOverlayHidden };
+      case SET_ALL_OVERLAYS:
+        return { ...state, isAllOverlayHidden: action.payload };
       case STORE_AIM_SELECTION_ALL:
         const { checked, map, tbPageIndex, clearAll } = action.payload;
         let newMultipageAimSelectionAll = _.cloneDeep(state.multipageAimSelection);
@@ -1031,6 +1049,23 @@ const asyncReducer = (state = initialState, action) => {
         }
         return { ...state, openSeriesAddition: newOpenSeriesAddition, otherSeriesAimsList: deepOther };
       }
+      case SET_MAMMOGRAM_SERIES:
+        return {
+          ...state,
+          mammogramSeries: action.payload.allSeries,
+          mammogramStudyUID: action.payload.studyUID,
+          mammogramPageIndex: 0,
+        };
+      case SET_MAMMOGRAM_PAGE:
+        return { ...state, mammogramPageIndex: action.payload };
+      case CLEAR_MAMMOGRAM_SERIES:
+        return { ...state, mammogramSeries: [], mammogramStudyUID: null, mammogramPageIndex: 0 };
+      case SET_PAGE_ORDER_SERIES:
+        return { ...state, pageOrderSeries: action.payload, currentPageOrder: 1 };
+      case SET_PAGE_ORDER:
+        return { ...state, currentPageOrder: action.payload };
+      case CLEAR_PAGE_ORDER_SERIES:
+        return { ...state, pageOrderSeries: [], currentPageOrder: 1 };
       default:
         return state;
     }

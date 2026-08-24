@@ -41,6 +41,7 @@ import {
   segUploadCompleted,
   annotationsLoadingError,
   setSeriesData,
+  setPageOrderSeries,
   storeAimSelectionAll
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
@@ -60,6 +61,7 @@ import { FaJoint } from "react-icons/fa";
 import { isSupportedModality } from "./Utils/aid.js";
 import { teachingFileTempCode } from './constants';
 import SelectSeriesModal from './components/annotationsList/selectSerieModal';
+import { openSeriesInDisplay, resetForNewStudy, isDifferentStudyOpen, requestStudySwitch } from './components/common/openSeriesHelper';
 
 const messages = {
   noPatient: {
@@ -108,6 +110,8 @@ class App extends Component {
       projectAdded: 0,
       showWarning: false,
       showConfirmation: false,
+      showStudySwitch: false,
+      pendingStudySwitch: null,
       showReportsMenu: false,
       title: "",
       message: "",
@@ -639,6 +643,7 @@ class App extends Component {
   };
 
   async componentDidMount() {
+    window.addEventListener("confirmSwitchStudy", this.handleConfirmSwitchStudy);
     localStorage.setItem("treeData", JSON.stringify({}));
     sessionStorage.removeItem("searchState");
     Promise.all([
@@ -747,12 +752,47 @@ class App extends Component {
   };
 
   componentWillUnmount = () => {
+    window.removeEventListener("confirmSwitchStudy", this.handleConfirmSwitchStudy);
     this.eventSource.removeEventListener(
       "message",
       this.getMessageFromEventSrc
     );
     localStorage.setItem("treeData", JSON.stringify({}));
     this.clearSessionStorageItems();
+  };
+
+  // One study at a time: openSeriesHelper fires this when the user tries to open
+  // a series from a different study than the one already open. Stash the pending
+  // open and show the confirmation; on approval we reset the display and reopen.
+  handleConfirmSwitchStudy = (e) => {
+    const pendingStudySwitch = e && e.detail ? e.detail.pendingOpen : null;
+    if (!pendingStudySwitch) return;
+    this.setState({ showStudySwitch: true, pendingStudySwitch });
+  };
+
+  confirmStudySwitch = () => {
+    const { pendingStudySwitch } = this.state;
+    this.setState({ showStudySwitch: false, pendingStudySwitch: null });
+    if (!pendingStudySwitch) return;
+    // Sites that build their own open flow pass an onConfirm callback that
+    // resets and re-runs their open. Sites that route through openSeriesInDisplay
+    // pass the series payload, which we reset-and-reopen here.
+    if (typeof pendingStudySwitch.onConfirm === "function") {
+      pendingStudySwitch.onConfirm();
+      return;
+    }
+    const dispatch = pendingStudySwitch.dispatch || this.props.dispatch;
+    resetForNewStudy(dispatch);
+    openSeriesInDisplay({
+      ...pendingStudySwitch,
+      dispatch,
+      openSeries: [],
+      force: true,
+    });
+  };
+
+  cancelStudySwitch = () => {
+    this.setState({ showStudySwitch: false, pendingStudySwitch: null });
   };
 
   clearSessionStorageItems = () => {
@@ -844,7 +884,18 @@ class App extends Component {
     });
   };
 
-  displaySeries = async (studyData, worklistID) => {
+  displaySeries = async (studyData, worklistID, force = false) => {
+    // One study at a time: if a different study is open (and this isn't a worklist
+    // step, which resets the grid itself), confirm closing the current study first.
+    if (!force && !worklistID && isDifferentStudyOpen([studyData], this.props.openSeries)) {
+      requestStudySwitch({
+        onConfirm: () => {
+          resetForNewStudy(this.props.dispatch);
+          this.displaySeries(studyData, worklistID, true);
+        },
+      });
+      return;
+    }
     const rawSeriesArray = await this.getSeriesData(studyData);
     if (!rawSeriesArray) return;
     let seriesArr = rawSeriesArray.filter(isSupportedModality);
@@ -854,8 +905,25 @@ class App extends Component {
     // If there are significant series use them to display
     // if not display modality filtered series
     if (significantSeries.length && !worklistID) seriesArr = significantSeries;
+
+    // Multi-page teaching files: load page 1, populate pageOrderSeries so the
+    // display view's PREV/NEXT can paginate the remaining pages.
+    const hasPageOrder = significantSeries.length > 0 &&
+      significantSeries.some(s => s.pageOrder != null);
+    if (hasPageOrder && !worklistID) {
+      this.props.dispatch(setPageOrderSeries(significantSeries));
+      const pageOne = significantSeries
+        .filter(s => s.pageOrder === 1)
+        .sort((a, b) => (a.significanceOrder || 0) - (b.significanceOrder || 0));
+      seriesArr = pageOne.length > 0
+        ? pageOne
+        : significantSeries.slice(0, parseInt(sessionStorage.getItem("maxPort")) || 4);
+    }
+
     //if check if there is enough available viewports
-    if (!this.hasEnoughViewports(seriesArr) && !worklistID) return;
+    // On a forced re-open the grid was just reset, but this.props.openSeries is
+    // still the pre-reset value; skip the room check so the open proceeds.
+    if (!force && !this.hasEnoughViewports(seriesArr) && !worklistID) return;
     //add serie to the grid
     const promiseArr = [];
     if (worklistID) this.props.dispatch(clearGrid());
@@ -1455,6 +1523,15 @@ class App extends Component {
             message={message}
             onSubmit={this.displayWaterfall}
             onCancel={this.closeWarning}
+          />
+        )}
+        {this.state.showStudySwitch && (
+          <ConfirmationModal
+            title={"A study is already open"}
+            button={"Close & Open"}
+            message={"Close the current study and open the new one? Unsaved image adjustments will be lost."}
+            onSubmit={this.confirmStudySwitch}
+            onCancel={this.cancelStudySwitch}
           />
         )}
         {this.state.reportsCompArr}

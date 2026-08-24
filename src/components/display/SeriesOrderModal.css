@@ -1,0 +1,273 @@
+/* Series Display Order modal — styling per UI/UX design.
+   All rules are scoped to .series-order-modal / .som-warn-modal so they never
+   leak onto other react-bootstrap modals in the app. Positioning/sizing of the
+   dialog is left to react-bootstrap (size="lg"/"sm"). */
+
+/* ── Bootstrap Modal shell ─────────────────────────────────── */
+.series-order-modal .modal-content,
+.som-warn-modal .modal-content {
+  background: #333;
+  color: #fff;
+  border: 1px solid #222;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.5);
+}
+
+.series-order-modal .modal-header,
+.som-warn-modal .modal-header {
+  background-color: #555;
+  color: #ccc;
+  padding: 3px 12px;
+  font-size: 14px;
+  text-shadow: 1px 2px 0px rgba(0, 0, 0, 0.25);
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.series-order-modal .modal-title,
+.som-warn-modal .modal-title {
+  color: #ccc;
+  font-size: 14px;
+}
+
+/* Keep react-bootstrap's auto-generated close button visible on the dark header */
+.series-order-modal .modal-header .btn-close,
+.som-warn-modal .modal-header .btn-close {
+  filter: invert(1) grayscale(1) brightness(1.5);
+  opacity: 0.7;
+}
+
+.series-order-modal .modal-header .btn-close:hover,
+.som-warn-modal .modal-header .btn-close:hover {
+  opacity: 1;
+}
+
+.series-order-modal .modal-body,
+.som-warn-modal .modal-body {
+  background: #333;
+  color: #ccc;
+}
+
+.series-order-modal .modal-footer,
+.som-warn-modal .modal-footer {
+  background-color: #555;
+  border-top: none;
+}
+
+/* Warning icon in the warning-modal titles */
+.series-order-modal .warn,
+.som-warn-modal .warn {
+  color: rgb(235, 105, 105);
+  font-size: larger;
+}
+
+/* ── Loading ──────────────────────────────────────────────── */
+.som-loading {
+  text-align: center;
+  padding: 2rem;
+  color: #aaa;
+}
+
+/* ── Layout: grid (left) + unordered list (right) ─────────── */
+.series-order-modal .som-layout {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* Left column: the slot grid stacked over its action row */
+.series-order-modal .som-grid-row {
+  flex: 1 1 60%;
+  min-width: 0;
+}
+
+/* ── Grid + actions ───────────────────────────────────────── */
+.series-order-modal .som-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 15px;
+}
+
+.series-order-modal .som-slot {
+  border: 1px solid #ccc;
+  padding: 2rem 1.5rem;
+  margin-bottom: 7px;
+  text-align: center;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.series-order-modal .som-slot--empty {
+  border: 3px dotted #777;
+}
+
+.series-order-modal .som-slot--droptarget:hover {
+  border-color: #01abd6;
+}
+
+.series-order-modal .som-slot-number {
+  color: #777;
+  text-align: center;
+}
+
+/* ── Series chip ──────────────────────────────────────────── */
+.series-order-modal .som-chip {
+  border: 1px solid #222;
+  background-color: #555;
+  color: #fff;
+  padding: 15px;
+  margin-right: 15px;
+  margin-bottom: 15px;
+  border-radius: 7px;
+  cursor: grab;
+  user-select: none;
+}
+
+.series-order-modal .som-chip:active {
+  cursor: grabbing;
+}
+
+.series-order-modal .som-slot .som-chip {
+  background-color: #555;
+  border: 1px solid #01abd6;
+  margin: 0;
+}
+
+/* Unordered pool chips stack vertically as a readable list. Inline <span>s
+   with vertical padding overlap when they wrap, so make them block-level. */
+.series-order-modal .som-chip--list {
+  display: block;
+  margin: 0 0 10px 0;
+  padding: 10px 12px;
+  white-space: normal;
+}
+
+/* ── Action buttons row (Clear Grid · pagination · + New Page) ── */
+.series-order-modal .som-grid-actions {
+  list-style-type: none;
+  display: inline-flex;
+  align-items: center;
+  margin: 15px 0 0 0;
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+.series-order-modal .som-btn,
+.som-warn-modal .som-btn {
+  background-color: #777;
+  border: 1px solid #222;
+  color: #ccc;
+  font-size: 14px;
+  padding: 5px 11px;
+  border-radius: 7px;
+  margin: 0 12px;
+  cursor: pointer;
+}
+
+.series-order-modal .som-btn:first-child,
+.som-warn-modal .som-btn:first-child {
+  margin-left: 0;
+}
+
+.series-order-modal .som-btn:hover,
+.som-warn-modal .som-btn:hover {
+  background-color: #555;
+  border: 1px solid #222;
+  color: #ccc;
+}
+
+.series-order-modal .som-btn:disabled,
+.som-warn-modal .som-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Page navigation ──────────────────────────────────────── */
+.series-order-modal .som-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.series-order-modal .som-page-num,
+.series-order-modal .som-page-nav {
+  background-color: #777;
+  border: 1px solid #222;
+  color: #ccc;
+  font-size: 14px;
+  padding: 5px 11px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.series-order-modal .som-page-nav:hover,
+.series-order-modal .som-page-num:hover {
+  background-color: #555;
+  border: 1px solid #222;
+  color: #ccc;
+}
+
+.series-order-modal .som-page-num--active {
+  background-color: #01abd6;
+  border-color: #01abd6;
+  color: #fff;
+}
+
+.series-order-modal button.som-page-nav:disabled {
+  background-color: #222;
+  border: 1px solid #222;
+  color: #555;
+  cursor: not-allowed;
+}
+
+/* ── Unordered list (right column) ────────────────────────── */
+/* The shell stretches (align-items: stretch) to match the grid column's
+   height. Its content lives in an absolutely-positioned scroll layer so the
+   number of chips can't push the box taller than the grid — it scrolls
+   instead, keeping the two columns the same height. */
+.series-order-modal .som-unordered {
+  flex: 1 1 40%;
+  min-width: 0;
+  margin: 0;
+  background-color: #222;
+  border: 1px solid #555;
+  border-radius: 7px;
+  position: relative;
+}
+
+.series-order-modal .som-unordered-scroll {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding: 15px 15px 30px 15px;
+}
+
+.series-order-modal .som-unordered-label {
+  color: #ccc;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #ccc;
+}
+
+.series-order-modal .som-unordered-empty {
+  font-size: 0.85rem;
+  color: #888;
+  padding: 8px 0;
+}
+
+/* ── Warning modal body ───────────────────────────────────── */
+.som-warn-modal .modal-body p {
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.som-warn-check {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  color: #ccc;
+  cursor: pointer;
+  margin-top: 8px;
+  gap: 6px;
+}

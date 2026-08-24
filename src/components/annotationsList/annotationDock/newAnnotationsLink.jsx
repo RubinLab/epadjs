@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import {
-  getSingleSerie,
   clearSelection,
   changeActivePort,
   addToGrid,
+  getSingleSerie,
   jumpToAim,
 } from "../action";
+import { openSeriesInDisplay } from "../../common/openSeriesHelper";
 import "../annotationsList.css";
 import cornerstone from "cornerstone-core";
 
@@ -90,40 +91,49 @@ const annotationsLink = (props) => {
   }
 
   const displayAnnotations = (e, selected) => {
-    const { openSeriesAddition, activePort } = props;
-    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
-
-    let isGridFull = openSeries.length === maxPort;
     const { isOpen, index } = checkIfSerieOpen(selected.seriesUID, selected.imgIDs);
 
     if (isOpen) {
+      // Fusion-aware jump: skip jump when the active layer is the fused CT companion.
       const imageUID = Object.keys(selected.imgIDs);
       const imgIDArr = imageUID[0].split("/frames/");
       props.dispatch(changeActivePort(index));
-      // if ct do not jump to aim
-      const {seriesUID} = getFusedSerieInfoAndAnnotations({...props, activePort: index});
+      const { seriesUID } = getFusedSerieInfoAndAnnotations({ ...props, activePort: index });
       const notFusionCT = seriesUID === props.openSeries[index].seriesUID;
       if (notFusionCT) {
-        // No need to change
         props.dispatch(jumpToAim(selected.seriesUID, selected.aimID, index));
-        // change the arguments to handle the multiframe
         handleJumpToAim(selected.aimID, index, imgIDArr[0], imgIDArr[1]);
       } else {
         console.log('Cannot jump on a fused image that is not the active layer');
       }
       props.dispatch(clearSelection());
     } else {
-      if (isGridFull) {
-        props.dispatch(addToGrid(selected, selected.aimID, props.activePort));
-      } else {
-        props.dispatch(addToGrid(selected, selected.aimID));
-      }
-      const list = getExistingSeriesData(selected);
-      props
-        .dispatch(getSingleSerie(selected, selected.aimID, null, list))
-        .then(() => {})
-        .catch((err) => console.error(err));
-      props.dispatch(clearSelection());
+      openSeriesInDisplay({
+        dispatch: props.dispatch,
+        navigate: () => {},  // already in display view
+        openSeries: props.openSeries,
+        // Pass per-port MF metadata so the helper disambiguates multiframe series
+        // that share a seriesUID (matching this list's own checkIfSerieOpen).
+        openSeriesAddition: props.openSeriesAddition,
+        series: selected,
+        aimID: selected.aimID,
+        existingData: getExistingSeriesData(selected),
+        // When the grid is full, replace the active viewport instead of blocking,
+        // then load the series (mirrors the not-full path).
+        onGridFull: () => {
+          // Replacing the active viewport — drop the previous series' per-port
+          // image adjustments so they don't carry over to the new series.
+          window.dispatchEvent(
+            new CustomEvent("resetReplacedViewport", {
+              detail: { port: props.activePort },
+            })
+          );
+          props.dispatch(addToGrid(selected, selected.aimID, props.activePort));
+          props.dispatch(
+            getSingleSerie(selected, selected.aimID, null, getExistingSeriesData(selected))
+          );
+        },
+      });
     }
   };
 

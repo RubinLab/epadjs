@@ -32,6 +32,13 @@ const SeriesDropDown = (props) => {
   const makeKey = (projectID, patientID, studyUID) =>
   `${projectID}|${patientID}|${studyUID}`;
 
+  const getSeriesWithFallback = (projectID, patientID, studyUID, label) =>
+    getSeries(projectID, patientID, studyUID, false, label).then(res =>
+      res.data && res.data.length > 0
+        ? res
+        : getSeries(projectID, patientID, studyUID, true, label)
+    );
+
   const checkMultiframe = () => {
     const { openSeries, activePort, openSeriesAddition } = props;
     // if the currrent series is multiframe 
@@ -121,7 +128,7 @@ const SeriesDropDown = (props) => {
     try {
       if (checkMultiframe() && studyExist && checkAllSameSeries(data[projectID][patientID][studyUID].list) && !data[projectID][patientID][studyUID].mfMerged) {
         if (!studyInGrid && !seriesCallSentRef.current.has(key)) {
-          getSeries(projectID, patientID, studyUID, false, 'seriesdropdown, checkMultiframe').then(res => {
+          getSeriesWithFallback(projectID, patientID, studyUID, 'seriesdropdown, checkMultiframe').then(res => {
             const newList = mergeLists(data[projectID][patientID][studyUID], res.data);
             props.dispatch(setSeriesData(projectID, patientID, studyUID, newList, true, true));
             setLoading(false);
@@ -143,7 +150,7 @@ const SeriesDropDown = (props) => {
         } else {
           if (!studyInGrid && !seriesCallSentRef.current.has(key)) {
             setLoading(true);
-            getSeries(projectID, patientID, studyUID, false, 'series dropdown, 2').then(res => {
+            getSeriesWithFallback(projectID, patientID, studyUID, 'series dropdown, 2').then(res => {
               props.dispatch(setSeriesData(projectID, patientID, studyUID, res.data, true, 'here'));
               setLoading(false);
               seriesCallSentRef.current.add(key);
@@ -223,6 +230,14 @@ const SeriesDropDown = (props) => {
         props.dispatch(addToGrid(serie));
         props.dispatch(getSingleSerie(serie, null, null, list));   
       } else {
+        // Replacing the series in an occupied viewport: drop the previous
+        // series' per-port adjustments (zoom/pan/W-L/invert) so they don't
+        // carry over to the newly opened series.
+        window.dispatchEvent(
+          new CustomEvent("resetReplacedViewport", {
+            detail: { port: props.activePort },
+          })
+        );
         props.onSelect(0, props.activePort, true);
         props.dispatch(replaceInGrid(serie));
         const list = seriesList.length > 0 ? seriesList : null;

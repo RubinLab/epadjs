@@ -16,12 +16,14 @@ const confirmationModal = props => {
         <Button
           variant="secondary"
           onClick={props.onSubmit}
+          style={{"margin": "4px 8px 8px 4px"}}
         >
           {props.button || "Submit"}
         </Button>
         <Button
           variant="secondary"
           onClick={props.onCancel}
+          style={{"margin": "4px 8px 8px 4px"}}
         >
           Cancel
         </Button>

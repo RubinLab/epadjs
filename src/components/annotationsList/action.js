@@ -56,6 +56,14 @@ import {
   TOGGLE_ALL_CALCULATIONS,
   SET_LAST_LOCATION,
   SHOW_PHI,
+  SET_MAMMOGRAM_SERIES,
+  SET_MAMMOGRAM_PAGE,
+  CLEAR_MAMMOGRAM_SERIES,
+  SET_PAGE_ORDER_SERIES,
+  SET_PAGE_ORDER,
+  CLEAR_PAGE_ORDER_SERIES,
+  TOGGLE_ALL_OVERLAYS,
+  SET_ALL_OVERLAYS,
   colors,
   commonLabels,
 } from "./types";
@@ -384,7 +392,7 @@ export const selectAnnotation = (
 // opens a new port to display series
 // adds series details to the array
 export const addToGrid = (serie, annotation, port, worklistID) => {
-  let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment, seriesDescription, numberOfAnnotations, numberOfImages, seriesNo, template, significanceOrder, multiFrameIndex } = serie;
+  let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment, seriesDescription, numberOfAnnotations, numberOfImages, seriesNo, template, significanceOrder, multiFrameIndex, displayState } = serie;
   const modFmComment = comment ? comment.split('/')[0].trim() : '';
   examType = examType ? examType.toUpperCase() : modality ? modality.toUpperCase() : modFmComment.toUpperCase();
 
@@ -406,7 +414,8 @@ export const addToGrid = (serie, annotation, port, worklistID) => {
     seriesNo,
     template,
     significanceOrder,
-    worklistID
+    worklistID,
+    displayState,
     // imageIndex: 0
   };
   if (multiFrameIndex) reference.multiFrameIndex = multiFrameIndex;
@@ -490,6 +499,10 @@ export const toggleAllCalculations = (checked) => {
     payload: { checked },
   };
 };
+
+export const toggleAllOverlays = () => ({ type: TOGGLE_ALL_OVERLAYS });
+
+export const setAllOverlays = (hidden) => ({ type: SET_ALL_OVERLAYS, payload: hidden });
 
 // invoked at display view right bar
 export const toggleSingleLabel = (serieID, aimID) => {
@@ -1201,6 +1214,34 @@ export const segUploadRemove = (segUid) => {
 export const aimDelete = (aimRefs) => {
   return { type: AIM_DELETE, payload: aimRefs };
 };
+
+export const setMammogramSeries = (allSeries, studyUID) => ({
+  type: SET_MAMMOGRAM_SERIES,
+  payload: { allSeries, studyUID },
+});
+
+export const setMammogramPage = (pageIndex) => ({
+  type: SET_MAMMOGRAM_PAGE,
+  payload: pageIndex,
+});
+
+export const clearMammogramSeries = () => ({
+  type: CLEAR_MAMMOGRAM_SERIES,
+});
+
+export const setPageOrderSeries = (allSeries) => ({
+  type: SET_PAGE_ORDER_SERIES,
+  payload: allSeries,
+});
+
+export const setPageOrder = (pageOrder) => ({
+  type: SET_PAGE_ORDER,
+  payload: pageOrder,
+});
+
+export const clearPageOrderSeries = () => ({
+  type: CLEAR_PAGE_ORDER_SERIES,
+});
 
 
 export const otherAimsUpdated = (seriesList, aimRefs) => {
