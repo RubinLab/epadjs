@@ -1267,6 +1267,7 @@ class DisplayView extends Component {
   // };
 
   clearAllMarkups = () => {
+    console.log('[DEBUG] clearAllMarkups called at', new Date().toISOString(), new Error().stack);
     // clear the toolState they will be rendered again on next load
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
     cornerstoneTools.store.modules.freehand3D.state.seriesCollection = [];
