@@ -269,6 +269,9 @@ class DisplayView extends Component {
     // if (series.length < 1) {
     //   onSwitchView('search');
     // }
+    // MG images are large (~40MB each); raise the cache ceiling to prevent
+    // eviction loops that cause annotation flickering on mammograms.
+    cornerstone.imageCache.setMaximumSizeBytes(2 * 1024 * 1024 * 1024); // 2GB
     this.props.dispatch(clearSelection());
     this.getViewports();
     this._explicitlyReset.clear();
@@ -1267,7 +1270,6 @@ class DisplayView extends Component {
   // };
 
   clearAllMarkups = () => {
-    console.log('[DEBUG] clearAllMarkups called at', new Date().toISOString(), new Error().stack);
     // clear the toolState they will be rendered again on next load
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
     cornerstoneTools.store.modules.freehand3D.state.seriesCollection = [];
@@ -4020,7 +4022,7 @@ class DisplayView extends Component {
                     setViewportActive={() => {
                       this.setActive(i);
                     }}
-                    isStackPrefetchEnabled={true}
+                    isStackPrefetchEnabled={this.isMGViewport(i) ? false : true}
                     style={{ height: "calc(100% - 26px)" }}
                     activeTool={activeTool}
                     showingPHI={this.props.showingPHI && mode === 'teaching'}
