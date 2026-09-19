@@ -673,15 +673,27 @@ class CornerstoneViewport extends Component {
     });
   };
 
-  onImageLoaded = () => {
-    // TODO: This is not necessarily true :thinking:
-    // We need better cache reporting a layer up
+  onImageLoaded = (e) => {
+    // Only count loads for images that belong to this viewport's stack.
+    // The event fires globally on cornerstone.events, so without this guard
+    // all viewport instances re-render on every image loaded anywhere in the
+    // app — causing unnecessary canvas repaints in unrelated viewports.
+    if (e && e.detail && e.detail.image) {
+      if (!this.props.imageIds.includes(e.detail.image.imageId)) {
+        return;
+      }
+    }
     this.setState({
       numImagesLoaded: this.state.numImagesLoaded + 1,
     });
   };
 
   onImageProgress = (e) => {
+    if (e && e.detail && e.detail.imageId) {
+      if (!this.props.imageIds.includes(e.detail.imageId)) {
+        return;
+      }
+    }
     this.setState({
       imageProgress: e.detail.percentComplete,
     });
