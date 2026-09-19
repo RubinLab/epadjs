@@ -595,48 +595,57 @@ class CornerstoneViewport extends Component {
     const { viewport, element, image } = event.detail;
     const { viewportIndex } = this.props;
 
-    // let wwwc = sessionStorage.getItem('wwwc');
-    let imgStatus = sessionStorage.getItem('imgStatus');
-    imgStatus = JSON.parse(imgStatus);
-    imgStatus = imgStatus ? imgStatus : [];
+    const imgStatus = JSON.parse(sessionStorage.getItem('imgStatus') || '[]');
+    const invertMap = JSON.parse(sessionStorage.getItem('invertMap') || '{}');
 
-    let invertMap = sessionStorage.getItem('invertMap');
-    invertMap = JSON.parse(invertMap);
-    invertMap = invertMap ? invertMap : {};
+    const storedEntry = imgStatus[viewportIndex] || {};
+    const wwwc = storedEntry.wwwc || {};
+    const pan = storedEntry.pan || {};
+    const zoom = storedEntry.zoom || null;
+    const storedInvert = invertMap[viewportIndex];
 
-    event.detail.viewport.invert = invertMap[viewportIndex];
-    cornerstone.setViewport(element, viewport);
+    let needsViewportUpdate = false;
 
-    let wwwc = imgStatus[viewportIndex] && imgStatus[viewportIndex].wwwc ? imgStatus[viewportIndex].wwwc : {};
-    let pan = imgStatus[viewportIndex] && imgStatus[viewportIndex].pan ? imgStatus[viewportIndex].pan : {};
-    let zoom = imgStatus[viewportIndex] && imgStatus[viewportIndex].zoom ? imgStatus[viewportIndex].zoom : null;
+    if (viewport.invert !== storedInvert) {
+      viewport.invert = storedInvert;
+      needsViewportUpdate = true;
+    }
+
+    if (Object.keys(pan).length > 0) {
+      if (viewport.translation.x !== pan.x || viewport.translation.y !== pan.y) {
+        viewport.translation.x = pan.x;
+        viewport.translation.y = pan.y;
+        needsViewportUpdate = true;
+      }
+    }
+
+    if (zoom && viewport.scale !== zoom) {
+      viewport.scale = zoom;
+      needsViewportUpdate = true;
+    }
 
     let wc = image.windowCenter;
     let ww = image.windowWidth;
 
-    if (Object.keys(wwwc).length > 0) {
-      wc = wwwc.wc;
-      ww = wwwc.ww;
-    }
-
-    if (Object.keys(pan).length > 0) {
-      viewport.translation.x += pan.x;
-      viewport.translation.y += pan.y;
-    }
-
-    if (zoom) {
-      viewport.scale = zoom;
-    }
-
     if (event.detail.enabledElement.layers.length === 0) {
-      viewport.voi.windowCenter = wc;
-      viewport.voi.windowWidth = ww;
-
-      cornerstone.setViewport(element, viewport);
+      if (Object.keys(wwwc).length > 0) {
+        wc = wwwc.wc;
+        ww = wwwc.ww;
+      }
+      if (viewport.voi.windowCenter !== wc || viewport.voi.windowWidth !== ww) {
+        viewport.voi.windowCenter = wc;
+        viewport.voi.windowWidth = ww;
+        needsViewportUpdate = true;
+      }
     } else {
       wc = viewport.voi.windowCenter;
       ww = viewport.voi.windowWidth;
     }
+
+    if (needsViewportUpdate) {
+      cornerstone.setViewport(element, viewport);
+    }
+
     // compute SUV if PET
     if (!!calculateSUV(image, ww, true)) {
       ww = calculateSUV(image, ww, true);
