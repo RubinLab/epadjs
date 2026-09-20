@@ -594,6 +594,7 @@ class CornerstoneViewport extends Component {
   onImageRendered = (event) => {
     const { viewport, element, image } = event.detail;
     const { viewportIndex } = this.props;
+    console.log(`[DEBUG] onImageRendered viewport=${viewportIndex} imageId=${image && image.imageId}`);
 
     const imgStatus = JSON.parse(sessionStorage.getItem('imgStatus') || '[]');
     const invertMap = JSON.parse(sessionStorage.getItem('invertMap') || '{}');
