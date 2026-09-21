@@ -532,7 +532,7 @@ function AnnotationTable(props) {
   // CHECK
   const displaySeries = async (selected, force = false) => {
     const { subjectID: patientID, studyUID, aimID, projectID, template } = selected;
-    console.log(selected);
+    // console.log(selected);
     let isTeachingFile = teachingFileTempCode === template;
     let seriesArr = [];
     let existingData = getExistingData(selected);
@@ -562,16 +562,16 @@ function AnnotationTable(props) {
       props.dispatch(clearPageOrderSeries());
       props.dispatch(clearMammogramSeries());
       seriesArr = await getSeriesData(selected);
-      console.log('seriesArr before filter');
-      console.log(seriesArr);
+      // console.log('seriesArr before filter');
+      // console.log(seriesArr);
       const filtered = Array.isArray(seriesArr) ? seriesArr.filter(isSupportedModality) : [];
-      console.log('filtered -->', filtered);
+      // console.log('filtered -->', filtered);
 
       // Decision tree: significant series take priority over mammogram fallback.
       const significant = filtered.filter(s => s.significanceOrder != null);
       const hasPageOrder = significant.length > 0 && significant.some(s => s.pageOrder != null);
 
-      console.log(significant, hasPageOrder);
+      // console.log(significant, hasPageOrder);
       if (significant.length > 0 && hasPageOrder) {
         // Case 1: pageOrder navigation — load page 1, enable Next/Prev by pageOrder.
         props.dispatch(setPageOrderSeries(significant));
