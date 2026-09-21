@@ -88,6 +88,11 @@ export default function (element, newImageIdIndex) {
   // if (newImageIdIndex === stackData.currentImageIdIndex) {
   //  return;
   // }
+  // Restored: skip redundant displayImage at scroll boundaries to prevent
+  // cross-viewport canvas repaints when already on the target frame.
+  if (newImageIdIndex === stackData.currentImageIdIndex) {
+    return;
+  }
 
   if (startLoadingHandler) {
     startLoadingHandler(element);
