@@ -18,6 +18,7 @@ import { withRouter } from "react-router-dom";
 import PropagateLoader from "react-spinners/PropagateLoader";
 import { deleteAnnotation, getAnnotation } from "../../services/annotationServices";
 import { getSignificantSeries, setSignificantSeries } from "../../services/seriesServices";
+import { shareStudies } from "../../services/shareService";
 import { refreshToken } from "../../services/authService";
 import { getImageMetadata } from "../../services/imageServices";
 import {
@@ -232,6 +233,7 @@ class DisplayView extends Component {
       showReorderModal: false,
       showSaveStatusWarning: false,
       pendingSaveStatusData: null,
+      sharing: false,
     };
   }
 
@@ -3749,6 +3751,30 @@ class DisplayView extends Component {
     }
   };
 
+  shareStudy = async () => {
+    if (this.state.sharing) return;
+    const { series, activePort, aimList } = this.props;
+    const active = series[activePort];
+    if (!active) return;
+
+    const { patientID, studyUID, seriesUID } = active;
+    const seriesAims = aimList[seriesUID] || {};
+    const firstAimID = Object.keys(seriesAims)[0];
+
+    const bodyArr = [{
+      subject: patientID,
+      study: studyUID,
+      ...(firstAimID && { aimuid: firstAimID }),
+    }];
+
+    this.setState({ sharing: true });
+    try {
+      await shareStudies(bodyArr);
+    } finally {
+      this.setState({ sharing: false });
+    }
+  };
+
   render() {
     const { series, activePort, updateProgress, updateTreeDataOnSave } =
       this.props;
@@ -3805,6 +3831,8 @@ class DisplayView extends Component {
             openNextWLStudy={this.openNextWLStudy}
             onReorder={() => this.setState({ showReorderModal: true })}
             onSaveState={this.handleSaveState}
+            onShare={this.shareStudy}
+            sharing={this.state.sharing}
           >
             <div className="mammo-toolbar-group">
               <div className="mammo-toolbar-separator" />

@@ -34,7 +34,7 @@ import {
   downloadProjectAnnotation,
   deleteAnnotationsList,
 } from "../../services/annotationServices.js";
-import { getExportLinks } from "../../services/studyServices";
+import { shareStudies } from "../../services/shareService";
 import AnnotationTable from "./AnnotationTable.jsx";
 import {
   clearSelection,
@@ -1397,66 +1397,8 @@ const AnnotationSearch = (props) => {
     const bodyArr = Object.values(studyMap);
 
     setSharing(true);
-
-    const buildContent = ({ data: results }) => {
-      if (!results || results.length === 0) throw new Error("no links returned");
-      const displayName = sessionStorage.getItem("displayName") || "";
-      const caseWord = results.length === 1 ? "this interesting case" : "these interesting cases";
-
-      const htmlParts = results.map(
-        (r) => `${r.name}<br/><a href="${r.link}">${r.study_desc}</a>`
-      );
-      const textParts = results.map(
-        (r) => `${r.name}\n${r.study_desc}\n${r.link}`
-      );
-
-      const html = `<div>Hey,<br/><br/>Take a look at ${caseWord} on STELLA!<br/><br/>${htmlParts.join("<br/><br/>")}<br/><br/>Make sure you are within the SHC firewall or on VPN to access STELLA.<br/>${displayName}</div>`;
-      const text = `Hey,\n\nTake a look at ${caseWord} on STELLA!\n\n${textParts.join("\n\n")}\n\nMake sure you are within the SHC firewall or on VPN to access STELLA.\n${displayName}`;
-
-      return { html, text, count: results.length };
-    };
-
-    // Start the fetch but don't await — pass Promise<Blob> into ClipboardItem
-    // so clipboard.write() is called synchronously within the user gesture context.
-    const fetchPromise = getExportLinks(bodyArr);
-    const htmlBlobPromise = fetchPromise.then((res) => new Blob([buildContent(res).html], { type: "text/html" }));
-    const textBlobPromise = fetchPromise.then((res) => new Blob([buildContent(res).text], { type: "text/plain" }));
-
     try {
-      if (navigator.clipboard && typeof ClipboardItem !== "undefined") {
-        await navigator.clipboard.write([
-          new ClipboardItem({
-            "text/html": htmlBlobPromise,
-            "text/plain": textBlobPromise,
-          }),
-        ]);
-      } else if (navigator.clipboard) {
-        const textBlob = await textBlobPromise;
-        await navigator.clipboard.writeText(await textBlob.text());
-      } else {
-        // Non-secure context (HTTP) fallback
-        const textBlob = await textBlobPromise;
-        const textStr = await textBlob.text();
-        const ta = document.createElement("textarea");
-        ta.value = textStr;
-        ta.style.cssText = "position:fixed;opacity:0";
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-      }
-
-      const { count } = buildContent(await fetchPromise);
-      toast.success(
-        `Copied ${count} ${count === 1 ? "study" : "studies"} to clipboard`,
-        { position: "top-right", autoClose: 3000 }
-      );
-    } catch (err) {
-      console.error(err);
-      const message = err.message === "no links returned"
-        ? "Share failed: no links returned."
-        : "Share failed. Please try again.";
-      toast.error(message, { position: "top-right" });
+      await shareStudies(bodyArr);
     } finally {
       setSharing(false);
     }

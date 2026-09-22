@@ -36,6 +36,7 @@ import {
   FaDotCircle,
   FaTimes,
   FaCamera,
+  FaShareSquare,
 } from "react-icons/fa";
 import { BsArrowUpLeft } from "react-icons/bs";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
@@ -924,6 +925,14 @@ class ToolMenu extends Component {
         {/* <Collapsible trigger={"Segmentation Tools"} transitionTime={100}> */}
         {this.state.showMetaData && (<MetaData onClose={this.showMetaData} imageData={this.props.imageData}/>)}
         <AddToWorklist toolMenu={true} parent="display"/>
+        <div
+          className={this.props.sharing ? "toolbarSectionButton toolbarSectionButton--disabled" : "toolbarSectionButton"}
+          onClick={this.props.sharing ? undefined : this.props.onShare}
+          title="Share study"
+        >
+          <div className="toolContainer"><FaShareSquare /></div>
+          <div className="buttonLabel"><span>Share</span></div>
+        </div>
         {mode !== "teaching" &&
           this.segmentationTools.map((segmentationTool, i) => {
             i = i + this.imagingTools.length + this.markupTools.length;
