@@ -5,18 +5,18 @@ export function getStudies(projectId, subjectId) {
   if (http.mode() === "lite")
     return http.get(
       apiUrl +
-        "/projects/lite/subjects/" +
-        encodeURIComponent(subjectId) +
-        "/studies?filterDSO=true"
+      "/projects/lite/subjects/" +
+      encodeURIComponent(subjectId) +
+      "/studies?filterDSO=true"
     );
   else
     return http.get(
       apiUrl +
-        "/projects/" +
-        encodeURIComponent(projectId) +
-        "/subjects/" +
-        encodeURIComponent(subjectId) +
-        "/studies?filterDSO=true"
+      "/projects/" +
+      encodeURIComponent(projectId) +
+      "/subjects/" +
+      encodeURIComponent(subjectId) +
+      "/studies?filterDSO=true"
     );
 }
 
@@ -45,10 +45,10 @@ export function deleteStudy(study, delSys) {
   return http.delete(url);
 }
 
-export function getStudyAims(subjectID, studyUID, projectID = "lite", countQuery=false) {
+export function getStudyAims(subjectID, studyUID, projectID = "lite", countQuery = false) {
   if (countQuery)
     return http.get(
-    http.apiUrl() +
+      http.apiUrl() +
       "/projects/" +
       encodeURIComponent(projectID) +
       "/subjects/" +
@@ -56,17 +56,17 @@ export function getStudyAims(subjectID, studyUID, projectID = "lite", countQuery
       "/studies/" +
       encodeURIComponent(studyUID) +
       "/aims?format=count"
-  );
-  else 
+    );
+  else
     return http.get(
       http.apiUrl() +
-        "/projects/" +
-        encodeURIComponent(projectID) +
-        "/subjects/" +
-        encodeURIComponent(subjectID) +
-        "/studies/" +
-        encodeURIComponent(studyUID) +
-        "/aims"
+      "/projects/" +
+      encodeURIComponent(projectID) +
+      "/subjects/" +
+      encodeURIComponent(subjectID) +
+      "/studies/" +
+      encodeURIComponent(studyUID) +
+      "/aims"
     );
 }
 
@@ -112,12 +112,12 @@ export function addStudyToProject(
 export function getStudy(projectId, subjectId, studyUID) {
   return http.get(
     http.apiUrl() +
-      "/projects/" +
-      encodeURIComponent(projectId) +
-      "/subjects/" +
-      encodeURIComponent(subjectId) +
-      "/studies/" +
-      encodeURIComponent(studyUID)
+    "/projects/" +
+    encodeURIComponent(projectId) +
+    "/subjects/" +
+    encodeURIComponent(subjectId) +
+    "/studies/" +
+    encodeURIComponent(studyUID)
   );
 }
 export function getSingleStudy(studyUID) {
@@ -126,5 +126,5 @@ export function getSingleStudy(studyUID) {
 
 export function getExportLinks(bodyArr) {
   const url = `${http.apiUrl()}/exportlinks?outputType=json&studyDesc=true`;
-  return http.post(url, bodyArr);
+  return http.put(url, bodyArr);
 }

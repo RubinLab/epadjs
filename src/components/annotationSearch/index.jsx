@@ -1397,46 +1397,63 @@ const AnnotationSearch = (props) => {
     const bodyArr = Object.values(studyMap);
 
     setSharing(true);
-    try {
-      const { data: results } = await getExportLinks(bodyArr);
 
-      if (!results || results.length === 0) {
-        toast.error("Share failed: no links returned.", { position: "top-right" });
-        return;
-      }
-
+    const buildContent = ({ data: results }) => {
+      if (!results || results.length === 0) throw new Error("no links returned");
       const htmlParts = results.map(
         (r) => `${r.study_desc}<br/><a href="${r.link}">${r.name}</a>`
       );
       const textParts = results.map(
         (r) => `${r.study_desc}\n${r.name}: ${r.link}`
       );
-      const htmlContent = `<div>${htmlParts.join("<br/><br/>")}</div>`;
-      const textContent = textParts.join("\n\n");
+      return {
+        html: `<div>${htmlParts.join("<br/><br/>")}</div>`,
+        text: textParts.join("\n\n"),
+        count: results.length,
+      };
+    };
 
-      try {
-        if (typeof ClipboardItem !== "undefined") {
-          await navigator.clipboard.write([
-            new ClipboardItem({
-              "text/html": new Blob([htmlContent], { type: "text/html" }),
-              "text/plain": new Blob([textContent], { type: "text/plain" }),
-            }),
-          ]);
-        } else {
-          await navigator.clipboard.writeText(textContent);
-        }
-      } catch (_clipErr) {
-        await navigator.clipboard.writeText(textContent);
+    // Start the fetch but don't await — pass Promise<Blob> into ClipboardItem
+    // so clipboard.write() is called synchronously within the user gesture context.
+    const fetchPromise = getExportLinks(bodyArr);
+    const htmlBlobPromise = fetchPromise.then((res) => new Blob([buildContent(res).html], { type: "text/html" }));
+    const textBlobPromise = fetchPromise.then((res) => new Blob([buildContent(res).text], { type: "text/plain" }));
+
+    try {
+      if (navigator.clipboard && typeof ClipboardItem !== "undefined") {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "text/html": htmlBlobPromise,
+            "text/plain": textBlobPromise,
+          }),
+        ]);
+      } else if (navigator.clipboard) {
+        const textBlob = await textBlobPromise;
+        await navigator.clipboard.writeText(await textBlob.text());
+      } else {
+        // Non-secure context (HTTP) fallback
+        const textBlob = await textBlobPromise;
+        const textStr = await textBlob.text();
+        const ta = document.createElement("textarea");
+        ta.value = textStr;
+        ta.style.cssText = "position:fixed;opacity:0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
       }
 
-      const count = results.length;
+      const { count } = buildContent(await fetchPromise);
       toast.success(
         `Copied ${count} ${count === 1 ? "study" : "studies"} to clipboard`,
         { position: "top-right", autoClose: 3000 }
       );
     } catch (err) {
       console.error(err);
-      toast.error("Share failed. Please try again.", { position: "top-right" });
+      const message = err.message === "no links returned"
+        ? "Share failed: no links returned."
+        : "Share failed. Please try again.";
+      toast.error(message, { position: "top-right" });
     } finally {
       setSharing(false);
     }
