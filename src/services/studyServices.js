@@ -123,3 +123,8 @@ export function getStudy(projectId, subjectId, studyUID) {
 export function getSingleStudy(studyUID) {
   return http.get(http.apiUrl() + "/studies/" + encodeURIComponent(studyUID));
 }
+
+export function getExportLinks(bodyArr) {
+  const url = `${http.apiUrl()}/exportlinks?outputType=json&studyDesc=true`;
+  return http.post(url, bodyArr);
+}

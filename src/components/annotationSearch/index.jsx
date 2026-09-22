@@ -12,6 +12,7 @@ import {
   FaSearch,
   FaPlus,
   FaEraser,
+  FaShareSquare,
 } from "react-icons/fa";
 import {
   RiCheckboxMultipleFill,
@@ -33,6 +34,7 @@ import {
   downloadProjectAnnotation,
   deleteAnnotationsList,
 } from "../../services/annotationServices.js";
+import { getExportLinks } from "../../services/studyServices";
 import AnnotationTable from "./AnnotationTable.jsx";
 import {
   clearSelection,
@@ -178,6 +180,7 @@ const AnnotationSearch = (props) => {
   const [showSelectSeries, setShowSelectSeries] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
   const [showDownloadAll, setShowDownloadAll] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const [seriesList, setSeriesList] = useState([]);
   const [encArgs, setEncArgs] = useState("");
   const [decrArgs, setDecrArgs] = useState("");
@@ -1371,6 +1374,74 @@ const AnnotationSearch = (props) => {
     else setShowDownload(!showDownload);
   }
 
+  const shareSelection = async () => {
+    if (sharing) return;
+
+    const selectedData = Object.values(formSelectedAnnotationsData());
+    if (selectedData.length === 0) {
+      toast.info("Select annotations to share", { position: "top-right" });
+      return;
+    }
+
+    // Deduplicate by studyUID — one API entry per study
+    const studyMap = {};
+    selectedData.forEach((item) => {
+      if (!studyMap[item.studyUID]) {
+        studyMap[item.studyUID] = {
+          subject: item.subjectID,
+          study: item.studyUID,
+          ...(item.aimID && { aimuid: item.aimID }),
+        };
+      }
+    });
+    const bodyArr = Object.values(studyMap);
+
+    setSharing(true);
+    try {
+      const { data: results } = await getExportLinks(bodyArr);
+
+      if (!results || results.length === 0) {
+        toast.error("Share failed: no links returned.", { position: "top-right" });
+        return;
+      }
+
+      const htmlParts = results.map(
+        (r) => `${r.study_desc}<br/><a href="${r.link}">${r.name}</a>`
+      );
+      const textParts = results.map(
+        (r) => `${r.study_desc}\n${r.name}: ${r.link}`
+      );
+      const htmlContent = `<div>${htmlParts.join("<br/><br/>")}</div>`;
+      const textContent = textParts.join("\n\n");
+
+      try {
+        if (typeof ClipboardItem !== "undefined") {
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              "text/html": new Blob([htmlContent], { type: "text/html" }),
+              "text/plain": new Blob([textContent], { type: "text/plain" }),
+            }),
+          ]);
+        } else {
+          await navigator.clipboard.writeText(textContent);
+        }
+      } catch (_clipErr) {
+        await navigator.clipboard.writeText(textContent);
+      }
+
+      const count = results.length;
+      toast.success(
+        `Copied ${count} ${count === 1 ? "study" : "studies"} to clipboard`,
+        { position: "top-right", autoClose: 3000 }
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error("Share failed. Please try again.", { position: "top-right" });
+    } finally {
+      setSharing(false);
+    }
+  };
+
   const selectAllChecked = checked => {
     const { searchTableIndex } = props;
     const pageData = data.slice(searchTableIndex * pageSize, (searchTableIndex + 1) * pageSize);
@@ -1581,6 +1652,20 @@ const AnnotationSearch = (props) => {
               <BiDownload />
               <br />
               Download
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm"
+              onClick={shareSelection}
+              disabled={sharing}
+            >
+              {sharing ? (
+                <Spinner animation="border" size="sm" />
+              ) : (
+                <FaShareSquare />
+              )}
+              <br />
+              Share
             </button>
             {/* <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
           {showWorklist && (<AddToWorklist className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)} */}
