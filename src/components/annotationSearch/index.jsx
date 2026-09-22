@@ -1400,17 +1400,20 @@ const AnnotationSearch = (props) => {
 
     const buildContent = ({ data: results }) => {
       if (!results || results.length === 0) throw new Error("no links returned");
+      const displayName = sessionStorage.getItem("displayName") || "";
+      const caseWord = results.length === 1 ? "this interesting case" : "these interesting cases";
+
       const htmlParts = results.map(
-        (r) => `${r.study_desc}<br/><a href="${r.link}">${r.name}</a>`
+        (r) => `${r.name}<br/><a href="${r.link}">${r.study_desc}</a>`
       );
       const textParts = results.map(
-        (r) => `${r.study_desc}\n${r.name}: ${r.link}`
+        (r) => `${r.name}\n${r.study_desc}\n${r.link}`
       );
-      return {
-        html: `<div>${htmlParts.join("<br/><br/>")}</div>`,
-        text: textParts.join("\n\n"),
-        count: results.length,
-      };
+
+      const html = `<div>Hey,<br/><br/>Take a look at ${caseWord} on STELLA!<br/><br/>${htmlParts.join("<br/><br/>")}<br/><br/>Make sure you are within the SHC firewall or on VPN to access STELLA.<br/>${displayName}</div>`;
+      const text = `Hey,\n\nTake a look at ${caseWord} on STELLA!\n\n${textParts.join("\n\n")}\n\nMake sure you are within the SHC firewall or on VPN to access STELLA.\n${displayName}`;
+
+      return { html, text, count: results.length };
     };
 
     // Start the fetch but don't await — pass Promise<Blob> into ClipboardItem
