@@ -460,6 +460,8 @@ class ToolMenu extends Component {
       keys: true,
       reorder: true,
       saveState: true,
+      toggleOverlays: true,
+      share: true,
     };
     
     if (!notActiveTools[tool]) sessionStorage.setItem("activeTool", tool);
@@ -569,6 +571,12 @@ class ToolMenu extends Component {
       return;
     } else if (tool === 'saveState') {
       if (this.props.onSaveState) this.props.onSaveState();
+      return;
+    } else if (tool === 'toggleOverlays') {
+      this.props.dispatch(toggleAllOverlays());
+      return;
+    } else if (tool === 'share') {
+      if (this.props.onShare) this.props.onShare();
       return;
     } else if (tool === 'next') {
       this.props.openNextWLStudy(worklistID, studyUID);
@@ -716,6 +724,20 @@ class ToolMenu extends Component {
 
   render() {
     const { activeTool } = this.state;
+    const actionTools = [
+      {
+        name: this.props.isAllOverlayHidden ? "Show Info" : "Hide Info",
+        icon: this.props.isAllOverlayHidden ? <MdOutlineLayers /> : <MdOutlineLayersClear />,
+        tool: "toggleOverlays",
+        isActive: !!this.props.isAllOverlayHidden,
+      },
+      {
+        name: "Share",
+        icon: <FaShareSquare />,
+        tool: "share",
+        disabled: !!this.props.sharing,
+      },
+    ];
     if (
       activeTool !== undefined &&
       activeTool !== "" &&
@@ -794,20 +816,6 @@ class ToolMenu extends Component {
             />
           );
         })}
-        <div
-          id="toggleAllOverlays"
-          tabIndex="12"
-          className={this.props.isAllOverlayHidden ? "toolbarSectionButton_Active" : "toolbarSectionButton"}
-          onClick={() => this.props.dispatch(toggleAllOverlays())}
-          title={this.props.isAllOverlayHidden ? "Show overlays on all viewports" : "Hide overlays on all viewports"}
-        >
-          <div className="toolContainer">
-            {this.props.isAllOverlayHidden ? <MdOutlineLayers /> : <MdOutlineLayersClear />}
-          </div>
-          <div className="buttonLabel">
-            <span>{this.props.isAllOverlayHidden ? "Show Info" : "Hide Info"}</span>
-          </div>
-        </div>
         {/* <div
                         id="point"
                         tabIndex="1"
@@ -925,14 +933,17 @@ class ToolMenu extends Component {
         {/* <Collapsible trigger={"Segmentation Tools"} transitionTime={100}> */}
         {this.state.showMetaData && (<MetaData onClose={this.showMetaData} imageData={this.props.imageData}/>)}
         <AddToWorklist toolMenu={true} parent="display"/>
-        <div
-          className={this.props.sharing ? "toolbarSectionButton toolbarSectionButton--disabled" : "toolbarSectionButton"}
-          onClick={this.props.sharing ? undefined : this.props.onShare}
-          title="Share study"
-        >
-          <div className="toolContainer"><FaShareSquare /></div>
-          <div className="buttonLabel"><span>Share</span></div>
-        </div>
+        {actionTools.map(({ name, icon, tool, isActive, disabled }) => (
+          <ToolMenuItem
+            key={name}
+            name={name}
+            icon={icon}
+            index={-1}
+            isActive={!!isActive}
+            disabled={!!disabled}
+            onClick={() => this.handleToolClicked(-1, tool)}
+          />
+        ))}
         {mode !== "teaching" &&
           this.segmentationTools.map((segmentationTool, i) => {
             i = i + this.imagingTools.length + this.markupTools.length;
