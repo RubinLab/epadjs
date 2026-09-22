@@ -655,3 +655,247 @@ body{
 .csv-link:hover {
   color: #e5c200
 }
+
+/* ---- Unified Download Modal ---- */
+.download-modal .modal-content {
+  background: #1b1e23;
+  border: 1px solid #2d323a;
+  border-radius: 10px;
+  overflow: hidden;
+  color: #ecebe6;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.dm-header {
+  background: #1b1e23 !important;
+  border-bottom: 1px solid #2d323a !important;
+  padding: 18px 20px;
+  align-items: flex-start;
+}
+
+.dm-subhead {
+  font-size: 12.5px;
+  color: #a4a9b0;
+  margin-top: 3px;
+}
+
+.dm-close {
+  background: none;
+  border: none;
+  color: #a4a9b0;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  align-self: flex-start;
+  margin-left: auto;
+}
+.dm-close:hover { color: #ecebe6; }
+
+.dm-body {
+  padding: 0 !important;
+  background: #1b1e23 !important;
+  max-height: 62vh;
+  overflow-y: auto;
+}
+
+.dm-section {
+  border-bottom: 1px solid #2d323a;
+}
+.dm-section--last {
+  border-bottom: none;
+}
+
+.dm-section__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  gap: 12px;
+}
+
+.dm-section__toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 0;
+  font: inherit;
+}
+
+.dm-section__title {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #ecebe6;
+}
+
+.dm-section__hint {
+  font-size: 12px;
+  color: #6b7078;
+}
+
+.dm-chev {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-right: 1.5px solid #6b7078;
+  border-bottom: 1.5px solid #6b7078;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+  flex: none;
+  margin-left: 2px;
+}
+.dm-section--expanded .dm-chev {
+  transform: rotate(45deg);
+}
+
+.dm-btn-primary {
+  background: #d9bf62;
+  color: #211b08;
+  border: none;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.dm-btn-primary:hover:not(:disabled) { background: #e5cd76; }
+.dm-btn-primary:disabled {
+  background: #21252b;
+  color: #6b7078;
+  cursor: not-allowed;
+  border: 1px solid #2d323a;
+}
+
+.dm-section__panel {
+  padding: 0 20px 18px;
+}
+
+.dm-check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 13.5px;
+  color: #a4a9b0;
+}
+.dm-check-row label { cursor: pointer; }
+
+.dm-panel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #262a31;
+}
+
+.dm-footer-hint {
+  font-size: 12px;
+  color: #6b7078;
+}
+
+/* Study blocks inside series panel */
+.dm-study-block {
+  border: 1px solid #262a31;
+  border-radius: 6px;
+  margin-top: 8px;
+  background: #21252b;
+  overflow: hidden;
+}
+
+.dm-study-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.dm-study-head__left {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.dm-study-chev {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid #6b7078;
+  border-bottom: 1.5px solid #6b7078;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+  flex: none;
+}
+.dm-study-block--expanded .dm-study-chev {
+  transform: rotate(45deg);
+}
+
+.dm-study-name {
+  font-size: 13px;
+  color: #ecebe6;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dm-study-count {
+  font-size: 11.5px;
+  color: #6b7078;
+  flex: none;
+}
+
+.dm-study-series {
+  padding: 2px 12px 12px 30px;
+  border-top: 1px solid #262a31;
+}
+
+.dm-select-all-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 0 7px;
+  font-size: 12.5px;
+  color: #a4a9b0;
+}
+.dm-select-all-row label { cursor: pointer; }
+
+.dm-series-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 6px 0;
+}
+.dm-series-row label {
+  cursor: pointer;
+  font-size: 13px;
+  color: #a4a9b0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
+.dm-series-desc { color: #ecebe6; }
+.dm-series-id {
+  font-size: 11px;
+  color: #6b7078;
+  font-variant-numeric: tabular-nums;
+}
+
+.dm-row-dim {
+  padding: 12px 0 8px;
+  font-size: 12.5px;
+  color: #6b7078;
+}
+
+input[type="checkbox"].dm-check {
+  accent-color: #d9bf62;
+}

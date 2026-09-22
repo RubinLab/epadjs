@@ -45,7 +45,7 @@ import {
   storeAimSelectionAll,
   setLastLocation
 } from "../annotationsList/action";
-import AnnotationDownloadModal from "../searchView/annotationDownloadModal";
+import DownloadModal from "./downloadModal";
 import UploadModal from "../searchView/uploadModal";
 import DeleteAlert from "../management/common/alertDeletionModal";
 import {
@@ -1408,8 +1408,8 @@ const AnnotationSearch = (props) => {
     const { searchTableIndex } = props;
     const pageData = data.slice(searchTableIndex * pageSize, (searchTableIndex + 1) * pageSize);
     const map =  checked ? pageData.reduce((all, item, i) => {
-      const { aimID, name, subjectID, studyUID, seriesUID } = item;
-      all[aimID] = { aimID, name, subjectID, studyUID, seriesUID };
+      const { aimID, name, subjectID, studyUID, seriesUID, patientName, subjectName } = item;
+      all[aimID] = { aimID, name, subjectID, studyUID, seriesUID, patientName: patientName || subjectName };
       return all;
     }, {}) : {};
     props.dispatch(storeAimSelectionAll(checked, map, searchTableIndex));
@@ -2054,18 +2054,37 @@ const AnnotationSearch = (props) => {
         error={explanation.errorMessage}
         show={showDeleteModal}
       />
-      <AnnotationDownloadModal
+      <DownloadModal
         onSubmit={() => {
           setShowDownload(false);
           getFieldSearchResults();
-          //if (mode === 'teaching')
-          //  getFieldSearchResults();
-          //else
-          //  getFieldSearchResults();
         }}
         onCancel={() => setShowDownload(false)}
-        // updateStatus={() => console.log('update status')}
-        projectID={selectedProject}
+        pid={selectedProject}
+        showingPHI={props.showingPHI}
+        selectedStudies={(() => {
+          const studyMap = {};
+          const addAnn = (ann) => {
+            // console.log(ann);
+            if (!ann || !ann.studyUID) return;
+            if (!studyMap[ann.studyUID]) {
+              studyMap[ann.studyUID] = {
+                studyUID: ann.studyUID,
+                patientID: ann.subjectID,
+                patientName: ann.patientName || ann.subjectName,
+                studyDescription: ann.studyDescription,
+                projectID: ann.projectID,
+                annotationNames: [],
+              };
+            }
+            if (ann.name) studyMap[ann.studyUID].annotationNames.push(ann.name);
+          };
+          Object.values(props.selectedAnnotations || {}).forEach(addAnn);
+          Object.values(props.multipageAimSelection || {}).forEach(page =>
+            Object.values(page).forEach(addAnn)
+          );
+          return Object.values(studyMap);
+        })()}
         show={showDownload}
       />
       {showWarning && (
