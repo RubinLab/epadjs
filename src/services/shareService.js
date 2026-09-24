@@ -13,8 +13,8 @@ const buildContent = ({ data: results }) => {
     (r) => `${r.name}\n${r.study_desc}\n${r.link}`
   );
 
-  const html = `<div>Hey,<br/><br/>Take a look at ${caseWord} on STELLA!<br/><br/>${htmlParts.join("<br/><br/>")}<br/><br/>Make sure you are within the SHC firewall or on VPN to access STELLA.<br/>${displayName}</div>`;
-  const text = `Hey,\n\nTake a look at ${caseWord} on STELLA!\n\n${textParts.join("\n\n")}\n\nMake sure you are within the SHC firewall or on VPN to access STELLA.\n${displayName}`;
+  const html = `<div>Hey,<br/><br/>Take a look at ${caseWord} on STELLA!<br/><br/>${htmlParts.join("<br/><br/>")}<br/><br/>Make sure you are within the SHC firewall or on VPN to access STELLA.<br/><br/>${displayName}</div>`;
+  const text = `Hey,\n\nTake a look at ${caseWord} on STELLA!\n\n${textParts.join("\n\n")}\n\nMake sure you are within the SHC firewall or on VPN to access STELLA.\n\n${displayName}`;
 
   return { html, text, count: results.length };
 };
