@@ -22,14 +22,14 @@ class ToolMenuItem extends Component {
   }
 
   render() {
-    const { index, isActive, icon, name, children } = this.props;
+    const { index, isActive, icon, name, children, disabled } = this.props;
     const hotkey = reverseKeyMap[name];
 
     const menuItem = (
       <div
         tabIndex={index}
-        className={isActive ? "toolbarSectionButton_Active" : "toolbarSectionButton"}
-        onClick={this.handleClick}
+        className={disabled ? "toolbarSectionButton toolbarSectionButton--disabled" : isActive ? "toolbarSectionButton_Active" : "toolbarSectionButton"}
+        onClick={disabled ? undefined : this.handleClick}
       >
         <div className="toolContainer">{icon}</div>
         <div className="buttonLabel">
