@@ -393,7 +393,7 @@ export const selectAnnotation = (
 // adds series details to the array
 export const addToGrid = (serie, annotation, port, worklistID) => {
   let { patientID, studyUID, seriesUID, projectID, patientName, examType, modality, comment, seriesDescription, numberOfAnnotations, numberOfImages, seriesNo, template, significanceOrder, multiFrameIndex, displayState } = serie;
-  const modFmComment = comment ? comment.split('/')[0].trim() : '';
+  const modFmComment = typeof comment === 'string' && comment ? comment.split('/')[0].trim() : '';
   examType = examType ? examType.toUpperCase() : modality ? modality.toUpperCase() : modFmComment.toUpperCase();
 
   projectID = projectID ? projectID : "lite";

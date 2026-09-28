@@ -523,9 +523,10 @@ function AnnotationTable(props) {
     try {
       const { subjectID: patientID, studyUID, projectID } = selected;
       const { data: seriesArr } = await getSignificantSeries(projectID, patientID, studyUID);
-      return seriesArr;
+      return Array.isArray(seriesArr) ? seriesArr : [];
     } catch (err) {
       console.error(err);
+      return [];
     }
   }
 
@@ -638,12 +639,16 @@ function AnnotationTable(props) {
         } else if (existingData && existingData.length > maxPort) {
           seriesArr = existingData.slice(0, maxPort);
         } else {
-          seriesArr = await getSeriesData(selected, true);
-          seriesArr = seriesArr.slice(0, maxPort);
+          // filtered was already fetched above — avoid re-calling getSeriesData,
+          // which fails on the first attempt because the seriesCallSent guard blocks
+          // a new API call while props.seriesData is still the stale pre-dispatch snapshot.
+          seriesArr = filtered.slice(0, maxPort);
         }
       }
     } catch (err) {
-        setShowSpinner(false);
+      console.error(err);
+      setShowSpinner(false);
+      return;
     }
 
     setSelected(seriesArr);
