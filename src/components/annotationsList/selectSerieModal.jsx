@@ -43,6 +43,9 @@ class selectSerieModal extends React.Component {
       limit: 0,
       list: [],
       isButtonDisabled: false,
+      comment: "",
+      runAI: false,
+      selectedModel: "",
     };
     this.maxPort = parseInt(sessionStorage.getItem("maxPort"));
     this.mode = sessionStorage.getItem("mode");
@@ -454,13 +457,6 @@ class selectSerieModal extends React.Component {
   saveTeachingFile = async () => {
     this.setState({ isButtonDisabled: true });
     const selectedSeries = Object.keys(this.state.selectedToDisplay);
-    if (this.semanticAnswers.checkFormSaveReady({ isTeachingModal: true })) {
-      const result = window.confirm("Please fill all required fields!");
-
-      if (result || !result) this.setState({ isButtonDisabled: false });
-
-      return -1;
-    }
     if (selectedSeries.length === 0) {
       const result = window.confirm("Please select at least one series!");
 
@@ -479,6 +475,7 @@ class selectSerieModal extends React.Component {
     }
 
     await decryptAndAdd(encrUrlArgs);
+    this.semanticAnswers.aimComment = this.state.comment;
     const answers = this.semanticAnswers.saveAim();
     answers.name.value = "Teaching File";
     const { data: study } = await getSingleStudy(studyUID);
@@ -544,6 +541,24 @@ class selectSerieModal extends React.Component {
   saveTeachingFileAndDisplay = async () => {
     let result = await this.saveTeachingFile();
     if (result === -1) return;
+
+    this.displaySelection(result);
+  };
+
+  saveTeachingFileAndRunAI = async () => {
+    const { selectedModel } = this.state;
+    let result = await this.saveTeachingFile();
+    if (result === -1) return;
+
+    if (selectedModel) {
+      toast.info(`AI model "${selectedModel}" queued.`, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });
+      // TODO: wire up addPluginsToQueue with selectedModel and study context
+    }
 
     this.displaySelection(result);
   };
