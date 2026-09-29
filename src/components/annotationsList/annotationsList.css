@@ -565,6 +565,54 @@ th {
   margin: 0.3rem 0.3rem 0.9rem 0.3rem;
 }
 
+.tf-bottom-split {
+  display: flex;
+  gap: 1rem;
+}
+
+.tf-series-panel {
+  flex: 1;
+  min-width: 0;
+}
+
+.tf-ai-panel {
+  flex: 1;
+  min-width: 0;
+  padding-top: 0.3rem;
+  color: #ccc;
+}
+
+.tf-run-ai-label {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #ccc;
+  margin-bottom: 0.5rem;
+}
+
+.tf-ai-collapsible {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tf-label {
+  display: block;
+  font-size: 0.9rem;
+  color: #ccc;
+  margin-bottom: 0.2rem;
+}
+
+.tf-model-select {
+  width: 100%;
+  background-color: #555;
+  color: #ccc;
+  border: 1px solid #888;
+  padding: 0.3rem;
+  font-size: 0.9rem;
+}
+
 .other-annotations {
   background-color: #222 !important;
   padding: 7px;

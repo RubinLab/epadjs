@@ -602,42 +602,102 @@ class selectSerieModal extends React.Component {
             </>
           )}
           <br />
-          <div className={"max-series"}>
-            Please select up to {this.maxPort} series to display:
-          </div>
-          {openSeries.length > 0 && (
-            <div>
-              <span style={{padding: '6px'}}>{`${openSeries.length} viewport${openSeries.length > 1 ? 's' : ''} in use - close some or all to open new series.`}</span>
-              <br />
-              <button
-              style={{marginLeft: '4px'}}
-                size="lg"
-                className="selectSerie-clearButton"
-                onClick={this.closeAllSeries}
-              >
-                X - Close all series
-              </button>
+          {isTeachingFile ? (
+            <div className="tf-bottom-split">
+              <div className="tf-series-panel">
+                <div className={"max-series"}>
+                  Please select up to {this.maxPort} series to display:
+                </div>
+                {openSeries.length > 0 && (
+                  <div>
+                    <span style={{padding: '6px'}}>{`${openSeries.length} viewport${openSeries.length > 1 ? 's' : ''} in use - close some or all to open new series.`}</span>
+                    <br />
+                    <button
+                      style={{marginLeft: '4px'}}
+                      size="lg"
+                      className="selectSerie-clearButton"
+                      onClick={this.closeAllSeries}
+                    >
+                      X - Close all series
+                    </button>
+                  </div>
+                )}
+                {this.state.limit > this.maxPort && !openSeries.length && (
+                  <div>Please select only {this.maxPort} series to open!</div>
+                )}
+                <div style={{ paddingLeft: "0.5em", maxHeight: "400px", overflowY: "auto" }}>
+                  {list}
+                </div>
+              </div>
+              <div className="tf-ai-panel">
+                <label className="tf-run-ai-label">
+                  <input
+                    type="checkbox"
+                    checked={this.state.runAI}
+                    onChange={(e) => this.setState({ runAI: e.target.checked, selectedModel: "" })}
+                    style={{ marginRight: "0.5rem" }}
+                  />
+                  Run AI
+                </label>
+                {this.state.runAI && (
+                  <div className="tf-ai-collapsible">
+                    <label className="tf-label">Select Model</label>
+                    <select
+                      className="tf-model-select"
+                      value={this.state.selectedModel}
+                      onChange={(e) => this.setState({ selectedModel: e.target.value })}
+                    >
+                      <option value="">-- Select --</option>
+                      <option value="C2C liver">C2C liver</option>
+                      <option value="Panorex">Panorex</option>
+                      <option value="Bone met">Bone met</option>
+                    </select>
+                    <Button
+                      className={"modal-button"}
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => this.saveTeachingFileAndRunAI()}
+                      disabled={this.state.isButtonDisabled}
+                    >
+                      Save TF, Open Case and Run AI
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
+          ) : (
+            <>
+              <div className={"max-series"}>
+                Please select up to {this.maxPort} series to display:
+              </div>
+              {openSeries.length > 0 && (
+                <div>
+                  <span style={{padding: '6px'}}>{`${openSeries.length} viewport${openSeries.length > 1 ? 's' : ''} in use - close some or all to open new series.`}</span>
+                  <br />
+                  <button
+                    style={{marginLeft: '4px'}}
+                    size="lg"
+                    className="selectSerie-clearButton"
+                    onClick={this.closeAllSeries}
+                  >
+                    X - Close all series
+                  </button>
+                </div>
+              )}
+              {this.state.limit > this.maxPort && !openSeries.length && (
+                <div>Please select only {this.maxPort} series to open!</div>
+              )}
+              <div
+                style={{
+                  paddingLeft: "0.5em",
+                  maxHeight: "500px",
+                  overflowY: "auto",
+                }}
+              >
+                {list}
+              </div>
+            </>
           )}
-          {/* <button
-            size="lg"
-            className="selectSerie-clearButton"
-            onClick={() => this.props.dispatch(clearGrid())}
-          >
-            X  - Close all series
-          </button> */}
-          {this.state.limit > this.maxPort && !openSeries.length && (
-            <div>Please select only {this.maxPort} series to open!</div>
-          )}
-          <div
-            style={{
-              paddingLeft: "0.5em",
-              maxHeight: "500px",
-              overflowY: "auto",
-            }}
-          >
-            {list}
-          </div>
         </Modal.Body>
         <Modal.Footer className="select-serie-footer">
           {isTeachingFile && (
