@@ -83,7 +83,6 @@ class selectSerieModal extends React.Component {
       const speciality = document.getElementById("speciality");
       const anatomy = document.getElementById("anatomy");
       const diagnosis = document.getElementById("diagnosis");
-      const narrative = document.getElementById("narrative");
 
       this.semanticAnswers = new questionaire.AimEditor(
         element,
@@ -93,7 +92,7 @@ class selectSerieModal extends React.Component {
         {},
         null,
         true, // is teachinng flag
-        { speciality, anatomy, diagnosis, narrative }, // the new div which holds only teaching components for aim editor
+        { speciality, anatomy, diagnosis }, // the new div which holds only teaching components for aim editor
         "#ccc"
       );
       const { data: templates } = await getTemplate(teachingFileTempUid);
@@ -476,6 +475,7 @@ class selectSerieModal extends React.Component {
     }
 
     await decryptAndAdd(encrUrlArgs);
+    this.semanticAnswers.aimComment = this.state.comment;
     const answers = this.semanticAnswers.saveAim();
     answers.name.value = "Teaching File";
     const { data: study } = await getSingleStudy(studyUID);
@@ -596,7 +596,15 @@ class selectSerieModal extends React.Component {
                 </row>
                 <row>
                   <div id="speciality"></div>
-                  <div id="narrative"></div>
+                  <div id="narrative">
+                    <div className="tf-narrative-label">Narrative</div>
+                    <textarea
+                      className="tf-narrative-textarea"
+                      value={this.state.comment}
+                      onChange={(e) => this.setState({ comment: e.target.value })}
+                      placeholder="Optional narrative / comments"
+                    />
+                  </div>
                 </row>
               </div>
             </>
@@ -630,39 +638,42 @@ class selectSerieModal extends React.Component {
                 </div>
               </div>
               <div className="tf-ai-panel">
-                <label className="tf-run-ai-label">
-                  <input
-                    type="checkbox"
-                    checked={this.state.runAI}
-                    onChange={(e) => this.setState({ runAI: e.target.checked, selectedModel: "" })}
-                    style={{ marginRight: "0.5rem" }}
-                  />
-                  Run AI
-                </label>
-                {this.state.runAI && (
-                  <div className="tf-ai-collapsible">
-                    <label className="tf-label">Select Model</label>
-                    <select
-                      className="tf-model-select"
-                      value={this.state.selectedModel}
-                      onChange={(e) => this.setState({ selectedModel: e.target.value })}
-                    >
-                      <option value="">-- Select --</option>
-                      <option value="C2C liver">C2C liver</option>
-                      <option value="Panorex">Panorex</option>
-                      <option value="Bone met">Bone met</option>
-                    </select>
-                    <Button
-                      className={"modal-button"}
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => this.saveTeachingFileAndRunAI()}
-                      disabled={this.state.isButtonDisabled}
-                    >
-                      Save TF, Open Case and Run AI
-                    </Button>
-                  </div>
-                )}
+                <div className="tf-ai-panel-header">AI Options</div>
+                <div className="tf-ai-panel-body">
+                  <label className="tf-run-ai-label">
+                    <input
+                      type="checkbox"
+                      checked={this.state.runAI}
+                      onChange={(e) => this.setState({ runAI: e.target.checked, selectedModel: "" })}
+                      style={{ marginRight: "0.5rem" }}
+                    />
+                    Run AI
+                  </label>
+                  {this.state.runAI && (
+                    <div className="tf-ai-collapsible">
+                      <label className="tf-label">Select Model</label>
+                      <select
+                        className="tf-model-select"
+                        value={this.state.selectedModel}
+                        onChange={(e) => this.setState({ selectedModel: e.target.value })}
+                      >
+                        <option value="">-- Select --</option>
+                        <option value="C2C liver">C2C liver</option>
+                        <option value="Panorex">Panorex</option>
+                        <option value="Bone met">Bone met</option>
+                      </select>
+                      <Button
+                        className={"modal-button"}
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => this.saveTeachingFileAndRunAI()}
+                        disabled={this.state.isButtonDisabled}
+                      >
+                        Save TF, Open Case and Run AI
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ) : (
