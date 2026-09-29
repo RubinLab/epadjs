@@ -83,6 +83,7 @@ class selectSerieModal extends React.Component {
       const speciality = document.getElementById("speciality");
       const anatomy = document.getElementById("anatomy");
       const diagnosis = document.getElementById("diagnosis");
+      const narrative = document.getElementById("narrative");
 
       this.semanticAnswers = new questionaire.AimEditor(
         element,
@@ -92,7 +93,7 @@ class selectSerieModal extends React.Component {
         {},
         null,
         true, // is teachinng flag
-        { speciality, anatomy, diagnosis }, // the new div which holds only teaching components for aim editor
+        { speciality, anatomy, diagnosis, narrative }, // the new div which holds only teaching components for aim editor
         "#ccc"
       );
       const { data: templates } = await getTemplate(teachingFileTempUid);
@@ -475,7 +476,6 @@ class selectSerieModal extends React.Component {
     }
 
     await decryptAndAdd(encrUrlArgs);
-    this.semanticAnswers.aimComment = this.state.comment;
     const answers = this.semanticAnswers.saveAim();
     answers.name.value = "Teaching File";
     const { data: study } = await getSingleStudy(studyUID);
@@ -596,13 +596,7 @@ class selectSerieModal extends React.Component {
                 </row>
                 <row>
                   <div id="speciality"></div>
-                  <div id="comment">
-                    {/* <i class="dropdown icon"></i>
-                  <div className="title active" style={{ color: "rgb(204, 204, 204)", fontSize: "13px" }}>Narrative</div>
-                  <div>
-                  <input className="comment ui input"></input>
-                </div> */}
-                  </div>
+                  <div id="narrative"></div>
                 </row>
               </div>
             </>

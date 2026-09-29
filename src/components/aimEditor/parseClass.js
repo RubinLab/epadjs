@@ -490,18 +490,12 @@ export var AimEditor = function (
         //  document.getElementById("accordion1").appendChild(componentDiv);
         if (component.label === "Anatomy Core" && isTeachingFlag) {
           teachingDivParent.anatomy.appendChild(componentDiv);
-          teachingDivParent.anatomy.appendChild(labelDiv);
-          teachingDivParent.anatomy.appendChild(commentDiv);
         }
         else if (component.label === "Radiology Specialty" && isTeachingFlag) {
           teachingDivParent.speciality.appendChild(componentDiv);
-          teachingDivParent.speciality.appendChild(labelDiv);
-          teachingDivParent.speciality.appendChild(commentDiv);
         }
         else if (component.label === "Findings and Diagnosis" && isTeachingFlag) {
           teachingDivParent.diagnosis.appendChild(componentDiv);
-          teachingDivParent.diagnosis.appendChild(labelDiv);
-          teachingDivParent.diagnosis.appendChild(commentDiv);
         }
         else {
           document.getElementById("accordion1").appendChild(componentDiv);
@@ -570,8 +564,13 @@ export var AimEditor = function (
         }
       }
     }
-    document.getElementById("accordion1").appendChild(labelDiv);
-    document.getElementById("accordion1").appendChild(commentDiv);
+    if (isTeachingFlag && teachingDivParent && teachingDivParent.narrative) {
+      teachingDivParent.narrative.appendChild(labelDiv);
+      teachingDivParent.narrative.appendChild(commentDiv);
+    } else {
+      document.getElementById("accordion1").appendChild(labelDiv);
+      document.getElementById("accordion1").appendChild(commentDiv);
+    }
 
     //uncomment below line for testing
     //self.mainButtonsDiv.innerHTML = "";
