@@ -723,16 +723,9 @@ class selectSerieModal extends React.Component {
                         onChange={(e) => this.setState({ selectedModel: e.target.value })}
                       >
                         <option value="">-- Select --</option>
-                        {this.state.aiModels.length > 0
-                          ? this.state.aiModels.map((m) => (
-                              <option key={m.id} value={m.id}>{m.name}</option>
-                            ))
-                          : <>
-                              <option value="C2C liver">C2C liver</option>
-                              <option value="Panorex">Panorex</option>
-                              <option value="Bone met">Bone met</option>
-                            </>
-                        }
+                        {this.state.aiModels.map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
                       </select>
                       <label className="tf-label" style={{ marginTop: "0.4rem" }}>Select Series for AI</label>
                       <select
