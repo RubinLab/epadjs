@@ -30,7 +30,7 @@ import { Aim, enumAimType } from "aimapi";
 import { teachingFileTempUid, teachingFileTempCode } from "../../constants";
 import { isSupportedModality } from "../../Utils/aid";
 import { DISP_MODALITIES } from "../../constants";
-import { getTools, getPluginsForProject } from "../../services/pluginServices";
+import { getTools, getPluginsForProject, triggerPlugin } from "../../services/pluginServices";
 
 class selectSerieModal extends React.Component {
   // _isMounted = false;
@@ -479,6 +479,13 @@ class selectSerieModal extends React.Component {
       return;
     }
 
+    const requiredCount = this.semanticAnswers.checkFormSaveReady({ isTeachingModal: true });
+    if (requiredCount > 0) {
+      window.alert("Please fill all required fields before saving.");
+      this.setState({ isButtonDisabled: false });
+      return -1;
+    }
+
     await decryptAndAdd(encrUrlArgs);
     this.semanticAnswers.aimComment = this.state.comment;
     const answers = this.semanticAnswers.saveAim();
@@ -551,18 +558,38 @@ class selectSerieModal extends React.Component {
   };
 
   saveTeachingFileAndRunAI = async () => {
-    const { selectedModel } = this.state;
+    const { selectedModel, selectedAISeries } = this.state;
     let result = await this.saveTeachingFile();
     if (result === -1) return;
 
-    if (selectedModel) {
-      toast.info(`AI model "${selectedModel}" queued.`, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-      });
-      // TODO: wire up addPluginsToQueue with selectedModel and study context
+    if (selectedModel && selectedAISeries.length > 0) {
+      const { projectID, patientID, studyUID } = this.props.decrArgs;
+      const userID = sessionStorage.getItem("username");
+      const seriesUIDs = selectedAISeries.map((s) => s.uid);
+      try {
+        await triggerPlugin({
+          projectID,
+          subjectID: patientID,
+          studyUID,
+          pluginID: selectedModel,
+          userID,
+          seriesUIDs,
+        });
+        toast.success("AI model triggered successfully.", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+        });
+      } catch (err) {
+        console.error("[TF Modal] triggerPlugin failed:", err);
+        toast.error("Failed to trigger AI model.", {
+          position: "top-right",
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: true,
+        });
+      }
     }
 
     this.displaySelection(result);
@@ -583,7 +610,7 @@ class selectSerieModal extends React.Component {
         const { data: projectPlugins } = await getPluginsForProject(projectID);
         console.log("[TF Modal] getPluginsForProject() response:", projectPlugins);
         const models = (projectPlugins?.projectplugin || []).map((p) => ({
-          id: p.id,
+          id: p.plugin_id,
           name: p.name,
         }));
         console.log("[TF Modal] parsed models for dropdown:", models);

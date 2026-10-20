@@ -231,6 +231,17 @@ export function pluginCopyAimsBetweenPlugins(fromid,toid) {
 // export function stopContainerLog(containerobj) {
 //   return http.post(http.apiUrl() + "/container/stop/", containerobj);
 // }
+export function triggerPlugin({ projectID, subjectID, studyUID, pluginID, userID, seriesUIDs }) {
+  const url =
+    http.apiUrl() +
+    "/projects/" + encodeURIComponent(projectID) +
+    "/subjects/" + encodeURIComponent(subjectID) +
+    "/studies/" + encodeURIComponent(studyUID) +
+    "/plugins/" + encodeURIComponent(pluginID) +
+    "/trigger?user=" + encodeURIComponent(userID);
+  return http.post(url, { seriesUIDs });
+}
+
 //plugin trigger section
 // export function getAnnotationTemplates() {
 //   return http.get(http.apiUrl() + "/pluginsannotationstemplates"); // /plugins/annotation/templates
