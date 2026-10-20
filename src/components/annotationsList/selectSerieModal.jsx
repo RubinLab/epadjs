@@ -30,6 +30,7 @@ import { Aim, enumAimType } from "aimapi";
 import { teachingFileTempUid, teachingFileTempCode } from "../../constants";
 import { isSupportedModality } from "../../Utils/aid";
 import { DISP_MODALITIES } from "../../constants";
+import { getTools, getPluginsForProject } from "../../services/pluginServices";
 
 class selectSerieModal extends React.Component {
   // _isMounted = false;
@@ -47,6 +48,7 @@ class selectSerieModal extends React.Component {
       runAI: false,
       selectedModel: "",
       selectedAISeries: [],
+      aiModels: [],
     };
     this.maxPort = parseInt(sessionStorage.getItem("maxPort"));
     this.mode = sessionStorage.getItem("mode");
@@ -103,6 +105,8 @@ class selectSerieModal extends React.Component {
       });
       this.semanticAnswers.createViewerWindow();
       this.props.completeLoading();
+
+      this.fetchAIModels();
     } // end teaching file related part
   };
 
@@ -564,6 +568,34 @@ class selectSerieModal extends React.Component {
     this.displaySelection(result);
   };
 
+  fetchAIModels = async () => {
+    const projectID = this.props.decrArgs?.projectID;
+
+    try {
+      const { data: allTools } = await getTools();
+      console.log("[TF Modal] getTools() response:", allTools);
+    } catch (err) {
+      console.error("[TF Modal] getTools() failed:", err);
+    }
+
+    if (projectID) {
+      try {
+        const { data: projectPlugins } = await getPluginsForProject(projectID);
+        console.log("[TF Modal] getPluginsForProject() response:", projectPlugins);
+        const models = (projectPlugins?.projectplugin || []).map((p) => ({
+          id: p.id,
+          name: p.name,
+        }));
+        console.log("[TF Modal] parsed models for dropdown:", models);
+        if (models.length > 0) this.setState({ aiModels: models });
+      } catch (err) {
+        console.error("[TF Modal] getPluginsForProject() failed:", err);
+      }
+    } else {
+      console.warn("[TF Modal] no projectID available, skipping getPluginsForProject");
+    }
+  };
+
   getSeriesOptions = () => {
     const { seriesPassed } = this.props;
     console.log(' ---> seriesPassed');
@@ -691,9 +723,16 @@ class selectSerieModal extends React.Component {
                         onChange={(e) => this.setState({ selectedModel: e.target.value })}
                       >
                         <option value="">-- Select --</option>
-                        <option value="C2C liver">C2C liver</option>
-                        <option value="Panorex">Panorex</option>
-                        <option value="Bone met">Bone met</option>
+                        {this.state.aiModels.length > 0
+                          ? this.state.aiModels.map((m) => (
+                              <option key={m.id} value={m.id}>{m.name}</option>
+                            ))
+                          : <>
+                              <option value="C2C liver">C2C liver</option>
+                              <option value="Panorex">Panorex</option>
+                              <option value="Bone met">Bone met</option>
+                            </>
+                        }
                       </select>
                       <label className="tf-label" style={{ marginTop: "0.4rem" }}>Select Series for AI</label>
                       <select
