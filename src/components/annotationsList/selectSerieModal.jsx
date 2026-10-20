@@ -46,6 +46,7 @@ class selectSerieModal extends React.Component {
       comment: "",
       runAI: false,
       selectedModel: "",
+      selectedAISeries: [],
     };
     this.maxPort = parseInt(sessionStorage.getItem("maxPort"));
     this.mode = sessionStorage.getItem("mode");
@@ -563,6 +564,38 @@ class selectSerieModal extends React.Component {
     this.displaySelection(result);
   };
 
+  getSeriesOptions = () => {
+    const { seriesPassed } = this.props;
+    console.log(' ---> seriesPassed');
+    console.log(seriesPassed);
+    const allSeries = Array.isArray(seriesPassed)
+      ? seriesPassed.flat()
+      : Object.values(seriesPassed).flat();
+    return allSeries
+      .filter(isSupportedModality)
+      .map((s) => {
+        const modality = s.examType || s.modality;
+        const desc = s.seriesDescription || `Sig Series ${s.significanceOrder}` || "Unnamed Series";
+        const label = `${s.seriesNo || ""} - ${desc}${modality ? ` [${modality.toUpperCase()}]` : ""}`;
+        return { uid: s.seriesUID, label };
+      });
+  };
+
+  addAISeries = (uid) => {
+    if (!uid) return;
+    const options = this.getSeriesOptions();
+    const series = options.find((s) => s.uid === uid);
+    if (!series) return;
+    if (this.state.selectedAISeries.find((s) => s.uid === uid)) return;
+    this.setState((prev) => ({ selectedAISeries: [...prev.selectedAISeries, series] }));
+  };
+
+  removeAISeries = (uid) => {
+    this.setState((prev) => ({
+      selectedAISeries: prev.selectedAISeries.filter((s) => s.uid !== uid),
+    }));
+  };
+
   closeAllSeries = () => {
     this.props.dispatch(clearGrid());
     sessionStorage.removeItem("wwwc");
@@ -662,6 +695,35 @@ class selectSerieModal extends React.Component {
                         <option value="Panorex">Panorex</option>
                         <option value="Bone met">Bone met</option>
                       </select>
+                      <label className="tf-label" style={{ marginTop: "0.4rem" }}>Select Series for AI</label>
+                      <select
+                        className="tf-model-select"
+                        value=""
+                        onChange={(e) => this.addAISeries(e.target.value)}
+                      >
+                        <option value="">-- Add series --</option>
+                        {this.getSeriesOptions()
+                          .filter((s) => !this.state.selectedAISeries.find((sel) => sel.uid === s.uid))
+                          .map((s) => (
+                            <option key={s.uid} value={s.uid}>{s.label}</option>
+                          ))}
+                      </select>
+                      {this.state.selectedAISeries.length > 0 && (
+                        <div className="tf-ai-series-list">
+                          {this.state.selectedAISeries.map((s) => (
+                            <div key={s.uid} className="tf-ai-series-tag">
+                              <span className="tf-ai-series-tag-label">{s.label}</span>
+                              <button
+                                className="tf-ai-series-tag-remove"
+                                onClick={() => this.removeAISeries(s.uid)}
+                                title="Remove"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                       <Button
                         className={"modal-button"}
                         variant="secondary"

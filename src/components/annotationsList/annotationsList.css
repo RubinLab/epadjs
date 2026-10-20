@@ -636,6 +636,48 @@ th {
   font-size: 0.9rem;
 }
 
+.tf-ai-series-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+}
+
+.tf-ai-series-tag {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #1e2d3a;
+  border: 1px solid #4a9bb4;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.82rem;
+  color: #ccc;
+}
+
+.tf-ai-series-tag-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 0.4rem;
+}
+
+.tf-ai-series-tag-remove {
+  background: none;
+  border: none;
+  color: #4a9bb4;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.tf-ai-series-tag-remove:hover {
+  color: #e06c75;
+}
+
 .tf-narrative-label {
   color: #ccc;
   font-size: 0.9rem;
