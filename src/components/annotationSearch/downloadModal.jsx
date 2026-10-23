@@ -336,7 +336,7 @@ class DownloadModal extends React.Component {
             onClick={this.handleCancel}
             aria-label="Close"
           >
-            &times;
+            &#8855;
           </button>
         </Modal.Header>
 
@@ -367,7 +367,7 @@ class DownloadModal extends React.Component {
                   studies.map(s => (
                     <div key={s.studyUID} className="dm-series-row">
                       <span style={{ display: "flex", flexDirection: "column", lineHeight: 1.35 }}>
-                        <span className="dm-series-desc">
+                        <span className="dm-studies-desc">
                           {this.props.showingPHI
                             ? (s.patientName || s.patientID)
                             : s.patientID}
@@ -375,7 +375,7 @@ class DownloadModal extends React.Component {
                         {this.props.showingPHI &&
                           s.annotationNames &&
                           s.annotationNames.length > 0 && (
-                            <span className="dm-series-id">
+                            <span className="dm-study-id">
                               {s.annotationNames.join(", ")}
                             </span>
                           )}
