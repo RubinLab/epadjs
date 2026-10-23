@@ -181,6 +181,7 @@ const AnnotationSearch = (props) => {
   const [showWarning, setShowWarning] = useState(false);
   const [showDownloadAll, setShowDownloadAll] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [seriesList, setSeriesList] = useState([]);
   const [encArgs, setEncArgs] = useState("");
   const [decrArgs, setDecrArgs] = useState("");
@@ -1724,8 +1725,11 @@ const AnnotationSearch = (props) => {
             </button>
           </div>
         )}
-          <div style={{ alignContent: 'end', fontSize: '0.8rem', padding: '3.5px 7px'}}>
+          <div style={{ alignContent: 'end', fontSize: '0.8rem', padding: '3.5px 7px', display: 'flex', alignItems: 'center', gap: '12px' }}>
             {`Showing ${rows} results`}
+            {downloading && (
+              <span className="downloading-text" style={{ color: "#eaddb2" }}>Downloading…</span>
+            )}
           </div>
         </div>
       </div>
@@ -2060,6 +2064,8 @@ const AnnotationSearch = (props) => {
           getFieldSearchResults();
         }}
         onCancel={() => setShowDownload(false)}
+        onDownloadStart={() => setDownloading(true)}
+        onDownloadEnd={() => setDownloading(false)}
         pid={selectedProject}
         showingPHI={props.showingPHI}
         selectedStudies={(() => {

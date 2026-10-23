@@ -299,3 +299,12 @@ th > span{
 .pagination-search select{
   color: white;
 }
+
+@keyframes downloading-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.downloading-text {
+  animation: downloading-pulse 1.2s ease-in-out infinite;
+}

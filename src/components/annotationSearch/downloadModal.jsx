@@ -63,12 +63,17 @@ class DownloadModal extends React.Component {
       study: el.studyUID,
       subject: el.patientID,
     }));
+    this.props.onDownloadStart?.();
     downloadStudies(pid, bodyArr)
       .then(result => {
         const blob = new Blob([result.data], { type: "application/zip" });
         this.triggerBrowserDownload(blob, "Downloaded_studies");
+        this.props.onDownloadEnd?.();
       })
-      .catch(err => console.error(err));
+      .catch(err => {
+        console.error(err);
+        this.props.onDownloadEnd?.();
+      });
     this.props.onCancel();
   };
 
@@ -202,12 +207,17 @@ class DownloadModal extends React.Component {
         }
       });
     });
+    this.props.onDownloadStart?.();
     downloadSeries(pid, bodyArr)
       .then(result => {
         const blob = new Blob([result.data], { type: "application/zip" });
         this.triggerBrowserDownload(blob, "Downloaded_series");
+        this.props.onDownloadEnd?.();
       })
-      .catch(err => console.error(err));
+      .catch(err => {
+        console.error(err);
+        this.props.onDownloadEnd?.();
+      });
     this.props.onCancel();
   };
 
@@ -492,6 +502,8 @@ DownloadModal.propTypes = {
   showingPHI: PropTypes.bool,
   onCancel: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
+  onDownloadStart: PropTypes.func,
+  onDownloadEnd: PropTypes.func,
   selectedAnnotations: PropTypes.object,
   multipageAimSelection: PropTypes.object,
 };
