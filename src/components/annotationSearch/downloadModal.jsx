@@ -138,7 +138,7 @@ class DownloadModal extends React.Component {
       this.setState({ loadingStudies: nextLoading });
 
       try {
-        const { data: series } = await getSeries(projectID, patientID, studyUID);
+        const { data: series } = await getSeries(projectID || this.props.pid, patientID, studyUID);
         this.setState(state => {
           const doneLoading = new Set(state.loadingStudies);
           doneLoading.delete(studyUID);
