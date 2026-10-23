@@ -414,7 +414,7 @@ class DownloadModal extends React.Component {
                 <span className="dm-chev" />
               </button>
               <span className="dm-section__hint">
-                Summary, AIM, segmentation
+                {sessionStorage.getItem("mode") === "thick" ? "Summary, AIM, segmentation" : "Summary, AIM"}
               </span>
             </div>
             {aimExpanded && (
@@ -422,7 +422,7 @@ class DownloadModal extends React.Component {
                 {[
                   { name: "summary", label: "Summary" },
                   { name: "aim", label: "AIM Document" },
-                  { name: "seg", label: "DICOM segmentation object" },
+                  ...(sessionStorage.getItem("mode") === "thick" ? [{ name: "seg", label: "DICOM segmentation object" }] : []),
                 ].map(({ name, label }) => (
                   <div key={name} className="dm-check-row">
                     <input
