@@ -283,7 +283,7 @@ class DownloadModal extends React.Component {
                       <span className="dm-series-desc">
                         {sr.seriesDescription || "Unnamed Series"}
                       </span>
-                      <span className="dm-series-id">{sr.seriesUID}</span>
+                      <span className="dm-series-id">{sr.seriesNo}</span>
                     </label>
                   </div>
                 ))}
