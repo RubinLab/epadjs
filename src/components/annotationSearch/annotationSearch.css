@@ -299,3 +299,12 @@ th > span{
 .pagination-search select{
   color: white;
 }
+
+@keyframes ai-running-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.ai-running-indicator {
+  animation: ai-running-pulse 1.2s ease-in-out infinite;
+}

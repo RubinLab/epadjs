@@ -231,6 +231,11 @@ export function pluginCopyAimsBetweenPlugins(fromid,toid) {
 // export function stopContainerLog(containerobj) {
 //   return http.post(http.apiUrl() + "/container/stop/", containerobj);
 // }
+export async function getRunningPlugins() {
+  const response = await getPluginsQueue();
+  return (response.data || []).filter(item => item.status === "running");
+}
+
 export function triggerPlugin({ projectID, subjectID, studyUID, pluginID, userID, seriesUIDs }) {
   const url =
     http.apiUrl() +
