@@ -45,7 +45,7 @@ import {
   storeAimSelectionAll,
   setLastLocation
 } from "../annotationsList/action";
-import AnnotationDownloadModal from "../searchView/annotationDownloadModal";
+import DownloadModal from "./downloadModal";
 import UploadModal from "../searchView/uploadModal";
 import DeleteAlert from "../management/common/alertDeletionModal";
 import {
@@ -181,6 +181,7 @@ const AnnotationSearch = (props) => {
   const [showWarning, setShowWarning] = useState(false);
   const [showDownloadAll, setShowDownloadAll] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [seriesList, setSeriesList] = useState([]);
   const [encArgs, setEncArgs] = useState("");
   const [decrArgs, setDecrArgs] = useState("");
@@ -1408,8 +1409,8 @@ const AnnotationSearch = (props) => {
     const { searchTableIndex } = props;
     const pageData = data.slice(searchTableIndex * pageSize, (searchTableIndex + 1) * pageSize);
     const map =  checked ? pageData.reduce((all, item, i) => {
-      const { aimID, name, subjectID, studyUID, seriesUID } = item;
-      all[aimID] = { aimID, name, subjectID, studyUID, seriesUID };
+      const { aimID, name, subjectID, studyUID, seriesUID, patientName, subjectName } = item;
+      all[aimID] = { aimID, name, subjectID, studyUID, seriesUID, patientName: patientName || subjectName };
       return all;
     }, {}) : {};
     props.dispatch(storeAimSelectionAll(checked, map, searchTableIndex));
@@ -1724,8 +1725,11 @@ const AnnotationSearch = (props) => {
             </button>
           </div>
         )}
-          <div style={{ alignContent: 'end', fontSize: '0.8rem', padding: '3.5px 7px'}}>
+          <div style={{ alignContent: 'end', fontSize: '0.8rem', padding: '3.5px 7px', display: 'flex', alignItems: 'center', gap: '12px' }}>
             {`Showing ${rows} results`}
+            {downloading && (
+              <span className="downloading-text" style={{ color: "#eaddb2" }}>Downloading…</span>
+            )}
           </div>
         </div>
       </div>
@@ -2054,18 +2058,39 @@ const AnnotationSearch = (props) => {
         error={explanation.errorMessage}
         show={showDeleteModal}
       />
-      <AnnotationDownloadModal
+      <DownloadModal
         onSubmit={() => {
           setShowDownload(false);
           getFieldSearchResults();
-          //if (mode === 'teaching')
-          //  getFieldSearchResults();
-          //else
-          //  getFieldSearchResults();
         }}
         onCancel={() => setShowDownload(false)}
-        // updateStatus={() => console.log('update status')}
-        projectID={selectedProject}
+        onDownloadStart={() => setDownloading(true)}
+        onDownloadEnd={() => setDownloading(false)}
+        pid={selectedProject}
+        showingPHI={props.showingPHI}
+        selectedStudies={(() => {
+          const studyMap = {};
+          const addAnn = (ann) => {
+            // console.log(ann);
+            if (!ann || !ann.studyUID) return;
+            if (!studyMap[ann.studyUID]) {
+              studyMap[ann.studyUID] = {
+                studyUID: ann.studyUID,
+                patientID: ann.subjectID,
+                patientName: ann.patientName || ann.subjectName,
+                studyDescription: ann.studyDescription,
+                projectID: ann.projectID,
+                annotationNames: [],
+              };
+            }
+            if (ann.name) studyMap[ann.studyUID].annotationNames.push(ann.name);
+          };
+          Object.values(props.selectedAnnotations || {}).forEach(addAnn);
+          Object.values(props.multipageAimSelection || {}).forEach(page =>
+            Object.values(page).forEach(addAnn)
+          );
+          return Object.values(studyMap);
+        })()}
         show={showDownload}
       />
       {showWarning && (
