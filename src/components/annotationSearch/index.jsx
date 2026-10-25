@@ -52,6 +52,7 @@ import {
   getPluginsForProject,
   addPluginsToQueue,
   runPluginsQueue,
+  getRunningPlugins,
 } from "../../services/pluginServices";
 import TeachingFilters from "./TeachingFilters.jsx";
 import AddToWorklist from "../searchView/addWorklist";
@@ -162,7 +163,8 @@ const AnnotationSearch = (props) => {
   const [selectedPluginDbId, setSelectedPluginDbId] = useState(-1);
   const [showRunPluginButton, setShowRunPluginButton] = useState(false);
   // cavit
-
+  
+  const [aiRunning, setAiRunning] = useState(true);
   const [firstRun, setFirstRun] = useState(true);
   const [selectedSubs, setSelectedSubs] = useState([]);
   const [selectedMods, setSelectedMods] = useState([]);
@@ -360,6 +362,18 @@ const AnnotationSearch = (props) => {
       );
     };
   }, [handleTeachingFilesModal]);
+
+  useEffect(() => {
+    const checkAIRunning = async () => {
+      try {
+        const running = await getRunningPlugins();
+        setAiRunning(running.length > 0);
+      } catch {}
+    };
+    checkAIRunning();
+    const interval = setInterval(checkAIRunning, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const useDebouncedEffect = (effect, deps, delay) => {
     useEffect(() => {
@@ -1731,6 +1745,14 @@ const AnnotationSearch = (props) => {
               <span className="downloading-text" style={{ color: "#eaddb2" }}>Downloading…</span>
             )}
           </div>
+          {aiRunning && (
+            <div
+              className="ai-running-indicator"
+              style={{ color: '#00cc99', fontSize: '0.8rem', padding: '3.5px 7px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              ● AI Running
+            </div>
+          )}
         </div>
       </div>
       <table

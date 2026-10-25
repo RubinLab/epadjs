@@ -30,6 +30,7 @@ import { Aim, enumAimType } from "aimapi";
 import { teachingFileTempUid, teachingFileTempCode } from "../../constants";
 import { isSupportedModality } from "../../Utils/aid";
 import { DISP_MODALITIES } from "../../constants";
+import { getTools, getPluginsForProject, triggerPlugin } from "../../services/pluginServices";
 
 class selectSerieModal extends React.Component {
   // _isMounted = false;
@@ -43,6 +44,11 @@ class selectSerieModal extends React.Component {
       limit: 0,
       list: [],
       isButtonDisabled: false,
+      comment: "",
+      runAI: false,
+      selectedModel: "",
+      selectedAISeries: [],
+      aiModels: [],
     };
     this.maxPort = parseInt(sessionStorage.getItem("maxPort"));
     this.mode = sessionStorage.getItem("mode");
@@ -99,6 +105,8 @@ class selectSerieModal extends React.Component {
       });
       this.semanticAnswers.createViewerWindow();
       this.props.completeLoading();
+
+      this.fetchAIModels();
     } // end teaching file related part
   };
 
@@ -454,13 +462,6 @@ class selectSerieModal extends React.Component {
   saveTeachingFile = async () => {
     this.setState({ isButtonDisabled: true });
     const selectedSeries = Object.keys(this.state.selectedToDisplay);
-    if (this.semanticAnswers.checkFormSaveReady({ isTeachingModal: true })) {
-      const result = window.confirm("Please fill all required fields!");
-
-      if (result || !result) this.setState({ isButtonDisabled: false });
-
-      return -1;
-    }
     if (selectedSeries.length === 0) {
       const result = window.confirm("Please select at least one series!");
 
@@ -478,7 +479,15 @@ class selectSerieModal extends React.Component {
       return;
     }
 
+    const requiredCount = this.semanticAnswers.checkFormSaveReady({ isTeachingModal: true });
+    if (requiredCount > 0) {
+      window.alert("Please fill all required fields before saving.");
+      this.setState({ isButtonDisabled: false });
+      return -1;
+    }
+
     await decryptAndAdd(encrUrlArgs);
+    this.semanticAnswers.aimComment = this.state.comment;
     const answers = this.semanticAnswers.saveAim();
     answers.name.value = "Teaching File";
     const { data: study } = await getSingleStudy(studyUID);
@@ -548,6 +557,104 @@ class selectSerieModal extends React.Component {
     this.displaySelection(result);
   };
 
+  saveTeachingFileAndRunAI = async () => {
+    const { selectedModel, selectedAISeries } = this.state;
+    let result = await this.saveTeachingFile();
+    if (result === -1) return;
+
+    if (selectedModel && selectedAISeries.length > 0) {
+      const { projectID, patientID, studyUID } = this.props.decrArgs;
+      const userID = sessionStorage.getItem("username");
+      const seriesUIDs = selectedAISeries.map((s) => s.uid);
+      try {
+        await triggerPlugin({
+          projectID,
+          subjectID: patientID,
+          studyUID,
+          pluginID: selectedModel,
+          userID,
+          seriesUIDs,
+        });
+        toast.success("AI model triggered successfully.", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+        });
+      } catch (err) {
+        console.error("[TF Modal] triggerPlugin failed:", err);
+        toast.error("Failed to trigger AI model.", {
+          position: "top-right",
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: true,
+        });
+      }
+    }
+
+    this.displaySelection(result);
+  };
+
+  fetchAIModels = async () => {
+    const projectID = this.props.decrArgs?.projectID;
+
+    try {
+      const { data: allTools } = await getTools();
+      console.log("[TF Modal] getTools() response:", allTools);
+    } catch (err) {
+      console.error("[TF Modal] getTools() failed:", err);
+    }
+
+    if (projectID) {
+      try {
+        const { data: projectPlugins } = await getPluginsForProject(projectID);
+        console.log("[TF Modal] getPluginsForProject() response:", projectPlugins);
+        const models = (projectPlugins?.projectplugin || []).map((p) => ({
+          id: p.plugin_id,
+          name: p.name,
+        }));
+        console.log("[TF Modal] parsed models for dropdown:", models);
+        if (models.length > 0) this.setState({ aiModels: models });
+      } catch (err) {
+        console.error("[TF Modal] getPluginsForProject() failed:", err);
+      }
+    } else {
+      console.warn("[TF Modal] no projectID available, skipping getPluginsForProject");
+    }
+  };
+
+  getSeriesOptions = () => {
+    const { seriesPassed } = this.props;
+    console.log(' ---> seriesPassed');
+    console.log(seriesPassed);
+    const allSeries = Array.isArray(seriesPassed)
+      ? seriesPassed.flat()
+      : Object.values(seriesPassed).flat();
+    return allSeries
+      .filter(isSupportedModality)
+      .map((s) => {
+        const modality = s.examType || s.modality;
+        const desc = s.seriesDescription || `Sig Series ${s.significanceOrder}` || "Unnamed Series";
+        const label = `${s.seriesNo || ""} - ${desc}${modality ? ` [${modality.toUpperCase()}]` : ""}`;
+        return { uid: s.seriesUID, label };
+      });
+  };
+
+  addAISeries = (uid) => {
+    if (!uid) return;
+    const options = this.getSeriesOptions();
+    const series = options.find((s) => s.uid === uid);
+    if (!series) return;
+    if (this.state.selectedAISeries.find((s) => s.uid === uid)) return;
+    this.setState((prev) => ({ selectedAISeries: [...prev.selectedAISeries, series] }));
+  };
+
+  removeAISeries = (uid) => {
+    this.setState((prev) => ({
+      selectedAISeries: prev.selectedAISeries.filter((s) => s.uid !== uid),
+    }));
+  };
+
   closeAllSeries = () => {
     this.props.dispatch(clearGrid());
     sessionStorage.removeItem("wwwc");
@@ -581,54 +688,148 @@ class selectSerieModal extends React.Component {
                 </row>
                 <row>
                   <div id="speciality"></div>
-                  <div id="comment">
-                    {/* <i class="dropdown icon"></i>
-                  <div className="title active" style={{ color: "rgb(204, 204, 204)", fontSize: "13px" }}>Narrative</div>
-                  <div>
-                  <input className="comment ui input"></input>
-                </div> */}
+                  <div id="narrative">
+                    <div className="tf-narrative-label">Narrative</div>
+                    <textarea
+                      className="tf-narrative-textarea"
+                      value={this.state.comment}
+                      onChange={(e) => this.setState({ comment: e.target.value })}
+                      placeholder="Optional narrative / comments"
+                    />
                   </div>
                 </row>
               </div>
             </>
           )}
           <br />
-          <div className={"max-series"}>
-            Please select up to {this.maxPort} series to display:
-          </div>
-          {openSeries.length > 0 && (
-            <div>
-              <span style={{padding: '6px'}}>{`${openSeries.length} viewport${openSeries.length > 1 ? 's' : ''} in use - close some or all to open new series.`}</span>
-              <br />
-              <button
-              style={{marginLeft: '4px'}}
-                size="lg"
-                className="selectSerie-clearButton"
-                onClick={this.closeAllSeries}
-              >
-                X - Close all series
-              </button>
+          {isTeachingFile ? (
+            <div className="tf-bottom-split">
+              <div className="tf-series-panel">
+                <div className={"max-series"}>
+                  Please select up to {this.maxPort} series to display:
+                </div>
+                {openSeries.length > 0 && (
+                  <div>
+                    <span style={{padding: '6px'}}>{`${openSeries.length} viewport${openSeries.length > 1 ? 's' : ''} in use - close some or all to open new series.`}</span>
+                    <br />
+                    <button
+                      style={{marginLeft: '4px'}}
+                      size="lg"
+                      className="selectSerie-clearButton"
+                      onClick={this.closeAllSeries}
+                    >
+                      X - Close all series
+                    </button>
+                  </div>
+                )}
+                {this.state.limit > this.maxPort && !openSeries.length && (
+                  <div>Please select only {this.maxPort} series to open!</div>
+                )}
+                <div style={{ paddingLeft: "0.5em", maxHeight: "400px", overflowY: "auto" }}>
+                  {list}
+                </div>
+              </div>
+              <div className="tf-ai-panel">
+                <div className="tf-ai-panel-header">AI Options</div>
+                <div className="tf-ai-panel-body">
+                  <label className="tf-run-ai-label">
+                    <input
+                      type="checkbox"
+                      checked={this.state.runAI}
+                      onChange={(e) => this.setState({ runAI: e.target.checked, selectedModel: "" })}
+                      style={{ marginRight: "0.5rem" }}
+                    />
+                    Run AI
+                  </label>
+                  {this.state.runAI && (
+                    <div className="tf-ai-collapsible">
+                      <label className="tf-label">Select Model</label>
+                      <select
+                        className="tf-model-select"
+                        value={this.state.selectedModel}
+                        onChange={(e) => this.setState({ selectedModel: e.target.value })}
+                      >
+                        <option value="">-- Select --</option>
+                        {this.state.aiModels.map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </select>
+                      <label className="tf-label" style={{ marginTop: "0.4rem" }}>Select Series for AI</label>
+                      <select
+                        className="tf-model-select"
+                        value=""
+                        onChange={(e) => this.addAISeries(e.target.value)}
+                      >
+                        <option value="">-- Add series --</option>
+                        {this.getSeriesOptions()
+                          .filter((s) => !this.state.selectedAISeries.find((sel) => sel.uid === s.uid))
+                          .map((s) => (
+                            <option key={s.uid} value={s.uid}>{s.label}</option>
+                          ))}
+                      </select>
+                      {this.state.selectedAISeries.length > 0 && (
+                        <div className="tf-ai-series-list">
+                          {this.state.selectedAISeries.map((s) => (
+                            <div key={s.uid} className="tf-ai-series-tag">
+                              <span className="tf-ai-series-tag-label">{s.label}</span>
+                              <button
+                                className="tf-ai-series-tag-remove"
+                                onClick={() => this.removeAISeries(s.uid)}
+                                title="Remove"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <Button
+                        className={"modal-button"}
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => this.saveTeachingFileAndRunAI()}
+                        disabled={this.state.isButtonDisabled}
+                      >
+                        Save TF, Open Case and Run AI
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
+          ) : (
+            <>
+              <div className={"max-series"}>
+                Please select up to {this.maxPort} series to display:
+              </div>
+              {openSeries.length > 0 && (
+                <div>
+                  <span style={{padding: '6px'}}>{`${openSeries.length} viewport${openSeries.length > 1 ? 's' : ''} in use - close some or all to open new series.`}</span>
+                  <br />
+                  <button
+                    style={{marginLeft: '4px'}}
+                    size="lg"
+                    className="selectSerie-clearButton"
+                    onClick={this.closeAllSeries}
+                  >
+                    X - Close all series
+                  </button>
+                </div>
+              )}
+              {this.state.limit > this.maxPort && !openSeries.length && (
+                <div>Please select only {this.maxPort} series to open!</div>
+              )}
+              <div
+                style={{
+                  paddingLeft: "0.5em",
+                  maxHeight: "500px",
+                  overflowY: "auto",
+                }}
+              >
+                {list}
+              </div>
+            </>
           )}
-          {/* <button
-            size="lg"
-            className="selectSerie-clearButton"
-            onClick={() => this.props.dispatch(clearGrid())}
-          >
-            X  - Close all series
-          </button> */}
-          {this.state.limit > this.maxPort && !openSeries.length && (
-            <div>Please select only {this.maxPort} series to open!</div>
-          )}
-          <div
-            style={{
-              paddingLeft: "0.5em",
-              maxHeight: "500px",
-              overflowY: "auto",
-            }}
-          >
-            {list}
-          </div>
         </Modal.Body>
         <Modal.Footer className="select-serie-footer">
           {isTeachingFile && (
