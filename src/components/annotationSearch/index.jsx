@@ -164,7 +164,7 @@ const AnnotationSearch = (props) => {
   const [showRunPluginButton, setShowRunPluginButton] = useState(false);
   // cavit
   
-  const [aiRunning, setAiRunning] = useState(true);
+  const [aiRunning, setAiRunning] = useState(false);
   const [firstRun, setFirstRun] = useState(true);
   const [selectedSubs, setSelectedSubs] = useState([]);
   const [selectedMods, setSelectedMods] = useState([]);
