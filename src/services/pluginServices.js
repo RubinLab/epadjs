@@ -40,10 +40,10 @@ export function updateTemplatesForPlugin(pluginid, templateids) {
 export function updateStatusQueueProcess(queueid, tostatus) {
   return http.put(
     http.apiUrl() +
-      "/plugins/queue/update/" +
-      encodeURIComponent(queueid) +
-      "/status/" +
-      tostatus
+    "/plugins/queue/update/" +
+    encodeURIComponent(queueid) +
+    "/status/" +
+    tostatus
   );
 }
 
@@ -94,27 +94,27 @@ export function deleteOneDefaultParameter(parameterdbid) {
   //  "/plugins/parameters/default/" + parameterdbid
   return http.delete(
     http.apiUrl() +
-      "/pluginparameters/" +
-      encodeURIComponent(parameterdbid) +
-      "/default"
+    "/pluginparameters/" +
+    encodeURIComponent(parameterdbid) +
+    "/default"
   );
 }
 export function deleteOneProjectParameter(parameterdbid) {
   // "/plugins/parameters/project/" + parameterdbid
   return http.delete(
     http.apiUrl() +
-      "/pluginparameters/" +
-      encodeURIComponent(parameterdbid) +
-      "/project"
+    "/pluginparameters/" +
+    encodeURIComponent(parameterdbid) +
+    "/project"
   );
 }
 export function deleteOneTemplateParameter(parameterdbid) {
   // "/plugins/parameters/template/" + parameterdbid
   return http.delete(
     http.apiUrl() +
-      "/pluginparameters/" +
-      encodeURIComponent(parameterdbid) +
-      "/template"
+    "/pluginparameters/" +
+    encodeURIComponent(parameterdbid) +
+    "/template"
   );
 }
 export function deleteFromPluginQueue(queuedbids) {
@@ -157,9 +157,9 @@ export function getDefaultParameter(plugindbid) {
   // "/plugins/parameters/default/" + plugindbid
   return http.get(
     http.apiUrl() +
-      "/plugins/" +
-      encodeURIComponent(plugindbid) +
-      "/defaultparameters"
+    "/plugins/" +
+    encodeURIComponent(plugindbid) +
+    "/defaultparameters"
   );
 }
 
@@ -167,22 +167,22 @@ export function getProjectParameter(plugindbid, projectdbid) {
   // "/plugins/parameters/project/" + plugindbid + "/" + projectdbid
   return http.get(
     http.apiUrl() +
-      "/plugins/" +
-      encodeURIComponent(plugindbid) +
-      "/project/" +
-      encodeURIComponent(projectdbid) +
-      "/projectparameters"
+    "/plugins/" +
+    encodeURIComponent(plugindbid) +
+    "/project/" +
+    encodeURIComponent(projectdbid) +
+    "/projectparameters"
   );
 }
 export function getTemplateParameter(plugindbid, templatedbid) {
   // "/plugins/parameters/template/" + plugindbid + "/" + templatedbid
   return http.get(
     http.apiUrl() +
-      "/plugins/" +
-      encodeURIComponent(plugindbid) +
-      "/template/" +
-      encodeURIComponent(templatedbid) +
-      "/templateparameters"
+    "/plugins/" +
+    encodeURIComponent(plugindbid) +
+    "/template/" +
+    encodeURIComponent(templatedbid) +
+    "/templateparameters"
   );
 }
 export function getContainerLog(containerid) {
@@ -196,8 +196,8 @@ export function getContainerLog(containerid) {
 
 export function getPluginParentsInQueue(selectedQueueId) {
   return http.get(
-    http.apiUrl() + "/pluginsubqueue/"+ encodeURIComponent(selectedQueueId)
-  ); 
+    http.apiUrl() + "/pluginsubqueue/" + encodeURIComponent(selectedQueueId)
+  );
 }
 
 export function insertPluginSubqueue(subQueueObject) {
@@ -211,19 +211,19 @@ export function deletePluginSubqueue(id) {
   // "/plugins/parameters/template/" + parameterdbid
   return http.delete(
     http.apiUrl() +
-      "/pluginsubqueue/" +
-      encodeURIComponent(id)
+    "/pluginsubqueue/" +
+    encodeURIComponent(id)
   );
 }
 
-export function pluginCopyAimsBetweenPlugins(fromid,toid) {
+export function pluginCopyAimsBetweenPlugins(fromid, toid) {
   // "/plugins/parameters/template/" + parameterdbid
   return http.get(
     http.apiUrl() +
-      "/pluginsubqueue/" +
-      encodeURIComponent(fromid) +
-      "/" + 
-      encodeURIComponent(toid) 
+    "/pluginsubqueue/" +
+    encodeURIComponent(fromid) +
+    "/" +
+    encodeURIComponent(toid)
   );
 }
 
@@ -236,14 +236,14 @@ export async function getRunningPlugins() {
   return (response.data || []).filter(item => item.status === "running");
 }
 
-export function triggerPlugin({ projectID, subjectID, studyUID, pluginID, userID, seriesUIDs }) {
+export function triggerPlugin({ projectID, subjectID, studyUID, pluginID, seriesUIDs }) {
   const url =
     http.apiUrl() +
     "/projects/" + encodeURIComponent(projectID) +
     "/subjects/" + encodeURIComponent(subjectID) +
     "/studies/" + encodeURIComponent(studyUID) +
     "/plugins/" + encodeURIComponent(pluginID) +
-    "/trigger?user=" + encodeURIComponent(userID);
+    "/trigger";
   return http.post(url, { seriesUIDs });
 }
 

@@ -564,7 +564,6 @@ class selectSerieModal extends React.Component {
 
     if (selectedModel && selectedAISeries.length > 0) {
       const { projectID, patientID, studyUID } = this.props.decrArgs;
-      const userID = sessionStorage.getItem("username");
       const seriesUIDs = selectedAISeries.map((s) => s.uid);
       try {
         await triggerPlugin({
@@ -572,7 +571,6 @@ class selectSerieModal extends React.Component {
           subjectID: patientID,
           studyUID,
           pluginID: selectedModel,
-          userID,
           seriesUIDs,
         });
         toast.success("AI model triggered successfully.", {
