@@ -559,6 +559,13 @@ class selectSerieModal extends React.Component {
 
   saveTeachingFileAndRunAI = async () => {
     const { selectedModel, selectedAISeries } = this.state;
+    const significantSeries = Object.keys(this.state.selectedToDisplay);
+    if (significantSeries.length === 0) {
+      window.alert(
+        "Please select at least one series using the checkboxes. The checked series will be saved as the significant series of this Teaching File."
+      );
+      return;
+    }
     let result = await this.saveTeachingFile();
     if (result === -1) return;
 
