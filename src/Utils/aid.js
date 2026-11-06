@@ -398,8 +398,8 @@ export const persistColorInSaveAim = (oldList, newList, colors) => {
     if (imgAimUID) {
       if (markupColor) {
         color = {
-          button: { background: "#aaaaaa", color: "black" },
-          label: { background: markupColor, color: "white" },
+          button: { background: markupColor, color: "black" },
+          label: { background: markupColor, color: "black" },
         };
       } else {
         color = colors[colorIndex];
