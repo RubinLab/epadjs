@@ -686,23 +686,21 @@ class selectSerieModal extends React.Component {
               <div id="stella-beta-warning">
               Enter metadata and select series.  For diagnosis you can use normal, abnormal or unlisted as needed.
               </div>
-              <div id="questionaire" className={"field-grid"}>
-                <row>
+              <div id="questionaire" className="tf-form-layout">
+                <div id="narrative" className="tf-narrative-col">
+                  <div className="tf-narrative-label">Narrative</div>
+                  <textarea
+                    className="tf-narrative-textarea"
+                    value={this.state.comment}
+                    onChange={(e) => this.setState({ comment: e.target.value })}
+                    placeholder="Optional narrative / comments"
+                  />
+                </div>
+                <div className="tf-dropdowns-col">
                   <div id="anatomy"></div>
                   <div id="diagnosis"></div>
-                </row>
-                <row>
                   <div id="speciality"></div>
-                  <div id="narrative">
-                    <div className="tf-narrative-label">Narrative</div>
-                    <textarea
-                      className="tf-narrative-textarea"
-                      value={this.state.comment}
-                      onChange={(e) => this.setState({ comment: e.target.value })}
-                      placeholder="Optional narrative / comments"
-                    />
-                  </div>
-                </row>
+                </div>
               </div>
             </>
           )}

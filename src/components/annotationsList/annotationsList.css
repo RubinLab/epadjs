@@ -537,11 +537,62 @@ th {
   margin: 0.2rem;
 }
 
-.field-grid {
-  display: grid;
-  grid-template-columns: 49% 49%;
-  gap: 1em 1em;
-  grid-auto-flow: row;
+.tf-form-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.tf-narrative-col {
+  flex: 2;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tf-narrative-col .tf-narrative-textarea {
+  flex: 1;
+}
+
+.tf-dropdowns-col {
+  flex: 3;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tf-dropdowns-col input,
+.tf-dropdowns-col select,
+.tf-dropdowns-col textarea {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* The AimEditor parks a <div class="comment"> (containing a <label>Narrative</label>)
+   and a bare commentDiv (containing an 8rem textarea) inside whichever teaching div
+   is processed last before moving them to the hidden accordion1. If the move is
+   delayed or the execution order leaves them behind, they create blank space.
+   The modal has its own Narrative textarea so both are safe to suppress here. */
+#anatomy .comment,
+#diagnosis .comment,
+#speciality .comment,
+#anatomy .requiredcomment,
+#diagnosis .requiredcomment,
+#speciality .requiredcomment {
+  display: none;
+}
+
+/* AnatomicEntity() in parseClass.js unconditionally appends an empty <label>
+   to the content div (parentDiv = #AnatomyCore). It has no text, class or id
+   but takes up line-height space. Hide it across all three teaching field
+   content divs to be safe. */
+#anatomy .content > label:empty,
+#diagnosis .content > label:empty,
+#speciality .content > label:empty {
+  display: none;
 }
 
 .max-series {
@@ -687,7 +738,8 @@ th {
 
 .tf-narrative-textarea {
   width: 100%;
-  height: 7rem;
+  min-height: 7rem;
+  height: 100%;
   background-color: #555;
   color: #ccc;
   border: 1px solid #888;
