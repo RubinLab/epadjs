@@ -74,14 +74,17 @@ class AimEditor extends Component {
         setAimDirty,
         prepAimForParseClass(JSON.parse(lastSavedAim)) // becasue there is the whole aim json in the session storage, pass only necessary parts to autofill
       );
-    else
+    else {
+      const { aimId } = this.props;
+      const initialName = aimId?.name?.value || this.getDefaultLesionName();
       this.semanticAnswers = new questionaire.AimEditor(
         element,
         // this.validateForm,
         this.renderButtons,
-        this.getDefaultLesionName(),
+        initialName,
         setAimDirty
       );
+    }
 
     const { projectMap } = this.props;
 
