@@ -25,6 +25,7 @@ import { BsEyeFill } from "react-icons/bs";
 import {
   AiOutlineSortAscending,
   AiOutlineSortDescending,
+  AiOutlineRobot,
 } from "react-icons/ai";
 import ReactTooltip from "react-tooltip";
 import {
@@ -54,11 +55,13 @@ import {
   runPluginsQueue,
   getRunningPlugins,
 } from "../../services/pluginServices";
+import { getSeries } from "../../services/seriesServices";
 import TeachingFilters from "./TeachingFilters.jsx";
 import AddToWorklist from "../searchView/addWorklist";
 import Projects from "../searchView/addToProject";
 import Spinner from "react-bootstrap/Spinner";
 import SeriesModal from "../annotationsList/selectSerieModal";
+import RunAIModal from "./RunAIModal";
 import WarningModal from "../common/warningModal";
 import ConfirmationModal from "../common/confirmationModal";
 import { COMP_MODALITIES as compModality } from "../../constants.js";
@@ -184,6 +187,9 @@ const AnnotationSearch = (props) => {
   const [showDownloadAll, setShowDownloadAll] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [showRunAIModal, setShowRunAIModal] = useState(false);
+  const [runAISeriesList, setRunAISeriesList] = useState([]);
+  const [runAIDecrArgs, setRunAIDecrArgs] = useState(null);
   const [seriesList, setSeriesList] = useState([]);
   const [encArgs, setEncArgs] = useState("");
   const [decrArgs, setDecrArgs] = useState("");
@@ -1377,6 +1383,49 @@ const AnnotationSearch = (props) => {
     clearAllTeachingFilers();
   };
 
+  const handleRunAIClick = async () => {
+    const studyMap = {};
+    const addAnn = (ann) => {
+      if (!ann || !ann.studyUID) return;
+      if (!studyMap[ann.studyUID]) {
+        studyMap[ann.studyUID] = {
+          studyUID: ann.studyUID,
+          patientID: ann.subjectID,
+          projectID: ann.projectID,
+        };
+      }
+    };
+    Object.values(props.selectedAnnotations || {}).forEach(addAnn);
+    Object.values(props.multipageAimSelection || {}).forEach((page) =>
+      Object.values(page).forEach(addAnn)
+    );
+
+    const uniqueStudies = Object.values(studyMap);
+
+    if (uniqueStudies.length === 0) {
+      toast.warn("Select a study to run AI model on", { position: "top-right" });
+      return;
+    }
+    if (uniqueStudies.length > 1) {
+      toast.warn("Select a single study for AI run", { position: "top-right" });
+      return;
+    }
+
+    const { studyUID, patientID, projectID } = uniqueStudies[0];
+    try {
+      let { data: series } = await getSeries(projectID, patientID, studyUID, false);
+      if (!series || series.length === 0) {
+        ({ data: series } = await getSeries(projectID, patientID, studyUID, true));
+      }
+      setRunAISeriesList([series || []]);
+      setRunAIDecrArgs({ projectID, patientID, studyUID });
+      setShowRunAIModal(true);
+    } catch (err) {
+      console.error("[RunAI] getSeries failed:", err);
+      toast.error("Failed to fetch series for the selected study.", { position: "top-right" });
+    }
+  };
+
   const selectAll = (checked) => {
     setAllSelected(checked);
   }
@@ -1670,6 +1719,15 @@ const AnnotationSearch = (props) => {
               <BiTrash />
               <br />
               Delete
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm"
+              onClick={handleRunAIClick}
+            >
+              <AiOutlineRobot />
+              <br />
+              Run AI
             </button>
           </div>
         {showPlugins && mode !== "teaching" && (
@@ -2134,6 +2192,13 @@ const AnnotationSearch = (props) => {
           button={'Download All'}
           title={"Downloading all"}
           message={`Do you want to download all annotations of the project?`}
+        />
+      )}
+      {showRunAIModal && runAIDecrArgs && (
+        <RunAIModal
+          seriesPassed={runAISeriesList}
+          decrArgs={runAIDecrArgs}
+          onClose={() => setShowRunAIModal(false)}
         />
       )}
     </>

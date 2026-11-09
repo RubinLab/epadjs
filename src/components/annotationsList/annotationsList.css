@@ -515,11 +515,13 @@ th {
   background-color: #666 !important;
   border: none !important;
   height: 2.5rem;
+  padding: 0.5rem;
 }
 
 .select-serie-title {
   color: #d3d3d3 !important;
   font-size: 1.2rem !important;
+  padding: 0.5rem;
 }
 
 .select-serie-body {
@@ -535,6 +537,7 @@ th {
 
 .modal-button {
   margin: 0.2rem;
+  background: red;
 }
 
 .tf-form-layout {
@@ -647,7 +650,7 @@ th {
 }
 
 .tf-ai-panel-body {
-  padding: 0.7rem;
+  padding: 1rem;
 }
 
 .tf-run-ai-label {
