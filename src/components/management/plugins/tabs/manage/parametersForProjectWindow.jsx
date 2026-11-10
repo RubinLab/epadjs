@@ -36,7 +36,7 @@ class ParametersForProjectWindow extends React.Component {
     editParam: false
   };
 
-  componentWillMount = async () => {
+  componentDidMount = async () => {
     const tempDefaultParameterList = await getProjectParameter(
       this.props.plugindbid,
       this.props.projectdbid

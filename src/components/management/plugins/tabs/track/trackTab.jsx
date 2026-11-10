@@ -52,7 +52,7 @@ class TrackTab extends React.Component {
     showAimList: { show: false }
   };
 
-  componentWillMount = async () => {
+  componentDidMount = async () => {
     const tempPluginQueueList = await getPluginsQueue();
     console.log("track tab queue lists needs to show", tempPluginQueueList);
     // const canc = new Cancellation();
