@@ -6,8 +6,6 @@ import { FaRegCheckSquare } from "react-icons/fa";
 import {
   addToGrid,
   getSingleSerie,
-  getWholeData,
-  updatePatient,
   clearSelection,
 } from "../annotationsList/action";
 

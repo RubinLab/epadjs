@@ -8,7 +8,6 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import {
   clearGrid,
-  getWholeData,
   clearSelection,
   setSeriesData,
   setPageOrderSeries,

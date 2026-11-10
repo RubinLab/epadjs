@@ -3,9 +3,6 @@ import {
   LOAD_ANNOTATIONS,
   LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
-  LOAD_PATIENT,
-  LOAD_PATIENT_SUCCESS,
-  LOAD_PATIENT_ERROR,
   VIEWPORT_FULL,
   UPDATE_ANNOTATION_DISPLAY,
   TOGGLE_ALL_ANNOTATIONS,
@@ -15,7 +12,6 @@ import {
   LOAD_SERIE_SUCCESS,
   SHOW_ANNOTATION_WINDOW,
   CLEAR_GRID,
-  DISPLAY_SINGLE_AIM,
   JUMP_TO_AIM,
   SELECT_SERIE,
   SELECT_STUDY,
@@ -33,7 +29,6 @@ import {
   // UPDATE_PATIENT_AIM_SAVE,
   // UPDATE_PATIENT_AIM_DELETE,
   GET_NOTIFICATIONS,
-  UPDATE_IMAGE_INDEX,
   GET_PROJECT_MAP,
   SET_SEG_LABEL_MAP_INDEX,
   GET_TEMPLATES,
@@ -73,11 +68,9 @@ import { getStudies, getStudyAims } from "../../services/studyServices";
 import {
   getAnnotations,
   getAnnotationsJSON,
-  getSubjectsAnnotations,
 } from "../../services/annotationServices";
 import { getAllTemplates } from "../../services/templateServices";
 import { getImageIdAnnotations } from "aimapi";
-import { ConsoleWriter } from "istanbul-lib-report";
 import aimEntityData from "./annotationDock/aimEntityData";
 import { setToolOptionsForElement } from 'cornerstone-tools';
 
