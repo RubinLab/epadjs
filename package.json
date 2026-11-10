@@ -82,7 +82,6 @@
     "@babel/helpers": "7.28.4",
     "@babel/runtime": "7.28.4",
     "@babel/runtime-corejs3": "7.28.4",
-    "babel-preset-stage-2": "^6.24.1",
     "chai": "^4.3.4",
     "chromedriver": "^157.0.0",
     "css-loader": "^6.7.3",
@@ -106,8 +105,11 @@
     "cipher-base": "1.0.5",
     "elliptic": "6.6.1",
     "cross-spawn": "7.0.5",
-    "image-size": "1.2.1",
+    "image-size": "2.1.0",
     "brace-expansion": "2.1.7",
-    "basic-ftp": "6.2.6"
+    "basic-ftp": "6.2.6",
+    "underscore": "1.13.8",
+    "decode-uri-component": "0.5.1",
+    "qs": "6.17.1"
   }
 }
