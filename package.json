@@ -110,6 +110,7 @@
     "basic-ftp": "6.2.6",
     "underscore": "1.13.8",
     "decode-uri-component": "0.5.1",
-    "qs": "6.17.1"
+    "qs": "6.17.1",
+    "serialize-javascript": ">=7.1.3"
   }
 }
