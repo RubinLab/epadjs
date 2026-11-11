@@ -38,7 +38,7 @@ class ParametersForTemplateWindow extends React.Component {
     editParam: false
   };
 
-  componentWillMount = async () => {
+  componentDidMount = async () => {
     const tempDefaultParameterList = await getTemplateParameter(
       this.props.plugindbid,
       this.props.templatedbid

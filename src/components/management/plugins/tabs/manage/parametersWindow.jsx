@@ -42,7 +42,7 @@ class ParametersWindow extends React.Component {
 
   state = { addnew: false, allTemplates: [], editParam: false, update: false };
 
-  componentWillMount = async () => {
+  componentDidMount = async () => {
     const tempDefaultParameterList = await getDefaultParameter(
       this.state.parameterFormElements.plugindbid
     );

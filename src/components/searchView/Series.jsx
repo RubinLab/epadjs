@@ -11,8 +11,6 @@ import SelectSerieModal from "../annotationsList/selectSerieModal";
 import {
   selectSerie,
   clearSelection,
-  getWholeData,
-  updatePatient,
   selectAnnotation,
 } from "../annotationsList/action";
 import { openSeriesInDisplay } from "../common/openSeriesHelper";
