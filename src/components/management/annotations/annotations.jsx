@@ -23,8 +23,6 @@ import {
   alertViewPortFull,
   addToGrid,
   getSingleSerie,
-  getWholeData,
-  updatePatient,
   startLoading,
   loadCompleted,
   annotationsLoadingError,

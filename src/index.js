@@ -1,5 +1,5 @@
 import React from "react";
-import { render } from "react-dom";
+import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import ReduxThunk from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension/developmentOnly";
@@ -18,12 +18,11 @@ const store = createStore(
 );
 
 /* eslint-enable */
-render(
+createRoot(document.getElementById("root")).render(
   <BrowserRouter basename={`${process.env.REACT_APP_BASE_URL}`}>
     <Provider store={store}>
       <App />
     </Provider>
-  </BrowserRouter>,
-  document.getElementById("root")
+  </BrowserRouter>
 );
 registerServiceWorker();

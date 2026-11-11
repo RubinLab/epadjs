@@ -9,9 +9,7 @@ import {
   showAnnotationWindow,
   alertViewPortFull,
   addToGrid,
-  updatePatient,
   jumpToAim,
-  showAnnotationDock
 } from "../action";
 import { openSeriesInDisplay } from "../../common/openSeriesHelper";
 
