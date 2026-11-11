@@ -292,9 +292,9 @@ function AnnotationTable(props) {
   
   const updateStoredAims = (e) => {
     const { searchTableIndex } = props;
-    const { subjectid, studyuid, seriesuid } = e.target.dataset;
+    const { subjectid, studyuid, seriesuid, projectid } = e.target.dataset;
     const { id, value } = e.target;
-    const map =  { aimID: id, name: value, subjectID: subjectid, studyUID: studyuid, seriesUID: seriesuid };
+    const map = { aimID: id, name: value, subjectID: subjectid, studyUID: studyuid, seriesUID: seriesuid, projectID: projectid };
     props.dispatch(storeAimSelection(map, searchTableIndex));
   }
 
@@ -694,6 +694,7 @@ function AnnotationTable(props) {
                 data-subjectid={row.original.subjectID}
                 data-studyuid={row.original.studyUID}
                 data-seriesuid={row.original.seriesUID}
+                data-projectid={row.original.projectID}
                 onClick={updateStoredAims}
                 checked={checked}
               />
@@ -896,6 +897,7 @@ function AnnotationTable(props) {
                 data-subjectid={row.original.subjectID}
                 data-studyuid={row.original.studyUID}
                 data-seriesuid={row.original.seriesUID}
+                data-projectid={row.original.projectID}
                 onClick={updateStoredAims}
                 checked={checked}
               />
@@ -1072,6 +1074,7 @@ function AnnotationTable(props) {
                 data-subjectid={row.original.subjectID}
                 data-studyuid={row.original.studyUID}
                 data-seriesuid={row.original.seriesUID}
+                data-projectid={row.original.projectID}
                 onClick={updateStoredAims}
                 checked={checked}
               />

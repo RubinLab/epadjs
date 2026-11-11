@@ -1712,6 +1712,15 @@ const AnnotationSearch = (props) => {
             <button
               type="button"
               className="btn btn-sm"
+              onClick={handleRunAIClick}
+            >
+              <AiOutlineRobot />
+              <br />
+              Run AI
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm"
               onClick={() => {
                 setShowDeleteModal(true);
               }}
@@ -1719,16 +1728,7 @@ const AnnotationSearch = (props) => {
               <BiTrash />
               <br />
               Delete
-            </button>
-            <button
-              type="button"
-              className="btn btn-sm"
-              onClick={handleRunAIClick}
-            >
-              <AiOutlineRobot />
-              <br />
-              Run AI
-            </button>
+            </button>            
           </div>
         {showPlugins && mode !== "teaching" && (
           <div
