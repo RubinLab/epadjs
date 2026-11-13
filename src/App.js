@@ -42,6 +42,8 @@ import {
   annotationsLoadingError,
   setSeriesData,
   setPageOrderSeries,
+  clearPageOrderSeries,
+  clearMammogramSeries,
   storeAimSelectionAll
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
@@ -926,7 +928,11 @@ class App extends Component {
     if (!force && !this.hasEnoughViewports(seriesArr) && !worklistID) return;
     //add serie to the grid
     const promiseArr = [];
-    if (worklistID) this.props.dispatch(clearGrid());
+    if (worklistID) {
+      this.props.dispatch(clearGrid());
+      this.props.dispatch(clearPageOrderSeries());
+      this.props.dispatch(clearMammogramSeries());
+    }
     for (let serie of seriesArr) {
       // optional clear grid
       // if (worklistID) this.props.dispatch(clearGrid());
