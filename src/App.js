@@ -1016,7 +1016,7 @@ class App extends Component {
         getAuthUser = new Promise((resolve, reject) => {
           if (sso && sso === 'true') {
             keycloak
-              .init({ onLoad: "check-sso", checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? { pkceMethod: 'S256' } : {}) })
+              .init({ onLoad: "check-sso", checkLoginIframe: false, checkLoginIframeInterval: 1, ...(pkce && pkce === "true" ? { pkceMethod: 'S256' } : {}) })
               .then((authenticated) => {
                 if (authenticated)
                   keycloak
