@@ -912,7 +912,7 @@ class App extends Component {
     // display view's PREV/NEXT can paginate the remaining pages.
     const hasPageOrder = significantSeries.length > 0 &&
       significantSeries.some(s => s.pageOrder != null);
-    if (hasPageOrder && !worklistID) {
+    if (hasPageOrder) {
       this.props.dispatch(setPageOrderSeries(significantSeries));
       const pageOne = significantSeries
         .filter(s => s.pageOrder === 1)
